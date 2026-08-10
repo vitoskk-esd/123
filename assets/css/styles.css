@@ -1,5 +1,5 @@
 /* =========================================================================
-   Autonoma AI — global styles
+   Synapse — global styles
    Design tokens sourced from design-system/ai-automation-agency/MASTER.md
    (generated via the ui-ux-pro-max skill). Dark-mode-only OLED theme.
 
@@ -202,4 +202,109 @@ select:focus-visible {
 
 .faq-item.open .faq-toggle-icon {
   transform: rotate(180deg);
+}
+
+/* =========================================================================
+   3D synapse network — hero visual
+   ---------------------------------------------------------------------
+   A genuine CSS 3D scene (perspective + preserve-3d + rotateX/Y), not an
+   image or a WebGL/Three.js embed — this environment has no CDN access
+   to load a 3D library, so the geometry is real: 10 nodes + 16 edges,
+   laid out on a Fibonacci sphere and pre-computed (see the repo's build
+   notes) into exact translate3d/rotateZ/rotateY/scaleX transforms baked
+   as inline styles on each element. The whole group spins as one rigid
+   body via .synapse3d__scene's animation, so the math only had to be
+   solved once, not per frame.
+   ========================================================================= */
+.synapse3d {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  perspective: 900px;
+}
+
+.synapse3d::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background: radial-gradient(circle, rgba(22, 163, 74, 0.22), transparent 68%);
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.synapse3d__scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: synapse-spin 30s linear infinite;
+}
+
+@keyframes synapse-spin {
+  from { transform: rotateX(-16deg) rotateY(0deg); }
+  to   { transform: rotateX(-16deg) rotateY(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .synapse3d__scene {
+    animation: none;
+    transform: rotateX(-16deg) rotateY(28deg);
+  }
+}
+
+.synapse3d__node {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #86efac, #16a34a 60%, #0f5132 100%);
+  box-shadow: 0 0 10px 2px rgba(22, 163, 74, 0.65), 0 0 22px 6px rgba(22, 163, 74, 0.22);
+}
+
+.synapse3d__node--core {
+  width: 17px;
+  height: 17px;
+  background: radial-gradient(circle at 35% 30%, #ffffff, #86efac 55%, #16a34a 100%);
+  box-shadow: 0 0 16px 4px rgba(22, 163, 74, 0.85), 0 0 44px 12px rgba(22, 163, 74, 0.32);
+}
+
+.synapse3d__edge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 1.5px;
+  transform-origin: 0% 50%;
+  background: linear-gradient(90deg, rgba(134, 239, 172, 0.9), rgba(22, 163, 74, 0.12));
+}
+
+/* =========================================================================
+   3D tilt-on-hover cards — cursor-driven perspective tilt for a tactile,
+   premium feel on the feature/value/team cards. JS (main.js) sets
+   --tilt-x / --tilt-y custom properties from pointer position; this is
+   the CSS side that turns them into a 3D rotation. Falls back to a flat
+   card with no transform if JS never runs (progressive enhancement).
+   ========================================================================= */
+.tilt-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  transform: perspective(800px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 500ms ease, box-shadow 300ms ease;
+  will-change: transform;
+}
+
+.tilt-card:hover,
+.tilt-card:focus-within {
+  box-shadow: 0 18px 40px -12px rgba(22, 163, 74, 0.25), 0 8px 16px -8px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-card {
+    transform: none !important;
+    transition: none;
+  }
 }

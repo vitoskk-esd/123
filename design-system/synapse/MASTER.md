@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** AI Automation Agency
+**Project:** Synapse — AI Automation Agency
 **Generated:** 2026-08-10 19:44:45
 **Category:** RPA / Automation Dashboard
 

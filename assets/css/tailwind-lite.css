@@ -153,6 +153,7 @@ button, [role="button"] { cursor: pointer; }
 .pb-4 { padding-bottom: 1rem; }
 .pb-24 { padding-bottom: 6rem; }
 .pt-8 { padding-top: 2rem; }
+.scroll-mt-24 { scroll-margin-top: 6rem; }
 
 /* ---------------------------------------------------------------------
    Sizing (icon / avatar squares)

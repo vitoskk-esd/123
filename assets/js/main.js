@@ -1,5 +1,5 @@
 /* =========================================================================
-   Autonoma AI — shared site behaviour (mobile menu, scroll reveal, FAQ,
+   Synapse — shared site behaviour (mobile menu, scroll reveal, FAQ,
    contact form). No external dependencies, no network calls.
    ========================================================================= */
 (function () {
@@ -74,6 +74,30 @@
       });
       observer.disconnect();
     }, 1200);
+  }
+
+  /* ---------------------------------------------------------------------
+     3D tilt-on-hover cards — mouse-only, skipped under reduced motion.
+     Sets --tilt-x/--tilt-y custom properties consumed by styles.css.
+     ------------------------------------------------------------------- */
+  if (!prefersReducedMotion) {
+    var MAX_TILT_DEG = 7;
+    document.querySelectorAll(".tilt-card").forEach(function (card) {
+      card.addEventListener("pointermove", function (event) {
+        if (event.pointerType && event.pointerType !== "mouse") return;
+        var rect = card.getBoundingClientRect();
+        var px = (event.clientX - rect.left) / rect.width;
+        var py = (event.clientY - rect.top) / rect.height;
+        var tiltY = (px - 0.5) * 2 * MAX_TILT_DEG;
+        var tiltX = (0.5 - py) * 2 * MAX_TILT_DEG;
+        card.style.setProperty("--tilt-x", tiltX.toFixed(2) + "deg");
+        card.style.setProperty("--tilt-y", tiltY.toFixed(2) + "deg");
+      });
+      card.addEventListener("pointerleave", function () {
+        card.style.setProperty("--tilt-x", "0deg");
+        card.style.setProperty("--tilt-y", "0deg");
+      });
+    });
   }
 
   /* ---------------------------------------------------------------------
