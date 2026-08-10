@@ -38,6 +38,21 @@
 }
 
 /* ---------------------------------------------------------------------
+   box-sizing: the single most load-bearing reset in any Tailwind-style
+   system. Without it, every element that combines an explicit width
+   (w-full) with padding/border (the contact form's inputs, in
+   particular) renders wider than declared — padding/border ADD to the
+   width instead of being carved out of it. Confirmed via computed
+   styles: inputs were overflowing their column by ~34px, silently
+   absorbed by the grid gap at this layout's current breakpoints, but
+   one narrower viewport or bigger gap change away from a visible
+   overflow bug.
+   ------------------------------------------------------------------- */
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------------
    Minimal Preflight-equivalent reset
    ---------------------------------------------------------------------
    Tailwind's real Preflight neutralizes the browser's default UA
@@ -60,6 +75,35 @@ button, select, input, textarea {
   border-radius: 0;
   padding: 0;
   margin: 0;
+}
+
+/* Same story for links: the browser default is an underline (and, absent
+   an explicit color utility, link-blue). Every <a> here already carries
+   an explicit color class, so this just kills the stray permanent
+   underline that was showing under the logo, nav items, and buttons —
+   intentional underlines (.link-cta below) opt back in deliberately. */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Headings/paragraphs ship their own UA margin (verified: an h1 with an
+   explicit mt-6 utility still got a 40px *default* margin-bottom on the
+   side nothing overrode it — margin-collapsing hid the worst of it, but
+   spacing was silently half browser-default, half authored). Every gap
+   in this site is meant to come from an explicit mt-*/gap-* utility or
+   the parent's padding, never a tag default. */
+h1, h2, h3, h4, h5, h6, p, blockquote, dl, dd, figure {
+  margin: 0;
+}
+
+/* Every <ol>/<ul> on this site is a custom grid/flex layout with its own
+   numbering (see .process-flow__node) or icon bullets — none of them
+   want the browser's native "1. 2. 3." or disc markers. */
+ol, ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 button { cursor: default; }
@@ -110,6 +154,7 @@ button, [role="button"] { cursor: pointer; }
 /* space-y (vertical stack spacing) */
 .space-y-3 > * + * { margin-top: 0.75rem; }
 .space-y-4 > * + * { margin-top: 1rem; }
+.space-y-10 > * + * { margin-top: 2.5rem; }
 
 /* ---------------------------------------------------------------------
    Spacing: margin / padding
@@ -117,6 +162,7 @@ button, [role="button"] { cursor: pointer; }
 .mt-0\.5 { margin-top: 0.125rem; }
 .mt-1 { margin-top: 0.25rem; }
 .mt-2 { margin-top: 0.5rem; }
+.mb-1\.5 { margin-bottom: 0.375rem; }
 .mt-3 { margin-top: 0.75rem; }
 .mt-4 { margin-top: 1rem; }
 .mt-5 { margin-top: 1.25rem; }

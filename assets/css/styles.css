@@ -137,6 +137,128 @@ select:focus-visible {
   text-shadow: 0 0 24px rgba(22, 163, 74, 0.35);
 }
 
+/* =========================================================================
+   Link-style CTAs ("Подробнее →", "Написать нам →", etc.)
+   ---------------------------------------------------------------------
+   Previously these just borrowed the body font at text-sm/font-semibold
+   with a plain hover:underline — indistinguishable from a copy-editing
+   mistake once the stray default <a> underline (see tailwind-lite.css)
+   made everything look "underlined" the same way. JetBrains Mono is
+   already the site's "system status" voice (terminal mockup); reusing it
+   here marks these specifically as actionable/navigational text, with a
+   permanent low-opacity rule instead of a hover-only underline so the
+   affordance reads before the pointer ever arrives.
+   ========================================================================= */
+.link-cta {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(22, 163, 74, 0.35);
+  padding-bottom: 0.15rem;
+  transition: border-color 200ms ease, color 200ms ease, transform 200ms ease;
+}
+
+.link-cta:hover {
+  border-color: var(--color-accent);
+  transform: translateX(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-cta:hover {
+    transform: none;
+  }
+}
+
+/* =========================================================================
+   Process flow infographic ("Как мы работаем") — a connecting line
+   threading through numbered nodes reads the 4 steps as one pipeline
+   instead of 4 unrelated cards, which is what they actually are: each
+   step's output is the next step's input.
+   ========================================================================= */
+.process-flow {
+  position: relative;
+}
+
+.process-flow__line {
+  display: none;
+  position: absolute;
+  top: 1.5rem; /* vertical center of the 3rem node below */
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(22, 163, 74, 0.12),
+    rgba(22, 163, 74, 0.65) 12%,
+    rgba(22, 163, 74, 0.65) 88%,
+    rgba(22, 163, 74, 0.12)
+  );
+}
+
+@media (min-width: 1024px) {
+  .process-flow__line {
+    display: block;
+  }
+}
+
+.process-flow__step {
+  position: relative;
+}
+
+.process-flow__node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  border: 2px solid rgba(22, 163, 74, 0.55);
+  background: var(--color-background);
+  color: var(--color-accent);
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* =========================================================================
+   Comparison infographic ("Что меняется для команды") — illustrative
+   paired bars, not a chart of measured data (see the disclaimer under
+   the section). Bar length is the only encoding; color reinforces which
+   side is "before" vs "after".
+   ========================================================================= */
+.compare-bar-track {
+  height: 1.75rem;
+  border-radius: 0.4rem;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.compare-bar {
+  height: 100%;
+  border-radius: 0.35rem;
+  transition: width 700ms ease;
+}
+
+.compare-bar--before {
+  background: rgba(51, 65, 85, 0.75);
+}
+
+.compare-bar--after {
+  background: linear-gradient(90deg, var(--color-accent), #22c55e);
+  box-shadow: 0 0 14px rgba(22, 163, 74, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare-bar {
+    transition: none;
+  }
+}
+
 /* Terminal-style card used in the hero mockup */
 .terminal-window {
   background: linear-gradient(180deg, #0b1220 0%, #020617 100%);
@@ -225,6 +347,13 @@ select:focus-visible {
   perspective: 900px;
 }
 
+/* Smaller variant used as a recurring accent on services/about/contact —
+   each instance also sets --spin-duration / --spin-direction inline so
+   the three don't spin in lockstep with each other or the hero's. */
+.synapse3d--sm {
+  max-width: 200px;
+}
+
 .synapse3d::before {
   content: "";
   position: absolute;
@@ -239,7 +368,7 @@ select:focus-visible {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  animation: synapse-spin 30s linear infinite;
+  animation: synapse-spin var(--spin-duration, 30s) linear infinite var(--spin-direction, normal);
 }
 
 @keyframes synapse-spin {
