@@ -22,7 +22,7 @@
         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-onprimary">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5L5 18M12 5L19 18M5 18L19 18" /><circle cx="12" cy="5" r="2.1" fill="currentColor" stroke="none" /><circle cx="5" cy="18" r="2.1" fill="currentColor" stroke="none" /><circle cx="19" cy="18" r="2.1" fill="currentColor" stroke="none" /></svg>
         </span>
-        Syn<span class="text-accent">apse</span>
+        <span>Syn<span class="text-accent">apse</span></span>
       </a>
 
       <nav class="hidden items-center gap-8 md:flex" aria-label="Основная навигация">
@@ -32,7 +32,14 @@
         <a data-nav-link="contact.html" href="contact.html" class="text-sm font-medium text-foreground/80 transition hover:text-accent">Контакты</a>
       </nav>
 
-      <div class="hidden md:block">
+      <div class="hidden md:flex items-center gap-3">
+        <!-- TODO: проверить точный формат ссылки на профиль MAX и указать реальные аккаунты менеджера -->
+        <a href="https://t.me/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="Написать менеджеру в Telegram" title="Написать в Telegram" class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </a>
+        <a href="https://max.ru/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="Написать менеджеру в MAX" title="Написать в MAX" class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border text-xs font-display font-bold text-foreground/70 transition hover:border-accent hover:text-accent">
+          M
+        </a>
         <a href="contact.html" class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-onprimary transition hover:-translate-y-0.5 hover:bg-accenthover">Обсудить проект</a>
       </div>
 
@@ -47,6 +54,16 @@
         <a data-nav-link="services.html" href="services.html" class="rounded-lg px-3 py-3 text-base font-medium text-foreground/90 hover:bg-muted hover:text-accent">Услуги</a>
         <a data-nav-link="about.html" href="about.html" class="rounded-lg px-3 py-3 text-base font-medium text-foreground/90 hover:bg-muted hover:text-accent">О нас</a>
         <a data-nav-link="contact.html" href="contact.html" class="rounded-lg px-3 py-3 text-base font-medium text-foreground/90 hover:bg-muted hover:text-accent">Контакты</a>
+        <div class="mt-2 flex items-center gap-2">
+          <a href="https://t.me/synapse_ai" target="_blank" rel="noopener noreferrer" class="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground/80 hover:border-accent hover:text-accent">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            Telegram
+          </a>
+          <a href="https://max.ru/synapse_ai" target="_blank" rel="noopener noreferrer" class="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground/80 hover:border-accent hover:text-accent">
+            <span class="font-display text-xs font-bold">M</span>
+            MAX
+          </a>
+        </div>
         <a href="contact.html" class="mt-2 inline-flex cursor-pointer items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-semibold text-onprimary">Обсудить проект</a>
       </nav>
     </div>
@@ -163,7 +180,15 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mt-0.5 h-5 w-5 shrink-0 text-accent"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 <div>
                   <p class="font-medium text-foreground/90">Telegram</p>
-                  <a href="#" class="text-foreground/70 hover:text-accent">@synapse_ai</a>
+                  <a href="https://t.me/synapse_ai" target="_blank" rel="noopener noreferrer" class="text-foreground/70 hover:text-accent">@synapse_ai</a>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-xs font-display font-bold text-accent">M</span>
+                <div>
+                  <p class="font-medium text-foreground/90">MAX</p>
+                  <!-- TODO: проверить точный формат ссылки на профиль MAX и указать реальный аккаунт менеджера -->
+                  <a href="https://max.ru/synapse_ai" target="_blank" rel="noopener noreferrer" class="text-foreground/70 hover:text-accent">@synapse_ai</a>
                 </div>
               </li>
               <li class="flex items-start gap-3">
@@ -255,12 +280,16 @@
             <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-onprimary">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5L5 18M12 5L19 18M5 18L19 18" /><circle cx="12" cy="5" r="2.1" fill="currentColor" stroke="none" /><circle cx="5" cy="18" r="2.1" fill="currentColor" stroke="none" /><circle cx="19" cy="18" r="2.1" fill="currentColor" stroke="none" /></svg>
             </span>
-            Syn<span class="text-accent">apse</span>
+            <span>Syn<span class="text-accent">apse</span></span>
           </a>
           <p class="mt-4 max-w-sm text-sm text-foreground/70">Автоматизируем рутину, парсим данные и собираем ИИ-презентации, чтобы ваша команда занималась стратегией, а не рутиной.</p>
+          <!-- TODO: проверить точный формат ссылки на профиль MAX и указать реальные аккаунты менеджера -->
           <div class="mt-6 flex gap-3">
-            <a href="#" aria-label="Telegram" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
+            <a href="https://t.me/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="Telegram" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </a>
+            <a href="https://max.ru/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="MAX" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-sm font-display font-bold text-foreground/70 transition hover:border-accent hover:text-accent">
+              M
             </a>
             <a href="mailto:hello@synapse.ai" aria-label="Email" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.007 1.872l-7.5 5.007a2.25 2.25 0 01-2.486 0L3.257 8.865A2.25 2.25 0 012.25 6.993V6.75" /></svg>
