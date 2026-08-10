@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>О нас — Autonoma AI</title>
+  <meta name="description" content="Autonoma AI — команда инженеров и разработчиков, которая внедряет автоматизацию бизнес-процессов, ИИ-презентации, парсеры и ботов." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230F172A'/%3E%3Cpath d='M9 21l1.5-6.5H7L14 3l-1.5 6.5H16L9 21z' fill='%2316A34A'/%3E%3C/svg%3E" />
+
+  <!-- Fonts are self-hosted (see assets/fonts/) — no Google Fonts CDN call. -->
+  <link rel="stylesheet" href="assets/css/tailwind-lite.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="bg-background font-sans text-foreground antialiased">
+
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-onprimary">Перейти к содержимому</a>
+
+  <!-- ============================= HEADER ============================= -->
+  <header class="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <a href="index.html" class="flex items-center gap-2 font-display text-xl font-bold text-foreground" aria-label="Autonoma AI — на главную">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-onprimary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+        </span>
+        Autonoma <span class="text-accent">AI</span>
+      </a>
+
+      <nav class="hidden items-center gap-8 md:flex" aria-label="Основная навигация">
+        <a data-nav-link="index.html" href="index.html" class="text-sm font-medium text-foreground/80 transition hover:text-accent">Главная</a>
+        <a data-nav-link="services.html" href="services.html" class="text-sm font-medium text-foreground/80 transition hover:text-accent">Услуги</a>
+        <a data-nav-link="about.html" href="about.html" class="text-sm font-medium text-foreground/80 transition hover:text-accent">О нас</a>
+        <a data-nav-link="contact.html" href="contact.html" class="text-sm font-medium text-foreground/80 transition hover:text-accent">Контакты</a>
+      </nav>
+
+      <div class="hidden md:block">
+        <a href="contact.html" class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-onprimary transition hover:-translate-y-0.5 hover:bg-accenthover">Обсудить проект</a>
+      </div>
+
+      <button id="menu-toggle" type="button" class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-border p-2.5 text-foreground md:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="Открыть меню">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="border-t border-border/60 px-4 sm:px-6 md:hidden">
+      <nav class="flex flex-col gap-1 py-4" aria-label="Мобильная навигация">
+        <a data-nav-link="index.html" href="index.html" class="rounded-lg px-3 py-3 text-base font-medium text-foreground/90 hover:bg-muted hover:text-accent">Главная</a>
+        <a data-nav-link="services.html" href="services.html" class="rounded-lg px-3 py-3 text-base font-medium text-foreground/90 hover:bg-muted hover:text-accent">Услуги</a>
+        <a data-nav-link="about.html" href="about.html" class="rounded-lg px-3 py-3 text-base font-medium text-foreground/90 hover:bg-muted hover:text-accent">О нас</a>
+        <a data-nav-link="contact.html" href="contact.html" class="rounded-lg px-3 py-3 text-base font-medium text-foreground/90 hover:bg-muted hover:text-accent">Контакты</a>
+        <a href="contact.html" class="mt-2 inline-flex cursor-pointer items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-semibold text-onprimary">Обсудить проект</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============================= PAGE HERO ============================= -->
+    <section class="border-b border-border/60">
+      <div class="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-20">
+        <div>
+          <p class="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-4 py-1.5 text-xs font-medium text-foreground/80">О нас</p>
+          <h1 class="mt-6 font-display text-4xl leading-tight text-foreground sm:text-5xl">Мы делаем ИИ-автоматизацию понятной и рабочей</h1>
+          <p class="mt-6 text-lg text-foreground/70">Autonoma AI — команда инженеров, которая проектирует и внедряет автоматизацию, а не продаёт коробочные решения. Каждый проект строится вокруг ваших реальных процессов и систем.</p>
+        </div>
+        <div class="rounded-2xl border border-border bg-muted p-8" data-reveal>
+          <h2 class="font-display text-xl text-foreground">Наш подход</h2>
+          <p class="mt-3 text-sm text-foreground/70">Сначала — понимание процесса. Мы не начинаем с инструмента, мы начинаем с вопроса «что именно отнимает время у команды» и уже под это подбираем автоматизацию, парсер или бота.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= MISSION ============================= -->
+    <section class="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8">
+      <h2 class="font-display text-3xl text-foreground sm:text-4xl">Миссия</h2>
+      <p class="mx-auto mt-6 max-w-2xl text-lg text-foreground/70">Освобождать команды от рутинных операций с помощью ИИ и автоматизации — чтобы люди занимались задачами, которые действительно требуют экспертизы и творческого подхода.</p>
+    </section>
+
+    <!-- ============================= VALUES ============================= -->
+    <section class="border-y border-border/60 bg-muted/40">
+      <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2 class="font-display text-3xl text-foreground sm:text-4xl">Наши принципы</h2>
+        </div>
+        <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-2xl border border-border bg-background p-6" data-reveal>
+            <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-accent/15 text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </span>
+            <h3 class="mt-4 font-display text-lg text-foreground">Прозрачность</h3>
+            <p class="mt-2 text-sm text-foreground/70">Показываем, как устроено решение, а не скрываем его за «чёрным ящиком».</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-background p-6" data-reveal>
+            <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-accent/15 text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+            </span>
+            <h3 class="mt-4 font-display text-lg text-foreground">Практичность</h3>
+            <p class="mt-2 text-sm text-foreground/70">Внедряем то, что реально работает в ваших процессах — без лишней сложности.</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-background p-6" data-reveal>
+            <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-accent/15 text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </span>
+            <h3 class="mt-4 font-display text-lg text-foreground">Надёжность</h3>
+            <p class="mt-2 text-sm text-foreground/70">Аккуратно работаем с вашими данными и системами, тестируем перед запуском.</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-background p-6" data-reveal>
+            <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-accent/15 text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </span>
+            <h3 class="mt-4 font-display text-lg text-foreground">Скорость</h3>
+            <p class="mt-2 text-sm text-foreground/70">Быстро проверяем гипотезы и запускаем первую версию решения, а не месяцами готовим ТЗ.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= TEAM ============================= -->
+    <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div>
+          <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/15 text-accent">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-7 w-7"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+          </span>
+          <h2 class="mt-5 font-display text-3xl text-foreground">Команда</h2>
+          <p class="mt-4 text-foreground/70">Над проектами работают инженеры автоматизации, ML/AI-инженеры и разработчики ботов и парсеров. Под задачу собираем нужный состав, а не даём одного универсального специалиста на всё.</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-xl border border-border bg-muted p-5" data-reveal>
+            <h3 class="font-display text-base text-foreground">Инженеры автоматизации</h3>
+            <p class="mt-2 text-sm text-foreground/70">Проектируют сценарии и интеграции между вашими системами.</p>
+          </div>
+          <div class="rounded-xl border border-border bg-muted p-5" data-reveal>
+            <h3 class="font-display text-base text-foreground">AI/ML-инженеры</h3>
+            <p class="mt-2 text-sm text-foreground/70">Отвечают за генерацию презентаций и логику ботов на базе ИИ.</p>
+          </div>
+          <div class="rounded-xl border border-border bg-muted p-5" data-reveal>
+            <h3 class="font-display text-base text-foreground">Разработчики парсеров</h3>
+            <p class="mt-2 text-sm text-foreground/70">Строят надёжный и устойчивый к изменениям сбор данных.</p>
+          </div>
+          <div class="rounded-xl border border-border bg-muted p-5" data-reveal>
+            <h3 class="font-display text-base text-foreground">Поддержка</h3>
+            <p class="mt-2 text-sm text-foreground/70">Сопровождают решения после запуска и оперативно реагируют на изменения.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= FINAL CTA ============================= -->
+    <section class="mx-auto max-w-5xl px-4 pb-24 sm:px-6 lg:px-8">
+      <div class="rounded-3xl border border-border bg-gradient-to-br from-secondary to-primary p-10 text-center sm:p-16" data-reveal>
+        <h2 class="font-display text-3xl text-foreground sm:text-4xl">Расскажите нам о своей задаче</h2>
+        <p class="mx-auto mt-4 max-w-xl text-foreground/70">Обсудим процессы, которые можно автоматизировать, и предложим варианты решения.</p>
+        <a href="contact.html" class="mt-8 inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-accent px-8 py-3.5 text-base font-semibold text-onprimary transition hover:-translate-y-0.5 hover:bg-accenthover">
+          Связаться с нами
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================= FOOTER ============================= -->
+  <footer class="border-t border-border/60 bg-primary/40">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div class="grid gap-10 md:grid-cols-4">
+        <div class="md:col-span-2">
+          <a href="index.html" class="flex items-center gap-2 font-display text-lg font-bold text-foreground" aria-label="Autonoma AI — на главную">
+            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-onprimary">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+            </span>
+            Autonoma <span class="text-accent">AI</span>
+          </a>
+          <p class="mt-4 max-w-sm text-sm text-foreground/70">Автоматизируем рутину, парсим данные и собираем ИИ-презентации, чтобы ваша команда занималась стратегией, а не рутиной.</p>
+          <div class="mt-6 flex gap-3">
+            <a href="#" aria-label="Telegram" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </a>
+            <a href="mailto:hello@autonoma.ai" aria-label="Email" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.007 1.872l-7.5 5.007a2.25 2.25 0 01-2.486 0L3.257 8.865A2.25 2.25 0 012.25 6.993V6.75" /></svg>
+            </a>
+            <a href="tel:+70000000000" aria-label="Телефон" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a1.5 1.5 0 001.5-1.5V17.25a1.5 1.5 0 00-1.5-1.5h-2.25a1.5 1.5 0 00-1.06.44l-1.25 1.25a12.75 12.75 0 01-7.13-7.13l1.25-1.25a1.5 1.5 0 00.44-1.06V4.5a1.5 1.5 0 00-1.5-1.5H4.5a1.5 1.5 0 00-1.5 1.5v2.25z" /></svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-display text-sm font-semibold uppercase tracking-wide text-foreground/60">Навигация</h3>
+          <ul class="mt-4 space-y-3 text-sm">
+            <li><a href="index.html" class="text-foreground/70 hover:text-accent">Главная</a></li>
+            <li><a href="services.html" class="text-foreground/70 hover:text-accent">Услуги</a></li>
+            <li><a href="about.html" class="text-foreground/70 hover:text-accent">О нас</a></li>
+            <li><a href="contact.html" class="text-foreground/70 hover:text-accent">Контакты</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-display text-sm font-semibold uppercase tracking-wide text-foreground/60">Контакты</h3>
+          <ul class="mt-4 space-y-3 text-sm text-foreground/70">
+            <li class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 shrink-0 text-foreground/50"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.007 1.872l-7.5 5.007a2.25 2.25 0 01-2.486 0L3.257 8.865A2.25 2.25 0 012.25 6.993V6.75" /></svg>
+              <a href="mailto:hello@autonoma.ai" class="hover:text-accent">hello@autonoma.ai</a>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 shrink-0 text-foreground/50"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a1.5 1.5 0 001.5-1.5V17.25a1.5 1.5 0 00-1.5-1.5h-2.25a1.5 1.5 0 00-1.06.44l-1.25 1.25a12.75 12.75 0 01-7.13-7.13l1.25-1.25a1.5 1.5 0 00.44-1.06V4.5a1.5 1.5 0 00-1.5-1.5H4.5a1.5 1.5 0 00-1.5 1.5v2.25z" /></svg>
+              <a href="tel:+70000000000" class="hover:text-accent">+7 (000) 000-00-00</a>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 shrink-0 text-foreground/50"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+              Москва, работаем удалённо
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-8 text-xs text-foreground/50 sm:flex-row">
+        <p>© <span id="current-year"></span> Autonoma AI. Все права защищены.</p>
+        <p>Сайт создан с помощью Claude Code и навыка ui-ux-pro-max</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>

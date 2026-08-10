@@ -1,0 +1,205 @@
+/* =========================================================================
+   Autonoma AI — global styles
+   Design tokens sourced from design-system/ai-automation-agency/MASTER.md
+   (generated via the ui-ux-pro-max skill). Dark-mode-only OLED theme.
+
+   Fonts are self-hosted (assets/fonts/, OFL-licensed) rather than pulled
+   from Google Fonts — this site works fully offline / behind restrictive
+   network policies, with no runtime CDN dependency. Gloock and Inter were
+   the design system's exact recommendation; Gloock/Work Sans/JetBrains
+   Mono are the closest OFL fonts bundled locally as a substitute for the
+   Inter body font.
+   ========================================================================= */
+
+@font-face {
+  font-family: "Gloock";
+  src: url("../fonts/Gloock-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Work Sans";
+  src: url("../fonts/WorkSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Work Sans";
+  src: url("../fonts/WorkSans-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Work Sans";
+  src: url("../fonts/WorkSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Work Sans";
+  src: url("../fonts/WorkSans-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/JetBrainsMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/JetBrainsMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-primary: #0f172a;
+  --color-on-primary: #ffffff;
+  --color-secondary: #1e293b;
+  --color-accent: #16a34a;
+  --color-accent-hover: #15803d;
+  --color-background: #020617;
+  --color-foreground: #f8fafc;
+  --color-muted: #1a1e2f;
+  --color-border: #334155;
+  --color-destructive: #dc2626;
+  --color-warning: #f59e0b;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+}
+
+* {
+  scrollbar-color: var(--color-border) var(--color-background);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: "Work Sans", system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: "Gloock", Georgia, serif;
+}
+
+code, .font-mono {
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Respect reduced-motion preference site-wide */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible focus ring for keyboard nav (never removed) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Subtle glow used sparingly on hero headline / accent numerals */
+.text-glow {
+  text-shadow: 0 0 24px rgba(22, 163, 74, 0.35);
+}
+
+/* Terminal-style card used in the hero mockup */
+.terminal-window {
+  background: linear-gradient(180deg, #0b1220 0%, #020617 100%);
+  border: 1px solid var(--color-border);
+}
+
+.terminal-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+}
+
+/* Reveal-on-scroll: starts hidden only when JS has confirmed IntersectionObserver
+   support (see main.js) and the user allows motion; otherwise stays visible. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Mobile nav panel */
+#mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 250ms ease;
+}
+
+#mobile-menu.open {
+  max-height: 28rem;
+}
+
+/* FAQ accordion */
+.faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 250ms ease;
+}
+
+.faq-answer > div {
+  overflow: hidden;
+}
+
+.faq-item[open] .faq-answer,
+.faq-item.open .faq-answer {
+  grid-template-rows: 1fr;
+}
+
+.faq-toggle-icon {
+  transition: transform 200ms ease;
+}
+
+.faq-item.open .faq-toggle-icon {
+  transform: rotate(180deg);
+}
