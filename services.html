@@ -33,12 +33,26 @@
       </nav>
 
       <div class="hidden md:flex items-center gap-3">
-        <!-- TODO: проверить точный формат ссылки на профиль MAX и указать реальные аккаунты менеджера -->
+        <!-- MAX has no wa.me-style deep link by phone number (privacy-by-design —
+             the in-app "find by number" search is the only way in). The icon
+             below opens max.ru itself; the number is surfaced via aria-label/
+             title and, in full, on the Контакты page. -->
         <a href="https://t.me/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="Написать менеджеру в Telegram" title="Написать в Telegram" class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </a>
-        <a href="https://max.ru/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="Написать менеджеру в MAX" title="Написать в MAX" class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border text-xs font-display font-bold text-foreground/70 transition hover:border-accent hover:text-accent">
-          M
+        <a href="https://max.ru/" target="_blank" rel="noopener noreferrer" aria-label="Написать нам в MAX: +7 927 587-55-30" title="MAX: +7 927 587-55-30" class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border transition hover:border-accent">
+          <svg viewBox="0 0 48 48" class="h-5 w-5" aria-hidden="true">
+            <defs>
+              <linearGradient id="maxGrad-hd" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4185F6" />
+                <stop offset="48%" stop-color="#4930E0" />
+                <stop offset="98%" stop-color="#964BDA" />
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="24" fill="url(#maxGrad-hd)" />
+            <rect x="13" y="14" width="22" height="17" rx="8" fill="none" stroke="#fff" stroke-width="2.6" />
+            <path d="M18 31 L14 36.5 L21.5 31" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </a>
         <a href="contact.html" class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-onprimary transition hover:-translate-y-0.5 hover:bg-accenthover">Обсудить проект</a>
       </div>
@@ -59,8 +73,19 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             Telegram
           </a>
-          <a href="https://max.ru/synapse_ai" target="_blank" rel="noopener noreferrer" class="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground/80 hover:border-accent hover:text-accent">
-            <span class="font-display text-xs font-bold">M</span>
+          <a href="https://max.ru/" target="_blank" rel="noopener noreferrer" title="MAX: +7 927 587-55-30" class="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground/80 hover:border-accent hover:text-accent">
+            <svg viewBox="0 0 48 48" class="h-4 w-4 shrink-0" aria-hidden="true">
+              <defs>
+                <linearGradient id="maxGrad-hm" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4185F6" />
+                  <stop offset="48%" stop-color="#4930E0" />
+                  <stop offset="98%" stop-color="#964BDA" />
+                </linearGradient>
+              </defs>
+              <circle cx="24" cy="24" r="24" fill="url(#maxGrad-hm)" />
+              <rect x="13" y="14" width="22" height="17" rx="8" fill="none" stroke="#fff" stroke-width="2.6" />
+              <path d="M18 31 L14 36.5 L21.5 31" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
             MAX
           </a>
         </div>
@@ -290,13 +315,23 @@
             <span>Syn<span class="text-accent">apse</span></span>
           </a>
           <p class="mt-4 max-w-sm text-sm text-foreground/70">Автоматизация, парсинг данных и ИИ-презентации — под ключ, под ваши процессы.</p>
-          <!-- TODO: проверить точный формат ссылки на профиль MAX и указать реальные аккаунты менеджера -->
           <div class="mt-6 flex gap-3">
             <a href="https://t.me/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="Telegram" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </a>
-            <a href="https://max.ru/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="MAX" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-sm font-display font-bold text-foreground/70 transition hover:border-accent hover:text-accent">
-              M
+            <a href="https://max.ru/" target="_blank" rel="noopener noreferrer" aria-label="Написать нам в MAX: +7 927 587-55-30" title="MAX: +7 927 587-55-30" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border transition hover:border-accent">
+              <svg viewBox="0 0 48 48" class="h-5 w-5" aria-hidden="true">
+                <defs>
+                  <linearGradient id="maxGrad-ft" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#4185F6" />
+                    <stop offset="48%" stop-color="#4930E0" />
+                    <stop offset="98%" stop-color="#964BDA" />
+                  </linearGradient>
+                </defs>
+                <circle cx="24" cy="24" r="24" fill="url(#maxGrad-ft)" />
+                <rect x="13" y="14" width="22" height="17" rx="8" fill="none" stroke="#fff" stroke-width="2.6" />
+                <path d="M18 31 L14 36.5 L21.5 31" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
             </a>
             <a href="mailto:synapseee@mail.ru" aria-label="Email" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.007 1.872l-7.5 5.007a2.25 2.25 0 01-2.486 0L3.257 8.865A2.25 2.25 0 012.25 6.993V6.75" /></svg>
