@@ -101,8 +101,19 @@
     <!-- ============================= FORM + CONTACT INFO ============================= -->
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <div class="grid gap-12 lg:grid-cols-5">
-        <!-- Contact form -->
-        <form id="contact-form" class="lg:col-span-3" novalidate>
+        <!-- Contact form — submitted via Web3Forms (see assets/js/main.js).
+             TODO: replace YOUR_WEB3FORMS_ACCESS_KEY below with a real key
+             from https://web3forms.com (free, no account — just an email
+             to receive submissions at) before launch. -->
+        <form id="contact-form" class="lg:col-span-3" novalidate
+          action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY" />
+          <input type="hidden" name="subject" value="Новая заявка с сайта Synapse" />
+          <input type="hidden" name="from_name" value="Synapse — сайт" />
+          <!-- Honeypot: real visitors never see or fill this field; bots
+               that auto-fill every input do, and Web3Forms silently drops
+               the submission when it's non-empty. -->
+          <input type="checkbox" name="botcheck" class="hidden" style="display: none" tabindex="-1" autocomplete="off" />
           <div class="grid gap-6 sm:grid-cols-2">
             <div class="sm:col-span-1">
               <label for="name" class="block text-sm font-medium text-foreground/80">Имя <span class="text-accent">*</span></label>
@@ -153,8 +164,6 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
           </button>
           <p id="contact-form-status" class="mt-4 text-sm text-foreground/60" role="status" aria-live="polite"></p>
-          <!-- NOTE: demo-only form — see assets/js/main.js. Connect to a real backend
-               or form service (own API, Formspree, Getform) before launch. -->
         </form>
 
         <!-- Contact info -->

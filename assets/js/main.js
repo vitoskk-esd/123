@@ -121,14 +121,21 @@
   });
 
   /* ---------------------------------------------------------------------
-     Contact form — front-end only demo.
-     NOTE: this does not send data anywhere yet. Wire it up to a real
-     backend or a form service (e.g. your own API endpoint, Formspree,
-     Getform) before going live.
+     Contact form — submits to Web3Forms (api.web3forms.com), a free
+     forms-as-a-service that just relays each submission to an inbox by
+     email. No backend of our own to host/maintain, works on any static
+     hosting (GitHub Pages, Netlify, anywhere).
+     Setup: get a free access key at https://web3forms.com (enter the
+     inbox email, they email back a key — no account/password) and paste
+     it into the hidden "access_key" input in contact.html, replacing
+     "YOUR_WEB3FORMS_ACCESS_KEY". Until that's done, submissions will
+     fail with the access-key error below.
      ------------------------------------------------------------------- */
   var contactForm = document.getElementById("contact-form");
   if (contactForm) {
     var statusEl = document.getElementById("contact-form-status");
+    var submitBtn = contactForm.querySelector('button[type="submit"]');
+
     contactForm.addEventListener("submit", function (event) {
       event.preventDefault();
 
@@ -152,14 +159,54 @@
         return;
       }
 
-      // Demo-only success state — replace with a real fetch() call to your
-      // backend once one exists.
-      contactForm.reset();
-      if (statusEl) {
-        statusEl.textContent =
-          "Спасибо! Заявка сформирована. Подключите форму к вашему backend или сервису форм, чтобы она реально отправлялась.";
-        statusEl.className = "mt-4 text-sm text-accent";
+      var accessKeyField = contactForm.querySelector('[name="access_key"]');
+      if (!accessKeyField || accessKeyField.value === "YOUR_WEB3FORMS_ACCESS_KEY") {
+        if (statusEl) {
+          statusEl.textContent =
+            "Форма почти готова: не хватает ключа Web3Forms (см. TODO в contact.html / assets/js/main.js), поэтому заявка сейчас никуда не ушла.";
+          statusEl.className = "mt-4 text-sm text-destructive";
+        }
+        return;
       }
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (statusEl) {
+        statusEl.textContent = "Отправляем…";
+        statusEl.className = "mt-4 text-sm text-foreground/60";
+      }
+
+      fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: new FormData(contactForm),
+      })
+        .then(function (response) {
+          return response.json().then(function (data) {
+            return { ok: response.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (result.ok && result.data.success) {
+            contactForm.reset();
+            if (statusEl) {
+              statusEl.textContent =
+                "Спасибо! Заявка отправлена — ответим в течение 1–2 рабочих дней.";
+              statusEl.className = "mt-4 text-sm text-accent";
+            }
+          } else {
+            throw new Error((result.data && result.data.message) || "Submit failed");
+          }
+        })
+        .catch(function () {
+          if (statusEl) {
+            statusEl.textContent =
+              "Не получилось отправить заявку. Попробуйте ещё раз или напишите нам напрямую — контакты ниже.";
+            statusEl.className = "mt-4 text-sm text-destructive";
+          }
+        })
+        .finally(function () {
+          if (submitBtn) submitBtn.disabled = false;
+        });
     });
   }
 
