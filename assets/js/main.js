@@ -170,4 +170,71 @@
   if (yearEl) {
     yearEl.textContent = new Date().getFullYear();
   }
+
+  /* ---------------------------------------------------------------------
+     Copy-to-clipboard — the Email icon/links copy the address instead of
+     opening the visitor's mail client (they're <button>s, not <a href
+     ="mailto:">, so there's nothing to navigate to in the first place).
+     Falls back to a hidden-textarea + execCommand for browsers/contexts
+     without the async Clipboard API (e.g. non-secure origins).
+     ------------------------------------------------------------------- */
+  var copyToast = null;
+  function showCopyToast(message) {
+    if (!copyToast) {
+      copyToast = document.createElement("div");
+      copyToast.className = "copy-toast";
+      copyToast.setAttribute("role", "status");
+      copyToast.setAttribute("aria-live", "polite");
+      document.body.appendChild(copyToast);
+    }
+    copyToast.textContent = message;
+    // Reflow before adding the class so the transition always plays, even
+    // on a second click while the first toast is still fading in.
+    copyToast.classList.remove("is-visible");
+    void copyToast.offsetWidth;
+    copyToast.classList.add("is-visible");
+    window.clearTimeout(copyToast._hideTimer);
+    copyToast._hideTimer = window.setTimeout(function () {
+      copyToast.classList.remove("is-visible");
+    }, 2200);
+  }
+
+  function copyTextFallback(text) {
+    var temp = document.createElement("textarea");
+    temp.value = text;
+    temp.setAttribute("readonly", "");
+    temp.style.position = "fixed";
+    temp.style.top = "-1000px";
+    temp.style.opacity = "0";
+    document.body.appendChild(temp);
+    temp.select();
+    temp.setSelectionRange(0, text.length);
+    try {
+      document.execCommand("copy");
+    } catch (e) {
+      // Nothing more we can do — the toast below still tells the visitor
+      // the address, so they can select/copy it manually.
+    }
+    document.body.removeChild(temp);
+  }
+
+  document.querySelectorAll("[data-copy-text]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var text = el.getAttribute("data-copy-text");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          function () {
+            showCopyToast("Email скопирован: " + text);
+          },
+          function () {
+            copyTextFallback(text);
+            showCopyToast("Email скопирован: " + text);
+          }
+        );
+      } else {
+        copyTextFallback(text);
+        showCopyToast("Email скопирован: " + text);
+      }
+    });
+  });
 })();

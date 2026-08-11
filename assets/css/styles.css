@@ -692,3 +692,37 @@ select:focus-visible {
   background-clip: text;
   color: transparent;
 }
+
+/* =========================================================================
+   Copy-to-clipboard toast — confirms the Email button/links actually did
+   something, since they no longer navigate anywhere (see main.js). Built
+   and inserted by JS on first use; this just styles it.
+   ========================================================================= */
+.copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  z-index: 100;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--color-accent);
+  color: var(--color-on-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.65rem 1.15rem;
+  border-radius: 9999px;
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.copy-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copy-toast {
+    transition: opacity 1ms linear;
+  }
+}
