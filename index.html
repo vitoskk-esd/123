@@ -111,35 +111,24 @@
         </div>
 
         <div data-reveal>
-          <div class="synapse3d" aria-hidden="true">
-        <div class="synapse3d__scene">
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(90.00deg) rotateY(-0.00deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(48.59deg) rotateY(-137.51deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(30.00deg) rotateY(84.98deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(14.48deg) rotateY(-52.52deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(0.00deg) rotateY(169.97deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(-14.48deg) rotateY(32.46deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(-30.00deg) rotateY(-105.05deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(-48.59deg) rotateY(117.45deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,0.0px,0.0px) rotateZ(-90.00deg) rotateY(-0.00deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(0.0px,128.0px,0.0px) rotateZ(-20.70deg) rotateY(-137.51deg) scaleX(0.9051);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(9.7px,64.0px,-110.4px) rotateZ(30.00deg) rotateY(-95.02deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(75.4px,32.0px,98.4px) rotateZ(-42.56deg) rotateY(-175.23deg) scaleX(1.4194);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(-126.0px,0.0px,-22.3px) rotateZ(43.32deg) rotateY(-51.33deg) scaleX(1.3993);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(104.6px,-32.0px,-66.5px) rotateZ(42.56deg) rotateY(155.17deg) scaleX(1.4194);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(-28.8px,-64.0px,107.1px) rotateZ(-30.00deg) rotateY(74.95deg) scaleX(1.2800);"></span>
-          <span class="synapse3d__edge" style="transform: translate3d(-39.0px,-96.0px,-75.1px) rotateZ(-20.70deg) rotateY(-62.55deg) scaleX(0.9051);"></span>
-          <span class="synapse3d__node synapse3d__node--core" style="transform: translate3d(0.0px,0.0px,0.0px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(0.0px,128.0px,0.0px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(-62.4px,96.0px,57.2px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(9.7px,64.0px,-110.4px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(75.4px,32.0px,98.4px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(-126.0px,0.0px,-22.3px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(104.6px,-32.0px,-66.5px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(-28.8px,-64.0px,107.1px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(-39.0px,-96.0px,-75.1px) translate(-50%,-50%);"></span>
-          <span class="synapse3d__node" style="transform: translate3d(0.0px,-128.0px,0.0px) translate(-50%,-50%);"></span>
-        </div>
+          <div class="chip3d" aria-hidden="true">
+            <div class="chip3d__scene">
+              <div class="chip3d__cube">
+                <div class="chip3d__face chip3d__face--top">
+                  <div class="chip3d__core"></div>
+                  <div class="chip3d__pins chip3d__pins--top"></div>
+                  <div class="chip3d__pins chip3d__pins--bottom"></div>
+                  <div class="chip3d__pins chip3d__pins--left"></div>
+                  <div class="chip3d__pins chip3d__pins--right"></div>
+                  <div class="chip3d__sheen"></div>
+                </div>
+                <div class="chip3d__face chip3d__face--bottom"></div>
+                <div class="chip3d__face chip3d__face--front"></div>
+                <div class="chip3d__face chip3d__face--back"></div>
+                <div class="chip3d__face chip3d__face--left"></div>
+                <div class="chip3d__face chip3d__face--right"></div>
+              </div>
+            </div>
           </div>
 
         <div class="terminal-window mt-6 rounded-2xl p-6 shadow-xl">
@@ -379,7 +368,9 @@
             </span>
             <span>Syn<span class="text-accent">apse</span></span>
           </a>
-          <p class="mt-4 max-w-sm text-sm text-foreground/70">Мы забираем рутину — автоматизацию, сбор данных, презентации — чтобы каждый час вашей команды стоил дороже, а не тратился впустую. Это не разовая услуга, а система, которая работает на вас каждый день.</p>
+          <div class="quote3d mt-4 max-w-sm">
+            <p class="quote3d__inner font-display text-base leading-snug text-foreground/85">Мы забираем рутину — автоматизацию, сбор данных, презентации — чтобы каждый час вашей команды стоил дороже, а не тратился впустую. Это не разовая услуга, а система, которая работает на вас каждый день.</p>
+          </div>
           <!-- TODO: проверить точный формат ссылки на профиль MAX и указать реальные аккаунты менеджера -->
           <div class="mt-6 flex gap-3">
             <a href="https://t.me/synapse_ai" target="_blank" rel="noopener noreferrer" aria-label="Telegram" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border text-foreground/70 transition hover:border-accent hover:text-accent">

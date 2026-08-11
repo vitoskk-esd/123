@@ -437,3 +437,211 @@ select:focus-visible {
     transition: none;
   }
 }
+
+/* =========================================================================
+   3D processor chip — hero visual
+   ---------------------------------------------------------------------
+   A second real CSS 3D object built the same way as .synapse3d above:
+   six flat faces assembled into a thin die (wide top/bottom, narrow side
+   walls), not an image or a WebGL/Three.js embed. It hovers within a
+   limited rotateX/rotateY arc rather than spinning a full 360° — a flat
+   rectangular die goes edge-on and shows its blank underside for a good
+   third of any full rotation, which reads as a rendering bug rather than
+   a premium object, so the motion stays a gentle tilt that always keeps
+   the die's face (grid, pins, core) in view.
+   ========================================================================= */
+.chip3d {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  perspective: 900px;
+  --chip-size: 320px;
+  --chip-depth: 22px;
+}
+
+.chip3d::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background: radial-gradient(circle, rgba(22, 163, 74, 0.25), transparent 68%);
+  filter: blur(22px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.chip3d__scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: chip-hover 12s ease-in-out infinite;
+}
+
+@keyframes chip-hover {
+  0%, 100% { transform: rotateX(-20deg) rotateY(-20deg); }
+  50%      { transform: rotateX(-27deg) rotateY(20deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip3d__scene {
+    animation: none;
+    transform: rotateX(-22deg) rotateY(-10deg);
+  }
+}
+
+.chip3d__cube {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.chip3d__face {
+  position: absolute;
+  background: linear-gradient(145deg, #111a2e, #0a1120);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Top face carries all the detail: circuit grid, glowing core, pins,
+   and the sheen sweep — it is the only face the visitor really reads. */
+.chip3d__face--top {
+  inset: 0;
+  transform: translateZ(calc(var(--chip-depth) / 2));
+  background:
+    radial-gradient(circle at 50% 50%, rgba(22, 163, 74, 0.1), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(22, 163, 74, 0.14) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(22, 163, 74, 0.14) 0 1px, transparent 1px 28px),
+    linear-gradient(145deg, #101a2d, #060b16);
+}
+
+.chip3d__face--bottom {
+  inset: 0;
+  transform: rotateX(180deg) translateZ(calc(var(--chip-depth) / 2));
+}
+
+.chip3d__face--front,
+.chip3d__face--back {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--chip-depth);
+  margin-top: calc(var(--chip-depth) / -2);
+}
+
+.chip3d__face--front { transform: rotateX(-90deg) translateZ(calc(var(--chip-size) / 2)); }
+.chip3d__face--back { transform: rotateX(90deg) translateZ(calc(var(--chip-size) / 2)); }
+
+.chip3d__face--left,
+.chip3d__face--right {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--chip-depth);
+  margin-left: calc(var(--chip-depth) / -2);
+}
+
+.chip3d__face--left { transform: rotateY(90deg) translateZ(calc(var(--chip-size) / 2)); }
+.chip3d__face--right { transform: rotateY(-90deg) translateZ(calc(var(--chip-size) / 2)); }
+
+.chip3d__core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26%;
+  height: 26%;
+  transform: translate3d(-50%, -50%, calc(var(--chip-depth) / 2 + 1px));
+  border-radius: 4px;
+  background: radial-gradient(circle at 35% 30%, #86efac, #16a34a 60%, #0f5132 100%);
+  box-shadow: 0 0 14px 3px rgba(22, 163, 74, 0.55), 0 0 30px 10px rgba(22, 163, 74, 0.18);
+  animation: chip-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes chip-pulse {
+  0%, 100% { box-shadow: 0 0 14px 3px rgba(22, 163, 74, 0.55), 0 0 30px 10px rgba(22, 163, 74, 0.18); }
+  50%      { box-shadow: 0 0 22px 6px rgba(22, 163, 74, 0.9), 0 0 48px 16px rgba(22, 163, 74, 0.32); }
+}
+
+/* Pins are a repeating background tick pattern along each edge, not 24
+   individually positioned elements — much cheaper and just as convincing
+   at this scale. */
+.chip3d__pins {
+  position: absolute;
+  pointer-events: none;
+}
+
+.chip3d__pins--top,
+.chip3d__pins--bottom {
+  left: 10%;
+  right: 10%;
+  height: 5px;
+  background-image: repeating-linear-gradient(90deg, rgba(203, 213, 225, 0.85) 0 3px, transparent 3px 16px);
+}
+
+.chip3d__pins--top { top: -5px; }
+.chip3d__pins--bottom { bottom: -5px; }
+
+.chip3d__pins--left,
+.chip3d__pins--right {
+  top: 10%;
+  bottom: 10%;
+  width: 5px;
+  background-image: repeating-linear-gradient(180deg, rgba(203, 213, 225, 0.85) 0 3px, transparent 3px 16px);
+}
+
+.chip3d__pins--left { left: -5px; }
+.chip3d__pins--right { right: -5px; }
+
+.chip3d__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 40%, rgba(134, 239, 172, 0.28) 50%, transparent 60%);
+  background-size: 300% 300%;
+  animation: chip-sheen 6s linear infinite;
+}
+
+@keyframes chip-sheen {
+  0%   { background-position: 100% 0%; }
+  100% { background-position: 0% 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip3d__core { animation: none; }
+  .chip3d__sheen { animation: none; opacity: 0.5; }
+}
+
+/* =========================================================================
+   3D animated quote — the closing statement in the footer ("Мы забираем
+   рутину…"). Continuous, small-amplitude rotateX/rotateY on a
+   preserve-3d wrapper plus a stacked text-shadow (each layer offset by
+   1px and dimmed) reads as extruded, physical text turning slowly in
+   space, without external assets or a canvas/WebGL text-rendering stack.
+   ========================================================================= */
+.quote3d {
+  perspective: 700px;
+}
+
+.quote3d__inner {
+  transform-style: preserve-3d;
+  animation: quote-float 9s ease-in-out infinite;
+  text-shadow:
+    0.5px 0.5px 0 rgba(22, 163, 74, 0.35),
+    1px 1px 0 rgba(22, 163, 74, 0.28),
+    1.5px 1.5px 0 rgba(22, 163, 74, 0.22),
+    2px 2px 0 rgba(22, 163, 74, 0.16),
+    2.5px 2.5px 0 rgba(22, 163, 74, 0.1),
+    3px 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes quote-float {
+  0%, 100% { transform: rotateX(5deg) rotateY(-5deg) translateZ(0); }
+  50%      { transform: rotateX(-4deg) rotateY(5deg) translateZ(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote3d__inner {
+    animation: none;
+    transform: none;
+    text-shadow: none;
+  }
+}
