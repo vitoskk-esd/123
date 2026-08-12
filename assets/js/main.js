@@ -190,7 +190,7 @@
             contactForm.reset();
             if (statusEl) {
               statusEl.textContent =
-                "Спасибо! Заявка отправлена — ответим в течение 1–2 рабочих дней.";
+                "Спасибо! Заявка отправлена — ответим в течение нескольких часов.";
               statusEl.className = "mt-4 text-sm text-accent";
             }
           } else {
