@@ -121,10 +121,10 @@
                 placeholder="Как к вам обращаться" />
             </div>
             <div class="sm:col-span-1">
-              <label for="company" class="block text-sm font-medium text-foreground/80">Компания</label>
-              <input type="text" id="company" name="company" autocomplete="organization"
+              <label for="telegram" class="block text-sm font-medium text-foreground/80">Telegram <span class="text-accent">*</span></label>
+              <input type="text" id="telegram" name="telegram" required autocomplete="off"
                 class="mt-2 block w-full rounded-lg border border-border bg-muted px-4 py-3 text-foreground placeholder:text-foreground/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-                placeholder="Необязательно" />
+                placeholder="@username" />
             </div>
             <div class="sm:col-span-1">
               <label for="email" class="block text-sm font-medium text-foreground/80">Email</label>
@@ -133,8 +133,8 @@
                 placeholder="you@company.com" />
             </div>
             <div class="sm:col-span-1">
-              <label for="phone" class="block text-sm font-medium text-foreground/80">Телефон <span class="text-accent">*</span></label>
-              <input type="tel" id="phone" name="phone" required autocomplete="tel"
+              <label for="phone" class="block text-sm font-medium text-foreground/80">Телефон</label>
+              <input type="tel" id="phone" name="phone" autocomplete="tel"
                 class="mt-2 block w-full rounded-lg border border-border bg-muted px-4 py-3 text-foreground placeholder:text-foreground/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
                 placeholder="+7 (___) ___-__-__" />
             </div>
