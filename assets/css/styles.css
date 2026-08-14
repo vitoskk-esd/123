@@ -726,3 +726,18 @@ select:focus-visible {
     transition: opacity 1ms linear;
   }
 }
+
+/* MAX messenger logo — the source app-icon file has a thin white margin
+   around the squircle. Zoom the image slightly inside a clipped circle so
+   it reads as a solid colour disc with no white edge, matching how the
+   Telegram icon (a self-contained SVG circle) looks. */
+.icon-max {
+  overflow: hidden;
+}
+
+.icon-max img {
+  width: 140%;
+  height: 140%;
+  max-width: none;
+  object-fit: cover;
+}
