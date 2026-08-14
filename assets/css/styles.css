@@ -727,9 +727,14 @@ select:focus-visible {
   }
 }
 
-/* Case study media (video + bot-menu screenshot) — kept deliberately small
-   so the block reads at a glance and scrolls past quickly, rather than
-   dominating the page at full card width. */
-.case-study-media {
+/* Case study video frame — the source clip's own encoded frame is much
+   taller than its visible content (large empty area below the picture),
+   so instead of trusting the file's intrinsic aspect ratio we pin the
+   frame to a fixed, compact 9:16 box and crop the video to fill it
+   (object-fit: cover). Keeps the card small and free of dead space
+   regardless of the underlying file's real dimensions. */
+.case-study-video-frame {
+  width: 100%;
   max-width: 220px;
+  aspect-ratio: 9 / 16;
 }
