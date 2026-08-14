@@ -747,3 +747,36 @@ select:focus-visible {
   max-width: 260px;
   aspect-ratio: 1170 / 667;
 }
+
+/* "Недавний проект" eyebrow badge — an accent-coloured pill with a soft
+   breathing glow and a pulsing dot, so it reads like a live/highlight
+   marker instead of the neutral section labels used elsewhere. */
+.badge-live {
+  animation: badge-live-glow 2.6s ease-in-out infinite;
+}
+
+.badge-live__dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  animation: badge-live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes badge-live-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+  50% { box-shadow: 0 0 18px 2px rgba(22, 163, 74, 0.3); }
+}
+
+@keyframes badge-live-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-live,
+  .badge-live__dot {
+    animation: none;
+  }
+}
