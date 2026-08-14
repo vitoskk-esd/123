@@ -738,3 +738,12 @@ select:focus-visible {
   max-width: 220px;
   aspect-ratio: 9 / 16;
 }
+
+/* Case study bot-menu photo — same fixed-box approach as the video frame
+   above, so its size never depends on the browser re-deriving an aspect
+   ratio from the file (which kept rendering far taller than intended). */
+.case-study-photo-frame {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1170 / 667;
+}
