@@ -726,3 +726,10 @@ select:focus-visible {
     transition: opacity 1ms linear;
   }
 }
+
+/* Case study media (video + bot-menu screenshot) — kept deliberately small
+   so the block reads at a glance and scrolls past quickly, rather than
+   dominating the page at full card width. */
+.case-study-media {
+  max-width: 220px;
+}
