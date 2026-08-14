@@ -12,3 +12,6 @@ __pycache__/
 
 # Node (in case tooling is added later)
 node_modules/
+
+# Claude Code local tooling (not part of the deployed site)
+.claude/
