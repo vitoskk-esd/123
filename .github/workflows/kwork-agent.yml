@@ -1,0 +1,71 @@
+name: Kwork AI agent (daily)
+
+on:
+  schedule:
+    # Каждый день в 08:17 по Москве (05:17 UTC).
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "daily | research | reflect | generate | publish | status"
+        default: daily
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kwork-agent
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Restore Kwork session
+        env:
+          KWORK_STATE_B64: ${{ secrets.KWORK_STATE_B64 }}
+        run: |
+          mkdir -p data
+          if [ -n "$KWORK_STATE_B64" ]; then echo "$KWORK_STATE_B64" | base64 -d > data/kwork_state.json; fi
+
+      - name: Run agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          KWORK_LOGIN: ${{ secrets.KWORK_LOGIN }}
+          KWORK_PASSWORD: ${{ secrets.KWORK_PASSWORD }}
+          KWORK_DRY_RUN: ${{ vars.KWORK_DRY_RUN || '1' }}
+          KWORK_LISTINGS_PER_DAY: ${{ vars.KWORK_LISTINGS_PER_DAY || '3' }}
+          KWORK_MAX_PUBLISH_PER_DAY: ${{ vars.KWORK_MAX_PUBLISH_PER_DAY || '3' }}
+        run: python -m kwork_agent ${{ github.event.inputs.command || 'daily' }}
+
+      - name: Save screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kwork-agent-${{ github.run_id }}
+          path: |
+            data/screenshots/
+            data/logs/
+          if-no-files-found: ignore
+
+      - name: Commit knowledge base and listings
+        if: always()
+        run: |
+          git config user.name "kwork-agent"
+          git config user.email "kwork-agent@users.noreply.github.com"
+          git add data/knowledge_base.json data/strategy.md data/strategy_history data/research data/listings.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "kwork-agent: daily update $(date -u +%F)"
+          git push

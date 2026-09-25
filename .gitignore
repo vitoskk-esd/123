@@ -12,3 +12,11 @@ __pycache__/
 
 # Node (in case tooling is added later)
 node_modules/
+
+# kwork_agent: секреты и тяжёлые/временные файлы
+.env
+data/kwork_state.json
+data/screenshots/
+data/covers/
+data/logs/
+*.tmp
