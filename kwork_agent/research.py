@@ -64,7 +64,7 @@ def _pick_focus(kb: dict) -> list[str]:
     return own + seeds
 
 
-def run_research(llm: LLM) -> dict:
+def run_research(llm: LLM, min_ideas: int = 8) -> dict:
     kb = storage.load_knowledge()
     focus = _pick_focus(kb)
     known = "\n".join(f"- {i['insight']}" for i in kb["insights"][-60:]) or "(пока пусто)"
@@ -93,13 +93,14 @@ def run_research(llm: LLM) -> dict:
     data = llm.ask(
         "Преобразуй отчёт исследования в структурированные данные. Идеи услуг — "
         "конкретные, узкие и продаваемые на Kwork (одна услуга = одна задача клиента); "
-        "дай 5–12 идей, которых нет в списке уже известных. Ключевые слова — фразы, "
+        f"дай не меньше {max(8, min_ideas)} идей, которых нет в списке уже известных "
+        "(разные аудитории и отрасли: розница, услуги, производство, e-commerce, B2B, эксперты). Ключевые слова — фразы, "
         "которыми заказчики ищут услугу. next_research_questions — 3–5 вопросов, "
         "которые стоит изучить завтра, чтобы стать лучше в этой нише.\n\n"
         "Уже известные идеи:\n" + ideas_known + "\n\nОТЧЁТ:\n" + report,
         schema=EXTRACT_SCHEMA,
         effort="medium",
-        max_tokens=16000,
+        max_tokens=32000,
     )
 
     date = storage.today()

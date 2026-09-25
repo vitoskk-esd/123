@@ -25,19 +25,26 @@ def _llm():
 
 
 def daily() -> int:
-    from .generator import generate_listings
+    from .generator import generate_listings, pending_count
     from .publisher import publish_pending
+    from .ramp import daily_target, record_result
     from .research import run_research
     from .strategy import run_reflection
 
     llm = _llm()
     storage.log("=== Ежедневный цикл ===")
+    target = daily_target()
+
+    def publish():
+        record_result(*publish_pending(llm, target))
+
     failures = 0
     stages = [
-        ("исследование", lambda: run_research(llm)),
+        ("исследование", lambda: run_research(llm, min_ideas=target)),
         ("стратегия", lambda: run_reflection(llm)),
-        ("генерация", lambda: generate_listings(llm)),
-        ("публикация", lambda: publish_pending(llm)),
+        # Дописываем только недостающее: черновики, не успевшие выйти вчера, тоже идут в план.
+        ("генерация", lambda: generate_listings(llm, max(0, target - pending_count()))),
+        ("публикация", publish),
     ]
     for name, fn in stages:
         try:
@@ -56,6 +63,9 @@ def status() -> None:
     print(f"Идей услуг: {len(kb['service_ideas'])} (не использовано: "
           f"{sum(1 for i in kb['service_ideas'] if not i.get('used'))})")
     print(f"Дней исследований: {len(kb['research_log'])}")
+    ramp = storage.load_json("ramp.json", {})
+    if ramp:
+        print(f"План на {ramp['date']}: {ramp['target']} (выполнено {ramp['succeeded']}/{ramp['attempted']})")
     print(f"Объявлений: {len(listings)} — {dict(Counter(l['status'] for l in listings))}")
     for l in listings[-10:]:
         print(f"  [{l['status']}] {l['title']} — {l['price_rub']} ₽")
@@ -73,10 +83,12 @@ def main(argv: list[str]) -> int:
         run_reflection(_llm())
     elif cmd == "generate":
         from .generator import generate_listings
-        generate_listings(_llm(), int(argv[1]) if len(argv) > 1 else None)
+        from .ramp import daily_target
+        generate_listings(_llm(), int(argv[1]) if len(argv) > 1 else daily_target())
     elif cmd == "publish":
         from .publisher import publish_pending
-        publish_pending(_llm(), int(argv[1]) if len(argv) > 1 else None)
+        from .ramp import daily_target, record_result
+        record_result(*publish_pending(_llm(), int(argv[1]) if len(argv) > 1 else daily_target()))
     elif cmd == "setup":
         from .setup import run_setup
         return run_setup()

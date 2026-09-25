@@ -292,46 +292,57 @@ def publish_one(llm: LLM, browser: KworkBrowser, listing: dict) -> tuple[str, st
     return "failed", f"не уложился в {CONFIG.browser_max_steps} шагов"
 
 
-def publish_pending(llm: LLM, limit: int | None = None) -> int:
-    limit = CONFIG.max_publish_per_day if limit is None else limit
+def publish_pending(llm: LLM, limit: int) -> tuple[int, int]:
+    """Публикует очередь (не больше limit за сегодня). Возвращает (попыток, успешных)."""
     listings = storage.load_listings()
-    published_today = sum(
-        1 for l in listings if l.get("published") == storage.today() and l["status"] == "submitted"
+    done_today = sum(
+        1 for l in listings
+        if l.get("published") == storage.today() and l["status"] in ("submitted", "draft_saved")
     )
-    queue = [l for l in listings if l["status"] in ("draft", "failed") and l.get("attempts", 0) < 3]
-    queue = queue[: max(0, limit - published_today)]
+    # Заполненные в режиме проверки объявления публикуются по-настоящему, когда проверку выключат.
+    ready = ("draft", "failed") if CONFIG.dry_run else ("draft", "failed", "draft_saved")
+    queue = [l for l in listings if l["status"] in ready and l.get("attempts", 0) < 3]
+    queue = queue[: max(0, limit - done_today)]
     if not queue:
-        storage.log("Публиковать нечего (или дневной лимит исчерпан)")
-        return 0
+        storage.log("Публиковать нечего (или дневной план выполнен)")
+        return 0, 0
 
+    deadline = time.monotonic() + CONFIG.publish_time_budget_min * 60
     browser = KworkBrowser()
-    done = 0
+    attempted = done = 0
     try:
         if not browser.is_logged_in() and not browser.login_with_password(llm):
             storage.log("Нет входа в Kwork. Запустите `python -m kwork_agent login` "
                         "или задайте KWORK_LOGIN/KWORK_PASSWORD.")
-            return 0
-        for listing in queue:
-            storage.log(f"Публикую «{listing['title']}»")
+            return 0, 0
+        for i, listing in enumerate(queue, 1):
+            if time.monotonic() > deadline:
+                storage.log(f"Время на публикацию вышло, {len(queue) - i + 1} объявлений ждут следующего дня")
+                break
+            storage.log(f"Публикую {i}/{len(queue)}: «{listing['title']}»")
+            if listing["status"] == "draft_saved":
+                listing["attempts"] = 0
             listing["attempts"] = listing.get("attempts", 0) + 1
             try:
                 status, note = publish_one(llm, browser, listing)
             except Exception as e:  # noqa: BLE001
                 status, note = "failed", str(e)[:300]
-            listing["status"] = status
-            listing["publish_note"] = note
-            if status == "submitted":
-                listing["published"] = storage.today()
-                done += 1
-            storage.save_listings(listings)
             storage.log(f"  → {status}: {note}")
+            listing["publish_note"] = note
             if status == "blocked":
-                # Проблема со входом/капчей, а не с объявлением — вернём его в очередь.
+                # Проблема со входом/капчей/лимитом, а не с объявлением — вернём его в очередь.
                 listing["status"] = "draft"
                 listing["attempts"] -= 1
                 storage.save_listings(listings)
+                attempted += 1
                 break
+            attempted += 1
+            listing["status"] = status
+            if status in ("submitted", "draft_saved"):
+                listing["published"] = storage.today()
+                done += 1
+            storage.save_listings(listings)
             time.sleep(20)  # пауза между кворками, чтобы не выглядеть как бот-спамер
     finally:
         browser.close()
-    return done
+    return attempted, done

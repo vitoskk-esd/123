@@ -103,6 +103,52 @@ class Tests(unittest.TestCase):
         self.assertEqual(saved[-1]["status"], "draft")
         self.assertTrue(storage.load_knowledge()["service_ideas"][0]["used"])
 
+    def test_ramp_grows_only_after_good_day(self):
+        from unittest import mock
+
+        from kwork_agent import ramp
+
+        days = iter(["2026-01-01", "2026-01-02", "2026-01-03", "2026-01-04"])
+        with mock.patch.object(storage, "today", side_effect=lambda: current):
+            current = next(days)
+            self.assertEqual(ramp.daily_target(), CONFIG.start_per_day)
+            self.assertEqual(ramp.daily_target(), CONFIG.start_per_day)  # повторный запуск в тот же день
+            ramp.record_result(15, 14)
+            current = next(days)
+            self.assertEqual(ramp.daily_target(), CONFIG.start_per_day + CONFIG.daily_increase)
+            ramp.record_result(10, 2)  # Kwork начал отказывать
+            current = next(days)
+            self.assertEqual(ramp.daily_target(), CONFIG.start_per_day + CONFIG.daily_increase)
+            ramp.record_result(0, 0)  # публикаций не было — тоже не растём
+            current = next(days)
+            self.assertEqual(ramp.daily_target(), CONFIG.start_per_day + CONFIG.daily_increase)
+
+    def test_ramp_respects_cap(self):
+        from kwork_agent import ramp
+
+        storage.save_json("ramp.json", {"date": "2000-01-01", "target": CONFIG.max_per_day,
+                                        "attempted": 5, "succeeded": 5})
+        self.assertEqual(ramp.daily_target(), CONFIG.max_per_day)
+
+    def test_generate_in_batches(self):
+        from kwork_agent import generator
+
+        themes = ["склад", "бухгалтерия", "салон красоты", "автосервис", "стоматология", "школа английского",
+                  "юристы", "фитнес-клуб", "ресторан", "турагентство", "застройщик", "интернет-магазин одежды"]
+        batches = []
+        for chunk in range(0, 12, 5):
+            batches.append([
+                listing(idea=t, title=f"{t.upper()} №{chunk + k}",
+                        description=" ".join(f"{chunk + k:02d}w{j:03d}" for j in range(60)))
+                for k, t in enumerate(themes[chunk:chunk + 5])
+            ])
+        llm = FakeLLM(batches)
+        out = generator.generate_listings(llm, n=12)
+        self.assertEqual(len(out), 12)
+        self.assertEqual(len(llm.prompts), 3)
+        self.assertIn("Создай 5 новых", llm.prompts[0])
+        self.assertIn("Создай 2 новых", llm.prompts[2])
+
     def test_strategy_seeded(self):
         self.assertIn("Стратегия", storage.load_strategy())
         storage.save_strategy("# Новая")
