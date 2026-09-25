@@ -16,6 +16,7 @@ node_modules/
 # kwork_agent: секреты и тяжёлые/временные файлы
 .env
 data/kwork_state.json
+data/KWORK_STATE_B64.txt
 data/screenshots/
 data/covers/
 data/logs/

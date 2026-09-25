@@ -20,6 +20,22 @@
    поэтому публикация не ломается при изменении вёрстки Kwork. Обложку
    660×440 агент рисует сам.
 
+## Запуск одной командой
+
+Нужны Python 3.10+ и git. На своём компьютере:
+
+```bash
+git clone https://github.com/vitoskk-esd/123.git && cd 123
+pip install -r requirements.txt
+python -m playwright install chromium
+python -m kwork_agent setup
+```
+
+`setup` спросит ключ Anthropic API, откроет браузер для входа в Kwork и — если
+установлен [GitHub CLI](https://cli.github.com) (`gh auth login`) — сам запишет
+секреты в репозиторий и запустит первый прогон. Без `gh` он подскажет, что
+вставить в настройки GitHub вручную.
+
 ## Быстрый старт (локально)
 
 ```bash

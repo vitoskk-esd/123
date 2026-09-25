@@ -5,6 +5,7 @@
     python -m kwork_agent reflect     # только обновление стратегии
     python -m kwork_agent generate 5  # сгенерировать N объявлений
     python -m kwork_agent publish     # опубликовать черновики
+    python -m kwork_agent setup       # мастер первого запуска (ключ, вход, секреты GitHub)
     python -m kwork_agent login       # войти в Kwork вручную и сохранить сессию
     python -m kwork_agent status      # статистика
 """
@@ -76,6 +77,9 @@ def main(argv: list[str]) -> int:
     elif cmd == "publish":
         from .publisher import publish_pending
         publish_pending(_llm(), int(argv[1]) if len(argv) > 1 else None)
+    elif cmd == "setup":
+        from .setup import run_setup
+        return run_setup()
     elif cmd == "login":
         from .publisher import KworkBrowser
         b = KworkBrowser(headless=False)
