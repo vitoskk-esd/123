@@ -77,7 +77,7 @@ def _prompt(n: int, kb: dict, strategy: str, existing: list[dict], rejected: lis
         f"результат: {i['deliverable']} | ~{i['price_rub']} ₽"
         for i in ideas
     ) or "(идей пока нет — придумай сам исходя из ниши)"
-    titles = "\n".join(f"- {l['title']}" for l in existing[-150:]) or "(пока нет)"
+    titles = "\n".join(f"- {l['title']}" for l in existing[-300:]) or "(пока нет)"
     insights = "\n".join(f"- {i['insight']}" for i in kb["insights"][-25:]) or "(пока нет)"
     rejected_txt = ""
     if rejected:
@@ -109,20 +109,26 @@ def _prompt(n: int, kb: dict, strategy: str, existing: list[dict], rejected: lis
 - Обещай только то, что реально сделать; никаких гарантий дохода.{rejected_txt}"""
 
 
-def generate_listings(llm: LLM, n: int | None = None) -> list[dict]:
-    n = n or CONFIG.listings_per_day
+BATCH = 5  # столько объявлений за один запрос к модели — чтобы ответ не обрезался
+
+
+def pending_count() -> int:
+    return sum(1 for l in storage.load_listings() if l["status"] in ("draft", "failed") and l.get("attempts", 0) < 3)
+
+
+def generate_listings(llm: LLM, n: int) -> list[dict]:
     kb = storage.load_knowledge()
     strategy = storage.load_strategy()
     listings = storage.load_listings()
     accepted: list[dict] = []
     rejected: list[str] = []
 
-    for attempt in range(3):
-        need = n - len(accepted)
+    for _ in range(n // BATCH + 4):
+        need = min(BATCH, n - len(accepted))
         if need <= 0:
             break
         data = llm.ask(
-            _prompt(need, kb, strategy, listings + accepted, rejected),
+            _prompt(need, kb, strategy, listings + accepted, rejected[-15:]),
             system="Ты — сильный копирайтер и продавец услуг по ИИ-автоматизации на Kwork.",
             schema=LISTING_SCHEMA,
             effort="high",
@@ -145,6 +151,8 @@ def generate_listings(llm: LLM, n: int | None = None) -> list[dict]:
             accepted.append(cand)
             if len(accepted) >= n:
                 break
+        # Сохраняем после каждой пачки — если прогон оборвётся, готовое не потеряется.
+        storage.save_listings(listings + accepted)
 
     used = {a["idea"].lower() for a in accepted}
     for idea in kb["service_ideas"]:

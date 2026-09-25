@@ -44,9 +44,14 @@ class Config:
         "ИИ-агенты и чат-боты, генерация контента, парсинг и обработка данных с ИИ",
     )
 
-    # Сколько объявлений генерировать и публиковать за один дневной прогон.
-    listings_per_day: int = _int("KWORK_LISTINGS_PER_DAY", 3)
-    max_publish_per_day: int = _int("KWORK_MAX_PUBLISH_PER_DAY", 3)
+    # Сколько объявлений в день: старт, прирост в день и потолок.
+    # Прирост срабатывает только если вчера ≥ ramp_success_ratio публикаций прошли.
+    start_per_day: int = _int("KWORK_START_PER_DAY", 15)
+    daily_increase: int = _int("KWORK_DAILY_INCREASE", 3)
+    max_per_day: int = _int("KWORK_MAX_PER_DAY", 45)
+    ramp_success_ratio: float = float(os.getenv("KWORK_RAMP_SUCCESS_RATIO", "0.7"))
+    # Сколько минут максимум тратить на публикацию за прогон (лимит GitHub — 6 часов).
+    publish_time_budget_min: int = _int("KWORK_PUBLISH_TIME_BUDGET_MIN", 300)
 
     # Ограничения полей кворка. Проверьте актуальные правила Kwork и при
     # необходимости поменяйте через переменные окружения.

@@ -20,7 +20,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
 
@@ -47,8 +47,9 @@ jobs:
           KWORK_LOGIN: ${{ secrets.KWORK_LOGIN }}
           KWORK_PASSWORD: ${{ secrets.KWORK_PASSWORD }}
           KWORK_DRY_RUN: ${{ vars.KWORK_DRY_RUN || '1' }}
-          KWORK_LISTINGS_PER_DAY: ${{ vars.KWORK_LISTINGS_PER_DAY || '3' }}
-          KWORK_MAX_PUBLISH_PER_DAY: ${{ vars.KWORK_MAX_PUBLISH_PER_DAY || '3' }}
+          KWORK_START_PER_DAY: ${{ vars.KWORK_START_PER_DAY || '15' }}
+          KWORK_DAILY_INCREASE: ${{ vars.KWORK_DAILY_INCREASE || '3' }}
+          KWORK_MAX_PER_DAY: ${{ vars.KWORK_MAX_PER_DAY || '45' }}
         run: python -m kwork_agent ${{ github.event.inputs.command || 'daily' }}
 
       - name: Save screenshots and logs
@@ -66,6 +67,7 @@ jobs:
         run: |
           git config user.name "kwork-agent"
           git config user.email "kwork-agent@users.noreply.github.com"
-          git add data/knowledge_base.json data/strategy.md data/strategy_history data/research data/listings.json 2>/dev/null || true
+          git add -A data/  # секреты, скриншоты и логи исключены в .gitignore
           git diff --cached --quiet || git commit -m "kwork-agent: daily update $(date -u +%F)"
+          git pull --rebase --autostash || true
           git push
