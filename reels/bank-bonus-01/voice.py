@@ -42,8 +42,9 @@ REF_VOICE = "en-US-AndrewMultilingualNeural"
 REF_TEXT = ("Слушай, я тут недавно разбирался, как банки привлекают новых клиентов. "
             "Оказалось, всё довольно просто: они платят тебе за то, что ты открываешь карту. "
             "Честно, сам сначала не поверил.")
-TEMPO = 1.06       # лёгкое ускорение готовой фразы (без изменения высоты)
-QC_MIN = 0.9       # минимальное совпадение распознанного текста со сценарием
+TEMPO = 1.06       # ускорение при генерации (без изменения высоты); входит в ключ кэша
+SPEED = 1.04       # дополнительное ускорение при сборке, кэш не сбрасывает
+QC_MIN = 0.95      # минимальное совпадение распознанного текста со сценарием
 TRIES = 4
 
 # edge-tts: голос и темп, если ENGINE = "edge"
@@ -72,7 +73,9 @@ SCRIPT = [
 
 plain = lambda s: s.replace("+", "")
 stressed = lambda s: re.sub(r"\+(\w)", lambda m: m.group(1) + "́", s)
-norm = lambda s: re.sub(r"[^а-яёa-z0-9 ]", "", s.lower().replace("ё", "е").replace("1%", "один процент")).split()
+# Whisper пишет «кэшбек 1 %» и т. п. — приводим обе стороны к одному виду
+norm = lambda s: re.sub(r"[^а-яa-z0-9 ]", "", s.lower().replace("ё", "е").replace("э", "е")
+                        .replace("1 %", "1%").replace("1%", "один процент")).split()
 
 # edge-tts сам выбирает certifi; в этом окружении TLS идёт через прокси со своим CA.
 _ca = os.environ.get("SSL_CERT_FILE") or ("/root/.ccr/ca-bundle.crt" if os.path.exists("/root/.ccr/ca-bundle.crt") else None)
@@ -185,6 +188,8 @@ async def synth(phrase, style):
     ref = await reference()
     k = key("cbx", ref, exag, cfg, TEMPO, phrase)
     wav, meta = os.path.join(TTS, k + ".wav"), os.path.join(TTS, k + ".json")
+    if os.path.exists(meta) and similarity(plain(phrase), json.load(open(meta))) < QC_MIN:
+        os.remove(meta)  # кэш не проходит текущую проверку — генерируем заново
     if not os.path.exists(meta):
         import torch
         import torchaudio
@@ -208,7 +213,8 @@ async def synth(phrase, style):
             print(f"  ! «{plain(phrase)}»: лучшее совпадение {best[0]:.2f}, проверьте на слух")
         os.replace(best[1], wav)
         json.dump(best[2], open(meta, "w"), ensure_ascii=False)
-    return trim(load_pcm(wav), json.load(open(meta)), phrase)
+    pcm, ws = trim(load_pcm(wav, SPEED), [dict(w, a=w["a"] / SPEED, d=w["d"] / SPEED) for w in json.load(open(meta))], phrase)
+    return pcm, ws
 
 
 def trim(pcm, ws, phrase):
@@ -218,9 +224,15 @@ def trim(pcm, ws, phrase):
     thr = peak * 0.02  # −34 дБ от пика
     loud = [i for i in range(0, len(pcm) - win, win) if max(abs(x) for x in pcm[i:i + win]) > thr]
     a = max(0, loud[0] - int(0.03 * SR))
+    if ws:
+        # Chatterbox иногда «дотягивает» после фразы вдох или бормотание: звук дальше
+        # конца последнего распознанного слова (+0.25 с на тихий хвост интонации) не берём
+        lim = int((ws[-1]["a"] + ws[-1]["d"] + 0.25) * SR)
+        loud = [i for i in loud if i < lim] or loud
+        last_end = int((ws[-1]["a"] + ws[-1]["d"]) * SR)
     b = min(len(pcm), loud[-1] + win + int(0.06 * SR))
     if ws:  # тихий хвост вопросительной интонации не режем раньше конца последнего слова
-        b = min(len(pcm), max(b, int((ws[-1]["a"] + ws[-1]["d"]) * SR) + int(0.04 * SR)))
+        b = min(len(pcm), max(b, last_end + int(0.04 * SR)))
     toks = plain(phrase).split()
     if ENGINE == "edge":
         assert len(toks) == len(ws), (phrase, [w["w"] for w in ws])
