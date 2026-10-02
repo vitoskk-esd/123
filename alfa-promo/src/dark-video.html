@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Видео «Тёмный премиум» 1080x1920</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="dark.css">
+<style>
+  .canvas { width: 1080px; height: 1920px; }
+  .layer { position: absolute; left: 70px; right: 70px; will-change: transform, opacity; }
+  .center { text-align: center; }
+  .h2 { font-size: 62px; font-weight: bold; letter-spacing: -0.03em; line-height: 1.12; }
+  .card { left: 260px; top: 980px; }
+  .legal { font-size: 15px; bottom: 34px; }
+  .progress { position: absolute; left: 40px; right: 40px; top: 16px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.2); }
+  .progress b { display: block; height: 100%; border-radius: 3px; background: var(--gold); width: 0; }
+</style>
+</head>
+<body>
+<div class="canvas dark">
+  <div class="grid"></div>
+  <div class="progress"><b id="bar"></b></div>
+  <div class="ad-mark" data-ad></div>
+
+  <!-- 0: хук -->
+  <div class="layer center" id="a1" style="top: 560px"><div class="eyebrow">Стоп ✋</div></div>
+  <div class="layer center" id="a2" style="top: 660px"><div class="mega">Ты упускаешь<br><span class="gold">1 000 ₽</span></div></div>
+
+  <!-- 1: карта -->
+  <div class="layer center" id="b1" style="top: 420px"><div class="eyebrow">Шаг 1</div></div>
+  <div class="layer center" id="b2" style="top: 510px"><div class="h2">Оформи кредитку<br><span class="red">Альфа-Банка</span><br>по моей ссылке</div></div>
+  <div class="card" id="card">
+    <div class="stripe"></div>
+    <div class="bank">Альфа-Банк</div>
+    <div class="type">кредитная карта</div>
+    <div class="chip"></div>
+    <div class="num">•••• •••• •••• 1000</div>
+  </div>
+
+  <!-- 2: условия -->
+  <div class="layer center" id="c0" style="top: 460px"><div class="eyebrow">Шаг 2</div></div>
+  <div class="layer" id="c1" style="top: 580px"><div class="glass check"><i>✓</i>Курьер привезёт карту</div></div>
+  <div class="layer" id="c2" style="top: 760px"><div class="glass check"><i>✓</i>1 покупка на любую сумму</div></div>
+
+  <!-- 3: уведомление о переводе -->
+  <div class="layer center" id="d0" style="top: 460px"><div class="eyebrow">Результат</div></div>
+  <div class="layer" id="d1" style="top: 600px"><div class="glass push"><div class="ico">₽</div><div><div class="t1">СБП · входящий перевод</div><div class="t2">+1 000 ₽ от меня</div></div></div></div>
+  <div class="layer center" id="d2" style="top: 860px"><div class="h2">Лично, на любую<br>твою карту</div></div>
+
+  <!-- 4: финал -->
+  <div class="layer center" id="e1" style="top: 470px"><div class="h2">А у карты ещё</div></div>
+  <div class="layer center" id="e2" style="top: 570px"><div class="mega"><span class="gold">60 дней</span><br>без %</div></div>
+  <div class="layer center" id="e3" style="top: 900px"><div class="h2" style="font-size:44px;opacity:.8">на покупки</div></div>
+  <div class="layer center" id="e4" style="top: 1060px"><span class="btn">Ссылка в описании ↓</span></div>
+  <div class="layer center" id="e5" style="top: 1250px"><div style="font-size:32px;font-weight:bold;opacity:.75">18+ · только новым клиентам<br>кредиток Альфа-Банка</div></div>
+
+  <div class="legal" data-legal></div>
+</div>
+<script src="legal.js"></script>
+<script src="timeline.js"></script>
+<script>
+  window.DEFAULT_STARTS = [0, 2.6, 5.4, 8.6, 11.2];
+  window.DEFAULT_DURATION = 15;
+
+  function draw(t, S, D) {
+    const end = (i) => (i + 1 < S.length ? S[i + 1] : 999);
+    const len = (i) => end(i) - S[i];
+    show($("a1"), t, S[0], end(0), 30);
+    show($("a2"), t, S[0] + 0.25, end(0), 0, true);
+    show($("b1"), t, S[1], end(1), 30);
+    show($("b2"), t, S[1] + 0.15, end(1));
+    show($("c0"), t, S[2], end(2), 30);
+    show($("c1"), t, S[2] + 0.1 * len(2), end(2), 0, true);
+    show($("c2"), t, S[2] + 0.45 * len(2), end(2), 0, true);
+    show($("d0"), t, S[3], end(3), 30);
+    show($("d2"), t, S[3] + 0.5 * len(3), end(3));
+    show($("e1"), t, S[4], 999);
+    show($("e2"), t, S[4] + 0.2, 999, 0, true);
+    show($("e3"), t, S[4] + 0.5, 999);
+    show($("e4"), t, S[4] + 1.2, 999, 0, true);
+    show($("e5"), t, S[4] + 1.6, 999);
+
+    // Уведомление съезжает сверху, как push
+    const d1 = $("d1"), k = ease((t - S[3] - 0.2) / 0.5), o = clamp((end(3) - t) / 0.3);
+    d1.style.opacity = Math.min(clamp((t - S[3] - 0.2) / 0.2), o);
+    d1.style.transform = `translateY(${(1 - k) * -260}px)`;
+
+    // Карта: вращается в 3D и светится на сцене 1
+    const card = $("card");
+    const inK = ease((t - S[1] - 0.2) / 0.8), out = clamp((end(1) - t) / 0.35);
+    card.style.opacity = Math.min(clamp((t - S[1] - 0.2) / 0.3), out);
+    card.style.transform =
+      `perspective(1400px) rotateY(${(1 - inK) * 70 + Math.sin(t * 1.6) * 8}deg) rotateX(${8 + Math.cos(t * 1.3) * 4}deg) rotate(-6deg) scale(${0.85 + 0.2 * inK})`;
+
+    const pulse = t > S[4] + 1.8 ? 1 + 0.04 * Math.sin((t - S[4] - 1.8) * 8) : 1;
+    $("e4").firstElementChild.style.transform = `scale(${pulse})`;
+  }
+</script>
+</body>
+</html>

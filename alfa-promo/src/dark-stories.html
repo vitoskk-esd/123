@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Сторис «Тёмный премиум» 1080x1920</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="dark.css">
+<style>
+  .canvas { width: 1080px; height: 1920px; }
+  .center { position: absolute; left: 70px; right: 70px; text-align: center; }
+  .card { left: 260px; top: 700px; transform: perspective(1400px) rotateY(-16deg) rotateX(10deg) rotate(-7deg) scale(0.95); }
+  .mega { font-size: 128px; }
+  .checks { position: absolute; left: 70px; right: 70px; top: 1140px; }
+  .push { margin-bottom: 26px; }
+  .legal { font-size: 15px; bottom: 30px; }
+</style>
+</head>
+<body>
+<div class="canvas dark">
+  <div class="grid"></div>
+  <div class="ad-mark" data-ad></div>
+  <div class="center eyebrow" style="top: 150px">Стоп ✋</div>
+  <div class="center mega" style="top: 220px">Ты упускаешь<br><span class="gold">1 000 ₽</span></div>
+  <div class="card">
+    <div class="stripe"></div>
+    <div class="bank">Альфа-Банк</div>
+    <div class="type">кредитная карта</div>
+    <div class="chip"></div>
+    <div class="num">•••• •••• •••• 1000</div>
+  </div>
+  <div class="checks">
+    <div class="glass check"><i>1</i>Оформи по моей ссылке</div>
+    <div class="glass check"><i>2</i>Получи карту курьером</div>
+    <div class="glass check"><i>3</i>1 покупка на любую сумму</div>
+  </div>
+  <div class="center" style="top: 1640px"><span class="btn">Жми на ссылку ↑</span></div>
+  <div class="legal" data-legal></div>
+</div>
+<script src="legal.js"></script>
+</body>
+</html>

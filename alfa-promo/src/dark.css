@@ -1,0 +1,39 @@
+/* Стиль «Тёмный премиум»: чёрный фон, красное свечение, золото */
+.dark {
+  --gold: #f2c46d;
+  background:
+    radial-gradient(70% 45% at 80% 20%, rgba(239,49,36,0.55) 0%, transparent 70%),
+    radial-gradient(60% 40% at 10% 90%, rgba(239,49,36,0.35) 0%, transparent 70%),
+    #0b0b0d;
+  color: #fff;
+}
+.dark .ad-mark { background: rgba(255,255,255,0.1); }
+.dark .grid {
+  position: absolute; inset: 0; opacity: 0.08;
+  background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px);
+  background-size: 90px 90px;
+  mask-image: radial-gradient(80% 60% at 50% 40%, #000 0%, transparent 100%);
+}
+.dark .gold { color: var(--gold); }
+.dark .red { color: #ff4a3d; }
+.dark .eyebrow { font-size: 34px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); font-weight: bold; }
+.dark .mega { font-size: 150px; font-weight: bold; letter-spacing: -0.06em; line-height: 0.98; }
+.dark .glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 32px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+.dark .check { display: flex; align-items: center; gap: 26px; padding: 30px 34px; font-size: 44px; font-weight: bold; margin-bottom: 26px; }
+.dark .check i { font-style: normal; flex: none; width: 72px; height: 72px; border-radius: 50%; background: var(--gold); color: #0b0b0d; display: grid; place-items: center; font-size: 40px; }
+.dark .card {
+  background: linear-gradient(135deg, #2a2a2e 0%, #121214 60%, #000 100%);
+  box-shadow: 0 0 120px rgba(239,49,36,0.55), 0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.dark .card .stripe { background: linear-gradient(135deg, var(--gold), #b8862f); opacity: 0.95; }
+.dark .push { display: flex; gap: 26px; align-items: center; padding: 30px 32px; }
+.dark .push .ico { flex: none; width: 92px; height: 92px; border-radius: 24px; background: #2fbf71; display: grid; place-items: center; font-size: 50px; font-weight: bold; color: #fff; }
+.dark .push .t1 { font-size: 28px; opacity: 0.7; }
+.dark .push .t2 { font-size: 44px; font-weight: bold; margin-top: 6px; }
+.dark .btn { display: inline-block; background: linear-gradient(135deg, #ff4a3d, #c7190e); color: #fff; font-size: 48px; font-weight: bold; padding: 30px 60px; border-radius: 999px; box-shadow: 0 0 60px rgba(239,49,36,0.6); }
+.dark .legal { opacity: 0.6; }

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Пост «Тёмный премиум» 1080x1080</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="dark.css">
+<style>
+  .canvas { width: 1080px; height: 1080px; }
+  .dark .eyebrow { position: absolute; left: 60px; top: 110px; font-size: 28px; }
+  .dark .mega { position: absolute; left: 56px; top: 150px; font-size: 128px; }
+  .card { right: -170px; top: 640px; transform: perspective(1400px) rotateY(-18deg) rotateX(8deg) rotate(-8deg) scale(0.78); }
+  .list { position: absolute; left: 60px; top: 445px; }
+  .dark .check { font-size: 32px; padding: 22px 30px 22px 22px; margin-bottom: 18px; gap: 20px; white-space: nowrap; width: fit-content; }
+  .dark .check i { width: 54px; height: 54px; font-size: 30px; }
+  .dark .btn { position: absolute; left: 60px; top: 735px; font-size: 32px; padding: 22px 40px; }
+  .legal { font-size: 12.5px; bottom: 22px; }
+</style>
+</head>
+<body>
+<div class="canvas dark">
+  <div class="grid"></div>
+  <div class="ad-mark" data-ad></div>
+  <div class="eyebrow">Кредитка Альфа-Банка</div>
+  <div class="mega">+1 000 ₽<br><span class="gold">от меня</span></div>
+  <div class="card">
+    <div class="stripe"></div>
+    <div class="bank">Альфа-Банк</div>
+    <div class="type">кредитная карта</div>
+    <div class="chip"></div>
+    <div class="num">•••• •••• •••• 1000</div>
+  </div>
+  <div class="list">
+    <div class="glass check"><i>✓</i>60 дней без % на покупки</div>
+    <div class="glass check"><i>✓</i>1 покупка на любую сумму</div>
+  </div>
+  <div class="btn">Ссылка в описании ↓</div>
+  <div class="legal" data-legal></div>
+</div>
+<script src="legal.js"></script>
+</body>
+</html>

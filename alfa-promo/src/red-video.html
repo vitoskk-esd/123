@@ -59,52 +59,40 @@
   <div class="legal" data-legal></div>
 </div>
 <script src="legal.js"></script>
+<script src="timeline.js"></script>
 <script>
-  const DURATION = 15;
-  const $ = (id) => document.getElementById(id);
-  const clamp = (x) => Math.max(0, Math.min(1, x));
-  const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
-  const back = (x) => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+  // Сцены: 0 хук, 1 «60 дней», 2 наличные, 3 шаги, 4 финал
+  window.DEFAULT_STARTS = [0, 2.6, 5.6, 8.4, 12.0];
+  window.DEFAULT_DURATION = 15;
 
-  // Появление в [a, a+0.45], исчезновение в [b-0.3, b]
-  function show(el, t, a, b, dy = 60, pop = false) {
-    const i = (t - a) / 0.45, o = (b - t) / 0.3;
-    const k = Math.min(clamp(i), clamp(o));
-    const s = pop ? 0.6 + 0.4 * back(i) : 1;
-    el.style.opacity = k;
-    el.style.transform = `translateY(${(1 - ease(i)) * dy - (1 - clamp(o)) * 40}px) scale(${s})`;
-  }
+  function draw(t, S, D) {
+    const end = (i) => (i + 1 < S.length ? S[i + 1] : 999);
+    const len = (i) => end(i) - S[i];
+    show($("s1a"), t, S[0] + 0.05, end(0), 80, true);
+    show($("s1b"), t, S[0] + 0.5, end(0));
+    show($("s2"), t, S[1], end(1));
+    show($("s3"), t, S[2], end(2));
+    show($("s4t"), t, S[3], end(3));
+    show($("st1"), t, S[3] + 0.1 * len(3), end(3), 0, true);
+    show($("st2"), t, S[3] + 0.35 * len(3), end(3), 0, true);
+    show($("st3"), t, S[3] + 0.6 * len(3), end(3), 0, true);
+    show($("s4n"), t, S[3] + 0.82 * len(3), end(3));
+    show($("s5a"), t, S[4], 999);
+    show($("s5b"), t, S[4], 999, 0, true);
+    show($("s5c"), t, S[4] + 1.0, 999);
+    show($("s5d"), t, S[4] + 1.4, 999);
+    $("num").textContent = Math.round(ease((t - S[4] - 0.1) / 1.0) * 1000).toLocaleString("ru-RU");
 
-  window.render = function (t) {
-    $("bar").style.width = (t / DURATION) * 100 + "%";
-    show($("s1a"), t, 0.05, 2.6, 80, true);
-    show($("s1b"), t, 0.5, 2.6);
-    show($("s2"), t, 2.6, 5.6);
-    show($("s3"), t, 5.6, 8.4);
-    show($("s4t"), t, 8.4, 12.0);
-    show($("st1"), t, 8.8, 12.0, 0, true);
-    show($("st2"), t, 9.6, 12.0, 0, true);
-    show($("st3"), t, 10.4, 12.0, 0, true);
-    show($("s4n"), t, 11.1, 12.0);
-    show($("s5a"), t, 12.0, 99);
-    show($("s5b"), t, 12.0, 99, 0, true);
-    show($("s5c"), t, 13.0, 99);
-    show($("s5d"), t, 13.4, 99);
-    $("num").textContent = Math.round(ease((t - 12.1) / 1.0) * 1000).toLocaleString("ru-RU");
-
-    // Карта: влетает снизу на сцене 2, покачивается, уходит перед шагами
+    // Карта: влетает на сцене 1, покачивается, уходит перед шагами
     const card = $("card");
-    const inK = ease((t - 2.7) / 0.7), outK = ease((t - 8.1) / 0.4);
+    const inK = ease((t - S[1] - 0.1) / 0.7), outK = ease((t - S[3] + 0.3) / 0.4);
     const sway = Math.sin(t * 2.2) * 4;
-    card.style.opacity = Math.min(clamp((t - 2.6) / 0.3), 1 - outK);
+    card.style.opacity = Math.min(clamp((t - S[1]) / 0.3), 1 - outK);
     card.style.transform =
       `translate(${outK * 700}px, ${(1 - inK) * 900}px) rotate(${-10 + (1 - inK) * 30 + sway}deg) scale(1.05)`;
-    // Пульсация кнопки CTA
-    const pulse = t > 13.5 ? 1 + 0.04 * Math.sin((t - 13.5) * 8) : 1;
+    const pulse = t > S[4] + 1.5 ? 1 + 0.04 * Math.sin((t - S[4] - 1.5) * 8) : 1;
     $("s5c").firstElementChild.style.transform = `scale(${pulse})`;
-  };
-  window.DURATION = DURATION;
-  render(0);
+  }
 </script>
 </body>
 </html>
