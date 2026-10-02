@@ -12,7 +12,9 @@ const add = (i, v, pan = 0) => { if (i >= 0 && i < N) { L[i] += v * (1 - pan) ; 
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 
 function inBreak(t) { const [a, b] = TL.sfx.breakAt; return t >= a && t < b; }
-const drumsOn = t => t >= 1.0 && !inBreak(t) && !(t >= 23.0 && t < 24.0);
+const M0 = TL.sfx.musicStart, [RIS0, RIS1] = TL.sfx.riser;
+// барабаны молчат на брейке и в последнюю секунду райзера перед финалом
+const drumsOn = t => t >= M0 && !inBreak(t) && !(t >= RIS1 - 1.0 && t < RIS1);
 
 // --- барабаны ---
 function kick(t0, g = 1) {
@@ -55,7 +57,7 @@ function renderTonal() {
     const sinceBeat = t % BEAT;
     const duck = drumsOn(t) ? Math.min(1, .25 + sinceBeat * 4) : 1;
     bph += 2 * Math.PI * mtof(roots[ci]) / SR;
-    const bassOn = t >= 1.0 && !inBreak(t) && t < 27.4;
+    const bassOn = t >= M0 && !inBreak(t) && t < DUR - .6;
     const bass = bassOn ? (Math.sin(bph) + .3 * Math.sin(bph * 2)) * .22 * duck : 0;
     // пэд: расстроенные пилы через фильтр
     let pad = 0;
@@ -66,9 +68,9 @@ function renderTonal() {
         pad += (phs[idx] % 1) * 2 - 1;
       }
     });
-    const cutoff = t < 1 ? .02 : (t >= 24 ? .09 : .05);
+    const cutoff = t < M0 ? .02 : (t >= RIS1 ? .09 : .05);
     lp1 += (pad - lp1) * cutoff; lp2 += (lp1 - lp2) * cutoff;
-    const padG = (t < 1 ? .05 : .06) * duck;
+    const padG = (t < M0 ? .05 : .06) * duck;
     add(i, bass, 0);
     L[i] += lp2 * padG * 1.0; R[i] += lp2 * padG * .8;
   }
@@ -116,9 +118,9 @@ function riser(a, b) {
 }
 
 renderTonal();
-for (let t = 1.0; t < 27.5; t += BEAT / 2) {
+for (let t = M0; t < DUR - .5; t += BEAT / 2) {
   if (!drumsOn(t)) continue;
-  const beat = Math.round((t - 1.0) / BEAT * 2);
+  const beat = Math.round((t - M0) / BEAT * 2);
   if (beat % 2 === 0) kick(t);
   if (beat % 4 === 2) clap(t);
   hat(t, beat % 2 ? 1 : .6, beat % 8 === 7);

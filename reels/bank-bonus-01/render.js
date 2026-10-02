@@ -16,7 +16,7 @@ const TL = require("./timeline.js");
   await page.evaluate(() => document.fonts.ready);
 
   if (stills) {
-    for (const t of [0.1, 1.9, 4.2, 7.2, 11.6, 15.5, 17.6, 22.8, 26.8]) {
+    for (const t of [0.1, ...TL.lines.map(l => +(l.end - .4).toFixed(2))]) {
       await page.evaluate(t => window.renderAt(t), t);
       await page.screenshot({ path: path.join(__dirname, "out", `still_${t}.jpg`), type: "jpeg", quality: 80 });
     }
