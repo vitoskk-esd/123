@@ -1,3 +1,4 @@
 anthropic>=0.80
 playwright>=1.45
 pillow>=10.0
+telethon>=1.36

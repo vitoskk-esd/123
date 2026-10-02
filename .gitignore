@@ -21,3 +21,8 @@ data/screenshots/
 data/covers/
 data/logs/
 *.tmp
+
+# tg_agent: сессия Telegram (= доступ к аккаунту!) и переписки
+data/tg/
+*.session
+*.session-journal
