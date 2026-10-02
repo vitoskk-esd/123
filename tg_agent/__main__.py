@@ -1,8 +1,8 @@
 """CLI Telegram-ассистента.
 
     python -m tg_agent login    # войти в Telegram (номер + код), сессия сохранится
-    python -m tg_agent run      # слушать каналы и чаты, присылать черновики в «Избранное»
-    python -m tg_agent status   # лимиты, черновики на одобрении, память чатов
+    python -m tg_agent run      # следить за каналами и комментировать новые посты
+    python -m tg_agent status   # сколько комментариев сегодня и последние из них
 """
 
 from __future__ import annotations
@@ -43,11 +43,10 @@ def status() -> int:
     from .memory import State
 
     state = State()
-    print(f"Комментариев сегодня осталось: {state.comment_budget_left()} из {CONFIG.max_comments_per_day}")
-    print(f"Черновиков ждут решения: {len(state.pending)}")
-    print(f"Выучено правок стиля: {len(state.style)}")
-    chats = sorted(CONFIG.chats_dir.glob("*.json")) if CONFIG.chats_dir.exists() else []
-    print(f"Чатов в памяти: {len(chats)}")
+    left = state.comment_budget_left()
+    print(f"Сегодня: {CONFIG.max_comments_per_day - left} из {CONFIG.max_comments_per_day} комментариев")
+    for item in state.log[-10:]:
+        print(f"\n[{item['day']}] {item['channel']}  {item['link']}\n  {item['text']}")
     return 0
 
 
