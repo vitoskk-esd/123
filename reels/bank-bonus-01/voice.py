@@ -331,7 +331,7 @@ def humanize(src, dst):
 #   formant — та же высота, но тембр ниже/глубже: голос «другого человека»
 #   vc      — тембр полностью заменяется нейросетью (Chatterbox VC) на голос из референса
 REC_FILE = os.environ.get("VOICE_REC", "")
-FX = os.environ.get("VOICE_FX", "formant")
+FX = os.environ.get("VOICE_FX", "vc")
 FX_CHAINS = {
     "none": "anull",
     "low": "rubberband=pitch=0.917:formant=shifted",

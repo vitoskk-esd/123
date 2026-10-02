@@ -47,6 +47,13 @@
 ./build.sh   # voice.py -> audio.js -> render.js -> add_voice.sh -> reel_final.mp4
 ```
 
+**Свой голос с заменой тембра (выбранный вариант).** Читаете сценарий целиком на телефон, файл кладёте в эту папку как `my_voice.m4a` (в git не попадает). Интонация и паузы остаются вашими, а тембр заменяет нейросеть Chatterbox VC; длинные паузы сжимаются, субтитры и сцены встают по распознанным словам:
+
+```bash
+VOICE_REC=my_voice.m4a ./build.sh                       # VOICE_FX=vc по умолчанию
+VOICE_REC=my_voice.m4a python3 voice.py fx-samples      # пробы: none / low / high / formant / vc
+```
+
 **ElevenLabs (самый живой вариант).** Нужен ключ в переменной окружения `ELEVENLABS_API_KEY` (права: Text to Speech, Voices). Подбор голоса и сборка:
 
 ```bash
