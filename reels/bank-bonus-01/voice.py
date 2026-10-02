@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
-"""Озвучка ролика нейроголосом (edge-tts) и пересчёт timeline.js под реальную речь.
+"""Озвучка ролика и пересчёт timeline.js под реальную речь.
 
 python3 voice.py  ->  out/voice.wav  +  перезаписанный timeline.js
 
-Каждая фраза синтезируется отдельно (с кэшем в out/tts/), обрезается по краям
-и склеивается с короткими паузами, так что темп задаём мы, а не синтезатор.
-Тайминги слов берутся из WordBoundary-событий edge-tts: по ним строятся
-сцены, субтитры и звуковые акценты.
+Движок по умолчанию — Chatterbox Multilingual (Resemble AI, MIT): живая,
+неровная интонация вместо «дикторской». Тембр берётся из референса
+(REF_TEXT голосом REF_VOICE через edge-tts), ударения размечены в SCRIPT
+знаком «+» перед ударной гласной. Каждую фразу проверяет Whisper: если модель
+проглотила или исказила слова, фраза перегенерируется с другим seed.
+Тайминги слов для субтитров тоже берутся из Whisper.
+
+ENGINE = "edge" — прежний вариант: голос edge-tts без Chatterbox.
+
+Зависимости: pip install edge-tts faster-whisper chatterbox-tts
+(torch для CPU: pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu)
 """
 import array
 import asyncio
+import difflib
 import hashlib
 import json
 import os
+import re
 import ssl
 import subprocess
+import wave
 
 import edge_tts
 
@@ -22,29 +32,47 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(DIR, "out")
 TTS = os.path.join(OUT, "tts")
 SR = 48000
-VOICE = "ru-RU-DmitryNeural"
-RATE = "+18%"      # живой разговорный темп
+ENGINE = os.environ.get("VOICE_ENGINE", "chatterbox")
 LEAD = 0.18        # сцена появляется чуть раньше первого слова
 TAIL = 1.5         # хвост после последней фразы под стрелку и фейд
 
-# Сценарий: сцены -> фразы. Фраза = (текст для синтеза, пауза после неё, подача).
-# Подача — (rate, pitch) поверх базовой; None = базовая.
+# Chatterbox: тембр из референса. Низкий тёплый мужской голос, читающий по-русски
+# разговорный текст: модель копирует тембр и манеру, а не текст.
+REF_VOICE = "en-US-AndrewMultilingualNeural"
+REF_TEXT = ("Слушай, я тут недавно разбирался, как банки привлекают новых клиентов. "
+            "Оказалось, всё довольно просто: они платят тебе за то, что ты открываешь карту. "
+            "Честно, сам сначала не поверил.")
+TEMPO = 1.06       # лёгкое ускорение готовой фразы (без изменения высоты)
+QC_MIN = 0.9       # минимальное совпадение распознанного текста со сценарием
+TRIES = 4
+
+# edge-tts: голос и темп, если ENGINE = "edge"
+EDGE_VOICE = "ru-RU-DmitryNeural"
+EDGE_RATE = 18
+
+# Сценарий: сцены -> фразы. Фраза = (текст, пауза после неё, подача).
+# «+» перед гласной — ударение. Подача: exag (эмоциональность Chatterbox, 0.25–1),
+# cfg (ниже — размереннее), rate (поправка темпа edge-tts, %).
 SCRIPT = [
-    [("Стоп!", 0.28, ("-6%", "+2Hz")),
-     ("Банки прямо сейчас раздают деньги,", 0.0, None)],
-    [("и почти никто их не забирает.", 0.26, ("+0%", "-2Hz"))],
-    [("Новому клиенту по приглашению банк платит бонус.", 0.14, None),
-     ("Просто за карту и первую покупку.", 0.26, None)],
-    [("Это не кредит и не розыгрыш.", 0.12, None),
-     ("Это рекламный бюджет банка, и он может достаться тебе.", 0.28, None)],
-    [("А теперь честно:", 0.08, None),
-     ("ты платишь за обслуживание?", 0.12, None),
-     ("Кэшбэк один процент?", 0.34, None)],
-    [("Значит, ты кормишь банк, который тебе не платит ничего.", 0.32, ("-8%", "-4Hz"))],
-    [("Я собрал в телеграме все актуальные бонусы: какой банк, сколько платит и какие условия.", 0.28, ("+4%", "+0Hz"))],
-    [("Ссылка в профиле.", 0.14, ("-4%", "+0Hz")),
-     ("Забирай, пока акции не закончились.", 0.0, None)],
+    [("Стоп!", 0.28, dict(exag=.9, cfg=.5, rate=-6)),
+     ("Б+анки пр+ямо сейч+ас разда+ют д+еньги,", 0.0, dict(exag=.65))],
+    [("и п+очти никт+о их не забир+ает.", 0.26, dict(exag=.55))],
+    [("Н+овому кли+енту по приглаш+ению банк пл+атит б+онус.", 0.14, dict()),
+     ("Пр+осто за к+арту и п+ервую пок+упку.", 0.26, dict())],
+    [("+Это не кред+ит и не р+озыгрыш.", 0.12, dict()),
+     ("+Это рекл+амный бюдж+ет б+анка, и он м+ожет дост+аться теб+е.", 0.28, dict(exag=.6))],
+    [("А теп+ерь ч+естно:", 0.08, dict(exag=.6)),
+     ("ты пл+атишь за обсл+уживание?", 0.12, dict(exag=.6)),
+     ("Кэшб+эк од+ин проц+ент?", 0.34, dict(exag=.65))],
+    [("Зн+ачит, ты к+ормишь банк, кот+орый теб+е не пл+атит ничег+о.", 0.32, dict(exag=.45, cfg=.3, rate=-8))],
+    [("Я собр+ал в телегр+аме все акту+альные б+онусы: как+ой банк, ск+олько пл+атит и как+ие усл+овия.", 0.28, dict(exag=.55, rate=4))],
+    [("Сс+ылка в проф+иле.", 0.14, dict(exag=.7, rate=-4)),
+     ("Забир+ай, пок+а +акции не зак+ончились.", 0.0, dict(exag=.6))],
 ]
+
+plain = lambda s: s.replace("+", "")
+stressed = lambda s: re.sub(r"\+(\w)", lambda m: m.group(1) + "́", s)
+norm = lambda s: re.sub(r"[^а-яёa-z0-9 ]", "", s.lower().replace("ё", "е").replace("1%", "один процент")).split()
 
 # edge-tts сам выбирает certifi; в этом окружении TLS идёт через прокси со своим CA.
 _ca = os.environ.get("SSL_CERT_FILE") or ("/root/.ccr/ca-bundle.crt" if os.path.exists("/root/.ccr/ca-bundle.crt") else None)
@@ -52,41 +80,168 @@ if _ca:
     edge_tts.communicate._SSL_CTX = ssl.create_default_context(cafile=_ca)
 
 
-async def synth(text, rate, pitch):
-    key = hashlib.sha1(f"{VOICE}|{rate}|{pitch}|{text}".encode()).hexdigest()[:12]
-    mp3, meta = os.path.join(TTS, key + ".mp3"), os.path.join(TTS, key + ".json")
-    if not os.path.exists(meta):
-        com = edge_tts.Communicate(text, VOICE, rate=rate, pitch=pitch, boundary="WordBoundary",
-                                   proxy=os.environ.get("HTTPS_PROXY"))
-        words, audio = [], bytearray()
+def key(*parts):
+    return hashlib.sha1("|".join(map(str, parts)).encode()).hexdigest()[:12]
+
+
+def load_pcm(path, tempo=1.0):
+    af = ["-af", f"atempo={tempo}"] if tempo != 1.0 else []
+    pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", path, *af, "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
+                         check=True, capture_output=True).stdout
+    return array.array("h", pcm)
+
+
+async def edge(text, voice, rate, path):
+    """edge-tts -> mp3; возвращает тайминги слов из WordBoundary."""
+    com = edge_tts.Communicate(text, voice, rate=f"{rate:+d}%", boundary="WordBoundary",
+                               proxy=os.environ.get("HTTPS_PROXY"))
+    words = []
+    with open(path, "wb") as f:
         async for ch in com.stream():
             if ch["type"] == "audio":
-                audio += ch["data"]
+                f.write(ch["data"])
             elif ch["type"] == "WordBoundary":
                 words.append({"w": ch["text"], "a": ch["offset"] / 1e7, "d": ch["duration"] / 1e7})
-        with open(mp3, "wb") as f:
-            f.write(audio)
-        with open(meta, "w") as f:
-            json.dump(words, f, ensure_ascii=False)
-    pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", mp3, "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
-                         check=True, capture_output=True).stdout
-    with open(meta) as f:
-        return array.array("h", pcm), json.load(f)
+    return words
 
 
-def trim(pcm, words):
-    """Обрезка тишины: начало — по первому слову, конец — по реальной энергии сигнала."""
-    a = max(0, int((words[0]["a"] - 0.03) * SR))
-    last = int((words[-1]["a"]) * SR)
-    win, thr = int(0.01 * SR), 500  # ~ -36 dBFS
-    b = last
-    for i in range(last, len(pcm) - win, win):
-        if max(abs(x) for x in pcm[i:i + win]) > thr:
-            b = i + win
-    # тихий хвост вопросительной интонации энергия может не поймать — не режем раньше конца слова
-    b = max(b, int((words[-1]["a"] + words[-1]["d"]) * SR))
-    b = min(len(pcm), b + int(0.04 * SR))
-    return pcm[a:b], a / SR
+_models = {}
+
+
+def whisper():
+    if "asr" not in _models:
+        from faster_whisper import WhisperModel
+        _models["asr"] = WhisperModel("small", device="cpu", compute_type="int8")
+    return _models["asr"]
+
+
+def transcribe(path):
+    segs, _ = whisper().transcribe(path, language="ru", beam_size=5, word_timestamps=True)
+    return [{"w": w.word.strip(), "a": w.start, "d": w.end - w.start} for s in segs for w in s.words]
+
+
+def similarity(phrase, words):
+    a, b = " ".join(norm(phrase)), " ".join(norm(" ".join(w["w"] for w in words)))
+    return difflib.SequenceMatcher(None, a, b).ratio()
+
+
+def align(phrase, words):
+    """Время каждого слова сценария по словам Whisper; несопоставленные — интерполяцией."""
+    toks = phrase.split()
+    want = [" ".join(norm(t)) for t in toks]
+    got = [" ".join(norm(w["w"])) for w in words]
+    t = [None] * len(toks)
+    for blk in difflib.SequenceMatcher(None, want, got).get_matching_blocks():
+        for k in range(blk.size):
+            t[blk.a + k] = words[blk.b + k]["a"]
+    if t[0] is None:
+        t[0] = words[0]["a"] if words else 0.0
+    end = words[-1]["a"] + words[-1]["d"] if words else 1.0
+    i = 0
+    while i < len(t):
+        if t[i] is None:
+            j = i
+            while j < len(t) and t[j] is None:
+                j += 1
+            hi = t[j] if j < len(t) else end
+            lo = t[i - 1]
+            for k in range(i, j):
+                t[k] = lo + (hi - lo) * (k - i + 1) / (j - i + 1)
+            i = j
+        i += 1
+    return t
+
+
+def chatterbox_tts():
+    if "tts" not in _models:
+        import torch
+        from chatterbox.mtl_tts import ChatterboxMultilingualTTS
+        torch.set_num_threads(os.cpu_count() or 4)
+        _models["tts"] = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
+    return _models["tts"]
+
+
+async def reference():
+    path = os.path.join(TTS, f"ref_{key(REF_VOICE, REF_TEXT)}.wav")
+    if not os.path.exists(path):
+        mp3 = path[:-4] + ".mp3"
+        await edge(REF_TEXT, REF_VOICE, 0, mp3)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", mp3, "-ac", "1", "-ar", "24000", path], check=True)
+    return path
+
+
+async def synth(phrase, style):
+    """Фраза -> (pcm 48 кГц, слова с временем относительно начала pcm)."""
+    if ENGINE == "edge":
+        rate = EDGE_RATE + style.get("rate", 0)
+        k = key("edge", EDGE_VOICE, rate, plain(phrase))
+        mp3, meta = os.path.join(TTS, k + ".mp3"), os.path.join(TTS, k + ".json")
+        if not os.path.exists(meta):
+            ws = await edge(plain(phrase), EDGE_VOICE, rate, mp3)
+            json.dump(ws, open(meta, "w"), ensure_ascii=False)
+        return trim(load_pcm(mp3), json.load(open(meta)), phrase)
+
+    exag, cfg = style.get("exag", .5), style.get("cfg", .4)
+    ref = await reference()
+    k = key("cbx", ref, exag, cfg, TEMPO, phrase)
+    wav, meta = os.path.join(TTS, k + ".wav"), os.path.join(TTS, k + ".json")
+    if not os.path.exists(meta):
+        import torch
+        import torchaudio
+        tts, best = chatterbox_tts(), None
+        for seed in range(TRIES):
+            torch.manual_seed(seed)
+            out = tts.generate(stressed(phrase), language_id="ru", audio_prompt_path=ref,
+                               exaggeration=exag, cfg_weight=cfg, temperature=.8)
+            tmp = os.path.join(TTS, f"{k}_s{seed}.wav")
+            torchaudio.save(tmp, out, tts.sr)
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp, "-af", f"atempo={TEMPO}", tmp + ".t.wav"], check=True)
+            os.replace(tmp + ".t.wav", tmp)
+            ws = transcribe(tmp)
+            score = similarity(plain(phrase), ws)
+            print(f"    seed {seed}: {score:.2f}  {' '.join(w['w'] for w in ws)}", flush=True)
+            if best is None or score > best[0]:
+                best = (score, tmp, ws)
+            if score >= QC_MIN:
+                break
+        if best[0] < QC_MIN:
+            print(f"  ! «{plain(phrase)}»: лучшее совпадение {best[0]:.2f}, проверьте на слух")
+        os.replace(best[1], wav)
+        json.dump(best[2], open(meta, "w"), ensure_ascii=False)
+    return trim(load_pcm(wav), json.load(open(meta)), phrase)
+
+
+def trim(pcm, ws, phrase):
+    """Обрезка тишины по энергии сигнала (с запасом на тихие края) и тайминги слов сценария."""
+    win = int(0.01 * SR)
+    peak = max(abs(x) for x in pcm) or 1
+    thr = peak * 0.02  # −34 дБ от пика
+    loud = [i for i in range(0, len(pcm) - win, win) if max(abs(x) for x in pcm[i:i + win]) > thr]
+    a = max(0, loud[0] - int(0.03 * SR))
+    b = min(len(pcm), loud[-1] + win + int(0.06 * SR))
+    if ws:  # тихий хвост вопросительной интонации не режем раньше конца последнего слова
+        b = min(len(pcm), max(b, int((ws[-1]["a"] + ws[-1]["d"]) * SR) + int(0.04 * SR)))
+    toks = plain(phrase).split()
+    if ENGINE == "edge":
+        assert len(toks) == len(ws), (phrase, [w["w"] for w in ws])
+        times = [w["a"] for w in ws]
+    else:
+        times = align(plain(phrase), ws)
+    off = a / SR
+    return pcm[a:b], [{"w": tok, "a": max(0.0, tm - off)} for tok, tm in zip(toks, times)]
+
+
+def humanize(src, dst):
+    """Тихий «воздух» комнаты: короткие ранние отражения и едва слышный фон вместо цифровой тишины."""
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src,
+                    "-f", "lavfi", "-i", f"anoisesrc=color=pink:amplitude=0.0016:sample_rate={SR}",
+                    "-filter_complex",
+                    "[0:a]asplit=2[d][w];"
+                    "[w]aecho=0.8:0.5:23|37|53:0.22|0.15|0.09,lowpass=f=5000,volume=0.6[r];"
+                    "[d][r]amix=inputs=2:weights=1 0.35:normalize=0[v];"
+                    "[1:a]lowpass=f=3000[n];"
+                    "[v][n]amix=inputs=2:duration=first:normalize=0",
+                    "-ac", "1", "-ar", str(SR), dst], check=True)
 
 
 async def main():
@@ -95,16 +250,10 @@ async def main():
     for scene in SCRIPT:
         words, text = [], []
         for phrase, gap, style in scene:
-            rate, pitch = style or (RATE, "+0Hz")
-            if style:
-                rate = f"{int(RATE[:-1]) + int(rate[:-1]):+d}%"
-            pcm, ws = await synth(phrase, rate, pitch)
-            pcm, off = trim(pcm, ws)
-            # слова фразы в тексте субтитров, с пунктуацией; время — из WordBoundary
-            toks = phrase.split()
-            assert len(toks) == len(ws), (phrase, [w["w"] for w in ws])
-            words += [{"w": tok, "a": round(t + w["a"] - off, 3)} for tok, w in zip(toks, ws)]
-            text.append(phrase)
+            print(f"  {plain(phrase)}", flush=True)
+            pcm, ws = await synth(phrase, style)
+            words += [{"w": w["w"], "a": round(t + w["a"], 3)} for w in ws]
+            text.append(plain(phrase))
             out.extend(pcm)
             t += len(pcm) / SR
             out.extend(array.array("h", bytes(int(gap * SR) * 2)))
@@ -118,15 +267,14 @@ async def main():
     for i, l in enumerate(lines):
         l["end"] = lines[i + 1]["start"] if i + 1 < len(lines) else duration
 
-    with open(os.path.join(OUT, "voice.wav"), "wb") as f:
-        import wave
-        w = wave.open(f, "wb")
+    raw = os.path.join(OUT, "voice_raw.wav")
+    with wave.open(raw, "wb") as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(out.tobytes())
-        w.close()
+    humanize(raw, os.path.join(OUT, "voice.wav"))
 
     write_timeline(lines, duration)
-    print(f"voice {t:.2f}s, ролик {duration}s")
+    print(f"voice ({ENGINE}) {t:.2f}s, ролик {duration}s")
     for l in lines:
         print(f"  {l['start']:6.2f}–{l['end']:6.2f}  {l['text']}")
 
