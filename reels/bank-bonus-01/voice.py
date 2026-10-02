@@ -26,6 +26,7 @@ import os
 import re
 import ssl
 import subprocess
+import sys
 import wave
 
 import edge_tts
@@ -321,8 +322,108 @@ def humanize(src, dst):
                     "-ac", "1", "-ar", str(SR), dst], check=True)
 
 
+# ---------- своя запись сценария + лёгкое изменение голоса ----------
+# VOICE_REC=my_voice.m4a VOICE_FX=low ./build.sh
+# Интонация и паузы остаются живыми, меняется только тембр:
+#   none    — без изменений (только чистка шума)
+#   low     — на 1.5 тона ниже вместе с тембром («крупнее» голос)
+#   high    — на 1.5 тона выше вместе с тембром
+#   formant — та же высота, но тембр ниже/глубже: голос «другого человека»
+#   vc      — тембр полностью заменяется нейросетью (Chatterbox VC) на голос из референса
+REC_FILE = os.environ.get("VOICE_REC", "")
+FX = os.environ.get("VOICE_FX", "formant")
+FX_CHAINS = {
+    "none": "anull",
+    "low": "rubberband=pitch=0.917:formant=shifted",
+    "high": "rubberband=pitch=1.091:formant=shifted",
+    "formant": f"asetrate={int(SR * 0.88)},aresample={SR},atempo={1 / 0.88:.4f},"
+               f"rubberband=pitch={1 / 0.88:.4f}:formant=preserved",
+}
+
+
+def clean_recording(src, dst, seconds=None):
+    """Чистка записи с телефона: гул и шум, тишина в начале, длинные паузы сжаты до ~0.35 с."""
+    cut = ["-t", str(seconds)] if seconds else []
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, *cut, "-af",
+                    "highpass=f=70,afftdn=nf=-25,"
+                    "silenceremove=start_periods=1:start_threshold=-42dB:"
+                    "stop_periods=-1:stop_duration=0.5:stop_threshold=-42dB:stop_silence=0.35,"
+                    "loudnorm=I=-18:TP=-2",
+                    "-ac", "1", "-ar", str(SR), dst], check=True)
+
+
+def apply_fx(src, dst, fx, ref=None):
+    if fx == "vc":
+        import torchaudio
+        from chatterbox.vc import ChatterboxVC
+        if "vc" not in _models:
+            _models["vc"] = ChatterboxVC.from_pretrained("cpu")
+        vc = _models["vc"]
+        wav = vc.generate(audio=src, target_voice_path=ref)
+        tmp = dst + ".vc.wav"
+        torchaudio.save(tmp, wav, vc.sr)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp, "-ac", "1", "-ar", str(SR), dst], check=True)
+        os.remove(tmp)
+    else:
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-af", FX_CHAINS[fx],
+                        "-ac", "1", "-ar", str(SR), dst], check=True)
+
+
+def fx_samples(rec, ref):
+    """Первые ~20 с записи во всех вариантах -> out/fx/*.mp3, чтобы выбрать на слух."""
+    d = os.path.join(OUT, "fx")
+    os.makedirs(d, exist_ok=True)
+    clean = os.path.join(d, "clean.wav")
+    clean_recording(rec, clean, seconds=20)
+    for i, fx in enumerate(["none", "low", "high", "formant", "vc"], 1):
+        wav = os.path.join(d, f"{fx}.wav")
+        apply_fx(clean, wav, fx, ref)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", wav, "-b:a", "160k",
+                        os.path.join(d, f"{i}_{fx}.mp3")], check=True)
+        print(os.path.join(d, f"{i}_{fx}.mp3"))
+
+
+def from_recording(rec, ref):
+    """Своя запись всего сценария: тайминги слов — по распознаванию, сцены — по сценарию."""
+    clean, fxw = os.path.join(OUT, "rec_clean.wav"), os.path.join(OUT, "voice.wav")
+    clean_recording(rec, clean)
+    apply_fx(clean, fxw, FX, ref)
+    ws = transcribe(clean)  # распознаём до эффекта: так точнее, а тайминг эффект не меняет
+    script = [[plain(ph) for ph, _, _ in scene] for scene in SCRIPT]
+    flat = " ".join(" ".join(sc) for sc in script)
+    print(f"  сценарий/запись: совпадение {similarity(flat, ws):.2f}")
+    times, toks, k, lines = align(flat, ws), flat.split(), 0, []
+    for sc in script:
+        n = len(" ".join(sc).split())
+        lines.append({"text": " ".join(sc),
+                      "words": [{"w": toks[k + j], "a": round(times[k + j], 3)} for j in range(n)]})
+        k += n
+    with wave.open(fxw) as w:
+        t = w.getnframes() / w.getframerate()
+    return lines, t
+
+
+def finish(lines, t):
+    # сцены: старт чуть раньше первого слова, конец = старт следующей
+    for i, l in enumerate(lines):
+        l["start"] = 0.0 if i == 0 else round(l["words"][0]["a"] - LEAD, 2)
+    duration = round(t + TAIL, 1)
+    for i, l in enumerate(lines):
+        l["end"] = lines[i + 1]["start"] if i + 1 < len(lines) else duration
+    write_timeline(lines, duration)
+    print(f"voice ({'запись, ' + FX if REC_FILE else ENGINE}) {t:.2f}s, ролик {duration}s")
+    for l in lines:
+        print(f"  {l['start']:6.2f}–{l['end']:6.2f}  {l['text']}")
+
+
 async def main():
     os.makedirs(TTS, exist_ok=True)
+    if REC_FILE:
+        rec = REC_FILE if os.path.isabs(REC_FILE) else os.path.join(DIR, REC_FILE)
+        ref = await reference()  # нужен только для VOICE_FX=vc
+        if len(sys.argv) > 1 and sys.argv[1] == "fx-samples":
+            return fx_samples(rec, ref)
+        return finish(*from_recording(rec, ref))
     out, t, lines = array.array("h"), 0.0, []
     flat = [plain(ph) for scene in SCRIPT for ph, _, _ in scene]
     n = 0
@@ -341,13 +442,6 @@ async def main():
             t += int(gap * SR) / SR
         lines.append({"text": " ".join(text), "words": words})
 
-    # сцены: старт чуть раньше первого слова, конец = старт следующей
-    for i, l in enumerate(lines):
-        l["start"] = 0.0 if i == 0 else round(l["words"][0]["a"] - LEAD, 2)
-    duration = round(t + TAIL, 1)
-    for i, l in enumerate(lines):
-        l["end"] = lines[i + 1]["start"] if i + 1 < len(lines) else duration
-
     raw = os.path.join(OUT, "voice_raw.wav")
     with wave.open(raw, "wb") as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
@@ -356,11 +450,7 @@ async def main():
         os.replace(raw, os.path.join(OUT, "voice.wav"))
     else:
         humanize(raw, os.path.join(OUT, "voice.wav"))
-
-    write_timeline(lines, duration)
-    print(f"voice ({ENGINE}) {t:.2f}s, ролик {duration}s")
-    for l in lines:
-        print(f"  {l['start']:6.2f}–{l['end']:6.2f}  {l['text']}")
+    finish(lines, t)
 
 
 def write_timeline(lines, duration):
