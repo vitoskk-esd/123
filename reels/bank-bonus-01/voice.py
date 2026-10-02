@@ -40,6 +40,9 @@ TAIL = 1.5         # хвост после последней фразы под 
 
 # Chatterbox: тембр из референса. Низкий тёплый мужской голос, читающий по-русски
 # разговорный текст: модель копирует тембр и манеру, а не текст.
+# Своя запись голоса (15–25 с живой речи) вместо синтетического референса:
+# VOICE_REF=my_voice.m4a ./build.sh — модель клонирует тембр и манеру записи.
+REF_FILE = os.environ.get("VOICE_REF", "")
 REF_VOICE = "en-US-AndrewMultilingualNeural"
 REF_TEXT = ("Слушай, я тут недавно разбирался, как банки привлекают новых клиентов. "
             "Оказалось, всё довольно просто: они платят тебе за то, что ты открываешь карту. "
@@ -171,7 +174,23 @@ def chatterbox_tts():
     return _models["tts"]
 
 
+def own_reference(src):
+    """Запись с телефона -> чистый референс: моно 24 кГц, срезан гул, тишина по краям
+    и длинные паузы убраны, громкость выровнена, не длиннее 25 с."""
+    path = os.path.join(TTS, f"ref_own_{key(os.path.getsize(src), os.path.getmtime(src), src)}.wav")
+    if not os.path.exists(path):
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-af",
+                        "highpass=f=70,afftdn=nf=-25,"
+                        "silenceremove=start_periods=1:start_threshold=-45dB:"
+                        "stop_periods=-1:stop_duration=0.6:stop_threshold=-45dB,"
+                        "loudnorm=I=-18:TP=-2,atrim=0:25",
+                        "-ac", "1", "-ar", "24000", path], check=True)
+    return path
+
+
 async def reference():
+    if REF_FILE:
+        return own_reference(os.path.join(DIR, REF_FILE) if not os.path.isabs(REF_FILE) else REF_FILE)
     path = os.path.join(TTS, f"ref_{key(REF_VOICE, REF_TEXT)}.wav")
     if not os.path.exists(path):
         mp3 = path[:-4] + ".mp3"
