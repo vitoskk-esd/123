@@ -352,8 +352,14 @@ def clean_recording(src, dst, seconds=None):
                     "-ac", "1", "-ar", str(SR), dst], check=True)
 
 
+# Эталон тембра для VOICE_FX=vc (вариант 5, выбранный по пробам): хранится в репозитории,
+# чтобы результат не зависел от того, как edge-tts синтезирует референс в другой день.
+VC_TARGET = os.path.join(DIR, "voice_target_v5.wav")
+
+
 def apply_fx(src, dst, fx, ref=None):
     if fx == "vc":
+        ref = VC_TARGET if os.path.exists(VC_TARGET) else ref
         import torchaudio
         from chatterbox.vc import ChatterboxVC
         if "vc" not in _models:
