@@ -10,7 +10,9 @@ python3 voice.py  ->  out/voice.wav  +  перезаписанный timeline.js
 проглотила или исказила слова, фраза перегенерируется с другим seed.
 Тайминги слов для субтитров тоже берутся из Whisper.
 
-ENGINE = "edge" — прежний вариант: голос edge-tts без Chatterbox.
+VOICE_ENGINE=elevenlabs — голос ElevenLabs (самый живой; нужен ключ в переменной
+ELEVENLABS_API_KEY и ELEVENLABS_VOICE_ID — выбрать голос помогает el_samples.py).
+VOICE_ENGINE=edge — голос edge-tts без Chatterbox.
 
 Зависимости: pip install edge-tts faster-whisper chatterbox-tts
 (torch для CPU: pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu)
@@ -46,6 +48,11 @@ TEMPO = 1.06       # ускорение при генерации (без изм
 SPEED = 1.04       # дополнительное ускорение при сборке, кэш не сбрасывает
 QC_MIN = 0.95      # минимальное совпадение распознанного текста со сценарием
 TRIES = 4
+
+# ElevenLabs: голос, модель и манера. stability ниже — живее и неровнее, style — экспрессия.
+EL_VOICE = os.environ.get("ELEVENLABS_VOICE_ID", "")
+EL_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
+EL_SETTINGS = dict(stability=0.35, similarity_boost=0.8, style=0.35, use_speaker_boost=True)
 
 # edge-tts: голос и темп, если ENGINE = "edge"
 EDGE_VOICE = "ru-RU-DmitryNeural"
@@ -173,8 +180,47 @@ async def reference():
     return path
 
 
-async def synth(phrase, style):
+def elevenlabs(text, path, prev="", nxt="", voice=None, settings=None):
+    """ElevenLabs TTS -> mp3; тайминги слов из посимвольного выравнивания ответа.
+    prev/nxt — соседние фразы: модель учитывает их для связной интонации, но не озвучивает."""
+    import base64
+    import requests
+    r = requests.post(
+        f"https://api.elevenlabs.io/v1/text-to-speech/{voice or EL_VOICE}/with-timestamps",
+        params={"output_format": "mp3_44100_128"},
+        headers={"xi-api-key": os.environ["ELEVENLABS_API_KEY"]},
+        json={"text": text, "model_id": EL_MODEL, "voice_settings": settings or EL_SETTINGS,
+              "previous_text": prev or None, "next_text": nxt or None},
+        timeout=120)
+    r.raise_for_status()
+    d = r.json()
+    with open(path, "wb") as f:
+        f.write(base64.b64decode(d["audio_base64"]))
+    al = d["alignment"]
+    chars, st, en = al["characters"], al["character_start_times_seconds"], al["character_end_times_seconds"]
+    # слово = непрерывная последовательность непробельных символов
+    words, cur = [], None
+    for c, a, b in zip(chars, st, en):
+        if c.isspace():
+            cur = None
+            continue
+        if cur is None:
+            cur = {"w": "", "a": a, "d": 0.0}
+            words.append(cur)
+        cur["w"] += c
+        cur["d"] = b - cur["a"]
+    return words
+
+
+async def synth(phrase, style, prev="", nxt=""):
     """Фраза -> (pcm 48 кГц, слова с временем относительно начала pcm)."""
+    if ENGINE == "elevenlabs":
+        k = key("el", EL_VOICE, EL_MODEL, json.dumps(EL_SETTINGS, sort_keys=True), prev, nxt, plain(phrase))
+        mp3, meta = os.path.join(TTS, k + ".mp3"), os.path.join(TTS, k + ".json")
+        if not os.path.exists(meta):
+            ws = elevenlabs(plain(phrase), mp3, prev, nxt)
+            json.dump(ws, open(meta, "w"), ensure_ascii=False)
+        return trim(load_pcm(mp3), json.load(open(meta)), phrase)
     if ENGINE == "edge":
         rate = EDGE_RATE + style.get("rate", 0)
         k = key("edge", EDGE_VOICE, rate, plain(phrase))
@@ -234,7 +280,7 @@ def trim(pcm, ws, phrase):
     if ws:  # тихий хвост вопросительной интонации не режем раньше конца последнего слова
         b = min(len(pcm), max(b, last_end + int(0.04 * SR)))
     toks = plain(phrase).split()
-    if ENGINE == "edge":
+    if ENGINE in ("edge", "elevenlabs"):
         assert len(toks) == len(ws), (phrase, [w["w"] for w in ws])
         times = [w["a"] for w in ws]
     else:
@@ -259,11 +305,15 @@ def humanize(src, dst):
 async def main():
     os.makedirs(TTS, exist_ok=True)
     out, t, lines = array.array("h"), 0.0, []
+    flat = [plain(ph) for scene in SCRIPT for ph, _, _ in scene]
+    n = 0
     for scene in SCRIPT:
         words, text = [], []
         for phrase, gap, style in scene:
             print(f"  {plain(phrase)}", flush=True)
-            pcm, ws = await synth(phrase, style)
+            prev, nxt = " ".join(flat[max(0, n - 2):n]), " ".join(flat[n + 1:n + 3])
+            n += 1
+            pcm, ws = await synth(phrase, style, prev, nxt)
             words += [{"w": w["w"], "a": round(t + w["a"], 3)} for w in ws]
             text.append(plain(phrase))
             out.extend(pcm)
@@ -283,7 +333,10 @@ async def main():
     with wave.open(raw, "wb") as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(out.tobytes())
-    humanize(raw, os.path.join(OUT, "voice.wav"))
+    if ENGINE == "elevenlabs":  # у ElevenLabs и так живая запись, ничего не добавляем
+        os.replace(raw, os.path.join(OUT, "voice.wav"))
+    else:
+        humanize(raw, os.path.join(OUT, "voice.wav"))
 
     write_timeline(lines, duration)
     print(f"voice ({ENGINE}) {t:.2f}s, ролик {duration}s")

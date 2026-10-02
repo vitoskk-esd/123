@@ -47,7 +47,15 @@
 ./build.sh   # voice.py -> audio.js -> render.js -> add_voice.sh -> reel_final.mp4
 ```
 
-На CPU генерация занимает ~10 минут, результат кэшируется в `out/tts/`. Прежний голос edge-tts без Chatterbox: `VOICE_ENGINE=edge ./build.sh`. Зависимости:
+**ElevenLabs (самый живой вариант).** Нужен ключ в переменной окружения `ELEVENLABS_API_KEY` (права: Text to Speech, Voices). Подбор голоса и сборка:
+
+```bash
+python3 el_samples.py list 20         # превью русских мужских голосов -> out/el_samples/ + index.txt
+python3 el_samples.py try <id> <id>   # наш отрывок выбранными голосами
+ELEVENLABS_VOICE_ID=<id> VOICE_ENGINE=elevenlabs ./build.sh
+```
+
+Для Chatterbox на CPU генерация занимает ~10 минут, результат кэшируется в `out/tts/`. Прежний голос edge-tts без Chatterbox: `VOICE_ENGINE=edge ./build.sh`. Зависимости:
 
 ```bash
 pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
