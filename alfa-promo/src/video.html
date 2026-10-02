@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Видео 1080x1920</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .canvas { width: 1080px; height: 1920px; }
+  .layer { position: absolute; left: 70px; right: 70px; will-change: transform, opacity; }
+  .h1 { font-size: 112px; font-weight: bold; letter-spacing: -0.05em; line-height: 1.02; }
+  .h2 { font-size: 64px; font-weight: bold; letter-spacing: -0.03em; line-height: 1.1; }
+  .h3 { font-size: 46px; font-weight: bold; line-height: 1.2; }
+  .pill { display: inline-block; background: #fff; color: var(--red); padding: 4px 22px; border-radius: 20px; }
+  .card { left: 260px; top: 1150px; }
+  .step { display: flex; align-items: center; gap: 26px; background: #fff; color: var(--ink); border-radius: 28px; padding: 28px 30px; font-size: 42px; font-weight: bold; margin-bottom: 24px; }
+  .step i { font-style: normal; flex: none; width: 76px; height: 76px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font-size: 40px; }
+  .counter { white-space: nowrap; font-size: 200px; font-weight: bold; letter-spacing: -0.07em; text-align: center; line-height: 1; }
+  .cta { text-align: center; }
+  .cta span { display: inline-block; background: var(--ink); color: #fff; font-size: 48px; font-weight: bold; padding: 30px 56px; border-radius: 999px; }
+  .note { text-align: center; font-size: 34px; font-weight: bold; opacity: 0.92; }
+  .legal { font-size: 15px; bottom: 34px; }
+  .progress { position: absolute; left: 40px; right: 40px; top: 16px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.3); }
+  .progress b { display: block; height: 100%; border-radius: 3px; background: #fff; width: 0; }
+</style>
+</head>
+<body>
+<div class="canvas" id="c">
+  <div class="progress"><b id="bar"></b></div>
+  <div class="ad-mark" data-ad></div>
+
+  <!-- Сцена 1: хук -->
+  <div class="layer" id="s1a" style="top: 520px"><div class="h1">Хочешь<br><span class="pill">+1 000 ₽</span></div></div>
+  <div class="layer" id="s1b" style="top: 810px"><div class="h2">просто за то, что оформишь кредитку?</div></div>
+
+  <!-- Сцена 2–3: выгоды карты -->
+  <div class="layer" id="s2" style="top: 360px"><div class="h2">Кредитка Альфа-Банка:</div><div class="h1" style="margin-top:24px"><span class="pill">60 дней</span><br>без % на покупки</div></div>
+  <div class="layer" id="s3" style="top: 360px"><div class="h2">Наличные без комиссии</div><div class="h1" style="margin-top:24px"><span class="pill">до 50 000 ₽</span><br>в месяц</div></div>
+  <div class="card" id="card">
+    <div class="stripe"></div>
+    <div class="bank">Альфа-Банк</div>
+    <div class="type">кредитная карта</div>
+    <div class="chip"></div>
+    <div class="num">•••• •••• •••• 1000</div>
+  </div>
+
+  <!-- Сцена 4: шаги -->
+  <div class="layer" id="s4t" style="top: 420px"><div class="h2">Как получить<br>1 000 ₽ от меня:</div></div>
+  <div class="layer" id="st1" style="top: 640px"><div class="step"><i>1</i>Оформи по моей ссылке</div></div>
+  <div class="layer" id="st2" style="top: 800px"><div class="step"><i>2</i>Получи карту курьером</div></div>
+  <div class="layer" id="st3" style="top: 960px"><div class="step"><i>3</i>2 покупки от 500 ₽</div></div>
+  <div class="layer" id="s4n" style="top: 1170px"><div class="h3" style="text-align:center">Всё! Деньги переведу тебе 💸</div></div>
+
+  <!-- Сцена 5: финал -->
+  <div class="layer" id="s5a" style="top: 560px"><div class="note">твой бонус</div></div>
+  <div class="layer" id="s5b" style="top: 630px"><div class="counter">+<span id="num">0</span> ₽</div></div>
+  <div class="layer" id="s5c" style="top: 960px"><div class="cta"><span>Ссылка в описании ↓</span></div></div>
+  <div class="layer" id="s5d" style="top: 1160px"><div class="note">18+ · только для новых<br>клиентов кредиток Альфа-Банка</div></div>
+
+  <div class="legal" data-legal></div>
+</div>
+<script src="legal.js"></script>
+<script>
+  const DURATION = 15;
+  const $ = (id) => document.getElementById(id);
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
+  const back = (x) => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+
+  // Появление в [a, a+0.45], исчезновение в [b-0.3, b]
+  function show(el, t, a, b, dy = 60, pop = false) {
+    const i = (t - a) / 0.45, o = (b - t) / 0.3;
+    const k = Math.min(clamp(i), clamp(o));
+    const s = pop ? 0.6 + 0.4 * back(i) : 1;
+    el.style.opacity = k;
+    el.style.transform = `translateY(${(1 - ease(i)) * dy - (1 - clamp(o)) * 40}px) scale(${s})`;
+  }
+
+  window.render = function (t) {
+    $("bar").style.width = (t / DURATION) * 100 + "%";
+    show($("s1a"), t, 0.05, 2.6, 80, true);
+    show($("s1b"), t, 0.5, 2.6);
+    show($("s2"), t, 2.6, 5.6);
+    show($("s3"), t, 5.6, 8.4);
+    show($("s4t"), t, 8.4, 12.0);
+    show($("st1"), t, 8.8, 12.0, 0, true);
+    show($("st2"), t, 9.6, 12.0, 0, true);
+    show($("st3"), t, 10.4, 12.0, 0, true);
+    show($("s4n"), t, 11.1, 12.0);
+    show($("s5a"), t, 12.0, 99);
+    show($("s5b"), t, 12.0, 99, 0, true);
+    show($("s5c"), t, 13.0, 99);
+    show($("s5d"), t, 13.4, 99);
+    $("num").textContent = Math.round(ease((t - 12.1) / 1.0) * 1000).toLocaleString("ru-RU");
+
+    // Карта: влетает снизу на сцене 2, покачивается, уходит перед шагами
+    const card = $("card");
+    const inK = ease((t - 2.7) / 0.7), outK = ease((t - 8.1) / 0.4);
+    const sway = Math.sin(t * 2.2) * 4;
+    card.style.opacity = Math.min(clamp((t - 2.6) / 0.3), 1 - outK);
+    card.style.transform =
+      `translate(${outK * 700}px, ${(1 - inK) * 900}px) rotate(${-10 + (1 - inK) * 30 + sway}deg) scale(1.05)`;
+    // Пульсация кнопки CTA
+    const pulse = t > 13.5 ? 1 + 0.04 * Math.sin((t - 13.5) * 8) : 1;
+    $("s5c").firstElementChild.style.transform = `scale(${pulse})`;
+  };
+  window.DURATION = DURATION;
+  render(0);
+</script>
+</body>
+</html>

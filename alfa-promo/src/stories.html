@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Сторис 1080x1920</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .canvas { width: 1080px; height: 1920px; }
+  .hook { position: absolute; left: 70px; right: 70px; top: 150px; font-size: 80px; font-weight: bold; line-height: 1.12; letter-spacing: -0.03em; }
+  .hook span { background: #fff; color: var(--red); padding: 0 16px; border-radius: 16px; display: inline-block; margin: 6px 0; }
+  .card { left: 300px; top: 610px; transform: rotate(-10deg); }
+  .steps { position: absolute; left: 70px; right: 70px; top: 1020px; display: flex; flex-direction: column; gap: 22px; }
+  .step { display: flex; align-items: center; gap: 26px; background: rgba(255,255,255,0.96); color: var(--ink); border-radius: 28px; padding: 26px 30px; font-size: 38px; font-weight: bold; }
+  .step i { font-style: normal; flex: none; width: 70px; height: 70px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font-size: 36px; }
+  .reward { position: absolute; left: 70px; right: 70px; top: 1470px; text-align: center; font-size: 46px; font-weight: bold; }
+  .reward b { display: block; font-size: 120px; letter-spacing: -0.05em; }
+  .swipe { position: absolute; left: 0; right: 0; top: 1690px; text-align: center; font-size: 32px; font-weight: bold; }
+  .swipe span { background: var(--ink); padding: 18px 40px; border-radius: 999px; }
+  .legal { font-size: 15px; bottom: 30px; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="ad-mark" data-ad></div>
+  <div class="hook">Банк даёт<br><span>60 дней без %</span><br>а я — <span>1 000 ₽</span><br>сверху</div>
+  <div class="card">
+    <div class="stripe"></div>
+    <div class="bank">Альфа-Банк</div>
+    <div class="type">кредитная карта</div>
+    <div class="chip"></div>
+    <div class="num">•••• •••• •••• 1000</div>
+  </div>
+  <div class="steps">
+    <div class="step"><i>1</i>Оформи по моей ссылке</div>
+    <div class="step"><i>2</i>Получи карту курьером</div>
+    <div class="step"><i>3</i>Сделай 2 покупки от 500 ₽</div>
+  </div>
+  <div class="reward">и забирай <b>+1 000 ₽</b></div>
+  <div class="swipe"><span>Жми на ссылку ↑</span></div>
+  <div class="legal" data-legal></div>
+</div>
+<script src="legal.js"></script>
+</body>
+</html>

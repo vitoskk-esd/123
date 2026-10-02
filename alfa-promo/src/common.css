@@ -1,0 +1,61 @@
+:root {
+  --red: #ef3124;
+  --red-dark: #b8170d;
+  --ink: #111111;
+  --white: #ffffff;
+  --cream: #fff3ef;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--ink); }
+body {
+  font-family: "DejaVu Sans", sans-serif;
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+.canvas {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 85% 10%, #ff5a4a 0%, transparent 55%),
+    radial-gradient(90% 70% at 0% 100%, #7a0c05 0%, transparent 60%),
+    var(--red);
+}
+.ad-mark {
+  position: absolute;
+  top: 36px; left: 40px;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+  background: rgba(0,0,0,0.25);
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+/* Generic card mockup: brand name as text only, no logo reproduction */
+.card {
+  position: absolute;
+  width: 560px; height: 353px;
+  border-radius: 34px;
+  background: linear-gradient(135deg, #1c1c1c 0%, #2e2e2e 55%, #0d0d0d 100%);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+  padding: 40px 44px;
+  color: #fff;
+  overflow: hidden;
+}
+.card .bank { font-size: 30px; font-weight: bold; letter-spacing: -0.01em; }
+.card .type { font-size: 20px; opacity: 0.6; margin-top: 6px; }
+.card .chip {
+  position: absolute; left: 44px; top: 150px;
+  width: 74px; height: 56px; border-radius: 12px;
+  background: linear-gradient(135deg, #f5d27a, #c9a14a);
+}
+.card .num { position: absolute; left: 44px; bottom: 44px; font-size: 26px; letter-spacing: 0.12em; opacity: 0.85; }
+.card .stripe {
+  position: absolute; right: -60px; top: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: var(--red); opacity: 0.9;
+}
+.legal {
+  position: absolute; left: 40px; right: 40px; bottom: 26px;
+  font-size: 13.5px; line-height: 1.35; opacity: 0.78;
+}

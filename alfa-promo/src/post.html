@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Пост 1080x1080</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .canvas { width: 1080px; height: 1080px; }
+  .kicker { position: absolute; left: 60px; top: 110px; font-size: 34px; font-weight: bold; opacity: 0.9; }
+  .big {
+    position: absolute; left: 52px; top: 150px;
+    font-size: 196px; font-weight: bold; letter-spacing: -0.06em; line-height: 1;
+  }
+  .sub { position: absolute; left: 60px; top: 375px; font-size: 44px; font-weight: bold; line-height: 1.15; width: 470px; }
+  .card { right: -70px; top: 450px; transform: rotate(-12deg) scale(0.92); }
+  .perks { position: absolute; left: 60px; top: 650px; display: flex; flex-direction: column; gap: 18px; }
+  .perk {
+    display: inline-flex; align-items: center; gap: 16px;
+    background: #fff; color: var(--ink); border-radius: 22px;
+    padding: 16px 26px; font-size: 32px; font-weight: bold; width: fit-content;
+  }
+  .perk b { color: var(--red); }
+  .cta {
+    position: absolute; right: 60px; top: 840px;
+    background: var(--ink); color: #fff; font-size: 30px; font-weight: bold;
+    padding: 22px 34px; border-radius: 999px;
+  }
+  .legal { font-size: 12.5px; bottom: 22px; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="ad-mark" data-ad></div>
+  <div class="kicker">Оформи кредитку Альфа-Банка и получи</div>
+  <div class="big">+1 000 ₽</div>
+  <div class="sub">от меня — сверху к&nbsp;условиям банка</div>
+  <div class="card">
+    <div class="stripe"></div>
+    <div class="bank">Альфа-Банк</div>
+    <div class="type">кредитная карта</div>
+    <div class="chip"></div>
+    <div class="num">•••• •••• •••• 1000</div>
+  </div>
+  <div class="perks">
+    <div class="perk"><b>60 дней</b> без % на покупки</div>
+    <div class="perk"><b>Курьер</b> привезёт карту домой</div>
+    <div class="perk"><b>2 покупки</b> от 500 ₽ — и всё</div>
+  </div>
+  <div class="cta">Ссылка ниже ↓</div>
+  <div class="legal" data-legal></div>
+</div>
+<script src="legal.js"></script>
+</body>
+</html>
