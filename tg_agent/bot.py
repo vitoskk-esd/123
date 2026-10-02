@@ -13,6 +13,7 @@ import time
 from telethon import TelegramClient, events, utils
 from telethon.errors import (
     ChatWriteForbiddenError,
+    SessionPasswordNeededError,
     FloodWaitError,
     MsgIdInvalidError,
     UserBannedInChannelError,
@@ -32,6 +33,43 @@ def make_client() -> TelegramClient:
         raise SystemExit("Заполните TG_API_ID и TG_API_HASH в .env (https://my.telegram.org → API development tools).")
     CONFIG.data_dir.mkdir(parents=True, exist_ok=True)
     return TelegramClient(CONFIG.session, CONFIG.api_id, CONFIG.api_hash)
+
+
+async def ensure_login(client: TelegramClient) -> None:
+    """Вход по QR-коду: работает на сервере без клавиатуры, код из SMS вводить не нужно.
+
+    QR печатается в лог. Сканируйте его телефоном: Telegram → Настройки → Устройства →
+    Подключить устройство. Сессия сохраняется в файл, повторно сканировать не придётся.
+    """
+    await client.connect()
+    if await client.is_user_authorized():
+        return
+    import qrcode
+
+    qr_login = await client.qr_login()
+    while True:
+        qr = qrcode.QRCode(border=2)
+        qr.add_data(qr_login.url)
+        print("\n" + "=" * 60)
+        print("ВХОД В TELEGRAM: отсканируйте QR-код телефоном")
+        print("Telegram → Настройки → Устройства → Подключить устройство")
+        print("=" * 60, flush=True)
+        qr.print_ascii(invert=True)
+        print("Код обновляется каждые ~30 секунд, если не успели — сканируйте новый ниже.", flush=True)
+        try:
+            await qr_login.wait()
+            break
+        except asyncio.TimeoutError:
+            await qr_login.recreate()
+        except SessionPasswordNeededError:
+            if not CONFIG.password:
+                raise SystemExit(
+                    "На аккаунте включён облачный пароль. Добавьте его в переменную TG_2FA_PASSWORD и перезапустите."
+                )
+            await client.sign_in(password=CONFIG.password)
+            break
+    me = await client.get_me()
+    print(f"Вход выполнен: {utils.get_display_name(me)}", flush=True)
 
 
 def post_link(chat, msg_id: int) -> str:
@@ -131,7 +169,7 @@ class Agent:
             await self.client.send_message("me", f"💬 «{chat.title}»\n{link}\n\n{text}", link_preview=False)
 
     async def run(self) -> None:
-        await self.client.start()
+        await ensure_login(self.client)
         me = await self.client.get_me()
         self.client.add_event_handler(
             self.on_channel_post, events.NewMessage(func=lambda e: e.is_channel and not e.is_group)

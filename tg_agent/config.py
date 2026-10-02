@@ -31,7 +31,8 @@ class Config:
     # https://my.telegram.org → API development tools
     api_id: int = _int("TG_API_ID", 0)
     api_hash: str = os.getenv("TG_API_HASH", "")
-    session: str = os.getenv("TG_SESSION", str(ROOT / "data" / "tg" / "account"))
+    # Облачный пароль Telegram (двухэтапная проверка), если он включён.
+    password: str = os.getenv("TG_2FA_PASSWORD", "")
 
     model: str = os.getenv("TG_AGENT_MODEL", "claude-opus-5-5")
     data_dir: Path = Path(os.getenv("TG_AGENT_DATA", ROOT / "data" / "tg"))
@@ -61,6 +62,11 @@ class Config:
     min_post_chars: int = _int("TG_MIN_POST_CHARS", 60)
     # Присылать в «Избранное» отчёт о каждом комментарии со ссылкой на него.
     report: bool = _bool("TG_REPORT", True)
+
+    @property
+    def session(self) -> str:
+        """Файл сессии Telegram (= доступ к аккаунту). Лежит рядом с остальными данными."""
+        return os.getenv("TG_SESSION", str(self.data_dir / "account"))
 
     @property
     def state_file(self) -> Path:

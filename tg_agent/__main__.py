@@ -1,6 +1,6 @@
 """CLI Telegram-ассистента.
 
-    python -m tg_agent login    # войти в Telegram (номер + код), сессия сохранится
+    python -m tg_agent login    # войти в Telegram по QR-коду, сессия сохранится
     python -m tg_agent run      # следить за каналами и комментировать новые посты
     python -m tg_agent status   # сколько комментариев сегодня и последние из них
 """
@@ -15,11 +15,11 @@ from .config import CONFIG
 
 
 def login() -> int:
-    from .bot import make_client
+    from .bot import ensure_login, make_client
 
     async def go():
         client = make_client()
-        await client.start()
+        await ensure_login(client)
         me = await client.get_me()
         print(f"Готово: вошли как {me.first_name} (@{me.username}). Сессия: {CONFIG.session}.session")
         await client.disconnect()
