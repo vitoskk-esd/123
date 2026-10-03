@@ -29,12 +29,18 @@ def login() -> int:
 
 
 def run() -> int:
-    from kwork_agent.llm import LLM
-
     from .bot import Agent, make_client
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-    agent = Agent(make_client(), LLM(model=CONFIG.model))
+    if CONFIG.llm_provider == "yandex":
+        from .yandex_llm import YandexLLM
+
+        llm = YandexLLM()
+    else:
+        from kwork_agent.llm import LLM
+
+        llm = LLM(model=CONFIG.model)
+    agent = Agent(make_client(), llm)
     asyncio.run(agent.run())
     return 0
 

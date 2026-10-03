@@ -81,5 +81,24 @@ class BrainTest(unittest.TestCase):
         self.assertIn("Никаких ссылок", kwargs["system"])
 
 
+class YandexTest(unittest.TestCase):
+    def test_parses_json_wrapped_in_markdown(self):
+        CONFIG.yandex_api_key, CONFIG.yandex_folder_id = "key", "b1gfolder"
+        from tg_agent.yandex_llm import YandexLLM
+
+        sent = {}
+
+        def fake_post(url, headers, body):
+            sent.update(headers=headers, body=body)
+            text = '```json\n{"worth_commenting": true, "reason": "по теме", "comment": "Тонкость в том..."}\n```'
+            return {"result": {"alternatives": [{"message": {"role": "assistant", "text": text}}]}}
+
+        result = brain.write_comment(YandexLLM(post=fake_post), "Канал", "Текст поста")
+        self.assertEqual(result["comment"], "Тонкость в том...")
+        self.assertEqual(sent["body"]["modelUri"], "gpt://b1gfolder/yandexgpt/latest")
+        self.assertEqual(sent["headers"]["Authorization"], "Api-Key key")
+        self.assertIn("Текст поста", sent["body"]["messages"][1]["text"])
+
+
 if __name__ == "__main__":
     unittest.main()

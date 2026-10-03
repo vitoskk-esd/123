@@ -34,7 +34,13 @@ class Config:
     # Облачный пароль Telegram (двухэтапная проверка), если он включён.
     password: str = os.getenv("TG_2FA_PASSWORD", "")
 
+    # Кто пишет комментарии: "claude" (Anthropic) или "yandex" (YandexGPT, доступен из РФ).
+    llm_provider: str = os.getenv("TG_LLM_PROVIDER", "claude").lower()
     model: str = os.getenv("TG_AGENT_MODEL", "claude-opus-5-5")
+    # YandexGPT: Yandex Cloud → сервисный аккаунт с ролью ai.languageModels.user → API-ключ.
+    yandex_api_key: str = os.getenv("YANDEX_API_KEY", "")
+    yandex_folder_id: str = os.getenv("YANDEX_FOLDER_ID", "")
+    yandex_model: str = os.getenv("YANDEX_MODEL", "yandexgpt/latest")
     data_dir: Path = Path(os.getenv("TG_AGENT_DATA", ROOT / "data" / "tg"))
 
     # Ваш канал (@username): под его постами ассистент не комментирует.
