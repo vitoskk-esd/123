@@ -122,15 +122,15 @@ async def edge(text, voice, rate, path):
 _models = {}
 
 
-def whisper():
-    if "asr" not in _models:
+def whisper(size="small"):
+    if size not in _models:
         from faster_whisper import WhisperModel
-        _models["asr"] = WhisperModel("small", device="cpu", compute_type="int8")
-    return _models["asr"]
+        _models[size] = WhisperModel(size, device="cpu", compute_type="int8")
+    return _models[size]
 
 
-def transcribe(path):
-    segs, _ = whisper().transcribe(path, language="ru", beam_size=5, word_timestamps=True)
+def transcribe(path, size="small"):
+    segs, _ = whisper(size).transcribe(path, language="ru", beam_size=5, word_timestamps=True)
     return [{"w": w.word.strip(), "a": w.start, "d": w.end - w.start} for s in segs for w in s.words]
 
 
@@ -389,12 +389,33 @@ def fx_samples(rec, ref):
         print(os.path.join(d, f"{i}_{fx}.mp3"))
 
 
+# Монтаж записи: какие отрезки оставить (секунды исходного файла). Запинки и повторные
+# дубли вырезаются по паузам; стыки сглаживаются, чтобы не было щелчков.
+# VOICE_REC_EDIT=rec_edit.json -> {"keep": [[начало, конец], ...]}
+REC_EDIT = os.environ.get("VOICE_REC_EDIT", "")
+
+
+def edit_recording(src, dst, keep, fade=0.015):
+    parts = "".join(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS,afade=t=in:d={fade},"
+                    f"afade=t=out:st={b - a - fade:.3f}:d={fade}[p{i}];" for i, (a, b) in enumerate(keep))
+    concat = "".join(f"[p{i}]" for i in range(len(keep))) + f"concat=n={len(keep)}:v=0:a=1"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-filter_complex", parts + concat,
+                    "-ac", "1", "-ar", str(SR), dst], check=True)
+
+
 def from_recording(rec, ref):
     """Своя запись всего сценария: тайминги слов — по распознаванию, сцены — по сценарию."""
     clean, fxw = os.path.join(OUT, "rec_clean.wav"), os.path.join(OUT, "voice.wav")
+    if REC_EDIT:
+        path = REC_EDIT if os.path.isabs(REC_EDIT) else os.path.join(DIR, REC_EDIT)
+        edited = os.path.join(OUT, "rec_edited.wav")
+        edit_recording(rec, edited, json.load(open(path))["keep"])
+        rec = edited
     clean_recording(rec, clean)
     apply_fx(clean, fxw, FX, ref)
-    ws = transcribe(clean)  # распознаём до эффекта: так точнее, а тайминг эффект не меняет
+    # распознаём до эффекта (так точнее, а тайминг эффект не меняет); medium — small путает
+    # границы коротких слов вроде «Стоп! Банки…», а для живой записи это и есть синхрон субтитров
+    ws = transcribe(clean, "medium")
     script = [[plain(ph) for ph, _, _ in scene] for scene in SCRIPT]
     flat = " ".join(" ".join(sc) for sc in script)
     print(f"  сценарий/запись: совпадение {similarity(flat, ws):.2f}")
