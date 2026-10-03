@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Reel: продать карту</title>
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root {
+    --bg: #07070b; --ink: #f4f4f0; --lime: #c8ff3d; --violet: #7b5cff;
+    --red: #ff4d5e; --muted: #8a8a99; --card: #14141c; --line: #26263a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(140px); opacity: .55; }
+  #b1 { width: 900px; height: 900px; background: var(--violet); }
+  #b2 { width: 700px; height: 700px; background: #1fd1a5; opacity: .28; }
+  #grain { position: absolute; inset: -100px; opacity: .07; pointer-events: none; mix-blend-mode: overlay; }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 40%; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .center { position: absolute; left: 80px; right: 80px; text-align: center; }
+  .big { font-size: 150px; line-height: .92; letter-spacing: -6px; text-transform: uppercase; }
+  .lime { color: var(--lime); }
+  .red { color: var(--red); }
+  .outline { color: transparent; -webkit-text-stroke: 4px var(--ink); }
+  .word { display: inline-block; }
+  .tag { display: inline-block; font-family: "Tek"; font-size: 40px; letter-spacing: 4px;
+         padding: 14px 28px; border: 3px solid var(--lime); color: var(--lime); border-radius: 60px; }
+
+  /* субтитры */
+  #subs { position: absolute; left: 70px; right: 150px; top: 1290px; text-align: center;
+          font-size: 66px; line-height: 1.12; letter-spacing: -1px; text-transform: uppercase; }
+  #subs span { display: inline-block; margin: 0 9px 10px; color: var(--ink);
+               text-shadow: 0 6px 0 rgba(0,0,0,.55), 0 0 30px rgba(0,0,0,.6); }
+  #subs span.on { color: var(--bg); background: var(--lime); padding: 0 12px; border-radius: 12px; text-shadow: none; }
+
+  /* монеты */
+  .coin { position: absolute; width: 120px; height: 120px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #f3ffb8, var(--lime) 45%, #7fae0f 100%);
+          box-shadow: inset 0 -8px 0 rgba(0,0,0,.25), 0 10px 30px rgba(200,255,61,.35);
+          font-family: "Display"; font-size: 72px; color: #213000; display: flex; align-items: center; justify-content: center; }
+
+  /* телефон */
+  #phone { position: absolute; left: 260px; top: 300px; width: 560px; height: 900px; border-radius: 70px;
+           background: #0e0e15; border: 6px solid #2c2c40; box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 0 2px #000 inset; overflow: hidden; }
+  #notch { position: absolute; left: 50%; top: 18px; width: 150px; height: 40px; margin-left: -75px; background: #000; border-radius: 30px; }
+  #bankcard { position: absolute; left: 40px; right: 40px; top: 240px; height: 290px; border-radius: 34px;
+              background: linear-gradient(135deg, #2b2b3d 0%, #121219 55%, #3a2c8f 100%); border: 2px solid #3d3d58; padding: 34px; }
+  #chip { width: 80px; height: 60px; border-radius: 12px; background: linear-gradient(135deg, #e6d48a, #9c8a3f); }
+  #cardnum { font-family: "Mono"; font-size: 34px; letter-spacing: 4px; margin-top: 90px; color: #d7d7e6; }
+  .nt { position: absolute; left: 24px; right: 24px; top: 70px; border-radius: 30px; padding: 24px 26px;
+           background: rgba(40,40,58,.92); border: 2px solid #44445f; display: flex; gap: 20px; align-items: center; }
+  .nt .ic { width: 76px; height: 76px; border-radius: 20px; background: var(--lime); color: #142000;
+               font-family: "Tek"; font-size: 48px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .nt .t1 { font-size: 30px; color: var(--muted); font-family: "Display"; }
+  .nt .t2 { font-size: 38px; white-space: nowrap; }
+  #phoneLabel { top: 160px; font-size: 64px; letter-spacing: -2px; text-transform: uppercase; }
+
+  /* списки */
+  .row { display: flex; align-items: center; gap: 30px; font-size: 92px; letter-spacing: -3px; text-transform: uppercase; margin: 26px 0; }
+  .mark { width: 110px; height: 110px; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 80px; flex: none; font-family: "Tek"; }
+  .mx { background: rgba(255,77,94,.15); color: var(--red); border: 3px solid var(--red); }
+  .mv { background: var(--lime); color: #142000; }
+  .strike { position: relative; color: var(--muted); }
+  .strike i { position: absolute; left: -6px; top: 50%; height: 10px; background: var(--red); border-radius: 6px; }
+
+  /* телеграм */
+  #tg { position: absolute; left: 80px; right: 80px; top: 230px; background: #151a24; border: 2px solid #26324a; border-radius: 44px; overflow: hidden; }
+  #tgHead { display: flex; align-items: center; gap: 24px; padding: 30px 36px; background: #1b2232; }
+  #tgAva { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, var(--lime), #1fd1a5);
+           display: flex; align-items: center; justify-content: center; font-family: "Tek"; font-size: 56px; color: #142000; }
+  #tgHead .n { font-size: 46px; }
+  #tgHead .s { font-size: 30px; color: #7f90b3; font-family: "Display"; }
+  #tgPost { padding: 34px 36px 40px; }
+  #tgPost .ttl { font-size: 50px; margin-bottom: 20px; }
+  .bk { display: flex; align-items: center; gap: 22px; padding: 22px 0; border-top: 2px solid #232c40; font-size: 44px; }
+  .bk .dot { width: 64px; height: 64px; border-radius: 18px; flex: none; }
+  .bk .nm { flex: 1; }
+  .bk .am { font-family: "Mono"; color: var(--lime); filter: blur(14px); font-size: 46px; }
+  .bk .ok { color: var(--lime); font-family: "Tek"; font-size: 44px; }
+
+  /* чат */
+  #chat { position: absolute; left: 110px; right: 110px; top: 560px; height: 620px; border-radius: 48px;
+          background: #12141c; border: 2px solid #262a3a; overflow: hidden; box-shadow: 0 40px 120px rgba(0,0,0,.6); }
+  #chatHead { display: flex; align-items: center; gap: 22px; padding: 26px 32px; background: #191c27; border-bottom: 2px solid #23273a; }
+  #chatAva { width: 84px; height: 84px; border-radius: 50%; background: #2c3044; display: flex; align-items: center; justify-content: center;
+             font-family: "Tek"; font-size: 50px; color: #9aa0b8; }
+  #chatHead .n { font-size: 42px; }
+  #chatHead .s { font-size: 28px; color: #6fd38a; font-family: "Display"; }
+  .bub { position: absolute; left: 32px; max-width: 700px; padding: 24px 32px; border-radius: 34px 34px 34px 10px;
+         background: #262a3b; font-size: 50px; line-height: 1.15; }
+  #bub1 { top: 170px; } #bub2 { top: 330px; }
+  #typing { position: absolute; left: 32px; top: 330px; padding: 26px 30px; border-radius: 30px; background: #262a3b; display: flex; gap: 12px; }
+  #typing i { width: 18px; height: 18px; border-radius: 50%; background: #8a90a8; display: block; }
+  #ugol { position: absolute; left: 0; right: 0; top: 760px; text-align: center; }
+  #ugol div { display: inline-block; font-size: 120px; letter-spacing: -3px; padding: 14px 44px; border: 10px solid var(--red);
+              color: var(--red); border-radius: 26px; background: rgba(7,7,11,.75); }
+  #hookTitle { top: 170px; font-size: 140px; }
+  #betterTitle { top: 640px; font-size: 140px; }
+
+  /* карточки банков */
+  .bcard { position: absolute; left: 190px; width: 700px; height: 300px; border-radius: 36px; padding: 34px 40px;
+           border: 2px solid rgba(255,255,255,.12); box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  .bcard .bn { font-size: 54px; }
+  .bcard .bt { font-family: "Tek"; font-size: 34px; letter-spacing: 3px; margin-top: 12px; opacity: .85; text-transform: uppercase; }
+  .bcard .chipx { position: absolute; right: 40px; bottom: 34px; width: 90px; height: 66px; border-radius: 14px;
+                  background: linear-gradient(135deg, #e6d48a, #9c8a3f); }
+  #sum { top: 1010px; font-family: "Mono"; font-size: 128px; letter-spacing: -6px; color: var(--lime); white-space: nowrap; left: 20px; right: 20px; }
+  #sumCap { top: 1190px; font-size: 44px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+  #coins { position: absolute; inset: 0; }
+  .coin { position: absolute; width: 120px; height: 120px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #f3ffb8, var(--lime) 45%, #7fae0f 100%);
+          box-shadow: inset 0 -8px 0 rgba(0,0,0,.25), 0 10px 30px rgba(200,255,61,.35);
+          font-family: "Display"; font-size: 72px; color: #213000; display: flex; align-items: center; justify-content: center; }
+
+  /* законно */
+  .row { display: flex; align-items: center; gap: 30px; font-size: 80px; letter-spacing: -3px; text-transform: uppercase; margin: 30px 0; }
+  .mark { width: 110px; height: 110px; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 80px; flex: none; font-family: "Tek"; }
+  .mv { background: var(--lime); color: #142000; }
+  #legalTitle { top: 220px; font-size: 130px; }
+
+  /* гайд */
+  #guideList { padding: 6px 36px 36px; }
+  .gl { display: flex; gap: 22px; align-items: center; font-size: 46px; padding: 20px 0; border-top: 2px solid #232c40; }
+  .gl b { font-family: "Tek"; color: var(--lime); font-size: 44px; width: 56px; }
+  #linkText { top: 1000px; font-size: 118px; }
+  #upArrow { position: absolute; left: 470px; top: 40px; width: 140px; height: 160px; }
+
+  #disc { position: absolute; left: 150px; right: 150px; top: 1580px; font-size: 26px; color: #6d6d7d; text-align: center; font-family: "Display"; letter-spacing: .5px; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="blob" id="b1"></div>
+  <div class="blob" id="b2"></div>
+  <svg id="grain" width="1280" height="2120"><filter id="n"><feTurbulence id="turb" type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="1"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+
+  <div id="cam">
+    <!-- S1–S2: хук «продать карту» и «уголовка» -->
+    <div class="scene" id="hook">
+      <div class="center big" id="hookTitle"><div class="word" id="h1">ПРОДАТЬ</div><br><div class="word lime" id="h2">КАРТУ?</div></div>
+      <div id="chat">
+        <div id="chatHead"><div id="chatAva">?</div><div><div class="n">Неизвестный</div><div class="s">в сети</div></div></div>
+        <div class="bub" id="bub1">Привет 👋 Куплю твою карту</div>
+        <div id="typing"><i></i><i></i><i></i></div>
+        <div class="bub" id="bub2">Плачу сразу 💸</div>
+      </div>
+      <div id="ugol"><div>УГОЛОВКА</div></div>
+    </div>
+    <div class="scene" id="better">
+      <div class="center big" id="betterTitle"><div class="word" id="bt1">ЕСТЬ СПОСОБ</div><br><div class="word lime" id="bt2">ЛУЧШЕ</div></div>
+    </div>
+    <!-- S3: банки платят сами -->
+    <div class="scene" id="s3">
+      <div class="center" id="phoneLabel">Банки платят <span class="lime">сами</span></div>
+      <div id="phone">
+        <div id="notch"></div>
+        <div id="bankcard"><div id="chip"></div><div id="cardnum">ТВОЁ ИМЯ</div></div>
+        <div style="position:absolute;left:40px;right:40px;top:580px">
+          <div style="font-size:30px;color:var(--muted);font-family:Display">Новый клиент</div>
+          <div style="display:flex;justify-content:space-between;font-size:44px;margin-top:14px"><span>Первая покупка</span><span style="font-family:Mono">✓</span></div>
+        </div>
+        <div class="nt" id="notifA"><div class="ic">₽</div><div><div class="t1">Банк • сейчас</div><div class="t2">Бонус за карту <span class="lime">+₽</span></div></div></div>
+        <div class="nt" id="notifB"><div class="ic">%</div><div><div class="t1">Банк • сейчас</div><div class="t2">Кэшбэк зачислен <span class="lime">+₽</span></div></div></div>
+      </div>
+    </div>
+    <!-- S4: до 15 000 -->
+    <div class="scene" id="s4">
+      <div class="bcard" id="c1" style="top:200px;background:linear-gradient(135deg,#2c2c40,#121219 60%,#3a2c8f)"><div class="bn">Банк №1</div><div class="bt">дебетовая</div><div class="chipx"></div></div>
+      <div class="bcard" id="c2" style="top:290px;background:linear-gradient(135deg,#3b1f2a,#141018 60%,#8f2c48)"><div class="bn">Банк №2</div><div class="bt">кредитная</div><div class="chipx"></div></div>
+      <div class="bcard" id="c3" style="top:380px;background:linear-gradient(135deg,#1d3328,#0f1614 60%,#1f8f5c)"><div class="bn">Банк №3</div><div class="bt">дебетовая</div><div class="chipx"></div></div>
+      <div class="bcard" id="c4" style="top:470px;background:linear-gradient(135deg,#3a3418,#16140c 60%,#a08a1f)"><div class="bn">Банк №4</div><div class="bt">кредитная</div><div class="chipx"></div></div>
+      <div class="center" id="sum">до 0 ₽</div>
+      <div class="center" id="sumCap">бонусами и кэшбэком*</div>
+      <div id="coins"></div>
+    </div>
+    <!-- S5: законно -->
+    <div class="scene" id="s5">
+      <div class="center big lime" id="legalTitle">ВСЁ ЗАКОННО</div>
+      <div style="position:absolute;left:90px;right:60px;top:520px">
+        <div class="row" id="r1"><div class="mark mv">✓</div><div>Карта твоя</div></div>
+        <div class="row" id="r2"><div class="mark mv">✓</div><div>Пользуешься сам</div></div>
+        <div class="row" id="r3" style="font-size:62px"><div class="mark mv">✓</div><div>Кредитка: льготный<br>период, гаси вовремя</div></div>
+      </div>
+    </div>
+    <!-- S6: гайд в ТГ -->
+    <div class="scene" id="s6">
+      <svg id="upArrow" viewBox="0 0 140 160"><path d="M70 150 V 20" stroke="#c8ff3d" stroke-width="16" stroke-linecap="round"/><path d="M20 70 L70 18 L120 70" stroke="#c8ff3d" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div id="tg">
+        <div id="tgHead"><div id="tgAva">₽</div><div><div class="n">Бонусы банков</div><div class="s">канал • ссылка в шапке профиля</div></div></div>
+        <div id="tgPost"><div class="ttl">Гайд: как получить до 15 000 ₽ 🔥</div></div>
+        <div id="guideList">
+          <div class="gl" id="g1"><b>1</b>Какие банки</div>
+          <div class="gl" id="g2"><b>2</b>Сколько платят</div>
+          <div class="gl" id="g3"><b>3</b>В каком порядке оформлять</div>
+        </div>
+      </div>
+      <div class="center big" id="linkText"><div class="word" id="l1">ССЫЛКА</div><br><div class="word lime" id="l2">В ШАПКЕ ↑</div></div>
+    </div>
+  </div>
+
+  <div id="subs"></div>
+  <div id="disc">*Реклама. Размер бонусов и условия зависят от банка. Оцените свои финансовые возможности и риски.</div>
+  <div id="flash"></div>
+</div>
+
+<script src="timeline.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = x => x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const outBack = x => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const lerp = (a, b, x) => a + (b - a) * x;
+// детерминированный псевдорандом
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// «Слэм» — элемент влетает с увеличенного масштаба
+function slam(el, t, t0, dur = .28, from = 1.9) {
+  const x = p(t, t0, t0 + dur);
+  el.style.opacity = x > 0 ? clamp(x * 3) : 0;
+  el.style.transform = `scale(${lerp(from, 1, outBack(x))})`;
+}
+function rise(el, t, t0, dur = .35, dy = 120) {
+  const x = outExpo(p(t, t0, t0 + dur));
+  el.style.opacity = x;
+  el.style.transform = `translateY(${(1 - x) * dy}px)`;
+}
+function sceneVis(id, t, a, b) {
+  const el = $(id);
+  const on = t >= a && t < b;
+  el.style.opacity = on ? 1 : 0;
+  // короткий «зум-аут» на выходе для динамики
+  const out = p(t, b - .12, b);
+  el.style.transform = `scale(${1 + out * .12})`;
+  el.style.filter = out > 0 ? `blur(${out * 12}px)` : "none";
+  return on;
+}
+
+const COIN_N = 14;
+for (let i = 0; i < COIN_N; i++) { const c = document.createElement("div"); c.className = "coin"; c.textContent = "₽"; $("coins").appendChild(c); }
+const subWords = TIMELINE.lines.map(l => l.words);
+const { S, E, W } = TIMELINE;
+function renderSubs(t) {
+  const li = TIMELINE.lines.findIndex(l => t >= l.start && t < l.end);
+  if (li < 0) { $("subs").innerHTML = ""; return; }
+  const words = subWords[li];
+  // показываем «окно» из 3–4 слов вокруг текущего
+  let cur = 0; words.forEach((x, i) => { if (t >= x.a) cur = i; });
+  const chunk = Math.floor(cur / 3) * 3;
+  const vis = words.slice(chunk, chunk + 3);
+  $("subs").innerHTML = vis.map((x, i) => {
+    const on = chunk + i === cur;
+    const k = outBack(p(t, x.a, x.a + .18));
+    const show = t >= x.a;
+    return `<span class="${on ? "on" : ""}" style="opacity:${show ? 1 : .0};transform:scale(${show ? lerp(.6, 1, k) : .6})">${x.w.replace(/[.,:?!]$/, "")}</span>`;
+  }).join(" ");
+}
+
+function renderAt(t) {
+  const hookEnd = W(1, "Есть") - .05;
+  // фон: красный на «уголовке»
+  $("b1").style.transform = `translate(${-200 + Math.sin(t * .4) * 160}px, ${200 + Math.cos(t * .3) * 200}px)`;
+  $("b2").style.transform = `translate(${500 + Math.cos(t * .5) * 140}px, ${1150 + Math.sin(t * .35) * 180}px)`;
+  $("turb").setAttribute("seed", Math.floor(t * 24) % 50);
+  $("grain").style.transform = `translate(${rnd(t * 30) * -60}px, ${rnd(t * 31) * -60}px)`;
+  $("b1").style.background = (t >= S(1) && t < hookEnd) ? "#ff3048" : (t < S(1) ? "#3a3f5c" : "#7b5cff");
+
+  // камера: наезд + тряска на ударах
+  let shake = 0;
+  for (const s of TIMELINE.sfx.impact) { const d = t - s; if (d >= 0 && d < .35) shake = Math.max(shake, (1 - d / .35) * 22); }
+  const segStart = TIMELINE.lines.filter(l => l.start <= t).pop().start;
+  const zoom = 1 + (t - segStart) * .012;
+  $("cam").style.transform = `translate(${(rnd(t * 50) - .5) * shake}px, ${(rnd(t * 51) - .5) * shake}px) scale(${zoom})`;
+
+  let fl = 0;
+  for (const s of [0, W(1, "уголовка"), W(3, "пятнадцати"), S(5)]) { const d = t - s; if (d >= 0 && d < .12) fl = Math.max(fl, 1 - d / .12); }
+  $("flash").style.opacity = fl * .85;
+
+  // Хук: чат с предложением + «уголовка»
+  if (sceneVis("hook", t, 0, hookEnd)) {
+    slam($("h1"), t, 0, .22, 2.2); slam($("h2"), t, .06, .25, 2.0);
+    // на «продать карту» вопрос ещё раз «бьёт» — голос догоняет текст
+    const pk = p(t, W(0, "продать"), W(0, "продать") + .25);
+    if (pk > 0 && pk < 1) $("hookTitle").style.transform = `scale(${1 + Math.sin(pk * Math.PI) * .08})`;
+    rise($("chat"), t, .05, .45, 400);
+    rise($("bub1"), t, .35, .3, 40);
+    const ty = t > .7 && t < W(0, "продать") + .1;
+    $("typing").style.opacity = ty ? 1 : 0;
+    [...$("typing").children].forEach((d, i) => d.style.transform = `translateY(${Math.sin(t * 12 - i) * 6}px)`);
+    rise($("bub2"), t, W(0, "продать") + .1, .3, 40);
+    const ug = W(1, "уголовка");
+    slam($("ugol"), t, ug - .05, .25, 2.6);
+    $("ugol").style.transform += " rotate(-6deg)";
+    $("chat").style.filter = t > ug ? "grayscale(1) brightness(.5)" : "none";
+  }
+  if (sceneVis("better", t, hookEnd, E(1))) {
+    slam($("bt1"), t, W(1, "Есть"), .28, 1.9); slam($("bt2"), t, W(1, "выгоднее") - .1, .28, 2.1);
+  }
+  // S3: банки платят сами
+  if (sceneVis("s3", t, S(2), E(2))) {
+    rise($("phoneLabel"), t, S(2) + .05, .4, 60);
+    const ph = outExpo(p(t, S(2), S(2) + .6));
+    $("phone").style.transform = `translateY(${(1 - ph) * 1000}px) rotate(${(1 - ph) * 8}deg)`;
+    $("phone").style.top = "330px";
+    const cardIn = outBack(p(t, S(2) + .4, S(2) + .8));
+    $("bankcard").style.transform = `scale(${lerp(.6, 1, cardIn)})`; $("bankcard").style.opacity = cardIn;
+    [["notifA", W(2, "бонусами"), 70], ["notifB", W(2, "кэшбэком"), 210]].forEach(([id, a, top]) => {
+      const n = outBack(p(t, a - .05, a + .25)), el = $(id);
+      el.style.top = top + "px";
+      el.style.transform = `translateY(${(1 - n) * -260}px) scale(${lerp(.9, 1, n)})`;
+      el.style.opacity = clamp(n * 2);
+      el.style.boxShadow = t > a ? `0 0 ${40 + Math.sin(t * 10) * 20}px rgba(200,255,61,.4)` : "none";
+    });
+  }
+  // S4: карты складываются, счётчик до 15 000
+  if (sceneVis("s4", t, S(3), E(3))) {
+    const d0 = W(3, "Дебетовые"), peak = W(3, "пятнадцати");
+    ["c1", "c2", "c3", "c4"].forEach((id, i) => {
+      const a = d0 + .3 + i * .45, x = outBack(p(t, a - .1, a + .25));
+      $(id).style.opacity = clamp(x * 2);
+      $(id).style.transform = `translateX(${(1 - x) * (i % 2 ? 900 : -900)}px) rotate(${(i - 1.5) * 3 * x}deg)`;
+    });
+    const v = Math.round(outExpo(p(t, d0 + .2, peak + .2)) * 15000 / 100) * 100;
+    $("sum").textContent = "до " + v.toLocaleString("ru-RU").replace(/\s/g, " ") + " ₽";
+    const k = outBack(p(t, peak, peak + .3));
+    $("sum").style.transform = `scale(${t >= peak ? lerp(1.35, 1, k) : 1})`;
+    rise($("sumCap"), t, peak + .2, .35, 40);
+    [...$("coins").children].forEach((c, i) => {
+      const t0 = peak + rnd(i) * .5, x = 40 + rnd(i + 9) * 920;
+      const y = -160 + (t - t0) * (900 + rnd(i + 3) * 500) + Math.pow(Math.max(0, t - t0), 2) * 600;
+      c.style.opacity = t > t0 ? 1 : 0;
+      c.style.transform = `translate(${x}px, ${y}px) rotate(${(t - t0) * (200 + rnd(i) * 300)}deg) scale(${.7 + rnd(i + 5) * .6})`;
+    });
+  }
+  // S5: законно
+  if (sceneVis("s5", t, S(4), E(4))) {
+    slam($("legalTitle"), t, W(4, "законно") - .05, .28, 1.8);
+    rise($("r1"), t, W(4, "твоя") - .15, .3, 80);
+    rise($("r2"), t, W(4, "сам") - .15, .3, 80);
+    rise($("r3"), t, W(4, "льготным") - .2, .35, 80);
+  }
+  // S6: гайд в телеграме
+  if (sceneVis("s6", t, S(5), E(5) + .01)) {
+    const tg = outExpo(p(t, S(5), S(5) + .5));
+    $("tg").style.transform = `translateY(${(1 - tg) * 400}px) scale(${lerp(.9, 1, tg)})`; $("tg").style.opacity = tg;
+    $("tg").style.top = "230px";
+    rise($("g1"), t, W(5, "Какие") - .1, .3, 40);
+    rise($("g2"), t, W(5, "сколько") - .1, .3, 40);
+    rise($("g3"), t, W(5, "порядке") - .1, .3, 40);
+    slam($("l1"), t, W(5, "Ссылка"), .26, 2); slam($("l2"), t, W(5, "шапке") - .05, .26, 2);
+    const ar = outExpo(p(t, W(5, "Ссылка"), W(5, "Ссылка") + .4));
+    $("upArrow").style.opacity = ar;
+    $("upArrow").style.transform = `translateY(${(1 - ar) * 80 - Math.abs(Math.sin(t * 5)) * 18}px)`;
+  }
+  $("disc").style.opacity = t >= S(3) ? .9 : 0;
+
+  renderSubs(t);
+}
+window.renderAt = renderAt;
+if (location.search.includes("play")) {
+  const t0 = performance.now();
+  (function loop() { renderAt(((performance.now() - t0) / 1000) % TIMELINE.duration); requestAnimationFrame(loop); })();
+} else renderAt(0);
+</script>
+</body>
+</html>
