@@ -129,9 +129,11 @@ def whisper(size="small"):
     return _models[size]
 
 
-def transcribe(path, size="small"):
-    segs, _ = whisper(size).transcribe(path, language="ru", beam_size=5, word_timestamps=True)
-    return [{"w": w.word.strip(), "a": w.start, "d": w.end - w.start} for s in segs for w in s.words]
+def transcribe(path, size="small", vad=False):
+    segs, _ = whisper(size).transcribe(path, language="ru", beam_size=5, word_timestamps=True, vad_filter=vad)
+    # слова нулевой длины — «галлюцинации» Whisper на тишине (например, повтор последней фразы)
+    return [{"w": w.word.strip(), "a": w.start, "d": w.end - w.start}
+            for s in segs for w in s.words if w.end - w.start >= 0.03]
 
 
 def similarity(phrase, words):
@@ -395,10 +397,14 @@ def fx_samples(rec, ref):
 REC_EDIT = os.environ.get("VOICE_REC_EDIT", "")
 
 
-def edit_recording(src, dst, keep, fade=0.015):
+def edit_recording(src, dst, keep, fade=0.015, tail_fade=0.25, pad=0.6):
+    """Последний отрезок затухает плавно (tail_fade), после него — тишина (pad): иначе
+    замена тембра нейросетью «зажёвывает» звук, обрывающийся на самом краю файла."""
+    fades = [fade] * (len(keep) - 1) + [tail_fade]
     parts = "".join(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS,afade=t=in:d={fade},"
-                    f"afade=t=out:st={b - a - fade:.3f}:d={fade}[p{i}];" for i, (a, b) in enumerate(keep))
-    concat = "".join(f"[p{i}]" for i in range(len(keep))) + f"concat=n={len(keep)}:v=0:a=1"
+                    f"afade=t=out:st={b - a - fo:.3f}:d={fo}[p{i}];" for i, ((a, b), fo) in enumerate(zip(keep, fades)))
+    concat = ("".join(f"[p{i}]" for i in range(len(keep))) + f"concat=n={len(keep)}:v=0:a=1,"
+              f"apad=pad_dur={pad}")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-filter_complex", parts + concat,
                     "-ac", "1", "-ar", str(SR), dst], check=True)
 
@@ -415,7 +421,13 @@ def from_recording(rec, ref):
     apply_fx(clean, fxw, FX, ref)
     # распознаём до эффекта (так точнее, а тайминг эффект не меняет); medium — small путает
     # границы коротких слов вроде «Стоп! Банки…», а для живой записи это и есть синхрон субтитров
-    ws = transcribe(clean, "medium")
+    ws = transcribe(clean, "medium", vad=True)
+    # Whisper любит «досочинять» повтор последней фразы на тишине в конце —
+    # отбрасываем слова, начинающиеся после того, как голос в файле реально закончился
+    pcm, win = load_pcm(clean), int(0.01 * SR)
+    thr = max(abs(x) for x in pcm) * 0.01  # −40 дБ от пика
+    voice_end = max(i for i in range(0, len(pcm) - win, win) if max(abs(x) for x in pcm[i:i + win]) > thr) / SR
+    ws = [w for w in ws if w["a"] < voice_end]
     script = [[plain(ph) for ph, _, _ in scene] for scene in SCRIPT]
     flat = " ".join(" ".join(sc) for sc in script)
     print(f"  сценарий/запись: совпадение {similarity(flat, ws):.2f}")
@@ -427,7 +439,8 @@ def from_recording(rec, ref):
         k += n
     with wave.open(fxw) as w:
         t = w.getnframes() / w.getframerate()
-    return lines, t
+    # длина ролика — по последнему слову, а не по файлу: в конце записи тишина и запас для VC
+    return lines, min(t, ws[-1]["a"] + ws[-1]["d"] + 0.4)
 
 
 def finish(lines, t):
