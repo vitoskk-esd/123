@@ -1,0 +1,13 @@
+# Настройки для хостинга Amvera (amvera.ru): сборка по Dockerfile,
+# постоянное хранилище /data — там лежит вход в Telegram и счётчики бота.
+meta:
+  environment: docker
+  toolchain:
+    name: docker
+    version: latest
+build:
+  dockerfile: Dockerfile
+  skip: false
+run:
+  persistenceMount: /data
+  containerPort: 80
