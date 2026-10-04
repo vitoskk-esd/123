@@ -28,9 +28,11 @@ def _list(name: str) -> list[str]:
 
 @dataclass
 class Config:
-    # https://my.telegram.org → API development tools
+    # https://my.telegram.org → API development tools.
+    # Если создать приложение там не получается — TG_USE_DESKTOP_KEYS=1 (см. TG_AGENT.md).
     api_id: int = _int("TG_API_ID", 0)
     api_hash: str = os.getenv("TG_API_HASH", "")
+    use_desktop_keys: bool = _bool("TG_USE_DESKTOP_KEYS", False)
     # Облачный пароль Telegram (двухэтапная проверка), если он включён.
     password: str = os.getenv("TG_2FA_PASSWORD", "")
 

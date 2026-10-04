@@ -28,11 +28,31 @@ from .schedule import Scheduler
 log = logging.getLogger("tg_agent")
 
 
+# Публичные ключи официального Telegram Desktop (опубликованы в его открытом исходном коде).
+# Клиент при этом представляется как Telegram Desktop на Windows, чтобы ключи и
+# описание устройства не противоречили друг другу.
+DESKTOP_KEYS = {
+    "api_id": 2040,
+    "api_hash": "b18441a1ff607e10a989891a5462e627",
+    "device_model": "Desktop",
+    "system_version": "Windows 10",
+    "app_version": "5.5.5 x64",
+    "lang_code": "ru",
+    "system_lang_code": "ru-RU",
+}
+
+
 def make_client() -> TelegramClient:
-    if not CONFIG.api_id or not CONFIG.api_hash:
-        raise SystemExit("Заполните TG_API_ID и TG_API_HASH в .env (https://my.telegram.org → API development tools).")
     CONFIG.data_dir.mkdir(parents=True, exist_ok=True)
-    return TelegramClient(CONFIG.session, CONFIG.api_id, CONFIG.api_hash)
+    if CONFIG.api_id and CONFIG.api_hash:
+        return TelegramClient(CONFIG.session, CONFIG.api_id, CONFIG.api_hash)
+    if CONFIG.use_desktop_keys:
+        keys = dict(DESKTOP_KEYS)
+        return TelegramClient(CONFIG.session, keys.pop("api_id"), keys.pop("api_hash"), **keys)
+    raise SystemExit(
+        "Заполните TG_API_ID и TG_API_HASH (https://my.telegram.org → API development tools) "
+        "или включите TG_USE_DESKTOP_KEYS=1."
+    )
 
 
 async def ensure_login(client: TelegramClient) -> None:
