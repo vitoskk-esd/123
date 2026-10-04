@@ -311,7 +311,7 @@ function renderAt(t) {
     const full = "у меня вышло ", n = Math.floor(clamp(p(t, S(5) + .4, S(5) + 1.4)) * full.length);
     $("cmtText").textContent = full.slice(0, n) + (n >= full.length ? "… ₽" : "");
     $("cmtInput").querySelector(".caret").style.opacity = Math.floor(t * 3) % 2 ? 1 : .2;
-    slam($("cmtBig"), t, W(5, "комментах") - .1, .3, 1.8);
+    slam($("cmtBig"), t, W(5, "комментариях") - .1, .3, 1.8);
   }
   // S6 телеграм
   if (sceneVis("s6", t, S(6), E(6) + .01)) {

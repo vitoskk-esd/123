@@ -75,7 +75,7 @@ SCRIPT = [
      ("При тр+атах тр+идцать т+ысяч в м+есяц к+аждый недобр+анный проц+ент +это три т+ысячи шестьс+от в год.", 0.3, dict())],
     [("Ит+ого б+ольше шест+и с полов+иной т+ысяч.", 0.12, dict(exag=.7, rate=-6)),
      ("Пр+осто потом+у, что ты не смен+ил банк.", 0.3, dict(exag=.5))],
-    [("Напиш+и в коммент+ах, ск+олько в+ышло у теб+я.", 0.3, dict(exag=.6))],
+    [("Напиш+и в коммент+ариях, ск+олько в+ышло у теб+я.", 0.3, dict(exag=.6))],
     [("А как всё верн+уть и забр+ать б+онусы б+анков, подр+обный гайд у мен+я в телегр+аме.", 0.12, dict()),
      ("Сс+ылка в ш+апке пр+офиля.", 0.0, dict(exag=.7, rate=-4))],
 ]
@@ -345,7 +345,7 @@ def humanize(src, dst):
 #   vc      — тембр полностью заменяется нейросетью (Chatterbox VC) на голос из референса
 REC_FILE = os.environ.get("VOICE_REC", "")
 FX = os.environ.get("VOICE_FX", "vc")
-VC_TRIES = int(os.environ.get("VC_TRIES", "4"))
+VC_TRIES = int(os.environ.get("VC_TRIES", "5"))
 FX_CHAINS = {
     "none": "anull",
     "low": "rubberband=pitch=0.917:formant=shifted",
@@ -421,6 +421,62 @@ def edit_recording(src, dst, keep, fade=0.015, tail_fade=0.25, pad=0.6):
                     "-ac", "1", "-ar", str(SR), dst], check=True)
 
 
+def vc_by_phrases(clean, dst, words, pad=0.3, min_len=3.0):
+    """Замена тембра по кускам между паузами, лучший из VC_TRIES прогонов для каждого куска.
+
+    Целиком длинный файл нейросеть «смазывает» местами (на рилсе №4 хук и призыв стали неразборчивы:
+    0.87 против 0.99 у исходника), а случайность у каждого куска своя. Режем по серединам пауз,
+    обрабатываем кусок с запасом pad по краям, выбираем прогон, ближе всего к словам сценария в этом
+    куске, и кладём его ровно на прежнее место — тайминги не меняются."""
+    import torch
+    import torchaudio
+    from chatterbox.vc import ChatterboxVC
+    if "vc" not in _models:
+        _models["vc"] = ChatterboxVC.from_pretrained("cpu")
+    vc = _models["vc"]
+    err = subprocess.run(["ffmpeg", "-i", clean, "-af", "silencedetect=n=-40dB:d=0.18", "-f", "null", "-"],
+                         capture_output=True, text=True).stderr
+    st = [float(x) for x in re.findall(r"silence_start: ([0-9.]+)", err)]
+    en = [float(x) for x in re.findall(r"silence_end: ([0-9.]+)", err)]
+    pcm = load_pcm(clean)
+    dur = len(pcm) / SR
+    segs, a = [], 0.0
+    for c in [(x + y) / 2 for x, y in zip(st, en)] + [dur]:
+        if c - a >= min_len or c >= dur - 0.01:
+            segs.append((a, min(c, dur)))
+            a = c
+    if len(segs) > 1 and segs[-1][1] - segs[-1][0] < 1.0:
+        segs[-2] = (segs[-2][0], segs[-1][1])
+        segs.pop()
+    out = array.array("h")
+    for i, (x, y) in enumerate(segs):
+        want = " ".join(w["w"] for w in words if x - .05 <= w["a"] < y - .05)
+        xa, ya = max(0.0, x - pad), min(dur, y + pad)
+        src = os.path.join(OUT, f"vcseg_{i}.wav")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", clean, "-ss", str(xa), "-to", str(ya),
+                        "-ac", "1", "-ar", "24000", src], check=True)
+        best = None
+        for seed in range(VC_TRIES):
+            torch.manual_seed(seed)
+            cand = os.path.join(OUT, f"vcseg_{i}_s{seed}.wav")
+            torchaudio.save(cand, vc.generate(audio=src, target_voice_path=VC_TARGET), vc.sr)
+            score = max(similarity(want, transcribe(cand, "medium", vad=v)) for v in (True, False))
+            if best is None or score > best[0]:
+                best = (score, cand, seed)
+            if score >= 0.98:
+                break
+        print(f"  VC кусок {x:5.2f}–{y:5.2f}: seed {best[2]}, разборчивость {best[0]:.3f}", flush=True)
+        seg = load_pcm(best[1])
+        s0, n = int((x - xa) * SR), int(round((y - x) * SR))
+        piece = seg[s0:s0 + n]
+        if len(piece) < n:
+            piece.extend(array.array("h", bytes((n - len(piece)) * 2)))
+        out.extend(piece)
+    with wave.open(dst, "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
+        w.writeframes(out.tobytes())
+
+
 def from_recording(rec, ref):
     """Своя запись всего сценария: тайминги слов — по распознаванию, сцены — по сценарию."""
     clean, fxw = os.path.join(OUT, "rec_clean.wav"), os.path.join(OUT, "voice.wav")
@@ -431,21 +487,7 @@ def from_recording(rec, ref):
         rec = edited
     clean_recording(rec, clean)
     flat_text = " ".join(plain(ph) for sc in SCRIPT for ph, _, _ in sc)
-    if FX == "vc":
-        # в замене тембра есть случайность, и на быстрой речи она иногда «смазывает» слова:
-        # делаем несколько прогонов и оставляем самый разборчивый (по Whisper)
-        import torch
-        best = None
-        for seed in range(VC_TRIES):
-            torch.manual_seed(seed)
-            cand = os.path.join(OUT, f"voice_vc_s{seed}.wav")
-            apply_fx(clean, cand, FX, ref)
-            score = max(similarity(flat_text, transcribe(cand, "medium", vad=v)) for v in (True, False))
-            print(f"  VC seed {seed}: разборчивость {score:.3f}", flush=True)
-            if best is None or score > best[0]:
-                best = (score, cand)
-        os.replace(best[1], fxw)
-    else:
+    if FX != "vc":
         apply_fx(clean, fxw, FX, ref)
     # распознаём до эффекта (так точнее, а тайминг эффект не меняет); medium — small путает
     # границы коротких слов вроде «Стоп! Банки…», а для живой записи это и есть синхрон субтитров
@@ -468,6 +510,8 @@ def from_recording(rec, ref):
         lines.append({"text": " ".join(sc),
                       "words": [{"w": toks[k + j], "a": round(times[k + j], 3)} for j in range(n)]})
         k += n
+    if FX == "vc":
+        vc_by_phrases(clean, fxw, [w for l in lines for w in l["words"]])
     with wave.open(fxw) as w:
         t = w.getnframes() / w.getframerate()
     # длина ролика — по последнему слову, а не по файлу: в конце записи тишина и запас для VC

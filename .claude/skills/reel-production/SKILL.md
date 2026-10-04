@@ -81,6 +81,12 @@ arrive under `/root/.claude/uploads/…`; copy into the reel folder.
   intelligible; timings don't change, so frames need no re-render, only remix.
 - If the drop stays large, offer the owner the `formant` version as an
   alternative alongside (on reel #2 he still chose VC, "variant 5").
+- Reel #4: whole-file VC garbled the hook and the CTA (0.87 vs 0.99 clean).
+  Fix that works: `vc_by_phrases` — cut at pause midpoints (≥3 s pieces),
+  VC each piece with 0.3 s context, best of `VC_TRIES` per piece by Whisper
+  against that piece's script words, put back at the same samples → 0.98.
+  It is now the default VC path in `reels/bank-calc-04/voice.py`; copy that
+  file for new reels.
 
 ## 5. QA before sending (do all, every time)
 
