@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Reel: бонусы банков</title>
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root {
+    --bg: #07070b; --ink: #f4f4f0; --lime: #c8ff3d; --violet: #7b5cff;
+    --red: #ff4d5e; --muted: #8a8a99; --card: #14141c; --line: #26263a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(140px); opacity: .55; }
+  #b1 { width: 900px; height: 900px; background: var(--violet); }
+  #b2 { width: 700px; height: 700px; background: #1fd1a5; opacity: .28; }
+  #grain { position: absolute; inset: -100px; opacity: .07; pointer-events: none; mix-blend-mode: overlay; }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 40%; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .center { position: absolute; left: 80px; right: 80px; text-align: center; }
+  .big { font-size: 150px; line-height: .92; letter-spacing: -6px; text-transform: uppercase; }
+  .lime { color: var(--lime); }
+  .red { color: var(--red); }
+  .outline { color: transparent; -webkit-text-stroke: 4px var(--ink); }
+  .word { display: inline-block; }
+  .tag { display: inline-block; font-family: "Tek"; font-size: 40px; letter-spacing: 4px;
+         padding: 14px 28px; border: 3px solid var(--lime); color: var(--lime); border-radius: 60px; }
+
+  /* субтитры */
+  #subs { position: absolute; left: 70px; right: 150px; top: 1290px; text-align: center;
+          font-size: 66px; line-height: 1.12; letter-spacing: -1px; text-transform: uppercase; }
+  #subs span { display: inline-block; margin: 0 9px 10px; color: var(--ink);
+               text-shadow: 0 6px 0 rgba(0,0,0,.55), 0 0 30px rgba(0,0,0,.6); }
+  #subs span.on { color: var(--bg); background: var(--lime); padding: 0 12px; border-radius: 12px; text-shadow: none; }
+
+  /* монеты */
+  .coin { position: absolute; width: 120px; height: 120px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #f3ffb8, var(--lime) 45%, #7fae0f 100%);
+          box-shadow: inset 0 -8px 0 rgba(0,0,0,.25), 0 10px 30px rgba(200,255,61,.35);
+          font-family: "Display"; font-size: 72px; color: #213000; display: flex; align-items: center; justify-content: center; }
+
+  /* телефон */
+  #phone { position: absolute; left: 260px; top: 300px; width: 560px; height: 900px; border-radius: 70px;
+           background: #0e0e15; border: 6px solid #2c2c40; box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 0 2px #000 inset; overflow: hidden; }
+  #notch { position: absolute; left: 50%; top: 18px; width: 150px; height: 40px; margin-left: -75px; background: #000; border-radius: 30px; }
+  #bankcard { position: absolute; left: 40px; right: 40px; top: 240px; height: 290px; border-radius: 34px;
+              background: linear-gradient(135deg, #2b2b3d 0%, #121219 55%, #3a2c8f 100%); border: 2px solid #3d3d58; padding: 34px; }
+  #chip { width: 80px; height: 60px; border-radius: 12px; background: linear-gradient(135deg, #e6d48a, #9c8a3f); }
+  #cardnum { font-family: "Mono"; font-size: 34px; letter-spacing: 4px; margin-top: 90px; color: #d7d7e6; }
+  #notif { position: absolute; left: 24px; right: 24px; top: 70px; border-radius: 30px; padding: 24px 26px;
+           background: rgba(40,40,58,.92); border: 2px solid #44445f; display: flex; gap: 20px; align-items: center; }
+  #notif .ic { width: 76px; height: 76px; border-radius: 20px; background: var(--lime); color: #142000;
+               font-family: "Tek"; font-size: 48px; display: flex; align-items: center; justify-content: center; flex: none; }
+  #notif .t1 { font-size: 30px; color: var(--muted); font-family: "Display"; }
+  #notif .t2 { font-size: 38px; white-space: nowrap; }
+  #phoneLabel { top: 160px; font-size: 64px; letter-spacing: -2px; text-transform: uppercase; }
+
+  /* списки */
+  .row { display: flex; align-items: center; gap: 30px; font-size: 92px; letter-spacing: -3px; text-transform: uppercase; margin: 26px 0; }
+  .mark { width: 110px; height: 110px; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 80px; flex: none; font-family: "Tek"; }
+  .mx { background: rgba(255,77,94,.15); color: var(--red); border: 3px solid var(--red); }
+  .mv { background: var(--lime); color: #142000; }
+  .strike { position: relative; color: var(--muted); }
+  .strike i { position: absolute; left: -6px; top: 50%; height: 10px; background: var(--red); border-radius: 6px; }
+
+  /* выписка */
+  #stmt { position: absolute; left: 90px; right: 90px; top: 250px; background: var(--card); border: 2px solid var(--line);
+          border-radius: 44px; padding: 40px 44px; }
+  #stmt h3 { font-size: 40px; color: var(--muted); font-weight: normal; margin-bottom: 18px; letter-spacing: 1px; }
+  .op { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; border-top: 2px solid var(--line); font-size: 44px; }
+  .op b { font-family: "Mono"; color: var(--red); font-size: 46px; }
+  #yearBox { position: absolute; left: 80px; right: 80px; top: 930px; text-align: center; }
+  #yearNum { font-family: "Mono"; font-size: 170px; letter-spacing: -6px; color: var(--red); }
+  #yearCap { font-size: 48px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+
+  /* телеграм */
+  #tg { position: absolute; left: 80px; right: 80px; top: 230px; background: #151a24; border: 2px solid #26324a; border-radius: 44px; overflow: hidden; }
+  #tgHead { display: flex; align-items: center; gap: 24px; padding: 30px 36px; background: #1b2232; }
+  #tgAva { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, var(--lime), #1fd1a5);
+           display: flex; align-items: center; justify-content: center; font-family: "Tek"; font-size: 56px; color: #142000; }
+  #tgHead .n { font-size: 46px; }
+  #tgHead .s { font-size: 30px; color: #7f90b3; font-family: "Display"; }
+  #tgPost { padding: 34px 36px 40px; }
+  #tgPost .ttl { font-size: 50px; margin-bottom: 20px; }
+  .bk { display: flex; align-items: center; gap: 22px; padding: 22px 0; border-top: 2px solid #232c40; font-size: 44px; }
+  .bk .dot { width: 64px; height: 64px; border-radius: 18px; flex: none; }
+  .bk .nm { flex: 1; }
+  .bk .am { font-family: "Mono"; color: var(--lime); filter: blur(14px); font-size: 46px; }
+  .bk .ok { color: var(--lime); font-family: "Tek"; font-size: 44px; }
+  #stamp { position: absolute; left: 0; right: 0; top: 1060px; text-align: center; }
+  #stamp div { display: inline-block; font-size: 64px; text-transform: uppercase; letter-spacing: -1px; padding: 18px 40px;
+               border: 6px solid var(--lime); color: var(--lime); border-radius: 22px; }
+
+  /* CTA */
+  #plane { position: absolute; left: 390px; top: 250px; width: 300px; height: 300px; }
+  #ctaText { top: 620px; }
+  #arrow { position: absolute; left: 50px; top: 1390px; width: 170px; height: 170px; }
+  #disc { position: absolute; left: 240px; right: 150px; top: 1590px; font-size: 26px; color: #6d6d7d; text-align: center; font-family: "Display"; letter-spacing: .5px; }
+
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="blob" id="b1"></div>
+  <div class="blob" id="b2"></div>
+  <svg id="grain" width="1280" height="2120"><filter id="n"><feTurbulence id="turb" type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="1"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+
+  <div id="cam">
+    <!-- S1 -->
+    <div class="scene" id="s1">
+      <div class="center big" id="stop" style="top:520px;font-size:300px;letter-spacing:-14px">СТОП</div>
+      <div class="center big" id="s1words" style="top:330px">
+        <div class="word" id="w1">БАНКИ</div><br>
+        <div class="word lime" id="w2">РАЗДАЮТ</div><br>
+        <div class="word" id="w3">ДЕНЬГИ</div>
+      </div>
+      <div id="coins"></div>
+    </div>
+    <!-- S2 -->
+    <div class="scene" id="s2">
+      <div class="center big" style="top:400px">
+        <div class="word outline" id="s2a">ПОЧТИ</div><br>
+        <div class="word outline" id="s2b">НИКТО</div><br>
+        <div class="word" id="s2c" style="font-size:118px">НЕ ЗАБИРАЕТ</div>
+      </div>
+      <div id="s2line" style="position:absolute;left:140px;top:835px;height:16px;background:var(--lime);border-radius:8px;width:0"></div>
+    </div>
+    <!-- S3 -->
+    <div class="scene" id="s3">
+      <div class="center" id="phoneLabel">Карта + покупка = <span class="lime">бонус</span></div>
+      <div id="phone">
+        <div id="notch"></div>
+        <div id="bankcard"><div id="chip"></div><div id="cardnum">•••• •••• 2026</div></div>
+        <div style="position:absolute;left:40px;right:40px;top:580px">
+          <div style="font-size:30px;color:var(--muted);font-family:Display">Первая покупка</div>
+          <div style="display:flex;justify-content:space-between;font-size:44px;margin-top:14px"><span>Кофе ☕</span><span style="font-family:Mono">−190 ₽</span></div>
+        </div>
+        <div id="notif"><div class="ic">₽</div><div><div class="t1">Банк • сейчас</div><div class="t2">Бонус зачислен <span class="lime">+₽</span></div></div></div>
+      </div>
+    </div>
+    <!-- S4 -->
+    <div class="scene" id="s4">
+      <div style="position:absolute;left:90px;right:90px;top:300px">
+        <div class="row" id="r1"><div class="mark mx">✕</div><div class="strike">кредит<i id="k1"></i></div></div>
+        <div class="row" id="r2"><div class="mark mx">✕</div><div class="strike">розыгрыш<i id="k2"></i></div></div>
+        <div class="row" id="r3" style="font-size:78px"><div class="mark mv">✓</div><div>рекламный<br><span class="lime">бюджет банка</span></div></div>
+      </div>
+      <div class="center big" id="toYou" style="top:960px;font-size:130px">→ <span class="lime">тебе</span></div>
+    </div>
+    <!-- S5 -->
+    <div class="scene" id="s5">
+      <div id="stmt">
+        <h3>История операций</h3>
+        <div class="op" id="o1"><span>Обслуживание</span><b>−150 ₽</b></div>
+        <div class="op" id="o2"><span>Обслуживание</span><b>−150 ₽</b></div>
+        <div class="op" id="o3"><span>Обслуживание</span><b>−150 ₽</b></div>
+        <div class="op" id="o4"><span>Кэшбэк 1%</span><b style="color:var(--muted)">+12 ₽</b></div>
+      </div>
+      <div id="yearBox"><div id="yearNum">−0 ₽</div><div id="yearCap">за год только на обслуживании*</div></div>
+    </div>
+    <!-- S6 -->
+    <div class="scene" id="s6">
+      <div class="center big" style="top:430px;font-size:132px">
+        <div class="word" id="s6a">ТЫ</div><br>
+        <div class="word red" id="s6b">ПЕРЕПЛА-</div><br>
+        <div class="word red" id="s6c">ЧИВАЕШЬ</div>
+      </div>
+    </div>
+    <!-- S7 -->
+    <div class="scene" id="s7">
+      <div id="tg">
+        <div id="tgHead"><div id="tgAva">₽</div><div><div class="n">Бонусы банков</div><div class="s">канал • ссылка в профиле</div></div></div>
+        <div id="tgPost">
+          <div class="ttl">Актуальные бонусы за карты 🔥</div>
+          <div class="bk" id="t1"><div class="dot" style="background:#ffdd2d"></div><div class="nm">Банк №1</div><div class="am">1 000 ₽</div><div class="ok">✓</div></div>
+          <div class="bk" id="t2"><div class="dot" style="background:#ef3124"></div><div class="nm">Банк №2</div><div class="am">500 ₽</div><div class="ok">✓</div></div>
+          <div class="bk" id="t3"><div class="dot" style="background:#0a2896"></div><div class="nm">Банк №3</div><div class="am">2 000 ₽</div><div class="ok">✓</div></div>
+          <div class="bk" id="t4"><div class="dot" style="background:#21a038"></div><div class="nm">Банк №4</div><div class="am">700 ₽</div><div class="ok">✓</div></div>
+        </div>
+      </div>
+      <div id="stamp"><div>без мелкого шрифта</div></div>
+    </div>
+    <!-- S8 -->
+    <div class="scene" id="s8">
+      <svg id="plane" viewBox="0 0 240 240"><circle cx="120" cy="120" r="120" fill="#c8ff3d"/><path d="M54 116l118-46c6-2 11 1 9 9l-20 94c-1 6-6 8-11 4l-30-22-15 14c-2 2-4 3-7 3l2-31 56-51c3-2-1-4-4-2l-69 44-30-9c-6-2-6-6 1-7z" fill="#07070b"/></svg>
+      <div class="center big" id="ctaText" style="font-size:138px">
+        <div class="word" id="c1">ССЫЛКА</div><br>
+        <div class="word lime" id="c2">В ПРОФИЛЕ</div>
+      </div>
+      <div class="center" id="c3" style="top:930px"><span class="tag">ЗАБИРАЙ, ПОКА ДЕЙСТВУЮТ АКЦИИ</span></div>
+      <svg id="arrow" viewBox="0 0 200 200"><path d="M150 20 C 150 110, 110 150, 40 160" stroke="#c8ff3d" stroke-width="14" fill="none" stroke-linecap="round"/><path d="M70 125 L 35 162 L 82 182" stroke="#c8ff3d" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div id="subs"></div>
+  <div id="disc">*Пример. Размер бонуса и условия зависят от банка и акции. Реклама.</div>
+  <div id="flash"></div>
+</div>
+
+<script src="timeline.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = x => x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const outBack = x => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const lerp = (a, b, x) => a + (b - a) * x;
+// детерминированный псевдорандом
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// «Слэм» — элемент влетает с увеличенного масштаба
+function slam(el, t, t0, dur = .28, from = 1.9) {
+  const x = p(t, t0, t0 + dur);
+  el.style.opacity = x > 0 ? clamp(x * 3) : 0;
+  el.style.transform = `scale(${lerp(from, 1, outBack(x))})`;
+}
+function rise(el, t, t0, dur = .35, dy = 120) {
+  const x = outExpo(p(t, t0, t0 + dur));
+  el.style.opacity = x;
+  el.style.transform = `translateY(${(1 - x) * dy}px)`;
+}
+function sceneVis(id, t, a, b) {
+  const el = $(id);
+  const on = t >= a && t < b;
+  el.style.opacity = on ? 1 : 0;
+  // короткий «зум-аут» на выходе для динамики
+  const out = p(t, b - .12, b);
+  el.style.transform = `scale(${1 + out * .12})`;
+  el.style.filter = out > 0 ? `blur(${out * 12}px)` : "none";
+  return on;
+}
+
+// монеты
+const COIN_N = 14;
+for (let i = 0; i < COIN_N; i++) { const c = document.createElement("div"); c.className = "coin"; c.textContent = "₽"; $("coins").appendChild(c); }
+
+// субтитры: тайминги слов из реальной озвучки (timeline.js генерирует voice.py)
+const subWords = TIMELINE.lines.map(l => l.words);
+const { S, E, W } = TIMELINE;
+function renderSubs(t) {
+  const li = TIMELINE.lines.findIndex(l => t >= l.start && t < l.end);
+  if (li < 0) { $("subs").innerHTML = ""; return; }
+  const words = subWords[li];
+  // показываем «окно» из 3–4 слов вокруг текущего
+  let cur = 0; words.forEach((x, i) => { if (t >= x.a) cur = i; });
+  const chunk = Math.floor(cur / 3) * 3;
+  const vis = words.slice(chunk, chunk + 3);
+  $("subs").innerHTML = vis.map((x, i) => {
+    const on = chunk + i === cur;
+    const k = outBack(p(t, x.a, x.a + .18));
+    const show = t >= x.a;
+    return `<span class="${on ? "on" : ""}" style="opacity:${show ? 1 : .0};transform:scale(${show ? lerp(.6, 1, k) : .6})">${x.w.replace(/[.,:?!]$/, "")}</span>`;
+  }).join(" ");
+}
+
+function renderAt(t) {
+  // фон
+  $("b1").style.transform = `translate(${-200 + Math.sin(t * .4) * 160}px, ${200 + Math.cos(t * .3) * 200}px)`;
+  $("b2").style.transform = `translate(${500 + Math.cos(t * .5) * 140}px, ${1150 + Math.sin(t * .35) * 180}px)`;
+  $("turb").setAttribute("seed", Math.floor(t * 24) % 50);
+  $("grain").style.transform = `translate(${rnd(t * 30) * -60}px, ${rnd(t * 31) * -60}px)`;
+  // фон краснеет на «переплачиваешь»
+  $("b1").style.background = (t >= S(5) && t < E(5)) ? "#ff3048" : "#7b5cff";
+
+  // камера: медленный наезд + тряска на ударах
+  let shake = 0;
+  for (const s of TIMELINE.sfx.impact) { const d = t - s; if (d >= 0 && d < .35) shake = Math.max(shake, (1 - d / .35) * 22); }
+  const segStart = TIMELINE.lines.filter(l => l.start <= t).pop().start;
+  const zoom = 1 + (t - segStart) * .012;
+  $("cam").style.transform = `translate(${(rnd(t * 50) - .5) * shake}px, ${(rnd(t * 51) - .5) * shake}px) scale(${zoom})`;
+
+  // вспышка
+  let fl = 0;
+  for (const s of [0, S(5), S(7)]) { const d = t - s; if (d >= 0 && d < .12) fl = Math.max(fl, 1 - d / .12); }
+  $("flash").style.opacity = fl * .85;
+
+  // S1
+  if (sceneVis("s1", t, S(0), E(0))) {
+    const stop = $("stop"), w1 = W(0, "Банки");
+    slam(stop, t, 0, .22, 2.6);
+    if (t > w1 - .1) stop.style.opacity = 1 - p(t, w1 - .1, w1);
+    $("s1words").style.opacity = t >= w1 ? 1 : 0;
+    slam($("w1"), t, w1); slam($("w2"), t, W(0, "раздают")); slam($("w3"), t, W(0, "деньги"));
+    [...$("coins").children].forEach((c, i) => {
+      const t0 = w1 + .1 + rnd(i) * 1.2, x = 40 + rnd(i + 9) * 920;
+      const y = -160 + (t - t0) * (900 + rnd(i + 3) * 500) + Math.pow(Math.max(0, t - t0), 2) * 600;
+      c.style.opacity = t > t0 ? 1 : 0;
+      c.style.transform = `translate(${x}px, ${y}px) rotate(${(t - t0) * (200 + rnd(i) * 300)}deg) scale(${.7 + rnd(i + 5) * .6})`;
+    });
+  }
+  // S2
+  if (sceneVis("s2", t, S(1), E(1))) {
+    const zb = W(1, "забирает");
+    rise($("s2a"), t, W(1, "почти") - .1); rise($("s2b"), t, W(1, "никто") - .1); slam($("s2c"), t, zb, .3, 1.6);
+    $("s2line").style.width = `${outExpo(p(t, zb + .25, zb + .75)) * 800}px`;
+  }
+  // S3
+  if (sceneVis("s3", t, S(2), E(2))) {
+    const s3 = S(2), bn = W(2, "бонус");
+    rise($("phoneLabel"), t, s3 + .05, .4, 60);
+    const ph = outExpo(p(t, s3, s3 + .6));
+    $("phone").style.transform = `translateY(${(1 - ph) * 1000}px) rotate(${(1 - ph) * 8}deg)`;
+    $("phone").style.top = "330px";
+    const cardIn = outBack(p(t, s3 + .5, s3 + .9));
+    $("bankcard").style.transform = `scale(${lerp(.6, 1, cardIn)})`; $("bankcard").style.opacity = cardIn;
+    const n = outBack(p(t, bn - .05, bn + .25));
+    $("notif").style.transform = `translateY(${(1 - n) * -260}px) scale(${lerp(.9, 1, n)})`;
+    $("notif").style.opacity = clamp(n * 2);
+    // пульс подсветки бонуса
+    $("notif").style.boxShadow = t > bn ? `0 0 ${40 + Math.sin(t * 10) * 20}px rgba(200,255,61,.45)` : "none";
+  }
+  // S4
+  if (sceneVis("s4", t, S(3), E(3))) {
+    const kr = W(3, "кредит"), rz = W(3, "розыгрыш");
+    rise($("r1"), t, S(3) + .05, .3, 80); rise($("r2"), t, rz - .2, .3, 80); rise($("r3"), t, W(3, "рекламный") - .1, .35, 80);
+    $("k1").style.width = `${outExpo(p(t, kr + .25, kr + .55)) * 105}%`;
+    $("k2").style.width = `${outExpo(p(t, rz + .3, rz + .6)) * 105}%`;
+    slam($("toYou"), t, W(3, "тебе") - .05, .3, 2);
+  }
+  // S5
+  if (sceneVis("s5", t, S(4), E(4))) {
+    const s5 = S(4), cb = W(4, "Кэшбэк");
+    const st = outExpo(p(t, s5, s5 + .4));
+    $("stmt").style.transform = `translateY(${(1 - st) * 300}px)`; $("stmt").style.opacity = st;
+    ["o1", "o2", "o3", "o4"].forEach((id, i) => rise($(id), t, i === 3 ? cb - .05 : s5 + .6 + i * .35, .25, 40));
+    const yv = Math.round(outExpo(p(t, s5 + .9, s5 + 2.8)) * 1800);
+    $("yearNum").textContent = "−" + yv.toLocaleString("ru-RU").replace(/ /g, " ") + " ₽";
+    rise($("yearBox"), t, s5 + .9, .35, 80);
+  }
+  // S6
+  if (sceneVis("s6", t, S(5), E(5))) {
+    const km = W(5, "кормишь");
+    slam($("s6a"), t, W(5, "ты") - .05, .2, 2.4); slam($("s6b"), t, km, .22, 2.2); slam($("s6c"), t, km + .3, .22, 2.2);
+    // глитч
+    const g = (t > km + .55 && Math.floor(t * 12) % 5 === 0) ? (rnd(t) - .5) * 30 : 0;
+    $("s6b").style.textShadow = g ? `${g}px 0 #00e5ff, ${-g}px 0 #ff00aa` : "none";
+    $("s6c").style.textShadow = g ? `${-g}px 0 #00e5ff, ${g}px 0 #ff00aa` : "none";
+  }
+  // S7
+  if (sceneVis("s7", t, S(6), E(6))) {
+    const tg = outExpo(p(t, S(6), S(6) + .5)), bs = W(6, "бонусы");
+    $("tg").style.transform = `translateY(${(1 - tg) * 400}px) scale(${lerp(.9, 1, tg)})`; $("tg").style.opacity = tg;
+    ["t1", "t2", "t3", "t4"].forEach((id, i) => rise($(id), t, bs + i * .35, .3, 50));
+    slam($("stamp"), t, W(6, "условия"), .3, 2.2);
+    $("stamp").style.transform += " rotate(-4deg)";
+  }
+  // S8
+  if (sceneVis("s8", t, S(7), E(7) + .01)) {
+    const pl = outBack(p(t, S(7), S(7) + .5)), zb = W(7, "Забирай");
+    $("plane").style.transform = `translate(${(1 - pl) * -700}px, ${(1 - pl) * 300}px) rotate(${(1 - pl) * -40 + Math.sin(t * 3) * 4}deg) scale(${1 + Math.sin(t * 6) * .02})`;
+    slam($("c1"), t, W(7, "Ссылка")); slam($("c2"), t, W(7, "профиле") - .1);
+    rise($("c3"), t, zb - .05, .35, 60);
+    const ar = outExpo(p(t, zb + .4, zb + .9));
+    $("arrow").style.opacity = ar;
+    $("arrow").style.transform = `translate(${Math.sin(t * 7) * 10}px, ${(1 - ar) * -80 + Math.abs(Math.sin(t * 5)) * 14}px)`;
+  }
+  // дисклеймер — на сценах с цифрами и в финале
+  $("disc").style.opacity = (t >= S(4) && t < E(4)) || t >= S(6) ? .9 : 0;
+
+  renderSubs(t);
+}
+window.renderAt = renderAt;
+// режим предпросмотра в браузере: reel.html?play
+if (location.search.includes("play")) {
+  const t0 = performance.now();
+  (function loop() { renderAt(((performance.now() - t0) / 1000) % TIMELINE.duration); requestAnimationFrame(loop); })();
+} else renderAt(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Reel: сколько банк заработал на тебе</title>
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root { --bg: #04050a; --ink: #eef3ff; --cyan: #3df5ff; --lime: #c8ff3d; --red: #ff3b5c; --violet: #8b5cff; --muted: #7d8aa8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #bg { position: absolute; inset: 0; }
+  #tint { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, rgba(255,59,92,.35), transparent 65%); opacity: 0; }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 45%; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .center { position: absolute; left: 70px; right: 70px; text-align: center; }
+  .glow-c { text-shadow: 0 0 18px rgba(61,245,255,.7), 0 0 60px rgba(61,245,255,.35); }
+  .glow-r { text-shadow: 0 0 18px rgba(255,59,92,.8), 0 0 70px rgba(255,59,92,.45); }
+  .glow-l { text-shadow: 0 0 18px rgba(200,255,61,.75), 0 0 60px rgba(200,255,61,.35); }
+
+  /* хук */
+  #hookTitle { top: 260px; font-size: 104px; line-height: .98; letter-spacing: -4px; text-transform: uppercase; }
+  #hookTitle .w { display: inline-block; }
+  #holoWrap { position: absolute; left: 0; right: 0; top: 760px; height: 520px; perspective: 1400px; }
+  #holo { position: absolute; left: 230px; width: 620px; height: 390px; border-radius: 40px; transform-style: preserve-3d;
+          background: linear-gradient(135deg, rgba(61,245,255,.16), rgba(139,92,255,.12) 55%, rgba(61,245,255,.06));
+          border: 3px solid rgba(61,245,255,.85); box-shadow: 0 0 40px rgba(61,245,255,.45), inset 0 0 60px rgba(61,245,255,.18); overflow: hidden; }
+  #holo .chip { position: absolute; left: 50px; top: 70px; width: 96px; height: 72px; border-radius: 14px; border: 3px solid rgba(61,245,255,.9); }
+  #holo .num { position: absolute; left: 50px; bottom: 70px; font-family: "Mono"; font-size: 40px; letter-spacing: 6px; color: rgba(220,250,255,.9); }
+  #holo .rub { position: absolute; right: 50px; top: 50px; font-family: "Tek"; font-size: 80px; color: var(--cyan); }
+  #beam { position: absolute; left: -10%; right: -10%; height: 70px; background: linear-gradient(180deg, transparent, rgba(61,245,255,.55), transparent); }
+  .hline { position: absolute; left: 0; right: 0; height: 2px; background: rgba(61,245,255,.12); }
+
+  /* счётчик (HUD) */
+  #hud { position: absolute; left: 0; right: 0; top: 120px; text-align: center; transform-origin: 50% 50%; }
+  #hudLabel { font-family: "Tek"; font-size: 34px; letter-spacing: 6px; color: var(--cyan); text-transform: uppercase; }
+  #hudNum { font-family: "Mono"; font-size: 132px; letter-spacing: -4px; color: var(--red); white-space: nowrap; margin-top: 6px; }
+  #hudBar { width: 640px; height: 10px; margin: 14px auto 0; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; }
+  #hudBar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--violet), var(--red)); box-shadow: 0 0 20px var(--red); }
+
+  /* карточки вопросов */
+  .qwrap { position: absolute; left: 0; right: 0; top: 520px; perspective: 1600px; }
+  .qcard { position: relative; margin: 0 auto; width: 900px; padding: 54px 56px 60px; border-radius: 48px;
+           background: linear-gradient(160deg, rgba(30,40,70,.72), rgba(12,16,30,.78)); border: 2px solid rgba(61,245,255,.55);
+           box-shadow: 0 0 50px rgba(61,245,255,.22), inset 0 1px 0 rgba(255,255,255,.12); }
+  .qn { font-family: "Tek"; font-size: 34px; letter-spacing: 6px; color: var(--cyan); }
+  .qt { font-size: 74px; line-height: 1.02; letter-spacing: -2px; margin-top: 18px; text-transform: uppercase; }
+  .qf { font-family: "Mono"; font-size: 36px; color: var(--muted); margin-top: 22px; }
+  .pills { display: flex; gap: 30px; margin-top: 44px; }
+  .pill { position: relative; flex: 1; height: 130px; border-radius: 70px; display: flex; align-items: center; justify-content: center;
+          font-family: "Tek"; font-size: 60px; letter-spacing: 4px; border: 3px solid rgba(255,255,255,.25); color: rgba(255,255,255,.75); overflow: hidden; }
+  .pill.yes { border-color: var(--lime); color: var(--lime); }
+  .ripple { position: absolute; width: 40px; height: 40px; border-radius: 50%; background: rgba(200,255,61,.55); left: 50%; top: 50%; margin: -20px; }
+  .cursor { position: absolute; width: 90px; height: 90px; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 30px rgba(255,255,255,.8); }
+  .fly { position: absolute; font-family: "Mono"; font-size: 96px; color: var(--red); white-space: nowrap; left: 0; top: 0; }
+
+  /* итог */
+  #ring { position: absolute; left: 540px; top: 760px; width: 10px; height: 10px; border-radius: 50%; border: 8px solid var(--red); margin: -5px; }
+  #totCap { top: 1010px; font-size: 52px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+  #totWhy { top: 1090px; font-size: 76px; letter-spacing: -2px; text-transform: uppercase; line-height: 1.02; }
+
+  /* комментарии */
+  #cmt { position: absolute; left: 90px; right: 90px; top: 520px; border-radius: 44px; padding: 40px 44px; background: rgba(16,20,34,.85);
+         border: 2px solid rgba(139,92,255,.6); box-shadow: 0 0 50px rgba(139,92,255,.3); }
+  #cmt .h { font-family: "Tek"; font-size: 34px; letter-spacing: 5px; color: var(--violet); }
+  #cmtInput { margin-top: 30px; height: 120px; border-radius: 60px; border: 2px solid rgba(255,255,255,.2); display: flex; align-items: center; padding: 0 40px;
+              font-size: 52px; color: var(--ink); }
+  #cmtInput .caret { display: inline-block; width: 5px; height: 60px; background: var(--lime); margin-left: 8px; }
+  #cmtBig { top: 900px; font-size: 104px; letter-spacing: -3px; text-transform: uppercase; line-height: .98; }
+
+  /* телеграм */
+  #tg { position: absolute; left: 80px; right: 80px; top: 300px; border-radius: 44px; overflow: hidden; background: rgba(14,20,34,.9);
+        border: 2px solid rgba(61,245,255,.55); box-shadow: 0 0 60px rgba(61,245,255,.25); }
+  #tgHead { display: flex; align-items: center; gap: 24px; padding: 30px 36px; background: rgba(61,245,255,.08); }
+  #tgAva { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, var(--lime), var(--cyan)); display: flex; align-items: center;
+           justify-content: center; font-family: "Tek"; font-size: 56px; color: #06110a; }
+  #tgHead .n { font-size: 46px; } #tgHead .s { font-size: 30px; color: var(--muted); }
+  #tgPost { padding: 30px 36px 10px; font-size: 48px; line-height: 1.15; }
+  .gl { display: flex; gap: 22px; align-items: center; font-size: 44px; padding: 20px 36px; border-top: 2px solid rgba(61,245,255,.12); }
+  .gl b { font-family: "Tek"; color: var(--lime); font-size: 44px; width: 50px; }
+  #linkText { top: 1010px; font-size: 112px; letter-spacing: -3px; text-transform: uppercase; line-height: .98; }
+  #upArrow { position: absolute; left: 470px; top: 40px; width: 140px; height: 160px; }
+
+  /* субтитры, дисклеймер, оверлеи */
+  #subs { position: absolute; left: 70px; right: 70px; top: 1330px; text-align: center; font-size: 62px; line-height: 1.12; letter-spacing: -1px; text-transform: uppercase; }
+  #subs span { display: inline-block; margin: 0 9px 10px; color: var(--ink); text-shadow: 0 6px 0 rgba(0,0,0,.55), 0 0 30px rgba(0,0,0,.6); }
+  #subs span.on { color: #04050a; background: var(--cyan); padding: 0 12px; border-radius: 12px; text-shadow: none; box-shadow: 0 0 30px rgba(61,245,255,.6); }
+  #disc { position: absolute; left: 120px; right: 120px; top: 1600px; font-size: 25px; color: #5d6782; text-align: center; letter-spacing: .5px; }
+  #scan { position: absolute; inset: 0; pointer-events: none; opacity: .18;
+          background: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 2px, transparent 2px 5px); }
+  #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.65)); }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1080" height="1920"></canvas>
+  <div id="tint"></div>
+  <div id="cam">
+    <div class="scene" id="s0">
+      <div class="center" id="hookTitle"><span class="w" id="hw1">СКОЛЬКО БАНК</span><br><span class="w glow-r" id="hw2" style="color:var(--red)">ЗАРАБОТАЛ</span><br><span class="w" id="hw3">НА ТЕБЕ?</span></div>
+      <div id="holoWrap"><div id="holo"><div class="chip"></div><div class="rub">₽</div><div class="num">•••• 2026</div><div id="beam"></div></div></div>
+    </div>
+    <div class="scene" id="s1"><div class="qwrap"><div class="qcard" id="q1"><div class="qn">ВОПРОС 1/3</div><div class="qt">Платишь за<br>обслуживание?</div><div class="qf">150 ₽ × 12 мес</div>
+      <div class="pills"><div class="pill yes" id="y1">ДА<div class="ripple"></div></div><div class="pill">НЕТ</div></div></div></div></div>
+    <div class="scene" id="s2"><div class="qwrap"><div class="qcard" id="q2"><div class="qn">ВОПРОС 2/3</div><div class="qt">Платишь за<br>смс?</div><div class="qf">99 ₽ × 12 мес</div>
+      <div class="pills"><div class="pill yes" id="y2">ДА<div class="ripple"></div></div><div class="pill">НЕТ</div></div></div></div></div>
+    <div class="scene" id="s3"><div class="qwrap"><div class="qcard" id="q3"><div class="qn">ВОПРОС 3/3</div><div class="qt">Кэшбэк<br>всего 1%?</div><div class="qf">+1% от 30 000 ₽ × 12 мес</div>
+      <div class="pills"><div class="pill yes" id="y3">ДА<div class="ripple"></div></div><div class="pill">НЕТ</div></div></div></div></div>
+    <div class="scene" id="s4"><div id="ring"></div><div class="center" id="totCap">в год</div>
+      <div class="center" id="totWhy">Просто потому, что<br><span class="glow-l" style="color:var(--lime)">ты не сменил банк</span></div></div>
+    <div class="scene" id="s5"><div id="cmt"><div class="h">КОММЕНТАРИИ</div><div id="cmtInput"><span id="cmtText"></span><span class="caret"></span></div></div>
+      <div class="center" id="cmtBig">Напиши<br><span class="glow-c" style="color:var(--cyan)">свою сумму 👇</span></div></div>
+    <div class="scene" id="s6">
+      <svg id="upArrow" viewBox="0 0 140 160"><path d="M70 150 V 20" stroke="#c8ff3d" stroke-width="16" stroke-linecap="round"/><path d="M20 70 L70 18 L120 70" stroke="#c8ff3d" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div id="tg">
+        <div id="tgHead"><div id="tgAva">₽</div><div><div class="n">Бонусы банков</div><div class="s">канал • ссылка в шапке профиля</div></div></div>
+        <div id="tgPost">Гайд: как вернуть своё и забрать бонусы банков 🔥</div>
+        <div class="gl" id="g1"><b>1</b>Обслуживание за 0 ₽</div>
+        <div class="gl" id="g2"><b>2</b>Кэшбэк выше 1%</div>
+        <div class="gl" id="g3"><b>3</b>Бонусы новым клиентам</div>
+      </div>
+      <div class="center" id="linkText">Ссылка<br><span class="glow-l" style="color:var(--lime)">в шапке ↑</span></div>
+    </div>
+  </div>
+  <div id="hud"><div id="hudLabel">банк заработал на тебе</div><div id="hudNum" class="glow-r">0 ₽</div><div id="hudBar"><i></i></div></div>
+  <div class="fly glow-r" id="fly">+0 ₽</div>
+  <div class="cursor" id="cursor"></div>
+  <div id="subs"></div>
+  <div id="disc">*Пример: обслуживание 150 ₽/мес, смс 99 ₽/мес, траты 30 000 ₽/мес. Реклама. Условия зависят от банка.</div>
+  <div id="scan"></div><div id="vig"></div><div id="flash"></div>
+</div>
+
+<script src="timeline.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = x => x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const outBack = x => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const lerp = (a, b, x) => a + (b - a) * x;
+// детерминированный псевдорандом
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// «Слэм» — элемент влетает с увеличенного масштаба
+function slam(el, t, t0, dur = .28, from = 1.9) {
+  const x = p(t, t0, t0 + dur);
+  el.style.opacity = x > 0 ? clamp(x * 3) : 0;
+  el.style.transform = `scale(${lerp(from, 1, outBack(x))})`;
+}
+function rise(el, t, t0, dur = .35, dy = 120) {
+  const x = outExpo(p(t, t0, t0 + dur));
+  el.style.opacity = x;
+  el.style.transform = `translateY(${(1 - x) * dy}px)`;
+}
+function sceneVis(id, t, a, b) {
+  const el = $(id);
+  const on = t >= a && t < b;
+  el.style.opacity = on ? 1 : 0;
+  // короткий «зум-аут» на выходе для динамики
+  const out = p(t, b - .12, b);
+  el.style.transform = `scale(${1 + out * .12})`;
+  el.style.filter = out > 0 ? `blur(${out * 12}px)` : "none";
+  return on;
+}
+
+const subWords = TIMELINE.lines.map(l => l.words);
+const { S, E, W } = TIMELINE;
+function renderSubs(t) {
+  const li = TIMELINE.lines.findIndex(l => t >= l.start && t < l.end);
+  if (li < 0) { $("subs").innerHTML = ""; return; }
+  const words = subWords[li];
+  // показываем «окно» из 3–4 слов вокруг текущего
+  let cur = 0; words.forEach((x, i) => { if (t >= x.a) cur = i; });
+  const chunk = Math.floor(cur / 3) * 3;
+  const vis = words.slice(chunk, chunk + 3);
+  $("subs").innerHTML = vis.map((x, i) => {
+    const on = chunk + i === cur;
+    const k = outBack(p(t, x.a, x.a + .18));
+    const show = t >= x.a;
+    return `<span class="${on ? "on" : ""}" style="opacity:${show ? 1 : .0};transform:scale(${show ? lerp(.6, 1, k) : .6})">${x.w.replace(/[.,:?!]$/, "")}</span>`;
+  }).join(" ");
+}
+
+
+// --- фон: частицы и неоновая сетка (детерминированно от t) ---
+const cv = $("bg"), cx = cv.getContext("2d");
+const PART = Array.from({ length: 160 }, (_, i) => ({ x: rnd(i) * 1080, y: rnd(i + 500) * 1920, z: .3 + rnd(i + 900) * .7, h: rnd(i + 77) }));
+function drawBg(t, heat) {
+  cx.fillStyle = "#04050a"; cx.fillRect(0, 0, 1080, 1920);
+  // свечение
+  const g = cx.createRadialGradient(540, 700, 50, 540, 700, 1100);
+  g.addColorStop(0, heat > .5 ? "rgba(120,20,40,.55)" : "rgba(40,30,110,.55)"); g.addColorStop(1, "rgba(4,5,10,0)");
+  cx.fillStyle = g; cx.fillRect(0, 0, 1080, 1920);
+  // сетка-пол в перспективе
+  const hy = 1180, col = heat > .5 ? "255,59,92" : "61,245,255";
+  cx.lineWidth = 2;
+  for (let i = -12; i <= 12; i++) {
+    cx.strokeStyle = `rgba(${col},.16)`; cx.beginPath(); cx.moveTo(540 + i * 40, hy); cx.lineTo(540 + i * 260, 1920); cx.stroke();
+  }
+  const off = (t * .9) % 1;
+  for (let k = 0; k < 14; k++) {
+    const d = (k + off) / 14, y = hy + Math.pow(d, 2.2) * (1920 - hy);
+    cx.strokeStyle = `rgba(${col},${.05 + d * .22})`; cx.beginPath(); cx.moveTo(0, y); cx.lineTo(1080, y); cx.stroke();
+  }
+  // частицы
+  for (const p of PART) {
+    const y = (p.y - t * 60 * p.z + 1920 * 4) % 1920, x = p.x + Math.sin(t * .6 + p.h * 9) * 20 * p.z;
+    const r = 1.2 + p.z * 2.6, a = .25 + p.z * .55;
+    cx.fillStyle = p.h > .8 ? `rgba(200,255,61,${a})` : (p.h > .55 ? `rgba(139,92,255,${a})` : `rgba(61,245,255,${a})`);
+    cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.fill();
+  }
+}
+
+// --- счётчик ---
+const ADDS = () => [[W(1, "Плюс"), 1800], [W(2, "Ещё"), 1188], [W(3, "три"), 3600]];
+function hudValue(t) {
+  let v = 0;
+  for (const [a, amt] of ADDS()) v += amt * outExpo(p(t, a + .35, a + 1.0));
+  return Math.round(v);
+}
+const fmt = v => v.toLocaleString("ru-RU").replace(/\s/g, " ") + " ₽";
+
+function renderAt(t) {
+  const tot = W(4, "Итого"), heat = t >= tot && t < E(4) ? 1 : 0;
+  drawBg(t, heat);
+  $("tint").style.opacity = heat ? .8 : 0;
+
+  let shake = 0;
+  for (const s of TIMELINE.sfx.impact) { const d = t - s; if (d >= 0 && d < .4) shake = Math.max(shake, (1 - d / .4) * 26); }
+  for (const [a] of ADDS()) { const d = t - (a + .35); if (d >= 0 && d < .25) shake = Math.max(shake, (1 - d / .25) * 10); }
+  const segStart = TIMELINE.lines.filter(l => l.start <= t).pop().start;
+  $("cam").style.transform = `translate(${(rnd(t * 50) - .5) * shake}px, ${(rnd(t * 51) - .5) * shake}px) scale(${1 + (t - segStart) * .01})`;
+  let fl = 0;
+  for (const s of [tot]) { const d = t - s; if (d >= 0 && d < .14) fl = Math.max(fl, 1 - d / .14); }
+  $("flash").style.opacity = fl * .8;
+
+  // S0 хук + голограмма
+  if (sceneVis("s0", t, 0, E(0))) {
+    // на кадре 0 первая строка заголовка уже стоит (обложка до старта воспроизведения)
+    slam($("hw1"), t, -.4, .22, 2.0); slam($("hw2"), t, W(0, "заработал") - .05, .25, 2.4); slam($("hw3"), t, W(0, "тебе") - .05, .22, 2.0);
+    const hx = outExpo(p(t, -.7, 0)); // карта видна с первого кадра
+    $("holo").style.opacity = hx;
+    $("holo").style.transform = `translateY(${(1 - hx) * 200}px) rotateX(${14 + Math.sin(t * 1.3) * 6}deg) rotateY(${Math.sin(t * .9) * 28}deg)`;
+    $("beam").style.top = `${((t * 1.4) % 1) * 460 - 70}px`;
+  }
+  // HUD: появляется после хука, на итоге уезжает в центр и растёт
+  const hudIn = outExpo(p(t, E(0) - .15, E(0) + .35));
+  const hudOut = 1 - p(t, E(4) - .2, E(4) + .2);
+  const big = outBack(p(t, tot - .1, tot + .35));
+  const v = hudValue(t);
+  $("hudNum").textContent = fmt(v);
+  $("hud").style.opacity = Math.min(hudIn, hudOut);
+  $("hud").style.transform = `translateY(${big * 470}px) scale(${1 + big * .55})`;
+  $("hudBar").firstElementChild.style.width = `${(v / 6588) * 100}%`;
+  let gl = 0;
+  for (const [a] of ADDS()) { const d = t - (a + .35); if (d >= 0 && d < .3) gl = 1 - d / .3; }
+  { const d = t - tot; if (d >= 0 && d < .5) gl = Math.max(gl, 1 - d / .5); }
+  const gx = gl ? (rnd(t * 40) - .5) * 26 * gl : 0;
+  $("hudNum").style.textShadow = gl ? `${gx}px 0 #3df5ff, ${-gx}px 0 #ff00aa, 0 0 30px rgba(255,59,92,.8)` : "";
+
+  // вопросы
+  [["s1", "q1", "y1", 1, "Плюс"], ["s2", "q2", "y2", 2, "Ещё"], ["s3", "q3", "y3", 3, "три"]].forEach(([sid, qid, yid, i, key]) => {
+    if (!sceneVis(sid, t, S(i), E(i))) return;
+    const k = outBack(p(t, S(i), S(i) + .45));
+    $(qid).style.opacity = clamp(k * 2);
+    $(qid).style.transform = `rotateX(${(1 - k) * 50}deg) translateY(${(1 - k) * 160}px) rotateY(${Math.sin(t * .8) * 4}deg)`;
+    const tap = W(i, key);
+    const rp = p(t, tap, tap + .45), y = $(yid);
+    y.querySelector(".ripple").style.transform = `scale(${rp * 16})`;
+    y.querySelector(".ripple").style.opacity = rp > 0 ? 1 - rp : 0;
+    y.style.background = t >= tap ? "rgba(200,255,61,.18)" : "transparent";
+    y.style.boxShadow = t >= tap ? "0 0 40px rgba(200,255,61,.5)" : "none";
+  });
+  // курсор-«палец» и летящая сумма
+  let cur = null, fly = null;
+  ADDS().forEach(([a, amt], idx) => {
+    const i = idx + 1;
+    if (t >= a - .6 && t < a + .35) {
+      const r = $("y" + i).getBoundingClientRect();
+      const m = outExpo(p(t, a - .6, a - .1));
+      cur = { x: lerp(820, r.left + r.width / 2, m), y: lerp(1500, r.top + r.height / 2, m), s: t >= a && t < a + .15 ? .8 : 1 };
+    }
+    if (t >= a + .05 && t < a + .45) {
+      const r = $("y" + i).getBoundingClientRect(), m = inOut(p(t, a + .05, a + .45));
+      fly = { x: lerp(r.left + 40, 390, m), y: lerp(r.top, 190, m), s: lerp(1, .6, m), txt: "+" + fmt(amt) };
+    }
+  });
+  $("cursor").style.opacity = cur ? .9 : 0;
+  if (cur) $("cursor").style.transform = `translate(${cur.x - 45}px, ${cur.y - 45}px) scale(${cur.s})`;
+  $("fly").style.opacity = fly ? 1 : 0;
+  if (fly) { $("fly").textContent = fly.txt; $("fly").style.transform = `translate(${fly.x}px, ${fly.y}px) scale(${fly.s})`; }
+
+  // S4 итог
+  if (sceneVis("s4", t, S(4), E(4))) {
+    const rr = p(t, tot, tot + .9);
+    const rs = outExpo(rr) * 1500;
+    $("ring").style.width = $("ring").style.height = rs + "px";
+    $("ring").style.margin = `${-rs / 2 - 8}px`;
+    $("ring").style.opacity = rr > 0 ? (1 - rr) : 0;
+    rise($("totCap"), t, tot + .25, .35, 30);
+    rise($("totWhy"), t, W(4, "Просто") - .1, .4, 80);
+  }
+  // S5 комментарии
+  if (sceneVis("s5", t, S(5), E(5))) {
+    const c = outBack(p(t, S(5), S(5) + .45));
+    $("cmt").style.transform = `translateY(${(1 - c) * 300}px) scale(${lerp(.9, 1, c)})`; $("cmt").style.opacity = clamp(c * 2);
+    const full = "у меня вышло ", n = Math.floor(clamp(p(t, S(5) + .4, S(5) + 1.4)) * full.length);
+    $("cmtText").textContent = full.slice(0, n) + (n >= full.length ? "… ₽" : "");
+    $("cmtInput").querySelector(".caret").style.opacity = Math.floor(t * 3) % 2 ? 1 : .2;
+    slam($("cmtBig"), t, W(5, "комментариях") - .1, .3, 1.8);
+  }
+  // S6 телеграм
+  if (sceneVis("s6", t, S(6), E(6) + .01)) {
+    const tg = outExpo(p(t, S(6), S(6) + .5));
+    $("tg").style.transform = `perspective(1600px) rotateX(${(1 - tg) * 40}deg) translateY(${(1 - tg) * 300}px)`; $("tg").style.opacity = tg;
+    rise($("g1"), t, W(6, "вернуть") - .1, .3, 40);
+    rise($("g2"), t, W(6, "бонусы") - .1, .3, 40);
+    rise($("g3"), t, W(6, "гайд") - .1, .3, 40);
+    slam($("linkText"), t, W(6, "Ссылка"), .28, 2);
+    const ar = outExpo(p(t, W(6, "Ссылка"), W(6, "Ссылка") + .4));
+    $("upArrow").style.opacity = ar;
+    $("upArrow").style.transform = `translateY(${(1 - ar) * 80 - Math.abs(Math.sin(t * 5)) * 18}px)`;
+  }
+  $("disc").style.opacity = t >= S(1) ? .9 : 0;
+  renderSubs(t);
+}
+window.renderAt = renderAt;
+if (location.search.includes("play")) {
+  const t0 = performance.now();
+  (function loop() { renderAt(((performance.now() - t0) / 1000) % TIMELINE.duration); requestAnimationFrame(loop); })();
+} else renderAt(0);
+</script>
+</body>
+</html>
