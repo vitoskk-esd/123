@@ -97,6 +97,14 @@ arrive under `/root/.claude/uploads/…`; copy into the reel folder.
 - Loudness of final mix ≈ -14 LUFS; video and audio durations equal.
 - You cannot listen: say so, and report what was verified and how.
 
+## 5b. First frame
+
+- Frame 0 is what Instagram shows before playback: it must already read as the
+  hook (title visible, no white flash). Reel #4 shipped with a flash at t=0 —
+  found by `reels/lab/analyze.py`, fixed by flashing only on later beats.
+- Run `python3 reels/lab/analyze.py reel_final.mp4 name` on every finished reel
+  and look at `sheet_hook.jpg` before sending.
+
 ## 6. Environment gotchas
 
 - edge-tts pins certifi: override `edge_tts.communicate._SSL_CTX` with
