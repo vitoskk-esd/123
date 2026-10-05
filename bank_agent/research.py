@@ -21,6 +21,17 @@ SEED_TOPICS = [
     "сезонные поводы этого месяца для рекламы карт: распродажи, зарплаты, сессия, праздники",
 ]
 
+# Темы под тип продукта: если продвигаем кредитку, исследуем рынок кредиток, а не карты вообще.
+SEED_BY_TYPE = {
+    "credit": [
+        "условия и акции кредитных карт с льготным периодом в этом месяце: Альфа-Банк, Т-Банк, Сбер, ВТБ, Яндекс, Озон",
+        "что пугает людей в кредитках и какие вопросы они задают перед оформлением (форумы, VK, Дзен, Пикабу)",
+        "как продвигают кредитные карты по партнёрским ссылкам в 2026: форматы, посевы, кейсы, одобрение и активация",
+        "требования ФАС и ЦБ к рекламе кредитных карт: ПСК, льготный период, кэшбэк — свежие дела и штрафы",
+        "поводы этого месяца для кредитки: распродажи 11.11 и Чёрная пятница, ремонт, сезонные траты, подготовка к Новому году",
+    ],
+}
+
 SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -65,7 +76,10 @@ SYSTEM = (
 
 def run_research(llm: LLM, catalog: list[Product]) -> dict:
     kb = storage.load_knowledge()
-    focus = kb["research_questions"][-3:] + random.sample(SEED_TOPICS, k=3)
+    typed = [t for p in catalog if p.active for t in SEED_BY_TYPE.get(p.type, [])]
+    seeds = random.sample(sorted(set(typed)), k=min(2, len(set(typed)))) if typed else []
+    seeds += random.sample(SEED_TOPICS, k=3 - len(seeds))
+    focus = kb["research_questions"][-3:] + seeds
     products = "\n".join(f"- {p.name} ({p.bank})" for p in catalog if p.active) or "(каталог пуст)"
     known = "\n".join(f"- {i['insight']}" for i in kb["insights"][-50:]) or "(пока пусто)"
 

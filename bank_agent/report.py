@@ -93,9 +93,8 @@ def import_conversions(db: DB, path: Path, catalog: list[Product]) -> dict:
     return stats
 
 
-def avg_payout(catalog: list[Product]) -> float:
-    paid = [p.payout_rub for p in catalog if p.active and p.payout_rub]
-    return sum(paid) / len(paid) if paid else 1000.0
+def _money(value: float) -> str:
+    return f"{value:,.0f}".replace(",", "\u00a0")
 
 
 def status_text(st: GoalStatus) -> str:
@@ -108,13 +107,13 @@ def status_text(st: GoalStatus) -> str:
         f"Конверсия клик→оформление: {st.cr:.1%} ({'факт' if st.cr_is_measured else 'пока допущение'}).\n"
         f"Прогноз к дедлайну: {st.projection} — {pace}.\n"
         f"Клик окупается, если стоит дешевле {st.break_even_cpc:.0f} ₽. "
-        f"Добрать остаток посевами ≈ {st.budget_for_rest:,} ₽.".replace(",", " ")
+        f"Добрать остаток посевами ≈ {_money(st.budget_for_rest)} ₽."
     )
 
 
 def daily_report(db: DB, catalog: list[Product], today: dt.date | None = None) -> str:
     today = today or dt.date.today()
-    st = goal_status(db, today, avg_payout(catalog))
+    st = goal_status(db, today, catalog)
     since = iso(now() - dt.timedelta(days=1))
     clicks = db.all("SELECT source, COUNT(*) n FROM clicks WHERE ts>=? GROUP BY source ORDER BY n DESC", (since,))
     posts = db.all("SELECT status, COUNT(*) n FROM posts WHERE created_at>=? GROUP BY status", (since,))

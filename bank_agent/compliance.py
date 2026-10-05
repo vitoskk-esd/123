@@ -32,6 +32,8 @@ _FORBIDDEN_RE = [(re.compile(p, re.IGNORECASE), why) for p, why in FORBIDDEN]
 # Ссылки в тексте ставит только код, иначе модель может подставить чужую или выдуманную.
 _URL_RE = re.compile(r"https?://|www\.|\bt\.me/|\bvk\.(?:cc|com|ru)/|\bmax\.ru/", re.IGNORECASE)
 
+_MINORS_RE = re.compile(r"школьн\w*|подрост\w*|несовершеннолетн\w*|до\s+18\s+лет", re.IGNORECASE)
+
 # Тело поста; ссылка и маркировка добавят ещё ~300 знаков (лимит Telegram — 4096, MAX — 4000).
 LIMITS = {"telegram": 3400, "max": 3400, "vk": 8000, "dzen": 15000, "shorts": 4000}
 
@@ -50,6 +52,12 @@ def check_body(body: str, product: Product, channel: str) -> list[str]:
         # говорить о выгоде кредита, не упомянув его стоимость.
         if re.search(r"\d+\s*(?:дн|%)|без\s+процент|льготн", body, re.IGNORECASE):
             issues.append("кредит: упомянуты условия, но нет ПСК — добавьте фразу про полную стоимость")
+    if product.type == "credit" and _MINORS_RE.search(body):
+        issues.append("реклама кредита не может обращаться к несовершеннолетним")
+    for rule in product.claim_rules:
+        m = re.search(rule["pattern"], body, re.IGNORECASE)
+        if m and not (rule.get("require") and re.search(rule["require"], body, re.IGNORECASE)):
+            issues.append(f"{rule['why']}: «{m.group(0)}»")
     limit = LIMITS.get(channel)
     if limit and len(body) > limit:
         issues.append(f"слишком длинно для {channel}: {len(body)} > {limit} символов")

@@ -6,6 +6,7 @@ from . import storage
 from .db import DB
 from .funnel import GoalStatus, performance
 from .llm import LLM
+from .products import Product
 
 SCHEMA = {
     "type": "object",
@@ -39,7 +40,7 @@ def top_posts(db: DB, limit: int = 8) -> str:
     return "\n".join(f"- [{r['channel']}] {r['idea']} — {r['clicks']} кликов" for r in rows) or "(пока нет)"
 
 
-def run_reflection(llm: LLM, db: DB, status: GoalStatus) -> dict:
+def run_reflection(llm: LLM, db: DB, status: GoalStatus, products: list[Product]) -> dict:
     kb = storage.load_knowledge()
     current = storage.load_strategy()
     insights = "\n".join(f"- ({i['date']}) {i['insight']}" for i in kb["insights"][-40:]) or "(пока нет)"
@@ -50,6 +51,8 @@ def run_reflection(llm: LLM, db: DB, status: GoalStatus) -> dict:
     result = llm.ask(
         "Твоя текущая стратегия продвижения банковских продуктов по партнёрским ссылкам:\n\n"
         f"{current}\n\n"
+        "ПРОДУКТЫ, КОТОРЫЕ СЕЙЧАС ПРОДВИГАЕМ (стратегия — только про них):\n"
+        + "\n\n".join(p.fact_sheet() for p in products) + "\n\n"
         f"ЦЕЛЬ: {status.goal} засчитанных оформлений до {status.deadline}. Сейчас {status.done} "
         f"(+{status.pending} в обработке), осталось {status.days_left} дн. Нужно ~{status.clicks_needed_per_day} "
         f"кликов в день при конверсии {status.cr:.1%} ({'факт' if status.cr_is_measured else 'допущение'}). "

@@ -18,7 +18,7 @@ from .db import DB
 from .funnel import goal_status
 from .products import load_catalog, sellable
 from .publish import publish_due
-from .report import avg_payout, status_text
+from .report import status_text
 from .tracker import start as start_tracker
 
 DAILY_AT = os.getenv("BANK_DAILY_AT", "07:40")  # местное время запуска ежедневного цикла
@@ -61,7 +61,7 @@ def serve() -> None:
     mtime = CONFIG.products_file.stat().st_mtime
     catalog_ref = {"products": {p.id: p for p in catalog}}
     consultant = Consultant(llm, db, sellable(catalog),
-                            status_fn=lambda: status_text(goal_status(db, dt.date.today(), avg_payout(catalog))))
+                            status_fn=lambda: status_text(goal_status(db, dt.date.today(), catalog)))
     start_tracker(db, catalog_ref, CONFIG.tracker_host, CONFIG.tracker_port)
     storage.log(f"Счётчик переходов слушает {CONFIG.tracker_host}:{CONFIG.tracker_port}")
 

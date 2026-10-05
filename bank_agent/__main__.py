@@ -1,6 +1,6 @@
 """CLI агента.
 
-    python -m bank_agent init               # создать каталог продуктов из примера
+    python -m bank_agent init [alfa-credit] # создать каталог продуктов (из примера или готового набора)
     python -m bank_agent check              # проверить настройки и каталог (ничего не тратит)
     python -m bank_agent serve              # всё сразу: боты, счётчик кликов, расписание (для VPS)
     python -m bank_agent daily              # один ежедневный цикл (для cron, если без serve)
@@ -74,13 +74,17 @@ def status() -> None:
 def main(argv: list[str]) -> int:
     cmd = argv[0] if argv else "check"
     if cmd == "init":
-        from .products import EXAMPLE_FILE
+        from .products import CATALOGS_DIR, EXAMPLE_FILE
 
+        source = CATALOGS_DIR / f"{argv[1]}.json" if len(argv) > 1 else EXAMPLE_FILE
+        if not source.exists():
+            print(f"Нет набора {argv[1]}. Есть: " + ", ".join(p.stem for p in CATALOGS_DIR.glob("*.json")))
+            return 2
         if CONFIG.products_file.exists():
             print(f"{CONFIG.products_file} уже есть — не перезаписываю")
             return 1
         CONFIG.products_file.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(EXAMPLE_FILE, CONFIG.products_file)
+        shutil.copy(source, CONFIG.products_file)
         print(f"Создан {CONFIG.products_file}. Впишите свои ссылки, erid и условия, затем: python -m bank_agent check")
         return 0
     if cmd == "check":
@@ -108,10 +112,9 @@ def main(argv: list[str]) -> int:
         run_research(_llm(), catalog)
     elif cmd == "reflect":
         from .funnel import goal_status
-        from .report import avg_payout
         from .strategy import run_reflection
 
-        run_reflection(_llm(), db, goal_status(db, dt.date.today(), avg_payout(catalog)))
+        run_reflection(_llm(), db, goal_status(db, dt.date.today(), catalog), sellable(catalog))
     elif cmd == "generate":
         from .content import generate_day
         from .publish import enabled_channels

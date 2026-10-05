@@ -15,20 +15,20 @@ def run_daily(llm, db: DB, publish: bool = True) -> int:
     """publish=False — когда публикацией по расписанию занимается процесс `serve`."""
     from .content import generate_day
     from .publish import enabled_channels, publish_due
-    from .report import avg_payout, daily_report, notify_owner
+    from .report import daily_report, notify_owner
     from .research import run_research
     from .strategy import run_reflection
 
     storage.log("=== Ежедневный цикл ===")
     catalog = load_catalog()
     products = sellable(catalog)
-    status = goal_status(db, dt.date.today(), avg_payout(catalog))
+    status = goal_status(db, dt.date.today(), catalog)
 
     stages = []
     if CONFIG.research:
         stages.append(("исследование", lambda: run_research(llm, catalog)))
     stages += [
-        ("стратегия", lambda: run_reflection(llm, db, status)),
+        ("стратегия", lambda: run_reflection(llm, db, status, products)),
         ("контент", lambda: generate_day(llm, db, products, enabled_channels())),
     ]
     if publish:

@@ -19,20 +19,30 @@ from .db import DB, anon, iso, now
 from .products import Product, link
 
 SOURCE = {"telegram": "bottg", "max": "botmax", "vk": "botvk"}
-REMIND_AFTER_H = (24, 120)
 
-MENU = [
-    ("m:card", "💳 Подобрать карту", "Помоги подобрать дебетовую карту под мои траты"),
-    ("m:bonus", "🎁 Где бонус за карту", "Где сейчас можно получить бонус за оформление карты?"),
-    ("m:credit", "🧾 Кредитка", "Расскажи про кредитные карты с льготным периодом"),
-    ("m:business", "💼 Для бизнеса", "Нужен счёт для ИП или самозанятого"),
-]
+# Кнопки меню под типы продуктов, которые сейчас продвигаются: (команда, кнопка, вопрос модели).
+MENU_BY_TYPE = {
+    "credit": [
+        ("m:fit", "💳 Подойдёт ли мне кредитка", "Подойдёт ли мне кредитная карта? Расскажи честно про плюсы и минусы"),
+        ("m:grace", "📅 Как не платить проценты", "Как работает льготный период и как не платить проценты?"),
+        ("m:cash", "💵 Снятие наличных", "Можно ли снимать наличные с кредитки без комиссии?"),
+        ("m:activate", "✅ Как активировать карту", "Как активировать кредитную карту после получения?"),
+    ],
+    "debit": [
+        ("m:card", "💳 Подобрать карту", "Помоги подобрать дебетовую карту под мои траты"),
+        ("m:bonus", "🎁 Бонус за карту", "Где сейчас можно получить бонус за оформление карты?"),
+    ],
+    "business": [("m:business", "💼 Для бизнеса", "Нужен счёт для ИП или самозанятого")],
+    "savings": [("m:savings", "💰 Накопления", "Куда положить накопления под процент?")],
+    "invest": [("m:invest", "📈 Инвестиции", "С чего начать инвестировать?")],
+}
+MENU_QUESTIONS = {key: q for items in MENU_BY_TYPE.values() for key, _, q in items}
 
 WELCOME = (
     "Привет! Я ИИ-помощник независимого партнёра банков{owner} — не сотрудник банка.\n\n"
-    "Помогу выбрать карту под ваши траты, разберу условия и подскажу, как получить бонус банка "
-    "за оформление. Ссылки в моих ответах партнёрские: если оформите по ним, партнёр получит "
-    "вознаграждение от банка, для вас условия те же.\n\n"
+    "Помогу честно разобраться в условиях продуктов, которые я рекомендую: подойдут ли они вам, "
+    "сколько это стоит и как пользоваться выгодно. Ссылки в моих ответах партнёрские: если "
+    "оформите по ним, партнёр получит вознаграждение от банка, для вас условия те же.{credit}\n\n"
     "Никогда не присылайте мне паспортные данные, номер карты и коды из СМС.\n"
     "Команды: /stop — не писать мне первым, /delete — удалить переписку."
 )
@@ -83,6 +93,12 @@ def _schema(product_ids: list[str]) -> dict:
     return schema
 
 
+def _human_delay(hours: int) -> str:
+    if hours < 48:
+        return "завтра" if hours >= 20 else f"через {hours} ч"
+    return f"через {round(hours / 24)} дн."
+
+
 class Consultant:
     def __init__(self, llm, db: DB, products: list[Product], status_fn=None):
         self.llm, self.db = llm, db
@@ -130,8 +146,22 @@ class Consultant:
                 rows.append([Button(f"{p.name} — оформить", url=link(p, SOURCE[inc.platform], None, user_hash))])
         return rows
 
+    @staticmethod
+    def _disclosure(p: Product) -> str:
+        """Маркировка рекламы и, для кредитов, стоимость кредита — под каждой ссылкой."""
+        parts = [p.ad_label + "."]
+        if p.credit_disclosure:
+            parts.append(p.credit_disclosure)
+        parts.append(f"Условия: {p.conditions_url}")
+        return "\n".join(parts)
+
     def menu(self) -> list[list[Button]]:
-        return [[Button(title, data=key)] for key, title, _ in MENU]
+        items: list[tuple[str, str, str]] = []
+        for p in self.products.values():
+            for item in MENU_BY_TYPE.get(p.type, []):
+                if item not in items:
+                    items.append(item)
+        return [[Button(title, data=key)] for key, title, _ in items[:4]]
 
     # --- обработка сообщений ------------------------------------------------
     def handle(self, inc: Incoming) -> list[Outgoing]:
@@ -142,7 +172,9 @@ class Consultant:
 
         if data == "start" or text.lower() in ("/start", "start", "начать"):
             owner = f" ({CONFIG.owner_name})" if CONFIG.owner_name else ""
-            return [Outgoing(WELCOME.format(owner=owner), self.menu())]
+            credit = ("\n\nКредитные карты — только с 18 лет; решение о выдаче и лимите принимает банк."
+                      if any(p.type == "credit" for p in self.products.values()) else "")
+            return [Outgoing(WELCOME.format(owner=owner, credit=credit), self.menu())]
         if data == "stop" or text.lower() == "/stop":
             self.db.execute("UPDATE users SET stopped=1 WHERE platform=? AND user_id=?", (inc.platform, inc.user_id))
             self.db.execute("DELETE FROM reminders WHERE platform=? AND user_id=? AND sent_at IS NULL",
@@ -163,7 +195,7 @@ class Consultant:
             idx = int(data[2:]) if data[2:].isdigit() else -1
             text = options[idx] if 0 <= idx < len(options) else ""
         elif data.startswith("m:"):
-            text = next((q for key, _, q in MENU if key == data), "")
+            text = MENU_QUESTIONS.get(data, "")
         if not text:
             return [Outgoing("Напишите, что ищете — например «карта с кэшбэком на продукты».", self.menu())]
         if self._over_limit(user):
@@ -184,7 +216,7 @@ class Consultant:
         recommended = [pid for pid in ans["recommend"] if pid in self.products][:2]
         buttons = self._product_buttons(inc, recommended)
         if recommended:
-            reply += "\n\n" + "\n".join(self.products[pid].ad_label for pid in recommended)
+            reply += "\n\n" + "\n".join(self._disclosure(self.products[pid]) for pid in recommended)
         if ans["offer_reminder"] and recommended:
             buttons.append([Button("⏰ Напомнить шаги для бонуса", data=f"r:{recommended[0]}")])
         quick = [q.strip()[:28] for q in ans["quick_replies"] if q.strip()][:3]
@@ -200,25 +232,26 @@ class Consultant:
         self.db.execute("UPDATE users SET stopped=0 WHERE platform=? AND user_id=?", (inc.platform, inc.user_id))
         self.db.execute("DELETE FROM reminders WHERE platform=? AND user_id=? AND sent_at IS NULL",
                         (inc.platform, inc.user_id))
-        for step, hours in enumerate(REMIND_AFTER_H, start=1):
+        hours = sorted(p.reminder_hours)[:3] or [24]
+        for step, h in enumerate(hours, start=1):
             self.db.execute("INSERT INTO reminders(platform, user_id, product_id, step, due_at) VALUES(?,?,?,?,?)",
-                            (inc.platform, inc.user_id, p.id, step, iso(now() + dt.timedelta(hours=hours))))
-        return Outgoing(f"Договорились: завтра и через 5 дней напомню, что сделать, чтобы банк начислил бонус "
-                        f"по продукту «{p.name}». Отключить — /stop.\n\nГлавное условие: {p.target_action}")
+                            (inc.platform, inc.user_id, p.id, step, iso(now() + dt.timedelta(hours=h))))
+        when = ", ".join(_human_delay(h) for h in hours)
+        return Outgoing(f"Договорились: напомню про «{p.name}» ({when}). Отключить — /stop.\n\n"
+                        f"Что сделать после получения: {p.target_action}"
+                        + (f"\nСовет: {p.reminder_tip}" if p.reminder_tip else ""))
 
     def reminder_message(self, platform: str, user_id: str, product_id: str, step: int) -> Outgoing | None:
         p = self.products.get(product_id)
         if not p:
             return None
         inc = Incoming(platform, user_id)
-        if step == 1:
-            text = (f"Напоминаю про «{p.name}». Если уже оформили — чтобы банк засчитал бонус: {p.target_action}."
-                    + (f"\nБонус: {p.client_bonus}." if p.client_bonus else "")
-                    + "\nЕсли что-то непонятно — просто напишите мне.")
-        else:
-            text = (f"Проверьте, выполнено ли условие по «{p.name}»: {p.target_action}. "
-                    f"Если не успеваете — сроки и детали на странице банка.\nЭто последнее напоминание.")
-        text += f"\n\n{p.ad_label}\nУсловия: {p.conditions_url}"
+        last = step >= len(p.reminder_hours)
+        text = (f"Напоминаю про «{p.name}». Если карта уже у вас — следующий шаг: {p.target_action}."
+                + (f"\nСовет: {p.reminder_tip}" if p.reminder_tip else "")
+                + (f"\nБонус от банка: {p.client_bonus}." if p.client_bonus else "")
+                + ("\nЭто последнее напоминание." if last else "\nЕсли что-то непонятно — просто напишите мне."))
+        text += "\n\n" + self._disclosure(p)
         return Outgoing(text, self._product_buttons(inc, [p.id]) + [[Button("Больше не напоминать", data="stop")]])
 
     def due_reminders(self) -> list[tuple[str, str, Outgoing, int]]:

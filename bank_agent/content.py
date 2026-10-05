@@ -12,7 +12,7 @@ from . import storage
 from .compliance import assemble, check_body, check_final
 from .config import CONFIG
 from .db import DB, iso
-from .funnel import allocate, performance
+from .funnel import allocate, avg_payout, performance, prior_cr
 from .llm import LLM
 from .products import Product, link
 
@@ -71,6 +71,9 @@ SYSTEM = """Ты — автор контента независимого фин
 - Не выдумывай личный опыт («я пользуюсь»), отзывы, истории клиентов, скриншоты.
 - Не обещай одобрение, доход, «бесплатные деньги», «без отказа», «без проверок».
 - Для кредиток не уговаривай брать в долг: польза — льготный период и кэшбэк при дисциплине.
+  Если упоминаешь любое условие кредита (дни без процентов, ставку, лимит) — в том же тексте
+  дай фразу со ставкой и ПСК из карточки (ст. 28 закона о рекламе). Не обращайся к
+  несовершеннолетним. Соблюдай «Обязательные правила текста» из карточки.
 - Не вставляй ссылки, @упоминания и маркировку — их добавит система.
 - Называй условия бонуса честно и по шагам: что сделать, до какого срока.
 - Пиши живо и конкретно, как человек, который разобрался в теме. Без канцелярита и воды."""
@@ -103,8 +106,7 @@ def plan_slots(db: DB, products: list[Product], enabled: list[str], rng: random.
     """Слоты дня: канал + продукт. Продукты выбираются по доходу с клика с долей разведки."""
     rng = rng or random.Random()
     by_product = performance(db, "product_id")
-    avg_payout = sum(p.payout_rub for p in products) / len(products)
-    prior_epc = avg_payout * CONFIG.cr_click_to_app * CONFIG.cr_app_to_conv
+    prior_epc = avg_payout(products) * prior_cr(products)
     slots = []
     for channel in enabled:
         n = CONFIG.channel_posts.get(channel, 0)

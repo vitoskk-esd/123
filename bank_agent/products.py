@@ -15,6 +15,7 @@ from pathlib import Path
 from .config import CONFIG, ROOT
 
 EXAMPLE_FILE = ROOT / "bank_agent" / "products.example.json"
+CATALOGS_DIR = ROOT / "bank_agent" / "catalogs"  # готовые наборы: python -m bank_agent init <имя>
 TYPES = ("debit", "credit", "business", "savings", "invest", "other")
 # Источник трафика в subid: только латиница и цифры, чтобы пережить любую партнёрку.
 _SOURCE_RE = re.compile(r"^[a-z0-9]{1,16}$")
@@ -39,7 +40,22 @@ class Product:
     advertiser: str = ""           # текст маркировки; по умолчанию — bank
     credit_disclosure: str = ""    # для кредитных: ставка, ПСК, льготный период
     subid_param: str = ""          # параметр subid партнёрки (sub1, utm_content…)
+    selling_notes: str = ""        # как подавать продукт: углы, акценты, чего не говорить
+    # Правила текста для этого продукта: {"pattern": regex, "require": regex, "why": ...}.
+    # Без require — фраза запрещена; с require — если есть pattern, обязано быть и require.
+    claim_rules: list[dict] = field(default_factory=list)
+    # Конверсии продукта, если отличаются от общих допущений (0 — брать из настроек).
+    cr_click_to_app: float = 0
+    cr_app_to_conv: float = 0
+    # Через сколько часов после согласия напомнить о шагах к засчитыванию.
+    reminder_hours: list[int] = field(default_factory=lambda: [24, 120])
+    reminder_tip: str = ""         # практичный совет в напоминании
     active: bool = True
+
+    @property
+    def cr(self) -> float:
+        """Клик → засчитанное оформление (допущение, пока нет фактических данных)."""
+        return (self.cr_click_to_app or CONFIG.cr_click_to_app) * (self.cr_app_to_conv or CONFIG.cr_app_to_conv)
 
     @property
     def ad_label(self) -> str:
@@ -65,6 +81,11 @@ class Product:
             lines.append("Кому подходит: " + "; ".join(self.audiences))
         if self.credit_disclosure:
             lines.append(f"Стоимость кредита: {self.credit_disclosure}")
+        if self.selling_notes:
+            lines.append(f"Как подавать: {self.selling_notes}")
+        rules = [r["why"] for r in self.claim_rules]
+        if rules:
+            lines.append("Обязательные правила текста: " + "; ".join(rules))
         return "\n".join(lines)
 
 
@@ -83,6 +104,12 @@ def problems(p: Product) -> list[str]:
         out.append(f"{p.id}: для кредитного продукта заполните credit_disclosure (ставка, ПСК) — ст. 28 закона о рекламе")
     if not p.key_benefits or not p.target_action:
         out.append(f"{p.id}: заполните key_benefits и target_action")
+    for r in p.claim_rules:
+        try:
+            re.compile(r["pattern"])
+            re.compile(r.get("require") or "")
+        except (re.error, KeyError) as e:
+            out.append(f"{p.id}: ошибка в claim_rules ({e})")
     return out
 
 

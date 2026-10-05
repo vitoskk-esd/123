@@ -143,7 +143,7 @@ class LinkTests(Base):
 
 class FunnelTests(Base):
     def test_goal_math_uses_prior_then_facts(self):
-        st = goal_status(self.db, dt.date(2026, 10, 5), 1000)
+        st = goal_status(self.db, dt.date(2026, 10, 5), [product(payout_rub=1000)])
         self.assertEqual(st.days_left, 27)
         self.assertAlmostEqual(st.cr, CONFIG.cr_click_to_app * CONFIG.cr_app_to_conv)
         self.assertGreater(st.clicks_needed_per_day, 50)
@@ -247,6 +247,62 @@ class ConsultantTests(Base):
         self.assertEqual(self.db.one("SELECT SUM(count) n FROM conversions")["n"], 3)
 
 
+class AlfaCreditTests(Base):
+    """Готовый набор для фокуса на кредитке Альфа-Банка."""
+
+    def setUp(self):
+        super().setUp()
+        from bank_agent.products import CATALOGS_DIR, load_catalog, sellable
+        self.p = load_catalog(CATALOGS_DIR / "alfa-credit.json")[0]
+        self.assertEqual(sellable([self.p]), [self.p])
+
+    def test_link_keeps_erid_and_marking(self):
+        CONFIG.tracker_url = ""
+        self.assertEqual(link(self.p, "vk", "ab12"),
+                         "https://t.fincpanetwork.ru/click/3161/339?erid=2W5zFJjJPEG&sub1=vk-ab12")
+        text = assemble("Кредитка с льготным периодом 60 дней. ПСК — ниже.", self.p, "https://x.example", "Оформить")
+        self.assertEqual(check_final(text, self.p), [])
+        self.assertIn("Реклама. АО «Альфа-Банк», ИНН 7728168971. erid: 2W5zFJjJPEG", text)
+        self.assertIn("ПСК 58,522–59,023%", text)
+
+    def test_claim_rules(self):
+        ok = ("Кредитка как подушка безопасности: если гасить покупки в течение льготного периода, "
+              "проценты не начисляются. До 60 дней без процентов, ПСК указана ниже. Снятие наличных "
+              "до 50 000 ₽ в месяц без комиссии. Главное — не пропускать минимальный платёж.")
+        self.assertEqual(check_body(ok, self.p, "vk"), [])
+        bad = {
+            ok + " А ещё 150 дней без процентов!": "150 дней",
+            ok + " Кэшбэк на всё!": "кэшбэк",
+            ok + " Бесплатное обслуживание.": "первый год",
+            ok + " Отличный подарок школьникам.": "несовершеннолетним",
+        }
+        for text, why in bad.items():
+            self.assertTrue(any(why in i for i in check_body(text, self.p, "vk")), text)
+        self.assertEqual(check_body(ok + " Продление до 150 дней — платная услуга.", self.p, "vk"), [])
+        self.assertEqual(check_body(ok + " Кэшбэк в выбранных категориях, лимит 5 000 ₽.", self.p, "vk"), [])
+
+    def test_bot_menu_and_reminders(self):
+        c = Consultant(FakeLLM(), self.db, [self.p])
+        start = c.handle(Incoming("vk", "5", data="start"))[0]
+        self.assertIn("с 18 лет", start.text)
+        self.assertIn("m:grace", [b.data for row in start.buttons for b in row])
+        confirm = c.handle(Incoming("vk", "5", data="r:alfa-credit"))[0].text
+        self.assertIn("через 2 дн.", confirm)
+        self.assertIn("через терминал", confirm)
+        due = [r["due_at"] for r in self.db.all("SELECT due_at FROM reminders ORDER BY step")]
+        self.assertEqual(len(due), 2)
+        self.db.execute("UPDATE reminders SET due_at=?", (iso(now() - dt.timedelta(minutes=1)),))
+        msgs = c.due_reminders()
+        self.assertIn("ПСК", msgs[0][2].text)
+        self.assertIn("последнее", msgs[1][2].text)
+
+    def test_credit_funnel(self):
+        st = goal_status(self.db, dt.date(2026, 10, 5), [self.p])
+        self.assertAlmostEqual(st.cr, 0.025)
+        self.assertAlmostEqual(st.break_even_cpc, 62.5)
+        self.assertEqual(st.clicks_needed_per_day, 148)
+
+
 class ReportTests(Base):
     def test_import_csv_and_report(self):
         csv_path = Path(self.tmp.name) / "export.csv"
@@ -263,7 +319,7 @@ class ReportTests(Base):
         self.assertTrue(row["ts"].startswith("2026-10-03"))
         text = daily_report(self.db, [product()], dt.date(2026, 10, 5))
         self.assertIn("Цель: 100", text)
-        self.assertIn("сейчас 1", text)
+        self.assertIn("сейчас 1 (1%), в обработке 1", text)
 
 
 class ChannelTests(unittest.TestCase):

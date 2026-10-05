@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from .config import CONFIG
 from .db import DB, iso
+from .products import Product
 
 # Вес априорных допущений: сколько «виртуальных кликов» они стоят.
 PRIOR_CLICKS = 300
@@ -43,15 +44,31 @@ def month_start(today: dt.date) -> dt.datetime:
     return dt.datetime(today.year, today.month, 1, tzinfo=dt.timezone.utc)
 
 
-def goal_status(db: DB, today: dt.date, avg_payout: float) -> GoalStatus:
+def avg_payout(products: list[Product]) -> float:
+    paid = [p.payout_rub for p in products if p.active and p.payout_rub]
+    return sum(paid) / len(paid) if paid else 1000.0
+
+
+def prior_cr(products: list[Product]) -> float:
+    """Допущение о конверсии клик → оформление: среднее по активным продуктам."""
+    active = [p for p in products if p.active]
+    if not active:
+        return CONFIG.cr_click_to_app * CONFIG.cr_app_to_conv
+    return sum(p.cr for p in active) / len(active)
+
+
+def goal_status(db: DB, today: dt.date, products: list[Product]) -> GoalStatus:
+    payout = avg_payout(products)
+    active = [p for p in products if p.active] or products
+    app_to_conv = (sum(p.cr_app_to_conv or CONFIG.cr_app_to_conv for p in active) / len(active)
+                   if active else CONFIG.cr_app_to_conv)
     start = iso(month_start(today))
     done = db.one("SELECT COALESCE(SUM(count),0) n FROM conversions WHERE status='approved' AND ts>=?", (start,))["n"]
     pending = db.one("SELECT COALESCE(SUM(count),0) n FROM conversions WHERE status='pending' AND ts>=?", (start,))["n"]
     clicks = db.one("SELECT COUNT(*) n FROM clicks WHERE ts>=?", (start,))["n"]
 
-    prior_cr = CONFIG.cr_click_to_app * CONFIG.cr_app_to_conv
     # Сглаживание: факт постепенно вытесняет допущение по мере роста кликов.
-    cr = (done + prior_cr * PRIOR_CLICKS) / (clicks + PRIOR_CLICKS)
+    cr = (done + prior_cr(products) * PRIOR_CLICKS) / (clicks + PRIOR_CLICKS)
     measured = clicks >= PRIOR_CLICKS and done >= 5
 
     deadline = CONFIG.deadline(today)
@@ -61,15 +78,15 @@ def goal_status(db: DB, today: dt.date, avg_payout: float) -> GoalStatus:
     clicks_per_day = int(round(conv_per_day / cr)) if cr > 0 else 0
 
     days_passed = max(1, (today - month_start(today).date()).days)
-    projection = int(done + pending * CONFIG.cr_app_to_conv + done / days_passed * days_left)
+    projection = int(done + pending * app_to_conv + done / days_passed * days_left)
 
-    break_even = avg_payout * cr
+    break_even = payout * cr
     budget = int(round(remaining / cr * CONFIG.avg_cpc_rub)) if cr > 0 else 0
     return GoalStatus(
         goal=CONFIG.goal, done=done, pending=pending, deadline=deadline, days_left=days_left,
         clicks_month=clicks, cr=cr, cr_is_measured=measured,
         clicks_needed_per_day=clicks_per_day, conv_needed_per_day=conv_per_day,
-        projection=projection, avg_payout=avg_payout, break_even_cpc=break_even, budget_for_rest=budget,
+        projection=projection, avg_payout=payout, break_even_cpc=break_even, budget_for_rest=budget,
     )
 
 
