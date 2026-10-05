@@ -17,7 +17,7 @@ write_files:
       YANDEX_FOLDER_ID=b1gdivf3kutv59154427
       YANDEX_API_KEY=ВСТАВЬТЕ_КЛЮЧ_AQVN
       TG_MY_CHANNEL=@ВАШ_КАНАЛ
-      TG_PERSONA=ОПИШИТЕ_СЕБЯ_кто_вы_и_в_чём_эксперт
+      TG_PERSONA=эксперт по банковским продуктам: подбираю людям карты, вклады, кредиты и РКО и зарабатываю на привлечении клиентов в банки через партнёрские программы, около 500 тыс. ₽ в месяц
       TG_MAX_COMMENTS_PER_DAY=5
       TG_2FA_PASSWORD=
   - path: /etc/systemd/system/tgbot.service

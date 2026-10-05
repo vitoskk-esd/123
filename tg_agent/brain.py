@@ -22,7 +22,14 @@ COMMENT_SCHEMA = {
 }
 
 
+def niche_notes() -> str:
+    path = CONFIG.niche_file
+    return path.read_text(encoding="utf-8").strip() if path.exists() else ""
+
+
 def comment_system() -> str:
+    notes = niche_notes()
+    notes = f"\n\nСправка по нише владельца:\n{notes}" if notes else ""
     return f"""Ты пишешь комментарий под постом в Telegram-канале от лица владельца аккаунта.
 Владелец — {CONFIG.persona}. Комментарий будет опубликован автоматически, без правок.
 
@@ -41,7 +48,8 @@ def comment_system() -> str:
 - Не выдумывай конкретные факты о проектах владельца (клиенты, суммы, кейсы). Если нужен
   пример из опыта — формулируй как общее наблюдение практика.
 - Если по существу сказать нечего или тема вне экспертизы владельца — worth_commenting=false.
-  Лучше промолчать, чем написать пустой или натянутый комментарий.""".strip()
+  Лучше промолчать, чем написать пустой или натянутый комментарий.
+- В финансовых темах не обещай одобрения и доходности, не советуй обходить проверки банков.{notes}""".strip()
 
 
 def write_comment(llm: Any, channel_title: str, post_text: str) -> dict:

@@ -79,6 +79,7 @@ class BrainTest(unittest.TestCase):
         self.assertIn("Текст поста про RAG", prompt)
         self.assertIs(kwargs["schema"], brain.COMMENT_SCHEMA)
         self.assertIn("Никаких ссылок", kwargs["system"])
+        self.assertIn("Льготный период", kwargs["system"])  # справка по нише подключена
 
 
 class YandexTest(unittest.TestCase):
