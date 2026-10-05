@@ -298,9 +298,9 @@ class AlfaCreditTests(Base):
 
     def test_credit_funnel(self):
         st = goal_status(self.db, dt.date(2026, 10, 5), [self.p])
-        self.assertAlmostEqual(st.cr, 0.025)
-        self.assertAlmostEqual(st.break_even_cpc, 92.0)
-        self.assertEqual(st.clicks_needed_per_day, 148)
+        self.assertAlmostEqual(st.cr, 0.098 * 0.3101)
+        self.assertAlmostEqual(st.break_even_cpc, 3680 * 0.098 * 0.3101)
+        self.assertEqual(st.clicks_needed_per_day, 122)
 
 
 class ReportTests(Base):
