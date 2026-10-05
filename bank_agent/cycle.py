@@ -8,7 +8,7 @@ from . import storage
 from .config import CONFIG
 from .db import DB
 from .funnel import goal_status
-from .products import load_catalog, sellable
+from .products import check_terms, load_catalog, sellable
 
 
 def run_daily(llm, db: DB, publish: bool = True) -> int:
@@ -21,6 +21,12 @@ def run_daily(llm, db: DB, publish: bool = True) -> int:
 
     storage.log("=== Ежедневный цикл ===")
     catalog = load_catalog()
+    try:
+        changed = check_terms(catalog)
+        if changed:
+            storage.log(f"Условия изменились, продукты на паузе: {changed}")
+    except Exception as e:  # noqa: BLE001
+        storage.log(f"Проверка условий не удалась: {e}")
     products = sellable(catalog)
     status = goal_status(db, dt.date.today(), catalog)
 

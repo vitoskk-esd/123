@@ -254,6 +254,7 @@ class AlfaCreditTests(Base):
         super().setUp()
         from bank_agent.products import CATALOGS_DIR, load_catalog, sellable
         self.p = load_catalog(CATALOGS_DIR / "alfa-credit.json")[0]
+        self.p.terms_valid_until = "2099-12-31"  # тесты не должны зависеть от сегодняшней даты
         self.assertEqual(sellable([self.p]), [self.p])
 
     def test_link_keeps_erid_and_marking(self):
@@ -272,14 +273,35 @@ class AlfaCreditTests(Base):
         self.assertEqual(check_body(ok, self.p, "vk"), [])
         bad = {
             ok + " А ещё 150 дней без процентов!": "150 дней",
-            ok + " Кэшбэк на всё!": "кэшбэк",
-            ok + " Бесплатное обслуживание.": "первый год",
+            ok + " Кэшбэк в выбранных категориях!": "кэшбэк",
+            ok + " Обслуживание 0 ₽ навсегда.": "навсегда",
             ok + " Отличный подарок школьникам.": "несовершеннолетним",
+            ok + " Получите +30% к одобрению.": "одобрения",
         }
         for text, why in bad.items():
             self.assertTrue(any(why in i for i in check_body(text, self.p, "vk")), text)
-        self.assertEqual(check_body(ok + " Продление до 150 дней — платная услуга.", self.p, "vk"), [])
-        self.assertEqual(check_body(ok + " Кэшбэк в выбранных категориях, лимит 5 000 ₽.", self.p, "vk"), [])
+        for fine in (" Продление до 150 дней — платная услуга.",
+                     " До 150 дней без процентов на перевод для погашения кредитки другого банка.",
+                     " Кэшбэк баллами — только с платной подпиской «Альфа-Смарт».",
+                     " Обслуживание 0 ₽ и в первый год, и со второго."):
+            self.assertEqual(check_body(ok + fine, self.p, "vk"), [], fine)
+
+    def test_terms_expiry_and_page_check(self):
+        from bank_agent.products import check_terms, sellable
+        self.assertTrue(any("действовали до" in x for x in problems(product(terms_valid_until="2020-01-01"))))
+        page = "Диапазон полной стоимости кредита: 58,522%\u00a0— 59,023%, ставка 58,49% — 58,99% годовых. " \
+               "Предложение с 10.08.2026 г. по 15.10.2026 г. Снятие наличных до 50 000 ₽ в месяц без комиссии. " \
+               "Обслуживание в 1-й год — 0 ₽, со 2-го — 0 ₽"
+        self.assertEqual(check_terms([self.p], fetch=lambda url: page), {})
+        self.assertEqual(sellable([self.p]), [self.p])
+        # Банк сменил ПСК — продукт уходит на паузу, публикация не идёт.
+        changed = check_terms([self.p], fetch=lambda url: page.replace("58,522", "61,100"))
+        self.assertEqual(changed, {"alfa-credit": ["58,522% — 59,023%"]})
+        self.assertEqual(sellable([self.p]), [])
+        # Страница не открылась — прошлый вердикт сохраняется, а не сбрасывается.
+        def down(url):
+            raise OSError("timeout")
+        self.assertEqual(check_terms([self.p], fetch=down), changed)
 
     def test_bot_menu_and_reminders(self):
         c = Consultant(FakeLLM(), self.db, [self.p])

@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import re
 import urllib.parse
@@ -50,6 +51,13 @@ class Product:
     # Через сколько часов после согласия напомнить о шагах к засчитыванию.
     reminder_hours: list[int] = field(default_factory=lambda: [24, 120])
     reminder_tip: str = ""         # практичный совет в напоминании
+    # Срок действия условий (ГГГГ-ММ-ДД). После него продукт не рекламируется, пока
+    # условия не сверят заново: реклама с устаревшими условиями недостоверна.
+    terms_valid_until: str = ""
+    # Страница банка с юридическим текстом и фразы, которые на ней обязаны быть.
+    # Агент проверяет их каждый день; если фразы пропали — условия изменились.
+    terms_check_url: str = ""
+    terms_must_contain: list[str] = field(default_factory=list)
     active: bool = True
 
     @property
@@ -104,6 +112,13 @@ def problems(p: Product) -> list[str]:
         out.append(f"{p.id}: для кредитного продукта заполните credit_disclosure (ставка, ПСК) — ст. 28 закона о рекламе")
     if not p.key_benefits or not p.target_action:
         out.append(f"{p.id}: заполните key_benefits и target_action")
+    if p.terms_valid_until and dt.date.today() > dt.date.fromisoformat(p.terms_valid_until):
+        out.append(f"{p.id}: условия предложения действовали до {p.terms_valid_until} — сверьте их на странице "
+                   "банка и обновите каталог (ставку, ПСК, срок)")
+    changed = terms_changes().get(p.id)
+    if changed:
+        out.append(f"{p.id}: условия на странице банка изменились — не найдено: "
+                   + "; ".join(f"«{x}»" for x in changed) + ". Сверьте и обновите каталог")
     for r in p.claim_rules:
         try:
             re.compile(r["pattern"])
@@ -111,6 +126,47 @@ def problems(p: Product) -> list[str]:
         except (re.error, KeyError) as e:
             out.append(f"{p.id}: ошибка в claim_rules ({e})")
     return out
+
+
+def _norm(text: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"[\u2010-\u2015\-]", "-", text.replace("\u00a0", " "))).lower()
+
+
+def terms_changes() -> dict[str, list[str]]:
+    """Последний результат проверки условий: {id продукта: фразы, которых нет на странице}."""
+    path = CONFIG.data_dir / "terms_status.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8")).get("missing", {})
+
+
+def check_terms(catalog: list["Product"], fetch=None) -> dict[str, list[str]]:
+    """Сверяет юридический текст на странице банка с каталогом. Ошибку сети не считает изменением."""
+    from . import net
+
+    fetch = fetch or net.fetch_text
+    missing: dict[str, list[str]] = {}
+    errors: dict[str, str] = {}
+    for p in catalog:
+        if not (p.active and p.terms_check_url and p.terms_must_contain):
+            continue
+        try:
+            page = _norm(fetch(p.terms_check_url))
+        except Exception as e:  # noqa: BLE001
+            errors[p.id] = f"{type(e).__name__}: {e}"
+            continue
+        lost = [x for x in p.terms_must_contain if _norm(x) not in page]
+        if lost:
+            missing[p.id] = lost
+    old = terms_changes()
+    for pid in errors:  # страница не открылась — оставляем прошлый вердикт
+        if pid in old:
+            missing[pid] = old[pid]
+    CONFIG.data_dir.mkdir(parents=True, exist_ok=True)
+    (CONFIG.data_dir / "terms_status.json").write_text(json.dumps(
+        {"date": dt.date.today().isoformat(), "missing": missing, "errors": errors},
+        ensure_ascii=False, indent=2), encoding="utf-8")
+    return missing
 
 
 def load_catalog(path: Path | None = None) -> list[Product]:

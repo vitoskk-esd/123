@@ -8,7 +8,7 @@ from . import storage
 from .channels import VK, Button, Max, Outgoing, Telegram, with_retries
 from .config import CONFIG
 from .db import DB, iso, now
-from .products import Product, link
+from .products import Product, link, problems
 
 
 def enabled_channels() -> list[str]:
@@ -56,8 +56,10 @@ def publish_due(db: DB, catalog: list[Product], publisher=None, at: dt.datetime 
     ok = 0
     for r in rows:
         product = products.get(r["product_id"])
-        if not product or not product.active:
-            db.execute("UPDATE posts SET status='rejected', note='продукт отключён' WHERE id=?", (r["id"],))
+        blockers = problems(product) if product else ["продукт удалён из каталога"]
+        if not product or not product.active or blockers:
+            note = "; ".join(blockers) or "продукт отключён"
+            db.execute("UPDATE posts SET status='rejected', note=? WHERE id=?", (note[:500], r["id"]))
             continue
         try:
             ext = with_retries(lambda: publisher.publish(r["channel"], r["text"], link(product, r["channel"], r["id"])))

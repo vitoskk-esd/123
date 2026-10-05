@@ -85,6 +85,12 @@ def serve() -> None:
                     storage.log("Каталог продуктов перечитан")
                 except Exception as e:  # noqa: BLE001
                     storage.log(f"Каталог с ошибкой, оставляю прежний: {e}")
+            # Продукт мог уйти на паузу (истёк срок условий, они изменились) — бот не должен его советовать.
+            current = sellable(catalog)
+            if [p.id for p in current] != list(consultant.products):
+                consultant.set_products(current)
+                catalog_ref["products"] = {p.id: p for p in catalog}
+                storage.log("Список продуктов бота обновлён: " + (", ".join(p.id for p in current) or "пусто"))
             try:
                 publish_due(db, catalog)
             except Exception as e:  # noqa: BLE001
