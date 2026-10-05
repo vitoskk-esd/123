@@ -102,7 +102,7 @@
       <div id="cards"></div>
       <div id="stamp">САМОЕ НУЖНОЕ</div>
     </div>
-    <div class="center" id="twist">А теперь<br><span class="glow-l" style="color:var(--lime)">без шуток</span> <span class="emo">👇</span></div>
+    <div class="center" id="twist">А если<br><span class="glow-l" style="color:var(--lime)">без шуток</span> <span class="emo">👇</span></div>
     <div id="cta">
       <svg id="upArrow" viewBox="0 0 140 160"><path d="M70 150 V 20" stroke="#c8ff3d" stroke-width="16" stroke-linecap="round"/><path d="M20 70 L70 18 L120 70" stroke="#c8ff3d" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div id="tg">
@@ -129,7 +129,11 @@ const outBack = x => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(x -
 const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const lerp = (a, b, x) => a + (b - a) * x;
 const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
-const T = TIMELINE, ALL = [...T.cats, T.punch];
+const T = TIMELINE, ALL = [...T.cats, T.punch], NC = T.cats.length;
+// всё привязано к словам озвучки: сцена 0 — хук, 1–7 — категории, 8 — «Продукты», 9 — поворот и CTA
+const HOOK = T.S(1), PUNCH_AT = T.S(8), HIT = T.PUNCH_HIT, TWIST_AT = T.S(9), CTA_AT = T.W(9, "где");
+const cardWin = i => [T.S(i + 1), i < NC ? T.S(i + 2) : TWIST_AT];
+const reAt = i => i < NC ? T.R(i + 1) : T.W(8, "Ну");
 
 // карточки и точки-индикатор
 $("cards").innerHTML = ALL.map((c, i) => `<div class="card${i === T.cats.length ? " bad" : ""}" id="c${i}">
@@ -162,35 +166,34 @@ function drawBg(t, heat) {
 }
 
 function renderAt(t) {
-  const heat = t >= T.PUNCH_AT && t < T.TWIST_AT;
+  const heat = t >= HIT && t < TWIST_AT;
   drawBg(t, heat);
   $("tint").style.opacity = heat ? .8 : 0;
 
   // тряска и вспышка на ударах
   let shake = 0, fl = 0;
   for (const s of T.sfx.impact) { const d = t - s; if (d >= 0 && d < .45) shake = Math.max(shake, (1 - d / .45) * 30); if (d >= 0 && d < .12) fl = Math.max(fl, 1 - d / .12); }
-  for (const s of T.sfx.swipe) { const d = t - s; if (d >= 0 && d < .2) shake = Math.max(shake, (1 - d / .2) * 6); }
+  for (const s of T.sfx.whoosh) { const d = t - s; if (d >= 0 && d < .2) shake = Math.max(shake, (1 - d / .2) * 6); }
   $("cam").style.transform = `translate(${(rnd(t * 50) - .5) * shake}px, ${(rnd(t * 51) - .5) * shake}px)`;
   $("flash").style.opacity = fl * .7;
 
   // заголовок и панель видны с кадра 0 до поворота
-  const out = p(t, T.TWIST_AT - .15, T.TWIST_AT);
+  const out = p(t, TWIST_AT - .15, TWIST_AT);
   const loopIn = p(t, T.duration - .35, T.duration); // в конце возвращаемся к первому кадру — петля
   const appVis = Math.max(1 - out, loopIn);
   $("head").style.opacity = appVis; $("app").style.opacity = appVis;
   $("app").style.transform = `scale(${1 + out * .1})`;
 
   // загрузка (хук): спиннер крутится, полоса бежит
-  const loadOn = t < T.HOOK || loopIn > 0;
-  $("load").style.opacity = loadOn ? (t < T.HOOK ? 1 - p(t, T.HOOK - .12, T.HOOK) : loopIn) : 0;
+  const loadOn = t < HOOK || loopIn > 0;
+  $("load").style.opacity = loadOn ? (t < HOOK ? 1 - p(t, HOOK - .12, HOOK) : loopIn) : 0;
   $("spin").style.transform = `rotate(${t * 540}deg)`;
-  $("loadBar").firstElementChild.style.width = `${(t < T.HOOK ? lerp(.18, 1, p(t, 0, T.HOOK)) : .18) * 100}%`;
-  $("cnt").textContent = t < T.HOOK || loopIn > 0 ? "ПОДБОР" : "ВЫБРАНО ДЛЯ ВАС";
+  $("loadBar").firstElementChild.style.width = `${(t < HOOK ? lerp(.18, 1, p(t, 0, HOOK)) : .18) * 100}%`;
+  $("cnt").textContent = t < HOOK || loopIn > 0 ? "ПОДБОР" : "ВЫБРАНО ДЛЯ ВАС";
 
   // карточки: свайп справа налево в 3D
   ALL.forEach((c, i) => {
-    const a = i < T.cats.length ? T.catStart(i) : T.PUNCH_AT;
-    const b = i < T.cats.length ? a + T.STEP : T.TWIST_AT;
+    const [a, b] = cardWin(i);
     const el = $("c" + i);
     if (t < a || t >= b || loopIn > 0) { el.style.opacity = 0; return; }
     const k = outExpo(p(t, a, a + .28));
@@ -201,44 +204,43 @@ function renderAt(t) {
     const orb = el.querySelector(".orb");
     orb.style.transform = `translateY(${Math.sin(t * 3 + i) * 10}px)`;
     el.querySelector(".ring2").style.transform = `rotate(${t * 60}deg)`;
-    const pk = outBack(p(t, a + .12, a + .42));
+    const ph = i < NC ? a + .12 : HIT; // у «Продуктов» процент бьёт на «ноль целых…»
+    const pk = outBack(p(t, ph, ph + .3));
     el.querySelector(".pct").style.transform = `scale(${lerp(1.8, 1, pk)})`;
     el.querySelector(".pct").style.opacity = clamp(pk * 2);
-    el.querySelector(".re").style.opacity = p(t, a + .4, a + .6);
-    if (i === T.cats.length) { // удар: глитч процента
-      const d = t - T.PUNCH_AT, gl = d < .7 ? 1 - d / .7 : 0, gx = gl ? (rnd(t * 40) - .5) * 40 * gl : 0;
+    el.querySelector(".re").style.opacity = p(t, reAt(i) - .05, reAt(i) + .12);
+    if (i === NC) { // удар: глитч процента
+      const d = t - HIT, gl = d < .7 ? 1 - d / .7 : 0, gx = gl ? (rnd(t * 40) - .5) * 40 * gl : 0;
       el.querySelector(".pct").style.textShadow = gl ? `${gx}px 0 #3df5ff, ${-gx}px 0 #ff00aa, 0 0 40px rgba(255,59,92,.8)` : "0 0 30px rgba(255,59,92,.7)";
-      el.querySelector(".re").style.opacity = p(t, a + .9, a + 1.1);
     }
   });
   // индикатор
   [...$("dots").children].forEach((d, i) => {
-    const a = i < T.cats.length ? T.catStart(i) : T.PUNCH_AT;
-    d.className = t >= a && loopIn === 0 ? (i === T.cats.length ? "bad" : "on") : "";
+    d.className = t >= cardWin(i)[0] && loopIn === 0 ? (i === NC ? "bad" : "on") : "";
   });
   // штамп «САМОЕ НУЖНОЕ»
-  const st = outBack(p(t, T.PUNCH_AT + .45, T.PUNCH_AT + .7));
-  $("stamp").style.opacity = t >= T.PUNCH_AT + .45 && t < T.TWIST_AT ? clamp(st * 2) : 0;
+  const st = outBack(p(t, HIT + .45, HIT + .7));
+  $("stamp").style.opacity = t >= HIT + .45 && t < TWIST_AT ? clamp(st * 2) : 0;
   $("stamp").style.transform = `translateX(-50%) rotate(-12deg) scale(${lerp(2.2, 1, st)})`;
 
   // поворот
-  const tw = t >= T.TWIST_AT && t < T.CTA_AT;
-  const tk = outBack(p(t, T.TWIST_AT, T.TWIST_AT + .3)), to = p(t, T.CTA_AT - .12, T.CTA_AT);
+  const tw = t >= TWIST_AT && t < CTA_AT;
+  const tk = outBack(p(t, TWIST_AT, TWIST_AT + .3)), to = p(t, CTA_AT - .12, CTA_AT);
   $("twist").style.opacity = tw ? clamp(tk * 2) * (1 - to) : 0;
   $("twist").style.transform = `scale(${lerp(2, 1, tk) + to * .15})`;
 
   // CTA: телеграм
-  const ct = t >= T.CTA_AT;
-  const tg = outExpo(p(t, T.CTA_AT, T.CTA_AT + .5));
+  const ct = t >= CTA_AT;
+  const tg = outExpo(p(t, CTA_AT, CTA_AT + .5));
   $("cta").style.opacity = ct ? 1 - loopIn : 0;
   $("tg").style.transform = `perspective(1600px) rotateX(${(1 - tg) * 40}deg) translateY(${(1 - tg) * 300}px)`; $("tg").style.opacity = tg;
   ["g1", "g2", "g3"].forEach((id, i) => {
-    const g = outExpo(p(t, T.CTA_AT + .5 + i * .3, T.CTA_AT + .8 + i * .3));
+    const g = outExpo(p(t, CTA_AT + .5 + i * .3, CTA_AT + .8 + i * .3));
     $(id).style.opacity = g; $(id).style.transform = `translateY(${(1 - g) * 40}px)`;
   });
-  const lk = outBack(p(t, T.CTA_AT + 1.5, T.CTA_AT + 1.8));
+  const lk = outBack(p(t, T.W(9, "Ссылка") - .1, T.W(9, "Ссылка") + .2));
   $("linkText").style.opacity = clamp(lk * 2); $("linkText").style.transform = `scale(${lerp(2, 1, lk)})`;
-  const ar = outExpo(p(t, T.CTA_AT + 1.6, T.CTA_AT + 2));
+  const ar = outExpo(p(t, T.W(9, "Ссылка"), T.W(9, "Ссылка") + .4));
   $("upArrow").style.opacity = ar;
   $("upArrow").style.transform = `translateY(${(1 - ar) * 80 - Math.abs(Math.sin(t * 5)) * 18}px)`;
 }
