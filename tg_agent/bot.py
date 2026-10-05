@@ -58,7 +58,8 @@ def make_client() -> TelegramClient:
 async def ensure_login(client: TelegramClient) -> None:
     """Вход по QR-коду: работает на сервере без клавиатуры, код из SMS вводить не нужно.
 
-    QR печатается в лог. Сканируйте его телефоном: Telegram → Настройки → Устройства →
+    QR печатается в лог, а при TG_LOGIN_PORT ещё и открывается в браузере по адресу
+    сервера. Сканируйте его телефоном: Telegram → Настройки → Устройства →
     Подключить устройство. Сессия сохраняется в файл, повторно сканировать не придётся.
     """
     await client.connect()
@@ -66,8 +67,16 @@ async def ensure_login(client: TelegramClient) -> None:
         return
     import qrcode
 
+    page = None
+    if CONFIG.login_port:
+        from .login_page import LoginPage
+
+        page = LoginPage(CONFIG.login_port)
+        print(f"QR-код для входа: откройте в браузере http://<IP-сервера>:{CONFIG.login_port}", flush=True)
     qr_login = await client.qr_login()
     while True:
+        if page:
+            page.show(qr_login.url)
         qr = qrcode.QRCode(border=2)
         qr.add_data(qr_login.url)
         print("\n" + "=" * 60)
@@ -88,6 +97,8 @@ async def ensure_login(client: TelegramClient) -> None:
                 )
             await client.sign_in(password=CONFIG.password)
             break
+    if page:
+        page.finish()
     me = await client.get_me()
     print(f"Вход выполнен: {utils.get_display_name(me)}", flush=True)
 

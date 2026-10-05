@@ -100,5 +100,27 @@ class YandexTest(unittest.TestCase):
         self.assertIn("Текст поста", sent["body"]["messages"][1]["text"])
 
 
+class LoginPageTest(unittest.TestCase):
+    def test_serves_qr_then_done(self):
+        import urllib.request
+
+        from tg_agent import login_page
+
+        login_page.qr_svg = lambda data: f"<svg>{data}</svg>"
+        get = urllib.request.build_opener(urllib.request.ProxyHandler({})).open
+        page = login_page.LoginPage(0)
+        port = page.server.server_address[1]
+        try:
+            page.show("tg://login?token=abc")
+            html = get(f"http://127.0.0.1:{port}/").read().decode()
+            self.assertIn("tg://login?token=abc", html)
+            self.assertIn('http-equiv="refresh"', html)
+            page.done = True
+            html = get(f"http://127.0.0.1:{port}/").read().decode()
+            self.assertIn("Вход выполнен", html)
+        finally:
+            page.close()
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -70,6 +70,9 @@ class Config:
     min_post_chars: int = _int("TG_MIN_POST_CHARS", 60)
     # Присылать в «Избранное» отчёт о каждом комментарии со ссылкой на него.
     report: bool = _bool("TG_REPORT", True)
+    # Порт страницы с QR-кодом для входа (0 — выключено). На сервере удобно 80:
+    # тогда QR открывается в браузере по адресу http://IP-сервера
+    login_port: int = _int("TG_LOGIN_PORT", 0)
 
     @property
     def session(self) -> str:

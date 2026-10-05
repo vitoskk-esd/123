@@ -1,0 +1,54 @@
+#cloud-config
+# Автоустановка Telegram-бота на виртуальную машину Yandex Cloud (Ubuntu 24.04).
+#
+# 1. Замените значения после «=» в блоке /etc/tgbot.env на свои.
+# 2. При создании ВМ вставьте ВЕСЬ этот текст в поле «Пользовательские данные» (user-data).
+# 3. Через 3–5 минут откройте в браузере http://<публичный IP машины> и отсканируйте QR.
+#
+# Бот перезапускается сам при сбоях и при перезагрузке ВМ, а при каждом
+# перезапуске подтягивает свежий код из GitHub.
+
+write_files:
+  - path: /etc/tgbot.env
+    permissions: "0600"
+    content: |
+      TG_USE_DESKTOP_KEYS=1
+      TG_LLM_PROVIDER=yandex
+      YANDEX_FOLDER_ID=b1gdivf3kutv59154427
+      YANDEX_API_KEY=ВСТАВЬТЕ_КЛЮЧ_AQVN
+      TG_MY_CHANNEL=@ВАШ_КАНАЛ
+      TG_PERSONA=ОПИШИТЕ_СЕБЯ_кто_вы_и_в_чём_эксперт
+      TG_MAX_COMMENTS_PER_DAY=5
+      TG_2FA_PASSWORD=
+  - path: /etc/systemd/system/tgbot.service
+    content: |
+      [Unit]
+      Description=Telegram comments bot
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      EnvironmentFile=/etc/tgbot.env
+      Environment=TG_AGENT_DATA=/var/lib/tgbot
+      Environment=TG_LOGIN_PORT=80
+      Environment=PYTHONUNBUFFERED=1
+      WorkingDirectory=/opt/tgbot
+      ExecStartPre=-/usr/bin/git -C /opt/tgbot pull --ff-only
+      ExecStart=/opt/tgbot-venv/bin/python -m tg_agent run
+      Restart=always
+      RestartSec=30
+      StandardOutput=journal+console
+      StandardError=journal+console
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - apt-get update
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y git python3-venv
+  - git clone --depth 1 -b claude/relaxed-heisenberg-tm8gbg https://github.com/vitoskk-esd/123.git /opt/tgbot
+  - python3 -m venv /opt/tgbot-venv
+  - /opt/tgbot-venv/bin/pip install "anthropic>=0.80" "telethon>=1.36" "qrcode>=7.4"
+  - mkdir -p /var/lib/tgbot
+  - systemctl daemon-reload
+  - systemctl enable --now tgbot
