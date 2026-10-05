@@ -237,6 +237,7 @@ class ConsultantTests(Base):
 
     def test_card_number_and_admin(self):
         c = self.make()
+        self.assertIn("Ваш id в telegram: 7", c.handle(Incoming("telegram", "7", text="/id"))[0].text)
         self.assertIn("никогда", c.handle(Incoming("telegram", "7", text="моя карта 2200 1234 5678 9012"))[0].text)
         self.assertIn("Записал 3", c.handle(Incoming("telegram", "42", text="/conv 3 alfa vk"))[0].text)
         self.assertEqual(self.db.one("SELECT SUM(count) n FROM conversions")["n"], 3)
@@ -342,6 +343,21 @@ class ReportTests(Base):
         text = daily_report(self.db, [product()], dt.date(2026, 10, 5))
         self.assertIn("Цель: 100", text)
         self.assertIn("сейчас 1 (1%), в обработке 1", text)
+
+
+class SetupTests(Base):
+    def test_wizard_updates_env_without_losing_lines(self):
+        from bank_agent import setup
+        setup.ENV = Path(self.tmp.name) / ".env"
+        setup.ENV.write_text("# комментарий\nKWORK_DRY_RUN=1\nBANK_TRACKER_URL=\nBANK_SALT=change-me\n", encoding="utf-8")
+        answers = iter(["", "https://go.example.ru/"] + [""] * 20)
+        setup.run_setup(ask=lambda q: next(answers))
+        env = setup.read_env()
+        self.assertEqual(env["BANK_TRACKER_URL"], "https://go.example.ru")
+        self.assertEqual(env["KWORK_DRY_RUN"], "1")
+        self.assertEqual(env["BANK_DRY_RUN"], "1")
+        self.assertNotEqual(env["BANK_SALT"], "change-me")
+        self.assertIn("# комментарий", setup.ENV.read_text(encoding="utf-8"))
 
 
 class ChannelTests(unittest.TestCase):

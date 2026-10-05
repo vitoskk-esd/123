@@ -1,6 +1,7 @@
 """CLI агента.
 
     python -m bank_agent init [alfa-credit] # создать каталог продуктов (из примера или готового набора)
+    python -m bank_agent setup              # мастер: ввести ключи, проверить их, записать .env
     python -m bank_agent check              # проверить настройки и каталог (ничего не тратит)
     python -m bank_agent serve              # всё сразу: боты, счётчик кликов, расписание (для VPS)
     python -m bank_agent daily              # один ежедневный цикл (для cron, если без serve)
@@ -89,6 +90,10 @@ def main(argv: list[str]) -> int:
         return 0
     if cmd == "check":
         return check()
+    if cmd == "setup":
+        from .setup import run_setup
+
+        return run_setup()
     if cmd == "serve":
         from .serve import serve
 

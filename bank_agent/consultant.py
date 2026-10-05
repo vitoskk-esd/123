@@ -180,6 +180,9 @@ class Consultant:
             self.db.execute("DELETE FROM reminders WHERE platform=? AND user_id=? AND sent_at IS NULL",
                             (inc.platform, inc.user_id))
             return [Outgoing("Хорошо, больше не буду писать первым. Если понадоблюсь — просто напишите.")]
+        if text.lower() == "/id":
+            return [Outgoing(f"Ваш id в {inc.platform}: {inc.user_id}\nЧтобы получать отчёты агента и команды "
+                             f"владельца, впишите его в BANK_ADMIN_{inc.platform.upper()} (python -m bank_agent setup).")]
         if text.lower() == "/delete":
             for table in ("messages", "reminders", "users"):
                 self.db.execute(f"DELETE FROM {table} WHERE platform=? AND user_id=?", (inc.platform, inc.user_id))

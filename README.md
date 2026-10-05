@@ -30,7 +30,8 @@ python3 -m http.server 8000
 ссылкам: исследует рынок, пишет и публикует посты в VK, MAX и Telegram, ведёт
 бота-консультанта, считает клики и оформления и шлёт отчёт о движении к цели.
 Стратегия и выводы исследования — [BANK_STRATEGY.md](BANK_STRATEGY.md),
-инструкция по запуску — [BANK_AGENT.md](BANK_AGENT.md).
+запуск по шагам с готовыми текстами — [BANK_LAUNCH.md](BANK_LAUNCH.md),
+справочник по агенту — [BANK_AGENT.md](BANK_AGENT.md).
 
 ## Структура
 
