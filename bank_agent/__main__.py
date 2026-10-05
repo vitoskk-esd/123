@@ -86,7 +86,10 @@ def main(argv: list[str]) -> int:
             return 1
         CONFIG.products_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(source, CONFIG.products_file)
-        print(f"Создан {CONFIG.products_file}. Впишите свои ссылки, erid и условия, затем: python -m bank_agent check")
+        if source == EXAMPLE_FILE:
+            print(f"Создан {CONFIG.products_file}. Впишите свои ссылки, erid и условия, затем: python -m bank_agent check")
+        else:
+            print(f"Каталог «{argv[1]}» установлен в {CONFIG.products_file}. Проверка: python -m bank_agent check")
         return 0
     if cmd == "check":
         return check()
