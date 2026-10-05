@@ -1,0 +1,146 @@
+"""Каталог продуктов (что продвигаем) и построение отслеживаемых ссылок.
+
+Все факты об условиях агент берёт только отсюда: модель не выдумывает ставки
+и бонусы, а ссылки в посты и в бота подставляет код, а не модель.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import urllib.parse
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from .config import CONFIG, ROOT
+
+EXAMPLE_FILE = ROOT / "bank_agent" / "products.example.json"
+TYPES = ("debit", "credit", "business", "savings", "invest", "other")
+# Источник трафика в subid: только латиница и цифры, чтобы пережить любую партнёрку.
+_SOURCE_RE = re.compile(r"^[a-z0-9]{1,16}$")
+
+
+@dataclass
+class Product:
+    id: str
+    bank: str                      # юрлицо банка, как в маркировке: «АО «Альфа-Банк»»
+    name: str                      # название продукта
+    type: str                      # debit | credit | business | savings | invest | other
+    referral_url: str
+    conditions_url: str            # страница с тарифами/условиями
+    key_benefits: list[str]
+    target_action: str             # что должен сделать клиент, чтобы банк засчитал
+    client_bonus: str = ""         # что получает клиент (бонус банка), если есть
+    important_terms: str = ""      # плата за обслуживание, ограничения и т. п.
+    restrictions: list[str] = field(default_factory=list)  # «только новые клиенты», «18+»
+    audiences: list[str] = field(default_factory=list)
+    payout_rub: float = 0
+    erid: str = ""
+    advertiser: str = ""           # текст маркировки; по умолчанию — bank
+    credit_disclosure: str = ""    # для кредитных: ставка, ПСК, льготный период
+    subid_param: str = ""          # параметр subid партнёрки (sub1, utm_content…)
+    active: bool = True
+
+    @property
+    def ad_label(self) -> str:
+        parts = ["Реклама", self.advertiser or self.bank]
+        if self.erid:
+            parts.append(f"erid: {self.erid}")
+        return ". ".join(parts)
+
+    def fact_sheet(self) -> str:
+        lines = [
+            f"id: {self.id}",
+            f"Продукт: {self.name} ({self.bank}), тип: {self.type}",
+            "Преимущества: " + "; ".join(self.key_benefits),
+            f"Что сделать клиенту для засчитывания: {self.target_action}",
+        ]
+        if self.client_bonus:
+            lines.append(f"Бонус клиенту от банка: {self.client_bonus}")
+        if self.important_terms:
+            lines.append(f"Важные условия: {self.important_terms}")
+        if self.restrictions:
+            lines.append("Ограничения: " + "; ".join(self.restrictions))
+        if self.audiences:
+            lines.append("Кому подходит: " + "; ".join(self.audiences))
+        if self.credit_disclosure:
+            lines.append(f"Стоимость кредита: {self.credit_disclosure}")
+        return "\n".join(lines)
+
+
+def problems(p: Product) -> list[str]:
+    """Что мешает законно продвигать продукт. Пустой список — всё в порядке."""
+    out = []
+    if p.type not in TYPES:
+        out.append(f"{p.id}: неизвестный тип «{p.type}» (допустимо: {', '.join(TYPES)})")
+    if not p.referral_url.startswith("https://"):
+        out.append(f"{p.id}: referral_url должен начинаться с https://")
+    if not p.conditions_url.startswith("https://"):
+        out.append(f"{p.id}: нужна ссылка на условия банка (conditions_url)")
+    if CONFIG.require_erid and not p.erid:
+        out.append(f"{p.id}: нет токена erid — возьмите его в кабинете партнёрки (без него реклама незаконна)")
+    if p.type == "credit" and not p.credit_disclosure:
+        out.append(f"{p.id}: для кредитного продукта заполните credit_disclosure (ставка, ПСК) — ст. 28 закона о рекламе")
+    if not p.key_benefits or not p.target_action:
+        out.append(f"{p.id}: заполните key_benefits и target_action")
+    return out
+
+
+def load_catalog(path: Path | None = None) -> list[Product]:
+    path = path or CONFIG.products_file
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Нет каталога продуктов {path}. Скопируйте {EXAMPLE_FILE.name} в это место "
+            "и впишите свои партнёрские ссылки, erid и условия."
+        )
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    known = set(Product.__dataclass_fields__)
+    items = [Product(**{k: v for k, v in item.items() if k in known}) for item in raw["products"]]
+    ids = [p.id for p in items]
+    if len(ids) != len(set(ids)):
+        raise ValueError("id продуктов в каталоге повторяются")
+    return items
+
+
+def sellable(catalog: list[Product]) -> list[Product]:
+    """Активные продукты без блокирующих проблем."""
+    return [p for p in catalog if p.active and not problems(p)]
+
+
+def subid(source: str, post_id: str | None) -> str:
+    return f"{source}-{post_id or '0'}"
+
+
+def parse_subid(value: str) -> tuple[str | None, str | None]:
+    if not value or "-" not in value:
+        return None, None
+    source, post = value.split("-", 1)
+    return source or None, (None if post == "0" else post)
+
+
+def _with_param(url: str, key: str, value: str) -> str:
+    parts = urllib.parse.urlsplit(url)
+    query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
+    query = [(k, v) for k, v in query if k != key] + [(key, value)]
+    return urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
+
+
+def destination(p: Product, source: str, post_id: str | None) -> str:
+    """Конечная партнёрская ссылка (с subid, если партнёрка его поддерживает)."""
+    if p.subid_param:
+        return _with_param(p.referral_url, p.subid_param, subid(source, post_id))
+    return p.referral_url
+
+
+def link(p: Product, source: str, post_id: str | None = None, user_hash: str | None = None) -> str:
+    """Ссылка для поста/бота: через трекер (считаем клики) или напрямую."""
+    if not _SOURCE_RE.match(source):
+        raise ValueError(f"источник «{source}»: только строчная латиница и цифры")
+    if not CONFIG.tracker_url:
+        return destination(p, source, post_id)
+    query = {"s": source}
+    if post_id:
+        query["p"] = post_id
+    if user_hash:
+        query["u"] = user_hash
+    return f"{CONFIG.tracker_url}/go/{urllib.parse.quote(p.id)}?{urllib.parse.urlencode(query)}"

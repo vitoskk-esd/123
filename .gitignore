@@ -21,3 +21,6 @@ data/screenshots/
 data/covers/
 data/logs/
 *.tmp
+
+# bank_agent: переписка с людьми, статистика и ключи — не в git
+data/bank/

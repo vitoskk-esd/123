@@ -1,0 +1,61 @@
+{
+  "_readme": "Пример. Скопируйте в data/bank/products.json (python -m bank_agent init) и замените ВСЕ значения на данные из своего кабинета партнёрки и с сайта банка. Цифры ниже — заглушки, а не реальные условия. Агент берёт факты только отсюда.",
+  "products": [
+    {
+      "id": "debit-cashback",
+      "bank": "АО «Название Банка»",
+      "name": "Дебетовая карта с кэшбэком",
+      "type": "debit",
+      "referral_url": "https://example.com/your-partner-link",
+      "subid_param": "sub1",
+      "conditions_url": "https://example.com/bank-card-tariffs",
+      "payout_rub": 1000,
+      "erid": "",
+      "advertiser": "",
+      "key_benefits": [
+        "кэшбэк X% на выбранные категории (впишите реальные условия)",
+        "бесплатное обслуживание при условии Y (впишите)",
+        "бесплатные переводы по СБП до Z ₽ в месяц (впишите)"
+      ],
+      "client_bonus": "впишите бонус банка новому клиенту, если он есть (например: N ₽ за первую покупку до даты)",
+      "target_action": "впишите, что засчитывает партнёрка: например, оформить карту, активировать и совершить покупку от 500 ₽ в течение 30 дней",
+      "important_terms": "впишите плату за обслуживание и главные ограничения",
+      "restrictions": ["только новые клиенты банка", "18+", "гражданство РФ"],
+      "audiences": ["студенты", "семьи", "любители маркетплейсов"],
+      "active": true
+    },
+    {
+      "id": "credit-grace",
+      "bank": "АО «Название Банка»",
+      "name": "Кредитная карта с льготным периодом",
+      "type": "credit",
+      "referral_url": "https://example.com/your-partner-link-2",
+      "subid_param": "sub1",
+      "conditions_url": "https://example.com/credit-card-tariffs",
+      "payout_rub": 3000,
+      "erid": "",
+      "credit_disclosure": "Ставка от A% до B% годовых, ПСК от C% до D% годовых (впишите из рекламных материалов партнёрки)",
+      "key_benefits": ["льготный период до N дней (впишите)", "кэшбэк (впишите)"],
+      "target_action": "впишите: например, одобрение и выдача карты",
+      "important_terms": "впишите плату за обслуживание, условия льготного периода",
+      "restrictions": ["решение о выдаче принимает банк"],
+      "audiences": ["люди с регулярным доходом, которые гасят долг в льготный период"],
+      "active": false
+    },
+    {
+      "id": "business-account",
+      "bank": "АО «Название Банка»",
+      "name": "Расчётный счёт для ИП и самозанятых",
+      "type": "business",
+      "referral_url": "https://example.com/your-partner-link-3",
+      "subid_param": "sub1",
+      "conditions_url": "https://example.com/business-tariffs",
+      "payout_rub": 3000,
+      "erid": "",
+      "key_benefits": ["впишите тариф и бесплатный период"],
+      "target_action": "впишите: например, открыть счёт и пополнить его в течение 30 дней",
+      "audiences": ["начинающие ИП", "самозанятые", "селлеры маркетплейсов"],
+      "active": false
+    }
+  ]
+}
