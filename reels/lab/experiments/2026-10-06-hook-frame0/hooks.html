@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Эксперимент: первый кадр, 3 хука</title>
+<style>
+@font-face { font-family: "Display"; src: url("../../../cashback-cats-05/fonts/LiberationSans-Bold.ttf"); }
+@font-face { font-family: "Tek"; src: url("../../../cashback-cats-05/fonts/Tektur-Medium.ttf"); }
+@font-face { font-family: "Mono"; src: url("../../../cashback-cats-05/fonts/GeistMono-Bold.ttf"); }
+:root { --ink:#eef3ff; --cyan:#3df5ff; --lime:#c8ff3d; --red:#ff3b5c; --violet:#8b5cff; --muted:#7d8aa8; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#04050a;font-family:"Display",sans-serif;color:var(--ink)}
+.bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(40,30,110,.55),transparent 60%),
+ repeating-linear-gradient(0deg,rgba(61,245,255,.06) 0 2px,transparent 2px 80px),repeating-linear-gradient(90deg,rgba(61,245,255,.06) 0 2px,transparent 2px 80px)}
+.v{position:absolute;inset:0;display:none}
+.t{position:absolute;left:60px;right:60px;text-align:center;text-transform:uppercase;letter-spacing:-3px;line-height:.98}
+.gr{color:var(--red);text-shadow:0 0 22px rgba(255,59,92,.8),0 0 80px rgba(255,59,92,.45)}
+.gl{color:var(--lime);text-shadow:0 0 22px rgba(200,255,61,.7)}
+.gc{color:var(--cyan);text-shadow:0 0 22px rgba(61,245,255,.7)}
+.card{position:absolute;border-radius:44px;background:linear-gradient(160deg,rgba(30,40,70,.8),rgba(12,16,30,.85));border:2px solid rgba(61,245,255,.5);box-shadow:0 0 50px rgba(61,245,255,.2)}
+.notif{position:absolute;left:90px;right:90px;height:170px;border-radius:36px;background:rgba(22,26,44,.92);border:2px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:30px;padding:0 36px}
+.notif .ic{width:96px;height:96px;border-radius:24px;background:linear-gradient(135deg,var(--violet),var(--cyan));flex:none;display:flex;align-items:center;justify-content:center;font-family:Tek;font-size:52px;color:#06110a}
+.notif b{display:block;font-size:38px}.notif span{font-size:32px;color:var(--muted)}
+</style></head><body><div class="bg"></div>
+
+<!-- A: число в начале -->
+<div class="v" id="A">
+  <div class="t" style="top:170px;font-size:96px">Банки урезали<br>кэшбэк</div>
+  <div class="t gr" style="top:430px;font-family:Mono;font-size:330px;letter-spacing:-14px">−10%</div>
+  <div class="card" style="left:150px;right:150px;top:880px;height:520px;padding:50px">
+    <div style="font-family:Tek;font-size:34px;letter-spacing:6px;color:var(--cyan)">КЭШБЭК • 2026</div>
+    <div style="display:flex;align-items:flex-end;gap:40px;height:330px;margin-top:40px">
+      <div style="flex:1;height:100%;border-radius:18px;background:linear-gradient(0deg,var(--violet),var(--cyan))"></div>
+      <div style="flex:1;height:90%;border-radius:18px;background:linear-gradient(0deg,#7a1630,var(--red));box-shadow:0 0 40px rgba(255,59,92,.6)"></div>
+    </div>
+    <div style="display:flex;justify-content:space-around;font-family:Mono;font-size:30px;color:var(--muted);margin-top:14px"><span>2025</span><span>2026</span></div>
+  </div>
+</div>
+
+<!-- B: уведомление-потеря -->
+<div class="v" id="B">
+  <div class="t" style="top:170px;font-size:104px">Тебе тоже<br><span class="gr">это пришло?</span></div>
+  <div class="notif" style="top:640px;transform:rotate(-2deg)"><div class="ic">₽</div><div><b>Условия кэшбэка изменены</b><span>категория «Маркетплейсы» отключена</span></div></div>
+  <div class="notif" style="top:850px;transform:rotate(1.5deg)"><div class="ic">₽</div><div><b>Новый лимит: 3 000 баллов</b><span>сверх лимита не начисляется</span></div></div>
+  <div class="notif" style="top:1060px;transform:rotate(-1deg);border-color:rgba(255,59,92,.6);box-shadow:0 0 40px rgba(255,59,92,.35)"><div class="ic" style="background:linear-gradient(135deg,#7a1630,var(--red))">!</div><div><b>Лучший кэшбэк — по подписке</b><span>399 ₽ в месяц</span></div></div>
+</div>
+
+<!-- C: контраст двух колонок -->
+<div class="v" id="C">
+  <div class="t" style="top:170px;font-size:96px">Одно урезали.<br><span class="gl">Другое — нет</span></div>
+  <div class="card" style="left:70px;width:450px;top:640px;height:700px;border-color:rgba(255,59,92,.6);text-align:center;padding-top:70px">
+    <div style="font-family:Tek;font-size:40px;letter-spacing:4px;color:var(--muted)">КЭШБЭК</div>
+    <div class="gr" style="font-family:Mono;font-size:170px;margin-top:60px">↓</div>
+    <div class="gr" style="font-family:Mono;font-size:90px;margin-top:30px">−10%</div>
+  </div>
+  <div class="card" style="left:560px;width:450px;top:640px;height:700px;border-color:rgba(200,255,61,.6);text-align:center;padding-top:70px">
+    <div style="font-family:Tek;font-size:40px;letter-spacing:4px;color:var(--muted)">БОНУС НОВИЧКУ</div>
+    <div class="gl" style="font-family:Mono;font-size:170px;margin-top:60px">✓</div>
+    <div class="gl" style="font-family:Mono;font-size:90px;margin-top:30px">ЕСТЬ</div>
+  </div>
+</div>
+<script>document.getElementById((location.search.match(/v=(\w)/)||[,"A"])[1]).style.display="block";</script>
+</body></html>

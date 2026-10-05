@@ -87,6 +87,13 @@ arrive under `/root/.claude/uploads/…`; copy into the reel folder.
   against that piece's script words, put back at the same samples → 0.98.
   It is now the default VC path in `reels/bank-calc-04/voice.py`; copy that
   file for new reels.
+- Reel #5: VC garbles short isolated words between pauses («Коровы.»,
+  «Верблюд.», «Ссылка в шапке») — 0.93 vs 0.98 clean even after 13 tries per
+  piece; more seeds and wider context (0.6 s) barely help. When the script
+  has one-word lines, ask the owner to read them in a phrase («Коровы — у меня
+  даже кота нет»), or offer his natural voice as an alternative alongside VC.
+  Run VC jobs with a long background timeout (≥ 1 h): a 5-piece re-run hit
+  the 30-min default and was killed.
 
 ## 5. QA before sending (do all, every time)
 
@@ -104,6 +111,13 @@ arrive under `/root/.claude/uploads/…`; copy into the reel folder.
   found by `reels/lab/analyze.py`, fixed by flashing only on later beats.
 - Run `python3 reels/lab/analyze.py reel_final.mp4 name` on every finished reel
   and look at `sheet_hook.jpg` before sending.
+- Frame 0 must carry the whole hook, not its first two words (reel #4 showed
+  «СКОЛЬКО БАНК» until 2.0 s). Glance test: view frame 0 at 25% size — only
+  text from ~90 px and 1–2 big elements survive; small UI copy is texture
+  (`reels/lab/experiments/2026-10-06-hook-frame0`). For "taken from you /
+  you can still get" topics a two-column contrast frame reads best muted.
+- On-screen hook text: 3–7 words that sharpen the spoken line, not repeat it
+  (meme formats like reel #5 are the exception).
 
 ## 6. Environment gotchas
 
