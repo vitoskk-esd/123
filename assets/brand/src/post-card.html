@@ -1,0 +1,33 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="brand.css">
+<style>
+  /* Карточка к посту 1080×1350 (4:5 — занимает больше места в ленте VK). */
+  body { background: var(--ink); color: var(--white); padding: 84px 84px 0; position: relative; }
+  .wordmark { font-size: 28px; display: flex; }
+  .wordmark .mark { width: 50px; height: 37px; }
+  .wordmark .mark .pct { font-size: 26px; }
+  .tag { display: table; margin-top: 64px; background: rgba(47,211,154,.16); color: var(--mint);
+         font-weight: 700; font-size: 28px; padding: 10px 22px; border-radius: 999px; }
+  h1 { font-size: 80px; line-height: 1.08; margin-top: 30px; }
+  h1 em { font-style: normal; color: var(--mint); }
+  .steps { margin-top: 64px; display: grid; gap: 24px; }
+  .step { display: flex; gap: 28px; align-items: center; background: var(--ink-2); border-radius: 28px; padding: 34px 34px; }
+  .n { flex: none; width: 76px; height: 76px; border-radius: 22px; background: var(--sun); color: var(--ink);
+       display: grid; place-items: center; font-family: "Unbounded"; font-weight: 800; font-size: 38px; }
+  .step p { font-size: 34px; line-height: 1.25; font-weight: 700; }
+  .step small { display: block; font-size: 25px; font-weight: 500; color: var(--muted-on-ink); margin-top: 6px; }
+  .warn { margin-top: 40px; font-size: 28px; color: var(--muted-on-ink); }
+  .warn b { color: var(--sun); }
+  .legal { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 84px 26px; background: rgba(0,0,0,.22);
+           font-size: 19px; line-height: 1.4; color: rgba(255,255,255,.7); }
+</style></head><body>
+  <div class="wordmark"><span class="mark"><span class="card"></span><span class="pct">%</span><span class="strike"></span></span>Без переплат</div>
+  <span class="tag">Кредитка · 3 правила</span>
+  <h1 class="display">Как не платить <em>проценты</em> по кредитке</h1>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><p>Платите картой как обычно<small>покупки попадают в беспроцентный период</small></p></div>
+    <div class="step"><span class="n">2</span><p>Каждый месяц — минимальный платёж<small>3–10% долга, но не меньше 300 ₽</small></p></div>
+    <div class="step"><span class="n">3</span><p>Гасите весь долг до конца льготы<small>тогда проценты не начисляются</small></p></div>
+  </div>
+  <p class="warn"><b>Пропустили платёж</b> — проценты начислятся с даты первой покупки.</p>
+  <div class="legal">Реклама. АО «Альфа-Банк», ИНН 7728168971. erid: 2W5zFJjJPEG. Ставка 58,49–58,99% годовых, ПСК 58,522–59,023% годовых. Подробные условия — в тексте поста.</div>
+</body></html>

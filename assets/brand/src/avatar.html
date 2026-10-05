@@ -1,0 +1,12 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="brand.css">
+<style>
+  body { background: var(--ink); display: grid; place-items: center; }
+  /* VK обрезает аватар в круг: знак держим в центральных ~70%. */
+  .glow { position: absolute; width: 320px; height: 320px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(47,211,154,.22), rgba(47,211,154,0) 65%); }
+  .mark { width: 236px; height: 168px; font-size: 56px; }
+  .mark .pct { font-size: 128px; padding-bottom: 4px; }
+</style></head><body>
+  <div class="glow"></div>
+  <div class="mark"><div class="card"></div><div class="pct">%</div><div class="strike"></div></div>
+</body></html>

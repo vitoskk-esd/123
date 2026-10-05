@@ -1,0 +1,45 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="brand.css">
+<style>
+  /* Обложка клипа 1080×1920. Снизу ~380px и справа ~170px перекрывает интерфейс VK Клипов. */
+  body { background: var(--ink); color: var(--white); position: relative; }
+  .ad { position: absolute; left: 70px; top: 90px; font-size: 26px; color: rgba(255,255,255,.75);
+        background: rgba(0,0,0,.25); padding: 10px 18px; border-radius: 12px; }
+  .hook { position: absolute; left: 70px; top: 230px; width: 860px; }
+  .hook h1 { font-size: 96px; line-height: 1.04; }
+  .hook h1 em { font-style: normal; color: var(--ink); background: var(--sun); padding: 0 14px; border-radius: 16px;
+                -webkit-box-decoration-break: clone; }
+  .cal { position: absolute; left: 70px; top: 720px; width: 820px; background: var(--paper); color: var(--ink);
+         border-radius: 36px; padding: 34px 36px 40px; }
+  .cal .m { font-family: "Unbounded"; font-weight: 800; font-size: 34px; margin-bottom: 22px; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+  .d { height: 74px; border-radius: 16px; display: grid; place-items: center; font-weight: 700; font-size: 28px; background: #E6ECE4; }
+  .d.e { background: transparent; }
+  .d.start { background: var(--mint); font-size: 34px; }
+  .d.buy { background: var(--white); outline: 5px solid var(--ink); }
+  .legend { display: flex; gap: 30px; margin-top: 24px; font-size: 26px; font-weight: 700; }
+  .legend span::before { content: ""; display: inline-block; width: 22px; height: 22px; border-radius: 6px; margin-right: 10px; vertical-align: -3px; }
+  .legend .a::before { background: var(--mint); }
+  .legend .b::before { background: var(--white); outline: 4px solid var(--ink); }
+  .cta { position: absolute; left: 70px; top: 1400px; width: 820px; font-size: 34px; line-height: 1.3; font-weight: 700; }
+  .cta b { color: var(--mint); }
+  .psk { position: absolute; left: 70px; top: 1500px; width: 820px; font-size: 22px; color: rgba(255,255,255,.62); }
+</style></head><body>
+  <div class="ad">Реклама · АО «Альфа-Банк»</div>
+  <div class="hook"><h1 class="display">60 дней без процентов — <em>на самом деле не&nbsp;60</em></h1></div>
+  <div class="cal">
+    <div class="m">Октябрь</div>
+    <div class="grid" id="g"></div>
+    <div class="legend"><span class="a">отсчёт идёт отсюда</span><span class="b">день покупки</span></div>
+  </div>
+  <div class="cta">Почему так — за 20 секунд. Вопросы: напишите <b>«КАРТА»</b> в сообщения сообщества</div>
+  <div class="psk">Ставка 58,49–58,99%, ПСК 58,522–59,023% годовых. Условия — в описании.</div>
+  <script>
+    // Октябрь 2026 начинается с четверга: 3 пустые клетки (пн–ср).
+    const g = document.getElementById("g");
+    for (let i = 0; i < 3; i++) g.insertAdjacentHTML("beforeend", '<div class="d e"></div>');
+    for (let d = 1; d <= 31; d++) {
+      const cls = d === 1 ? "d start" : d === 25 ? "d buy" : "d";
+      g.insertAdjacentHTML("beforeend", `<div class="${cls}">${d}</div>`);
+    }
+  </script>
+</body></html>
