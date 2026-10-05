@@ -31,6 +31,7 @@ python3 -m http.server 8000
 бота-консультанта, считает клики и оформления и шлёт отчёт о движении к цели.
 Стратегия и выводы исследования — [BANK_STRATEGY.md](BANK_STRATEGY.md),
 запуск по шагам с готовыми текстами — [BANK_LAUNCH.md](BANK_LAUNCH.md),
+челлендж «100 оформлений без бюджета» — [BANK_CHALLENGE.md](BANK_CHALLENGE.md),
 справочник по агенту — [BANK_AGENT.md](BANK_AGENT.md).
 
 ## Структура

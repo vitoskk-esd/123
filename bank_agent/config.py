@@ -96,6 +96,13 @@ class Config:
     dry_run: bool = _bool("BANK_DRY_RUN", True)
     research: bool = _bool("BANK_RESEARCH", True)
     research_max_searches: int = _int("BANK_RESEARCH_MAX_SEARCHES", 12)
+    # Экономия API: исследование раз в N дней (самый дорогой этап — веб-поиск).
+    research_every_days: int = _int("BANK_RESEARCH_EVERY_DAYS", 1)
+    # Глубина размышлений модели при написании постов: low | medium | high.
+    content_effort: str = os.getenv("BANK_CONTENT_EFFORT", "high")
+    # Сколько можно тратить на платную рекламу в месяц. 0 — только бесплатные
+    # методы: агент не предлагает покупать размещения.
+    ads_budget_rub: int = _int("BANK_ADS_BUDGET_RUB", 0)
 
     # --- Трекинг кликов -----------------------------------------------------
     # Публичный адрес сервера `serve` (например https://go.example.ru). Пусто —

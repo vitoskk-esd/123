@@ -11,10 +11,20 @@ from .funnel import goal_status
 from .products import check_terms, load_catalog, sellable
 
 
+def _research_due() -> bool:
+    """Исследование — самый дорогой этап, его можно запускать раз в несколько дней."""
+    log = storage.load_knowledge()["research_log"]
+    if not log:
+        return True
+    last = dt.date.fromisoformat(log[-1]["date"])
+    return (dt.date.today() - last).days >= max(1, CONFIG.research_every_days)
+
+
 def run_daily(llm, db: DB, publish: bool = True) -> int:
     """publish=False — когда публикацией по расписанию занимается процесс `serve`."""
     from .content import generate_day
     from .publish import enabled_channels, publish_due
+    from .questions import find_questions
     from .report import daily_report, notify_owner
     from .research import run_research
     from .strategy import run_reflection
@@ -31,12 +41,13 @@ def run_daily(llm, db: DB, publish: bool = True) -> int:
     status = goal_status(db, dt.date.today(), catalog)
 
     stages = []
-    if CONFIG.research:
+    if CONFIG.research and _research_due():
         stages.append(("исследование", lambda: run_research(llm, catalog)))
     stages += [
         ("стратегия", lambda: run_reflection(llm, db, status, products)),
         ("контент", lambda: generate_day(llm, db, products, enabled_channels())),
     ]
+    stages.append(("вопросы людей", lambda: find_questions(llm, products)))
     if publish:
         stages.append(("публикация", lambda: publish_due(db, catalog)))
     failures = 0

@@ -106,8 +106,11 @@ def status_text(st: GoalStatus) -> str:
         f"≈ {st.clicks_needed_per_day} кликов в день.\n"
         f"Конверсия клик→оформление: {st.cr:.1%} ({'факт' if st.cr_is_measured else 'пока допущение'}).\n"
         f"Прогноз к дедлайну: {st.projection} — {pace}.\n"
-        f"Клик окупается, если стоит дешевле {st.break_even_cpc:.0f} ₽. "
-        f"Добрать остаток посевами ≈ {_money(st.budget_for_rest)} ₽."
+        + (f"Клик окупается, если стоит дешевле {st.break_even_cpc:.0f} ₽. "
+           f"Добрать остаток посевами ≈ {_money(st.budget_for_rest)} ₽."
+           if CONFIG.ads_budget_rub else
+           f"Режим без бюджета: каждый клик стоит вам только времени, а приносит в среднем "
+           f"{st.break_even_cpc:.0f} ₽.")
     )
 
 
@@ -133,9 +136,9 @@ def daily_report(db: DB, catalog: list[Product], today: dt.date | None = None) -
         if p.active:
             todo += problems(p)
     outbox = storage.outbox_dir()
-    drafts = sorted(outbox.glob("*.md"))
-    if drafts:
-        todo.append(f"опубликуйте вручную {len(drafts)} черновиков (Дзен, видео): {outbox}")
+    plan = _owner_plan(outbox)
+    if plan:
+        lines += ["", f"🗓 Ваш план на сегодня (файлы: {outbox}):"] + [f"• {t}" for t in plan]
     failed = db.one("SELECT COUNT(*) n FROM posts WHERE status='failed' AND created_at>=?", (since,))["n"]
     if failed:
         todo.append(f"{failed} постов не опубликовались — см. логи")
@@ -150,6 +153,23 @@ def daily_report(db: DB, catalog: list[Product], today: dt.date | None = None) -
     if todo:
         lines += ["", "Нужно от вас:"] + [f"• {t}" for t in todo]
     return "\n".join(lines)
+
+
+def _owner_plan(outbox) -> list[str]:
+    """То, что за владельца сделать нельзя: снять видео, опубликовать статью, ответить людям."""
+    shorts = sorted(outbox.glob("shorts-*.md"))
+    dzen = sorted(outbox.glob("dzen-*.md"))
+    plan = []
+    if shorts:
+        plan.append(f"🎬 снять и выложить в VK Клипы {len(shorts)} ролика по сценариям shorts-*.md "
+                    "(15–30 сек, цепляющие первые 3 секунды, надпись «Реклама» и банк в кадре)")
+    if dzen:
+        plan.append(f"📝 опубликовать в Дзене {len(dzen)} статью: dzen-*.md")
+    questions = outbox / "questions.md"
+    if questions.exists():
+        n = questions.read_text(encoding="utf-8").count("\n## ")
+        plan.append(f"💬 ответить людям во VK ({n} вопросов): questions.md — от себя, без ссылок в комментариях")
+    return plan
 
 
 def notify_owner(text: str) -> int:

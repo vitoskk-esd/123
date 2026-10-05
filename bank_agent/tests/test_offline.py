@@ -281,7 +281,10 @@ class AlfaCreditTests(Base):
         }
         for text, why in bad.items():
             self.assertTrue(any(why in i for i in check_body(text, self.p, "vk")), text)
+        self.assertTrue(any("1-го числа" in i for i in check_body(
+            ok + " У вас 60 дней без процентов с момента покупки.", self.p, "vk")))
         for fine in (" Продление до 150 дней — платная услуга.",
+                     " 60 дней считаются с 1-го числа месяца первой покупки.",
                      " До 150 дней без процентов на перевод для погашения кредитки другого банка.",
                      " Кэшбэк баллами — только с платной подпиской «Альфа-Смарт».",
                      " Обслуживание 0 ₽ и в первый год, и со второго."):
@@ -343,6 +346,57 @@ class ReportTests(Base):
         text = daily_report(self.db, [product()], dt.date(2026, 10, 5))
         self.assertIn("Цель: 100", text)
         self.assertIn("сейчас 1 (1%), в обработке 1", text)
+
+
+class ChallengeTests(Base):
+    """Режим без бюджета: поиск вопросов людей, план владельца, экономия на исследовании."""
+
+    def test_find_questions_and_owner_plan(self):
+        from bank_agent.questions import find_questions
+        posts = [
+            {"owner_id": 1, "id": 10, "text": "Посоветуйте кредитку с беспроцентным периодом?", "comments": {"can_post": 1}},
+            {"owner_id": 2, "id": 20, "text": "Продаю диван, недорого", "comments": {"can_post": 1}},
+            {"owner_id": 3, "id": 30, "text": "Какую кредитку оформить? Комменты закрыты", "comments": {"can_post": 0}},
+            {"owner_id": 4, "id": 40, "text": "Кто пользовался кредиткой Альфы?", "marked_as_ads": 1},
+        ]
+        seen_queries = []
+
+        def search(q, start):
+            seen_queries.append(q)
+            return posts
+
+        llm = FakeLLM(asks=[lambda prompt: {"answers": [
+            {"id": "1_10", "relevant": True, "reply": "Смотрите на ПСК и условия льготного периода."}]}])
+        p = product(type="credit", credit_disclosure="ПСК 58%")
+        found = find_questions(llm, [p], search=search)
+        self.assertEqual([f["url"] for f in found], ["https://vk.com/wall1_10"])
+        self.assertIn("[1_10]", llm.prompts[0])
+        self.assertNotIn("[2_20]", llm.prompts[0])   # не вопрос
+        self.assertNotIn("[3_30]", llm.prompts[0])   # комментарии закрыты
+        self.assertNotIn("[4_40]", llm.prompts[0])   # реклама
+        self.assertIn("посоветуйте кредитную карту", seen_queries)
+        # Повторно уже виденные посты модели не отправляются.
+        self.assertEqual(find_questions(FakeLLM(), [p], search=search), [])
+        CONFIG.ads_budget_rub = 0
+        storage.outbox_dir().joinpath("shorts-ab.md").write_text("x", encoding="utf-8")
+        report = daily_report(self.db, [product()], dt.date(2026, 10, 5))
+        self.assertIn("Ваш план на сегодня", report)
+        self.assertIn("VK Клипы 1 ролика", report)
+        self.assertIn("ответить людям во VK (1 вопросов)", report)
+        self.assertIn("Режим без бюджета", report)
+        self.assertNotIn("посевами", report)
+
+    def test_research_cadence(self):
+        from bank_agent.cycle import _research_due
+        CONFIG.research_every_days = 3
+        try:
+            self.assertTrue(_research_due())
+            kb = storage.load_knowledge()
+            kb["research_log"].append({"date": (dt.date.today() - dt.timedelta(days=2)).isoformat(), "focus": []})
+            storage.save_knowledge(kb)
+            self.assertFalse(_research_due())
+        finally:
+            CONFIG.research_every_days = 1
 
 
 class SetupTests(Base):
