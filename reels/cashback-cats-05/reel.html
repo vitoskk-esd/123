@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Reel: категории кэшбэка</title>
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root { --bg: #04050a; --ink: #eef3ff; --cyan: #3df5ff; --lime: #c8ff3d; --red: #ff3b5c; --violet: #8b5cff; --muted: #7d8aa8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  .emo { font-family: "Noto Color Emoji", sans-serif; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #bg { position: absolute; inset: 0; }
+  #tint { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(255,59,92,.45), transparent 65%); opacity: 0; }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+  .center { position: absolute; left: 60px; right: 60px; text-align: center; }
+  .glow-c { text-shadow: 0 0 18px rgba(61,245,255,.7), 0 0 60px rgba(61,245,255,.35); }
+  .glow-r { text-shadow: 0 0 18px rgba(255,59,92,.8), 0 0 70px rgba(255,59,92,.45); }
+  .glow-l { text-shadow: 0 0 18px rgba(200,255,61,.75), 0 0 60px rgba(200,255,61,.35); }
+
+  /* мем-заголовок: стоит с кадра 0 */
+  #head { top: 140px; font-size: 80px; line-height: 1.02; letter-spacing: -2px; text-transform: uppercase;
+          text-shadow: 0 6px 0 rgba(0,0,0,.6), 0 0 40px rgba(0,0,0,.7); }
+  #head .k { color: var(--cyan); }
+
+  /* панель «приложения банка» */
+  #app { position: absolute; left: 70px; right: 70px; top: 520px; height: 1060px; border-radius: 56px;
+         background: linear-gradient(165deg, rgba(28,36,64,.78), rgba(10,13,26,.86)); border: 2px solid rgba(61,245,255,.5);
+         box-shadow: 0 0 60px rgba(61,245,255,.2), inset 0 1px 0 rgba(255,255,255,.12); overflow: hidden; perspective: 1800px; }
+  #appBar { display: flex; justify-content: space-between; align-items: center; padding: 36px 48px 0; font-family: "Tek"; font-size: 34px; letter-spacing: 5px; color: var(--cyan); }
+  #appBar .m { color: var(--muted); }
+  #dots { position: absolute; left: 0; right: 0; top: 108px; display: flex; justify-content: center; gap: 16px; }
+  #dots i { width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,.14); }
+  #dots i.on { background: var(--lime); box-shadow: 0 0 16px var(--lime); }
+  #dots i.bad { background: var(--red); box-shadow: 0 0 16px var(--red); }
+
+  /* загрузка (хук) */
+  #load { position: absolute; left: 0; right: 0; top: 330px; text-align: center; }
+  #spin { width: 190px; height: 190px; margin: 0 auto; border-radius: 50%; border: 12px solid rgba(61,245,255,.15); border-top-color: var(--cyan);
+          box-shadow: 0 0 40px rgba(61,245,255,.35); }
+  #loadT { margin-top: 60px; font-size: 54px; letter-spacing: -1px; }
+  #loadS { margin-top: 18px; font-family: "Mono"; font-size: 32px; color: var(--muted); }
+  #loadBar { width: 640px; height: 12px; margin: 44px auto 0; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; }
+  #loadBar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--violet), var(--cyan)); box-shadow: 0 0 20px var(--cyan); }
+
+  /* карточка категории */
+  .card { position: absolute; left: 0; right: 0; top: 160px; text-align: center; opacity: 0; transform-style: preserve-3d; }
+  .orb { position: relative; width: 340px; height: 340px; margin: 0 auto; border-radius: 50%;
+         background: radial-gradient(circle at 50% 45%, rgba(61,245,255,.28), rgba(139,92,255,.12) 55%, transparent 70%); }
+  .orb .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(61,245,255,.55); }
+  .orb .ring2 { position: absolute; inset: -34px; border-radius: 50%; border: 2px dashed rgba(139,92,255,.5); }
+  .orb .e { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 195px;
+            filter: drop-shadow(0 0 30px rgba(61,245,255,.55)); }
+  .name { margin-top: 44px; font-size: 72px; line-height: 1.02; letter-spacing: -2px; text-transform: uppercase; padding: 0 40px; }
+  .pct { font-family: "Mono"; font-size: 150px; letter-spacing: -6px; color: var(--lime); margin-top: 10px; }
+  .re { font-size: 44px; color: var(--muted); margin-top: 6px; font-style: italic; }
+  .card.bad .orb { background: radial-gradient(circle at 50% 45%, rgba(255,59,92,.35), rgba(139,92,255,.1) 55%, transparent 70%); }
+  .card.bad .orb .ring { border-color: rgba(255,59,92,.7); }
+  .card.bad .orb .e { filter: drop-shadow(0 0 30px rgba(255,59,92,.6)); }
+  .card.bad .pct { color: var(--red); }
+  .card.bad .re { color: var(--ink); }
+  #stamp { position: absolute; left: 50%; top: 330px; padding: 14px 34px; border: 6px solid var(--red); border-radius: 18px; color: var(--red);
+           font-family: "Tek"; font-size: 54px; letter-spacing: 4px; white-space: nowrap; opacity: 0; }
+
+  /* поворот */
+  #twist { top: 640px; font-size: 128px; line-height: .96; letter-spacing: -4px; text-transform: uppercase; opacity: 0; }
+
+  /* телеграм */
+  #cta { position: absolute; inset: 0; opacity: 0; }
+  #tg { position: absolute; left: 80px; right: 80px; top: 300px; border-radius: 44px; overflow: hidden; background: rgba(14,20,34,.92);
+        border: 2px solid rgba(61,245,255,.55); box-shadow: 0 0 60px rgba(61,245,255,.25); }
+  #tgHead { display: flex; align-items: center; gap: 24px; padding: 30px 36px; background: rgba(61,245,255,.08); }
+  #tgAva { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, var(--lime), var(--cyan)); display: flex; align-items: center;
+           justify-content: center; font-family: "Tek"; font-size: 56px; color: #06110a; }
+  #tgHead .n { font-size: 46px; } #tgHead .s { font-size: 30px; color: var(--muted); }
+  #tgPost { padding: 30px 36px 10px; font-size: 50px; line-height: 1.15; }
+  .gl { display: flex; gap: 22px; align-items: center; font-size: 44px; padding: 20px 36px; border-top: 2px solid rgba(61,245,255,.12); opacity: 0; }
+  .gl b { font-family: "Tek"; color: var(--lime); font-size: 44px; width: 50px; }
+  #linkText { top: 1040px; font-size: 92px; letter-spacing: -3px; text-transform: uppercase; line-height: .98; opacity: 0; }
+  #upArrow { position: absolute; left: 470px; top: 40px; width: 140px; height: 160px; opacity: 0; }
+
+  #disc { position: absolute; left: 120px; right: 120px; top: 1640px; font-size: 26px; color: #5d6782; text-align: center; letter-spacing: .5px; }
+  #scan { position: absolute; inset: 0; pointer-events: none; opacity: .16;
+          background: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 2px, transparent 2px 5px); }
+  #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.65)); }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1080" height="1920"></canvas>
+  <div id="tint"></div>
+  <div id="cam">
+    <div class="center" id="head">Когда банк<br>выбрал тебе<br><span class="k glow-c">категории кэшбэка</span><br>на месяц:</div>
+    <div id="app">
+      <div id="appBar"><span>КЭШБЭК • НОЯБРЬ</span><span class="m" id="cnt">ПОДБОР</span></div>
+      <div id="dots"></div>
+      <div id="load"><div id="spin"></div><div id="loadT">Подбираем категории<br>специально для вас…</div><div id="loadS">анализ ваших покупок</div><div id="loadBar"><i></i></div></div>
+      <div id="cards"></div>
+      <div id="stamp">САМОЕ НУЖНОЕ</div>
+    </div>
+    <div class="center" id="twist">А теперь<br><span class="glow-l" style="color:var(--lime)">без шуток</span> <span class="emo">👇</span></div>
+    <div id="cta">
+      <svg id="upArrow" viewBox="0 0 140 160"><path d="M70 150 V 20" stroke="#c8ff3d" stroke-width="16" stroke-linecap="round"/><path d="M20 70 L70 18 L120 70" stroke="#c8ff3d" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div id="tg">
+        <div id="tgHead"><div id="tgAva">₽</div><div><div class="n">Бонусы банков</div><div class="s">канал • ссылка в шапке профиля</div></div></div>
+        <div id="tgPost">Где кэшбэк реально есть <span class="emo">🔥</span></div>
+        <div class="gl" id="g1"><b>1</b>Кэшбэк на то, что ты покупаешь</div>
+        <div class="gl" id="g2"><b>2</b>Бонусы новым клиентам</div>
+        <div class="gl" id="g3"><b>3</b>Обслуживание за 0 ₽</div>
+      </div>
+      <div class="center" id="linkText">Подробный гайд<br>в телеграме<br><span class="glow-l" style="color:var(--lime)">ссылка в шапке ↑</span></div>
+    </div>
+  </div>
+  <div id="disc">Юмор. Категории вымышлены, совпадения случайны.</div>
+  <div id="scan"></div><div id="vig"></div><div id="flash"></div>
+</div>
+
+<script src="timeline.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = x => x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const outBack = x => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const lerp = (a, b, x) => a + (b - a) * x;
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const T = TIMELINE, ALL = [...T.cats, T.punch];
+
+// карточки и точки-индикатор
+$("cards").innerHTML = ALL.map((c, i) => `<div class="card${i === T.cats.length ? " bad" : ""}" id="c${i}">
+  <div class="orb"><div class="ring2"></div><div class="ring"></div><div class="e emo">${c.e}</div></div>
+  <div class="name">${c.name}</div><div class="pct">${c.pct}</div><div class="re">— ${c.re}</div></div>`).join("");
+$("dots").innerHTML = ALL.map(() => "<i></i>").join("");
+
+// --- фон: частицы и неоновая сетка (детерминированно от t) ---
+const cv = $("bg"), cx = cv.getContext("2d");
+const PART = Array.from({ length: 160 }, (_, i) => ({ x: rnd(i) * 1080, y: rnd(i + 500) * 1920, z: .3 + rnd(i + 900) * .7, h: rnd(i + 77) }));
+function drawBg(t, heat) {
+  cx.fillStyle = "#04050a"; cx.fillRect(0, 0, 1080, 1920);
+  const g = cx.createRadialGradient(540, 900, 50, 540, 900, 1100);
+  g.addColorStop(0, heat ? "rgba(120,20,40,.55)" : "rgba(40,30,110,.55)"); g.addColorStop(1, "rgba(4,5,10,0)");
+  cx.fillStyle = g; cx.fillRect(0, 0, 1080, 1920);
+  const hy = 1260, col = heat ? "255,59,92" : "61,245,255";
+  cx.lineWidth = 2;
+  for (let i = -12; i <= 12; i++) { cx.strokeStyle = `rgba(${col},.14)`; cx.beginPath(); cx.moveTo(540 + i * 40, hy); cx.lineTo(540 + i * 260, 1920); cx.stroke(); }
+  const off = (t * .9) % 1;
+  for (let k = 0; k < 14; k++) {
+    const d = (k + off) / 14, y = hy + Math.pow(d, 2.2) * (1920 - hy);
+    cx.strokeStyle = `rgba(${col},${.05 + d * .2})`; cx.beginPath(); cx.moveTo(0, y); cx.lineTo(1080, y); cx.stroke();
+  }
+  for (const q of PART) {
+    const y = (q.y - t * 60 * q.z + 1920 * 4) % 1920, x = q.x + Math.sin(t * .6 + q.h * 9) * 20 * q.z;
+    const a = .25 + q.z * .55;
+    cx.fillStyle = q.h > .8 ? `rgba(200,255,61,${a})` : (q.h > .55 ? `rgba(139,92,255,${a})` : `rgba(61,245,255,${a})`);
+    cx.beginPath(); cx.arc(x, y, 1.2 + q.z * 2.6, 0, 6.283); cx.fill();
+  }
+}
+
+function renderAt(t) {
+  const heat = t >= T.PUNCH_AT && t < T.TWIST_AT;
+  drawBg(t, heat);
+  $("tint").style.opacity = heat ? .8 : 0;
+
+  // тряска и вспышка на ударах
+  let shake = 0, fl = 0;
+  for (const s of T.sfx.impact) { const d = t - s; if (d >= 0 && d < .45) shake = Math.max(shake, (1 - d / .45) * 30); if (d >= 0 && d < .12) fl = Math.max(fl, 1 - d / .12); }
+  for (const s of T.sfx.swipe) { const d = t - s; if (d >= 0 && d < .2) shake = Math.max(shake, (1 - d / .2) * 6); }
+  $("cam").style.transform = `translate(${(rnd(t * 50) - .5) * shake}px, ${(rnd(t * 51) - .5) * shake}px)`;
+  $("flash").style.opacity = fl * .7;
+
+  // заголовок и панель видны с кадра 0 до поворота
+  const out = p(t, T.TWIST_AT - .15, T.TWIST_AT);
+  const loopIn = p(t, T.duration - .35, T.duration); // в конце возвращаемся к первому кадру — петля
+  const appVis = Math.max(1 - out, loopIn);
+  $("head").style.opacity = appVis; $("app").style.opacity = appVis;
+  $("app").style.transform = `scale(${1 + out * .1})`;
+
+  // загрузка (хук): спиннер крутится, полоса бежит
+  const loadOn = t < T.HOOK || loopIn > 0;
+  $("load").style.opacity = loadOn ? (t < T.HOOK ? 1 - p(t, T.HOOK - .12, T.HOOK) : loopIn) : 0;
+  $("spin").style.transform = `rotate(${t * 540}deg)`;
+  $("loadBar").firstElementChild.style.width = `${(t < T.HOOK ? lerp(.18, 1, p(t, 0, T.HOOK)) : .18) * 100}%`;
+  $("cnt").textContent = t < T.HOOK || loopIn > 0 ? "ПОДБОР" : "ВЫБРАНО ДЛЯ ВАС";
+
+  // карточки: свайп справа налево в 3D
+  ALL.forEach((c, i) => {
+    const a = i < T.cats.length ? T.catStart(i) : T.PUNCH_AT;
+    const b = i < T.cats.length ? a + T.STEP : T.TWIST_AT;
+    const el = $("c" + i);
+    if (t < a || t >= b || loopIn > 0) { el.style.opacity = 0; return; }
+    const k = outExpo(p(t, a, a + .28));
+    const o = p(t, b - .14, b);
+    el.style.opacity = clamp(k * 1.6) * (1 - o);
+    el.style.transform = `translateX(${(1 - k) * 700 - o * 700}px) rotateY(${(1 - k) * -40 + o * 40}deg) scale(${lerp(.85, 1, k)})`;
+    el.style.filter = o > 0 ? `blur(${o * 14}px)` : "none";
+    const orb = el.querySelector(".orb");
+    orb.style.transform = `translateY(${Math.sin(t * 3 + i) * 10}px)`;
+    el.querySelector(".ring2").style.transform = `rotate(${t * 60}deg)`;
+    const pk = outBack(p(t, a + .12, a + .42));
+    el.querySelector(".pct").style.transform = `scale(${lerp(1.8, 1, pk)})`;
+    el.querySelector(".pct").style.opacity = clamp(pk * 2);
+    el.querySelector(".re").style.opacity = p(t, a + .4, a + .6);
+    if (i === T.cats.length) { // удар: глитч процента
+      const d = t - T.PUNCH_AT, gl = d < .7 ? 1 - d / .7 : 0, gx = gl ? (rnd(t * 40) - .5) * 40 * gl : 0;
+      el.querySelector(".pct").style.textShadow = gl ? `${gx}px 0 #3df5ff, ${-gx}px 0 #ff00aa, 0 0 40px rgba(255,59,92,.8)` : "0 0 30px rgba(255,59,92,.7)";
+      el.querySelector(".re").style.opacity = p(t, a + .9, a + 1.1);
+    }
+  });
+  // индикатор
+  [...$("dots").children].forEach((d, i) => {
+    const a = i < T.cats.length ? T.catStart(i) : T.PUNCH_AT;
+    d.className = t >= a && loopIn === 0 ? (i === T.cats.length ? "bad" : "on") : "";
+  });
+  // штамп «САМОЕ НУЖНОЕ»
+  const st = outBack(p(t, T.PUNCH_AT + .45, T.PUNCH_AT + .7));
+  $("stamp").style.opacity = t >= T.PUNCH_AT + .45 && t < T.TWIST_AT ? clamp(st * 2) : 0;
+  $("stamp").style.transform = `translateX(-50%) rotate(-12deg) scale(${lerp(2.2, 1, st)})`;
+
+  // поворот
+  const tw = t >= T.TWIST_AT && t < T.CTA_AT;
+  const tk = outBack(p(t, T.TWIST_AT, T.TWIST_AT + .3)), to = p(t, T.CTA_AT - .12, T.CTA_AT);
+  $("twist").style.opacity = tw ? clamp(tk * 2) * (1 - to) : 0;
+  $("twist").style.transform = `scale(${lerp(2, 1, tk) + to * .15})`;
+
+  // CTA: телеграм
+  const ct = t >= T.CTA_AT;
+  const tg = outExpo(p(t, T.CTA_AT, T.CTA_AT + .5));
+  $("cta").style.opacity = ct ? 1 - loopIn : 0;
+  $("tg").style.transform = `perspective(1600px) rotateX(${(1 - tg) * 40}deg) translateY(${(1 - tg) * 300}px)`; $("tg").style.opacity = tg;
+  ["g1", "g2", "g3"].forEach((id, i) => {
+    const g = outExpo(p(t, T.CTA_AT + .5 + i * .3, T.CTA_AT + .8 + i * .3));
+    $(id).style.opacity = g; $(id).style.transform = `translateY(${(1 - g) * 40}px)`;
+  });
+  const lk = outBack(p(t, T.CTA_AT + 1.5, T.CTA_AT + 1.8));
+  $("linkText").style.opacity = clamp(lk * 2); $("linkText").style.transform = `scale(${lerp(2, 1, lk)})`;
+  const ar = outExpo(p(t, T.CTA_AT + 1.6, T.CTA_AT + 2));
+  $("upArrow").style.opacity = ar;
+  $("upArrow").style.transform = `translateY(${(1 - ar) * 80 - Math.abs(Math.sin(t * 5)) * 18}px)`;
+}
+window.renderAt = renderAt;
+if (location.search.includes("play")) {
+  const t0 = performance.now();
+  (function loop() { renderAt(((performance.now() - t0) / 1000) % TIMELINE.duration); requestAnimationFrame(loop); })();
+} else renderAt(0);
+</script>
+</body>
+</html>
