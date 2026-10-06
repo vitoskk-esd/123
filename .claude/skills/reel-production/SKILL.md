@@ -103,6 +103,11 @@ arrive under `/root/.claude/uploads/…`; copy into the reel folder.
   pause > 0.6 s, ending word complete.
 - Loudness of final mix ≈ -14 LUFS; video and audio durations equal.
 - You cannot listen: say so, and report what was verified and how.
+- Music grid vs accents: with fixed 120 BPM from scene 1, impacts and swipes land
+  on the beat only by chance (~50% within ±40 ms). Fitting tempo (100–140 BPM)
+  and phase to the accents puts ~85% on the beat for any reel
+  (`reels/lab/experiments/2026-10-07-beat-grid/beat_grid.js`). Verified by
+  calculation only, not by ear: offer the owner both mixes to compare.
 
 ## 5b. First frame
 
