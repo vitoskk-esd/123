@@ -56,7 +56,20 @@ jobs:
           INSTAGRAM_FORMAT: ${{ vars.INSTAGRAM_FORMAT }}
           INSTAGRAM_FIT: ${{ vars.INSTAGRAM_FIT }}
           FASHION_BOT_MODEL: ${{ vars.FASHION_BOT_MODEL }}
-        run: python -m fashion_bot ${{ github.event.inputs.command || 'cycle' }}
+          CMD: ${{ github.event.inputs.command || 'cycle' }}
+        run: |
+          # Пока ключи не добавлены, посты не готовим: иначе прогон падает или зря тратит деньги на Claude.
+          if [ "$CMD" = "cycle" ] || [ "$CMD" = "preview" ]; then
+            if [ -z "$ANTHROPIC_API_KEY" ]; then
+              echo "::warning::Не задан секрет ANTHROPIC_API_KEY — пропускаю. Настройка: FASHION_BOT.md"
+              exit 0
+            fi
+            if [ -z "$TELEGRAM_BOT_TOKEN" ] && [ -z "$INSTAGRAM_ACCESS_TOKEN" ]; then
+              echo "::warning::Не заданы ни Telegram, ни Instagram — некуда публиковать, пропускаю"
+              exit 0
+            fi
+          fi
+          python -m fashion_bot "$CMD"
 
       - name: Save post images and logs
         if: always()
