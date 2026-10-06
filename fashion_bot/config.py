@@ -59,8 +59,8 @@ class Config:
         "Moncler, Stone Island и др.), новые коллекции, дропы, тренды, громкие новости брендов",
     )
     language: str = _str("FASHION_LANGUAGE", "русский")
-    # Указывать источник в посте (рекомендуется: фото и новости принадлежат изданиям).
-    source_credit: bool = _bool("FASHION_SOURCE_CREDIT", True)
+    # 1 — указывать в посте издание, откуда взята новость (по умолчанию не указывается).
+    source_credit: bool = _bool("FASHION_SOURCE_CREDIT", False)
     telegram_hashtags: int = _int("TELEGRAM_HASHTAGS", 3)
     instagram_hashtags: int = _int("INSTAGRAM_HASHTAGS", 15)
 

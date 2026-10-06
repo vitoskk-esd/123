@@ -61,7 +61,7 @@ def strip_html(text: str) -> str:
 def read_sources(path: Path | None = None) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
     """Читает sources.txt. Возвращает ([(rss_url, имя)], [(канал, имя)]); имя может быть пустым.
 
-    Формат строки: `ссылка` или `ссылка | Как подписывать источник в постах`.
+    Формат строки: `ссылка` или `ссылка | Название источника для подписи в постах`.
     """
     rss, channels = [], []
     for line in (path or CONFIG.sources_file).read_text(encoding="utf-8").splitlines():

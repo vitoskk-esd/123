@@ -286,6 +286,19 @@ class WriterTests(Base):
         self.assertTrue(html.endswith("#nike #Air_Max"))
         self.assertLess(length, len(html))  # теги не считаются в лимит
 
+    def test_no_source_credit(self):
+        CONFIG.source_credit = False
+        it = item(source="Hypebeast")
+        html, _ = writer.telegram_html(post_data(), it)
+        caption = writer.instagram_caption(post_data(), it)
+        self.assertNotIn("Источник", html)
+        self.assertNotIn(it.url, html)
+        self.assertNotIn("Источник", caption)
+        prompt = writer._write_prompt(it, "текст", 2, "")
+        self.assertIn("Не упоминай издание", prompt)
+        CONFIG.source_credit = True
+        self.assertNotIn("Не упоминай издание", writer._write_prompt(it, "текст", 2, ""))
+
     def test_instagram_caption_trim(self):
         CONFIG.instagram_hashtags = 50
         body = "Предложение номер один. " * 200

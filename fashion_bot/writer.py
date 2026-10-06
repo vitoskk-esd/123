@@ -105,6 +105,13 @@ def select_news(llm: LLM, items: list[NewsItem], n: int) -> list[tuple[NewsItem,
 
 def _write_prompt(item: NewsItem, text: str, n_photos: int, feedback: str) -> str:
     tags = max(CONFIG.telegram_hashtags, CONFIG.instagram_hashtags)
+    if CONFIG.source_credit:
+        signature = "подпись магазина и источник\n  добавятся автоматически."
+    else:
+        signature = (
+            "подпись магазина\n  добавится автоматически. Не упоминай издание или канал, откуда взята "
+            "новость\n  (никаких «как сообщает Hypebeast»)."
+        )
     prompt = f"""Ты ведёшь Telegram-канал и Instagram магазина брендовой оригинальной одежды и обуви
 «{CONFIG.shop_name}». Тематика: {CONFIG.focus}.
 
@@ -116,8 +123,7 @@ def _write_prompt(item: NewsItem, text: str, n_photos: int, feedback: str) -> st
   и почему это интересно.
 - instagram_text: тот же смысл, 500–1300 символов, живее, с абзацами, до 4 эмодзи;
   в конце — вопрос подписчикам.
-- В текстах без ссылок, без хэштегов и без призывов купить: подпись магазина и источник
-  добавятся автоматически.
+- В текстах без ссылок, без хэштегов и без призывов купить: {signature}
 - Только факты из источника. Не выдумывай цены, даты, артикулы и цитаты; цены оставляй
   в валюте источника.
 - Бренды и модели пиши в оригинальном написании (Nike Air Jordan 1, Louis Vuitton).

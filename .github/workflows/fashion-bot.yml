@@ -44,6 +44,7 @@ jobs:
           FASHION_DRY_RUN: ${{ vars.FASHION_DRY_RUN || '1' }}
           SHOP_NAME: ${{ vars.SHOP_NAME }}
           SHOP_CTA: ${{ vars.SHOP_CTA }}
+          FASHION_SOURCE_CREDIT: ${{ vars.FASHION_SOURCE_CREDIT }}
           FASHION_FOCUS: ${{ vars.FASHION_FOCUS }}
           FASHION_MAX_POSTS_PER_DAY: ${{ vars.FASHION_MAX_POSTS_PER_DAY }}
           FASHION_POSTS_PER_CYCLE: ${{ vars.FASHION_POSTS_PER_CYCLE }}
