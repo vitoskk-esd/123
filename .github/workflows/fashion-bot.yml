@@ -1,0 +1,79 @@
+name: Fashion bot (posts)
+
+on:
+  schedule:
+    # Каждые 2 часа с 09:23 до 21:23 по Москве (06:23–18:23 UTC).
+    - cron: "23 6-18/2 * * *"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "cycle | preview | check | status | collect"
+        default: cycle
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fashion-bot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install anthropic pillow requests feedparser beautifulsoup4
+
+      - name: Run bot
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ADMIN_CHAT: ${{ secrets.TELEGRAM_ADMIN_CHAT }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          IMGBB_API_KEY: ${{ secrets.IMGBB_API_KEY }}
+          TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL }}
+          FASHION_DRY_RUN: ${{ vars.FASHION_DRY_RUN || '1' }}
+          SHOP_NAME: ${{ vars.SHOP_NAME }}
+          SHOP_CTA: ${{ vars.SHOP_CTA }}
+          FASHION_FOCUS: ${{ vars.FASHION_FOCUS }}
+          FASHION_MAX_POSTS_PER_DAY: ${{ vars.FASHION_MAX_POSTS_PER_DAY }}
+          FASHION_POSTS_PER_CYCLE: ${{ vars.FASHION_POSTS_PER_CYCLE }}
+          WATERMARK_LOGO: ${{ vars.WATERMARK_LOGO }}
+          WATERMARK_TEXT: ${{ vars.WATERMARK_TEXT }}
+          WATERMARK_POSITION: ${{ vars.WATERMARK_POSITION }}
+          WATERMARK_OPACITY: ${{ vars.WATERMARK_OPACITY }}
+          WATERMARK_SCALE: ${{ vars.WATERMARK_SCALE }}
+          INSTAGRAM_FORMAT: ${{ vars.INSTAGRAM_FORMAT }}
+          INSTAGRAM_FIT: ${{ vars.INSTAGRAM_FIT }}
+          FASHION_BOT_MODEL: ${{ vars.FASHION_BOT_MODEL }}
+        run: python -m fashion_bot ${{ github.event.inputs.command || 'cycle' }}
+
+      - name: Save post images and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fashion-bot-${{ github.run_id }}
+          path: |
+            data/fashion_bot/images/
+            data/fashion_bot/logs/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Commit post history
+        if: always()
+        run: |
+          git config user.name "fashion-bot"
+          git config user.email "fashion-bot@users.noreply.github.com"
+          git add -A data/fashion_bot/  # токен, картинки и логи исключены в .gitignore
+          git diff --cached --quiet || git commit -m "fashion-bot: update history $(date -u +%F)"
+          git pull --rebase --autostash || true
+          git push

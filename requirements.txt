@@ -1,3 +1,8 @@
 anthropic>=0.80
 playwright>=1.45
 pillow>=10.0
+# fashion_bot
+requests>=2.31
+feedparser>=6.0
+beautifulsoup4>=4.12
+tzdata; sys_platform == "win32"

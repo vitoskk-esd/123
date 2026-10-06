@@ -21,3 +21,9 @@ data/screenshots/
 data/covers/
 data/logs/
 *.tmp
+
+# fashion_bot: токен, картинки и логи не коммитим (история постов — коммитим)
+data/fashion_bot/instagram_token.json
+data/fashion_bot/images/
+data/fashion_bot/watermark_test/
+data/fashion_bot/logs/

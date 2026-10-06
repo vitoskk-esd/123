@@ -1,0 +1,24 @@
+# Откуда бот берёт новости. Одна строка — один источник, строки с # не читаются.
+# Можно добавлять свои: RSS-ленту сайта (обычно /feed или /rss) или публичный
+# Telegram-канал (@имя или https://t.me/имя). Закрытые каналы не поддерживаются.
+# После « | » — как подписывать источник в постах (необязательно).
+
+# Кроссовки и стритвир
+https://hypebeast.com/feed | Hypebeast
+https://www.highsnobiety.com/feed/ | Highsnobiety
+https://sneakernews.com/feed/ | Sneaker News
+https://www.nicekicks.com/feed/ | Nice Kicks
+https://sneakerbardetroit.com/feed/ | Sneaker Bar Detroit
+https://www.sneakerfiles.com/feed/ | Sneaker Files
+https://justfreshkicks.com/feed/ | Just Fresh Kicks
+https://footwearnews.com/feed/ | Footwear News
+
+# Мода, люкс, бизнес брендов
+https://www.vogue.com/feed/fashion/rss | Vogue
+https://www.gq.com/feed/rss | GQ
+https://wwd.com/feed/ | WWD
+https://fashionista.com/.rss/full/ | Fashionista
+https://www.buro247.ru/rss/ | Buro 24/7
+
+# Telegram-каналы
+@theblueprintru | The Blueprint
