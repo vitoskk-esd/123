@@ -22,7 +22,17 @@
   .gc { color: var(--cyan); text-shadow: 0 0 22px rgba(61,245,255,.7); }
   .mono { font-family: "Mono"; letter-spacing: -4px; }
 
-  #title { top: 150px; font-size: 116px; }
+  #title { top: 150px; font-size: 116px; opacity: 0; }
+  /* хук: сообщение «Нужна твоя карта» (кадр 0) */
+  #hook { position: absolute; inset: 0; }
+  #hTitle { top: 150px; font-size: 104px; }
+  #msg { position: absolute; left: 70px; right: 70px; top: 560px; padding: 44px 48px; border-radius: 44px; transform-origin: 50% 50%;
+         background: linear-gradient(160deg, rgba(30,40,70,.82), rgba(12,16,30,.88)); border: 2px solid rgba(255,255,255,.14); box-shadow: 0 0 50px rgba(61,245,255,.18); }
+  #msg .who { display: flex; align-items: center; gap: 26px; }
+  #msg .ava { width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #555b72, #2a2f42); display: flex; align-items: center; justify-content: center; font-size: 60px; }
+  #msg .n { font-size: 46px; } #msg .s { font-size: 32px; color: var(--muted); }
+  #msg .bub { margin-top: 40px; background: rgba(61,245,255,.1); border: 2px solid rgba(61,245,255,.35); border-radius: 40px 40px 40px 10px; padding: 38px 42px; font-size: 66px; line-height: 1.12; }
+  #hStamp { position: absolute; left: 540px; top: 1300px; padding: 24px 48px; border: 10px solid var(--red); border-radius: 26px; font-family: "Tek"; font-size: 96px; letter-spacing: 4px; white-space: nowrap; }
   #honest { top: 170px; font-size: 110px; opacity: 0; }
   #scales { position: absolute; inset: 0; transform-origin: 540px 1000px; }
   #scales svg { position: absolute; left: 0; top: 0; }
@@ -82,6 +92,12 @@
   <canvas id="bg" width="1080" height="1920"></canvas>
   <div id="tint"></div>
   <div id="cam">
+    <div id="hook">
+      <div class="center up" id="hTitle">Тебе тоже<br><span class="gr">так писали?</span></div>
+      <div id="msg"><div class="who"><div class="ava emo">👤</div><div><div class="n">Незнакомец</div><div class="s">был(а) в сети недавно</div></div></div>
+        <div class="bub">Нужна твоя карта.<br>Плачу <span class="mono gl" style="font-size:78px">20 000 ₽</span> <span class="emo">💸</span></div></div>
+      <div class="gr" id="hStamp">ДО 3 ЛЕТ</div>
+    </div>
     <div class="center up" id="title">20 000<br>за карту?</div>
     <div id="art">СТ. 187 УК РФ</div>
     <div class="center up" id="honest">А теперь<br><span class="gl">честно</span></div>
@@ -148,6 +164,7 @@ const K = {
   flip: W(4, "платят"), legal: W(4, "Законно"), link: W(5, "Ссылка"),
 };
 const LOOP = .35; // последние 0.35 с возвращают первый кадр — петля
+const HX = W(0, "взвесим") - .15; // переход «сообщение → весы»
 
 // --- весы: угол коромысла (градусы, + = правая чаша ниже) ---
 function beamAngle(t) {
@@ -224,15 +241,29 @@ function renderAt(t) {
 
   // заголовок: с кадра 0, уходит на базе дропов, возвращается в петле
   const tOut = p(t, S(3) - .15, S(3)), tBack = p(t, S(4), S(4) + .3);
-  const titleVis = t < S(3) ? 1 - tOut : (t < S(5) ? 0 : 0);
-  $("title").style.opacity = Math.max(titleVis, loopIn);
+  const titleVis = t < S(3) ? (1 - tOut) * p(t, HX + .2, HX + .5) : 0;
+  $("title").style.opacity = titleVis * (1 - loopIn);
   $("art").style.opacity = t >= K.slam && t < S(3) ? outExpo(p(t, K.slam, K.slam + .3)) * (1 - tOut) : 0;
 
   // весы: видны в сценах 0–2 и 4, в петле
-  const scVis = t < S(3) ? 1 - tOut : (t < S(5) ? outExpo(tBack) * (1 - p(t, S(5) - .15, S(5))) : 0);
-  $("scales").style.opacity = Math.max(scVis, loopIn);
+  const scVis = t < S(3) ? (1 - tOut) * p(t, HX + .1, HX + .5) : (t < S(5) ? outExpo(tBack) * (1 - p(t, S(5) - .15, S(5))) : 0);
+  $("scales").style.opacity = scVis * (1 - loopIn);
   $("scales").style.transform = `scale(${lerp(.92, 1, t < S(3) ? 1 : outExpo(tBack))})`;
   const g = drawScales(t);
+
+  // хук → весы: сообщение улетает в левую чашу и становится «20 000 ₽», штамп падает в правую — «до 3 лет»
+  const tr = inOut(p(t, HX, HX + .6)), hookOn = t < HX + .6 || loopIn > 0;
+  $("hook").style.opacity = hookOn ? 1 : 0;
+  const back = loopIn > 0 ? 0 : tr; // в петле — снова кадр 0
+  $("hTitle").style.opacity = 1 - p(t, HX, HX + .3) * (1 - loopIn);
+  const mx = lerp(0, g.lx - 540, back), my = lerp(0, g.pyL + 100 - 830, back);
+  $("msg").style.transform = `translate(${mx}px, ${my}px) scale(${lerp(1, .22, back)})`;
+  $("msg").style.opacity = loopIn > 0 ? loopIn : 1 - p(t, HX + .35, HX + .6);
+  const sx = lerp(0, g.rx - 540, back), sy = lerp(0, g.pyR + 110 - 1370, back);
+  $("hStamp").style.transform = `translate(-50%, 0) translate(${sx}px, ${sy}px) rotate(${lerp(-9, 0, back)}deg) scale(${lerp(1, .7, back)})`;
+  $("hStamp").style.opacity = loopIn > 0 ? loopIn : 1 - p(t, HX + .45, HX + .6);
+  const labIn = loopIn > 0 ? 0 : p(t, HX + .45, HX + .6);
+  $("labL").style.opacity = labIn; $("labR").style.opacity = labIn;
 
   // подписи чаш: до поворота «20 000 ₽» / «до 3 лет», после — «бонусы банков» / «дроп»
   const flipped = t >= K.flip && loopIn === 0;
