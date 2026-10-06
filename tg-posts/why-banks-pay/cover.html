@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Обложка «Почему банк платит тебе?»</title>
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root { --bg: #04050a; --ink: #eef3ff; --cyan: #3df5ff; --lime: #c8ff3d; --violet: #8b5cff; --red: #ff3b5c; --muted: #8f9bb8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 1280px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  canvas { position: absolute; inset: 0; }
+  .v { position: absolute; inset: 0; display: none; }
+  .glow-l { color: var(--lime); text-shadow: 0 0 22px rgba(200,255,61,.75), 0 0 80px rgba(200,255,61,.35); }
+  .glow-c { color: var(--cyan); text-shadow: 0 0 22px rgba(61,245,255,.7), 0 0 80px rgba(61,245,255,.35); }
+  .h { text-transform: uppercase; letter-spacing: -5px; line-height: .92; }
+  .sub { font-size: 44px; line-height: 1.15; color: #c9d3ee; letter-spacing: -.5px; }
+  .tag { display: inline-block; font-family: "Tek"; font-size: 34px; letter-spacing: 6px; padding: 12px 28px; border-radius: 40px;
+         border: 3px solid var(--lime); color: var(--lime); box-shadow: 0 0 30px rgba(200,255,61,.35), inset 0 0 20px rgba(200,255,61,.15); }
+  .coin { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: Tek; color: #142000;
+          background: radial-gradient(circle at 35% 30%, #f9ffd6, #c8ff3d 42%, #5f8a08 100%); box-shadow: 0 0 90px rgba(200,255,61,.7), inset 0 -14px 0 rgba(0,0,0,.25); }
+  .scan { position: absolute; inset: 0; pointer-events: none; opacity: .12; background: repeating-linear-gradient(0deg, rgba(255,255,255,.1) 0 2px, transparent 2px 5px); }
+  .vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.6)); }
+  /* айсберг */
+  .ice-lab { position: absolute; font-family: Tek; font-size: 38px; letter-spacing: 2px; color: #dff9ff; white-space: nowrap; text-shadow: 0 0 18px rgba(61,245,255,.6); }
+  /* чек */
+  #receipt { position: absolute; left: 640px; top: 150px; width: 540px; padding: 44px 42px 56px; background: rgba(14,20,34,.92); border: 2px solid rgba(61,245,255,.55);
+             border-radius: 30px 30px 6px 6px; box-shadow: 0 0 60px rgba(61,245,255,.25); transform: rotate(4deg); font-family: Mono; }
+  #receipt .t { font-family: Tek; font-size: 36px; letter-spacing: 5px; color: var(--cyan); text-align: center; }
+  #receipt .ln { display: flex; justify-content: space-between; font-size: 32px; margin-top: 26px; letter-spacing: -1px; color: #dfe6f8; }
+  #receipt .ln b { color: var(--lime); } #receipt .ln i { font-style: normal; color: var(--red); }
+  #receipt hr { border: 0; border-top: 3px dashed rgba(255,255,255,.25); margin: 30px 0 4px; }
+  #receipt .tot { display: flex; justify-content: space-between; font-size: 40px; margin-top: 22px; color: var(--lime); text-shadow: 0 0 18px rgba(200,255,61,.6); }
+  /* карта */
+  .bc { position: absolute; width: 560px; height: 352px; border-radius: 40px; padding: 36px 40px; overflow: hidden; border: 2px solid rgba(61,245,255,.8);
+        background: linear-gradient(135deg, rgba(61,245,255,.18), rgba(139,92,255,.16) 55%, rgba(61,245,255,.06)); box-shadow: 0 0 60px rgba(61,245,255,.45), inset 0 0 60px rgba(61,245,255,.18); }
+  .bc::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.18) 45%, transparent 60%); }
+  .bc .chip { position: absolute; left: 40px; top: 120px; width: 96px; height: 72px; border-radius: 14px; border: 3px solid rgba(61,245,255,.9); }
+  .bc .num { position: absolute; left: 40px; bottom: 40px; font-family: Mono; font-size: 34px; letter-spacing: 6px; color: rgba(220,250,255,.9); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1280" height="1280"></canvas>
+
+  <!-- В1: айсберг — бонус сверху, доход банка под водой -->
+  <div class="v" id="v1">
+    <div class="h" style="position:absolute;left:70px;top:70px;font-size:112px">Почему банк<br><span class="glow-l">платит тебе?</span></div>
+    <svg style="position:absolute;left:0;top:0" width="1280" height="1280">
+      <defs>
+        <filter id="g1" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <linearGradient id="deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(61,245,255,.22)"/><stop offset="1" stop-color="rgba(139,92,255,.08)"/></linearGradient>
+      </defs>
+      <!-- вода -->
+      <rect x="0" y="560" width="1280" height="720" fill="rgba(20,40,90,.35)"/>
+      <path d="M0 560 Q 80 545 160 560 T 320 560 T 480 560 T 640 560 T 800 560 T 960 560 T 1120 560 T 1280 560" stroke="#3df5ff" stroke-width="5" fill="none" filter="url(#g1)"/>
+      <!-- верхушка -->
+      <polygon points="560,560 620,430 660,455 700,400 760,560" fill="rgba(200,255,61,.2)" stroke="#c8ff3d" stroke-width="5" filter="url(#g1)"/>
+      <!-- подводная часть -->
+      <polygon points="540,566 780,566 960,700 1050,880 960,1060 760,1180 520,1170 330,1050 250,860 360,690" fill="url(#deep)" stroke="#3df5ff" stroke-width="4" stroke-dasharray="14 10" filter="url(#g1)"/>
+    </svg>
+    <div class="coin" style="left:615px;top:310px;width:96px;height:96px;font-size:56px">₽</div>
+    <div class="ice-lab" style="left:790px;top:440px;color:var(--lime);font-size:44px;text-shadow:0 0 18px rgba(200,255,61,.7)">← бонус тебе</div>
+    <div class="ice-lab" style="left:450px;top:700px">комиссии с покупок</div>
+    <div class="ice-lab" style="left:410px;top:790px">проценты по кредитам</div>
+    <div class="ice-lab" style="left:470px;top:880px">деньги на счетах</div>
+    <div class="ice-lab" style="left:440px;top:970px">вклады и подписки</div>
+    <div class="ice-lab" style="left:500px;top:1060px;color:var(--muted)">… годы клиента</div>
+  </div>
+
+  <!-- В2: чек «расчёт банка» -->
+  <div class="v" id="v2">
+    <div style="position:absolute;left:80px;top:90px"><span class="tag">РАЗБОР</span></div>
+    <div class="h" style="position:absolute;left:76px;top:190px;font-size:118px">Почему<br>банк<br><span class="glow-l">платит</span><br><span class="glow-l">тебе?</span></div>
+    <div class="sub" style="position:absolute;left:80px;top:720px;width:520px">Бонус за карту —<br>не подарок,<br>а <span class="glow-c">расчёт</span></div>
+    <div id="receipt">
+      <div class="t">РАСЧЁТ БАНКА</div>
+      <hr>
+      <div class="ln"><span>Бонус клиенту</span><i>−1 000 ₽</i></div>
+      <div class="ln"><span>Реклама</span><b>не нужна</b></div>
+      <div class="ln"><span>Комиссии</span><b>+ ₽</b></div>
+      <div class="ln"><span>Кредиты</span><b>+ ₽</b></div>
+      <div class="ln"><span>Деньги на счёте</span><b>+ ₽</b></div>
+      <div class="ln"><span>Подписки</span><b>+ ₽</b></div>
+      <hr>
+      <div class="tot"><span>ИТОГО</span><span>В ПЛЮСЕ</span></div>
+    </div>
+  </div>
+
+  <!-- В3: карта + монета + большой вопрос -->
+  <div class="v" id="v3">
+    <div style="position:absolute;left:0;right:0;top:70px;text-align:center"><span class="tag">БОНУС ЗА КАРТУ</span></div>
+    <div style="position:absolute;inset:0;perspective:1600px">
+      <div class="bc" style="left:360px;top:250px;transform:rotateX(16deg) rotateY(-22deg) rotateZ(-6deg)"><div class="chip"></div><div class="num">•••• 2026</div>
+        <div style="position:absolute;right:40px;top:30px;font-family:Tek;font-size:84px;color:var(--cyan)">₽</div></div>
+    </div>
+    <div class="coin" style="left:820px;top:200px;width:200px;height:200px;font-size:120px">₽</div>
+    <div style="position:absolute;left:160px;top:470px;font-family:Tek;font-size:300px;color:var(--lime);text-shadow:0 0 40px rgba(200,255,61,.8);transform:rotate(-12deg)">?</div>
+    <div class="h" style="position:absolute;left:0;right:0;top:760px;text-align:center;font-size:120px">Банк платит<br><span class="glow-l">тебе. Зачем?</span></div>
+    <div class="sub" style="position:absolute;left:0;right:0;top:1030px;text-align:center;font-size:44px">5 причин, почему бонус выгоден <span class="glow-c">самому банку</span></div>
+  </div>
+
+  <div class="scan"></div><div class="vig"></div>
+</div>
+<script>
+const V = (new URLSearchParams(location.search)).get("v") || "1";
+document.getElementById("v" + V).style.display = "block";
+const cx = document.getElementById("bg").getContext("2d");
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+cx.fillStyle = "#04050a"; cx.fillRect(0, 0, 1280, 1280);
+const glows = { "1": [[640, 850, "rgba(61,245,255,.3)"], [660, 420, "rgba(200,255,61,.22)"]],
+                "2": [[900, 600, "rgba(61,245,255,.3)"], [250, 400, "rgba(139,92,255,.35)"]],
+                "3": [[640, 450, "rgba(139,92,255,.45)"], [820, 300, "rgba(200,255,61,.3)"]] }[V];
+for (const [x, y, c] of glows) { const g = cx.createRadialGradient(x, y, 20, x, y, 700); g.addColorStop(0, c); g.addColorStop(1, "rgba(4,5,10,0)"); cx.fillStyle = g; cx.fillRect(0, 0, 1280, 1280); }
+if (V !== "1") {
+  const hy = 900; cx.lineWidth = 2;
+  for (let i = -14; i <= 14; i++) { cx.strokeStyle = "rgba(61,245,255,.13)"; cx.beginPath(); cx.moveTo(640 + i * 45, hy); cx.lineTo(640 + i * 230, 1280); cx.stroke(); }
+  for (let k = 0; k < 10; k++) { const d = k / 10, y = hy + Math.pow(d, 2.2) * (1280 - hy); cx.strokeStyle = `rgba(61,245,255,${.05 + d * .2})`; cx.beginPath(); cx.moveTo(0, y); cx.lineTo(1280, y); cx.stroke(); }
+}
+for (let i = 0; i < 220; i++) {
+  const x = rnd(i) * 1280, y = rnd(i + 500) * 1280, z = .3 + rnd(i + 900) * .7, h = rnd(i + 77);
+  cx.fillStyle = h > .8 ? `rgba(200,255,61,${.2 + z * .6})` : (h > .55 ? `rgba(139,92,255,${.2 + z * .6})` : `rgba(61,245,255,${.2 + z * .6})`);
+  cx.beginPath(); cx.arc(x, y, 1 + z * 2.6, 0, 6.283); cx.fill();
+}
+</script>
+</body>
+</html>
