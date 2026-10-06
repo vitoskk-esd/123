@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Рилс #6: первый кадр, 3 варианта</title>
+<style>
+@font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+@font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+@font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+:root { --ink:#eef3ff; --cyan:#3df5ff; --lime:#c8ff3d; --red:#ff3b5c; --violet:#8b5cff; --muted:#7d8aa8; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#04050a;font-family:"Display",sans-serif;color:var(--ink)}
+.emo{font-family:"Noto Color Emoji",sans-serif}
+.bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(120,20,40,.45),transparent 60%),
+ repeating-linear-gradient(0deg,rgba(255,59,92,.05) 0 2px,transparent 2px 80px),repeating-linear-gradient(90deg,rgba(255,59,92,.05) 0 2px,transparent 2px 80px)}
+.bgc{background:radial-gradient(ellipse at 50% 55%,rgba(40,30,110,.55),transparent 60%),
+ repeating-linear-gradient(0deg,rgba(61,245,255,.06) 0 2px,transparent 2px 80px),repeating-linear-gradient(90deg,rgba(61,245,255,.06) 0 2px,transparent 2px 80px)}
+.v{position:absolute;inset:0;display:none}
+.t{position:absolute;left:50px;right:50px;text-align:center;text-transform:uppercase;letter-spacing:-3px;line-height:.98}
+.gr{color:var(--red);text-shadow:0 0 22px rgba(255,59,92,.85),0 0 80px rgba(255,59,92,.45)}
+.gl{color:var(--lime);text-shadow:0 0 22px rgba(200,255,61,.7)}
+.gc{color:var(--cyan);text-shadow:0 0 22px rgba(61,245,255,.7)}
+.mono{font-family:Mono;letter-spacing:-4px}
+.card{position:absolute;border-radius:44px;background:linear-gradient(160deg,rgba(30,40,70,.82),rgba(12,16,30,.88));box-shadow:0 0 50px rgba(61,245,255,.18)}
+.scan{position:absolute;inset:0;opacity:.14;background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 2px,transparent 2px 5px)}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(0,0,0,.6))}
+</style></head><body><div class="bg" id="bg"></div>
+
+<!-- A: весы — 20 000 ₽ легче, чем срок -->
+<div class="v" id="A">
+  <div class="t" style="top:150px;font-size:116px">20 000<br>за карту?</div>
+  <svg style="position:absolute;left:0;top:560px" width="1080" height="1100" viewBox="0 0 1080 1000" preserveAspectRatio="none">
+    <defs><filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <g filter="url(#g)" stroke-linecap="round">
+      <line x1="540" y1="140" x2="540" y2="880" stroke="#3df5ff" stroke-width="10"/>
+      <path d="M420 900 H660" stroke="#3df5ff" stroke-width="12"/>
+      <circle cx="540" cy="140" r="22" fill="#3df5ff"/>
+      <!-- коромысло наклонено: правая чаша тяжелее -->
+      <line x1="170" y1="40" x2="910" y2="250" stroke="#3df5ff" stroke-width="12"/>
+      <line x1="170" y1="40" x2="90" y2="250" stroke="#3df5ff" stroke-width="4"/><line x1="170" y1="40" x2="250" y2="250" stroke="#3df5ff" stroke-width="4"/>
+      <path d="M60 250 Q170 330 280 250 Z" fill="rgba(200,255,61,.15)" stroke="#c8ff3d" stroke-width="8"/>
+      <line x1="910" y1="250" x2="790" y2="560" stroke="#ff3b5c" stroke-width="4"/><line x1="910" y1="250" x2="1030" y2="560" stroke="#ff3b5c" stroke-width="4"/>
+      <path d="M760 560 Q910 660 1060 560 Z" fill="rgba(255,59,92,.18)" stroke="#ff3b5c" stroke-width="8"/>
+    </g>
+  </svg>
+  <div class="mono gl" style="position:absolute;left:0;width:340px;top:905px;text-align:center;font-size:70px;white-space:nowrap">20 000 ₽</div>
+  <div class="gr" style="position:absolute;left:740px;width:340px;top:1255px;text-align:center;font-size:110px;line-height:.92;text-transform:uppercase;letter-spacing:-3px">до 6<br>лет</div>
+</div>
+
+<!-- B: сообщение-оффер + штамп -->
+<div class="v" id="B">
+  <div class="t" style="top:150px;font-size:104px">Тебе тоже<br><span class="gr">так писали?</span></div>
+  <div class="card" style="left:70px;right:70px;top:560px;padding:44px 48px;border:2px solid rgba(255,255,255,.14)">
+    <div style="display:flex;align-items:center;gap:26px">
+      <div style="width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#555b72,#2a2f42);display:flex;align-items:center;justify-content:center;font-size:60px" class="emo">👤</div>
+      <div><div style="font-size:46px">Незнакомец</div><div style="font-size:32px;color:var(--muted)">был(а) в сети недавно</div></div>
+    </div>
+    <div style="margin-top:40px;background:rgba(61,245,255,.1);border:2px solid rgba(61,245,255,.35);border-radius:40px 40px 40px 10px;padding:38px 42px;font-size:66px;line-height:1.12">
+      Нужна твоя карта.<br>Плачу <span class="mono gl" style="font-size:78px">20 000 ₽</span> <span class="emo">💸</span>
+    </div>
+  </div>
+  <div class="gr" style="position:absolute;left:50%;top:1240px;transform:translateX(-50%) rotate(-9deg);padding:24px 48px;border:10px solid var(--red);border-radius:26px;font-family:Tek;font-size:96px;letter-spacing:4px;white-space:nowrap">ДО 6 ЛЕТ</div>
+</div>
+
+<!-- C: одна карта — два исхода -->
+<div class="v" id="C">
+  <div class="t" style="top:150px;font-size:100px">Одна карта.<br><span class="gc">Два исхода</span></div>
+  <div class="card" style="left:60px;width:460px;top:560px;height:860px;border:3px solid rgba(255,59,92,.7);text-align:center;padding-top:60px">
+    <div style="font-family:Tek;font-size:44px;letter-spacing:3px;color:var(--muted)">ПРОДАЛ</div>
+    <div class="mono gl" style="font-size:84px;margin-top:40px">+20 000</div>
+    <div class="gr" style="font-size:150px;margin-top:20px;font-family:Mono">↓</div>
+    <div class="gr" style="font-size:96px;line-height:.95;text-transform:uppercase;letter-spacing:-2px;margin-top:20px">до 6<br>лет</div>
+  </div>
+  <div class="card" style="left:560px;width:460px;top:560px;height:860px;border:3px solid rgba(200,255,61,.7);text-align:center;padding-top:60px">
+    <div style="font-family:Tek;font-size:44px;letter-spacing:3px;color:var(--muted)">ОФОРМИЛ</div>
+    <div class="gl" style="font-size:84px;margin-top:40px;text-transform:uppercase;letter-spacing:-2px">бонусы</div>
+    <div class="gl" style="font-size:150px;margin-top:20px;font-family:Mono">✓</div>
+    <div class="gl" style="font-size:78px;line-height:.95;text-transform:uppercase;letter-spacing:-2px;margin-top:34px">законно</div>
+  </div>
+</div>
+<div class="scan"></div><div class="vig"></div>
+<script>const v=(location.search.match(/v=(\w)/)||[,"A"])[1];document.getElementById(v).style.display="block";if(v==="C")document.getElementById("bg").classList.add("bgc");</script>
+</body></html>
