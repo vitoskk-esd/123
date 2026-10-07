@@ -125,13 +125,37 @@
   .who .plate { font: 900 50px "Unb"; }
   .stack { width: 900px; display: flex; flex-direction: column; gap: 18px; }
   .bonus { display: flex; align-items: center; gap: 24px; padding: 24px 32px; border-radius: 22px; background: #10163a; border: 2px solid #26306a; font: 700 38px "Mont"; }
-  .bonus .v { margin-left: auto; font: 900 44px "Unb"; color: var(--green); }
+  .bonus .v { white-space: nowrap; margin-left: auto; font: 900 44px "Unb"; color: var(--green); }
   .total { margin-top: 10px; display: flex; align-items: baseline; justify-content: space-between; padding: 26px 32px; border-radius: 22px; background: var(--green); color: var(--bg); }
   .total span { font: 800 40px "Mont"; } .total b { font: 900 76px "Unb"; }
   .k { font: 700 22px "Mont"; font-style: normal; padding: 4px 12px; border-radius: 8px; background: #2a335f; color: var(--muted); }
   .k.cr { background: rgba(255,210,31,.16); color: var(--B); }
   .warn { font: 800 30px "Mont"; color: var(--B); padding-left: 8px; }
   .ex { position: absolute; top: 44px; left: 56px; font: 800 26px "Mont"; color: var(--bg); background: var(--B); padding: 6px 16px; border-radius: 10px; }
+
+
+  /* банки: плашка логотипа */
+  .logo { height: 76px; min-width: 250px; padding: 0 22px; border-radius: 16px; background: #fff; display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .logo img { height: 44px; width: auto; max-width: 236px; object-fit: contain; }
+  .logo .ic { height: 58px; border-radius: 12px; }
+  .logo img.tb { height: 50px; }
+  .stack .logo { width: 300px; }
+  .logo .wm { font: 900 26px "Unb"; color: #5b2c8f; letter-spacing: 1px; }
+  .bonus { gap: 22px; padding: 18px 26px; }
+  .bonus .cond { font: 600 24px "Mont"; color: var(--muted); max-width: 300px; line-height: 1.25; }
+  .stack { width: 1040px; }
+  .s10 { gap: 50px; }
+  /* 12. карточка одного предложения */
+  .offer { width: 1400px; padding: 54px 64px; display: grid; grid-template-columns: 1fr auto; gap: 34px 50px; align-items: center; border-color: var(--bc); box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 80px color-mix(in srgb, var(--bc) 45%, transparent); }
+  .offer .logo { height: 110px; min-width: 380px; } .offer .logo img { height: 66px; max-width: 330px; }
+  .offer .logo .ic { height: 84px; } .offer .logo .wm { font-size: 38px; } .offer .logo img.tb { height: 76px; }
+  .offer .amt { white-space: nowrap; font: 900 132px/1 "Unb"; color: var(--green); text-shadow: 0 0 40px rgba(57,255,136,.5); justify-self: end; grid-row: span 2; }
+  .offer .prod { white-space: nowrap; font: 800 46px "Mont"; display: flex; gap: 16px; align-items: center; }
+  .offer ul { grid-column: 1 / -1; list-style: none; display: grid; gap: 14px; }
+  .offer li { font: 700 38px "Mont"; display: flex; gap: 18px; align-items: center; }
+  .offer li::before { content: "✓"; width: 50px; height: 50px; border-radius: 50%; background: var(--green); color: var(--bg); display: grid; place-items: center; font: 900 30px "Mont"; flex: none; }
+  .legal { grid-column: 1 / -1; font: 500 20px "Mont"; color: var(--muted); border-top: 2px solid var(--line); padding-top: 18px; }
+  .legal b { color: var(--B); }
 
   /* 11. CTA */
   .s11 { gap: 80px; }
@@ -218,14 +242,11 @@
 
   <section class="scene s10">
     <div class="who"><span class="emo">📱</span><div class="plate">Только телефон · 18+</div></div>
-    <div class="stack">
-      <div class="bonus"><span class="emo">💳</span>Карта №1<i class="k cr">кредитная</i><span class="v">+1 000 ₽</span></div>
-      <div class="bonus"><span class="emo">💳</span>Карта №2<i class="k">дебетовая</i><span class="v">+1 000 ₽</span></div>
-      <div class="bonus"><span class="emo">💳</span>Карта №3<i class="k cr">кредитная</i><span class="v">+2 000 ₽</span></div>
-      <div class="bonus"><span class="emo">💳</span>Карта №4<i class="k cr">кредитная</i><span class="v">+1 500 ₽</span></div>
-      <div class="total"><span>Итого сейчас</span><b>+5 500 ₽</b></div>
-      <div class="warn">⚠ Кредитка = долг: верни в льготный период</div>
-    </div>
+    <div class="stack" id="stack"></div>
+  </section>
+
+  <section class="scene s12">
+    <div class="offer card" id="offer"></div>
   </section>
 
   <section class="scene s11 cta">
@@ -251,6 +272,35 @@
   };
   board(document.getElementById("b2"));
   board(document.getElementById("b4"), "B");
+
+  // Предложения владельца (пост в Telegram, 2026-10-07). Выплаты — от владельца по партнёрским ссылкам.
+  const BANKS = {
+    alfa:    { logo: '<img src="../assets/logos/alfa.svg">', color: "#ef3124" },
+    otp:     { logo: '<img src="../assets/logos/otp.svg">', color: "#52ae30" },
+    tbank:   { logo: '<img class="tb" src="../assets/logos/tbank.svg">', color: "#ffdd2d" },
+    uralsib: { logo: '<img class="ic" src="../assets/logos/uralsib_icon.png"><span class="wm">УРАЛСИБ</span>', color: "#7a3fc4" },
+  };
+  const OFFERS = [
+    { bank: "alfa", kind: "кредитная", v: 1000, cond: ["Любая покупка по терминалу", "На любую сумму"] },
+    { bank: "otp", kind: "дебетовая", v: 1000, cond: ["2 покупки от 500 ₽ каждая", "Получить карту курьером"] },
+    { bank: "tbank", kind: "кредитная", v: 2000, cond: ["1 покупка по терминалу от 3 000 ₽"] },
+    { bank: "uralsib", kind: "кредитная", v: 1500, cond: ["1 покупка от 500 ₽", "Не закрывать карту 31 день"] },
+  ];
+  const rub = v => "+" + v.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
+  const nb = t => t.replace(/ (?=₽|\d{3}\b)/g, "\u00a0");
+  OFFERS.forEach(o => o.cond = o.cond.map(nb));
+  const kind = k => `<i class="k ${k === "кредитная" ? "cr" : ""}">${k}</i>`;
+  document.getElementById("stack").innerHTML = OFFERS.map(o =>
+    `<div class="bonus"><div class="logo">${BANKS[o.bank].logo}</div>${kind(o.kind)}<span class="cond">${o.cond[0]}</span><span class="v">${rub(o.v)}</span></div>`).join("") +
+    `<div class="total"><span>Итого сейчас</span><b>${rub(OFFERS.reduce((a, o) => a + o.v, 0))}</b></div>
+     <div class="warn">⚠ Кредитка = долг: верни в льготный период</div>`;
+  const oi = +(new URLSearchParams(location.search).get("o") || 0), o = OFFERS[oi];
+  const offer = document.getElementById("offer");
+  offer.style.setProperty("--bc", BANKS[o.bank].color);
+  offer.innerHTML = `<div class="logo">${BANKS[o.bank].logo}</div><div class="amt">${rub(o.v)}</div>
+    <div class="prod">${o.kind === "кредитная" ? "Кредитная" : "Дебетовая"} карта ${kind("18+")}</div>
+    <ul>${o.cond.map(c => `<li>${c}</li>`).join("")}</ul>
+    <div class="legal"><b>Реклама.</b> [наименование банка, ИНН] · erid: [из партнёрского кабинета] · [ПСК для кредитных карт] · Условия на 07.10.2026</div>`;
   const s = +(new URLSearchParams(location.search).get("s") || 1);
   const sc = document.querySelector(".s" + s);
   sc.classList.add("on");
