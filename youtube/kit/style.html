@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>YouTube kit — style frames</title>
+<!-- Кадры стиля для длинных роликов (16:9). style.html?s=N — одна сцена.
+     Палитра и типы сцен — из youtube/references/README.md. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root {
+    --bg: #05060d; --ink: #f2f5ff; --muted: #8a93b0; --card: #0d1120; --line: #1c2440;
+    --green: #39ff88; --red: #ff3355; --D: #ff3355; --C: #ff8a1f; --B: #ffd21f; --A: #2fa8ff; --S: #b46bff;
+    --tg: #2aabee;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Mont", sans-serif; color: var(--ink); position: relative; }
+  .emo { font-family: "Noto Color Emoji"; }
+
+  /* фон: перспективная сетка + горизонт + пыль + виньетка */
+  .bg { position: absolute; inset: 0; overflow: hidden; }
+  .grid { position: absolute; left: -50%; right: -50%; top: 52%; height: 140%;
+    background-image: linear-gradient(rgba(120,90,255,.55) 2px, transparent 2px),
+                      linear-gradient(90deg, rgba(120,90,255,.55) 2px, transparent 2px);
+    background-size: 120px 120px; transform: perspective(700px) rotateX(72deg); transform-origin: top;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,.95), transparent 70%); }
+  .horizon { position: absolute; left: 0; right: 0; top: 50%; height: 260px; transform: translateY(-50%);
+    background: radial-gradient(ellipse at center, rgba(140,80,255,.35), transparent 65%); }
+  .dust { position: absolute; inset: 0; background-image:
+    radial-gradient(2px 2px at 10% 20%, #fff8, transparent), radial-gradient(2px 2px at 80% 12%, #fff6, transparent),
+    radial-gradient(1.5px 1.5px at 30% 70%, #fff5, transparent), radial-gradient(2px 2px at 65% 40%, #fff5, transparent),
+    radial-gradient(1.5px 1.5px at 90% 60%, #fff6, transparent), radial-gradient(2px 2px at 45% 15%, #fff4, transparent); }
+  .vig { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.85)); }
+  .black .grid, .black .horizon { display: none; }
+
+  /* мини-шкала уровней в углу — где мы сейчас */
+  .tierbar { position: absolute; top: 44px; right: 56px; display: flex; gap: 10px; z-index: 5; }
+  .tierbar b { width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center;
+    font: 800 28px "Unb"; color: #0008; background: #ffffff14; color: #ffffff40; }
+  .tierbar b.on { color: #05060d; box-shadow: 0 0 24px var(--c); background: var(--c); }
+
+  .stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .scene { display: none; align-items: center; } .scene.on { display: flex; }
+
+  h1, .big { font-family: "Unb"; font-weight: 900; letter-spacing: -1px; line-height: 1.02; text-transform: uppercase; }
+  .glow-g { color: var(--green); text-shadow: 0 0 30px rgba(57,255,136,.6); }
+  .glow-r { color: var(--red); text-shadow: 0 0 30px rgba(255,51,85,.6); }
+  .plate { display: inline-block; padding: 6px 22px 10px; border-radius: 14px; background: var(--ink); color: var(--bg); }
+  .card { background: linear-gradient(180deg, #121833, #0a0e1c); border: 2px solid #2b3560; border-radius: 28px;
+    box-shadow: 0 0 0 1px #000, 0 30px 80px rgba(0,0,0,.6), 0 0 60px rgba(120,90,255,.25); }
+  .note { position: absolute; bottom: 36px; left: 56px; font: 500 22px "Mont"; color: var(--muted); }
+
+  /* 1. хук */
+  .s1 h1 { font-size: 150px; text-align: center; }
+
+  /* 2. критерии + размытая доска */
+  .s2 { gap: 70px; }
+  .board { width: 820px; padding: 22px; transform: perspective(1400px) rotateY(18deg) rotateX(6deg); }
+  .row { display: flex; align-items: center; gap: 14px; height: 116px; border-bottom: 2px solid var(--line); }
+  .row:last-child { border: 0; }
+  .row .t { width: 116px; height: 96px; border-radius: 16px; display: grid; place-items: center; font: 900 58px "Unb"; color: #05060d; background: var(--c); box-shadow: 0 0 24px var(--c); }
+  .row .chips { display: flex; gap: 12px; flex-wrap: wrap; }
+  .chip { padding: 12px 18px; border-radius: 12px; background: #1a2140; font: 700 26px "Mont"; white-space: nowrap; }
+  .blur .chips { filter: blur(14px); }
+  .crit { width: 640px; padding: 46px 50px; }
+  .crit h2 { font: 900 34px "Unb"; color: var(--muted); margin-bottom: 26px; letter-spacing: 1px; }
+  .crit li { list-style: none; display: flex; align-items: center; gap: 24px; font: 800 48px "Mont"; padding: 18px 0; }
+  .crit li .emo { font-size: 54px; }
+
+  /* 3. заставка уровня */
+  .s3 { flex-direction: column; gap: 10px; }
+  .s3 .tier { font: 900 460px/0.9 "Unb"; color: var(--D); text-shadow: 0 0 40px var(--D), 0 0 120px var(--D); }
+  .s3 .sub { font: 900 76px "Unb"; text-transform: uppercase; }
+
+  /* 4. доска целиком, текущий уровень подсвечен */
+  .s4 .board { transform: none; width: 1500px; }
+  .s4 .row { height: 150px; } .s4 .row .t { width: 140px; height: 124px; font-size: 72px; }
+  .s4 .chip { font-size: 34px; padding: 16px 24px; }
+  .s4 .row.dim { opacity: .28; }
+  .s4 .row.cur { background: linear-gradient(90deg, rgba(255,210,31,.16), transparent); border-radius: 18px; }
+
+  /* 5. карточка с контентом (категории кэшбэка) */
+  .s5 { flex-direction: column; gap: 46px; }
+  .s5 .card { width: 1320px; padding: 40px 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .cat { display: flex; align-items: center; gap: 22px; padding: 22px 28px; border-radius: 20px; background: #161d3a; font: 700 36px "Mont"; }
+  .cat .emo { font-size: 56px; } .cat .p { margin-left: auto; font: 900 40px "Unb"; color: var(--green); }
+  .cat.bad .p { color: var(--red); }
+  .s5 .plate { font: 900 52px "Unb"; text-transform: uppercase; }
+
+  /* 6. цифра */
+  .s6 { flex-direction: column; gap: 26px; }
+  .s6 .num { white-space: nowrap; font: 900 170px/1 "Unb"; color: var(--green); text-shadow: 0 0 50px rgba(57,255,136,.55); letter-spacing: -6px; }
+  .s6 .cap { font: 800 60px "Mont"; }
+  .s6 .fine { font: 500 26px "Mont"; color: var(--muted); }
+
+  /* 7. перебивка */
+  .s7 h1 { font-size: 170px; text-shadow: 0 0 40px rgba(255,255,255,.45); }
+
+  /* 8. список + телефон */
+  .s8 { gap: 90px; }
+  .list { width: 860px; display: flex; flex-direction: column; gap: 26px; }
+  .li { display: flex; align-items: center; gap: 30px; padding: 30px 36px; border-radius: 24px; background: #0f1430; border: 2px solid #232c55; font: 800 46px "Mont"; opacity: .4; }
+  .li .n { font: 900 64px "Unb"; color: var(--B); width: 64px; }
+  .li.on { opacity: 1; border-color: var(--B); box-shadow: 0 0 40px rgba(255,210,31,.3); transform: scale(1.04); }
+  .phone { width: 430px; height: 860px; border-radius: 64px; background: #000; border: 14px solid #1d2238; position: relative; padding: 70px 30px;
+    box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 60px rgba(120,90,255,.3); transform: perspective(1400px) rotateY(-14deg); }
+  .phone::before { content: ""; position: absolute; top: 20px; left: 50%; width: 120px; height: 32px; border-radius: 20px; background: #1d2238; transform: translateX(-50%); }
+  .phone h3 { font: 800 30px "Mont"; margin-bottom: 22px; }
+  .phone .ln { height: 18px; border-radius: 9px; background: #262d4a; margin: 16px 0; }
+  .phone .hl { background: none; height: auto; font: 700 24px "Mont"; color: var(--ink); padding: 12px 14px; border-radius: 12px; border: 3px solid var(--red); box-shadow: 0 0 22px rgba(255,51,85,.5); }
+
+  /* 9. предупреждение */
+  .s9 { flex-direction: column; gap: 40px; }
+  .s9 h1 { font-size: 118px; text-align: center; }
+  .stamp { font: 900 92px "Unb"; color: var(--red); border: 12px solid var(--red); border-radius: 26px; padding: 8px 46px; transform: rotate(-6deg);
+    text-shadow: 0 0 30px rgba(255,51,85,.6); box-shadow: 0 0 40px rgba(255,51,85,.4), inset 0 0 30px rgba(255,51,85,.25); }
+  .s9 .fine { font: 600 30px "Mont"; color: var(--muted); }
+
+  /* 10. подсчёт «только телефон» */
+  .s10 { gap: 80px; }
+  .who { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .who .emo { font-size: 260px; }
+  .who .plate { font: 900 50px "Unb"; }
+  .stack { width: 900px; display: flex; flex-direction: column; gap: 18px; }
+  .bonus { display: flex; align-items: center; gap: 24px; padding: 24px 32px; border-radius: 22px; background: #10163a; border: 2px solid #26306a; font: 700 38px "Mont"; }
+  .bonus .v { margin-left: auto; font: 900 44px "Unb"; color: var(--green); }
+  .total { margin-top: 10px; display: flex; align-items: baseline; justify-content: space-between; padding: 26px 32px; border-radius: 22px; background: var(--green); color: var(--bg); }
+  .total span { font: 800 40px "Mont"; } .total b { font: 900 76px "Unb"; }
+  .ex { position: absolute; top: 44px; left: 56px; font: 800 26px "Mont"; color: var(--bg); background: var(--B); padding: 6px 16px; border-radius: 10px; }
+
+  /* 11. CTA */
+  .s11 { gap: 80px; }
+  .tg { width: 560px; padding: 30px; }
+  .tg .hd { display: flex; align-items: center; gap: 18px; padding-bottom: 20px; border-bottom: 2px solid var(--line); }
+  .tg .av { width: 72px; height: 72px; border-radius: 50%; background: var(--tg); display: grid; place-items: center; font: 900 34px "Unb"; }
+  .tg .nm { font: 800 32px "Mont"; } .tg .sb { font: 500 24px "Mont"; color: var(--muted); }
+  .msg { margin-top: 20px; padding: 20px 24px; border-radius: 20px 20px 20px 6px; background: #182046; font: 600 28px/1.35 "Mont"; }
+  .msg b { color: var(--green); }
+  .cta h1 { font-size: 92px; } .cta .arrow { font: 900 140px "Unb"; color: var(--tg); text-shadow: 0 0 40px var(--tg); }
+  .cta .sub { font: 700 44px "Mont"; color: var(--muted); margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="bg" id="bg"><div class="horizon"></div><div class="grid"></div><div class="dust"></div><div class="vig"></div></div>
+<div class="tierbar" id="tierbar"></div>
+
+<div class="stage">
+  <section class="scene s1" data-bg="black">
+    <h1>Банки <span class="glow-g">платят</span><br>новым клиентам</h1>
+  </section>
+
+  <section class="scene s2">
+    <div class="board card blur" id="b2"></div>
+    <div class="crit card">
+      <h2>ОЦЕНИВАЕМ ПО:</h2>
+      <ul>
+        <li><span class="emo">💰</span>Сколько платят</li>
+        <li><span class="emo">⏱️</span>Сколько сил</li>
+        <li><span class="emo">⚠️</span>Какой риск</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="scene s3" data-bg="black" data-tier="D">
+    <div class="tier">D</div>
+    <div class="sub">Розыгрыши и баллы</div>
+  </section>
+
+  <section class="scene s4" data-tier="B">
+    <div class="board card" id="b4"></div>
+  </section>
+
+  <section class="scene s5" data-tier="C">
+    <div class="card">
+      <div class="cat"><span class="emo">🐄</span>Ветклиники для коров<span class="p">7%</span></div>
+      <div class="cat"><span class="emo">🛥️</span>Аренда яхт<span class="p">10%</span></div>
+      <div class="cat"><span class="emo">🚜</span>Запчасти для тракторов<span class="p">15%</span></div>
+      <div class="cat bad"><span class="emo">🛒</span>Продукты<span class="p">0,01%</span></div>
+    </div>
+    <div class="plate">Повышенный — там, где не тратишь</div>
+  </section>
+
+  <section class="scene s6" data-tier="B">
+    <div class="num">1 000 – 2 000 ₽</div>
+    <div class="cap">за одну покупку новой картой</div>
+    <div class="fine">Условия на дату записи — проверяй в правилах акции</div>
+  </section>
+
+  <section class="scene s7" data-bg="black">
+    <h1>Что делать?</h1>
+  </section>
+
+  <section class="scene s8" data-tier="B">
+    <div class="list">
+      <div class="li"><span class="n">1</span>«Новый клиент» — у всех по-разному</div>
+      <div class="li on"><span class="n">2</span>Срок на покупку</div>
+      <div class="li"><span class="n">3</span>Платное обслуживание</div>
+    </div>
+    <div class="phone">
+      <h3>Правила акции</h3>
+      <div class="ln"></div><div class="ln" style="width:80%"></div>
+      <div class="hl">Покупка в течение 30 дней с даты оформления</div>
+      <div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:90%"></div>
+      <div class="ln" style="width:60%"></div><div class="ln"></div><div class="ln" style="width:75%"></div>
+    </div>
+  </section>
+
+  <section class="scene s9" data-bg="black">
+    <h1>Карту чужому —<br><span class="glow-r">никогда</span></h1>
+    <div class="stamp">ДО 3 ЛЕТ</div>
+    <div class="fine">ст. 187 УК РФ · или штраф 100–300 тыс. ₽</div>
+  </section>
+
+  <section class="scene s10">
+    <div class="ex">ПРИМЕР ВЁРСТКИ · цифры возьмём из поста</div>
+    <div class="who"><span class="emo">📱</span><div class="plate">Только телефон · 18+</div></div>
+    <div class="stack">
+      <div class="bonus"><span class="emo">💳</span>Карта №1<span class="v">+1 000 ₽</span></div>
+      <div class="bonus"><span class="emo">💳</span>Карта №2<span class="v">+2 000 ₽</span></div>
+      <div class="bonus"><span class="emo">💳</span>Карта №3<span class="v">+1 500 ₽</span></div>
+      <div class="bonus"><span class="emo">👥</span>Друг по ссылке<span class="v">+500 ₽</span></div>
+      <div class="total"><span>Итого сейчас</span><b>5 000 ₽</b></div>
+    </div>
+  </section>
+
+  <section class="scene s11 cta">
+    <div class="tg card">
+      <div class="hd"><div class="av">₽</div><div><div class="nm">Бонусы банков</div><div class="sb">Telegram-канал</div></div></div>
+      <div class="msg">Актуальные бонусы на эту неделю: <b>+2 000 ₽</b> за карту, <b>+1 000 ₽</b> за первую покупку…</div>
+      <div class="msg">Условия и ссылки — в закрепе 📌</div>
+    </div>
+    <div>
+      <h1>Актуальные<br>бонусы —<br>в Telegram</h1>
+      <div class="sub">ссылка в описании <span class="arrow">↓</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  const TIERS = { D: ["Розыгрыши", "Баллы партнёров"], C: ["Кэшбэк по категориям"], B: ["Бонус за карту", "Бонус за покупку"],
+                  A: ["Приведи друга"], S: ["Свой канал + партнёрки"] };
+  const board = (el, cur) => {
+    el.innerHTML = Object.entries(TIERS).map(([t, items]) =>
+      `<div class="row ${cur ? (t === cur ? "cur" : "dim") : ""}" style="--c:var(--${t})"><div class="t">${t}</div>
+       <div class="chips">${items.map(i => `<span class="chip">${i}</span>`).join("")}</div></div>`).join("");
+  };
+  board(document.getElementById("b2"));
+  board(document.getElementById("b4"), "B");
+  const s = +(new URLSearchParams(location.search).get("s") || 1);
+  const sc = document.querySelector(".s" + s);
+  sc.classList.add("on");
+  if (sc.dataset.bg === "black") document.getElementById("bg").classList.add("black");
+  const cur = sc.dataset.tier;
+  if (cur) document.getElementById("tierbar").innerHTML =
+    "DCBAS".split("").map(t => `<b class="${t === cur ? "on" : ""}" style="--c:var(--${t})">${t}</b>`).join("");
+  if (cur) document.querySelectorAll(".s3 .tier").forEach(e => e.style.color = `var(--${cur})`);
+</script>
+</body>
+</html>
