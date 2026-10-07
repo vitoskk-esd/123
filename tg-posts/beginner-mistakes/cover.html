@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Обложка «5 ошибок новичка»</title>
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root { --bg: #04050a; --ink: #eef3ff; --cyan: #3df5ff; --lime: #c8ff3d; --violet: #8b5cff; --red: #ff3b5c; --muted: #8f9bb8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 1280px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  canvas { position: absolute; inset: 0; }
+  .v { position: absolute; inset: 0; display: none; }
+  .gr { color: var(--red); text-shadow: 0 0 22px rgba(255,59,92,.85), 0 0 80px rgba(255,59,92,.4); }
+  .gl { color: var(--lime); text-shadow: 0 0 22px rgba(200,255,61,.75), 0 0 80px rgba(200,255,61,.35); }
+  .h { text-transform: uppercase; letter-spacing: -5px; line-height: .92; }
+  .sub { font-size: 44px; line-height: 1.15; color: #c9d3ee; letter-spacing: -.5px; }
+  .tag { display: inline-block; font-family: "Tek"; font-size: 34px; letter-spacing: 6px; padding: 12px 28px; border-radius: 40px;
+         border: 3px solid var(--red); color: var(--red); box-shadow: 0 0 30px rgba(255,59,92,.35), inset 0 0 20px rgba(255,59,92,.15); }
+  .row { display: flex; align-items: center; gap: 26px; font-size: 44px; margin-bottom: 22px; }
+  .row i { font-style: normal; width: 74px; height: 74px; border-radius: 20px; border: 4px solid var(--red); color: var(--red); display: flex; align-items: center; justify-content: center;
+           font-family: Tek; font-size: 42px; box-shadow: 0 0 20px rgba(255,59,92,.5); flex: none; }
+  .ntf { position: absolute; border-radius: 40px; background: rgba(18,24,40,.95); border: 2px solid rgba(255,59,92,.6); box-shadow: 0 0 60px rgba(255,59,92,.3);
+         display: flex; align-items: center; gap: 34px; padding: 0 44px; }
+  .ntf .ic { width: 120px; height: 120px; border-radius: 30px; flex: none; display: flex; align-items: center; justify-content: center; font-family: Tek; font-size: 80px; color: #fff;
+             background: linear-gradient(135deg, #ff6b84, #b0102e); box-shadow: 0 0 40px rgba(255,59,92,.6); }
+  .ntf b { display: block; font-size: 54px; } .ntf span { font-size: 36px; color: var(--muted); }
+  .coin { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: Tek; color: #142000;
+          background: radial-gradient(circle at 35% 30%, #f9ffd6, #c8ff3d 42%, #5f8a08 100%); box-shadow: 0 0 90px rgba(200,255,61,.6), inset 0 -14px 0 rgba(0,0,0,.25); }
+  .scan { position: absolute; inset: 0; pointer-events: none; opacity: .12; background: repeating-linear-gradient(0deg, rgba(255,255,255,.1) 0 2px, transparent 2px 5px); }
+  .vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.6)); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1280" height="1280"></canvas>
+
+  <!-- В1: список из 5 ошибок -->
+  <div class="v" id="v1">
+    <div style="position:absolute;left:80px;top:80px"><span class="tag">НОВИЧКАМ</span></div>
+    <div class="h" style="position:absolute;left:76px;top:170px;font-size:150px"><span class="gr">5 ошибок</span><br>новичка</div>
+    <div class="sub" style="position:absolute;left:80px;top:470px">из-за которых банк <span class="gr">не выплатит бонус</span></div>
+    <div style="position:absolute;left:80px;top:600px;width:1120px">
+      <div class="row"><i>1</i>оформил не по ссылке</div>
+      <div class="row"><i>2</i>оплатил переводом или связью</div>
+      <div class="row"><i>3</i>не успел в срок</div>
+      <div class="row"><i>4</i>уже был клиентом банка</div>
+      <div class="row"><i>5</i>закрыл карту раньше времени</div>
+    </div>
+  </div>
+
+  <!-- В2: уведомление «Бонус не начислен» -->
+  <div class="v" id="v2">
+    <div class="h" style="position:absolute;left:0;right:0;top:90px;text-align:center;font-size:126px">Бонус<br><span class="gr">не пришёл?</span></div>
+    <div class="ntf" style="left:110px;right:110px;top:470px;height:220px;transform:rotate(-2deg)"><div class="ic">!</div><div><b>Бонус не начислен</b><span>условия акции не выполнены</span></div></div>
+    <div class="ntf" style="left:170px;right:170px;top:730px;height:150px;opacity:.55;transform:rotate(1.5deg)"><div class="ic" style="width:90px;height:90px;font-size:56px">!</div><div><b style="font-size:42px">Покупка не засчитана</b><span style="font-size:30px">перевод не является покупкой</span></div></div>
+    <div class="h" style="position:absolute;left:0;right:0;top:960px;text-align:center;font-size:96px"><span class="gl">5 ошибок</span> новичка</div>
+    <div class="sub" style="position:absolute;left:0;right:0;top:1080px;text-align:center;font-size:42px">и как получить бонус с первого раза</div>
+  </div>
+
+  <!-- В3: перечёркнутая монета -->
+  <div class="v" id="v3">
+    <div class="coin" style="left:430px;top:170px;width:420px;height:420px;font-size:260px;filter:saturate(.6) brightness(.8)">₽</div>
+    <svg style="position:absolute;inset:0" width="1280" height="1280"><defs><filter id="g" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <circle cx="640" cy="380" r="250" fill="none" stroke="#ff3b5c" stroke-width="26" filter="url(#g)"/>
+      <line x1="463" y1="557" x2="817" y2="203" stroke="#ff3b5c" stroke-width="26" stroke-linecap="round" filter="url(#g)"/></svg>
+    <div class="h" style="position:absolute;left:0;right:0;top:700px;text-align:center;font-size:132px">Не теряй<br><span class="gl">свой бонус</span></div>
+    <div class="sub" style="position:absolute;left:0;right:0;top:980px;text-align:center;font-size:46px">5 ошибок, на которых новички <span class="gr">теряют деньги</span></div>
+    <div style="position:absolute;left:0;right:0;top:1080px;text-align:center"><span class="tag">ЧЕК-ЛИСТ</span></div>
+  </div>
+
+  <div class="scan"></div><div class="vig"></div>
+</div>
+<script>
+const V = (new URLSearchParams(location.search)).get("v") || "1";
+document.getElementById("v" + V).style.display = "block";
+const cx = document.getElementById("bg").getContext("2d");
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+cx.fillStyle = "#04050a"; cx.fillRect(0, 0, 1280, 1280);
+const glows = { "1": [[1050, 700, "rgba(255,59,92,.3)"], [200, 250, "rgba(139,92,255,.35)"]],
+                "2": [[640, 560, "rgba(255,59,92,.32)"], [640, 1050, "rgba(200,255,61,.18)"]],
+                "3": [[640, 380, "rgba(255,59,92,.35)"], [640, 900, "rgba(139,92,255,.35)"]] }[V];
+for (const [x, y, c] of glows) { const g = cx.createRadialGradient(x, y, 20, x, y, 700); g.addColorStop(0, c); g.addColorStop(1, "rgba(4,5,10,0)"); cx.fillStyle = g; cx.fillRect(0, 0, 1280, 1280); }
+const hy = 1000; cx.lineWidth = 2;
+for (let i = -14; i <= 14; i++) { cx.strokeStyle = "rgba(255,59,92,.1)"; cx.beginPath(); cx.moveTo(640 + i * 45, hy); cx.lineTo(640 + i * 230, 1280); cx.stroke(); }
+for (let k = 0; k < 8; k++) { const d = k / 8, y = hy + Math.pow(d, 2.2) * (1280 - hy); cx.strokeStyle = `rgba(255,59,92,${.04 + d * .16})`; cx.beginPath(); cx.moveTo(0, y); cx.lineTo(1280, y); cx.stroke(); }
+for (let i = 0; i < 220; i++) {
+  const x = rnd(i) * 1280, y = rnd(i + 500) * 1280, z = .3 + rnd(i + 900) * .7, h = rnd(i + 77);
+  cx.fillStyle = h > .8 ? `rgba(200,255,61,${.2 + z * .6})` : (h > .55 ? `rgba(139,92,255,${.2 + z * .6})` : `rgba(61,245,255,${.2 + z * .6})`);
+  cx.beginPath(); cx.arc(x, y, 1 + z * 2.6, 0, 6.283); cx.fill();
+}
+</script>
+</body>
+</html>
