@@ -138,7 +138,7 @@ body { font-family: "Mont", sans-serif; color: var(--ink); position: relative; }
 .sting .big { font: 900 560px/0.8 "Unb"; color: var(--c); text-shadow: 0 0 120px color-mix(in srgb, var(--c) 45%, transparent); }
 .sting .tt { display: flex; flex-direction: column; gap: 18px; }
 .sting .tt small { font: 700 34px "Mont"; color: var(--muted); letter-spacing: 6px; text-transform: uppercase; }
-.sting .tt span { font: 900 96px/1.02 "Unb"; text-transform: uppercase; max-width: 1000px; }
+.sting .tt span { font: 900 84px/1.04 "Unb"; text-transform: uppercase; max-width: 1300px; }
 .sting .ln { height: 8px; width: 0; background: var(--c); border-radius: 4px; }
 
 /* нижняя плашка: раздел/ключевая мысль (≤ 3 слов) */
@@ -188,3 +188,16 @@ body { font-family: "Mont", sans-serif; color: var(--ink); position: relative; }
 .capw .cv { font: 800 40px "Mont"; color: var(--green); } .capw .cv.r { color: var(--red); }
 .capw .cs { font: 700 30px "Mont"; color: var(--muted); }
 .mtag { position: absolute; padding: 6px 12px 8px; background: rgba(0,0,0,.78); color: #fff; border-radius: 10px; font: 900 22px/1.1 "Mont"; text-transform: uppercase; }
+.fn { position: absolute; min-width: 240px; padding: 22px 30px 24px; border-radius: 18px; background: #161d28; border: 3px solid var(--c); text-align: center; white-space: nowrap; }
+.fn b { display: block; font: 800 40px "Mont"; } .fn small { display: block; margin-top: 6px; font: 700 24px "Mont"; color: var(--muted); }
+.chl { font: 800 30px "Mont"; color: var(--muted); text-align: center; margin-top: 8px; }
+.ofr { position: absolute; inset: 0; display: flex; align-items: center; gap: 28px; padding: 12px 26px; }
+.ofr .bank.sm { width: 220px; height: 120px; flex: none; position: relative; }
+.ofr .ot { display: flex; flex-direction: column; gap: 6px; } .ofr small { font: 700 22px "Mont"; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+.ofr b { font: 800 50px/1 "Mono"; color: var(--green); letter-spacing: -2px; } .ofr span { font: 700 23px "Mont"; color: var(--ink); white-space: nowrap; }
+.board.big .chip { padding: 8px 10px; } .board.big .chip .logo { height: 84px; padding: 0 18px; border-radius: 12px; } .board.big .chip .logo img { height: 48px; } .board.big .chip .logo img.tb { height: 56px; } .board.big .chip .logo .ic { height: 62px; } .board.big .chip .logo .wm { font-size: 24px; }
+/* логотип банка на белой плашке (чипы доски) */
+.logo { height: 56px; padding: 0 14px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.logo img { height: 30px; width: auto; max-width: 220px; object-fit: contain; } .logo img.tb { height: 36px; }
+.logo .ic { height: 40px; border-radius: 8px; } .logo .wm { font: 900 18px "Unb"; color: #5b2c8f; letter-spacing: .5px; }
+.ofr .bank.sm .wm { font-size: 17px; } .ofr .bank.sm .ic { height: 54%; } .ofr .bank.sm img { max-width: 70%; }

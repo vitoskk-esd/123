@@ -69,7 +69,7 @@
   };
   // доска: b.rows {D:[{t|bank, at}]}, b.blur [{t, v}] (px), b.focus {row, at}
   B.board = {
-    build: (b) => $(`<div class="board">${"SABCD".split("").map(T => `<div class="row" data-r="${T}"><b style="--c:var(--${T})">${T}</b>
+    build: (b) => $(`<div class="board ${b.big ? "big" : ""}">${(b.only || "SABCD").split("").map(T => `<div class="row" data-r="${T}"><b style="--c:var(--${T})">${T}</b>
       ${(b.rows[T] || []).map(c => `<div class="chip" data-a="${c.at}">${c.bank ? `<div class="logo">${LOGO[c.bank]}</div>` : c.t}</div>`).join("")}</div>`).join("")}</div>`),
     tick: (el, b, t) => {
       el.querySelectorAll(".chip").forEach(e => { const a = +e.dataset.a, k = out3((t - a) / .4); e.style.opacity = clamp((t - a) / .2); e.style.transform = `translateX(${60 * (1 - k)}px)`;
@@ -130,9 +130,46 @@
     tick: (el, b, t) => {
       const p = clamp((t - b.a) / (b.b - b.a)), f = Math.min(p / b.cap, 1) * .8, hit = p >= b.cap;
       el.querySelector(".bar i").style.width = `${f * 100}%`; el.querySelector(".bar i").classList.toggle("hit", hit);
-      el.querySelector(".cv").textContent = hit ? "дальше — 0 ₽ кэшбэка" : "кэшбэк растёт…"; el.querySelector(".cv").classList.toggle("r", hit);
+      el.querySelector(".cv").textContent = hit ? (b.stop || "дальше — 0 ₽ кэшбэка") : (b.grow || "кэшбэк растёт…"); el.querySelector(".cv").classList.toggle("r", hit);
       fade(el.querySelector(".cs"), t, b.at2, .4, 16);
     },
+  };
+
+  // схема потока: b.nodes [{id, x, y, t, sub, c, at}] (координаты в px окна), b.edges [{a, b, t, at, c}] — стрелка «прорисовывается»
+  B.flow = {
+    build: (b) => {
+      const N = Object.fromEntries(b.nodes.map(n => [n.id, n]));
+      const ed = b.edges.map((e, i) => { const A = N[e.a], Bn = N[e.b]; const dx = Bn.x - A.x, dy = Bn.y - A.y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+        const x1 = A.x + ux * 95, y1 = A.y + uy * 60, x2 = Bn.x - ux * 95, y2 = Bn.y - uy * 60, len = Math.hypot(x2 - x1, y2 - y1);
+        return `<g class="ed" data-a="${e.at}" data-l="${len}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${e.c || "#8b96a5"}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}"/>
+          <polygon points="${x2},${y2} ${x2 - ux * 22 - uy * 12},${y2 - uy * 22 + ux * 12} ${x2 - ux * 22 + uy * 12},${y2 - uy * 22 - ux * 12}" fill="${e.c || "#8b96a5"}" opacity="0"/>
+          ${e.t ? `<text x="${(x1 + x2) / 2 - uy * 26}" y="${(y1 + y2) / 2 + ux * 26 + 8}" text-anchor="middle" fill="${e.c || "#cfd6df"}" font-family="Mont" font-weight="800" font-size="26" opacity="0">${e.t}</text>` : ""}</g>`; }).join("");
+      return $(`<div style="position:absolute;inset:0"><svg style="position:absolute;inset:0;width:100%;height:100%">${ed}</svg>
+        ${b.nodes.map(n => `<div class="fn" data-a="${n.at}" style="left:${n.x}px;top:${n.y}px;--c:${n.c || "var(--line)"}"><b>${n.t}</b>${n.sub ? `<small>${n.sub}</small>` : ""}</div>`).join("")}</div>`);
+    },
+    tick: (el, b, t) => {
+      el.querySelectorAll(".fn").forEach(e => { const a = +e.dataset.a, k = back((t - a) / .35); e.style.opacity = clamp((t - a) / .12); e.style.transform = `translate(-50%,-50%) scale(${t < a ? .6 : .6 + .4 * k})`; });
+      el.querySelectorAll(".ed").forEach(g => { const a = +g.dataset.a, L = +g.dataset.l, p = io3((t - a) / .5);
+        g.querySelector("line").setAttribute("stroke-dashoffset", L * (1 - p)); g.querySelector("polygon").setAttribute("opacity", p > .9 ? 1 : 0);
+        const tx = g.querySelector("text"); if (tx) tx.setAttribute("opacity", clamp((t - a - .3) / .3)); });
+    },
+  };
+  // график роста: b.pts [[x,y]] в долях, рисуется с a по b; b.label, b.mark {i, text, at}
+  B.chart = {
+    build: (b) => { const W = 900, H = 420, P = b.pts.map(([x, y]) => [40 + x * (W - 80), H - 40 - y * (H - 90)]);
+      const d = "M" + P.map(p => p.join(",")).join(" L"); let len = 0; for (let i = 1; i < P.length; i++) len += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]);
+      return $(`<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:20px 30px"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+        <line x1="40" y1="${H - 40}" x2="${W - 40}" y2="${H - 40}" stroke="#263040" stroke-width="3"/><line x1="40" y1="30" x2="40" y2="${H - 40}" stroke="#263040" stroke-width="3"/>
+        ${(b.ticks || []).map(([x, s]) => `<text x="${40 + x * (W - 80)}" y="${H - 8}" text-anchor="middle" fill="#8b96a5" font-family="Mont" font-weight="700" font-size="22">${s}</text>`).join("")}
+        <path class="ln" d="${d}" fill="none" stroke="${b.c || "#3ddc84"}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" data-l="${len}"/>
+        <circle class="dot" r="13" fill="${b.c || "#3ddc84"}" opacity="0"/></svg><div class="chl">${b.label || ""}</div></div>`); },
+    tick: (el, b, t) => { const p = io3((t - b.a) / (b.b - b.a)), ln = el.querySelector(".ln"), L = +ln.dataset.l; ln.setAttribute("stroke-dashoffset", L * (1 - p));
+      const pt = ln.getPointAtLength(L * p), d = el.querySelector(".dot"); d.setAttribute("cx", pt.x); d.setAttribute("cy", pt.y); d.setAttribute("opacity", p > .01 ? 1 : 0); },
+  };
+  // предложение банка (финальный подсчёт): b.bank, b.card, b.bonus, b.cond, b.at
+  B.offer = {
+    build: (b) => $(`<div class="ofr"><div class="bank sm">${LOGO[b.bank]}</div><div class="ot"><small>${b.card}</small><b>${b.bonus}</b><span>${b.cond}</span></div></div>`),
+    tick: () => {},
   };
 
   // ---------- виды объектов ----------
@@ -152,8 +189,11 @@
       ${(o.pushes || []).map(p => `<div class="push" data-a="${p.at}"><div class="pl">${p.bank ? `<img src="../assets/logos/${PLOGO[p.bank]}">` : p.ico || ""}</div><div><div class="pt">${p.title}</div><div class="pm">${p.html}</div></div></div>`).join("")}
       </div></div>`),
     tick: (el, o, t) => {
-      if (o.balText) el.querySelector(".bal").textContent = o.balText;
-      if (o.bal) { const b = o.bal, p = io3((t - b.a) / (b.b - b.a)), v = b.from + (b.to - b.from) * p; el.querySelector(".bal").textContent = (b.sign ? (v < 0 ? "−" : "+") : "") + fmt(v) + " ₽"; }
+      if (o.balText && !o.bal) el.querySelector(".bal").textContent = o.balText;
+      if (o.bal && o.balText && o.bal.steps && t < o.bal.steps[0][0]) el.querySelector(".bal").textContent = o.balText;   // до первого шага — «?? ??? ₽» (отсылка к хуку)
+      else if (o.bal) { const b = o.bal; let v;
+        if (b.steps) { v = b.from; for (const [st, val] of b.steps) { if (t < st) break; v = v + (val - v) * io3((t - st) / .6); } }   // ступеньками: каждое предложение банка
+        else { const p = io3((t - b.a) / (b.b - b.a)); v = b.from + (b.to - b.from) * p; } el.querySelector(".bal").textContent = (b.sign ? (v < 0 ? "−" : "+") : "") + fmt(v) + " ₽"; }
       el.querySelectorAll(".row").forEach(e => fade(e, t, +e.dataset.a, .35, 20));
       const ps = [...el.querySelectorAll(".push")];
       ps.forEach((e, i) => {  // новые уведомления сверху, старые съезжают вниз

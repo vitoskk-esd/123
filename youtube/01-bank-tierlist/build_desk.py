@@ -17,7 +17,7 @@ def sec(phrase):
     global SEC
     SEC = 0.0 if phrase is None else W.A(phrase, after=SEC) - .05
     return SEC + .05
-TO = float(sys.argv[sys.argv.index("--to") + 1]) if "--to" in sys.argv else W.duration
+TO = float(sys.argv[sys.argv.index("--to") + 1]) if "--to" in sys.argv else W.duration + 20
 objs, cam, glow = [], [], []
 music = [{"t": 0, "part": "intro"}]
 sfx = {k: [] for k in ["ui", "pan", "notif", "mark", "click", "thud", "ticks", "coin", "sting", "riser", "chip"]}
@@ -329,17 +329,292 @@ ob("tx_fg", "text", t_forget - .1, t_not + .1, X6 + 244, Y6 + 70, cls="s", in_="
 ob("tk_C", "takeaway", t_not - .1, t_always, X6, Y6, z=3, in_="up", s=1.15,
    html=f'<span data-a="{t_not:.3f}">Кэшбэк — <span class="r">не заработок</span>,</span><br><span data-a="{t_disc:.3f}">а <span class="g">скидка</span> на то, что ты и так покупаешь</span>')
 camto(t_always - .4, 960, Y3, 1, 1.0)
-ob("w_board4", "win", t_always - .5, TO + 1, 960, Y3 - 60, 1100, 760, title="Тир-лист: как банк платит тебе", in_="fade",
+t_B = A("Уровень B")
+ob("w_board4", "win", t_always - .5, t_B + .3, 960, Y3 - 60, 1100, 760, title="Тир-лист: как банк платит тебе", in_="fade",
    body={"type": "board", "rows": rows_D, "blur": [{"t": 0, "v": 9}], "unblur": {"D": 0, "C": t_soC + .1}, "focus": {"row": "B", "at": t_next + .2}})
 ob("tk_C2", "takeaway", t_always, t_next + .2, 960, Y3 + 400, z=3, in_="up", html='<span>Работает всегда, но <span class="r">много не даст</span></span>')
-ob("tx_next", "text", t_next - .1, TO + 1, 960, Y3 + 400, cls="m", in_="up", html=ws(("где платят", A("платят", after=t_next), "")) + " " + ws(("больше?", A("больше", after=t_next), "g")))
+ob("tx_next", "text", t_next - .1, t_B + .3, 960, Y3 + 400, cls="m", in_="up", html=ws(("где платят", A("платят", after=t_next), "")) + " " + ws(("больше?", A("больше", after=t_next), "g")))
 camto(t_lvl - .2, 470, Y3 - 70, 1.6, 1.4, pan=False)
 music.append({"t": t_soC + .4, "part": "intro"})
+
+
+def sting(tier, t, t_end, title, color):
+    ob(f"sting_{tier}", "sting", t - .05, t_end, 0, 0, fixed=True, tier=tier, title=title, sub="уровень", z=50, sound=False)
+    sfx["sting"].append(t); glow.append({"t": t, "c": color}); music.append({"t": t, "part": "main"})
+
+
+def to_board(t, unblur, focus_row, t_end, take=None, take_t=None):
+    """Отсылка к доске из хука: камера к доске, строка разобранного уровня открывается, наезд в следующую строку."""
+    camto(t - .4, 960, Y3, 1, 1.0)
+    ob(f"w_board_{focus_row}", "win", t - .5, t_end + .3, 960, Y3 - 60, 1100, 760, title="Тир-лист: как банк платит тебе", in_="fade",
+       body={"type": "board", "rows": rows_D, "blur": [{"t": 0, "v": 9}], "unblur": unblur, "focus": {"row": focus_row, "at": t_end - 1.2}})
+    if take: ob(f"tk_b_{focus_row}", "takeaway", take_t or t, t_end - .5, 960, Y3 + 400, z=3, in_="up", html=take)
+    y_row = {"S": -290, "A": -150, "B": 0, "C": 150, "D": 290}[focus_row] * 760 / 820 - 60
+    camto(t_end - .55, 470, Y3 + y_row, 2.4, .6)
+    sfx["riser"].append([t_end - 1.3, t_end - .02])
+
+
+# ================= уровень B — станция 7 (7260×540) =================
+X7, Y7 = 7260, 540
+sec("Уровень B"); t_B = A("Уровень B"); t_nc = A("Новый клиент"); t_pay2 = A("готов"); t_how = A("Работает это так"); t_form = A("Оформляешь"); t_buy = A("делаешь одну")
+t_get = A("получаешь бонус"); t_now = A("Сейчас это"); t_cash = A("деньгами"); t_cb = A("кэшбеком"); t_cert = A("сертификатом"); t_range = A("за одну покупку от")
+t_gift = A("Звучит"); t_3 = A("три подвоха"); t_n1 = A("Новый клиент", after=t_gift); t_had = A("если у тебя"); t_n2 = A("Сроки"); t_miss = A("Пропустил")
+t_n3 = A("Обслуживание"); t_free = A("бесплатны"); t_fee = A("Не выполнил"); t_more = A("больше, чем"); t_whB = A("Что делать", after=t_n3); t_rules = A("правила")
+t_ban = A("баннер"); t_now2 = A("Сделать покупку"); t_close = A("закрыть"); t_throw = A("выкинуть"); t_tg2 = A("А какие банки"); t_list = A("Список"); t_link = A("Ссылка в описании")
+sting("B", t_B, t_nc - .1, "Приветственные бонусы", "#ffd84a")
+camto(t_B + .4, X7, Y7, 1, .05, pan=False)
+ob("low_b", "lower", t_nc + .2, A("Уровень А"), 80, 975, fixed=True, text="Уровень B", sub="приветственные бонусы", c="var(--B)", z=40, sound=False)
+ob("w_flowB", "win", t_nc - .2, t_how + .1, X7, Y7 - 20, 1300, 620, title="Почему банк платит", in_="scale",
+   body={"type": "flow", "nodes": [{"id": "b", "x": 260, "y": 280, "t": "Банк", "sub": "нужны клиенты", "c": "var(--B)", "at": t_nc},
+                                    {"id": "y", "x": 1020, "y": 280, "t": "Ты", "sub": "новый клиент", "c": "var(--green)", "at": t_nc + .4}],
+            "edges": [{"a": "b", "b": "y", "t": "платит за тебя", "c": "#3ddc84", "at": t_pay2}]})
+ob("w_stepsB", "win", t_how - .1, t_now + .1, X7 - 330, Y7, 760, 560, title="Как это работает", in_="left",
+   body={"type": "crit", "title": "3 шага", "items": [{"ic": "rub", "t": "Оформляешь карту", "at": t_form}, {"ic": "clock", "t": "Одна покупка", "at": t_buy}, {"ic": "rub", "t": "Получаешь бонус", "at": t_get}]})
+ob("w_payB", "win", t_buy - .1, t_now + .1, X7 + 470, Y7 - 120, 640, 400, title="", in_="right", z=2, body=frames("d_payB", "pay_terminal", 3.0, t_buy, t_now + .2, cr("pay_terminal")))
+ob("ph7", "phone", t_get - .4, t_now + .1, X7 + 470, Y7 + 260, 300, 600, in_="up", z=3, appTop=420, s=.8,
+   pushes=[{"at": t_get + .1, "ico": "<b style='font:900 22px Unb;color:#0b0f14'>₽</b>", "title": "Банк · сейчас", "html": "Бонус новому клиенту <b>+1 000 ₽</b>"}])
+sfx["notif"].append(t_get + .1); sfx["chip"] += [t_form, t_buy]
+ob("n_rangeB", "num", t_now - .1, t_gift, X7, Y7 - 150, c="g", **{"from": 1000, "to": 2000}, a=A("1000"), b=A("2000") + .3, label="обычно — от 1 000 до 2 000 ₽", text="1 000–2 000 ₽")
+sfx["ticks"].append([A("1000"), A("2000") + .3])
+ob("w_formB", "win", t_cash - .2, t_gift, X7, Y7 + 170, 1100, 300, title="Чем платят", in_="up",
+   body={"type": "rows", "items": [{"l": "Деньгами", "r": "₽", "c": "g", "at": t_cash}, {"l": "Кэшбэком или сертификатом", "r": "маркетплейс", "at": t_cb}]})
+ob("tx_rangeB", "text", t_range - .1, t_gift, X7, Y7 + 400, cls="s", in_="fade", html=ws(("за одну покупку от 500 до 3 000 ₽", t_range, "")))
+# три подвоха — документ правил с маркером
+ob("lb_3", "label", t_3 - .1, t_whB, X7 - 330, Y7 - 390, z=6, at=t_3, kicker="внимание", text="3 подвоха", c="var(--red)",
+   items=[{"t": "новый клиент", "at": t_n1}, {"t": "сроки", "at": t_n2}, {"t": "обслуживание", "at": t_n3}])
+sfx["thud"].append(t_3)
+ob("w_rulesB", "win", t_n1 - .3, t_whB, X7 + 200, Y7 + 60, 1000, 680, title="Правила акции.pdf", paper=True, in_="up",
+   body={"type": "doc", "html": "<h3>Бонус за первую покупку</h3>"
+         f"<p>1. Участник — {mark('новый клиент банка', t_n1 + .1, .6)}: ранее не имел карт банка.</p>"
+         f"<p>2. Покупку нужно совершить {mark('в течение установленного срока', t_n2 + .1, .7)} с даты выдачи карты.</p>"
+         f"<p>3. {mark('Обслуживание бесплатно при выполнении условий', t_free - .2, .8, 'r')}, иначе — по тарифу.</p>"
+         "<p style='color:#8a8d94;font-size:20px'>Пример формулировок. Условия — на сайте банка.</p>"})
+ob("st_had", "stamp", t_had + .2, t_n2 - .1, X7 + 520, Y7 - 120, at=t_had + .2, text="бонуса нет", z=4, rot=-5)
+sfx["thud"].append(t_had + .2)
+ob("n_days", "num", t_miss - .5, t_n3, X7 + 520, Y7 + 330, z=4, c="r", **{"from": 7, "to": 0}, a=t_miss - .4, b=t_miss + .2, unit=" дней", label="срок вышел — бонус всё")
+ob("ph7b", "phone", t_fee - .3, t_whB, X7 - 660, Y7 + 60, 420, 860, in_="left", z=5, s=.85, appTop=420, kf=[kf(t_fee - .3, .01, s=.85)],
+   pushes=[{"at": t_fee - .1, "ico": "<b style='font:900 22px Unb;color:#0b0f14'>₽</b>", "title": "Банк", "html": "Бонус <b>+1 000 ₽</b>"},
+           {"at": t_more, "ico": "<b style='font:900 22px Unb;color:#0b0f14'>!</b>", "title": "Банк · пример", "html": "Обслуживание <b class='r'>−1 490 ₽</b>"}])
+sfx["notif"] += [t_fee - .1, t_more]
+# что делать: правила целиком, а не баннер; закрыть, а не выкинуть
+ob("w_banB", "win", t_whB - .1, t_now2, X7 - 380, Y7 - 40, 640, 520, title="Реклама", in_="left",
+   body={"type": "html", "html": '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;background:linear-gradient(135deg,#6a4cff,#b44cff);font:900 54px/1.05 Unb;text-transform:uppercase;text-align:center">+2 000 ₽<br>за покупку!<small style="font:600 24px Mont;text-transform:none;opacity:.8">* подробности мелким шрифтом</small></div>'})
+ob("st_ban", "stamp", t_ban - .05, t_now2, X7 - 380, Y7 + 60, at=t_ban, text="не верь баннеру", z=3, rot=-7)
+sfx["thud"].append(t_ban)
+ob("w_rules2", "win", t_rules - .2, t_now2, X7 + 380, Y7 - 20, 760, 600, title="Правила акции.pdf", paper=True, in_="right",
+   body={"type": "doc", "html": f"<h3>Правила акции</h3><p>{mark('Читать целиком', t_rules + .1, .6)}: кто считается новым клиентом, срок покупки, минимальная сумма, тариф обслуживания.</p>",
+         "scroll": {"from": 0, "to": 0, "a": 0, "b": 1}})
+ob("w_doB", "win", t_now2 - .1, t_tg2, X7, Y7, 1000, 520, title="Чек-лист", in_="scale",
+   body={"type": "rows", "items": [{"l": "Покупку — сразу", "at": t_now2, "mark": {"at": t_now2 + .5, "ok": True}},
+                                   {"l": "Карта не нужна — закрыть в приложении/отделении", "at": t_close - .2, "mark": {"at": t_close + .4, "ok": True}},
+                                   {"l": "Просто выкинуть карту", "at": t_throw - .3, "mark": {"at": t_throw, "ok": False}}]})
+sfx["chip"] += [t_now2 + .5, t_close + .4, t_throw]
+# встроенный CTA: список банков в TG (та же карточка канала, что в хуке)
+ob("w_tgB", "win", t_tg2 - .2, A("Уровень А") - .2, X7 - 260, Y7, 720, 820, title="Telegram", acc="var(--tg)", in_="up",
+   body={"type": "tg", "name": "Бонусы банков", "sub": "канал · список обновляется", "msgs": [
+       {"html": "<b>Приветственные бонусы — сейчас</b><br>актуальный список банков", "at": A("собрал")},
+       {"html": "Обновлено сегодня ✓", "at": t_list}]})
+ob("tx_link", "text", t_link - .1, A("Уровень А") - .2, X7 + 460, Y7, cls="m", in_="fade", html=ws(("ссылка", t_link, "")) + "<br>" + ws(("в описании ↓", t_link + .3, "g")))
+
+# ================= уровень A — станция 8 (9360×1900) =================
+X8, Y8 = 9360, 1900
+sec("Уровень А"); t_A = A("Уровень А"); t_ref = A("программа"); t_share = A("делишься ссылкой"); t_fr = A("друг оформляет"); t_you = A("получаешь ты"); t_too = A("и он тоже")
+t_sum = A("обычно это"); t_why = A("Почему это выше"); t_once = A("один раз"); t_many = A("друзей может"); t_f1 = A("однокурсники"); t_f2 = A("коллеги"); t_f3 = A("семья")
+t_self = A("им самим"); t_vp = A("впариваешь"); t_shb = A("делишься бонусом"); t_whA = A("Что делать"); t_honest = A("честно объяснять"); t_what3 = A("что сделать")
+t_term = A("в какой срок"); t_paid = A("платное"); t_if = A("Если друг"); t_listen = A("не послушает"); t_rem = A("помни"); t_lim2 = A("лимит"); t_year = A("в год"); t_also = A("Это тоже написано")
+to_board(t_tg2 + 0, {"D": 0, "C": 0, "B": t_tg2 + .2}, "A", t_A, take='<span>Бонус за карту — <span class="g">разовый</span>, читай правила целиком</span>')
+objs[-2]["t0"] = round(A("Ссылка в описании", after=t_tg2) + .9, 3); objs[-2]["kf"][0]["t"] = objs[-2]["t0"]
+cam[-2]["t"] = round(objs[-2]["t0"] + .3, 3); objs[-1]["t0"] = objs[-2]["t0"]
+for o in objs:
+    if o["id"] == "w_board_A": o["t0"] = objs[-1]["t0"] - .1; o["kf"][0]["t"] = o["t0"]; o["body"]["unblur"]["B"] = o["t0"] + .4
+for o in objs:
+    if o["id"] in ("w_tgB", "tx_link", "low_b"): o["t1"] = round(objs[-1]["t0"] + .3, 3)
+sting("A", t_A, A("большинства", after=t_A) + .2, "Приведи друга", "#4aa8ff")
+camto(t_A + .4, X8, Y8, 1, .05, pan=False)
+ob("low_a", "lower", A("большинства", after=t_A) + .3, A("уровень S"), 80, 975, fixed=True, text="Уровень A", sub="приведи друга", c="var(--A)", z=40, sound=False)
+ob("w_flowA", "win", A("большинства", after=t_A) + .1, t_why, X8, Y8 - 110, 1500, 700, title="Реферальная программа", in_="scale",
+   body={"type": "flow", "nodes": [{"id": "y", "x": 220, "y": 200, "t": "Ты", "sub": "делишься ссылкой", "c": "var(--green)", "at": t_ref},
+                                    {"id": "f", "x": 750, "y": 200, "t": "Друг", "sub": "оформляет карту", "c": "var(--A)", "at": t_fr},
+                                    {"id": "b", "x": 1280, "y": 200, "t": "Банк", "sub": "условия выполнены", "c": "var(--B)", "at": t_fr + .6},
+                                    {"id": "y2", "x": 500, "y": 520, "t": "+ бонус тебе", "c": "var(--green)", "at": t_you},
+                                    {"id": "f2", "x": 1000, "y": 520, "t": "+ бонус другу", "sub": "часто", "c": "var(--A)", "at": t_too}],
+            "edges": [{"a": "y", "b": "f", "t": "ссылка", "at": t_share}, {"a": "f", "b": "b", "t": "карта", "at": t_fr + .3},
+                      {"a": "b", "b": "y2", "c": "#3ddc84", "at": t_you - .2}, {"a": "b", "b": "f2", "c": "#4aa8ff", "at": t_too - .1}]})
+ob("tx_sumA", "text", t_sum - .1, t_why, X8, Y8 + 330, cls="m", in_="up", html=ws(("от сотен ₽", t_sum, "")) + " " + ws(("до 2 000 ₽", A("пары тысяч"), "g")) + " " + ws(("за друга", A("одного друга"), "")))
+ob("w_once", "win", t_why - .2, t_self, X8 - 450, Y8, 640, 560, title="Приветственный бонус", in_="left",
+   body={"type": "html", "html": f'<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px"><div style="font:800 140px Mono;color:var(--muted)">×1</div><div style="font:700 30px Mont;color:var(--muted)">один раз</div></div>'})
+ob("w_frA", "win", t_many - .2, t_self, X8 + 330, Y8, 900, 560, title="Друзей может быть много", in_="right",
+   body=frames("d_friends", "friends", 1.0, t_many - .2, t_self + .2, cr("friends")))
+for k, (tt, w_) in enumerate(((t_f1, "однокурсники"), (t_f2, "коллеги"), (t_f3, "семья"))):
+    ob(f"chA{k}", "lower", tt - .05, t_self, X8 + 30 + 280 * k - 260, Y8 + 330, text=w_, c="var(--A)", z=4)
+    objs[-1].pop("fixed", None)
+ob("tk_vp", "takeaway", t_self - .1, t_whA, X8, Y8, z=3, in_="up", s=1.2,
+   html=f'<span>Им самим выгодно:</span><br><span data-a="{t_vp:.3f}">ты <span class="r">не впариваешь</span>,</span> <span data-a="{t_shb:.3f}">а <span class="g">делишься бонусом</span></span>')
+ob("w_chat", "win", t_whA - .1, t_rem, X8 - 260, Y8, 820, 860, title="Чат с другом", acc="var(--tg)", in_="up",
+   body={"type": "tg", "name": "Друг", "sub": "в сети", "msgs": [
+       {"html": "Смотри, оформи карту по моей ссылке 👇".replace(" 👇", ""), "at": t_honest},
+       {"html": "Что сделать: <b>покупка по условиям</b>", "at": t_what3},
+       {"html": "Срок: <b>успей за отведённые дни</b>", "at": t_term},
+       {"html": "И проверь, чтобы <b>обслуживание было бесплатным</b>", "at": t_paid},
+       {"html": "<span style='color:#ff4d5e'>бонус так и не пришёл…</span>", "at": t_if + .3}]})
+ob("lb_trust", "label", t_listen - .3, t_rem, X8 + 470, Y8 + 150, z=5, at=t_listen - .2, kicker="правило", text="честность", c="var(--A)", rot=2)
+sfx["thud"].append(t_listen - .2)
+ob("w_capA", "win", t_rem - .1, t_also + 1.2, X8 + 200, Y8 + 40, 1000, 460, title="Реферальная программа", in_="up",
+   body={"type": "cap", "label": "друзей и выплат в год", "a": t_lim2, "b": t_year + .4, "cap": .7, "at2": t_year, "sub": "лимиты — в правилах программы", "grow": "друзья приходят…", "stop": "дальше — бонус не начислят"})
+ob("lb_capA", "label", t_lim2 - .1, t_also + 1.2, X8 - 160, Y8 - 300, z=5, at=t_lim2, kicker="помни", text="лимит друзей", c="var(--A)", rot=-2)
+sfx["thud"].append(t_lim2)
+
+# ================= уровень S — станция 9 (11460×540) =================
+X9, Y9 = 11460, 540
+sec("наконец"); t_S = A("уровень S"); t_time = A("твое время"); t_three = A("не тврем"); t_aud = A("целевой"); t_ch = A("Свой телеграм"); t_vid = A("ролики"); t_post = A("посты")
+t_people = A("Люди приходят"); t_links = A("по твоим ссылкам"); t_partner = A("как партнеру"); t_good = A("Один хороший"); t_weeks = A("неделями"); t_mych = A("мой канал")
+t_ipay = A("я сам плачу"); t_adult = A("взрослые правила"); t_r1 = A("Первое"); t_mk2 = A("маркировать"); t_note = A("пометка"); t_adv = A("рекламодатель"); t_code = A("специальный код")
+t_r2 = A("Второй"); t_tax = A("налог"); t_self2 = A("проще всего"); t_6 = A("6"); t_app = A("в приложении"); t_r3 = A("Третья"); t_rec = A("рекомендуй"); t_cond = A("пиши условия")
+t_bad = A("плохую карту"); t_back = A("не вернется"); t_soS = A("Поэтому S"); t_grow = A("растет")
+to_board(t_also, {"D": 0, "C": 0, "B": 0, "A": t_also + .6}, "S", t_S, take='<span>Друзей много — бонусов много, <span class="r">но есть лимит</span></span>')
+sting("S", t_S, t_time - .2, "Свой канал", "#b77cff")
+camto(t_S + .4, X9, Y9, 1, .05, pan=False)
+ob("low_s", "lower", t_time, A("Я обещал"), 80, 975, fixed=True, text="Уровень S", sub="свой канал", c="var(--S)", z=40, sound=False)
+ob("w_aud3", "win", t_time - .2, t_ch - .1, X9 - 420, Y9, 640, 560, title="Друзья", in_="left",
+   body={"type": "dots", "n": 3, "cols": 3, "a": t_three - .3, "b": t_three})
+ob("w_aud", "win", t_aud - .3, t_ch - .1, X9 + 330, Y9, 900, 620, title="Аудитория", in_="right",
+   body={"type": "dots", "n": 600, "cols": 30, "a": t_aud, "b": t_aud + 1.6})
+sfx["ticks"].append([t_aud, t_aud + 1.6])
+ob("w_flowS", "win", t_ch - .2, t_good, X9, Y9 - 40, 1500, 720, title="Как платят партнёру", in_="scale",
+   body={"type": "flow", "nodes": [{"id": "c", "x": 230, "y": 210, "t": "Твой контент", "sub": "канал · ролики · посты", "c": "var(--S)", "at": t_ch},
+                                    {"id": "p", "x": 750, "y": 210, "t": "Люди", "sub": "за полезным", "c": "var(--A)", "at": t_people},
+                                    {"id": "b", "x": 1270, "y": 210, "t": "Банк", "sub": "карты по ссылкам", "c": "var(--B)", "at": t_links},
+                                    {"id": "y", "x": 750, "y": 530, "t": "Тебе", "sub": "как партнёру", "c": "var(--green)", "at": t_partner}],
+            "edges": [{"a": "c", "b": "p", "at": t_people - .2}, {"a": "p", "b": "b", "t": "карты", "at": t_links - .1}, {"a": "b", "b": "y", "t": "₽", "c": "#3ddc84", "at": t_partner}]})
+ob("w_tgS", "win", t_good - .2, t_adult, X9 - 300, Y9, 720, 820, title="Telegram", acc="var(--tg)", in_="up",
+   body={"type": "tg", "name": "Бонусы банков", "sub": "канал", "msgs": [
+       {"html": "<b>С чего начать</b><br>Кредитка Альфа-Банка — <b>+1 000 ₽</b>", "at": t_good},
+       {"html": "За карты по моим ссылкам <b>плачу подписчикам</b>", "at": t_ipay}]})
+ob("w_chartS0", "win", t_weeks - .3, t_adult, X9 + 420, Y9, 700, 460, title="Просмотры поста", in_="right",
+   body={"type": "chart", "pts": [[0, 0], [.15, .45], [.35, .62], [.6, .78], [.85, .88], [1, .93]], "a": t_weeks - .1, "b": t_weeks + 1.5, "ticks": [[0, "день 1"], [.5, "неделя"], [1, "3 недели"]], "label": "пост работает неделями"})
+ob("lb_adult", "label", t_adult - .1, t_r1 + .3, X9, Y9, z=6, at=t_adult, kicker="взрослые правила", text="реклама · налог · честность", c="var(--S)", rot=-1)
+sfx["thud"].append(t_adult)
+ob("w_mark", "win", t_r1 - .1, t_r2, X9, Y9, 1200, 620, title="Пост с реферальной ссылкой", paper=True, in_="up",
+   body={"type": "doc", "html": "<h3>Карта с бонусом +1 000 ₽</h3><p>Оформи по ссылке и сделай покупку…</p>"
+         f"<p style='font-size:24px'>{mark('Реклама.', t_note, .4)} {mark('ООО «Рекламодатель», ИНН 0000000000.', t_adv, .7)} {mark('erid: 2Vtzq…', t_code, .5)}</p>"
+         "<p style='color:#8a8d94;font-size:20px'>Пример маркировки: пометка «Реклама», рекламодатель и код erid.</p>"})
+ob("tx_law", "text", t_mk2 - .1, t_r2, X9, Y9 - 400, cls="m", in_="fade", html=ws(("по закону — ", t_mk2, "")) + ws(("маркировка", t_mk2 + .2, "y")))
+ob("ph9", "phone", t_r2 - .2, t_r3, X9 - 380, Y9 + 10, 420, 860, in_="left", balLabel="Самозанятый · пример", bal={"from": 0, "to": 10000, "a": t_tax, "b": t_tax + .8, "c": "g"},
+   rows=[{"ico": "₽", "t": "От компании", "am": "+10 000 ₽", "c": "g", "at": t_tax + .2}, {"ico": "%", "t": "Налог 6%", "am": "−600 ₽", "c": "r", "at": t_6}])
+ob("tx_tax", "text", t_self2 - .1, t_r3, X9 + 100, Y9 - 40, cls="m", in_="fade", anchor="left", html=ws(("доход =", t_tax, "")) + "<br>" + ws(("налог 6%", t_6, "y")))
+ob("tx_tax2", "text", t_app - .1, t_r3, X9 + 104, Y9 + 110, cls="s", in_="fade", anchor="left", html=ws(("самозанятость, всё в приложении", t_app, "")))
+ob("w_honest", "win", t_r3 - .1, t_soS, X9, Y9, 1100, 560, title="Третье правило: честность", in_="scale",
+   body={"type": "rows", "items": [{"l": "Рекомендуй то, что понимаешь сам", "at": t_rec, "mark": {"at": t_rec + .6, "ok": True}},
+                                   {"l": "Всегда пиши условия", "at": t_cond - .2, "mark": {"at": t_cond + .3, "ok": True}},
+                                   {"l": "Впарить плохую карту", "at": t_bad - .4, "mark": {"at": t_back, "ok": False}}]})
+sfx["chip"] += [t_rec + .6, t_cond + .3, t_back]
+ob("w_growS", "win", t_soS - .2, A("Я обещал"), X9, Y9 - 20, 1100, 620, title="Доход: способ S против разового бонуса", in_="up",
+   body={"type": "chart", "pts": [[0, .02], [.25, .05], [.45, .12], [.65, .3], [.85, .62], [1, .95]], "a": t_soS, "b": t_grow + .8, "c": "#b77cff",
+         "ticks": [[0, "старт"], [.5, "полгода"], [1, "дальше"]], "label": "на старте дольше всего — потом растёт вместе с тобой"})
+
+# ================= способ вне рейтинга — станция 10 (13560×1900) =================
+X10, Y10 = 13560, 1900
+sec("Я обещал"); t_prom = A("Я обещал"); t_dm = A("в личку"); t_give = A("отдай нам"); t_wepay = A("мы заплатим"); t_notb = A("Это не бонусы"); t_scam = A("мошенники")
+t_you2 = A("Отвечать будешь"); t_crim = A("уголовная"); t_3y = A("трех лет"); t_fine = A("от 100"); t_block = A("блокировка"); t_never = A("никогда")
+to_board(t_soS + .2, {"D": 0, "C": 0, "B": 0, "A": 0, "S": t_soS + .8}, "S", t_prom - .05)
+for o in objs:
+    if o["id"] == "w_board_S" and o["t0"] > t_soS: o["id"] = "w_board_S2"
+cam[-1]["t"] = cam[-2]["t"]; cam.pop()   # без наезда: дальше — не уровень, а «способ вне рейтинга»
+sfx["riser"].pop()
+for o in objs:
+    if o["id"] == "w_growS": o["t1"] = round(t_soS + .3, 3)
+camto(t_prom - .3, X10, Y10, 1, 1.0)
+glow.append({"t": t_prom, "c": "#ff4d5e"}); music += [{"t": t_prom - .1, "part": "break"}]
+ob("w_secret2", "win", t_prom - .3, t_notb, X10 - 420, Y10, 760, 560, title="Способ вне рейтинга", paper=True, acc="var(--red)", in_="scale",
+   body={"type": "doc", "html": f"<h3>Способ №7</h3>{RED}"})
+ob("w_dm", "win", t_dm - .2, t_notb + .2, X10 + 380, Y10, 760, 640, title="Личные сообщения", acc="var(--red)", in_="right",
+   body={"type": "tg", "name": "Незнакомец", "sub": "был в сети недавно", "msgs": [
+       {"html": "Привет! Оформи карту и <b style='color:#ff4d5e'>отдай нам на время</b>", "at": t_give - .3},
+       {"html": "Мы заплатим, всё легально 😉".replace(" 😉", ""), "at": t_wepay}]})
+ob("st_not", "stamp", t_notb - .05, t_scam, X10 - 420, Y10 + 60, at=t_notb, text="не заработок", z=4)
+sfx["thud"].append(t_notb)
+ob("w_hack", "win", t_scam - .3, t_you2 + .2, X10 + 330, Y10, 900, 520, title="", acc="var(--red)", in_="right", body=frames("d_hack", "hacker", 1.0, t_scam - .3, t_you2 + .3, cr("hacker")))
+ob("w_flowX", "win", t_scam - .2, t_you2 + .2, X10 - 520, Y10 + 40, 620, 600, title="Куда идут деньги", acc="var(--red)", in_="left",
+   body={"type": "flow", "nodes": [{"id": "m", "x": 310, "y": 110, "t": "Мошенники", "c": "var(--red)", "at": t_scam},
+                                    {"id": "c", "x": 310, "y": 300, "t": "Твоя карта", "c": "var(--yel)", "at": t_scam + .3},
+                                    {"id": "v", "x": 310, "y": 490, "t": "Чужие деньги", "c": "var(--red)", "at": t_scam + .6}],
+            "edges": [{"a": "m", "b": "c", "c": "#ff4d5e", "at": t_scam + .2}, {"a": "c", "b": "v", "c": "#ff4d5e", "at": t_scam + .5}]})
+ob("lb_you", "label", t_you2 - .1, t_never + .8, X10, Y10 - 360, z=6, at=t_you2, kicker="отвечаешь ты", text="уголовная статья", c="var(--red)")
+sfx["thud"].append(t_you2)
+ob("w_law", "win", t_crim - .2, t_never + .8, X10 - 300, Y10 + 60, 900, 560, title="Передача карты третьим лицам", paper=True, acc="var(--red)", in_="up",
+   body={"type": "rows", "items": [{"l": "Лишение свободы", "r": "до 3 лет", "c": "r", "at": t_3y}, {"l": "Или штраф", "r": "100–300 тыс. ₽", "c": "r", "at": t_fine},
+                                   {"l": "Плюс", "r": "блокировка счетов", "c": "r", "at": t_block}], "note": "Ответственность — на владельце карты."})
+ob("w_cuff2", "win", t_3y - .3, t_never + .8, X10 + 520, Y10 + 40, 640, 420, title="", acc="var(--red)", in_="right", z=2,
+   body=frames("d_cuff2", "handcuffs_money", 1.0, t_3y - .3, t_never + 1.0, cr("handcuffs_money"), gray=True))
+ob("st_never", "stamp", t_never - .1, t_never + .8, X10 + 520, Y10 + 330, at=t_never, text="карту чужому — никогда", z=5, rot=-4)
+sfx["thud"].append(t_never); music.append({"t": t_never + .3, "part": "stop"})
+
+# ================= обещанный подсчёт — станция 11 (15660×540) =================
+X11, Y11 = 15660, 540
+sec("А теперь обещанный"); t_calc = A("А теперь обещанный"); t_18 = A("Допустим"); t_phone = A("кроме телефона"); t_here = A("Вот сколько можно")
+t_alfa = A("Альфа"); t_any = A("Любая покупка"); t_otp = A("УТП"); t_two = A("Две покупки"); t_cour = A("курьера"); t_tb = A("Т", after=t_cour); t_3k = A("от трех тысяч")
+t_ur = A("Ураус"); t_31 = A("31"); t_tot = A("Итого"); t_place = A("Если расставить"); t_inS = A("в С попадает"); t_big = A("самый большой"); t_alfa2 = A("и Альфа")
+t_inA = A("В А"); t_month2 = A("держать месяц"); t_otp2 = A("бонус хороший"); t_cr = A("три из"); t_bankm = A("деньги банка"); t_ret = A("верни"); t_serv = A("обслуживания")
+t_once2 = A("разовый"); t_cta = A("выплату"); t_end = W.ws[-1]["a"] + W.ws[-1]["d"]
+glow.append({"t": t_calc, "c": "#3ddc84"}); music.append({"t": t_calc, "part": "main"})
+camto(t_calc - .3, X11, Y11, 1, 1.0)
+ob("ph11", "phone", t_calc - .3, t_place, X11 - 640, Y11 + 10, 420, 860, in_="up", balLabel="Можешь получить", appTop=120, balText="?? ??? ₽",
+   bal={"from": 0, "to": 5500, "a": t_alfa, "b": t_tot + .6, "c": "g"})
+objs[-1]["bal"]["steps"] = [[t_any, 1000], [t_two + .5, 2000], [t_3k + .5, 4000], [t_31 + .3, 5500]]
+ob("tx18b", "text", t_18 - .1, t_here, X11 + 60, Y11 - 40, cls="m", in_="fade", anchor="left",
+   html=ws(("18 лет", A("18", after=t_18 - .5), "")) + "<br>" + ws(("и только телефон", t_phone, "g")))
+ob("tx_here", "text", t_here - .1, t_alfa - .3, X11 + 64, Y11 + 150, cls="s", in_="fade", anchor="left",
+   html=ws(("прямо сейчас — по ссылкам из моего ТГ", t_here + .4, "")))
+objs[-2]["t1"] = round(t_alfa - .3, 3)
+for k, bk in enumerate(["tbank", "alfa", "uralsib", "otp"]):   # отсылка к хуку: те же размытые логотипы — сейчас откроем
+    ob(f"bkx{k}", "bank", t_here + .1 * k, t_alfa - .1, X11 - 260 + 330 * k, Y11 + 330, 290, 160, bank=bk, blur=10, in_="up", z=2, sound=k == 0)
+offers = [("alfa", "Альфа-Банк · кредитная карта", "+1 000 ₽", "любая покупка по терминалу", t_alfa),
+          ("otp", "ОТП Банк · дебетовая карта", "+1 000 ₽", "2 покупки от 500 ₽, карту забрать у курьера", t_otp),
+          ("tbank", "Т-Банк · кредитная карта", "+2 000 ₽", "одна покупка по терминалу от 3 000 ₽", t_tb),
+          ("uralsib", "Уралсиб · кредитная карта", "+1 500 ₽", "покупка от 500 ₽, не закрывать 31 день", t_ur)]
+for k, (bk, card, bon, cond, tt) in enumerate(offers):
+    ob(f"of{k}", "win", tt - .2, t_place, X11 + 230, Y11 - 345 + 225 * k, 1100, 210, title="Реклама · условия на дату записи", in_="right",
+       body={"type": "offer", "bank": bk, "card": card, "bonus": bon, "cond": cond})
+    sfx["coin"].append(tt + .3)
+ob("n_tot", "num", t_tot - .1, t_place, X11 + 230, Y11 + 370, z=5, c="g", sign=True, **{"from": 0, "to": 5500}, a=t_tot, b=t_tot + .8, label="за простые действия")
+for o in objs:
+    if o["id"].startswith("of"): o["kf"].append(kf(t_tot - .3, .6, y=Y11 - 420 + 180 * int(o["id"][2:]), s=.8))
+sfx["ticks"].append([t_tot, t_tot + .8]); sfx["coin"].append(t_tot + .8)
+# банки — в тир-лист (вторая доска: с логотипами)
+camto(t_place - .3, X11, Y11 + 1360, 1, 1.0)
+bank_rows = {"S": [{"bank": "tbank", "at": t_big - .3}, {"bank": "alfa", "at": t_alfa2}], "A": [{"bank": "uralsib", "at": t_inA}, {"bank": "otp", "at": t_otp2 - .4}], "B": [], "C": [], "D": []}
+ob("w_banks", "win", t_place - .3, t_cr, X11 - 380, Y11 + 1360, 1000, 600, title="Тир-лист банков — прямо сейчас", in_="fade",
+   body={"type": "board", "rows": bank_rows, "big": 1, "only": "SA"})
+ob("tx_whyS", "text", t_big - .1, t_inA, X11 + 180, Y11 + 1230, cls="s", in_="fade", anchor="left",
+   html=ws(("S: Т-Банк — самый большой бонус", t_big, "")) + "<br>" + ws(("S: Альфа — любая покупка", t_alfa2 + .3, "")))
+ob("tx_whyA", "text", t_inA - .1, t_cr, X11 + 180, Y11 + 1500, cls="s", in_="fade", anchor="left",
+   html=ws(("A: Уралсиб — держать месяц", t_month2, "")) + "<br>" + ws(("A: ОТП — 2 покупки и курьер", t_otp2, "")))
+sfx["chip"] += [t_big - .3, t_alfa2, t_inA, t_otp2 - .4]
+# честно про кредитки
+glow.append({"t": t_cr, "c": "#ffd84a"})
+camto(t_cr - .3, X11, Y11 + 2720, 1, 1.0)
+ob("lb_cr", "label", t_cr - .1, t_once2, X11 - 300, Y11 + 2380, z=6, at=t_cr, kicker="честно", text="3 из 4 — кредитки", c="var(--yel)")
+sfx["thud"].append(t_cr)
+ob("w_crd", "win", t_bankm - .3, t_once2, X11, Y11 + 2760, 1200, 560, title="Кредитная карта — правила", paper=True, in_="up",
+   body={"type": "doc", "html": f"<h3>Кредитка — это {mark('деньги банка, не твои', t_bankm, .6, 'r')}</h3>"
+         f"<p>Всё потраченное {mark('верни до конца льготного периода', t_ret, .9)} — тогда процентов не будет.</p>"
+         f"<p>Проверь, {mark('сколько стоит обслуживание', t_serv - .2, .7)}.</p>"})
+ob("tk_end", "takeaway", t_once2 - .1, t_cta, X11, Y11 + 2720, z=3, in_="up", s=1.2,
+   html='<span>Это <span class="g">разовый бонус</span> новым клиентам, <span class="r">а не зарплата</span></span>')
+# CTA + конечная заставка (20 с спокойного кадра под элементы YouTube)
+camto(t_cta - .3, X11, Y11 + 4080, 1, 1.0)
+ob("w_tgEnd", "win", t_cta - .3, t_end + 20, X11 - 420, Y11 + 4080, 720, 760, title="Telegram", acc="var(--tg)", in_="up",
+   body={"type": "tg", "name": "Бонусы банков", "sub": "канал · выплаты за карты", "msgs": [
+       {"html": "<b>Как получить выплату за карты</b><br>пиши в личку @vitoskk", "at": t_cta}]})
+ob("tx_endL", "text", t_cta + .2, t_end + 20, X11 + 380, Y11 + 3900, cls="m", in_="fade", html=ws(("ссылка", t_cta + .3, "")) + "<br>" + ws(("в описании ↓", t_cta + .6, "g")))
+ob("tx_endN", "text", t_end + .5, t_end + 20, X11 + 380, Y11 + 4260, cls="s", in_="fade", html=ws(("смотри следующий ролик →", t_end + .6, "")))
+music.append({"t": t_end + .2, "part": "intro"})
+END_TAIL = 20
 
 # ---------- выход ----------
 objs = [o for o in objs if o["t0"] < TO]
 for o in objs: o["t1"] = min(o["t1"], TO + 1)
-dur = round(min(TO, W.duration), 3)
+dur = round(min(TO, W.duration + (END_TAIL if "END_TAIL" in globals() else 0)), 3)
 for k in sfx: sfx[k] = sorted(x for x in sfx[k] if (x[0] if isinstance(x, list) else x) < dur)
 tl = {"duration": dur, "fps": 30, "objs": objs, "cam": cam, "glow": glow, "music": [m for m in music if m["t"] < dur], "sfx": sfx, "bpm": 92, "hats": .6}
 open(os.path.join(DIR, "timeline_desk.js"), "w").write("window.TL = " + json.dumps(tl, ensure_ascii=False) + ";\n")
