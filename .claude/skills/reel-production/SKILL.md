@@ -26,6 +26,21 @@ Pipeline: `voice.py` → `timeline.js` → `audio.js` (music+SFX) → `render.js
 - Write voiceover phrases short; mark stress with `+` before the vowel when
   synthesis is used (`пл+атишь`).
 
+## 1b. Instagram safety (owner's account lost reach after reel #6)
+
+Reel #6 «20 000 за карту?» got 1 view; the next reel got 0 — likely not eligible
+for recommendations. Meta does not publish trigger words, so treat these as risky
+in speech, on-screen text and captions:
+- «дроп(ы)», «продать/купить карту», «обнал», «схема», «заработок/деньги без
+  вложений», «лёгкие деньги»; never show the scam offer itself («Плачу 20 000 ₽
+  за карту») as a hook.
+- Use instead: «мошенники», «как защитить карту», «бонусы банков новым
+  клиентам», «кэшбэк», «акции банков». Anti-fraud topics are framed as
+  education («как распознать мошенника»).
+- Every reel gets a caption (what it is + keywords + CTA), never just the handle.
+- Before publishing a sensitive topic, the owner can check «Статус аккаунта» and
+  use trial reels.
+
 ## 2. Voice — owner's decision
 
 The owner rejected every synthetic voice as "sounds like AI" (edge-tts Dmitry,
