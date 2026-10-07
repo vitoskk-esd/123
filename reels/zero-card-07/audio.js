@@ -14,7 +14,7 @@ const add = (i, v, pan = 0) => { if (i >= 0 && i < N) { L[i] += v * (1 - pan) ; 
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 
 function inBreak(t) { const [a, b] = TL.sfx.breakAt; return t >= a && t < b; }
-const M0 = TL.sfx.musicStart, [RIS0, RIS1] = TL.sfx.riser;
+const M0 = +(process.env.M0 || TL.sfx.musicStart), [RIS0, RIS1] = TL.sfx.riser; // M0 — старт ударных (сетка от него)
 // барабаны молчат на брейке и в последнюю секунду райзера перед финалом
 const drumsOn = t => t >= M0 && !inBreak(t) && !(t >= RIS1 - 1.0 && t < RIS1);
 
@@ -54,9 +54,9 @@ function renderTonal() {
   const phs = new Float64Array(8); let bph = 0;
   for (let i = 0; i < N; i++) {
     const t = i / SR;
-    const ci = Math.floor(t / (BAR)) % 4;
+    const ci = ((Math.floor((t - M0) / BAR) % 4) + 4) % 4; // аккорды меняются по тактам от старта ударных
     // бас: восьмые с «сайдчейном» от бочки
-    const sinceBeat = t % BEAT;
+    const sinceBeat = ((t - M0) % BEAT + BEAT) % BEAT; // приглушение — по той же сетке, что бочка
     const duck = drumsOn(t) ? Math.min(1, .25 + sinceBeat * 4) : 1;
     bph += 2 * Math.PI * mtof(roots[ci]) / SR;
     const bassOn = t >= M0 && !inBreak(t) && t < DUR - .6;
