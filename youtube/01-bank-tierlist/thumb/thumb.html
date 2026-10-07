@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью — тир-лист банков</title>
+<!-- thumb.html?v=1..3 → 1280×720. Правило: ≤ 3–4 слов, не повторять название, читается в 25 %. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  :root { --bg: #05060d; --ink: #f2f5ff; --green: #39ff88; --red: #ff3355;
+    --D: #ff3355; --C: #ff8a1f; --B: #ffd21f; --A: #2fa8ff; --S: #b46bff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: var(--bg); }
+  body { position: relative; font-family: "Mont"; color: var(--ink); }
+  .emo { font-family: "Noto Color Emoji"; }
+  .bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 40%, rgba(140,80,255,.45), transparent 60%), var(--bg); }
+  .grid { position: absolute; left: -50%; right: -50%; top: 58%; height: 120%;
+    background-image: linear-gradient(rgba(140,100,255,.6) 2px, transparent 2px), linear-gradient(90deg, rgba(140,100,255,.6) 2px, transparent 2px);
+    background-size: 90px 90px; transform: perspective(500px) rotateX(70deg); transform-origin: top;
+    mask-image: linear-gradient(to bottom, #000, transparent 75%); }
+  .v { display: none; position: absolute; inset: 0; } .v.on { display: block; }
+  .big { font-family: "Unb"; font-weight: 900; text-transform: uppercase; line-height: .95; letter-spacing: -2px; }
+  .logo { background: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .logo img { height: 40px; } .logo img.tb { height: 48px; } .logo .ic { height: 54px; border-radius: 12px; }
+  .logo .wm { font: 900 24px "Unb"; color: #5b2c8f; }
+  .tier { display: grid; place-items: center; font: 900 72px "Unb"; color: #05060d; border-radius: 18px; }
+
+  /* v1: доска тир-листа с логотипами + «КТО ПЛАТИТ?» */
+  .v1 .board { position: absolute; left: 40px; top: 50px; width: 640px; display: flex; flex-direction: column; gap: 12px;
+    transform: perspective(1200px) rotateY(14deg); }
+  .v1 .row { display: flex; align-items: center; gap: 14px; height: 112px; padding: 8px; border-radius: 20px; background: rgba(16,20,44,.9); border: 2px solid #2b3560; }
+  .v1 .row .tier { width: 96px; height: 96px; }
+  .v1 .row .logo { height: 80px; width: 240px; }
+  .v1 .row.dim { opacity: .35; }
+  .v1 .row.S { border-color: var(--S); box-shadow: 0 0 40px rgba(180,107,255,.6); }
+  .v1 .q { position: absolute; right: 44px; top: 70px; width: 560px; text-align: right; }
+  .v1 .q .big { font-size: 92px; letter-spacing: -3px; text-shadow: 0 6px 0 #000, 0 0 40px rgba(0,0,0,.6); }
+  .v1 .q .big b { color: var(--green); text-shadow: 0 6px 0 #000, 0 0 40px rgba(57,255,136,.6); }
+  .v1 .sum { position: absolute; right: 70px; bottom: 150px; font: 900 92px "Unb"; color: #05060d; background: var(--green); padding: 10px 30px 18px; border-radius: 22px; transform: rotate(-3deg); box-shadow: 0 0 50px rgba(57,255,136,.5); }
+
+  /* v2: «+5 500 ₽» + «ТОЛЬКО ТЕЛЕФОН» */
+  .v2 .ph { position: absolute; left: 40px; top: 60px; width: 300px; height: 640px; border-radius: 52px; background: linear-gradient(160deg, #1b2148, #090b18); border: 12px solid #2a3060; transform: rotate(-8deg); box-shadow: 0 30px 80px #000, 0 0 60px rgba(57,255,136,.25); padding: 70px 18px; display: flex; flex-direction: column; gap: 16px; }
+  .v2 .nt { background: rgba(255,255,255,.95); color: #05060d; border-radius: 22px; padding: 14px 18px; font: 600 22px "Mont"; display: flex; flex-direction: column; }
+  .v2 .nt b { font: 900 34px "Unb"; color: #0a9a4a; }
+  .v2 .phone-unused { position: absolute; left: 60px; top: 80px; font-size: 470px; line-height: 1; transform: rotate(-10deg); filter: drop-shadow(0 20px 40px #000); }
+  .v2 .num { position: absolute; right: 50px; top: 100px; font-size: 140px; color: var(--green); text-shadow: 0 8px 0 #000, 0 0 60px rgba(57,255,136,.6); }
+  .v2 .plate { position: absolute; right: 60px; top: 300px; font: 900 64px "Unb"; background: var(--ink); color: var(--bg); padding: 8px 26px 14px; border-radius: 16px; transform: rotate(-2deg); }
+  .v2 .logos { position: absolute; right: 150px; bottom: 120px; flex-wrap: wrap; width: 640px; justify-content: flex-end; display: flex; gap: 14px; }
+  .v2 .logos .logo { height: 74px; padding: 0 16px; }
+  .v2 .logos .logo img { height: 34px; } .v2 .logos .logo img.tb { height: 42px; } .v2 .logos .logo .ic { height: 48px; } .v2 .logos .logo .wm { font-size: 20px; }
+
+  /* v3: огромная S + 4 логотипа «S-TIER» */
+  .v3 .s { position: absolute; left: 50px; top: 60px; width: 470px; height: 600px; font-size: 520px; line-height: 1;
+    background: var(--S); box-shadow: 0 0 90px rgba(180,107,255,.8); border-radius: 40px; }
+  .v3 .stack { position: absolute; left: 590px; top: 80px; display: flex; flex-direction: column; gap: 30px; }
+  .v3 .stack .logo { width: 470px; height: 140px; position: relative; }
+  .v3 .stack .logo img { height: 64px; } .v3 .stack .logo img.tb { height: 78px; } .v3 .stack .logo .ic { height: 70px; } .v3 .stack .logo .wm { font-size: 30px; }
+  .v3 .stack .logo i { position: absolute; right: -10px; top: -16px; font: 900 34px "Unb"; font-style: normal; color: #05060d; background: var(--green); padding: 2px 12px 6px; border-radius: 12px; transform: rotate(6deg); }
+  .v3 .cap { position: absolute; left: 590px; bottom: 120px; font-size: 84px; text-shadow: 0 6px 0 #000; }
+  .v3 .cap b { color: var(--green); }
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="grid"></div>
+
+<section class="v v1">
+  <div class="board" id="board"></div>
+  <div class="q"><div class="big">Кто<br><b>платит?</b></div></div>
+  <div class="sum">+5 500 ₽</div>
+</section>
+
+<section class="v v2">
+  <div class="ph"><div class="nt"><b>+1 000 ₽</b>Бонус зачислен</div><div class="nt"><b>+2 000 ₽</b>Бонус зачислен</div><div class="nt"><b>+1 500 ₽</b>Бонус зачислен</div></div>
+  <div class="num big">+5 500 ₽</div>
+  <div class="plate">ТОЛЬКО ТЕЛЕФОН</div>
+  <div class="logos" id="logos2"></div>
+</section>
+
+<section class="v v3">
+  <div class="s tier">S</div>
+  <div class="stack" id="stack3"></div>
+  <div class="cap big">Кто <b>в топе?</b></div>
+</section>
+
+<script>
+  const L = {
+    alfa: '<img src="../../assets/logos/alfa.svg">',
+    otp: '<img src="../../assets/logos/otp.svg">',
+    tbank: '<img class="tb" src="../../assets/logos/tbank.svg">',
+    uralsib: '<img class="ic" src="../../assets/logos/uralsib_icon.png"><span class="wm">УРАЛСИБ</span>',
+  };
+  const logo = k => `<div class="logo">${L[k]}</div>`;
+  document.getElementById("board").innerHTML = [
+    ["S", ["tbank", "alfa"]], ["A", ["uralsib", "otp"]], ["B", []], ["C", []], ["D", []],
+  ].map(([t, ls]) => `<div class="row ${t} ${ls.length ? "" : "dim"}"><div class="tier" style="background:var(--${t})">${t}</div>${ls.map(logo).join("")}</div>`).join("");
+  document.getElementById("logos2").innerHTML = ["alfa", "otp", "tbank", "uralsib"].map(logo).join("");
+  document.getElementById("stack3").innerHTML = [["tbank", "+2 000 ₽"], ["alfa", "+1 000 ₽"]]
+    .map(([k, v]) => `<div class="logo">${L[k]}<i>${v}</i></div>`).join("");
+  const v = new URLSearchParams(location.search).get("v") || "1";
+  document.querySelector(".v" + v).classList.add("on");
+</script>
+</body>
+</html>
