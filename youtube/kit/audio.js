@@ -69,6 +69,20 @@ function coin(t0) {
 }
 function tick(t0) { const s = Math.floor(t0 * SR); for (let i = 0; i < SR * .035; i++) { const t = i / SR; add(s + i, Math.sin(2 * Math.PI * 1300 * t) * Math.exp(-t * 120) * .18, -.2); } }
 
+function riser(a, b) {  // шум с поднимающимся фильтром + тон вверх перед заставкой уровня
+  const s = Math.floor(a * SR), len = Math.floor((b - a) * SR); let lp = 0, ph = 0;
+  for (let i = 0; i < len; i++) { const x = i / len, n = noise(); lp += (n - lp) * (.01 + .4 * x * x); ph += 2 * Math.PI * (180 + 900 * x * x) / SR;
+    add(s + i, (lp * .5 + Math.sin(ph) * .06) * x * x * .8); }
+}
+function glitch(t0) {  // цифровой «треск»: короткие куски квадратной волны и шума
+  const s = Math.floor(t0 * SR);
+  for (let i = 0; i < SR * .22; i++) { const t = i / SR, seg = Math.floor(t * 40), on = (seg * 7919 % 5) < 3;
+    const sq = Math.sign(Math.sin(2 * Math.PI * (220 + (seg % 4) * 160) * t)); add(s + i, on ? (sq * .08 + noise() * .06) * Math.exp(-t * 6) : 0, (seg % 2 ? .4 : -.4)); }
+}
+function swish(t0) {  // лёгкий свист на наезде камеры
+  const len = .22, s = Math.floor((t0 - .08) * SR); let lp = 0;
+  for (let i = 0; i < SR * len; i++) { const x = i / (SR * len), env = Math.sin(Math.PI * x) ** 3, n = noise(); lp += (n - lp) * (.15 + .4 * x); add(s + i, (n - lp) * env * .12, (x - .5) * .8); }
+}
 tonal();
 for (let t = 0; t < DUR - .5; t += BEAT / 2) {
   if (!drumsOn(t)) continue;
@@ -80,6 +94,7 @@ for (let t = 0; t < DUR - .5; t += BEAT / 2) {
 const S = TL.sfx || {};
 (S.impact || []).forEach(impact); (S.whoosh || []).forEach(whoosh); (S.pop || []).forEach(pop);
 (S.coin || []).forEach(coin); (S.tick || []).forEach(tick);
+(S.riser || []).forEach(([a, b]) => riser(a, b)); (S.glitch || []).forEach(glitch); (S.swish || []).forEach(swish);
 
 let peak = 0;
 for (let i = 0; i < N; i++) { const t = i / SR, f = Math.min(1, t / .5, (DUR - t) / 1.5); L[i] = Math.tanh(L[i]) * f; R[i] = Math.tanh(R[i]) * f; peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); }

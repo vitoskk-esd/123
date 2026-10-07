@@ -15,6 +15,7 @@ def norm(w):
 class Words:
     def __init__(self, path):
         d = json.load(open(path))
+        self.ws_all = d["words"]                       # все слова (индексы как в файле — для правки субтитров)
         self.ws = [w for w in d["words"] if norm(w["w"])]
         self.duration = d["duration"]
         self.toks = [norm(w["w"]) for w in self.ws]

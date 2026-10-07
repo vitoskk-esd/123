@@ -222,7 +222,115 @@ for s in scenes:
     if s["type"] == "calc": sfx["coin"] += [s["totalAt"]]
 music = [{"t": 0, "part": "intro"}, {"t": T_D - LEAD, "part": "main"}, {"t": T_X - LEAD, "part": "break"},
          {"t": T_CALC - LEAD, "part": "main"}]
-TL = {"duration": dur, "fps": 30, "bpm": 96, "tier": tier, "scenes": scenes, "sfx": sfx, "music": music}
+
+# ================= v2: монтаж на удержание (см. .claude/skills/retention-editing) =================
+TYPES_BIG = ("tier", "inter", "words", "warn")      # сцены с крупным текстом — без субтитров
+# 1) переходы: у каждого типа свой, остальные чередуются; направление меняется
+cycle = ["whip", "slide", "zoom", "whip", "blur", "glitch"]
+for i, sc_ in enumerate(scenes):
+    sc_["tr"] = {"tier": "glitch", "inter": "flash", "words": "zoom", "warn": "glitch"}.get(sc_["type"], cycle[i % len(cycle)])
+    sc_["dir"] = 1 if i % 2 else -1
+
+# 2) субтитры: слова озвучки с правкой ошибок распознавания (индексы — out/words_final.json)
+CAP_FIX = {57: "расставил", 65: "трём", 78: "тир-лист", 115: "Досмотри", 116: "", 141: "картой", 173: "у них",
+           176: "Где-то", 177: "", 183: "где-то", 184: "", 208: "—", 209: "они", 245: "Кэшбэк", 266: "Ветклиники", 267: "",
+           278: "утрирую", 287: "где ты", 291: "", 292: "", 293: "", 308: "", 357: "C,", 408: "кэшбэком", 428: "Первый:",
+           447: "Второй:", 459: "Третий:", 461: "Карта", 462: "бесплатна", 485: "акции", 535: "У большинства",
+           539: "реферальная", 543: "ссылкой,", 548: "выполняет", 549: "условия,", 553: "ты,", 554: "а часто", 557: "тоже.",
+           558: "Обычно", 560: "от", 562: "сотен", 569: "друга.", 570: "Почему", 574: "бонуса?", 575: "Приветственный",
+           579: "раз,", 583: "много:", 584: "однокурсники,", 585: "коллеги,", 586: "семья.", 587: "И", 599: "Честно",
+           627: "И", 628: "помни,", 629: "у многих", 646: "И наконец,", 662: "трём", 668: "Telegram-канал,", 669: "",
+           671: "посты.", 716: "за которую", 718: "— реклама.", 725: "«Реклама»,", 730: "Второе:", 736: "Проще",
+           739: "самозанятость:", 740: "", 742: "выплат", 744: "компаний", 746: "6 %", 747: "", 753: "Третье —",
+           771: "впарил", 801: "личку", 803: "оформи", 836: "До", 837: "трёх", 841: "или штраф", 858: "Допустим,",
+           862: "у тебя", 875: "из", 876: "", 878: "ТГ.", 879: "Альфа-Банк.", 880: "", 882: "карта.", 885: "рублей.",
+           886: "Условие:", 887: "любая", 893: "сумму.", 894: "ОТП", 895: "Банк.", 896: "Дебетовая", 897: "карта.",
+           899: "тысяча.", 911: "Т-Банк.", 912: "", 925: "Уралсиб.", 926: "", 941: "Итого:", 942: "пять", 943: "с половиной",
+           954: "тир-листу,", 956: "S", 958: "Т-Банк,", 959: "", 976: "A —", 977: "", 978: "Уралсиб:", 986: "И", 987: "ОТП:",
+           1010: "не твои.", 1017: "льготного", 1019: "тогда", 1027: "обслуживание.", 1036: "Ссылки на", 1043: "ТГ.", 1044: "Ссылка"}
+big = [(x["t0"], x["t1"]) for x in scenes if x["type"] in TYPES_BIG]
+caps, chunk = [], []
+ws_all = W.ws_all
+def flush():
+    if chunk: caps.append({"t0": round(chunk[0]["a"] - .05, 3), "words": [{"w": w["w"], "a": round(w["a"], 3)} for w in chunk]})
+for i, w in enumerate(ws_all):
+    txt = CAP_FIX.get(i, w["w"])
+    if not txt: continue
+    if any(a <= w["a"] < b for a, b in big):
+        flush(); chunk = []; continue
+    gap = chunk and w["a"] - (chunk[-1]["a"] + chunk[-1]["d"]) > .35
+    if chunk and (len(chunk) >= 4 or sum(len(x["w"]) for x in chunk) + len(txt) > 24 or gap or chunk[-1]["w"][-1] in ".?!:—,"):
+        flush(); chunk = []
+    chunk.append({"w": txt.upper() if False else txt, "a": w["a"], "d": w["d"]})
+flush()
+for x, y in zip(caps, caps[1:]):
+    end = x["words"][-1]["a"] + 1.2
+    x["t1"] = round(min(y["t0"], end), 3)
+caps[-1]["t1"] = round(caps[-1]["words"][-1]["a"] + 1.0, 3)
+for cpt in caps:   # не наезжать на сцены с крупным текстом
+    for a, b in big:
+        if cpt["t0"] < a < cpt["t1"]: cpt["t1"] = a
+
+# 3) камера: в каждой сцене наезд/смещение на словах примерно каждые 1.8 с (не чаще 1.4 с)
+FRAMES = [(1.0, 0, 0, 0), (1.12, -60, 14, -.8), (1.05, 40, -10, .6), (1.16, 70, 20, 1.0), (1.08, -30, -16, -.5)]
+starts = [w["a"] for w in ws_all]
+cam, k = [], 0
+for i, sc_ in enumerate(scenes):
+    base = FRAMES[(i * 2) % len(FRAMES)] if sc_["type"] not in TYPES_BIG else (1.0, 0, 0, 0)
+    cam.append({"t": sc_["t0"], "s": base[0], "x": base[1], "y": base[2], "r": base[3], "slow": False})
+    lastp = sc_["t0"]
+    for t_ in starts:
+        if t_ <= lastp + 1.6 or t_ >= sc_["t1"] - .5: continue
+        if t_ - lastp >= 1.6:
+            k += 1; f = FRAMES[k % len(FRAMES)]
+            if sc_["type"] in TYPES_BIG: f = (1.0 + .06 * (k % 2), 0, 0, 0)
+            cam.append({"t": round(t_ - .04, 3), "s": f[0], "x": f[1], "y": f[2], "r": f[3]}); lastp = t_
+cam.sort(key=lambda c: c["t"])
+
+# 4) тряска, вспышки, оттенок уровня, главы
+shake = [{"t": round(x["t0"] + .05, 3), "a": 22} for x in scenes if x["type"] == "tier"]
+shake += [{"t": x["stampAt"], "a": 26} for x in scenes if x["type"] == "warn" and x.get("stampAt")]
+shake += [{"t": round(x["t0"] + 1.0, 3), "a": 12} for x in scenes if x["type"] == "number"]
+shake += [{"t": x["totalAt"], "a": 18} for x in scenes if x["type"] == "calc"]
+TINT = {"D": "#ff3355", "C": "#ff8a1f", "B": "#ffd21f", "A": "#2fa8ff", "S": "#b46bff", None: "#ff3355"}
+tint = [{"t": 0, "c": "#7a5cff"}] + [{"t": t_, "c": TINT[T]} for t_, T in tier] + [{"t": round(T_CALC - LEAD, 3), "c": "#39ff88"}]
+flash = [t_ for t_, T in tier]
+chapters = [t_ for t_, T in tier] + [round(T_CALC - LEAD, 3)]
+
+# 5) стикеры-реакции на словах (углы кадра, чередуются), частицы на деньгах
+SPOTS = [(1600, 260, 12), (320, 270, -12), (1620, 700, -8), (300, 700, 10)]
+REACT = [("раздают", "💸"), ("потраченное", "🫠"), ("мусора", "🗑️"), ("топа", "🏆"), ("свободы", "⛓️"), ("единицы", "😬"),
+         ("собирался", "🤡"), ("дороже", "🤨"), ("сгорели", "⏳"), ("маркетинг", "🤡"), ("веселье", "🎪"), ("коров", "😂"),
+         ("копейки", "🥲"), ("забыл", "😎"), ("подвоха", "🤔"), ("Пропустил", "❌"), ("выкинуть", "🗑️"), ("впариваешь", "🙅"),
+         ("послушает", "💔"), ("неделями", "📈"), ("вернется", "👋"), ("мошенники", "🚨"), ("никогда", "🚫"),
+         ("курьера", "🚚"), ("месяц", "📅"), ("кредитные", "😬"), ("зарплата", "🙃")]
+W.cur = 0; stickers = []
+for j, (ph, e) in enumerate(REACT):
+    try:
+        t_ = W.A(ph, after=stickers[-1]["t"] if stickers else 0)
+    except KeyError:
+        print("! стикер без якоря:", ph); continue
+    x_, y_, r_ = SPOTS[j % len(SPOTS)]
+    stickers.append({"t": t_, "e": e, "x": x_, "y": y_, "r": r_})
+bursts = []
+for x in scenes:
+    if x["type"] == "number": bursts.append({"t": round(x["t0"] + 1.0, 3), "e": "💰", "x": 960, "y": 380})
+    if x["type"] == "offer": bursts.append({"t": round(x["t0"] + .35, 3), "e": "🪙", "x": 1500, "y": 300})
+    if x["type"] == "calc": bursts.append({"t": x["totalAt"], "e": "💵", "x": 1400, "y": 760})
+bursts.append({"t": scenes[0]["words"][2]["at"], "e": "💸", "x": 960, "y": 300})
+
+# 6) звук под новые приёмы
+sfx["riser"] = [[round(t_ - 1.1, 3), t_] for t_, T in tier if T]
+sfx["glitch"] = [x["t0"] for x in scenes if x["tr"] == "glitch"]
+sfx["swish"] = [c["t"] for c in cam if not any(abs(c["t"] - x["t0"]) < .05 for x in scenes)]
+sfx["pop"] += [st["t"] for st in stickers]
+sfx["coin"] += [b_["t"] + .08 for b_ in bursts] + [b_["t"] + .2 for b_ in bursts]
+sfx["impact"] += [x["stampAt"] for x in scenes if x["type"] == "warn" and x.get("stampAt")] and []
+TL = {"duration": dur, "fps": 30, "bpm": 96, "tier": tier, "scenes": scenes, "sfx": sfx, "music": music,
+      "caps": caps, "cam": cam, "shake": shake, "tint": tint, "flash": flash, "chapters": chapters, "stickers": stickers, "bursts": bursts}
 open(os.path.join(DIR, "timeline.js"), "w").write("// СГЕНЕРИРОВАН build_timeline.py — правьте сцены там.\nwindow.TL = " + json.dumps(TL, ensure_ascii=False, indent=0) + ";\n")
+ev = sorted(set([x["t0"] for x in scenes] + [c_["t"] for c_ in cam] + [c_["t0"] for c_ in caps] + [st["t"] for st in stickers]))
+gaps = [b_ - a_ for a_, b_ in zip(ev, ev[1:])]
+print(f"визуальных событий {len(ev)}, в среднем каждые {dur / len(ev):.2f} с, самая длинная пауза {max(gaps):.2f} с; субтитров {len(caps)}, наездов {len(cam)}, стикеров {len(stickers)}")
 print(f"сцен {len(scenes)}, длительность {dur} с, средняя сцена {dur / len(scenes):.1f} с; длиннейшая "
       f"{max(s['t1'] - s['t0'] for s in scenes):.1f} с ({max(scenes, key=lambda s: s['t1'] - s['t0'])['type']})")

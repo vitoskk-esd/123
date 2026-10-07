@@ -97,6 +97,7 @@
       ic.style.opacity = clamp((t - s.t0) / .12);
       const tx = el.querySelector(".txt"); tx.style.opacity = clamp((t - s.t0 - .15) / .2); tx.style.transform = `translateX(${40 * (1 - ease((t - s.t0 - .15) / .35))}px)`;
       const sub = el.querySelector(".sub"); if (sub && s.subAt) sub.style.opacity = clamp((t - s.subAt) / .2);
+      el.querySelector("h2").style.setProperty("--hl", ease((t - s.t0 - .35) / .45));
     },
   };
   // сравнение 50/50
@@ -156,27 +157,118 @@
   // итог из 3 пунктов (переиспользует list)
   S.recap = S.list;
 
-  // --- кадр ---
-  const stage = () => document.getElementById("stage");
-  let curScene = null, curEl = null;
+  // --- кадр (v2: камера, переходы, субтитры, стикеры, частицы, тряска, зерно, прогресс) ---
+  // Приёмы удержания — .claude/skills/retention-editing/SKILL.md
+  const $id = (id) => document.getElementById(id);
+  const hash = (n) => { n = (n ^ 61) ^ (n >>> 16); n = (n + (n << 3)) | 0; n ^= n >>> 4; n = Math.imul(n, 0x27d4eb2d); n ^= n >>> 15; return (n >>> 0) / 4294967296; };
+  const last = (arr, t) => { let r = null; for (const x of arr || []) { if (x.t <= t) r = x; else break; } return r; };
+  let curScene = null, curEl = null, curCap = null;
+
+  // камера: TL.cam — [{t, s, x, y, r}] (снап за 0.14 с) + микродрейф + тряска TL.shake
+  function camera(t, TL) {
+    const cams = TL.cam || [];
+    let i = -1; for (let k = 0; k < cams.length && cams[k].t <= t; k++) i = k;
+    const B = { s: 1, x: 0, y: 0, r: 0 }, cur = i >= 0 ? cams[i] : B, prev = i > 0 ? cams[i - 1] : B;
+    const k = i >= 0 ? ease((t - cur.t) / (cur.slow ? .9 : .14)) : 1;
+    const mix = (a, b) => a + (b - a) * k;
+    let s = mix(prev.s, cur.s), x = mix(prev.x, cur.x), y = mix(prev.y, cur.y), r = mix(prev.r, cur.r);
+    s *= 1 + .012 * Math.sin(t * .7); x += 6 * Math.sin(t * .53); y += 4 * Math.sin(t * .41 + 1);
+    for (const st of TL.shake || []) {
+      const d = t - st; if (d < 0 || d > .45) continue;
+      const a = (st.a || 16) * Math.exp(-d * 9);
+      x += a * Math.sin(d * 70); y += a * .7 * Math.cos(d * 55); r += a * .03 * Math.sin(d * 60);
+    }
+    return { s, x, y, r };
+  }
+
+  // переход входа сцены (первые 0.28 с) и выхода (последние 0.12 с)
+  function transition(s, t) {
+    const lt = t - s.t0, rest = s.t1 - t, dir = s.dir || 1;
+    const kin = clamp(lt / .28), kout = clamp(1 - rest / .12);
+    let tf = "", flt = "", op = 1;
+    switch (s.tr) {
+      case "whip": { const e = 1 - ease(kin); tf = `translateX(${dir * 1400 * e}px)`; if (e > .01) flt = `blur(${30 * e}px)`; break; }
+      case "slide": { const e = 1 - ease(kin); tf = `translateY(${dir * 500 * e}px)`; if (e > .01) flt = `blur(${12 * e}px)`; break; }
+      case "glitch": {
+        if (lt < .26) { const q = Math.floor(lt * 30), j = hash(q + Math.floor(s.t0 * 7)); tf = `translateX(${(j - .5) * 80}px) skewX(${(hash(q * 3) - .5) * 14}deg)`;
+          flt = `drop-shadow(${10 + j * 14}px 0 0 rgba(255,0,60,.8)) drop-shadow(-${10 + j * 14}px 0 0 rgba(0,240,255,.8))`; }
+        break; }
+      case "blur": { const e = 1 - ease(kin); tf = `scale(${1 + .15 * e})`; if (e > .01) flt = `blur(${22 * e}px) brightness(${1 + e})`; break; }
+      case "zoom": default: { const e = 1 - ease(kin); tf = `scale(${1 + .5 * e})`; if (e > .01) flt = `blur(${14 * e}px)`; op = clamp(lt / .1); }
+    }
+    if (kout > 0) { tf += ` scale(${1 - .06 * kout})`; flt = (flt ? flt + " " : "") + `blur(${10 * kout}px)`; op *= 1 - .5 * kout; }
+    return { tf, flt, op };
+  }
+
+  function captions(t, TL) {
+    const cap = $id("cap"); if (!cap) return;
+    const c = (TL.caps || []).find(x => t >= x.t0 && t < x.t1);
+    if (c !== curCap) {
+      cap.innerHTML = c ? `<div class="cl">${c.words.map(w => `<span class="cw">${w.w}</span>`).join(" ")}</div>` : "";
+      curCap = c;
+    }
+    if (!c) return;
+    const line = cap.firstElementChild, k = back((t - c.t0) / .22);
+    line.style.transform = `scale(${.85 + .15 * k})`; line.style.opacity = clamp((t - c.t0) / .06);
+    cap.querySelectorAll(".cw").forEach((e, i) => {
+      const w = c.words[i], on = t >= w.a && (i === c.words.length - 1 || t < c.words[i + 1].a);
+      e.classList.toggle("on", on); e.classList.toggle("done", t >= w.a);
+    });
+  }
+
+  // стикеры-реакции: TL.stickers [{t, e, x, y, r}] — живут 1.5 с
+  function stickers(t, TL) {
+    const fx = $id("fx"); if (!fx) return;
+    let h = "";
+    for (const st of TL.stickers || []) {
+      const d = t - st.t; if (d < 0 || d > 1.5) continue;
+      const k = back(d / .3), out = clamp((d - 1.2) / .3), fl = Math.sin(d * 5) * 6;
+      h += `<div class="stk emo" style="left:${st.x}px;top:${st.y}px;opacity:${1 - out};transform:translate(-50%,-50%) translateY(${fl - 40 * out}px) rotate(${st.r + 6 * Math.sin(d * 4)}deg) scale(${(.2 + .8 * k) * (st.s || 1)})">${st.e}</div>`;
+    }
+    // частицы: TL.bursts [{t, e, x, y}] — 16 штук по баллистике, детерминированно
+    for (const b of TL.bursts || []) {
+      const d = t - b.t; if (d < 0 || d > 1.6) continue;
+      for (let i = 0; i < 16; i++) {
+        const a = hash(i * 13 + Math.floor(b.t * 10)) * Math.PI * 2, v = 600 + 700 * hash(i * 7 + 3);
+        const px = b.x + Math.cos(a) * v * d, py = b.y + Math.sin(a) * v * d * .8 + 900 * d * d;
+        h += `<div class="ptc emo" style="left:${px}px;top:${py}px;opacity:${1 - clamp((d - 1) / .6)};transform:translate(-50%,-50%) rotate(${d * 400 * (hash(i) - .5)}deg) scale(${.6 + .6 * hash(i * 5)})">${b.e}</div>`;
+      }
+    }
+    fx.innerHTML = h;
+  }
+
   window.renderAt = (t) => {
     const TL = window.TL;
     const s = TL.scenes.find(x => t >= x.t0 && t < x.t1) || TL.scenes[TL.scenes.length - 1];
     if (s !== curScene) {
-      stage().innerHTML = ""; curEl = S[s.type].build(s); stage().appendChild(curEl); curScene = s;
+      $id("stage").innerHTML = ""; curEl = S[s.type].build(s); $id("stage").appendChild(curEl); curScene = s;
       document.body.classList.toggle("black", !!s.black);
     }
     S[s.type].tick(curEl, s, t);
-    // общий «дыхательный» зум сцены и вход/выход
-    const lt = t - s.t0, rest = s.t1 - t;
-    const zin = 1 - ease(lt / .3), zout = clamp(1 - rest / .18);
-    curEl.style.transform = `scale(${(1 + .025 * clamp(lt / (s.t1 - s.t0))) * (1 + .06 * zin) * (1 - .04 * zout)})`;
-    curEl.style.filter = zin > .01 || zout > .01 ? `blur(${8 * Math.max(zin, zout)}px)` : "none";
-    curEl.style.opacity = 1 - zout * .6;
-    // фон: сетка едет
-    document.querySelector(".grid").style.backgroundPosition = `0 ${(t * 60) % 120}px`;
-    // шкала уровней
+    const tr = transition(s, t);
+    curEl.style.transform = `scale(${1 + .02 * clamp((t - s.t0) / (s.t1 - s.t0))}) ${tr.tf}`;
+    curEl.style.filter = tr.flt || "none";
+    curEl.style.opacity = tr.op;
+    const c = camera(t, TL);
+    $id("cam").style.transform = `translate(${c.x}px, ${c.y}px) rotate(${c.r}deg) scale(${c.s})`;
+    // фон: сетка едет (параллакс к камере), оттенок уровня
+    const g = document.querySelector(".grid");
+    g.style.backgroundPosition = `${-c.x * .3}px ${(t * 60) % 120}px`;
+    const tint = last(TL.tint, t); document.body.style.setProperty("--tint", tint ? tint.c : "#7a5cff");
+    // вспышка: белая на переходах flash и на TL.flash
+    let fl = 0;
+    if (s.tr === "flash") fl = Math.max(fl, .85 * (1 - clamp((t - s.t0) / .2)));
+    for (const f of TL.flash || []) { const d = t - f; if (d >= 0 && d < .2) fl = Math.max(fl, .7 * (1 - d / .2)); }
+    $id("flash").style.opacity = fl;
+    // зерно: сдвиг текстуры по кадру
+    const fr = Math.floor(t * 30); $id("grain").style.backgroundPosition = `${Math.floor(hash(fr) * 200)}px ${Math.floor(hash(fr + 7) * 200)}px`;
+    captions(t, TL); stickers(t, TL);
+    // прогресс ролика с отметками глав
+    const p = $id("prog"); if (p) { p.firstElementChild.style.transform = `scaleX(${clamp(t / TL.duration)})`; }
     let tier = null; (TL.tier || []).forEach(([a, T]) => { if (t >= a) tier = T; });
-    document.getElementById("tierbar").innerHTML = tier ? "DCBAS".split("").map(T => `<b class="${T === tier ? "on" : ""}" style="--c:var(--${T})">${T}</b>`).join("") : "";
+    $id("tierbar").innerHTML = tier ? "DCBAS".split("").map(T => `<b class="${T === tier ? "on" : ""}" style="--c:var(--${T})">${T}</b>`).join("") : "";
   };
+  window.addEventListener("DOMContentLoaded", () => {
+    const p = $id("prog"); if (p && window.TL) p.innerHTML = `<i></i>` + (window.TL.chapters || []).map(x => `<b style="left:${x / window.TL.duration * 100}%"></b>`).join("");
+  });
 })();

@@ -130,6 +130,12 @@ Scene types, all from the references:
   graphics, free-licence stock, AI images. No film/TV/game clips and no
   copyrighted music — Content ID blocks monetization. Keep `assets/LICENSES.md`.
 
+## 4b. Retention editing — mandatory
+
+Read `retention-editing` skill before building a timeline: a visual change every ≤ 2 s (camera
+punches, varied transitions, word-synced captions, stickers, bursts, shake, tints, progress bar).
+Video #1 v1 (one scene per 4.5 s, simple fades) was rejected by the owner as boring.
+
 ## 5. Sound
 
 - Background: dark electronic/phonk-style bed, synthesized as in reels
