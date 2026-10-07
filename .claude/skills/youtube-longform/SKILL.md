@@ -74,6 +74,23 @@ viewer?" (if not — research more, don't record) → intro → body → outro.
 - **CTA native**: the Telegram resource as the solution inside a point, not an ad at the end.
 - Audio is primary: viewers listen first — simple words, jokes, talk like to a friend.
 
+**Script checklist 2026** (most-liked 2026 tutorials — Isaac, Tube Sensei, Mirko Vigna, DecodingYT;
+details and what commenters praised: `youtube/references/tutorials.md` «Волна 2026»):
+- [ ] Click confirmation in 3–6 s, spoken AND shown; then a curiosity gap (tease what's coming).
+- [ ] Intro = viewer's pain → consequence → open question → specific numbered promise. No greeting.
+- [ ] Surface problem + deeper problem (e.g. "which banks pay" / "how not to let the bank earn on you");
+      viewer's point A → point B.
+- [ ] Domino: every point ends with a question/limitation that the next point answers ("but…, therefore…").
+- [ ] Viewer is the hero: their situation in second person ("оформил, купил, а бонус не пришёл — знакомо?").
+- [ ] 2–3 labels for key ideas («ловушка баллов», «правило 31 дня»), one analogy per hard idea, stakes as loss.
+- [ ] Every 30–45 s something shifts: question to viewer, owner's story, twist, joke, viewer's objection aloud.
+- [ ] Experience before theory where possible; callbacks to earlier parts; each block closes with a one-line takeaway.
+- [ ] Value rhythm unique → known → unique; a sub-hook every ~3 min.
+- [ ] Outro: short recap + a need for the next video (end-screen loop), not just "like and subscribe".
+- [ ] Edit notes in the script for every line (what is on screen); vary sentence length; final compression pass.
+- [ ] Owner's own experience is the strongest "shock value" (doing > analysing > consuming) — real payouts,
+      screenshots, mistakes. Never invent them. Don't cut useful complex parts just for retention.
+
 Structure (both references):
 1. **Hook 20–35 s**, five beats: pain question → why other guides are bad →
    right to speak (owner's real experience only) → full promise («от нуля до

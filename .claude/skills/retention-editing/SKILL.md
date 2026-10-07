@@ -32,6 +32,14 @@ desk.js objects: `win` (bodies `doc`, `frames`, `img`, `yt`, `tg`, `board`, `cri
 Every object has `kf` keyframes (x, y, w, h, s, r, ry, o) → moves smoothly; `cam` keyframes move the camera.
 `build_desk.py` prints the event gap: the longest pause without any change should be < 2.5 s except stings.
 
+2026 additions (most-liked tutorials, `youtube/references/tutorials.md` «Волна 2026»):
+- **A picture for every script line** — check the timeline against `script.md` line by line.
+- **Labels on screen**: name plates for key ideas («ловушка баллов», «правило 31 дня») — heavy animated style;
+  regular text stays simple (typography system: 2–3 weights of one style).
+- **Close each block visually**: one-line takeaway card + the tier board gets its new row (callback to the
+  board from the hook).
+- **Texture** (grain, paper, halftone) so screens don't look flat; **outro loops** into the next video via end screen.
+
 Workflow: `python build_desk.py` → `python extract_desk.py` (video frames for windows) → `python build_desk.py`
 → stills sheet (`node render.js --page desk.html --stills …`) → audio `node ../kit/audio.js timeline_desk.js music_desk.wav`
 → render chunks in parallel → `mix.sh`.
