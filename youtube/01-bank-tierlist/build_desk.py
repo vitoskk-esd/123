@@ -148,7 +148,7 @@ sfx["chip"] += [A("сколько платят"), A("сколько сил"), A(
 
 # --- «а в конце — тир-лист конкретных банков» (логотипы размыты — петля до финала)
 sec("А в конце"); t_banks = A("конкретных"); t6 = A("сколько из")
-ob("tx_end", "text", t_end, t6 + .1, 960, Y3 - 250, cls="m", in_="fade", html=ws(("В конце —", t_end, ""), ("банки", t_banks, "g")))
+ob("tx_end", "text", t_end + .3, t6 + .1, 960, Y3 - 250, cls="m", in_="fade", html=ws(("В конце —", t_end, ""), ("банки", t_banks, "g")))
 for i, b in enumerate(["tbank", "alfa", "uralsib", "otp"]):
     ob(f"bk{i}", "bank", t_banks + .12 * i, t6 + .1, 450 + 340 * i, Y3 + 60, 300, 170, bank=b, blur=10, in_="up", z=2, sound=i == 0)
 ob("st_now", "stamp", A("прямо") - .1, t6 + .1, 960, Y3 + 300, at=A("прямо"), text="платят сейчас", c="var(--green)", rot=-4, z=3)

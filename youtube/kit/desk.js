@@ -141,7 +141,7 @@
   K.num = {
     build: (o) => $(`<div class="num ${o.c || ""}"><span></span>${o.label ? `<small>${o.label}</small>` : ""}</div>`),
     tick: (el, o, t) => { const v = o.from + (o.to - o.from) * io3((t - o.a) / (o.b - o.a));
-      el.firstElementChild.textContent = o.text && t >= o.b ? o.text : (o.sign ? (v < 0 ? "−" : "+") : "") + fmt(v) + (o.unit ?? " ₽"); },
+      el.firstElementChild.textContent = o.text && t >= o.b ? o.text : (o.sign ? (v < 0 || o.to < 0 ? "−" : "+") : "") + fmt(v) + (o.unit ?? " ₽"); },
   };
   // курсор: позиция — из kf; o.clicks [t]
   K.cursor = {
