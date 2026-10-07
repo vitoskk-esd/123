@@ -148,22 +148,68 @@ def vc(attempts=None):
     print(f"VC готово: кусков {len(segs)}, средняя {np.mean(sims):.3f}, ниже {GOOD}: {sum(s < GOOD for s in sims)}, ниже 0.85: {sum(s < .85 for s in sims)}", flush=True)
 
 
+def composite(limit=.97):
+    """Для кусков ниже limit: внутри куска по паузам исходника выбираем для каждой фразы самую разборчивую
+    из уже сделанных попыток (все попытки на одном таймлайне) -> res[i]["plan"] = [[от, до, tag], ...]."""
+    sys.path.insert(0, "/home/user/123/reels/zero-card-07")
+    import voice as V
+    meta_p = os.path.join(VC2, "pieces.json"); meta = json.load(open(meta_p))
+    norm = lambda w: re.sub(r"[^а-яa-z0-9]", "", w.lower().replace("ё", "е"))
+    sim = lambda a, b: __import__("difflib").SequenceMatcher(None, " ".join(norm(x["w"]) for x in a), " ".join(norm(x["w"]) for x in b), autojunk=False).ratio() if a else 1.0
+    for i, r in meta["res"].items():
+        if r["best"]["sim"] >= limit or len(r["tries"]) < 2: continue
+        x, y = r["x"], r["y"]
+        ref = os.path.join(VC2, f"ref_{int(i):03d}.wav")
+        src_w = V.transcribe(ref, "medium")
+        err = subprocess.run(["ffmpeg", "-i", ref, "-af", "silencedetect=n=-38dB:d=0.12", "-f", "null", "-"], capture_output=True, text=True).stderr
+        st = [float(v) for v in re.findall(r"silence_start: ([0-9.]+)", err)]; en = [float(v) for v in re.findall(r"silence_end: ([0-9.]+)", err)]
+        cuts = [0.0] + [(a + b) / 2 for a, b in zip(st, en) if .4 < (a + b) / 2 < y - x - .4] + [y - x]
+        tw = {}
+        for t in r["tries"]:
+            tw[t["tag"]] = V.transcribe(os.path.join(VC2, f"vc_{int(i):03d}_{t['tag']}.crop.wav"), "medium")
+        plan, tot = [], []
+        for a, b in zip(cuts, cuts[1:]):
+            want = [w for w in src_w if a - .05 <= w["a"] < b - .05]
+            sc = {tag: sim(want, [w for w in ws if a - .15 <= w["a"] < b - .05]) for tag, ws in tw.items()}
+            best = max(sc, key=lambda k: (sc[k], k == r["best"]["tag"]))
+            if plan and plan[-1][2] == best: plan[-1][1] = round(b, 3)
+            else: plan.append([round(a, 3), round(b, 3), best])
+            tot.append((sc[best], b - a))
+        r["plan"] = plan
+        est = sum(s_ * d for s_, d in tot) / sum(d for _, d in tot)
+        print(f"кусок {i}: было {r['best']['sim']:.2f}, фраз {len(cuts) - 1}, план {[(p[0], p[1], p[2]) for p in plan]}, по фразам ~{est:.2f}", flush=True)
+    json.dump(meta, open(meta_p, "w"), ensure_ascii=False, indent=0)
+
+
+def piece_audio(i, r, X, n):
+    """Аудио куска (48 кГц) на отрезке [x - X, y + X] из лучшей попытки или по плану фраз."""
+    def load(tag):
+        f = os.path.join(VC2, f"vc_{i:03d}_{tag}.wav"); a, rsr = sf.read(f)
+        if rsr != SR:
+            tmp = os.path.join(VC2, "_rs.wav"); subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f, "-ar", str(SR), tmp], check=True); a, _ = sf.read(tmp)
+        return a
+    x = r["x"]; off = int(round((x - max(0.0, x - .3)) * SR)) - X
+    plan = r.get("plan") or [[0.0, r["y"] - x, r["best"]["tag"]]]
+    out = np.zeros(n); F = int(SR * .015)
+    for k, (a, b, tag) in enumerate(plan):
+        src = load(tag)[max(0, off):]; src = np.pad(src, (0, max(0, n - len(src))))[:n]
+        i0 = 0 if k == 0 else X + int(a * SR) - F; i1 = n if k == len(plan) - 1 else X + int(b * SR) + F
+        w = np.zeros(n); w[i0:i1] = 1
+        if k > 0: w[i0:i0 + 2 * F] = np.linspace(0, 1, 2 * F)
+        if k < len(plan) - 1: w[i1 - 2 * F:i1] = np.linspace(1, 0, 2 * F)
+        out += src * w
+    return out
+
+
 def build():
     meta = json.load(open(os.path.join(VC2, "pieces.json")))
     segs, dur = meta["segs"], meta["dur"]
     N = int(round(dur * SR)); out = np.zeros(N + SR)
     X = int(SR * .02)   # перекрытие ±20 мс с линейным кроссфейдом
     for i, (x, y) in enumerate(segs):
-        tag = meta["res"][str(i)]["best"]["tag"]
-        raw, rsr = sf.read(os.path.join(VC2, f"vc_{i:03d}_{tag}.wav"))
-        if rsr != SR:
-            tmp = os.path.join(VC2, "_rs.wav"); subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", os.path.join(VC2, f"vc_{i:03d}_{tag}.wav"), "-ar", str(SR), tmp], check=True)
-            raw, _ = sf.read(tmp)
-        xa = max(0.0, x - .3); off = int(round((x - xa) * SR))
         i0 = int(round(x * SR)); i1 = int(round(y * SR))
         a0, a1 = max(0, i0 - X), min(N, i1 + X)
-        p = raw[off - (i0 - a0): off - (i0 - a0) + (a1 - a0)]
-        p = np.pad(p, (0, (a1 - a0) - len(p)))
+        p = piece_audio(i, meta["res"][str(i)], i0 - a0, a1 - a0)
         w = np.ones(len(p))
         if i > 0: w[:2 * X] = np.linspace(0, 1, 2 * X)
         if i < len(segs) - 1: w[-2 * X:] = np.linspace(1, 0, 2 * X)
@@ -212,4 +258,4 @@ def build():
 
 
 if __name__ == "__main__":
-    {"edit": edit, "vc": vc, "vc2": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS), "build": build}[sys.argv[1]]()
+    {"edit": edit, "vc": vc, "vc2": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS), "composite": composite, "build": build}[sys.argv[1]]()
