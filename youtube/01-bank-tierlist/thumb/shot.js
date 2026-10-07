@@ -5,7 +5,7 @@ const { execFileSync } = require("child_process");
 (async () => {
   const b = await chromium.launch();
   const pg = await b.newPage({ viewport: { width: 1280, height: 720 } });
-  for (const v of ["1", "2", "3", "4", "5", "6"]) {
+  for (const v of (process.env.V || "1,2,3,4,5,6,7,8,9,10").split(",")) {
     await pg.goto("file://" + path.join(__dirname, "thumb.html") + "?v=" + v);
     await pg.evaluate(() => document.fonts.ready);
     await pg.waitForTimeout(300);

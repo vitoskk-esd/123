@@ -90,6 +90,56 @@
   .v6 .chip { position: absolute; left: 330px; top: 70px; font-size: 64px; color: #05060d; background: var(--green); padding: 10px 26px 16px; border-radius: 20px; transform: rotate(8deg); box-shadow: 0 0 50px rgba(57,255,136,.6); }
   .v6 .cap { position: absolute; right: 50px; top: 190px; text-align: right; font-size: 118px; text-shadow: 0 6px 0 #000; }
   .v6 .cap b { color: var(--green); }
+
+  /* общие: банковская карта и веер */
+  .fan { position: absolute; }
+  .bk { position: absolute; width: 360px; height: 226px; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: 0 20px 50px rgba(0,0,0,.7); transform-origin: 50% 230%; }
+  .bk .logo { width: 176px; height: 58px; } .bk .logo img { height: 26px; max-width: 156px; object-fit: contain; } .bk .logo img.tb { height: 34px; } .bk .logo .ic { height: 40px; } .bk .logo .wm { font-size: 15px; }
+  .chipx { width: 58px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #f6d77a, #b8902e); }
+  .bk .tag { position: absolute; right: -18px; top: -22px; font: 900 40px "Unb"; color: #05060d; background: var(--green); padding: 4px 16px 10px; border-radius: 14px; transform: rotate(10deg); box-shadow: 0 0 30px rgba(57,255,136,.6); white-space: nowrap; }
+  .nt { background: rgba(255,255,255,.96); color: #05060d; border-radius: 20px; padding: 12px 16px; font: 600 20px "Mont"; display: flex; flex-direction: column; }
+  .nt b { font: 900 32px "Unb"; color: #0a9a4a; white-space: nowrap; }
+
+  /* v7: веер карт за телефоном + сумма */
+  .v7 .fan { left: 10px; top: 150px; width: 600px; height: 500px; }
+  .v7 .ph7 { position: absolute; left: 300px; z-index: 2; top: 60px; width: 280px; height: 600px; border-radius: 48px; background: linear-gradient(160deg, #1b2148, #090b18); border: 12px solid #2a3060;
+    transform: rotate(6deg); box-shadow: 0 30px 80px #000, 0 0 60px rgba(57,255,136,.3); padding: 60px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .v7 .num { position: absolute; right: 40px; top: 130px; font-size: 108px; color: var(--green); text-shadow: 0 8px 0 #000, 0 0 60px rgba(57,255,136,.6); white-space: nowrap; }
+  .v7 .plate { position: absolute; right: 50px; top: 300px; font: 900 64px "Unb"; background: var(--ink); color: var(--bg); padding: 8px 26px 14px; border-radius: 16px; transform: rotate(-2deg); }
+
+  /* v8: было / стало в виде банковских карт */
+  .v8 .bc { position: absolute; top: 80px; width: 520px; height: 326px; border-radius: 34px; padding: 34px 40px; display: flex; flex-direction: column; justify-content: space-between; }
+  .v8 .bc span { font: 800 36px "Mont"; text-transform: uppercase; letter-spacing: 2px; }
+  .v8 .bc b { font: 900 96px/1 "Unb"; letter-spacing: -3px; white-space: nowrap; }
+  .v8 .bc .chipx { position: absolute; right: 40px; top: 36px; }
+  .v8 .was { left: 36px; background: linear-gradient(135deg, #3a3f52, #15171f); color: #9aa0b4; transform: rotate(-6deg); filter: saturate(.4); }
+  .v8 .was b { color: var(--red); }
+  .v8 .now { right: 36px; width: 580px; background: linear-gradient(135deg, #0f5a33, #062010); color: var(--green); border: 4px solid var(--green); transform: rotate(4deg); box-shadow: 0 0 80px rgba(57,255,136,.5); }
+  .v8 .arr { position: absolute; left: 560px; top: 180px; font: 900 110px "Unb"; color: var(--ink); text-shadow: 0 0 30px rgba(255,255,255,.6); }
+  .v8 .plate { position: absolute; left: 50px; bottom: 120px; font: 900 64px "Unb"; background: var(--ink); color: var(--bg); padding: 8px 26px 14px; border-radius: 16px; transform: rotate(-2deg); }
+  .v8 .logos8 { position: absolute; left: 50px; bottom: 30px; display: flex; gap: 12px; }
+  .v8 .logos8 .logo { height: 70px; padding: 0 16px; } .v8 .logos8 .logo img { height: 30px; } .v8 .logos8 .logo img.tb { height: 38px; } .v8 .logos8 .logo .ic { height: 46px; } .v8 .logos8 .logo .wm { font-size: 18px; }
+
+  /* v9: большой телефон с одним пушем, логотипы вокруг */
+  .v9 .ph9 { position: absolute; left: 150px; top: 40px; width: 380px; height: 760px; border-radius: 60px; background: linear-gradient(170deg, #2a1b5a, #0a0b1c 70%); border: 14px solid #2a3060;
+    transform: rotate(-6deg); box-shadow: 0 30px 90px #000, 0 0 80px rgba(57,255,136,.35); padding: 40px 18px; }
+  .v9 .time { text-align: center; font: 300 96px "Mont"; color: #fff; margin-bottom: 24px; }
+  .v9 .push9 { background: rgba(255,255,255,.97); border-radius: 26px; padding: 18px; display: flex; gap: 14px; align-items: center; color: #05060d; box-shadow: 0 0 40px rgba(57,255,136,.5); }
+  .v9 .push9 .ap { width: 64px; height: 64px; border-radius: 16px; background: var(--tg, #2aabee); color: #fff; display: grid; place-items: center; font: 900 34px "Unb"; flex: none; }
+  .v9 .push9 span { display: block; font: 600 20px "Mont"; color: #555b70; } .v9 .push9 b { display: block; font: 900 40px/1.05 "Unb"; color: #0a9a4a; white-space: nowrap; }
+  .v9 .orbit { position: absolute; inset: 0; z-index: 3; }
+  .v9 .orbit .logo { position: absolute; height: 70px; padding: 0 16px; box-shadow: 0 14px 30px rgba(0,0,0,.6); }
+  .v9 .orbit .logo img { height: 30px; } .v9 .orbit .logo img.tb { height: 38px; } .v9 .orbit .logo .ic { height: 46px; } .v9 .orbit .logo .wm { font-size: 18px; }
+  .v9 .cap { position: absolute; right: 50px; top: 190px; text-align: right; font-size: 112px; text-shadow: 0 6px 0 #000; }
+  .v9 .cap b { color: var(--green); text-shadow: 0 6px 0 #000, 0 0 40px rgba(57,255,136,.5); }
+
+  /* v10: веер карт с ценниками */
+  .v10 .fan { left: 10px; top: 160px; width: 640px; height: 560px; }
+  .v10 .bk { width: 340px; height: 214px; }
+  .v10 .bk .tag { right: auto; left: -14px; top: -26px; transform: rotate(-8deg); font-size: 34px; }
+  .v10 .cap { position: absolute; right: 40px; top: 210px; text-align: right; font-size: 92px; text-shadow: 0 6px 0 #000; }
+  .v10 .cap b { color: var(--green); text-shadow: 0 6px 0 #000, 0 0 40px rgba(57,255,136,.5); }
 </style>
 </head>
 <body>
@@ -137,6 +187,32 @@
   <div class="cap big">Какую<br><b>брать?</b></div>
 </section>
 
+<section class="v v7">
+  <div class="fan" id="fan7"></div>
+  <div class="ph7"><div class="nt"><b>+2 000 ₽</b>Бонус зачислен</div><div class="nt"><b>+1 500 ₽</b>Бонус зачислен</div><div class="nt"><b>+1 000 ₽</b>Бонус зачислен</div><div class="nt"><b>+1 000 ₽</b>Бонус зачислен</div></div>
+  <div class="num big">+5 500 ₽</div>
+  <div class="plate">ЗА 4 КАРТЫ</div>
+</section>
+
+<section class="v v8">
+  <div class="bc was"><span>Было</span><b>0 ₽</b><div class="chipx"></div></div>
+  <div class="arr">→</div>
+  <div class="bc now"><span>Стало</span><b>+5 500 ₽</b><div class="chipx"></div></div>
+  <div class="plate">ТОЛЬКО ТЕЛЕФОН</div>
+  <div class="logos8" id="logos8"></div>
+</section>
+
+<section class="v v9">
+  <div class="orbit" id="orbit9"></div>
+  <div class="ph9"><div class="time">12:47</div><div class="push9"><div class="ap">₽</div><div><span>Бонусы банков</span><b>+5 500 ₽</b><span>4 бонуса зачислено</span></div></div></div>
+  <div class="cap big">Только<br><b>телефон</b></div>
+</section>
+
+<section class="v v10">
+  <div class="fan" id="fan10"></div>
+  <div class="cap big">Кто даёт<br><b>больше?</b></div>
+</section>
+
 <script>
   const L = {
     alfa: '<img src="../../assets/logos/alfa.svg">',
@@ -157,6 +233,16 @@
   const CARDS = [["otp", "#1f7a3a", -36], ["uralsib", "#5b2c8f", -12], ["alfa", "#d92d20", 12], ["tbank", "#2b2b2b", 36]];
   document.getElementById("hand").innerHTML = CARDS.map(([k, c, r]) =>
     `<div class="card" style="background:linear-gradient(135deg, ${c}, #0b0d18 140%); transform: rotate(${r}deg)">${logo(k)}<div class="chipx"></div><div class="num">•••• 2026</div></div>`).join("");
+
+  const BK = { otp: "#1f7a3a", uralsib: "#5b2c8f", alfa: "#d92d20", tbank: "#2b2b2b" };
+  const bonusOf = { tbank: "+2 000", uralsib: "+1 500", alfa: "+1 000", otp: "+1 000" };
+  const fan = (el, order, rots, x0, dx, tags) => el.innerHTML = order.map((k, i) =>
+    `<div class="bk" style="left:${x0 + i * dx}px;top:60px;background:linear-gradient(135deg, ${BK[k]}, #0b0d18 140%);transform:rotate(${rots[i]}deg)">${logo(k)}<div class="chipx"></div>${tags ? `<i class="tag">${bonusOf[k]}</i>` : ""}</div>`).join("");
+  fan(document.getElementById("fan7"), ["otp", "uralsib", "alfa", "tbank"], [-26, -14, -2, 10], -20, 40, false);
+  fan(document.getElementById("fan10"), ["otp", "alfa", "uralsib", "tbank"], [-22, -8, 6, 20], 70, 40, true);
+  document.getElementById("logos8").innerHTML = ["tbank", "alfa", "uralsib", "otp"].map(logo).join("");
+  document.getElementById("orbit9").innerHTML = [["tbank", 40, 400, -10], ["alfa", 430, 470, 8], ["uralsib", 60, 540, 6], ["otp", 400, 590, -6]]
+    .map(([k, x, y, r]) => `<div class="logo" style="left:${x}px;top:${y}px;transform:rotate(${r}deg)">${L[k]}</div>`).join("");
   const v = new URLSearchParams(location.search).get("v") || "1";
   document.querySelector(".v" + v).classList.add("on");
 </script>
