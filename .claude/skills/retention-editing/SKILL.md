@@ -1,9 +1,44 @@
 ---
 name: retention-editing
-description: "Editing for viewer retention in faceless YouTube videos and Reels made with the repo's HTML engine (youtube/kit/engine.js): a visual change every ≤ 2 s via camera punch-ins, varied transitions (whip, glitch, flash, zoom, slide, blur), kinetic word-synced captions, reaction stickers, particle bursts, screen shake, tier-colour tints, progress bar and matching SFX. Use whenever building or reviewing the edit of a long video or reel, when the owner says the edit is 'simple', 'boring', 'не цепляет', or asks for more editing techniques. Pairs with youtube-longform (pipeline) and hyperframes-animation (motion recipes)."
+description: "Editing for viewer retention. Long-form YouTube uses the 'desk' language (youtube/kit/desk.js): one canvas with windows, phone mockups, documents with a highlighter, live counters, a cursor, camera moves between objects, chapter stings, tactile UI sound, no karaoke captions or emoji. Reels/Shorts use the stimulation kit (youtube/kit/engine.js): punch-ins, whip/glitch transitions, word captions, stickers, bursts. Use whenever building or reviewing an edit, when the owner says it is 'simple', 'boring', 'как для рилса', 'не цепляет', or asks for more editing techniques. Pairs with youtube-longform (pipeline) and hyperframes-animation (motion recipes)."
 ---
 
 # Retention editing (монтаж на удержание)
+
+## ⚠️ Long-form ≠ reel (owner, 2026-10-07, video #1 v3: «монтаж очень простой, как для рилса»)
+
+The v2/v3 layers below (punch every 1.6 s, karaoke captions, emoji stickers, bursts, shake, flashes,
+neon grid) are **short-form stimulation**. On a 6–15 min YouTube video they read as a reel. Studied
+5 tutorials + a frame-by-frame breakdown of a 153k finance long-form — notes in
+`youtube/references/tutorials.md`. For long-form use the **desk language** (`youtube/kit/desk.js`,
+`desk.css`, example `youtube/01-bank-tierlist/build_desk.py`):
+
+| | Long-form (desk.js) | Reel / Shorts (engine.js) |
+|---|---|---|
+| Cut / camera move | on a change of thought, shot lives 3–8 s | every 1.5–2 s |
+| Something moves inside the shot | every 1.5–2.5 s: highlighter, cursor click, push, counter, new window, new row | — |
+| Text | keywords ≤ 3 words and numbers inside the graphics; full subtitles via YouTube CC (.srt) | word-by-word karaoke captions |
+| Graphics | one canvas, macOS-style windows, phone with bank app and pushes, paper documents with yellow highlighter, odometer counters, tier board, diagrams | centred card, emoji, stickers |
+| Proof | the source itself in a window (post, conditions, document), marker over the exact phrase | flash of a screenshot |
+| Continuity | objects stay on the canvas and move (board slides left, criteria come in on the right); camera pans to the next "station"; zoom-through into the board row before a chapter sting | hard scene swaps |
+| B-roll | stock in a window with source credit, packs of 3–6 s shots | full-screen slams |
+| Memes | rare: 1 per 1–1.5 min, small window as a reaction | in every block |
+| Sound | quiet bed per chapter, tactile UI (window lands, click, push chime, marker, stamp), pan air on camera moves, riser only before a chapter/reveal, music stops for a key moment | whoosh on every cut, risers in a row |
+| Chapters | 2–3 s sting (tier letter + title) + lower-third «Уровень D · …» | — |
+
+desk.js objects: `win` (bodies `doc`, `frames`, `img`, `yt`, `tg`, `board`, `crit`, `dots`, `gauge`, `html`),
+`phone` (balance counter, rows, pushes, banner, button), `text` (word-timed keywords), `num` (odometer),
+`cursor` (clicks), `stamp`, `bank` (logo card, blur for open loops), `sting` (chapter), `lower` (lower third).
+Every object has `kf` keyframes (x, y, w, h, s, r, ry, o) → moves smoothly; `cam` keyframes move the camera.
+`build_desk.py` prints the event gap: the longest pause without any change should be < 2.5 s except stings.
+
+Workflow: `python build_desk.py` → `python extract_desk.py` (video frames for windows) → `python build_desk.py`
+→ stills sheet (`node render.js --page desk.html --stills …`) → audio `node ../kit/audio.js timeline_desk.js music_desk.wav`
+→ render chunks in parallel → `mix.sh`.
+
+---
+
+# Reel / Shorts kit (engine.js) — v2/v3 notes
 
 Owner's verdict on video #1 v1 (2026-10-07): «слишком просто, много моментов, когда зрителю
 скучно; кадры почти каждые 2 секунды должны меняться». v1 had one animated scene per 4.5 s.

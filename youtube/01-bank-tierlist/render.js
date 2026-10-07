@@ -1,4 +1,4 @@
-// Рендер video.html: node render.js --stills t1,t2,...  -> out/still_<t>.jpg
+// Рендер video.html (или --page desk.html): node render.js --stills t1,t2,...  -> out/still_<t>.jpg
 //                    node render.js --from A --to B --out file.mp4  -> кадры [A, B) в видео (без звука)
 const { chromium } = require("playwright");
 const { spawn } = require("child_process");
@@ -9,7 +9,7 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? proces
   fs.mkdirSync(path.join(__dirname, "out"), { recursive: true });
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-  await page.goto("file://" + path.join(__dirname, "video.html"));
+  await page.goto("file://" + path.join(__dirname, arg("--page", "video.html")));
   await page.evaluate(() => document.fonts.ready);
   const TL = await page.evaluate(() => ({ duration: window.TL.duration, fps: window.TL.fps }));
   const stills = arg("--stills");

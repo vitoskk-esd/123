@@ -62,6 +62,18 @@ Never spend hours of render before gates 3–4.
 Length: the owner's reading pace × target minutes. References speak 143–174
 words/min; until measured on the owner, assume ~150 → 8 min ≈ 1200 words.
 
+Before writing (Kallaway, `youtube/references/tutorials.md`): packaging first (idea = viewer's pain,
+title fixed, thumbnail loose) → bullet outline where every point is checked for "is it new to the
+viewer?" (if not — research more, don't record) → intro → body → outro.
+- **Intro formula**: 1) click confirmation — the first line repeats and beats the title's promise;
+  2) the common belief; 3) the contrarian take; 4) proof why to trust us (owner's real experience);
+  5) the plan («разберу 5 уровней»). No greeting.
+- **Body order**: 2nd-best point first, the best second, then the rest (value keeps rising);
+  each point = context → application with examples → why it matters in the whole picture.
+- **Re-hook between points**: «это важно, но без следующего пункта не сработает».
+- **CTA native**: the Telegram resource as the solution inside a point, not an ad at the end.
+- Audio is primary: viewers listen first — simple words, jokes, talk like to a friend.
+
 Structure (both references):
 1. **Hook 20–35 s**, five beats: pain question → why other guides are bad →
    right to speak (owner's real experience only) → full promise («от нуля до
@@ -100,6 +112,11 @@ Structure (both references):
 
 ## 4. Visual system (16:9, 1920×1080, 30 fps)
 
+**Since v4 (2026-10-07) long-form is edited in the desk language — `youtube/kit/desk.js`, see
+`retention-editing` §"Long-form ≠ reel".** The owner rejected v3 (engine.js: centred cards, karaoke
+captions, emoji, punch every 1.6 s) as «как для рилса». The table below is the old v1–v3 scene list
+(still used by engine.js for Shorts cut-downs).
+
 Build once into `youtube/kit/` (HTML/CSS/JS, same `renderAt(t)` contract as
 reels, or HyperFrames — read `hyperframes` skill first), then reuse per video.
 Scene types, all from the references:
@@ -122,7 +139,7 @@ Scene types, all from the references:
 - Text: bold grotesque (Montserrat Black / Unbounded, local fonts as in reels),
   white base, **green = money/success, red = error/risk**, key words on plates.
   On-screen text is a keyword, not a subtitle; full burned-in subtitles are off
-  (YouTube has CC — upload the `.srt` from Whisper instead).
+  (YouTube has CC — upload the `.srt` from Whisper instead). v2/v3 broke this rule — don't repeat.
 - Pace: **something changes every 1.5–3 s** (cut, zoom, text pop, new card);
   never a static frame > 4 s. Check with the scene-change counter (§6).
 - Animations are anchored to words (`W(section, "слово")`), never absolute seconds.
@@ -132,9 +149,10 @@ Scene types, all from the references:
 
 ## 4b. Retention editing — mandatory
 
-Read `retention-editing` skill before building a timeline: a visual change every ≤ 2 s (camera
-punches, varied transitions, word-synced captions, stickers, bursts, shake, tints, progress bar).
-Video #1 v1 (one scene per 4.5 s, simple fades) was rejected by the owner as boring.
+Read `retention-editing` skill before building a timeline. Long-form: shot 3–8 s, something moves
+inside it every 1.5–2.5 s (highlighter, cursor, push, counter, new window), camera moves between
+objects on a change of thought, keywords instead of subtitles, tactile UI sound.
+History: v1 (one static scene per 4.5 s) — «скучно»; v2/v3 (reel stimulation) — «как для рилса».
 
 ## 5. Sound
 
