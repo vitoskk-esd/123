@@ -128,6 +128,9 @@
   .bonus .v { margin-left: auto; font: 900 44px "Unb"; color: var(--green); }
   .total { margin-top: 10px; display: flex; align-items: baseline; justify-content: space-between; padding: 26px 32px; border-radius: 22px; background: var(--green); color: var(--bg); }
   .total span { font: 800 40px "Mont"; } .total b { font: 900 76px "Unb"; }
+  .k { font: 700 22px "Mont"; font-style: normal; padding: 4px 12px; border-radius: 8px; background: #2a335f; color: var(--muted); }
+  .k.cr { background: rgba(255,210,31,.16); color: var(--B); }
+  .warn { font: 800 30px "Mont"; color: var(--B); padding-left: 8px; }
   .ex { position: absolute; top: 44px; left: 56px; font: 800 26px "Mont"; color: var(--bg); background: var(--B); padding: 6px 16px; border-radius: 10px; }
 
   /* 11. CTA */
@@ -214,14 +217,14 @@
   </section>
 
   <section class="scene s10">
-    <div class="ex">ПРИМЕР ВЁРСТКИ · цифры возьмём из поста</div>
     <div class="who"><span class="emo">📱</span><div class="plate">Только телефон · 18+</div></div>
     <div class="stack">
-      <div class="bonus"><span class="emo">💳</span>Карта №1<span class="v">+1 000 ₽</span></div>
-      <div class="bonus"><span class="emo">💳</span>Карта №2<span class="v">+2 000 ₽</span></div>
-      <div class="bonus"><span class="emo">💳</span>Карта №3<span class="v">+1 500 ₽</span></div>
-      <div class="bonus"><span class="emo">👥</span>Друг по ссылке<span class="v">+500 ₽</span></div>
-      <div class="total"><span>Итого сейчас</span><b>5 000 ₽</b></div>
+      <div class="bonus"><span class="emo">💳</span>Карта №1<i class="k cr">кредитная</i><span class="v">+1 000 ₽</span></div>
+      <div class="bonus"><span class="emo">💳</span>Карта №2<i class="k">дебетовая</i><span class="v">+1 000 ₽</span></div>
+      <div class="bonus"><span class="emo">💳</span>Карта №3<i class="k cr">кредитная</i><span class="v">+2 000 ₽</span></div>
+      <div class="bonus"><span class="emo">💳</span>Карта №4<i class="k cr">кредитная</i><span class="v">+1 500 ₽</span></div>
+      <div class="total"><span>Итого сейчас</span><b>+5 500 ₽</b></div>
+      <div class="warn">⚠ Кредитка = долг: верни в льготный период</div>
     </div>
   </section>
 
