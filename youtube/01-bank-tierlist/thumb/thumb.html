@@ -58,6 +58,38 @@
   .v3 .stack .logo i { position: absolute; right: -10px; top: -16px; font: 900 34px "Unb"; font-style: normal; color: #05060d; background: var(--green); padding: 2px 12px 6px; border-radius: 12px; transform: rotate(6deg); }
   .v3 .cap { position: absolute; left: 590px; bottom: 120px; font-size: 84px; text-shadow: 0 6px 0 #000; }
   .v3 .cap b { color: var(--green); }
+
+  /* v4: 0 ₽ → +5 500 ₽ */
+  .v4 .bal { position: absolute; top: 90px; width: 500px; height: 300px; border-radius: 36px; padding: 40px 44px; display: flex; flex-direction: column; justify-content: space-between; }
+  .v4 .bal span { font: 700 34px "Mont"; opacity: .8; }
+  .v4 .bal b { font: 900 92px/1 "Unb"; letter-spacing: -3px; white-space: nowrap; }
+  .v4 .red { left: 40px; background: linear-gradient(160deg, #3a0d18, #1a0710); border: 4px solid var(--red); color: var(--red); transform: rotate(-4deg); box-shadow: 0 0 50px rgba(255,51,85,.4); }
+  .v4 .grn { right: 40px; width: 580px; background: linear-gradient(160deg, #0d3a22, #071a10); border: 4px solid var(--green); color: var(--green); transform: rotate(3deg); box-shadow: 0 0 70px rgba(57,255,136,.55); }
+  .v4 .arr { position: absolute; left: 545px; top: 170px; font: 900 120px "Unb"; color: var(--ink); text-shadow: 0 0 30px rgba(255,255,255,.6); }
+  .v4 .cap { position: absolute; left: 50px; bottom: 130px; font-size: 88px; text-shadow: 0 6px 0 #000; }
+  .v4 .logos4 { position: absolute; left: 600px; bottom: 128px; display: flex; gap: 12px; }
+  .v4 .logos4 .logo { width: 118px; height: 90px; } .v4 .logos4 .logo img { height: 26px; max-width: 100px; object-fit: contain; }
+  .v4 .logos4 .logo img.tb { height: 34px; } .v4 .logos4 .logo .ic { height: 56px; } .v4 .logos4 .logo .wm { display: none; }
+
+  /* v5: пуш-уведомления */
+  .v5 .push { position: absolute; left: 30px; top: var(--y); width: 520px; height: 130px; border-radius: 30px; background: rgba(245,247,255,.97); color: #05060d;
+    display: flex; align-items: center; gap: 22px; padding: 0 26px; transform: rotate(var(--r)); box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+  .v5 .push .lg { width: 170px; height: 90px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .v5 .push .lg img { height: 32px; max-width: 200px; object-fit: contain; } .v5 .push .lg img.tb { height: 40px; } .v5 .push .lg .ic { height: 60px; border-radius: 12px; } .v5 .push .lg .wm { font: 900 18px "Unb"; color: #5b2c8f; }
+  .v5 .push b { display: block; white-space: nowrap; font: 900 46px/1 "Unb"; color: #0a9a4a; } .v5 .push span { font: 600 24px "Mont"; color: #555b70; }
+  .v5 .cap { position: absolute; right: 40px; top: 200px; text-align: right; font-size: 80px; text-shadow: 0 6px 0 #000; }
+  .v5 .cap b { color: var(--green); }
+
+  /* v6: веер банковских карт */
+  .v6 .hand { position: absolute; left: 40px; top: 170px; width: 620px; height: 520px; }
+  .v6 .card { position: absolute; left: 120px; top: 120px; width: 400px; height: 252px; border-radius: 26px; transform-origin: 50% 220%;
+    box-shadow: 0 20px 50px rgba(0,0,0,.7); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+  .v6 .card .logo { width: 190px; height: 64px; } .v6 .card .logo img { height: 28px; max-width: 170px; object-fit: contain; } .v6 .card .logo img.tb { height: 36px; } .v6 .card .logo .ic { height: 44px; } .v6 .card .logo .wm { font-size: 16px; }
+  .v6 .card .chipx { width: 64px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #f6d77a, #b8902e); }
+  .v6 .card .num { font: 700 26px "Mono", monospace; color: rgba(255,255,255,.85); letter-spacing: 3px; }
+  .v6 .chip { position: absolute; left: 330px; top: 70px; font-size: 64px; color: #05060d; background: var(--green); padding: 10px 26px 16px; border-radius: 20px; transform: rotate(8deg); box-shadow: 0 0 50px rgba(57,255,136,.6); }
+  .v6 .cap { position: absolute; right: 50px; top: 190px; text-align: right; font-size: 118px; text-shadow: 0 6px 0 #000; }
+  .v6 .cap b { color: var(--green); }
 </style>
 </head>
 <body>
@@ -82,6 +114,29 @@
   <div class="cap big">Кто <b>в топе?</b></div>
 </section>
 
+
+<section class="v v4">
+  <div class="bal red"><span>Баланс</span><b>0 ₽</b></div>
+  <div class="arr">→</div>
+  <div class="bal grn"><span>Баланс</span><b>+5 500 ₽</b></div>
+  <div class="cap big">4 карты</div>
+  <div class="logos4" id="logos4"></div>
+</section>
+
+<section class="v v5">
+  <div class="push" style="--r:-4deg;--y:40px"><div class="lg" id="p1"></div><div><b>+2 000 ₽</b><span>Бонус за покупку</span></div></div>
+  <div class="push" style="--r:3deg;--y:190px"><div class="lg" id="p2"></div><div><b>+1 500 ₽</b><span>Бонус за покупку</span></div></div>
+  <div class="push" style="--r:-2deg;--y:340px"><div class="lg" id="p3"></div><div><b>+1 000 ₽</b><span>Бонус за покупку</span></div></div>
+  <div class="push" style="--r:4deg;--y:490px"><div class="lg" id="p4"></div><div><b>+1 000 ₽</b><span>Бонус за покупку</span></div></div>
+  <div class="cap big">18+ и<br><b>телефон</b></div>
+</section>
+
+<section class="v v6">
+  <div class="hand" id="hand"></div>
+  <div class="chip big">+5 500 ₽</div>
+  <div class="cap big">Какую<br><b>брать?</b></div>
+</section>
+
 <script>
   const L = {
     alfa: '<img src="../../assets/logos/alfa.svg">',
@@ -96,6 +151,12 @@
   document.getElementById("logos2").innerHTML = ["alfa", "otp", "tbank", "uralsib"].map(logo).join("");
   document.getElementById("stack3").innerHTML = [["tbank", "+2 000 ₽"], ["alfa", "+1 000 ₽"]]
     .map(([k, v]) => `<div class="logo">${L[k]}<i>${v}</i></div>`).join("");
+
+  document.getElementById("logos4").innerHTML = ["tbank", "alfa", "uralsib", "otp"].map(logo).join("");
+  ["tbank", "uralsib", "alfa", "otp"].forEach((k, i) => document.getElementById("p" + (i + 1)).innerHTML = L[k]);
+  const CARDS = [["otp", "#1f7a3a", -36], ["uralsib", "#5b2c8f", -12], ["alfa", "#d92d20", 12], ["tbank", "#2b2b2b", 36]];
+  document.getElementById("hand").innerHTML = CARDS.map(([k, c, r]) =>
+    `<div class="card" style="background:linear-gradient(135deg, ${c}, #0b0d18 140%); transform: rotate(${r}deg)">${logo(k)}<div class="chipx"></div><div class="num">•••• 2026</div></div>`).join("");
   const v = new URLSearchParams(location.search).get("v") || "1";
   document.querySelector(".v" + v).classList.add("on");
 </script>
