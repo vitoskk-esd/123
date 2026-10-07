@@ -100,7 +100,7 @@ def pieces(path):
     return segs, dur
 
 
-def vc(attempts=None):
+def vc(attempts=None, only=None):
     attempts = attempts or ATTEMPTS
     sys.path.insert(0, "/home/user/123/reels/zero-card-07")
     import voice as V, torch, torchaudio
@@ -116,7 +116,8 @@ def vc(attempts=None):
     for i, (x, y) in enumerate(segs):
         key = hashlib.md5(f"{x},{y}".encode()).hexdigest()[:8]
         r = meta["res"].get(str(i))
-        if r and r.get("key") == key and r["best"]["sim"] >= (GOOD if attempts is ATTEMPTS else .85): continue
+        if only is not None and i not in only: continue
+        if only is None and r and r.get("key") == key and r["best"]["sim"] >= (GOOD if attempts is ATTEMPTS else .85): continue
         xa, ya = max(0.0, x - PAD), min(dur, y + PAD)
         src = os.path.join(VC2, f"src_{i:03d}.wav"); sf.write(src, a[int(xa * SR):int(ya * SR)], SR)
         ref16 = os.path.join(VC2, f"ref_{i:03d}.wav")
@@ -126,7 +127,7 @@ def vc(attempts=None):
         for tempo, seed in attempts:
             tag = f"t{int(tempo * 100)}s{seed}"
             if any(t["tag"] == tag for t in tries): continue
-            if tries and max(t["sim"] for t in tries) >= GOOD: break
+            if tries and max(t["sim"] for t in tries) >= (.97 if only else GOOD): break
             vin = src
             if tempo != 1.0:
                 vin = src[:-4] + f".t{int(tempo * 100)}.wav"; subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-af", f"atempo={tempo}", vin], check=True)
@@ -142,7 +143,8 @@ def vc(attempts=None):
             tries.append({"tag": tag, "sim": round(sim, 3), "got": " ".join(w["w"] for w in got)})
             print(f"кусок {i:3d}/{len(segs)} {x:6.1f}–{y:6.1f} {tag}: {sim:.2f}  {tries[-1]['got'][:70]}", flush=True)
         best = max(tries, key=lambda t: t["sim"])
-        meta["res"][str(i)] = {"key": key, "x": x, "y": y, "want": want, "tries": tries, "best": best}
+        meta["res"][str(i)] = {**(r or {}), "key": key, "x": x, "y": y, "want": want, "tries": tries, "best": best}
+        meta["res"][str(i)].pop("plan", None)
         json.dump(meta, open(meta_p, "w"), ensure_ascii=False, indent=0)
     sims = [r["best"]["sim"] for r in meta["res"].values()]
     print(f"VC готово: кусков {len(segs)}, средняя {np.mean(sims):.3f}, ниже {GOOD}: {sum(s < GOOD for s in sims)}, ниже 0.85: {sum(s < .85 for s in sims)}", flush=True)
@@ -258,4 +260,5 @@ def build():
 
 
 if __name__ == "__main__":
-    {"edit": edit, "vc": vc, "vc2": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS), "composite": composite, "build": build}[sys.argv[1]]()
+    {"edit": edit, "vc": vc, "vc2": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS), "composite": composite, "build": build,
+     "more": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS + [(.8, 4), (.9, 4)], only={int(v) for v in sys.argv[2].split(",")})}[sys.argv[1]]()
