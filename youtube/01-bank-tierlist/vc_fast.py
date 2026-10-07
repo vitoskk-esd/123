@@ -95,6 +95,17 @@ def main():
         json.dump(res, open(os.path.join(VCP, "check.json"), "w"), ensure_ascii=False, indent=1)
         bad = [r["i"] for r in res if r["sim"] < 0.85]
         print("ПЛОХИЕ:", ",".join(map(str, bad)), flush=True)
+    elif mode == "rescore":  # точная модель (medium, с VAD и без) для подозрительных кусков; правит check.json
+        m = json.load(open(meta_p)); chk = json.load(open(os.path.join(VCP, "check.json")))
+        for i in map(int, sys.argv[2].split(",")):
+            s0 = os.path.join(VCP, f"chk_src_{i:03d}.wav")
+            want = " ".join(w["w"] for w in V.transcribe(s0, "medium"))
+            crop = os.path.join(VCP, f"piece_{i:03d}_s{m['choice'].get(str(i), 0)}.crop.wav")
+            sim = max(V.similarity(want, V.transcribe(crop, "medium", vad=v)) for v in (True, False))
+            chk[i].update({"want": want, "sim": round(sim, 3), "medium": True})
+            print(f"{i:3d} medium {sim:.2f}", flush=True)
+        json.dump(chk, open(os.path.join(VCP, "check.json"), "w"), ensure_ascii=False, indent=1)
+        print("ПЛОХИЕ:", ",".join(str(r["i"]) for r in chk if r["sim"] < 0.85), flush=True)
     elif mode == "redo":
         m = json.load(open(meta_p)); chk = {r["i"]: r for r in json.load(open(os.path.join(VCP, "check.json")))}
         for i in map(int, sys.argv[2].split(",")):
