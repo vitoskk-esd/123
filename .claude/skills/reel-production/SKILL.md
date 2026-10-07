@@ -139,6 +139,17 @@ arrive under `/root/.claude/uploads/…`; copy into the reel folder.
 - On-screen hook text: 3–7 words that sharpen the spoken line, not repeat it
   (meme formats like reel #5 are the exception).
 
+## 5c. Transitions
+
+- Shape match cut: when neighbouring scenes have objects of the same shape (coin → the
+  «0» of «0 ₽», card → phone screen), align their centre and size and morph 0.3–0.4 s
+  (easeInOut); change the headline with a hard cut in the middle of the morph. Never
+  cross-fade two headlines: both are unreadable for ~0.3 s; a whip blur loses ~0.23 s
+  of text. Measured on frames in `reels/lab/experiments/2026-10-08-match-cut` (not yet
+  on stats or by ear).
+- VC input: convert the voice from the edit WITHOUT the denoiser — on the long video
+  (07.10) denoised input garbled words (0.58→0.79, 0.68→0.94 on the worst pieces).
+
 ## 6. Environment gotchas
 
 - edge-tts pins certifi: override `edge_tts.communicate._SSL_CTX` with

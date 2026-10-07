@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Эксперимент: переход по форме</title>
+<!-- Переход «монета → 0 в «0 ₽»»: ?v=cut | whip | match | match2 (форма морфом, текст склейкой). Кадр в момент t: window.renderAt(t). -->
+<style>
+@font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+@font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #07090d; color: #eef2f6; font-family: "Mont"; }
+.bg { position: absolute; inset: 0; background: radial-gradient(900px 900px at 50% 46%, #12301f 0%, transparent 70%), #07090d; }
+.dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.07) 2px, transparent 2.4px); background-size: 46px 46px; }
+.layer { position: absolute; inset: 0; }
+.top { position: absolute; left: 0; right: 0; top: 300px; text-align: center; font: 900 92px/1.02 "Unb"; text-transform: uppercase; letter-spacing: -2px; }
+.top .g { color: #3ddc84; }
+.sub { position: absolute; left: 0; right: 0; top: 1390px; text-align: center; font: 800 64px "Mont"; color: #8b96a5; }
+svg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+.rub { font: 900 300px "Unb"; }
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="dots"></div>
+<div class="layer" id="A"><div class="top">Банки раздают<br><span class="g">деньги</span></div></div>
+<div class="layer" id="B"><div class="top">Тем, у кого<br><span class="g">0 на карте</span></div><div class="sub">вот как это работает →</div></div>
+<svg viewBox="0 0 1080 1920">
+  <defs><radialGradient id="gold" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffe68a"/><stop offset=".6" stop-color="#f4b62a"/><stop offset="1" stop-color="#b9780f"/></radialGradient></defs>
+  <g id="coin"><ellipse id="disc" cx="540" cy="960" rx="230" ry="230" fill="url(#gold)" stroke="#ffe68a" stroke-width="0"/>
+    <text id="cr" x="540" y="1050" text-anchor="middle" font-family="Unb" font-weight="900" font-size="260" fill="#8a5a08">₽</text></g>
+  <g id="zero"><ellipse id="z" cx="430" cy="960" rx="150" ry="215" fill="none" stroke="#eef2f6" stroke-width="58"/>
+    <text id="zr" x="740" y="1068" text-anchor="middle" font-family="Unb" font-weight="900" font-size="300" fill="#eef2f6">₽</text></g>
+</svg>
+<script>
+const V = new URLSearchParams(location.search).get("v") || "match";
+const T = 1.2;                               // момент перехода
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const io = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const lerp = (a, b, k) => a + (b - a) * k;
+const $ = (id) => document.getElementById(id);
+window.renderAt = (t) => {
+  const A = $("A"), B = $("B"), coin = $("coin"), zero = $("zero"), disc = $("disc"), cr = $("cr"), z = $("z"), zr = $("zr");
+  // монета: лёгкое «дыхание» и поворот
+  const spin = Math.cos(t * 3.2);
+  disc.setAttribute("rx", 230 * (.75 + .25 * Math.abs(spin))); cr.setAttribute("transform", `translate(540 0) scale(${.75 + .25 * Math.abs(spin)} 1) translate(-540 0)`);
+  let showA = t < T, kB = t >= T ? 1 : 0, xoff = 0, blur = 0;
+  A.style.opacity = 1; B.style.opacity = 0; coin.style.opacity = 1; zero.style.opacity = 0; A.style.transform = B.style.transform = coin.style.transform = zero.style.transform = "none";
+  A.style.filter = B.style.filter = "none";
+  if (V === "cut") {
+    A.style.opacity = showA ? 1 : 0; coin.style.opacity = showA ? 1 : 0; B.style.opacity = kB; zero.style.opacity = kB;
+  } else if (V === "whip") {           // смазанный «вжух» за 0,25 с: старое уезжает влево, новое въезжает справа
+    const k = io((t - (T - .12)) / .25), d = 1100;
+    A.style.transform = coin.style.transform = `translateX(${-d * k}px)`; B.style.transform = zero.style.transform = `translateX(${d * (1 - k)}px)`;
+    const b = 40 * Math.sin(Math.PI * clamp((t - (T - .12)) / .25)); A.style.filter = B.style.filter = `blur(${b}px)`;
+    B.style.opacity = zero.style.opacity = k > 0 ? 1 : 0;
+  } else {                              // match: золотой диск превращается в «0» той же точкой и почти той же формой
+    const k = io((t - (T - .2)) / .4);   // морф 0,4 с вокруг момента перехода
+    disc.setAttribute("cx", lerp(540, 430, k)); disc.setAttribute("rx", lerp(+disc.getAttribute("rx"), 150, k)); disc.setAttribute("ry", lerp(230, 215, k));
+    disc.setAttribute("fill-opacity", 1 - k); disc.setAttribute("stroke", "#eef2f6"); disc.setAttribute("stroke-width", 58 * k);
+    cr.style.opacity = 1 - clamp(k * 2);
+    zr.style.opacity = clamp((k - .6) / .4); zero.style.opacity = k >= 1 ? 1 : 0; coin.style.opacity = k >= 1 ? 0 : 1;
+    if (k > 0 && k < 1) { zero.style.opacity = 1; z.style.opacity = 0; } else z.style.opacity = 1;
+    if (V === "match2") { A.style.opacity = t < T ? 1 : 0; B.style.opacity = t >= T ? 1 : 0; }   // текст — жёсткой склейкой, форма — морфом
+    else { A.style.opacity = 1 - clamp((t - (T - .2)) / .25); B.style.opacity = clamp((t - (T + .05)) / .25);
+      B.style.transform = `translateY(${30 * (1 - clamp((t - (T + .05)) / .25))}px)`; }
+  }
+};
+renderAt(0);
+</script>
+</body>
+</html>
