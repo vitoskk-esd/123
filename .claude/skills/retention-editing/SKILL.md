@@ -34,6 +34,25 @@ Y > 2.5 s is a bug unless it's a deliberate dramatic hold (warning stamp, tier t
 | Tier bar | D C B A S, current lit | `tier` | tier-list format only |
 | Marker | highlighter sweeps under icon titles | engine | automatic |
 
+## Inserts: memes and B-roll (v3 — owner: «посмотри ролики на ютубе, там мемы, картинки»)
+
+Top niche video (H1_a3qg3cT4, 103k views, breakdown in `youtube/references/H1_a3qg3cT4.md`) cuts to an
+insert on every emotion: memes, real footage, screenshots, 2–4 s each. Ours (`build_timeline.py` → `INS`):
+
+- **Meme** (`type: meme`): imgflip template in `youtube/assets/memes/` (Drake, Gru's Plan, Expanding Brain,
+  Distracted Boyfriend, Two Buttons, Trade Offer, Waiting Skeleton, Epic Handshake, Is This A Pigeon,
+  Change My Mind, Always Has Been), Russian labels in % boxes that pop on the beat, white card, slight tilt,
+  slam-in + bass «boom». Template images are fine; **no film/TV/streamer clips** (Content ID).
+- **B-roll** (`type: broll`): Pexels stock via `vidiq_generate_broll` (1 credit = 4 clips, mp4 link + author),
+  saved to `youtube/assets/broll/` (gitignored; `list.tsv` + `CREDITS.md` kept; credit authors in the
+  description). `extract_broll.py` cuts frames to `out/bfr/<id>/`; the engine flips `<img>` per frame and
+  waits for decode. Full screen, darkened, big slam label bottom-left, slow zoom, invert-glitch or whip in.
+- Phrase → insert: money → cash counting; lottery → casino; «crowd» → crowd; burned points → burning paper;
+  absurd categories → cows / yacht / tractor; purchase → card terminal; friends → students; scammers → hacker;
+  criminal liability → handcuffs; courier → courier; «only a phone» → surprised person with phone.
+- Inserts split the host scene (the rest continues with a zoom-in); no fragment shorter than 0.8 s.
+- Stickers inside a B-roll go top-right, inside a meme to the side.
+
 ## Sound follows picture
 
 Every visual event gets a sound (`kit/audio.js`): whoosh on scene cuts, **swish** on camera
@@ -57,6 +76,11 @@ break (warnings) → main.
 - Render the first 60 s with sound and send it before the full render.
 
 ## Next techniques to add (not yet in the engine)
+
+From the niche reference: focus frame (red dashed box) on screenshots of offers, money-flow infographic with
+arrows, formula card (1 000 000 / 11 500 = 86 человек), highlighter over a law excerpt, 2.5D collage
+(person with a bank logo as head), owner's own POV phone footage in the hook.
+
 
 Speed-ramped zoom-through between chapters, split-flap / slot counters for amounts
 (`hyperframes-animation` rules `vertical-spring-ticker`, `counting-dynamic-scale`), hand-drawn

@@ -154,6 +154,30 @@
       el.querySelector(".arrow").style.transform = `translateY(${10 * Math.sin((t - s.t0) * 6)}px)`;
     },
   };
+  // мем: шаблон-картинка + подписи в % от картинки; s.labels [{x,y,w,h,text,at,style:"dark"|"photo",fs}]
+  S.meme = {
+    build: (s) => $(`<div class="sc sc-meme"><div class="mcard" style="--rot:${s.rot || -2}deg"><img src="../assets/memes/${s.img}">
+      ${s.labels.map(l => `<div class="ml ${l.style || "dark"}" style="left:${l.x}%;top:${l.y}%;width:${l.w}%;height:${l.h}%;font-size:${l.fs || 40}px">${l.text}</div>`).join("")}</div></div>`),
+    tick: (el, s, t) => {
+      const c = el.querySelector(".mcard"), k = back((t - s.t0) / .3);
+      c.style.transform = `rotate(${s.rot || -2}deg) scale(${1.35 - .35 * k})`;
+      el.querySelectorAll(".ml").forEach((e, i) => pop(e, t, s.labels[i].at, .22));
+    },
+  };
+  // видеовставка: кадры стока out/bfr/<id>/00001.jpg… (30 к/с) на весь экран + крупная подпись
+  const pad5 = (n) => String(n).padStart(5, "0");
+  S.broll = {
+    build: (s) => $(`<div class="sc sc-broll"><img class="bf" src="out/bfr/${s.id}/00001.jpg"><div class="shade"></div>
+      ${s.text ? `<div class="bt ${s.tone || ""}">${s.text}</div>` : ""}</div>`),
+    tick: (el, s, t) => {
+      const n = Math.max(1, Math.min(s.frames, Math.floor((t - s.t0) * 30) + 1)), img = el.querySelector(".bf");
+      const src = `out/bfr/${s.id}/${pad5(n)}.jpg`;
+      if (img.getAttribute("src") !== src) { img.setAttribute("src", src); PENDING.push(img.decode().catch(() => {})); }
+      img.style.transform = `scale(${1.04 + .06 * clamp((t - s.t0) / (s.t1 - s.t0))})`;
+      const bt = el.querySelector(".bt"); if (bt) { const k = back((t - s.t0 - .08) / .3); bt.style.transform = `scale(${1.5 - .5 * k}) rotate(-2deg)`; bt.style.opacity = clamp((t - s.t0 - .08) / .08); }
+    },
+  };
+  const PENDING = [];
   // итог из 3 пунктов (переиспользует list)
   S.recap = S.list;
 
@@ -192,6 +216,9 @@
       case "glitch": {
         if (lt < .26) { const q = Math.floor(lt * 30), j = hash(q + Math.floor(s.t0 * 7)); tf = `translateX(${(j - .5) * 80}px) skewX(${(hash(q * 3) - .5) * 14}deg)`;
           flt = `drop-shadow(${10 + j * 14}px 0 0 rgba(255,0,60,.8)) drop-shadow(-${10 + j * 14}px 0 0 rgba(0,240,255,.8))`; }
+        break; }
+      case "invert": {
+        if (lt < .15) { tf = `scale(${1.08 - .5 * lt})`; flt = `invert(1) hue-rotate(180deg) contrast(1.4)`; }
         break; }
       case "blur": { const e = 1 - ease(kin); tf = `scale(${1 + .15 * e})`; if (e > .01) flt = `blur(${22 * e}px) brightness(${1 + e})`; break; }
       case "zoom": default: { const e = 1 - ease(kin); tf = `scale(${1 + .5 * e})`; if (e > .01) flt = `blur(${14 * e}px)`; op = clamp(lt / .1); }
@@ -243,6 +270,7 @@
     if (s !== curScene) {
       $id("stage").innerHTML = ""; curEl = S[s.type].build(s); $id("stage").appendChild(curEl); curScene = s;
       document.body.classList.toggle("black", !!s.black);
+      curEl.querySelectorAll("img").forEach(im => PENDING.push(im.decode().catch(() => {})));
     }
     S[s.type].tick(curEl, s, t);
     const tr = transition(s, t);
@@ -267,6 +295,7 @@
     const p = $id("prog"); if (p) { p.firstElementChild.style.transform = `scaleX(${clamp(t / TL.duration)})`; }
     let tier = null; (TL.tier || []).forEach(([a, T]) => { if (t >= a) tier = T; });
     $id("tierbar").innerHTML = tier ? "DCBAS".split("").map(T => `<b class="${T === tier ? "on" : ""}" style="--c:var(--${T})">${T}</b>`).join("") : "";
+    const wait = PENDING.splice(0); return wait.length ? Promise.all(wait) : null;  // render.js дождётся картинок
   };
   window.addEventListener("DOMContentLoaded", () => {
     const p = $id("prog"); if (p && window.TL) p.innerHTML = `<i></i>` + (window.TL.chapters || []).map(x => `<b style="left:${x / window.TL.duration * 100}%"></b>`).join("");

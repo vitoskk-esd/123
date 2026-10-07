@@ -202,6 +202,71 @@ dur = round(W.duration + 1.2, 2)
 for a, b in zip(scenes, scenes[1:]):
     a["t1"] = b["t0"]
 scenes[-1]["t1"] = dur
+# ---------- v3: мемы и видеовставки (врезки 1.4–4 с, разрывают сцену; остаток сцены продолжается) ----------
+def M(img, labels, rot=-2):
+    return {"type": "meme", "img": img, "labels": labels, "rot": rot}
+def L(x, y, w, h, text, at=None, style="dark", fs=40):
+    return {"x": x, "y": y, "w": w, "h": h, "text": text, "at": at, "style": style, "fs": fs}
+def B(src, text=None, tone=None, ss=1.0):
+    return {"type": "broll", "src": src, "text": text, "tone": tone, "ss": ss}
+INS = [  # (якорь, длительность, сцена; at у подписей — секунды от начала врезки)
+    ("пару", 1.5, B("cash_count", "+ пара тысяч", "g", 3.0)),
+    ("Поэтому я собрал", 3.0, M("drake.jpg", [L(51, 2, 47, 46, "Реклама одной карты", .1, fs=58), L(51, 52, 47, 46, "ВСЕ способы — от мусора до топа", 1.2, fs=54)])),
+    ("розыгрыше", 1.8, B("casino", "Розыгрыш айфона", None, 2.0)),
+    ("Участников", 1.6, B("crowd", "Участников — тьма", None, 2.0)),
+    ("Шанс", 2.4, M("skeleton.jpg", [L(0, 1, 100, 22, "Я жду айфон", .1, "photo", 40), L(0, 77, 100, 22, "из розыгрыша", .6, "photo", 40)], rot=2)),
+    ("каталоге", 2.8, M("trade.jpg", [L(2, 24, 46, 22, "твои покупки по завышенным ценам", .15, "tag", 30), L(52, 24, 46, 22, "баллы 🙂", .9, "tag", 34)])),
+    ("сгорели", 1.4, B("burning", "Сгорели", "r", 1.0)),
+    ("Вид", 1.05, B("cows", "Ветклиники для коров", None, 2.0)),
+    ("аренда", 1.1, B("yacht", "Аренда яхт", None, 2.0)),
+    ("запчасти", 1.5, B("tractor", "Запчасти для тракторов", None, 2.0)),
+    ("повышенный", 3.6, M("distracted.jpg", [L(10, 52, 30, 18, "Ветклиники для коров 15%", .1, "tag", 30), L(44, 22, 26, 14, "БАНК", .5, "tag", 40),
+                                              L(68, 44, 30, 16, "Продукты 0,01%", 1.0, "tag", 32)], rot=1)),
+    ("Это не заработок", 2.6, M("changemind.jpg", [L(46, 45, 40, 22, "Кэшбэк — скидка, а не заработок", .3, "dark", 30)])),
+    ("делаешь одну", 1.4, B("pay_terminal", "1 покупка", "g", 1.0)),
+    ("Звучит", 3.4, M("gru.jpg", [L(28, 8, 19, 38, "Оформил карту", .1, "dark", 32), L(78, 8, 20, 38, "Сделал покупку", .7, "dark", 32),
+                                   L(28, 58, 19, 38, "Не прочитал условия", 1.4, "dark", 28), L(78, 58, 20, 38, "Не прочитал условия", 2.1, "dark", 28)])),
+    ("однокурсники", 1.8, B("friends", "Однокурсники · коллеги · семья", None, 1.0)),
+    ("самим", 2.6, M("handshake.jpg", [L(2, 60, 30, 16, "Ты", .1, "tag", 48), L(68, 60, 30, 16, "Друг", .3, "tag", 48), L(30, 2, 40, 16, "Бонус обоим", .7, "tag", 44)])),
+    ("закону", 2.6, M("buttons.jpg", [L(14, 14, 34, 16, "Маркировать рекламу", .1, "tag", 26), L(52, 8, 34, 16, "Не маркировать", .5, "tag", 26),
+                                       L(10, 84, 80, 12, "Блогер с партнёрками", 1.1, "tag", 26)], rot=2)),
+    ("Поэтому S", 3.6, M("brain.jpg", [L(2, 2, 47, 22, "Розыгрыши", .1, "dark", 30), L(2, 27, 47, 22, "Кэшбэк", .7, "dark", 30),
+                                        L(2, 52, 47, 22, "Бонус за карту", 1.3, "dark", 28), L(2, 77, 47, 22, "Свой канал + партнёрки", 1.9, "dark", 26)])),
+    ("Иногда", 2.8, M("pigeon.jpg", [L(14, 74, 30, 10, "Ты", .1, "tag", 44), L(56, 10, 40, 14, "«Отдай карту на время»", .5, "tag", 30),
+                                      L(5, 84, 90, 12, "Это заработок?", 1.2, "photo", 52)])),
+    ("мошенники", 1.5, B("hacker", "Мошенники", "r", 1.0)),
+    ("уголовная", 1.6, B("handcuffs", "Уголовная статья", "r", 0.5)),
+    ("Допустим", 2.0, B("surprised", "18 лет + телефон", "g", 2.0)),
+    ("курьера", 1.4, B("courier", "Забрать у курьера", None, 1.0)),
+    ("Одна покупка", 1.4, B("pay_phone", "Покупка от 3 000 ₽", "g", 2.0)),
+    ("кредитка", 3.0, M("alwayshasbeen.png", [L(20, 6, 40, 16, "Подожди, кредитка — это деньги банка?", .1, "photo", 30), L(62, 4, 36, 14, "Всегда были", 1.3, "photo", 34)])),
+]
+for a, b in zip(scenes, scenes[1:]):
+    a["t1"] = b["t0"]
+scenes[-1]["t1"] = round(W.duration + 1.2, 2)
+cur_t, nid = 0.0, 0
+for ph, d, spec in INS:
+    t_ = W.A(ph, after=cur_t) - 0.06; cur_t = t_ + 0.1
+    host = next(x for x in scenes if x["t0"] <= t_ < x["t1"])
+    if host.get("insert"): print("! врезка внутри врезки:", ph); continue
+    end = min(t_ + d, host["t1"])
+    if host["t1"] - end < .8: end = host["t1"]            # не оставлять обрывок сцены короче 0.8 с
+    ins = {**spec, "t0": round(t_, 3), "t1": round(end, 3), "insert": True}
+    if ins["type"] == "meme":
+        for l in ins["labels"]: l["at"] = round(t_ + (l["at"] or 0), 3)
+    if ins["type"] == "broll":
+        nid += 1; ins["id"] = f"b{nid:02d}"; ins["frames"] = int(round((end - t_) * 30)) + 2
+    i = scenes.index(host)
+    rest = None
+    if end < host["t1"] - .05:
+        rest = {**host, "t0": round(end, 3), "cont": True}
+    host["t1"] = round(t_, 3)
+    new = [ins] + ([rest] if rest else [])
+    if host["t1"] - host["t0"] < .25: scenes[i:i + 1] = new        # врезка в самом начале сцены — заменяет начало
+    else: scenes[i + 1:i + 1] = new
+    if not rest and i + 1 + len(new) < len(scenes): pass
+for a, b in zip(scenes, scenes[1:]):
+    a["t1"] = b["t0"]
 bad = [s for s in scenes if s["t1"] - s["t0"] < 0.6]
 for s in bad:
     print(f"! короткая сцена {s['type']} {s['t0']:.2f}–{s['t1']:.2f}")
@@ -228,7 +293,8 @@ TYPES_BIG = ("tier", "inter", "words", "warn")      # сцены с крупны
 # 1) переходы: у каждого типа свой, остальные чередуются; направление меняется
 cycle = ["whip", "slide", "zoom", "whip", "blur", "glitch"]
 for i, sc_ in enumerate(scenes):
-    sc_["tr"] = {"tier": "glitch", "inter": "flash", "words": "zoom", "warn": "glitch"}.get(sc_["type"], cycle[i % len(cycle)])
+    sc_["tr"] = {"tier": "glitch", "inter": "flash", "words": "zoom", "warn": "glitch", "meme": "zoom", "broll": "invert" if i % 3 == 0 else "whip"}.get(sc_["type"], cycle[i % len(cycle)])
+    if sc_.get("cont"): sc_["tr"] = "zoom"                   # возврат к сцене после врезки
     sc_["dir"] = 1 if i % 2 else -1
 
 # 2) субтитры: слова озвучки с правкой ошибок распознавания (индексы — out/words_final.json)
@@ -311,6 +377,9 @@ for j, (ph, e) in enumerate(REACT):
     except KeyError:
         print("! стикер без якоря:", ph); continue
     x_, y_, r_ = SPOTS[j % len(SPOTS)]
+    host = next((x for x in scenes if x["t0"] <= t_ < x["t1"]), None)
+    if host and host["type"] == "broll": x_, y_ = 1660, 230            # подпись видеовставки — внизу слева
+    if host and host["type"] == "meme": x_, y_ = (230 if j % 2 else 1690), 300   # мем — по центру
     stickers.append({"t": t_, "e": e, "x": x_, "y": y_, "r": r_})
 bursts = []
 for x in scenes:
@@ -320,8 +389,10 @@ for x in scenes:
 bursts.append({"t": scenes[0]["words"][2]["at"], "e": "💸", "x": 960, "y": 300})
 
 # 6) звук под новые приёмы
+sfx["impact"] += [x["t0"] + .02 for x in scenes if x["type"] == "meme"]
+sfx["glitch"] = [x["t0"] for x in scenes if x["type"] == "broll" and x["tr"] == "invert"]
 sfx["riser"] = [[round(t_ - 1.1, 3), t_] for t_, T in tier if T]
-sfx["glitch"] = [x["t0"] for x in scenes if x["tr"] == "glitch"]
+sfx["glitch"] += [x["t0"] for x in scenes if x["tr"] == "glitch"]
 sfx["swish"] = [c["t"] for c in cam if not any(abs(c["t"] - x["t0"]) < .05 for x in scenes)]
 sfx["pop"] += [st["t"] for st in stickers]
 sfx["coin"] += [b_["t"] + .08 for b_ in bursts] + [b_["t"] + .2 for b_ in bursts]
