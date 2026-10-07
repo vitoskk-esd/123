@@ -48,7 +48,13 @@ Never spend hours of render before gates 3–4.
   Avoid «схема», «без вложений», «лёгкие деньги», «обнал», «дропы», «продать
   карту». Use «бонусы банков новым клиентам», «кэшбэк», «как получить», «2026».
 - Thumbnail = 3 words max + one object/face-emoji + contrast colour; it must not
-  repeat the title. 1280×720, made from HTML like TG covers (`tg-posts/*/shot.js`),
+  repeat the title.
+  Owner's taste (video #1, picked v8 of 10): a money result in big green
+  (`+5 500 ₽`), before/after («было 0 ₽ → стало»), phone or bank cards as the
+  object, real bank logos, short white plate («ТОЛЬКО ТЕЛЕФОН»). Liked: phone
+  with push notifications, fanned bank cards, 0 → 5 500. Not picked: tier
+  board, giant tier letter. Build 3, then 3–4 more remixing the ones he likes;
+  keep the bottom-right corner clear (duration badge); check the 320×180 glance. 1280×720, made from HTML like TG covers (`tg-posts/*/shot.js`),
   3 variants; `vidiq_score_thumbnail` only after upload (needs a video id).
 
 ## 2. Script (`script.md`)
