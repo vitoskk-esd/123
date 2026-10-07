@@ -22,6 +22,7 @@ objs, cam, glow = [], [], []
 music = [{"t": 0, "part": "intro"}]
 sfx = {k: [] for k in ["ui", "pan", "notif", "mark", "click", "thud", "ticks", "coin", "sting", "riser", "chip"]}
 BR = []      # кадры видео для extract_desk.py: (id, src, ss, n)
+THUMBS = []  # стоп-кадры для карточек: (src, ss)
 
 
 def ob(id, k, t0, t1, x, y, w=None, h=None, kf=(), sound=True, **kw):
@@ -197,8 +198,8 @@ music.append({"t": t_d, "part": "main"})
 glow.append({"t": t_d, "c": "#ff4d5e"})
 camto(t_d + .4, X4, Y4, 1, .05, pan=False)
 sec("Знаешь"); t_pay = A("Оплати"); t_crowd = A("Участников"); t_ch = A("Шанс"); t_sp = A("зато"); t_end_d = A("С баллами")
-ob("low_d", "lower", t_know + .2, TO, 80, 975, fixed=True, text="Уровень D", sub="розыгрыши и баллы", c="var(--D)", z=40, sound=False)
-ob("ph3", "phone", t_know - .3, TO + 1, X4 - 260, Y4 + 20, 420, 860, in_="up",
+ob("low_d", "lower", t_know + .2, A("Уровень C", after=t_know), 80, 975, fixed=True, text="Уровень D", sub="розыгрыши и баллы", c="var(--D)", z=40, sound=False)
+ob("ph3", "phone", t_know - .3, t_end_d + .5, X4 - 260, Y4 + 20, 420, 860, in_="up",
    kf=[kf(t_crowd - .3, .7, x=X4 - 560, s=.9)],
    banner={"at": t_know + .3, "until": t_sp - .2, "top": 150, "html": "Розыгрыш смартфона<small>Оплати картой — участвуй</small>"},
    btn={"at": t_pay + .1, "until": t_sp - .2, "text": "Участвовать"},
@@ -225,6 +226,116 @@ ob("w_gauge", "win", t_ch - .2, t_end_d + .1, X4 + 330, Y4 - 40, 820, 520, title
 ob("n_sp", "num", t_sp - .05, t_end_d + .1, X4 + 330, Y4 + 270, c="r", **{"from": 0, "to": -4099}, sign=True, a=A("начинаешь"), b=A("собирался") + .3, label="а тратишь больше, чем собирался")
 sfx["ticks"].append([A("начинаешь"), A("собирался") + .3])
 
+# ================= минута 2: конец уровня D — станция 5 (5160×1900) =================
+# Уроки 2026 (youtube/references/tutorials.md): картинка под каждую фразу, ярлыки для ключевых идей,
+# вывод в конце блока + тир-лист пополняется (отсылка к доске из хука), саб-хук в конце уровня.
+X5, Y5 = 5160, 1900
+sec("С баллами"); t_b = A("С баллами"); t_rate = A("курс"); t_r1 = A("равен"); t_cat = A("каталоге"); t_exp = A("дороже")
+t_life = A("срок"); t_burn = A("сгорели"); t_what = A("Что с этим"); t_rub = A("рублями"); t_there = A("там"); t_mk = A("маркетинг")
+camto(t_b - .3, X5, Y5, 1, 1.0)
+ob("ph5", "phone", t_b - .4, t_what + .2, X5 - 520, Y5 + 10, 420, 860, in_="up", balLabel="Бонусный счёт", balText="1 250 баллов", balC="g", appTop=400,
+   kf=[kf(t_life - .2, .5, x=X5 - 260), kf(t_what - .25, .5, x=X5 - 700, o=0)],
+   pushes=[{"at": A("начисляет") + .1, "ico": "<b style='font:900 22px Unb;color:#0b0f14'>Б</b>", "title": "Банк · сейчас", "html": "Начислено <b>+250 баллов</b>"},
+           {"at": t_life + .1, "ico": "<b style='font:900 22px Unb;color:#0b0f14'>!</b>", "title": "Банк · напоминание", "html": "Баллы <b class='r'>сгорят</b> через 3 дня"}])
+sfx["notif"] += [A("начисляет") + .1, t_life + .1]
+ob("tx_pts", "text", A("не рубли") - .1, t_rate, X5 - 180, Y5 - 60, cls="m", in_="fade", anchor="left",
+   html=ws(("не рубли,", A("не рубли"), "")) + "<br>" + ws(("а баллы", A("баллы", after=t_b + 1), "y")))
+ob("w_rate", "win", t_rate - .2, t_life - .2, X5 + 330, Y5, 820, 520, title="Курс баллов", in_="right",
+   body={"type": "rows", "title": "1 балл = ? ₽", "items": [
+       {"l": "Где-то", "r": "1 балл = 1 ₽", "c": "g", "at": A("Где", after=t_rate), "mark": {"at": A("рублю"), "ok": True}},
+       {"l": "А где-то", "r": "только каталог", "c": "r", "at": A("а где") , "mark": {"at": t_cat + .1, "ok": False}}]})
+sfx["chip"] += [A("рублю"), t_cat + .1]
+ob("w_shop", "win", t_cat + .2, t_life - .2, X5 + 330, Y5 + 330, 820, 300, title="Пример: те же наушники", in_="up", z=2, paper=True,
+   body={"type": "rows", "items": [{"l": "Каталог партнёров", "r": "4 990 баллов", "c": "r", "at": t_cat + .4},
+                                   {"l": "Обычный магазин", "r": "3 490 ₽", "c": "g", "at": t_exp}]})
+objs[-2]["kf"].append(kf(t_cat + .1, .6, y=Y5 - 160, s=.85))
+ob("w_burn", "win", t_life + .3, t_what + .2, X5 + 330, Y5 - 20, 760, 460, title="", acc="var(--red)", in_="scale", z=3,
+   body=frames("d_burn", "burning", .5, t_life + .3, t_what + .3, cr("burning")))
+ob("n_burn", "num", t_burn - .5, t_what + .1, X5 + 330, Y5 + 330, z=4, c="r", **{"from": 1250, "to": 0}, a=t_burn - .3, b=t_burn + .4, unit=" баллов", label="не потратил вовремя")
+sfx["ticks"].append([t_burn - .3, t_burn + .4])
+# ярлык: три ловушки одним именем
+ob("lb_pts", "label", t_burn + .45, t_mk + .4, X5 - 40, Y5 - 330, z=6, at=t_burn + .45, kicker="ловушка", text="ловушка баллов", c="var(--yel)",
+   items=[{"t": "свой курс", "at": t_burn + .7}, {"t": "каталог дороже", "at": t_burn + .85}, {"t": "сгорают", "at": t_burn + 1.0}])
+sfx["thud"].append(t_burn + .45)
+objs[-1]["kf"].append(kf(t_what + .2, .7, x=X5 - 420, y=Y5 - 380, s=.7))
+ob("w_check", "win", t_what - .1, A("Поэтому уровень") + .2, X5 + 250, Y5 + 60, 980, 520, title="Проверь, прежде чем радоваться", paper=True, in_="up", z=2,
+   body={"type": "rows", "title": "Во что превращаются баллы?", "items": [
+       {"l": "Можно получить рублями?", "at": A("проверь"), "mark": {"at": A("не деньги"), "ok": False}},
+       {"l": "Можно тратить там, где покупаешь?", "at": A("превращаются"), "mark": {"at": A("не деньги") + .2, "ok": False}}],
+       "note": "Если нет — это не деньги."})
+camto(A("проверь") - .2, X5 + 120, Y5 + 40, 1.08, 1.6, pan=False)
+ob("cur5", "cursor", A("Если бонус") - .2, t_mk, X5 + 700, Y5 + 380, in_="fade", z=6,
+   kf=[kf(t_rub - .5, .4, x=X5 + 520, y=Y5 + 10), kf(t_there - .4, .4, x=X5 + 620, y=Y5 + 120)], clicks=[t_rub, t_there])
+sfx["click"] += [t_rub, t_there]
+ob("st_mk", "stamp", t_mk - .05, A("Поэтому уровень") + .2, X5 + 250, Y5 + 250, at=t_mk, text="маркетинг", z=4, rot=-6)
+sfx["thud"].append(t_mk); sfx["chip"] += [A("не деньги"), A("не деньги") + .2]
+
+# --- вывод уровня D: назад к доске (отсылка к хуку), строка D открывается
+t_poD = A("Поэтому уровень"); t_C = A("Уровень C")
+camto(t_poD - .4, 960, Y3, 1, 1.0)
+rows_D = {k: [{**c, "at": 0} for c in v] for k, v in board_rows.items()}
+ob("w_board3", "win", t_poD - .5, t_C + .3, 960, Y3 - 60, 1100, 760, title="Тир-лист: как банк платит тебе", in_="fade",
+   body={"type": "board", "rows": rows_D, "blur": [{"t": 0, "v": 9}], "unblur": {"D": t_poD + .2}})
+ob("tk_D", "takeaway", t_poD + .1, t_C + .3, 960, Y3 + 400, z=3, in_="up",
+   html=f'<span>Баллы — <span class="r">не деньги</span>, пока их нельзя вывести рублями</span>')
+camto(t_C - .5, 470, Y3 + 230, 2.4, .7)
+sfx["riser"].append([t_poD + .2, t_C - .02])
+
+# ================= уровень C — станция 6 (5160×540) =================
+X6, Y6 = 5160, 540
+t_k = A("Тут деньги"); t_month = A("Каждый месяц"); t_fun = A("веселье"); t_cow = A("Вид"); t_yacht = A("аренда"); t_tr = A("запчасти")
+t_exag = A("Это я"); t_hi = A("повышенный"); t_food = A("продукты"); t_lim = A("И почти"); t_sum = A("несколько")
+t_what2 = A("Что делать"); t_2m = A("две минуты"); t_p1 = A("Продукты", after=t_what2); t_p2 = A("транспорт"); t_p3 = A("кафе"); t_forget = A("Включил")
+t_not = A("Это не заработок"); t_disc = A("скидка"); t_always = A("Работает всегда"); t_soC = A("поэтому С"); t_next = A("а вот где"); t_lvl = A("следующем")
+ob("sting_c", "sting", t_C - .05, t_k - .05, 0, 0, fixed=True, tier="C", title="Кэшбэк по категориям", sub="уровень", z=50, sound=False)
+sfx["sting"].append(t_C); glow.append({"t": t_C, "c": "#ff9a3c"})
+camto(t_C + .4, X6, Y6, 1, .05, pan=False)
+ob("low_c", "lower", t_k + .2, t_next, 80, 975, fixed=True, text="Уровень C", sub="кэшбэк по категориям", c="var(--C)", z=40, sound=False)
+ob("ph6", "phone", t_k - .3, t_month + .2, X6 - 300, Y6 + 10, 420, 860, in_="up", balLabel="Кэшбэк за месяц", bal={"from": 0, "to": 312, "a": A("процент") , "b": A("покупок") + .6, "c": "g"},
+   rows=[{"ico": "П", "t": "Продукты", "am": "−1 200 ₽", "c": "r", "at": A("возвращает") - .2}, {"ico": "₽", "t": "Кэшбэк", "am": "+12 ₽", "c": "g", "at": A("процент")}])
+ob("tx_real", "text", A("настоящие") - .1, t_month + .1, X6 + 40, Y6 - 40, cls="m", in_="fade", anchor="left",
+   html=ws(("деньги", A("деньги", after=t_k - 1), "")) + "<br>" + ws(("настоящие", A("настоящие"), "g")))
+ob("tx_real2", "text", A("процент") - .1, t_month + .1, X6 + 44, Y6 + 90, cls="s", in_="fade", anchor="left", html=ws(("процент с покупок возвращается рублями", A("процент"), "")))
+# категории: картинка под каждую строку
+for src, ss in (("cows", 2.0), ("yacht", 2.0), ("tractor", 3.0), ("groceries", 2.0)): THUMBS.append((src, ss))
+cats = [{"name": "Ветклиники для коров", "p": "7%", "at": t_cow, "img": "out/thumbs/cows.jpg"}, {"name": "Аренда яхт", "p": "10%", "at": t_yacht, "img": "out/thumbs/yacht.jpg"},
+        {"name": "Запчасти для тракторов", "p": "15%", "at": t_tr, "img": "out/thumbs/tractor.jpg"}, {"name": "Продукты", "p": "1%", "bad": 1, "at": t_food - .1, "img": "out/thumbs/groceries.jpg"}]
+ob("w_cats", "win", t_month - .2, t_lim + .1, X6, Y6, 1100, 800, title="Выбери категории кэшбэка на месяц", in_="scale",
+   kf=[kf(t_fun - .1, 1.2, s=1.06), kf(t_exag - .1, .7, x=X6 - 330, s=.8)],
+   body={"type": "cats", "items": cats, "hl": [{"i": 3, "at": t_food}]})
+sfx["chip"] += [t_cow, t_yacht, t_tr, t_food]
+ob("w_meme2", "win", t_hi - .2, t_lim + .1, X6 + 470, Y6 - 10, 640, 474, title="мем", r=2, in_="right", z=3,
+   body={"type": "img", "src": "../assets/memes/distracted.jpg", "labels":
+         f'<div data-a="{t_hi:.3f}" class="mtag" style="left:6%;top:56%">повышенный %<br>на коров</div>'
+         f'<div data-a="{t_hi + .5:.3f}" class="mtag" style="left:44%;top:20%">банк</div>'
+         f'<div data-a="{t_food:.3f}" class="mtag" style="left:66%;top:46%">продукты —<br>копейки</div>'})
+ob("tx_hi", "text", t_hi - .1, t_lim + .1, X6 + 470, Y6 + 330, cls="s", in_="fade", html=ws(("повышенный — там, где ты почти не тратишь", t_hi, "")))
+# потолок кэшбэка
+ob("w_cap", "win", t_lim - .1, t_what2 + .1, X6 + 180, Y6 + 40, 1000, 460, title="Кэшбэк за месяц", in_="up",
+   body={"type": "cap", "label": "сколько вернут", "a": t_lim + .2, "b": A("вернут") + .2, "cap": .7, "at2": t_sum, "sub": "лимит обычно — несколько тысяч ₽ в месяц"})
+ob("lb_cap", "label", A("лимит") + .2, t_what2 + .1, X6 - 100, Y6 - 330, z=5, at=A("лимит") + .2, kicker="ловушка", text="потолок кэшбэка", c="var(--C)", rot=2)
+sfx["thud"].append(A("лимит") + .2)
+# что делать: та же сетка категорий, выбираем свои (отсылка назад)
+my = [{"name": "Продукты", "p": "5%", "at": t_what2 + .1, "img": "out/thumbs/groceries.jpg"}, {"name": "Транспорт", "p": "5%", "at": t_what2 + .2},
+      {"name": "Кафе", "p": "5%", "at": t_what2 + .3}, {"name": "Аренда яхт", "p": "10%", "at": t_what2 + .4, "img": "out/thumbs/yacht.jpg"}]
+ob("w_my", "win", t_what2 - .1, t_not + .1, X6 - 300, Y6, 900, 700, title="Мои категории · раз в месяц", in_="scale",
+   body={"type": "cats", "items": my, "sel": [{"i": 0, "at": t_p1}, {"i": 1, "at": t_p2}, {"i": 2, "at": t_p3}]})
+ob("cur6", "cursor", t_what2 + .4, t_not, X6 + 400, Y6 + 400, in_="fade", z=6,
+   kf=[kf(t_p1 - .35, .3, x=X6 - 520, y=Y6 - 60), kf(t_p2 - .35, .3, x=X6 - 80, y=Y6 - 60), kf(t_p3 - .35, .3, x=X6 - 520, y=Y6 + 280)], clicks=[t_p1, t_p2, t_p3])
+sfx["click"] += [t_p1, t_p2, t_p3]
+ob("tx_2m", "text", t_2m - .1, t_not + .1, X6 + 240, Y6 - 80, cls="m", in_="fade", anchor="left", html=ws(("2 минуты", t_2m, "y")) + "<br>" + ws(("раз в месяц", t_2m + .2, "")))
+ob("tx_fg", "text", t_forget - .1, t_not + .1, X6 + 244, Y6 + 70, cls="s", in_="fade", anchor="left", html=ws(("включил и забыл", t_forget, "")))
+# вывод уровня C → доска, строка C открывается; саб-хук на уровень B
+ob("tk_C", "takeaway", t_not - .1, t_always, X6, Y6, z=3, in_="up", s=1.15,
+   html=f'<span data-a="{t_not:.3f}">Кэшбэк — <span class="r">не заработок</span>,</span><br><span data-a="{t_disc:.3f}">а <span class="g">скидка</span> на то, что ты и так покупаешь</span>')
+camto(t_always - .4, 960, Y3, 1, 1.0)
+ob("w_board4", "win", t_always - .5, TO + 1, 960, Y3 - 60, 1100, 760, title="Тир-лист: как банк платит тебе", in_="fade",
+   body={"type": "board", "rows": rows_D, "blur": [{"t": 0, "v": 9}], "unblur": {"D": 0, "C": t_soC + .1}, "focus": {"row": "B", "at": t_next + .2}})
+ob("tk_C2", "takeaway", t_always, t_next + .2, 960, Y3 + 400, z=3, in_="up", html='<span>Работает всегда, но <span class="r">много не даст</span></span>')
+ob("tx_next", "text", t_next - .1, TO + 1, 960, Y3 + 400, cls="m", in_="up", html=ws(("где платят", A("платят", after=t_next), "")) + " " + ws(("больше?", A("больше", after=t_next), "g")))
+camto(t_lvl - .2, 470, Y3 - 70, 1.6, 1.4, pan=False)
+music.append({"t": t_soC + .4, "part": "intro"})
+
 # ---------- выход ----------
 objs = [o for o in objs if o["t0"] < TO]
 for o in objs: o["t1"] = min(o["t1"], TO + 1)
@@ -233,8 +344,11 @@ for k in sfx: sfx[k] = sorted(x for x in sfx[k] if (x[0] if isinstance(x, list) 
 tl = {"duration": dur, "fps": 30, "objs": objs, "cam": cam, "glow": glow, "music": [m for m in music if m["t"] < dur], "sfx": sfx, "bpm": 92, "hats": .6}
 open(os.path.join(DIR, "timeline_desk.js"), "w").write("window.TL = " + json.dumps(tl, ensure_ascii=False) + ";\n")
 json.dump([b for b in BR], open(os.path.join(DIR, "out", "desk_broll.json"), "w"))
+json.dump(THUMBS, open(os.path.join(DIR, "out", "desk_thumbs.json"), "w"))
 # статистика: события внутри кадра (появления, маркеры, клики, пуши) — чтобы не было «мёртвых» пауз
-ev = sorted(set([o["t0"] for o in objs] + [k["t"] for o in objs for k in o["kf"][1:]] + [c["t"] for c in cam]
+import re as _re
+inner = [float(x) for o in objs for x in _re.findall(r'"(?:at|a|reveal)": ([0-9.]+)|data-a=\\"([0-9.]+)', json.dumps(o)) for x in x if x]
+ev = sorted(set(inner + [o["t0"] for o in objs] + [k["t"] for o in objs for k in o["kf"][1:]] + [c["t"] for c in cam]
             + [x for k, v in sfx.items() if k != "ticks" and k != "riser" for x in v]))
 ev = [e for e in ev if e < dur]
 gaps = [b - a for a, b in zip(ev, ev[1:])]

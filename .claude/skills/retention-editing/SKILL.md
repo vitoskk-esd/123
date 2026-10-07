@@ -26,7 +26,9 @@ neon grid) are **short-form stimulation**. On a 6–15 min YouTube video they re
 | Sound | quiet bed per chapter, tactile UI (window lands, click, push chime, marker, stamp), pan air on camera moves, riser only before a chapter/reveal, music stops for a key moment | whoosh on every cut, risers in a row |
 | Chapters | 2–3 s sting (tier letter + title) + lower-third «Уровень D · …» | — |
 
-desk.js objects: `win` (bodies `doc`, `frames`, `img`, `yt`, `tg`, `board`, `crit`, `dots`, `gauge`, `html`),
+desk.js objects: `win` (bodies `doc`, `frames`, `img`, `yt`, `tg`, `board` (+`unblur` per row, `focus`), `crit`, `dots`, `gauge`,
+`rows` (checklist/comparison rows with ✓/✕ marks), `cats` (category cards with thumbnails, `sel`, `hl`), `cap` (bar hitting a limit), `html`),
+`label` (heavy name plate for a key idea: kicker + title + chips), `takeaway` (one-line block conclusion),
 `phone` (balance counter, rows, pushes, banner, button), `text` (word-timed keywords), `num` (odometer),
 `cursor` (clicks), `stamp`, `bank` (logo card, blur for open loops), `sting` (chapter), `lower` (lower third).
 Every object has `kf` keyframes (x, y, w, h, s, r, ry, o) → moves smoothly; `cam` keyframes move the camera.

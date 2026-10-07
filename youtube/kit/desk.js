@@ -73,7 +73,9 @@
       ${(b.rows[T] || []).map(c => `<div class="chip" data-a="${c.at}">${c.bank ? `<div class="logo">${LOGO[c.bank]}</div>` : c.t}</div>`).join("")}</div>`).join("")}</div>`),
     tick: (el, b, t) => {
       el.querySelectorAll(".chip").forEach(e => { const a = +e.dataset.a, k = out3((t - a) / .4); e.style.opacity = clamp((t - a) / .2); e.style.transform = `translateX(${60 * (1 - k)}px)`;
-        let bl = 0; for (const x of b.blur || []) if (t >= x.t) bl = x.v; e.style.filter = bl ? `blur(${bl}px)` : "none"; });
+        let bl = 0; for (const x of b.blur || []) if (t >= x.t) bl = x.v;
+        const ub = b.unblur && b.unblur[e.closest(".row").dataset.r]; if (ub != null) bl *= 1 - io3((t - ub) / .5);   // уровень разобран — строка открывается
+        e.style.filter = bl > .05 ? `blur(${bl}px)` : "none"; });
       el.querySelectorAll(".row").forEach(r => { let on = 1; if (b.focus && t >= b.focus.at) on = r.dataset.r === b.focus.row ? 1 : .25 + .75 * (1 - out3((t - b.focus.at) / .5)); r.style.opacity = on; });
     },
   };
@@ -100,6 +102,37 @@
       <g class="nd"><line x1="260" y1="270" x2="260" y2="90" stroke="#eef2f6" stroke-width="10" stroke-linecap="round"/></g><circle cx="260" cy="270" r="22" fill="#eef2f6"/></svg><div class="gl">${b.label}</div></div>`),
     tick: (el, b, t) => { const v = 50 + (b.val - 50) * back((t - b.at) / .7), a = (v - 50) * 1.8 + 2 * Math.sin(t * 9) * clamp((t - b.at) / .7);
       el.querySelector(".nd").setAttribute("transform", `rotate(${a} 260 270)`); },
+  };
+
+  // строки с отметками: b.title, b.items [{l, r, c, at, mark:{at, ok}}]
+  B.rows = {
+    build: (b) => $(`<div class="rows">${b.title ? `<h4>${b.title}</h4>` : ""}${b.items.map(i => `<div class="rw" data-a="${i.at}"><span class="l">${i.l}</span><span class="r ${i.c || ""}">${i.r || ""}</span>
+      ${i.mark ? `<b class="mk ${i.mark.ok ? "ok" : "no"}" data-a="${i.mark.at}">${i.mark.ok ? "✓" : "✕"}</b>` : ""}</div>`).join("")}${b.note ? `<div class="note">${b.note}</div>` : ""}</div>`),
+    tick: (el, b, t) => {
+      el.querySelectorAll(".rw").forEach(e => fade(e, t, +e.dataset.a, .35, 16));
+      el.querySelectorAll(".mk").forEach(e => { const a = +e.dataset.a, k = back((t - a) / .3); e.style.opacity = clamp((t - a) / .08); e.style.transform = `scale(${t < a ? 0 : .3 + .7 * k})`; });
+    },
+  };
+  // категории кэшбэка: b.items [{name, p, at, img, bad}], b.sel [{i, at}], b.hl {i, at}
+  B.cats = {
+    build: (b) => $(`<div class="cats">${b.items.map((c, i) => `<div class="ct ${c.bad ? "bad" : ""}" data-a="${c.at}" data-i="${i}">${c.img ? `<img src="${c.img}">` : `<div class="ph">${c.name[0]}</div>`}
+      <div class="nm">${c.name}</div><div class="pc">${c.p}</div><div class="tg"></div></div>`).join("")}</div>`),
+    tick: (el, b, t) => el.querySelectorAll(".ct").forEach(e => {
+      fade(e, t, +e.dataset.a, .4, 24); const i = +e.dataset.i;
+      const sel = (b.sel || []).find(x => x.i === i && t >= x.at); e.classList.toggle("on", !!sel);
+      if (sel) e.style.transform += ` scale(${1 + .06 * (1 - out3((t - sel.at) / .3))})`;
+      const hl = (b.hl || []).find(x => x.i === i && t >= x.at); e.classList.toggle("hl", !!hl);
+    }),
+  };
+  // потолок: шкала растёт с a до b и упирается в лимит на доле b.cap (0..1); b.at2 — подпись суммы
+  B.cap = {
+    build: (b) => $(`<div class="capw"><div class="cl">${b.label}</div><div class="bar"><i></i><b></b><span>лимит</span></div><div class="cv"></div><div class="cs" data-a="${b.at2}">${b.sub}</div></div>`),
+    tick: (el, b, t) => {
+      const p = clamp((t - b.a) / (b.b - b.a)), f = Math.min(p / b.cap, 1) * .8, hit = p >= b.cap;
+      el.querySelector(".bar i").style.width = `${f * 100}%`; el.querySelector(".bar i").classList.toggle("hit", hit);
+      el.querySelector(".cv").textContent = hit ? "дальше — 0 ₽ кэшбэка" : "кэшбэк растёт…"; el.querySelector(".cv").classList.toggle("r", hit);
+      fade(el.querySelector(".cs"), t, b.at2, .4, 16);
+    },
   };
 
   // ---------- виды объектов ----------
@@ -170,6 +203,22 @@
       fade(el.querySelector(".tt span"), t, o.t0 + .15, .45, 30);
     },
   };
+  // плашка-ярлык (тяжёлый стиль типографики): o.kicker, o.text, o.items [{t, at}], o.at, o.c
+  K.label = {
+    build: (o) => $(`<div class="label" style="--c:${o.c || "var(--yel)"}"><small>${o.kicker || "приём"}</small><div class="lt">${o.text}</div>
+      ${o.items ? `<div class="li">${o.items.map(i => `<span data-a="${i.at}">${i.t}</span>`).join("")}</div>` : ""}</div>`),
+    tick: (el, o, t) => {
+      const lt = t - o.at; el.style.opacity = t < o.at ? 0 : 1;
+      el.querySelector(".lt").style.clipPath = `inset(0 ${100 * (1 - io3(lt / .35))}% 0 0)`;
+      el.style.transform = `rotate(${o.rot ?? -2}deg) scale(${1.15 - .15 * out3(lt / .3)})`;
+      el.querySelectorAll(".li span").forEach(e => fade(e, t, +e.dataset.a, .35, 14));
+    },
+  };
+  // вывод блока: o.html
+  K.takeaway = {
+    build: (o) => $(`<div class="take"><small>вывод</small><div>${o.html}</div></div>`),
+    tick: (el, o, t) => el.querySelectorAll("[data-a]").forEach(e => fade(e, t, +e.dataset.a, .35, 12)),
+  };
   K.lower = {
     build: (o) => $(`<div class="lower" style="--c:${o.c || "var(--green)"}"><i></i><div><b>${o.text}</b>${o.sub ? `<br><span>${o.sub}</span>` : ""}</div></div>`),
     tick: (el, o, t) => { const lt = t - o.t0, rest = o.t1 - t; el.style.clipPath = `inset(0 ${100 * (1 - io3(lt / .4))}% 0 0)`; if (rest < .3) el.style.opacity = rest / .3; },
@@ -237,7 +286,7 @@
       }
       const L = layout(o, t), E = enterExit(o, t, L);
       el.style.left = L.x + "px"; el.style.top = L.y + "px";
-      if (o.k !== "text" && o.k !== "num" && o.k !== "stamp" && o.k !== "lower" && o.k !== "cursor") { el.style.width = L.w + "px"; el.style.height = L.h + "px"; }
+      if (!["text", "num", "stamp", "lower", "cursor", "label", "takeaway"].includes(o.k)) { el.style.width = L.w + "px"; el.style.height = L.h + "px"; }
       const anchor = o.k === "cursor" ? "translate(-4px,-4px)" : (o.k === "lower" || o.anchor === "left") ? "translate(0,-50%)" : o.anchor === "right" ? "translate(-100%,-50%)" : "translate(-50%,-50%)";
       el.style.transform = `${anchor} translate(${E.dx}px,${E.dy}px) perspective(1600px) rotateY(${L.ry}deg) rotateX(${L.rx}deg) rotate(${L.r}deg) scale(${L.s * E.sc})`;
       el.style.opacity = L.o * E.op;

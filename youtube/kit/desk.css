@@ -145,3 +145,46 @@ body { font-family: "Mont", sans-serif; color: var(--ink); position: relative; }
 .lower { display: flex; align-items: center; gap: 18px; padding: 14px 26px 16px 20px; background: rgba(13,17,23,.92); border: 1.5px solid var(--line); border-radius: 16px; white-space: nowrap; }
 .lower i { width: 10px; height: 44px; border-radius: 5px; background: var(--c, var(--green)); }
 .lower b { font: 800 36px "Mont"; } .lower span { font: 600 26px "Mont"; color: var(--muted); }
+
+/* ===== v4.1 (уроки 2026): ярлыки, выводы, чек-листы, категории, потолок, текстура ===== */
+.win.paper .body::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .35; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .42  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"); }
+.sting::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .18;
+  background-image: radial-gradient(color-mix(in srgb, var(--c) 70%, transparent) 2px, transparent 2.6px); background-size: 14px 14px;
+  mask-image: linear-gradient(100deg, transparent 35%, #000 75%); }
+.label { display: inline-flex; flex-direction: column; gap: 10px; padding: 22px 34px 26px; background: #0d1117; border: 3px solid var(--c); border-radius: 18px;
+  box-shadow: 0 30px 70px rgba(0,0,0,.55), 0 0 40px color-mix(in srgb, var(--c) 25%, transparent); white-space: nowrap; }
+.label small { align-self: flex-start; font: 800 22px "Mont"; letter-spacing: 3px; text-transform: uppercase; color: #0b0f14; background: var(--c); padding: 4px 12px; border-radius: 8px; }
+.label .lt { font: 900 72px/1 "Unb"; text-transform: uppercase; letter-spacing: -1px; color: var(--ink); }
+.label .li { display: flex; gap: 12px; } .label .li span { font: 700 26px "Mont"; color: var(--muted); background: #1a2230; padding: 8px 16px; border-radius: 10px; }
+.take { display: flex; align-items: center; gap: 22px; padding: 20px 30px; background: rgba(13,17,23,.95); border: 1.5px solid var(--line); border-left: 10px solid var(--green);
+  border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.5); white-space: nowrap; }
+.take small { font: 800 22px "Mont"; letter-spacing: 3px; text-transform: uppercase; color: var(--green); }
+.take div { font: 800 38px "Mont"; } .take .g { color: var(--green); } .take .r { color: var(--red); }
+.rows { padding: 30px 36px; display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.rows h4 { font: 800 24px "Mont"; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+.win.paper .rows h4 { color: #6b6e75; }
+.rows .rw { display: flex; align-items: center; gap: 16px; background: rgba(127,140,160,.12); border-radius: 14px; padding: 16px 20px; font: 700 30px "Mont"; }
+.rows .rw .r { margin-left: auto; font: 800 30px "Mono"; } .rows .rw .r.g { color: var(--green); } .rows .rw .r.r { color: var(--red); } .win.paper .rows .rw .r.g { color: #1d9a55; }
+.rows .mk { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; font: 900 30px "Mont"; color: #fff; flex: none; }
+.rows .rw .r + .mk, .rows .rw .l + .mk { margin-left: 12px; } .rows .mk.ok { background: #1fae5f; } .rows .mk.no { background: var(--red); }
+.rows .note { margin-top: auto; font: 600 20px "Mont"; color: #8a8d94; }
+.cats { position: absolute; inset: 0; padding: 26px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.cats .ct { position: relative; border-radius: 16px; background: #182030; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; border: 3px solid transparent; }
+.cats .ct img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+.cats .ct .ph { position: absolute; inset: 0; display: grid; place-items: center; font: 900 120px "Unb"; color: #263042; }
+.cats .ct .nm { position: relative; font: 800 28px/1.15 "Mont"; text-shadow: 0 2px 8px #000; }
+.cats .ct .pc { position: absolute; top: 14px; right: 14px; font: 800 34px "Mono"; color: #0b0f14; background: var(--yel); padding: 2px 12px; border-radius: 10px; }
+.cats .ct.bad .pc { background: var(--red); color: #fff; }
+.cats .ct.on { border-color: var(--green); } .cats .ct.on .tg::after { content: "✓"; position: absolute; bottom: 14px; right: 14px; width: 44px; height: 44px; border-radius: 50%; background: var(--green); color: #0b0f14; display: grid; place-items: center; font: 900 26px "Mont"; }
+.cats .ct.hl { border-color: var(--red); box-shadow: inset 0 0 0 2px var(--red); }
+.capw { position: absolute; inset: 0; padding: 40px 46px; display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+.capw .cl { font: 800 28px "Mont"; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+.capw .bar { position: relative; height: 70px; border-radius: 16px; background: #1a2230; }
+.capw .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 16px; background: linear-gradient(90deg, #1f9e5c, var(--green)); }
+.capw .bar i.hit { background: linear-gradient(90deg, #1f9e5c, var(--yel)); }
+.capw .bar b { position: absolute; left: 80%; top: -16px; bottom: -16px; width: 6px; border-radius: 3px; background: var(--red); }
+.capw .bar span { position: absolute; left: 80%; top: -54px; transform: translateX(-50%); font: 800 24px "Mont"; color: var(--red); text-transform: uppercase; }
+.capw .cv { font: 800 40px "Mont"; color: var(--green); } .capw .cv.r { color: var(--red); }
+.capw .cs { font: 700 30px "Mont"; color: var(--muted); }
+.mtag { position: absolute; padding: 6px 12px 8px; background: rgba(0,0,0,.78); color: #fff; border-radius: 10px; font: 900 22px/1.1 "Mont"; text-transform: uppercase; }
