@@ -106,7 +106,7 @@
 
   // строки с отметками: b.title, b.items [{l, r, c, at, mark:{at, ok}}]
   B.rows = {
-    build: (b) => $(`<div class="rows">${b.title ? `<h4>${b.title}</h4>` : ""}${b.items.map(i => `<div class="rw" data-a="${i.at}"><span class="l">${i.l}</span><span class="r ${i.c || ""}">${i.r || ""}</span>
+    build: (b) => $(`<div class="rows">${b.title ? `<h4>${b.title}</h4>` : ""}${b.items.map(i => `<div class="rw" data-a="${i.at}"><span class="l">${i.l}</span><span class="val ${i.c || ""}">${i.r || ""}</span>
       ${i.mark ? `<b class="mk ${i.mark.ok ? "ok" : "no"}" data-a="${i.mark.at}">${i.mark.ok ? "✓" : "✕"}</b>` : ""}</div>`).join("")}${b.note ? `<div class="note">${b.note}</div>` : ""}</div>`),
     tick: (el, b, t) => {
       el.querySelectorAll(".rw").forEach(e => fade(e, t, +e.dataset.a, .35, 16));
