@@ -235,7 +235,7 @@
   };
   // заставка главы (fixed): o.tier, o.title, o.sub
   K.sting = {
-    build: (o) => $(`<div class="sting" style="--c:var(--${o.tier})"><div class="big">${o.tier}</div><div class="tt"><small>${o.sub || "уровень"}</small><span>${o.title}</span><div class="ln"></div></div></div>`),
+    build: (o) => $(`<div class="sting" style="--c:${o.c || `var(--${o.tier})`}"><div class="big">${o.big || o.tier}</div><div class="tt"><small>${o.sub || "уровень"}</small><span>${o.title}</span><div class="ln"></div></div></div>`),
     tick: (el, o, t) => {
       const lt = t - o.t0, rest = o.t1 - t, kin = io3(lt / .35), kout = io3(1 - rest / .3);
       el.style.clipPath = `inset(0 ${100 * (1 - kin)}% 0 ${100 * kout}%)`;
@@ -263,6 +263,60 @@
   K.lower = {
     build: (o) => $(`<div class="lower" style="--c:${o.c || "var(--green)"}"><i></i><div><b>${o.text}</b>${o.sub ? `<br><span>${o.sub}</span>` : ""}</div></div>`),
     tick: (el, o, t) => { const lt = t - o.t0, rest = o.t1 - t; el.style.clipPath = `inset(0 ${100 * (1 - io3(lt / .4))}% 0 0)`; if (rest < .3) el.style.opacity = rest / .3; },
+  };
+
+  // ---------- v5 (2026-10-08): деньги, обводка, переходы, новые сцены ----------
+  const hsh = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  // счётчик-«слот»: каждая цифра крутится столбиком к своему значению, со сдвигом по разрядам. o.value, o.at, o.dur, o.c (g|r), o.prefix, o.unit, o.label
+  K.slot = {
+    build: (o) => { const s = fmt(o.value); let i = 0;
+      return $(`<div class="slot num ${o.c || "g"}" style="${o.size ? `font-size:${o.size}px;letter-spacing:${-o.size * .04}px` : ""}"><span class="dg">${o.prefix || ""}${[...s].map(ch => /\d/.test(ch) ? `<span class="col" data-d="${ch}" data-i="${i++}"><span class="strip">${[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].map(d => `<b>${d}</b>`).join("")}</span></span>` : `<span class="sep">${ch}</span>`).join("")}<span class="un">${o.unit ?? "\u00a0₽"}</span></span>${o.label ? `<small>${o.label}</small>` : ""}</div>`); },
+    tick: (el, o, t) => { const cols = [...el.querySelectorAll(".col")], n = cols.length, dur = o.dur || 1.1;
+      cols.forEach((c, i) => { const d = +c.dataset.d, a = o.at + (n - 1 - i) * .07, k = out5((t - a) / dur);
+        const pos = (10 + d) * k;   // проходит полный круг и встаёт на цифру
+        c.firstElementChild.style.transform = `translateY(${-pos}em)`; c.style.filter = k > 0 && k < .85 ? `blur(${(1 - k) * 2.5}px)` : ""; }); },
+  };
+  // разлёт монет: o.at, o.n (≤ 40), o.spread; детерминированные траектории
+  K.burst = {
+    build: (o) => $(`<div class="burst">${Array.from({ length: Math.min(40, o.n || 24) }, (_, i) => `<i style="--r:${(hsh(i) * 360) | 0}deg"></i>`).join("")}</div>`),
+    tick: (el, o, t) => { const lt = t - o.at, sp = o.spread || 420;
+      [...el.children].forEach((c, i) => { const ang = hsh(i + 7) * Math.PI * 2, v = sp * (.45 + .55 * hsh(i + 19)), up = 260 * hsh(i + 31);
+        const x = Math.cos(ang) * v * lt, y = Math.sin(ang) * v * lt - up * lt + 520 * lt * lt;
+        c.style.opacity = lt < 0 ? 0 : clamp(1.4 - lt * 1.1); c.style.transform = `translate(${x}px,${y}px) rotate(${lt * 540 * (hsh(i) - .5)}deg) scale(${.6 + .5 * hsh(i + 3)})`; }); },
+  };
+  // обводка «от руки» вокруг цифры/слова: o.at, o.w, o.h, o.c, o.dur
+  K.scribble = {
+    build: (o) => { const w = o.w || 360, h = o.h || 140, rx = w / 2 - 10, ry = h / 2 - 10;
+      const cx = w / 2, cy = h / 2, d = `M ${cx + rx * .55} ${cy - ry} C ${cx + rx * 1.12} ${cy - ry}, ${cx + rx * 1.12} ${cy + ry}, ${cx} ${cy + ry} C ${cx - rx * 1.12} ${cy + ry}, ${cx - rx * 1.12} ${cy - ry * 1.02}, ${cx} ${cy - ry * 1.03} C ${cx + rx * .45} ${cy - ry * 1.05}, ${cx + rx * .85} ${cy - ry * .97}, ${cx + rx * 1.02} ${cy - ry * .72}`;
+      return $(`<svg class="scrib" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="none" stroke="${o.c || "#ffd84a"}" stroke-width="7" stroke-linecap="round"/></svg>`); },
+    tick: (el, o, t) => { const p = el.querySelector("path"), L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L * (1 - out3((t - o.at) / (o.dur || .55))); el.style.opacity = t < o.at ? 0 : 1; },
+  };
+  // переход между главами (fixed, поверх всего): o.style flash | leak | zoom; пик в o.at
+  K.tr = {
+    build: (o) => $(`<div class="tr ${o.style || "flash"}"></div>`),
+    tick: (el, o, t) => { const d = t - o.at, w = o.style === "leak" ? .9 : .32;
+      const env = d < 0 ? clamp(1 + d / (w * .45)) : clamp(1 - d / w);
+      el.style.opacity = o.style === "zoom" ? 0 : (o.style === "leak" ? .85 : 1) * Math.pow(env, o.style === "flash" ? 2 : 1);
+      if (o.style === "leak") el.style.backgroundPosition = `${-60 + 160 * clamp((d + w * .45) / (w * 1.45))}% 50%`; },
+  };
+  // таблица «банк зарабатывает → ты разворачиваешь»: b.rows [{l, r, at, ra}], b.head [левый, правый]
+  B.table = {
+    build: (b) => $(`<div class="tbl"><div class="th"><span>${b.head[0]}</span><span>${b.head[1]}</span></div>${b.rows.map(r => `<div class="tr2" data-a="${r.at}" data-ra="${r.ra ?? r.at + .4}"><span class="l">${r.l}</span><span class="arr">→</span><span class="r">${r.r}</span></div>`).join("")}</div>`),
+    tick: (el, b, t) => el.querySelectorAll(".tr2").forEach(e => { fade(e, t, +e.dataset.a, .35, 16); const r = e.querySelector(".r"), ra = +e.dataset.ra;
+      r.style.filter = t < ra ? "blur(9px)" : `blur(${9 * (1 - out5((t - ra) / .4))}px)`; r.style.opacity = t < ra ? .5 : 1; }),
+  };
+  // календарь льготного периода: b.days, b.from (день покупки), b.to (последний день), b.a/b.b — заполнение; b.marks [{d, text, c, at}]
+  B.cal = {
+    build: (b) => $(`<div class="cal">${Array.from({ length: b.days || 35 }, (_, i) => `<i data-d="${i + 1}"><span>${((i + (b.start || 0)) % 31) + 1}</span></i>`).join("")}${(b.marks || []).map(m => `<div class="cmk" style="--c:${m.c || "var(--green)"}" data-d="${m.d}" data-a="${m.at}">${m.text}</div>`).join("")}</div>`),
+    tick: (el, b, t) => { const n = Math.round((b.to - b.from + 1) * out3((t - b.a) / (b.b - b.a)));
+      el.querySelectorAll("i").forEach(e => { const d = +e.dataset.d; e.className = d >= b.from && d < b.from + n ? "on" : (d === b.to + 1 && t >= b.b ? "end" : ""); });
+      el.querySelectorAll(".cmk").forEach(m => { const d = +m.dataset.d - 1, cols = 7; m.style.left = `${(d % cols) * (100 / cols)}%`; m.style.top = `${Math.floor(d / cols) * 20}%`; fade(m, t, +m.dataset.a, .35, 10); }); },
+  };
+  // калькулятор: b.lines [{t, at}], b.res {v, at, c}
+  B.calc = {
+    build: (b) => $(`<div class="calc">${b.lines.map(l => `<div class="cl" data-a="${l.at}">${l.t}</div>`).join("")}${b.res ? `<div class="cr ${b.res.c || "g"}" data-a="${b.res.at}">${b.res.v}</div>` : ""}</div>`),
+    tick: (el, b, t) => { el.querySelectorAll(".cl").forEach(e => fade(e, t, +e.dataset.a, .3, 12));
+      const r = el.querySelector(".cr"); if (!r) return; const a = +r.dataset.a, k = out5((t - a) / .4); r.style.opacity = t < a ? 0 : 1; r.style.transform = `scale(${1.25 - .25 * k})`; },
   };
 
   // ---------- раскладка, вход/выход, камера ----------
@@ -331,16 +385,32 @@
       }
       const L = layout(o, t), E = enterExit(o, t, L);
       el.style.left = L.x + "px"; el.style.top = L.y + "px";
-      if (!["text", "num", "stamp", "lower", "cursor", "label", "takeaway"].includes(o.k)) { el.style.width = L.w + "px"; el.style.height = L.h + "px"; }
+      if (!["text", "num", "stamp", "lower", "cursor", "label", "takeaway", "slot", "burst", "scribble"].includes(o.k)) { el.style.width = L.w + "px"; el.style.height = L.h + "px"; }
       const anchor = o.k === "cursor" ? "translate(-4px,-4px)" : (o.k === "lower" || o.anchor === "left") ? "translate(0,-50%)" : o.anchor === "right" ? "translate(-100%,-50%)" : "translate(-50%,-50%)";
       el.style.transform = `${anchor} translate(${E.dx}px,${E.dy}px) perspective(1600px) rotateY(${L.ry}deg) rotateX(${L.rx}deg) rotate(${L.r}deg) scale(${L.s * E.sc})`;
       el.style.opacity = L.o * E.op;
-      el.style.filter = E.bl > .3 ? `blur(${E.bl.toFixed(1)}px)` : "";
+      let fb = E.bl;
+      if (TL.dof && !o.fixed && o.k !== "sting") { const Cc = camera(t, TL), dd = Math.hypot(L.x - Cc.x, L.y - Cc.y) * Cc.s; fb += 4 * clamp((dd - 900) / 700); }
+      el.style.filter = fb > .3 ? `blur(${fb.toFixed(1)}px)` : "";
+      if (o.k === "tr") { el.style.left = "0px"; el.style.top = "0px"; el.style.width = "1920px"; el.style.height = "1080px"; el.style.transform = "none"; el.style.filter = ""; }
       if (o.k === "sting") { el.style.left = "0px"; el.style.top = "0px"; el.style.width = "1920px"; el.style.height = "1080px"; el.style.transform = "none"; el.style.opacity = 1; el.style.filter = ""; }
       K[o.k].tick(el.firstElementChild, o, t);
     }
     // порядок слоёв по z
     const C = camera(t, TL);
+    // толчок камеры на переходах (TL.kick [{t, a}]): быстрый наезд и возврат
+    for (const k of TL.kick || []) { const d = t - k.t; if (d > -.18 && d < .5) C.s *= 1 + (k.a || .06) * (d < 0 ? out3(1 + d / .18) : 1 - out3(d / .5)); }
+    // передний план (TL.fg): размытые монеты/карты ближе камеры, двигаются быстрее мира (параллакс ×1.6)
+    if (TL.fg) {
+      let fg = document.getElementById("fg");
+      if (!fg) { fg = document.createElement("div"); fg.id = "fg"; document.body.insertBefore(fg, document.getElementById("hud")); }
+      if (!fg.children.length) TL.fg.forEach((f, i) => fg.insertAdjacentHTML("beforeend", `<div class="fgi ${f.kind || "coin"}" style="width:${f.size || 140}px;height:${(f.size || 140) * (f.kind === "card" ? .63 : 1)}px"></div>`));
+      TL.fg.forEach((f, i) => { const e = fg.children[i], P = f.p || 1.6, on = t >= (f.t0 ?? 0) && t < (f.t1 ?? 1e9);
+        const x = 960 + (f.x - C.x) * C.s * P + 30 * Math.sin(t * .3 + i), y = 540 + (f.y - C.y) * C.s * P + 24 * Math.cos(t * .23 + i * 1.7);
+        e.style.display = on ? "" : "none"; if (!on) return;
+        e.style.transform = `translate(${x}px,${y}px) translate(-50%,-50%) rotate(${(f.r || 0) + t * (f.spin ?? 6)}deg) scale(${C.s})`;
+        e.style.filter = `blur(${f.blur ?? 9}px)`; e.style.opacity = f.o ?? .55; });
+    }
     // смаз камеры по скорости переезда (HyperFrames motion-blur-streak: пик на максимальной скорости, 0 в покое)
     if (TL.mblur !== false) {
       const P = camera(t - 1 / 30, TL), v = Math.hypot((C.x - P.x) * C.s, (C.y - P.y) * C.s) + 900 * Math.abs(C.s - P.s);   // px экрана за кадр

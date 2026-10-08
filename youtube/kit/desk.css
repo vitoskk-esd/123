@@ -204,3 +204,35 @@ body { font-family: "Mont", sans-serif; color: var(--ink); position: relative; }
 
 /* цифры одинаковой ширины — счётчики не «прыгают» (HyperFrames typography: tabular-nums) */
 .phone .app .bal, .num, .num *, .rows .val, .chart, .gauge, .offer { font-variant-numeric: tabular-nums; }
+
+/* ---------- v5 (2026-10-08): слот-счётчик, монеты, обводка, переходы, передний план, таблица, календарь, калькулятор ---------- */
+.slot { display: flex; flex-direction: column; align-items: center; }
+.slot .dg { display: flex; align-items: baseline; white-space: nowrap; }
+.slot small { text-align: center; }
+.slot .col { display: inline-block; height: 1em; line-height: 1em; overflow: hidden; vertical-align: bottom; }
+.slot .col .strip { display: flex; flex-direction: column; } .slot .col b { height: 1em; line-height: 1em; font-weight: inherit; }
+.slot .sep { white-space: pre; }
+.burst { position: relative; width: 0; height: 0; }
+.burst i { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b0, #ffd84a 45%, #b8860b); box-shadow: 0 0 18px rgba(255,216,74,.55); }
+.scrib { overflow: visible; filter: drop-shadow(0 0 10px rgba(255,216,74,.45)); }
+.tr.flash { background: radial-gradient(circle at 50% 50%, #fff 0%, rgba(255,255,255,.85) 35%, rgba(255,255,255,0) 75%); mix-blend-mode: screen; }
+.tr.leak { background: linear-gradient(100deg, transparent 20%, rgba(255,140,60,.55) 40%, rgba(255,220,140,.75) 50%, rgba(255,80,120,.45) 62%, transparent 80%);
+  background-size: 260% 100%; mix-blend-mode: screen; }
+#fg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fgi { position: absolute; left: 0; top: 0; will-change: transform; }
+.fgi.coin { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3b0, #ffd84a 45%, #9c6f0a); }
+.fgi.card { border-radius: 14px; background: linear-gradient(135deg, #3ddc84, #1f6f4a 60%, #0f3a28); }
+.fgi.card.dark { background: linear-gradient(135deg, #2a3446, #121821); }
+.tbl { padding: 34px 44px; font: 700 34px/1.2 "Mont"; }
+.tbl .th { display: grid; grid-template-columns: 1fr 60px 1fr; font: 800 24px "Mont"; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 18px; }
+.tbl .th span:last-child { grid-column: 3; }
+.tbl .tr2 { display: grid; grid-template-columns: 1fr 60px 1fr; align-items: center; padding: 18px 0; border-top: 2px solid var(--line); }
+.tbl .tr2 .l { color: var(--red); } .tbl .tr2 .r { color: var(--green); } .tbl .tr2 .arr { color: var(--muted); text-align: center; }
+.cal { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; padding: 28px; height: 100%; }
+.cal i { font-style: normal; border-radius: 12px; background: #1b2230; display: grid; place-items: center; font: 700 28px "Mono"; color: var(--muted); }
+.cal i.on { background: color-mix(in srgb, var(--green) 30%, #1b2230); color: var(--ink); } .cal i.end { background: var(--red); color: #fff; }
+.cal .cmk { position: absolute; margin: 18px 0 0 28px; padding: 8px 16px; border-radius: 10px; background: var(--c); color: #08130d; font: 800 24px "Mont"; white-space: nowrap; }
+.calc { padding: 40px 54px; font: 700 40px/1.5 "Mono"; color: var(--ink); }
+.calc .cr { margin-top: 24px; font: 800 92px "Mono"; letter-spacing: -3px; transform-origin: 0 50%; }
+.calc .cr.g { color: var(--green); text-shadow: 0 0 26px rgba(61,220,132,.45); } .calc .cr.r { color: var(--red); }
