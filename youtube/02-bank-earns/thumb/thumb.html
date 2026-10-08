@@ -49,6 +49,51 @@
   .v3 .left { position: absolute; left: 70px; top: 120px; }
   .v3 .left .t { font-size: 84px; line-height: .98; }
   .v3 .left .plate { margin-top: 40px; font-size: 52px; }
+
+  /* v4: 48 % на кредитке + «ловушка» */
+  .v4 .card { left: 720px; top: 250px; width: 540px; height: 340px; transform: perspective(1300px) rotateY(-20deg) rotateZ(-7deg); background: linear-gradient(135deg, #ff8a95, #ff4d5e 40%, #5a0c15); }
+  .v4 .card .pct { position: absolute; left: 34px; bottom: 20px; font: 900 150px/1 "Unb"; color: #fff; letter-spacing: -.05em; text-shadow: 0 8px 0 rgba(0,0,0,.25); }
+  .v4 .t { position: absolute; left: 60px; top: 130px; font-size: 84px; line-height: .98; }
+  .v4 .plate { position: absolute; left: 60px; top: 530px; transform: rotate(-3deg); font-size: 60px; background: #ff4d5e; color: #fff; }
+  /* v5: «ты — товар» с ценником */
+  .v5 .t { position: absolute; left: 70px; top: 120px; font-size: 150px; line-height: .92; }
+  .v5 .tag { position: absolute; left: 740px; top: 170px; width: 470px; border-radius: 30px 30px 30px 120px; background: linear-gradient(150deg, #ffe066, #ffc21a);
+    color: #050608; transform: rotate(12deg); padding: 40px 40px 40px 90px; box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+  .v5 .tag::before { content: ""; position: absolute; left: 34px; top: 120px; width: 38px; height: 38px; border-radius: 50%; background: #050608; }
+  .v5 .tag small { display: block; font: 800 30px "Mont"; letter-spacing: 3px; text-transform: uppercase; }
+  .v5 .tag b { display: block; font: 900 74px/1.05 "Unb"; white-space: nowrap; letter-spacing: -.04em; }
+  .v5 .tag span { display: block; font: 800 30px "Mont"; margin-top: 6px; }
+  .v5 .plate { position: absolute; left: 70px; top: 520px; font-size: 52px; background: #3ddc84; transform: rotate(-2deg); }
+  /* v6: тебе 0 % / банку 14 % */
+  .v6 .row { position: absolute; left: 70px; display: flex; align-items: baseline; gap: 34px; }
+  .v6 .r1 { top: 70px; } .v6 .r2 { top: 360px; }
+  .v6 .row .t { font-size: 78px; width: 360px; }
+  .v6 .row .big { font-size: 230px; }
+  .v6 .line { position: absolute; left: 70px; right: 70px; top: 345px; height: 4px; background: linear-gradient(90deg, rgba(255,255,255,.25), transparent); }
+  .v6 .plate { position: absolute; right: 60px; bottom: 50px; transform: rotate(-3deg); font-size: 44px; }
+  /* v7: длинный чек от банка + зелёный штамп */
+  .v7 .rcpt { position: absolute; left: 770px; top: -20px; width: 430px; height: 800px; background: #f2f0ea; color: #111; padding: 70px 34px; transform: rotate(6deg);
+    box-shadow: 0 40px 90px rgba(0,0,0,.7); font: 700 28px/1.9 "Mono"; }
+  .v7 .rcpt h4 { font: 900 34px "Unb"; text-align: center; margin-bottom: 16px; }
+  .v7 .rcpt div { display: flex; justify-content: space-between; border-bottom: 2px dashed #bbb; }
+  .v7 .rcpt .tot { font-size: 34px; color: #c4121f; border: 0; margin-top: 10px; }
+  .v7 .stamp { position: absolute; left: 520px; top: 540px; padding: 14px 30px; border: 10px solid #3ddc84; border-radius: 20px; color: #3ddc84; font: 900 76px "Unb";
+    transform: rotate(-14deg); background: rgba(5,6,8,.75); box-shadow: 0 0 60px rgba(61,220,132,.45); }
+  .v7 .t { position: absolute; left: 60px; top: 150px; font-size: 80px; line-height: .98; }
+  /* v8: вопрос-хук + сумма за год */
+  .v8 .t { position: absolute; left: 0; right: 0; top: 70px; text-align: center; font-size: 76px; }
+  .v8 .big { position: absolute; left: 0; right: 0; top: 230px; text-align: center; font-size: 250px; }
+  .v8 .plate { position: absolute; white-space: nowrap; left: 50%; top: 545px; transform: translateX(-50%) rotate(-2deg); font-size: 50px; }
+  /* v9: 5 стрелок в банк, одна — обратно тебе */
+  .v9 .bank { position: absolute; left: 500px; top: 170px; width: 340px; height: 300px; border-radius: 36px; background: linear-gradient(160deg, #1b222d, #0a0d12);
+    box-shadow: inset 0 0 0 3px #3a4555, 0 40px 90px rgba(0,0,0,.6); display: grid; place-items: center; font: 900 64px "Unb"; color: #9aa5b4; }
+  .v9 .ar { position: absolute; height: 16px; border-radius: 8px; transform-origin: 0 50%; }
+  .v9 .ar::after { content: ""; position: absolute; right: -22px; top: -16px; border: 24px solid transparent; border-left: 30px solid currentColor; border-right: 0; }
+  .v9 .in { width: 250px; background: #ff4d5e; color: #ff4d5e; box-shadow: 0 0 30px rgba(255,77,94,.5); }
+  .v9 .out { width: 250px; background: #3ddc84; color: #3ddc84; box-shadow: 0 0 40px rgba(61,220,132,.7); height: 26px; }
+  .v9 .out::after { top: -24px; border-width: 36px; border-left-width: 44px; right: -32px; }
+  .v9 .lbl { position: absolute; font: 900 70px "Unb"; text-transform: uppercase; }
+  .v9 .five { position: absolute; left: 60px; top: 520px; font: 900 64px "Unb"; color: #ff4d5e; text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -76,6 +121,52 @@
     <div class="row x"><span>Баллы сгорели</span><b>−12</b></div>
     <div class="row ok"><span>Бонус</span><b>+1 000 ₽</b></div>
   </div>
+</div>
+<div class="v v4"><div class="orb" style="left:500px;top:-100px;width:900px;height:900px;background:radial-gradient(closest-side,rgba(255,77,94,.35),transparent)"></div>
+  <div class="t">Минималка —<br><span class="r">ловушка</span></div>
+  <div class="card"><div class="chip"></div><div class="pct">48%</div><div class="sheen"></div></div>
+  <div class="plate">разворот внутри</div>
+</div>
+
+<div class="v v5"><div class="orb" style="left:-150px;top:-100px;width:900px;height:900px;background:radial-gradient(closest-side,rgba(255,216,74,.22),transparent)"></div>
+  <div class="orb" style="left:700px;top:150px;width:800px;height:700px;background:radial-gradient(closest-side,rgba(61,220,132,.22),transparent)"></div>
+  <div class="t">Ты —<br><span style="color:#ffd84a;text-shadow:0 0 60px rgba(255,216,74,.5)">товар</span></div>
+  <div class="tag"><small>клиент</small><b>−1 900 ₽</b><span>в год за то, что есть карта</span></div>
+  <div class="plate">как развернуть</div>
+</div>
+
+<div class="v v6"><div class="orb" style="left:-150px;top:-200px;width:900px;height:700px;background:radial-gradient(closest-side,rgba(255,77,94,.28),transparent)"></div>
+  <div class="orb" style="left:200px;top:300px;width:1000px;height:700px;background:radial-gradient(closest-side,rgba(61,220,132,.28),transparent)"></div>
+  <div class="row r1"><div class="t">Тебе</div><div class="big r">0%</div></div>
+  <div class="line"></div>
+  <div class="row r2"><div class="t">Банку</div><div class="big g">14%</div></div>
+  <div class="plate">на твоих деньгах</div>
+</div>
+
+<div class="v v7"><div class="orb" style="left:-200px;top:0;width:900px;height:900px;background:radial-gradient(closest-side,rgba(255,77,94,.25),transparent)"></div>
+  <div class="t">Чек<br>от твоего<br><span class="r">банка</span></div>
+  <div class="rcpt"><h4>БАНК</h4><div><span>Обслуживание</span><span>1 188</span></div><div><span>СМС</span><span>708</span></div><div><span>Проценты</span><span>?</span></div>
+    <div><span>Подписка</span><span>?</span></div><div><span>Сгорели баллы</span><span>?</span></div><div class="tot"><span>ИТОГО</span><span>за год</span></div></div>
+  <div class="stamp">ВЕРНИ</div>
+</div>
+
+<div class="v v8"><div class="orb" style="left:240px;top:60px;width:800px;height:700px;background:radial-gradient(closest-side,rgba(255,77,94,.3),transparent)"></div>
+  <div class="t">Сколько ты платишь банку?</div>
+  <div class="big r">1 900 ₽</div>
+  <div class="plate">в год — просто так</div>
+</div>
+
+<div class="v v9"><div class="orb" style="left:300px;top:0;width:700px;height:700px;background:radial-gradient(closest-side,rgba(255,77,94,.25),transparent)"></div>
+  <div class="orb" style="left:750px;top:200px;width:700px;height:600px;background:radial-gradient(closest-side,rgba(61,220,132,.3),transparent)"></div>
+  <div class="lbl" style="left:60px;top:250px">Ты</div>
+  <div class="ar in" style="left:230px;top:200px;transform:rotate(-8deg)"></div>
+  <div class="ar in" style="left:230px;top:250px;transform:rotate(-2deg)"></div>
+  <div class="ar in" style="left:230px;top:300px;transform:rotate(3deg)"></div>
+  <div class="ar in" style="left:230px;top:350px;transform:rotate(9deg)"></div>
+  <div class="bank">БАНК</div>
+  <div class="ar out" style="left:860px;top:310px;"></div>
+  <div class="lbl g" style="left:850px;top:390px;font-size:84px">+ тебе</div>
+  <div class="five">4 способа ему · 1 тебе</div>
 </div>
 <div class="grain"></div><div class="vig"></div>
 <script>const v = new URLSearchParams(location.search).get("v") || "1"; document.querySelector(".v" + v).classList.add("on");</script>
