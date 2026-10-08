@@ -119,6 +119,22 @@ break (warnings) → main.
 - Stills at random times inside long scenes — camera framing never crops key text.
 - The event-gap stat from `build_timeline.py`.
 - Render the first 60 s with sound and send it before the full render.
+- Readability lint: `node ../kit/lint_desk.js desk.html 0.5 22` — fix every text that stays < 22 px on
+  screen for ≥ 1 s (raise font or zoom the camera in) and every text that overflows its plate.
+
+## Motion craft (owner's reel with agent skills, 2026-10-08 — full notes: `youtube/references/agent-skills.md`)
+
+From HyperFrames (HeyGen), Emil Kowalski's animation skills, impeccable, taste-skill, Remotion skills:
+- Ease-out on enter/exit, ease-in-out for moves on screen, never ease-in on an entrance; exit faster than enter.
+- Never enter from scale(0) (.9–.97 + fade); stagger 30–80 ms, a group ≤ 0.5 s.
+- Motion blur peaks at max speed, 0 at rest — `desk.js` now does it automatically for camera moves
+  (`TL.mblur=false` to switch off) and clears a 10 px blur on entrances (`TL.blurIn=false`).
+- Velocity-matched cuts (out accelerates + blur, in decelerates + blur clears) for chapter changes;
+  1–2 «big» transitions (flash/zoom-through) per video, for the hero reveal and CTA only.
+- ≥ 3 different eases/directions per scene; give each element a motion verb before building.
+- Video type scale on screen: headline 64–120, body 28–42, labels ≥ 18–24 px; extreme weight contrast;
+  tabular-nums on counters; decorative opacity 12–25 % (under 10 % is invisible); 2–4 px borders.
+- No full-screen linear gradients on dark backgrounds (H.264 banding) — radial glows only.
 
 ## Next techniques to add (not yet in the engine)
 

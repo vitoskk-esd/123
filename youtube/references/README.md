@@ -41,3 +41,4 @@
 - Кадры из фильмов, мультфильмов и чужой геймплей — риск Content ID и отказа
   в монетизации. Мемы-реакции делаем свои (код/ИИ-картинки/стикеры).
 - Байт «500 лайков — и я сделаю…» — допустим, только если обещание реально выполним.
+- [agent-skills.md](agent-skills.md) — rules from HyperFrames, Remotion, taste-skill, impeccable, Emil Kowalski skills (owner's reel, 2026-10-08)

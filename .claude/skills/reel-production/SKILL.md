@@ -150,6 +150,18 @@ arrive under `/root/.claude/uploads/…`; copy into the reel folder.
 - VC input: convert the voice from the edit WITHOUT the denoiser — on the long video
   (07.10) denoised input garbled words (0.58→0.79, 0.68→0.94 on the worst pieces).
 
+## 5d. Motion craft from agent skills (owner's reel, 2026-10-08)
+
+Rules from HyperFrames / Emil Kowalski / impeccable / taste-skill / Remotion, rewritten for our HTML→MP4
+engines — full list in `youtube/references/agent-skills.md`. For vertical 1080×1920 reels:
+- On-screen text: headline ≥ 90 px, body ≥ 32 px, nothing < 24 px; 3 s on screen must read in 2 s.
+- Ease-out for entrances (`cubic-bezier(0.23,1,0.32,1)`), never ease-in on an entrance; exits faster;
+  never from scale(0); stagger 30–80 ms. Fast moves get motion blur that peaks mid-move and is 0 at rest.
+- Whip/zoom transitions only as velocity-matched pairs; 1–2 big transitions per reel, hard cuts on the beat
+  for lists. Keep the shape match cut rule from §5c (headlines never cross-fade).
+- Every background decoration moves slowly (breathe/drift); one accent colour per scene; no em-dash
+  decoration in captions; tabular-nums on counting amounts.
+
 ## 6. Environment gotchas
 
 - edge-tts pins certifi: override `edge_tts.communicate._SSL_CTX` with

@@ -201,3 +201,6 @@ body { font-family: "Mont", sans-serif; color: var(--ink); position: relative; }
 .logo img { height: 30px; width: auto; max-width: 220px; object-fit: contain; } .logo img.tb { height: 36px; }
 .logo .ic { height: 40px; border-radius: 8px; } .logo .wm { font: 900 18px "Unb"; color: #5b2c8f; letter-spacing: .5px; }
 .ofr .bank.sm .wm { font-size: 17px; } .ofr .bank.sm .ic { height: 54%; } .ofr .bank.sm img { max-width: 70%; }
+
+/* цифры одинаковой ширины — счётчики не «прыгают» (HyperFrames typography: tabular-nums) */
+.phone .app .bal, .num, .num *, .rows .val, .chart, .gauge, .offer { font-variant-numeric: tabular-nums; }

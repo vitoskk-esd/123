@@ -296,8 +296,11 @@
       case "none": break;
       default: op *= 1 - x;
     }
-    return { dx, dy, sc, op };
+    // вход «из размытия» (HyperFrames: blur → 0 на замедляющейся кривой), выход быстрее входа (Emil Kowalski)
+    const bl = o.in === "none" || TL_NOBLUR ? 0 : 10 * e + (o.out === "none" ? 0 : 6 * x);
+    return { dx, dy, sc, op, bl };
   }
+  let TL_NOBLUR = false;
   function camera(t, TL) {
     const C = { x: 960, y: 540, s: 1 }, cs = TL.cam || [];
     for (const k of cs) { if (t < k.t) break; const p = io3((t - k.t) / (k.d || 1)); for (const key of ["x", "y", "s"]) if (k[key] != null) C[key] += (k[key] - C[key]) * p; }
@@ -314,6 +317,7 @@
 
   const ELS = new Map();
   window.renderAt = (t) => {
+    TL_NOBLUR = window.TL.blurIn === false;
     const TL = window.TL, world = document.getElementById("world"), hud = document.getElementById("hud");
     for (const o of TL.objs) {
       const on = t >= o.t0 && t < o.t1;
@@ -330,11 +334,18 @@
       const anchor = o.k === "cursor" ? "translate(-4px,-4px)" : (o.k === "lower" || o.anchor === "left") ? "translate(0,-50%)" : o.anchor === "right" ? "translate(-100%,-50%)" : "translate(-50%,-50%)";
       el.style.transform = `${anchor} translate(${E.dx}px,${E.dy}px) perspective(1600px) rotateY(${L.ry}deg) rotateX(${L.rx}deg) rotate(${L.r}deg) scale(${L.s * E.sc})`;
       el.style.opacity = L.o * E.op;
-      if (o.k === "sting") { el.style.left = "0px"; el.style.top = "0px"; el.style.width = "1920px"; el.style.height = "1080px"; el.style.transform = "none"; el.style.opacity = 1; }
+      el.style.filter = E.bl > .3 ? `blur(${E.bl.toFixed(1)}px)` : "";
+      if (o.k === "sting") { el.style.left = "0px"; el.style.top = "0px"; el.style.width = "1920px"; el.style.height = "1080px"; el.style.transform = "none"; el.style.opacity = 1; el.style.filter = ""; }
       K[o.k].tick(el.firstElementChild, o, t);
     }
     // порядок слоёв по z
     const C = camera(t, TL);
+    // смаз камеры по скорости переезда (HyperFrames motion-blur-streak: пик на максимальной скорости, 0 в покое)
+    if (TL.mblur !== false) {
+      const P = camera(t - 1 / 30, TL), v = Math.hypot((C.x - P.x) * C.s, (C.y - P.y) * C.s) + 900 * Math.abs(C.s - P.s);   // px экрана за кадр
+      const b = Math.min(9, Math.max(0, (v - 12) * .09));
+      world.style.filter = b > .3 ? `blur(${b.toFixed(1)}px)` : "";
+    }
     world.style.transform = `translate(960px,540px) scale(${C.s}) translate(${-C.x}px,${-C.y}px)`;
     const dots = document.querySelector("#bg .dots");
     dots.style.transform = `translate(${-(C.x - 960) * .25 % 34}px, ${-(C.y - 540) * .25 % 34}px) scale(${1 + (C.s - 1) * .3})`;
