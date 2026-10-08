@@ -229,7 +229,11 @@ for (let i = 0; i < 46; i++) {
 for (let i = 0; i < 7; i++) coin(C.x + .9 + i * .05, FLOOR + CR * .62 + i * .012, 1.5 + i * .02, 0, .5, -1.0);   // упавший столбик «веером»
 coin(C.x - .95, FLOOR + CR, 2.1, Math.PI / 2 - .15, 0, .8);                                                        // монета на ребре
 coin(C.x + .35, FLOOR + CR, 2.9, Math.PI / 2 - .2, 0, -.5);
-for (let i = 0; i < 5; i++) coin(C.x - .6 + i * .32, C.y - R0 + .07, .05 + rnd() * .15, .5, rnd() * 6, 0);         // выкатываются через порог
+// монеты на пороге: лежат на изогнутом дне проёма (высота и наклон — по окружности R0), не проваливаются в металл
+for (const [dx, z] of [[-.3, -.16], [-.14, -.34], [.12, -.08], [.4, -.26], [-.02, -.46]]) {
+  const yb = C.y - Math.sqrt(R0 * R0 - dx * dx), ang = Math.atan2(dx, Math.sqrt(R0 * R0 - dx * dx));
+  coin(C.x + dx + Math.sin(ang) * CT / 2 * -1, yb + Math.cos(ang) * (CT / 2 + .004), z, 0, rnd() * 6, ang);
+}
 
 // ---------- свет ----------
 scene.add(new THREE.HemisphereLight(0x3a4250, 0x0a0806, .35));
