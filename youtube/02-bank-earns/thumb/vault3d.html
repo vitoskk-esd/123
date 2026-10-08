@@ -52,7 +52,7 @@ scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.38;
 
 const cam = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
-cam.position.set(-0.4, 0.8, 13.2); cam.lookAt(1.55, -0.15, 0);
+cam.position.set(-0.4, 1.55, 13.2); cam.lookAt(1.55, -0.3, 0);
 
 // ---------- процедурные текстуры: шлифовка металла (радиальная и линейная), шум бетона ----------
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -123,28 +123,73 @@ rows[0] = [-.99, -.33, .33, .99]; rows[1] = [-.66, 0, .66]; rows[2] = [-.33, .33
 rows.forEach((xs, lvl) => xs.forEach(x => { for (const zz of [-2.25, -1.9]) {
   const b = new THREE.Mesh(barGeo, gold); b.position.set(C.x + .25 + x * 1.25, shelfY + .13 + lvl * .26, zz + .3 + (lvl % 2) * .04); b.rotation.y = (rnd() - .5) * .06;
   b.castShadow = b.receiveShadow = true; scene.add(b); bars.push(b); } }));
-const coinGeo = new THREE.CylinderGeometry(.19, .19, .04, 48);
-function stack(x, z, n, y0 = shelfY) { for (let i = 0; i < n; i++) { const c = new THREE.Mesh(coinGeo, i % 2 ? gold : goldDim); c.position.set(x + (rnd() - .5) * .02, y0 + .018 + i * .036, z + (rnd() - .5) * .02);
-  c.rotation.y = rnd() * 3; c.castShadow = c.receiveShadow = true; scene.add(c); } }
-stack(C.x - 1.25, -1.4, 9); stack(C.x - 1.0, -1.15, 6); stack(C.x + 1.2, -1.35, 11); stack(C.x + .95, -1.1, 5);
+// ---------- монеты: рифлёное ребро, выпуклый кант и «₽» (bump), золото ----------
+const faceCanvas = (relief) => canvasTex(512, 512, (g, w, h) => {
+  g.fillStyle = relief ? "#808080" : "#d9a42a"; g.fillRect(0, 0, w, h);
+  const ring = (r, lw, c) => { g.strokeStyle = c; g.lineWidth = lw; g.beginPath(); g.arc(w / 2, h / 2, r, 0, 6.283); g.stroke(); };
+  ring(238, 26, relief ? "#ffffff" : "#ffe08a");                 // кант
+  for (let i = 0; i < 72; i++) { const a = i / 72 * 6.283; g.fillStyle = relief ? "#e0e0e0" : "#f5c95a"; g.beginPath(); g.arc(w / 2 + Math.cos(a) * 205, h / 2 + Math.sin(a) * 205, 4, 0, 6.283); g.fill(); }
+  ring(190, 4, relief ? "#c8c8c8" : "#c88f1c");
+  g.fillStyle = relief ? "#ffffff" : "#ffd25a"; g.font = "900 230px Unb"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("₽", w / 2 + 6, h / 2 + 10);
+});
+const sideCanvas = (relief) => canvasTex(1024, 32, (g, w, h) => { g.fillStyle = relief ? "#606060" : "#c99325"; g.fillRect(0, 0, w, h);
+  for (let x = 0; x < w; x += 8) { g.fillStyle = relief ? "#ffffff" : "#ffd870"; g.fillRect(x, 0, 4, h); } });
+await document.fonts.load("900 230px Unb");
+const coinFaceMat = new THREE.MeshPhysicalMaterial({ color: 0xffd36a, map: faceCanvas(false), bumpMap: faceCanvas(true), bumpScale: 2.2, metalness: 1, roughness: .24, clearcoat: .3 });
+coinFaceMat.map.colorSpace = THREE.SRGBColorSpace; coinFaceMat.map.repeat.set(1, 1); coinFaceMat.bumpMap.repeat.set(1, 1);
+const coinSideMat = new THREE.MeshPhysicalMaterial({ color: 0xffcf60, map: sideCanvas(false), bumpMap: sideCanvas(true), bumpScale: 1.5, metalness: 1, roughness: .3 });
+coinSideMat.map.colorSpace = THREE.SRGBColorSpace; coinSideMat.map.repeat.set(1, 1); coinSideMat.bumpMap.repeat.set(1, 1);
+const CR = .2, CT = .045;
+const coinGeo = new THREE.CylinderGeometry(CR, CR, CT, 72);
+const coinMats = [coinSideMat, coinFaceMat, coinFaceMat];
+function coin(x, y, z, rx = 0, ry = 0, rz = 0) { const c = new THREE.Mesh(coinGeo, coinMats); c.position.set(x, y, z); c.rotation.set(rx, ry, rz); c.castShadow = c.receiveShadow = true; scene.add(c); return c; }
+function stack(x, z, n, y0 = shelfY) { for (let i = 0; i < n; i++) coin(x + (rnd() - .5) * .025, y0 + CT / 2 + i * CT * 1.02, z + (rnd() - .5) * .025, 0, rnd() * 6); }
+stack(C.x - 1.25, -1.35, 9); stack(C.x - .98, -1.1, 6); stack(C.x + 1.25, -1.3, 12); stack(C.x + 1.0, -1.05, 5); stack(C.x + .62, -.62, 4);
 
-// карта-бонус: золотой пластик с текстом (CanvasTexture), прислонена в проёме
-const drawCard = (g, w, h) => {
-  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, "#fff2b0"); gr.addColorStop(.25, "#ffd84a"); gr.addColorStop(.6, "#d99a0b"); gr.addColorStop(1, "#8a5a00");
-  g.fillStyle = gr; g.fillRect(0, 0, w, h);
-  g.fillStyle = "#e8d28c"; g.beginPath(); g.roundRect(70, 90, 150, 115, 22); g.fill(); g.strokeStyle = "rgba(120,80,0,.6)"; g.lineWidth = 4; g.stroke();
-  g.fillStyle = "rgba(60,35,0,.75)"; g.font = "800 46px Mont"; g.fillText("Б О Н У С", 72, 300);
-  g.fillStyle = "#2a1800"; g.font = "900 150px Unb"; g.fillText("+1 000 ₽", 60, 560);
+// ---------- карта: настоящая банковская — пропорции 85,6×54, скругление, чип с контактами, бесконтакт, выпуклые цифры ----------
+const CW = 2048, CH = 1292;
+const drawCard = (relief) => (g, w, h) => {
+  if (!relief) { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, "#f7e3a0"); gr.addColorStop(.3, "#e9c35a"); gr.addColorStop(.62, "#c99327"); gr.addColorStop(1, "#9a6a10");
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    // тонкий узор-гильош
+    g.strokeStyle = "rgba(255,245,210,.10)"; g.lineWidth = 2; for (let i = 0; i < 40; i++) { g.beginPath(); g.ellipse(w * .78, h * .2, 200 + i * 26, 120 + i * 18, -.4, 0, 6.283); g.stroke(); }
+  } else { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h); }
+  // чип: золото, контактные площадки
+  if (!relief) { const cg = g.createLinearGradient(170, 330, 450, 540); cg.addColorStop(0, "#fbeab0"); cg.addColorStop(.5, "#c9a24a"); cg.addColorStop(1, "#f0d48a");
+    g.fillStyle = cg; g.beginPath(); g.roundRect(170, 330, 280, 215, 34); g.fill();
+    g.strokeStyle = "rgba(110,75,10,.75)"; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(170, 400); g.lineTo(265, 400); g.moveTo(170, 475); g.lineTo(265, 475); g.moveTo(355, 400); g.lineTo(450, 400); g.moveTo(355, 475); g.lineTo(450, 475);
+    g.moveTo(265, 330); g.lineTo(265, 545); g.moveTo(355, 330); g.lineTo(355, 545); g.rect(265, 400, 90, 75); g.stroke(); }
+  // бесконтактная оплата
+  g.strokeStyle = relief ? "#c0c0c0" : "rgba(70,45,5,.75)"; g.lineWidth = 14; g.lineCap = "round";
+  for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(520, 437, 34 + i * 30, -.75, .75); g.stroke(); }
+  // надписи
+  g.textBaseline = "alphabetic";
+  g.fillStyle = relief ? "#909090" : "rgba(60,35,0,.8)"; g.font = "800 64px Mont"; g.fillText("БОНУС НОВОМУ КЛИЕНТУ", 170, 220);
+  g.fillStyle = relief ? "#ffffff" : "#3a2400"; g.font = "900 250px Unb"; g.fillText("+1 000 ₽", 150, 860);
+  g.font = "800 92px Mono"; g.fillStyle = relief ? "#f0f0f0" : "#fff3c8"; g.fillText("2200  0000  1000  2026", 170, 1060);
+  g.font = "700 54px Mono"; g.fillText("10/29", 170, 1180);
+  // абстрактный знак (не логотип реальной платёжной системы)
+  if (!relief) { g.fillStyle = "rgba(255,248,220,.85)"; g.beginPath(); g.moveTo(1700, 1180); g.lineTo(1800, 1020); g.lineTo(1900, 1180); g.closePath(); g.fill();
+    g.fillStyle = "rgba(90,60,10,.6)"; g.beginPath(); g.moveTo(1760, 1180); g.lineTo(1860, 1020); g.lineTo(1960, 1180); g.closePath(); g.fill(); }
 };
-// шрифты — до рисования текстуры, иначе canvas возьмёт запасной шрифт
-await document.fonts.load("900 150px Unb"); await document.fonts.load("800 46px Mont");
-const cardTex = canvasTex(1024, 646, drawCard); cardTex.repeat.set(1, 1); cardTex.colorSpace = THREE.SRGBColorSpace;
-const card = new THREE.Group();
-const cardBody = new THREE.Mesh(new RoundedBoxGeometry(2.0, 1.26, .035, 4, .08), gold); card.add(cardBody);
-const cardFace = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 1.17), new THREE.MeshPhysicalMaterial({ map: cardTex, metalness: .85, roughness: .25, clearcoat: 1, clearcoatRoughness: .1 }));
-cardFace.position.z = .02; card.add(cardFace);
-card.position.set(C.x - .75, shelfY + .62, -.15); card.rotation.set(-.12, .2, .1); card.scale.setScalar(.9);
-card.traverse(o => { o.castShadow = true; }); scene.add(card);
+await document.fonts.load("800 92px Mono"); await document.fonts.load("900 250px Unb"); await document.fonts.load("800 64px Mont");
+const cardMap = canvasTex(CW, CH, drawCard(false)), cardBump = canvasTex(CW, CH, drawCard(true));
+for (const t of [cardMap, cardBump]) t.repeat.set(1, 1); cardMap.colorSpace = THREE.SRGBColorSpace;
+const cardW = 1.712, cardH = 1.08, cardT = .03, rad = .1;
+const cs = new THREE.Shape(); { const x = -cardW / 2, y = -cardH / 2; cs.moveTo(x + rad, y); cs.lineTo(x + cardW - rad, y); cs.quadraticCurveTo(x + cardW, y, x + cardW, y + rad);
+  cs.lineTo(x + cardW, y + cardH - rad); cs.quadraticCurveTo(x + cardW, y + cardH, x + cardW - rad, y + cardH); cs.lineTo(x + rad, y + cardH); cs.quadraticCurveTo(x, y + cardH, x, y + cardH - rad);
+  cs.lineTo(x, y + rad); cs.quadraticCurveTo(x, y, x + rad, y); }
+const cardGeo = new THREE.ExtrudeGeometry(cs, { depth: cardT, bevelEnabled: true, bevelThickness: .006, bevelSize: .006, bevelSegments: 3, curveSegments: 24 });
+// UV лицевой стороны: из координат вершин в [0,1]
+{ const pos = cardGeo.attributes.position, uv = cardGeo.attributes.uv; for (let i = 0; i < pos.count; i++) uv.setXY(i, (pos.getX(i) + cardW / 2) / cardW, (pos.getY(i) + cardH / 2) / cardH); }
+const cardFaceMat = new THREE.MeshPhysicalMaterial({ map: cardMap, bumpMap: cardBump, bumpScale: 3, metalness: .85, roughness: .36, roughnessMap: brushedLin, clearcoat: .35, clearcoatRoughness: .3 });
+const cardEdgeMat = new THREE.MeshPhysicalMaterial({ color: 0xb98a2a, metalness: 1, roughness: .3 });
+const card = new THREE.Mesh(cardGeo, [cardFaceMat, cardEdgeMat]); card.geometry.translate(0, 0, -cardT / 2);
+// лежит внутри сейфа: нижним краем на полке, верхним — на слитках, лицом к зрителю
+card.scale.setScalar(1.32); card.position.set(C.x - .32, shelfY + .6, -.98); card.rotation.set(-.6, .1, .03);
+card.castShadow = card.receiveShadow = true; scene.add(card);
+const cardFill = new THREE.PointLight(0xfff0d0, 7, 6, 1.2); cardFill.position.set(C.x - 1.6, shelfY + .6, 2.2); scene.add(cardFill);   // подсветка карты, чтобы читалась
 
 // ---------- дверь: толстый диск, ригели по кромке, механизм на внутренней стороне ----------
 const DR = R0 + .3, DT = .7;
@@ -173,16 +218,25 @@ for (const y of [-1.1, 1.1]) { const h = new THREE.Mesh(new THREE.CylinderGeomet
 
 // ---------- пол и монеты, высыпавшиеся наружу ----------
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = FLOOR; floor.receiveShadow = true; scene.add(floor);
-for (let i = 0; i < 16; i++) { const c = new THREE.Mesh(coinGeo, i % 3 ? gold : goldDim);
-  c.position.set(C.x - 1.6 + rnd() * 2.6, FLOOR + .018 + (i % 4 === 0 ? .03 : 0), .6 + rnd() * 2.2); c.rotation.set((rnd() - .5) * .2, rnd() * 3, (rnd() - .5) * .2); c.castShadow = c.receiveShadow = true; scene.add(c); }
-for (const [x, z, a] of [[C.x - .5, 1.6, .9], [C.x + .7, 2.4, -.6]]) { const c = new THREE.Mesh(coinGeo, gold); c.position.set(x, FLOOR + .15, z); c.rotation.set(Math.PI / 2 - .25, 0, a); c.castShadow = true; scene.add(c); }
+// россыпь у порога: плотно у проёма, реже к зрителю; монеты ложатся друг на друга, пара — на ребре, один упавший столбик
+const placed = [];
+for (let i = 0; i < 46; i++) {
+  const t = Math.pow(rnd(), 1.6), x = C.x - .2 + (rnd() - .5) * (1.2 + t * 3.2), z = .55 + t * 3.0;
+  let y = FLOOR + CT / 2; for (const p of placed) if (Math.hypot(p.x - x, p.z - z) < CR * 1.7) y = Math.max(y, p.y + CT * .95);
+  const tilt = y > FLOOR + CT ? .12 : .03;
+  coin(x, y, z, (rnd() - .5) * tilt, rnd() * 6, (rnd() - .5) * tilt); placed.push({ x, y, z });
+}
+for (let i = 0; i < 7; i++) coin(C.x + .9 + i * .05, FLOOR + CR * .62 + i * .012, 1.5 + i * .02, 0, .5, -1.0);   // упавший столбик «веером»
+coin(C.x - .95, FLOOR + CR, 2.1, Math.PI / 2 - .15, 0, .8);                                                        // монета на ребре
+coin(C.x + .35, FLOOR + CR, 2.9, Math.PI / 2 - .2, 0, -.5);
+for (let i = 0; i < 5; i++) coin(C.x - .6 + i * .32, C.y - R0 + .07, .05 + rnd() * .15, .5, rnd() * 6, 0);         // выкатываются через порог
 
 // ---------- свет ----------
 scene.add(new THREE.HemisphereLight(0x3a4250, 0x0a0806, .35));
 const key = new THREE.DirectionalLight(0xdfe8ff, 1.6); key.position.set(-6, 7, 8); key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8 }); key.shadow.bias = -.0004; scene.add(key);
-const inside = new THREE.PointLight(0xffb84a, 20, 9, 1.6); inside.position.set(C.x, C.y + .9, -1.2); inside.castShadow = true; scene.add(inside);
-const inside2 = new THREE.PointLight(0xffd070, 6, 6, 1.8); inside2.position.set(C.x - .8, C.y - .2, -.4); scene.add(inside2);
+const inside = new THREE.PointLight(0xffb84a, 20, 9, 1.6); inside.position.set(C.x + .3, C.y + 1.25, -2.4); inside.castShadow = true; scene.add(inside);
+const inside2 = new THREE.PointLight(0xffd070, 6, 6, 1.8); inside2.position.set(C.x + 1.25, C.y + .4, -.7); scene.add(inside2);
 const spill = new THREE.SpotLight(0xffb040, 55, 16, .62, .7, 1.4); spill.position.set(C.x, C.y + .3, -2.2); spill.target.position.set(C.x - .6, FLOOR, 4.5);
 spill.castShadow = true; spill.shadow.mapSize.set(2048, 2048); scene.add(spill, spill.target);
 const rim = new THREE.PointLight(0x7fb0ff, 9, 14, 1.5); rim.position.set(7.5, 3.5, 4); scene.add(rim);
