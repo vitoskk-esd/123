@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Reel: бонус не пришёл</title>
+<!-- Рилс #8 «Бонус не пришёл: 5 причин». Кадр в момент t: window.renderAt(t). Время — от слов озвучки (timeline.js). -->
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root { --bg: #05060b; --ink: #eef3ff; --cyan: #3df5ff; --lime: #c8ff3d; --red: #ff3b5c; --amber: #ffb52e; --muted: #8a96b3; --panel: #10162a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #bg { position: absolute; inset: 0; }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 45%; }
+  .center { position: absolute; left: 50px; right: 50px; text-align: center; }
+  .up { text-transform: uppercase; letter-spacing: -3px; line-height: .98; }
+  .gr { color: var(--red); text-shadow: 0 0 22px rgba(255,59,92,.8), 0 0 70px rgba(255,59,92,.4); }
+  .gl { color: var(--lime); text-shadow: 0 0 22px rgba(200,255,61,.7); }
+  .ga { color: var(--amber); text-shadow: 0 0 22px rgba(255,181,46,.6); }
+
+  /* заголовок сцены: номер причины + 2–3 слова */
+  .ttl { position: absolute; left: 60px; right: 60px; top: 150px; font-size: 104px; opacity: 0; display: flex; align-items: center; gap: 34px; }
+  .ttl .n { flex: none; width: 170px; height: 170px; border-radius: 40px; display: grid; place-items: center; font-family: "Tek"; font-size: 132px; letter-spacing: 0;
+            color: #05060b; background: var(--amber); box-shadow: 0 0 40px rgba(255,181,46,.55); }
+  .ttl .tx { line-height: .98; }
+  #t0 { display: block; text-align: center; top: 130px; font-size: 128px; }
+  #five { position: absolute; left: 0; right: 0; top: 1340px; text-align: center; font-family: "Tek"; font-size: 120px; color: #05060b; opacity: 0; }
+  #five span { background: var(--amber); padding: 6px 34px; border-radius: 26px; box-shadow: 0 0 50px rgba(255,181,46,.6); }
+
+  /* прогресс 5 причин */
+  #prog { position: absolute; left: 140px; right: 140px; top: 70px; display: flex; gap: 16px; opacity: 0; }
+  #prog i { flex: 1; height: 16px; border-radius: 8px; background: rgba(255,255,255,.14); }
+  #prog i.on { background: var(--amber); box-shadow: 0 0 18px rgba(255,181,46,.7); }
+
+  /* телефон */
+  #phone { position: absolute; left: 140px; top: 440px; width: 800px; height: 1020px; border-radius: 76px; background: #0b0f1d;
+           border: 6px solid #2a3350; box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 70px rgba(61,245,255,.12); overflow: hidden; }
+  #phone .isl { position: absolute; left: 320px; top: 22px; width: 160px; height: 44px; border-radius: 22px; background: #000; }
+  .scr { position: absolute; inset: 90px 34px 40px; opacity: 0; }
+  .scr h5 { font-size: 36px; color: var(--muted); font-weight: normal; margin-bottom: 26px; letter-spacing: 1px; }
+  .row { display: flex; align-items: center; gap: 22px; background: var(--panel); border-radius: 30px; padding: 26px 74px 26px 26px; margin-bottom: 20px; font-size: 36px; position: relative; opacity: 0; }
+  .row .ic { width: 78px; height: 78px; flex: none; border-radius: 22px; display: grid; place-items: center; font-family: "Tek"; font-size: 44px; background: #1d2742; color: var(--cyan); }
+  .row .tx small { display: block; font-size: 30px; color: var(--muted); margin-top: 4px; }
+  .row .sum { margin-left: auto; font-family: "Mono"; font-size: 36px; letter-spacing: -1px; white-space: nowrap; }
+  .row .tx { white-space: nowrap; }
+  .mk { position: absolute; right: -14px; top: -18px; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; font-size: 52px; opacity: 0; }
+  .mk.no { background: var(--red); color: #fff; box-shadow: 0 0 30px rgba(255,59,92,.7); }
+  .mk.ok { background: var(--lime); color: #142000; box-shadow: 0 0 30px rgba(200,255,61,.7); }
+  .row.dead .ic, .row.dead .tx, .row.dead .sum { filter: grayscale(1); opacity: .7; }
+  .row.dead .tx, .row.dead .sum { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 5px; }
+
+  /* сцена 0: пустые уведомления */
+  #empty { position: absolute; left: 0; right: 0; top: 330px; text-align: center; }
+  #empty .bell { font-family: "Tek"; font-size: 150px; color: #2a3350; }
+  #empty p { font-size: 40px; color: var(--muted); margin-top: 18px; }
+  #bal0 { position: absolute; left: 0; right: 0; top: 70px; text-align: center; font-family: "Mono"; font-size: 130px; letter-spacing: -6px; color: var(--red); }
+  #bal0 b { font-weight: normal; }
+  #bal0 small { display: block; font-family: "Display"; font-size: 34px; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+
+  /* сцена 2: клиент */
+  #client { text-align: center; }
+  #client .who { font-size: 44px; color: var(--muted); margin: 40px 0 26px; }
+  #client .badge { display: inline-block; font-family: "Tek"; font-size: 64px; padding: 22px 44px; border-radius: 30px; border: 5px solid var(--red); color: var(--red); }
+  #client .rule { margin-top: 70px; font-size: 52px; line-height: 1.15; opacity: 0; }
+
+  /* сцена 3: кнопки */
+  .btn { border-radius: 34px; padding: 40px 30px; text-align: center; font-size: 46px; margin-bottom: 34px; position: relative; opacity: 0; }
+  .btn small { display: block; font-size: 32px; color: var(--muted); margin-top: 10px; }
+  .btn.plain { background: #1a2136; }
+  .btn.promo { background: linear-gradient(135deg, rgba(200,255,61,.22), rgba(61,245,255,.16)); border: 4px solid var(--lime); }
+
+  /* сцена 4: срок и сумма */
+  .meter { background: var(--panel); border-radius: 30px; padding: 30px; margin-bottom: 30px; opacity: 0; }
+  .meter .lb { font-size: 36px; color: var(--muted); }
+  .meter .big { font-family: "Mono"; font-size: 92px; letter-spacing: -4px; margin-top: 8px; }
+  .bar { height: 30px; border-radius: 15px; background: #222b45; margin-top: 18px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; border-radius: 15px; background: var(--amber); }
+  .need { font-size: 34px; color: var(--muted); margin-top: 12px; }
+
+  /* сцена 5: в пути */
+  #cal { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-top: 10px; }
+  #cal i { height: 74px; border-radius: 16px; background: #1a2136; font-style: normal; font-family: "Mono"; font-size: 30px; display: grid; place-items: center; color: var(--muted); }
+  #cal i.on { background: rgba(61,245,255,.22); color: var(--ink); }
+  #push { position: absolute; left: 0; right: 0; top: 580px; height: 150px; border-radius: 36px; background: rgba(22,30,52,.97); border: 3px solid rgba(200,255,61,.7);
+          box-shadow: 0 0 50px rgba(200,255,61,.35); display: flex; align-items: center; gap: 24px; padding: 0 28px; opacity: 0; }
+  #push .ic { width: 96px; height: 96px; flex: none; border-radius: 26px; display: grid; place-items: center; font-family: "Tek"; font-size: 58px; color: #142000;
+              background: radial-gradient(circle at 35% 30%, #f6ffc8, #c8ff3d 45%, #6f9c0d); }
+  #push b { display: block; font-size: 44px; color: var(--lime); }
+  #push span { font-size: 30px; color: var(--muted); }
+
+  /* CTA: Telegram */
+  #cta { position: absolute; inset: 0; opacity: 0; }
+  #tg { position: absolute; left: 80px; right: 80px; top: 440px; border-radius: 44px; overflow: hidden; background: rgba(14,20,34,.95);
+        border: 2px solid rgba(61,245,255,.55); box-shadow: 0 0 60px rgba(61,245,255,.25); }
+  #tgHead { display: flex; align-items: center; gap: 24px; padding: 30px 36px; background: rgba(61,245,255,.08); }
+  #tgAva { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, var(--lime), var(--cyan)); display: grid; place-items: center; font-family: "Tek"; font-size: 56px; color: #06110a; }
+  #tgHead .n { font-size: 46px; } #tgHead .s { font-size: 30px; color: var(--muted); }
+  #tgPost { padding: 30px 36px 14px; font-size: 52px; line-height: 1.12; }
+  .gli { display: flex; gap: 22px; align-items: center; font-size: 42px; padding: 20px 36px; border-top: 2px solid rgba(61,245,255,.12); opacity: 0; }
+  .gli b { font-family: "Tek"; color: var(--lime); font-size: 42px; width: 46px; }
+  #ctaTop { top: 200px; font-size: 92px; opacity: 0; }
+  #linkText { top: 1110px; font-size: 92px; opacity: 0; }
+  #upArrow { position: absolute; left: 470px; top: 20px; width: 140px; height: 150px; opacity: 0; }
+  #send { position: absolute; left: 90px; right: 90px; top: 1330px; display: flex; align-items: center; justify-content: center; gap: 26px; font-size: 54px; opacity: 0;
+          background: rgba(61,245,255,.12); border: 3px solid var(--cyan); border-radius: 40px; padding: 26px 30px; }
+  #send svg { width: 74px; height: 74px; flex: none; }
+
+  #subs { position: absolute; left: 60px; right: 60px; top: 1600px; text-align: center; font-size: 60px; line-height: 1.12; letter-spacing: -1px; text-transform: uppercase; }
+  #subs span { display: inline-block; margin: 0 9px 10px; color: var(--ink); text-shadow: 0 6px 0 rgba(0,0,0,.55), 0 0 30px rgba(0,0,0,.6); }
+  #subs span.on { color: #05060b; background: var(--amber); padding: 0 12px; border-radius: 12px; text-shadow: none; box-shadow: 0 0 30px rgba(255,181,46,.55); }
+  #disc { position: absolute; left: 90px; right: 90px; top: 1800px; font-size: 32px; color: #7a849f; text-align: center; }
+  #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.6)); }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1080" height="1920"></canvas>
+  <div id="cam">
+    <div id="prog"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="ttl up" id="t0">Бонус<br><span class="gr">не пришёл?</span></div>
+    <div class="ttl up" id="t1"><div class="n">1</div><div class="tx">Перевод <span class="gr">≠</span><br>покупка</div></div>
+    <div class="ttl up" id="t2"><div class="n">2</div><div class="tx">Ты уже<br><span class="gr">клиент</span></div></div>
+    <div class="ttl up" id="t3"><div class="n">3</div><div class="tx">Не через<br><span class="ga">акцию</span></div></div>
+    <div class="ttl up" id="t4"><div class="n">4</div><div class="tx">Срок<br>и <span class="ga">сумма</span></div></div>
+    <div class="ttl up" id="t5"><div class="n">5</div><div class="tx">Бонус<br><span class="gl">в пути</span></div></div>
+
+    <div id="phone"><div class="isl"></div>
+      <!-- 0: пусто -->
+      <div class="scr" id="s0">
+        <div id="bal0"><small>БОНУСЫ</small><b>0 ₽</b></div>
+        <div id="empty"><div class="bell">◎</div><p>Новых уведомлений нет</p></div>
+      </div>
+      <!-- 1: история операций -->
+      <div class="scr" id="s1"><h5>ИСТОРИЯ ОПЕРАЦИЙ</h5>
+        <div class="row" id="r1a"><div class="ic">⇄</div><div class="tx">Перевод другу<small>не покупка</small></div><div class="sum">−1 000 ₽</div><div class="mk no">✕</div></div>
+        <div class="row" id="r1b"><div class="ic">◫</div><div class="tx">Покупка в магазине<small>засчитана</small></div><div class="sum">−600 ₽</div><div class="mk ok">✓</div></div>
+        <div class="row" id="r1c"><div class="ic">⌂</div><div class="tx">Оплата ЖКХ<small>не считается</small></div><div class="sum">−2 400 ₽</div><div class="mk no">✕</div></div>
+        <div class="row" id="r1d"><div class="ic">+</div><div class="tx">Пополнение<small>не считается</small></div><div class="sum">+5 000 ₽</div><div class="mk no">✕</div></div>
+      </div>
+      <!-- 2: уже клиент -->
+      <div class="scr" id="s2"><div id="client">
+        <h5>ПРОВЕРКА УСЛОВИЙ</h5>
+        <div class="who">Клиент банка раньше?</div>
+        <div class="badge" id="b2">ДА, БЫЛ</div>
+        <div class="rule" id="rule2">Бонус —<br><span class="gl">только новым</span><br>клиентам</div>
+      </div></div>
+      <!-- 3: страница акции -->
+      <div class="scr" id="s3"><h5>КАК ОФОРМИЛ</h5>
+        <div class="btn plain" id="b3a">Обычная заявка<small>на сайте или в приложении</small><div class="mk no">✕</div></div>
+        <div class="btn promo" id="b3b">Страница акции<small>или промокод акции</small><div class="mk ok">✓</div></div>
+      </div>
+      <!-- 4: срок и сумма -->
+      <div class="scr" id="s4"><h5>УСЛОВИЯ АКЦИИ</h5>
+        <div class="meter" id="m4a"><div class="lb">Срок на покупки</div><div class="big" id="days">30 дн.</div><div class="bar"><i id="dbar"></i></div></div>
+        <div class="meter" id="m4b"><div class="lb">Сумма покупок</div><div class="big" id="sum4">0 ₽</div><div class="bar"><i id="sbar"></i></div><div class="need">нужно: 5 000 ₽ (пример)</div></div>
+      </div>
+      <!-- 5: в пути -->
+      <div class="scr" id="s5"><h5>НАЧИСЛЕНИЕ БОНУСА</h5>
+        <div id="cal"></div>
+        <div id="push"><div class="ic">₽</div><div><b>Бонус зачислен</b><span>за выполнение условий акции</span></div></div>
+      </div>
+    </div>
+    <div id="five"><span>5 ПРИЧИН</span></div>
+
+    <div id="cta">
+      <div class="center up" id="ctaTop">Кто платит<br><span class="gl">сейчас?</span></div>
+      <svg id="upArrow" viewBox="0 0 140 150"><path d="M70 140 V 20" stroke="#c8ff3d" stroke-width="16" stroke-linecap="round"/><path d="M20 70 L70 18 L120 70" stroke="#c8ff3d" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div id="tg">
+        <div id="tgHead"><div id="tgAva">₽</div><div><div class="n">Бонусы банков</div><div class="s">канал • ссылка в шапке профиля</div></div></div>
+        <div id="tgPost">Банки, которые платят сейчас</div>
+        <div class="gli" id="g1"><b>1</b>За что платят</div>
+        <div class="gli" id="g2"><b>2</b>Какие условия</div>
+        <div class="gli" id="g3"><b>3</b>До какого числа</div>
+      </div>
+      <div class="center up" id="linkText"><span class="gl">ссылка в шапке ↑</span></div>
+      <div id="send"><svg viewBox="0 0 24 24"><path d="M3 11.5 21 3l-6.5 18-3.2-7.3z" fill="none" stroke="#3df5ff" stroke-width="2" stroke-linejoin="round"/><path d="M11.3 13.7 21 3" stroke="#3df5ff" stroke-width="2"/></svg>Отправь тому, кто ждёт бонус</div>
+    </div>
+  </div>
+  <div id="subs"></div>
+  <div id="disc">Условия зависят от банка и акции. Суммы — пример.</div>
+  <div id="vig"></div><div id="flash"></div>
+</div>
+
+<script src="timeline.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = x => x === 1 ? 1 : 1 - Math.pow(2, -10 * x);          // сильный ease-out для входов
+const out5 = x => 1 - Math.pow(1 - clamp(x), 5);
+const outBack = x => { const c1 = 1.6, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const lerp = (a, b, x) => a + (b - a) * x;
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const T = TIMELINE, { S, E, W } = T;
+const LOOP = .35;                       // последние 0.35 с возвращают первый кадр — петля
+const NS = 7;
+const fmt = v => Math.round(v).toLocaleString("ru-RU").replace(/\s/g, " ") + " ₽";
+for (let d = 1; d <= 30; d++) $("cal").insertAdjacentHTML("beforeend", `<i>${d}</i>`);
+
+// --- фон: сетка-пол и частицы; цвет по сцене (красный — проблема, янтарь — причины, лайм — бонус пришёл) ---
+const cv = $("bg"), cx = cv.getContext("2d");
+const PART = Array.from({ length: 140 }, (_, i) => ({ x: rnd(i) * 1080, y: rnd(i + 500) * 1920, z: .3 + rnd(i + 900) * .7, h: rnd(i + 77) }));
+function drawBg(t, col) {
+  cx.fillStyle = "#05060b"; cx.fillRect(0, 0, 1080, 1920);
+  const g = cx.createRadialGradient(540, 900, 60, 540, 900, 1100);
+  g.addColorStop(0, `rgba(${col},.22)`); g.addColorStop(1, "rgba(5,6,11,0)");
+  cx.fillStyle = g; cx.fillRect(0, 0, 1080, 1920);
+  const hy = 1300; cx.lineWidth = 2;
+  for (let i = -12; i <= 12; i++) { cx.strokeStyle = `rgba(${col},.12)`; cx.beginPath(); cx.moveTo(540 + i * 40, hy); cx.lineTo(540 + i * 260, 1920); cx.stroke(); }
+  const off = (t * .8) % 1;
+  for (let k = 0; k < 14; k++) { const d = (k + off) / 14, y = hy + Math.pow(d, 2.2) * (1920 - hy); cx.strokeStyle = `rgba(${col},${.05 + d * .16})`; cx.beginPath(); cx.moveTo(0, y); cx.lineTo(1080, y); cx.stroke(); }
+  for (const q of PART) {
+    const y = (q.y - t * 46 * q.z + 1920 * 4) % 1920, x = q.x + Math.sin(t * .6 + q.h * 9) * 18 * q.z, a = .18 + q.z * .45;
+    cx.fillStyle = `rgba(${col},${a})`; cx.beginPath(); cx.arc(x, y, 1.2 + q.z * 2.4, 0, 6.283); cx.fill();
+  }
+}
+
+// --- субтитры по словам (окно из 3 слов) ---
+function renderSubs(t) {
+  const li = T.lines.findIndex(l => t >= l.start && t < l.end);
+  if (li < 0 || t >= T.duration - LOOP) { $("subs").innerHTML = ""; return; }
+  const words = T.lines[li].words;
+  let cur = -1; words.forEach((x, i) => { if (t >= x.a) cur = i; });
+  if (cur < 0) { $("subs").innerHTML = ""; return; }
+  const chunk = Math.floor(cur / 3) * 3;
+  $("subs").innerHTML = words.slice(chunk, chunk + 3).map((x, i) => {
+    const k = out5(p(t, x.a, x.a + .16)), show = t >= x.a;
+    return `<span class="${chunk + i === cur ? "on" : ""}" style="opacity:${show ? 1 : 0};transform:scale(${show ? lerp(.8, 1, k) : .8})">${x.w.replace(/[.,:?!]$/, "")}</span>`;
+  }).join(" ");
+}
+
+// появление элемента: ease-out, из 0.92 и чуть снизу; уход быстрее
+function show(el, t, a, b, dy = 40) {
+  const k = out5(p(t, a, a + .4)), o = b == null ? 0 : p(t, b - .15, b);
+  const vis = t >= a && (b == null || t < b);
+  el.style.opacity = vis ? clamp(k * 1.6) * (1 - o) : 0;
+  el.style.transform = `translateY(${(1 - k) * dy}px) scale(${lerp(.92, 1, k)})`;
+  return k;
+}
+// метка ✓/✕ «штампом»: из 1.6 к 1 за 0.18 с
+function stamp(el, t, a) {
+  const k = out5(p(t, a, a + .18));
+  el.style.opacity = t >= a ? 1 : 0; el.style.transform = `scale(${lerp(1.6, 1, k)}) rotate(${lerp(-14, 0, k)}deg)`;
+}
+
+function renderAt(t) {
+  const loopIn = p(t, T.duration - LOOP, T.duration);
+  const sc = loopIn > 0 ? 0 : T.lines.findIndex(l => t >= l.start && t < l.end);
+  const bonus = t >= W(5, "месяц") && sc === 5;
+  drawBg(t, sc === 0 ? "255,59,92" : sc === 6 ? "61,245,255" : bonus ? "200,255,61" : "255,181,46");
+
+  let shake = 0, fl = 0;
+  for (const s of T.sfx.impact) { const d = t - s; if (d >= 0 && d < .35) shake = Math.max(shake, (1 - d / .35) * 20); if (d > 0 && d < .1) fl = Math.max(fl, 1 - d / .1); }
+  $("cam").style.transform = `translate(${(rnd(t * 50) - .5) * shake}px, ${(rnd(t * 51) - .5) * shake}px)`;
+  $("flash").style.opacity = fl * .35;
+
+  // заголовки: 0 — с кадра 0 (и в петле), остальные — на смене сцены, жёсткой склейкой
+  for (let i = 0; i <= 5; i++) {
+    const el = $("t" + i), a = i === 0 ? 0 : S(i), b = E(i);
+    const on = (t >= a && t < b && loopIn === 0) || (i === 0 && loopIn > 0);
+    const k = i === 0 ? 1 : out5(p(t, a, a + .3));
+    el.style.opacity = on ? (i === 0 && loopIn > 0 ? loopIn : 1) : 0;
+    el.style.transform = `translateX(${(1 - k) * -60}px) scale(${lerp(1.08, 1, k)})`;
+  }
+  // прогресс причин
+  $("prog").style.opacity = sc >= 1 && sc <= 5 ? 1 : 0;
+  [...$("prog").children].forEach((e, i) => e.className = sc >= i + 1 ? "on" : "");
+
+  // телефон: виден в сценах 0–5, на CTA уезжает вниз
+  const ph = out5(p(t, S(6) - .1, S(6) + .35));
+  $("phone").style.opacity = sc === 6 ? 1 - ph : 1;
+  $("phone").style.transform = `translateY(${sc === 6 ? ph * 500 : 0}px) rotate(${Math.sin(t * .9) * 1.2}deg)`;
+  for (let i = 0; i <= 5; i++) $("s" + i).style.opacity = sc === i ? 1 : 0;
+
+  // 0: «0 ₽», «5 ПРИЧИН»
+  const f = W(0, "пять"), fk = out5(p(t, f, f + .25));
+  $("five").style.opacity = sc === 0 && t >= f && loopIn === 0 ? 1 : 0;
+  $("five").style.transform = `scale(${lerp(1.5, 1, fk)})`;
+  const gx = sc === 0 ? (rnd(Math.floor(t * 12)) - .5) * 12 : 0;
+  $("bal0").querySelector("b").style.textShadow = `${gx}px 0 #3df5ff, ${-gx}px 0 #ff00aa, 0 0 30px rgba(255,59,92,.7)`;
+
+  // 1: операции
+  if (sc === 1) {
+    const rows = [["r1a", W(1, "переводил"), W(1, "переводил") + .25], ["r1b", W(1, "покупал"), W(1, "покупал") + .25],
+                  ["r1c", W(1, "ЖКХ") - .3, W(1, "ЖКХ") + .1], ["r1d", W(1, "обычно"), W(1, "считаются")]];
+    rows.forEach(([id, a, m]) => { show($(id), t, a - .1, null, 30); stamp($(id).querySelector(".mk"), t, m); $(id).classList.toggle("dead", t >= m && !$(id).querySelector(".ok")); });
+  }
+  // 2: уже клиент
+  if (sc === 2) {
+    const a = W(2, "клиентом"), k = out5(p(t, a, a + .2));
+    $("b2").style.transform = `scale(${t >= a ? lerp(1.4, 1, k) : 1})`; $("b2").style.opacity = t >= a - .05 ? 1 : .25;
+    show($("rule2"), t, W(2, "бонус") - .05);
+  }
+  // 3: кнопки
+  if (sc === 3) {
+    show($("b3a"), t, W(3, "оформил") - .1); stamp($("b3a").querySelector(".mk"), t, W(3, "через"));
+    show($("b3b"), t, W(3, "страницу") - .05); stamp($("b3b").querySelector(".mk"), t, W(3, "акции") + .05);
+    $("b3a").classList.toggle("dead", t >= W(3, "попал"));
+  }
+  // 4: срок истекает, сумма не дотягивает
+  if (sc === 4) {
+    const a = W(4, "уложился"), d = out5(p(t, a, a + 1.2));
+    show($("m4a"), t, S(4) + .05);
+    $("days").textContent = Math.round(lerp(30, 0, d)) + " дн."; $("days").style.color = d > .8 ? "var(--red)" : "var(--ink)";
+    $("dbar").style.width = (100 - d * 100) + "%"; $("dbar").style.background = d > .8 ? "var(--red)" : "var(--amber)";
+    const b = W(4, "набрал"), s = out5(p(t, b, b + 1.1));
+    show($("m4b"), t, b - .25);
+    $("sum4").textContent = fmt(Math.round(lerp(0, 3700, s) / 100) * 100); $("sbar").style.width = (s * 74) + "%";
+    $("sum4").style.color = t >= W(4, "покупок") ? "var(--red)" : "var(--ink)";
+  }
+  // 5: календарь листается к «месяцу», затем пуш о зачислении
+  if (sc === 5) {
+    const a = W(5, "пути"), m = W(5, "месяц"), n = Math.round(lerp(1, 30, out5(p(t, a, m))));
+    [...$("cal").children].forEach((e, i) => e.className = t >= a && i < n ? "on" : "");
+    const k = out5(p(t, m, m + .35));
+    $("push").style.opacity = t >= m ? 1 : 0; $("push").style.transform = `translateY(${(1 - k) * -90}px) scale(${lerp(.92, 1, k)})`;
+  }
+  // CTA
+  const ct = sc === 6, tg = out5(p(t, S(6), S(6) + .5));
+  $("cta").style.opacity = ct ? 1 : 0;
+  show($("ctaTop"), t, S(6) + .05, null, 30);
+  $("tg").style.transform = `perspective(1600px) rotateX(${(1 - tg) * 30}deg) translateY(${(1 - tg) * 260}px)`; $("tg").style.opacity = tg;
+  ["g1", "g2", "g3"].forEach((id, i) => show($(id), t, S(6) + .45 + i * .08, null, 24));
+  const L = W(6, "Ссылка"), lk = out5(p(t, L - .05, L + .25));
+  $("linkText").style.opacity = t >= L - .05 ? 1 : 0; $("linkText").style.transform = `scale(${lerp(1.5, 1, lk)})`;
+  const ar = out5(p(t, L, L + .4));
+  $("upArrow").style.opacity = ar; $("upArrow").style.transform = `translateY(${(1 - ar) * 70 - Math.abs(Math.sin(t * 5)) * 16}px)`;
+  show($("send"), t, W(6, "Отправь") - .05, null, 30);
+
+  renderSubs(t);
+}
+window.renderAt = renderAt;
+if (location.search.includes("play")) {
+  const t0 = performance.now();
+  (function loop() { renderAt(((performance.now() - t0) / 1000) % TIMELINE.duration); requestAnimationFrame(loop); })();
+} else renderAt(0);
+</script>
+</body>
+</html>
