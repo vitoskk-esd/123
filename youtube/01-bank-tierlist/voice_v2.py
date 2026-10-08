@@ -23,8 +23,25 @@ CUTS = [(63.25, 66.55, "дубль «Шанс почти нулевой, зат�
         (143.00, 143.85, "фальстарт «А вот где…»"),
         (342.75, 345.42, "первый дубль «Вот сколько можно получить прямо сейчас…»")]
 # вставки: (куда, откуда_начало, откуда_конец, слова) — «а не» из «…клиентам, а не зарплата»
-# паузы вокруг вставки подобраны по распознаванию: «…деньги банка, а не твои» (без паузы «а» сливается с «банка»)
-INSERTS = [(395.17, 405.46, 405.665, ["а", "не"], .18, .03)]
+# «а не» из «…клиентам, а не зарплата» распознаётся как «они» («деньги банка, они твои» — смысл наоборот!).
+# Перебор (Whisper medium + small): чисто читается только «не» из «ты не впариваешь» -> «деньги банка, не твои».
+INSERTS = [(395.13, 237.85, 238.05, ["не"], .14, .03)]
+# Фальстарты, найденные уже после VC (время rec_v2, Whisper medium по исходнику): режутся из готового голоса
+POST_CUTS = [(108.05, 108.97, "«запчасти для коров.» перед «запчасти для тракторов»"),
+             (158.96, 161.45, "«За одну покупку от 500 до…» перед дублем"),
+             (290.72, 292.55, "«рекомендуй только то, что сам» перед дублем"),
+             (389.93, 391.12, "«И проверь ск…» перед «и проверь, сколько стоит»")]
+# Фразы, которые VC смазал: переделываем отдельно (время rec_v2 по Whisper medium; края подтягиваются к тишине)
+PATCH_SPANS = [(73.28, 77.6, "Где-то один балл равен рублю, а где-то… только в"), (80.76, 84.38, "И у баллов бывает срок жизни…"),
+               (142.62, 144.8, "Уровень B. Приветственные бонусы"), (164.48, 166.50, "Звучит как подарок, но есть три подвоха"),
+               (185.51, 189.09, "Перед оформлением прочитать правила…"), (282.61, 286.09, "Второе — это доход, а значит налог…"),
+               (286.37, 289.57, "С выплат от компании налог 6%…"), (306.56, 308.96, "Я обещал способ…"),
+               (309.11, 312.47, "Иногда в личку пишут…"), (319.47, 322.39, "За передачу карты третьим лицам…"),
+               (322.43, 325.81, "До трёх лет лишения свободы…"), (331.97, 334.77, "Допустим, тебе 18…"),
+               (334.99, 337.99, "Вот сколько можно получить…"), (338.57, 340.83, "Альфа-Банк. Кредитная карта. Плюс 1000 рублей"),
+               (347.11, 348.87, "Две покупки, каждая от 500 рублей"), (365.31, 373.68, "Если расставить их по тир-листу…"),
+               (373.75, 377.12, "В A — Уралсиб…")]
+PATCH_ATTEMPTS = [(1.0, 0), (.85, 0), (1.0, 1), (.85, 1), (.75, 0), (.9, 2)]
 # попытки: (замедление входа VC, seed). vc_lab: без шумодава лучше всегда; замедление ×0.85 помогает быстрым фразам,
 # но портит часть других — поэтому пробуем оба и берём самую разборчивую (Whisper medium против исходника)
 ATTEMPTS = [(1.0, 0), (.85, 0), (1.0, 1), (.85, 1)]
@@ -110,7 +127,9 @@ def vc(attempts=None, only=None):
     segs, dur = pieces(REC2)
     meta_p = os.path.join(VC2, "pieces.json")
     meta = json.load(open(meta_p)) if os.path.exists(meta_p) else {}
-    if meta.get("segs") != segs: meta = {"segs": segs, "dur": dur, "res": {}}
+    if meta.get("segs") != segs:   # куски сдвинулись (правка монтажа): оставляем результаты кусков с тем же [x, y]
+        keep = {str(i): r for i, (x, y) in enumerate(segs) for r in meta.get("res", {}).values() if abs(r["x"] - x) < .06 and abs(r["y"] - y) < .06}
+        meta = {"segs": segs, "dur": dur, "res": keep, "patches": meta.get("patches", {})}
     a, _ = sf.read(REC2)
     PAD = .3
     for i, (x, y) in enumerate(segs):
@@ -183,6 +202,49 @@ def composite(limit=.97):
     json.dump(meta, open(meta_p, "w"), ensure_ascii=False, indent=0)
 
 
+def patch():
+    """Переделка смазанных фраз по отдельности: несколько попыток, берём лучшую, но только если она
+    разборчивее того, что уже стоит в voice_vc2.wav на этом месте."""
+    sys.path.insert(0, "/home/user/123/reels/zero-card-07")
+    import voice as V, torch, torchaudio
+    from chatterbox.vc import ChatterboxVC
+    model = ChatterboxVC.from_pretrained("cpu"); model.set_target_voice(V.VC_TARGET)
+    a, _ = sf.read(REC2); cur, _ = sf.read(os.path.join(OUT, "voice_vc2.wav"))
+    meta_p = os.path.join(VC2, "pieces.json"); meta = json.load(open(meta_p)); meta.setdefault("patches", {})
+    PD = os.path.join(VC2, "patch"); os.makedirs(PD, exist_ok=True)
+    tmp16 = os.path.join(PD, "_16.wav")
+    def tr(arr):
+        sf.write(os.path.join(PD, "_48.wav"), arr, SR)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", os.path.join(PD, "_48.wav"), "-ar", "16000", "-ac", "1", tmp16], check=True)
+        return V.transcribe(tmp16, "medium")
+    for x0, x1, why in PATCH_SPANS:
+        x, y = snap(a, x0 - .05, .2), snap(a, x1 + .05, .2)
+        key = f"{x:.2f}-{y:.2f}"
+        if key in meta["patches"]: continue
+        want = " ".join(w["w"] for w in tr(a[int(x * SR):int(y * SR)]))
+        base = V.similarity(want, tr(cur[int(x * SR):int(y * SR)]))
+        xa, ya = max(0, x - .3), y + .3
+        src = os.path.join(PD, f"src_{key}.wav"); sf.write(src, a[int(xa * SR):int(ya * SR)], SR)
+        best = (base, None)
+        for tempo, seed in PATCH_ATTEMPTS:
+            vin = src
+            if tempo != 1.0:
+                vin = src[:-4] + f".t{int(tempo * 100)}.wav"; subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-af", f"atempo={tempo}", vin], check=True)
+            raw = os.path.join(PD, f"vc_{key}_t{int(tempo * 100)}s{seed}.wav")
+            torch.manual_seed(seed); torchaudio.save(raw, model.generate(audio=vin), model.sr)
+            r48 = raw[:-4] + ".48.wav"
+            af = ["-af", f"atempo={1 / tempo:.5f}"] if tempo != 1.0 else []
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, *af, "-ar", str(SR), "-ac", "1", r48], check=True)
+            p, _ = sf.read(r48); off = int(round((x - xa) * SR)); seg = p[off:off + int((y - x) * SR)]
+            sim = V.similarity(want, tr(seg))
+            print(f"  {why[:40]:40s} {key} t{int(tempo * 100)}s{seed}: {sim:.2f} (было {base:.2f})", flush=True)
+            if sim > best[0]: best = (sim, r48)
+            if sim >= .97: break
+        meta["patches"][key] = {"x": x, "y": y, "why": why, "want": want, "base": round(base, 3), "sim": round(best[0], 3), "file": best[1]}
+        print(f"фраза «{why}»: было {base:.2f} -> {best[0]:.2f}{'' if best[1] else ' (оставляем как было)'}", flush=True)
+        json.dump(meta, open(meta_p, "w"), ensure_ascii=False, indent=0)
+
+
 def piece_audio(i, r, X, n):
     """Аудио куска (48 кГц) на отрезке [x - X, y + X] из лучшей попытки или по плану фраз."""
     def load(tag):
@@ -218,6 +280,14 @@ def build():
         out[a0:a1] += p * w
     out = out[:N]
     vcf = os.path.join(OUT, "voice_vc2.wav"); sf.write(vcf, out, SR)
+    F = int(SR * .02)
+    for pt in meta.get("patches", {}).values():   # заплатки фраз (кроссфейд 20 мс по краям, края — в паузах)
+        if not pt.get("file"): continue
+        p, _ = sf.read(pt["file"]); xa = max(0, pt["x"] - .3); off = int(round((pt["x"] - xa) * SR))
+        i0, i1 = int(pt["x"] * SR), int(pt["y"] * SR); seg = p[off - F:off - F + (i1 - i0) + 2 * F]
+        seg = np.pad(seg, (0, (i1 - i0) + 2 * F - len(seg)))
+        w = np.ones(len(seg)); w[:2 * F] = np.linspace(0, 1, 2 * F); w[-2 * F:] = np.linspace(1, 0, 2 * F)
+        out[i0 - F:i1 + F] = out[i0 - F:i1 + F] * (1 - w) + seg * w
     # сжатие длинных пауз (как tighten.py: ищем по исходнику v2, режем середину в VC)
     a, _ = sf.read(REC2); win = int(SR * .05)
     db = np.array([rms_db(a, k, k + win) for k in range(0, len(a) - win, win)])
@@ -228,9 +298,14 @@ def build():
         if v >= -42 and k0 is not None:
             if (k - k0) * .05 > .8: gaps.append((k0 * .05, k * .05))
             k0 = None
+    cuts = sorted([(gx + .225, gy - .225) for gx, gy in gaps] + [(snap(a, cx), snap(a, cy)) for cx, cy, _ in POST_CUTS])
+    merged = []
+    for cx, cy in cuts:
+        if merged and cx <= merged[-1][1]: merged[-1][1] = max(merged[-1][1], cy)
+        else: merged.append([cx, cy])
     keep, cur = [], 0.0
-    for gx, gy in gaps:
-        keep.append([cur, gx + .225]); cur = gy - .225
+    for cx, cy in merged:
+        keep.append([cur, cx]); cur = cy
     keep.append([cur, dur])
     fade = int(SR * .01); parts = []
     for x, y in keep:
@@ -250,7 +325,10 @@ def build():
             if t < y: return off + t - x
             off += y - x
         return off
-    w2 = json.load(open(os.path.join(OUT, "words_v2.json")))["words"]
+    # слова — из распознавания самого монтажа v2 (Whisper medium по кускам, out/words_v2m.json): старое распознавание
+    # исходника склеивало дубли (терялось «Шанс почти нулевой»); если его нет — из words_v2.json
+    wm = os.path.join(OUT, "words_v2m.json")
+    w2 = json.load(open(wm)) if os.path.exists(wm) else json.load(open(os.path.join(OUT, "words_v2.json")))["words"]
     ws = [{**w, "a": round(remap(w["a"]), 3)} for w in w2]
     total = sum(y - x for x, y in keep)
     json.dump({"duration": round(total, 2), "tighten": keep, "words": ws}, open(os.path.join(OUT, "words_final.json"), "w"), ensure_ascii=False, indent=0)
@@ -260,5 +338,5 @@ def build():
 
 
 if __name__ == "__main__":
-    {"edit": edit, "vc": vc, "vc2": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS), "composite": composite, "build": build,
+    {"edit": edit, "vc": vc, "vc2": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS), "composite": composite, "build": build, "patch": patch,
      "more": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS + [(.8, 4), (.9, 4)], only={int(v) for v in sys.argv[2].split(",")})}[sys.argv[1]]()
