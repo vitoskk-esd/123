@@ -72,7 +72,13 @@ def check():
     lim = call("GET", "me/threads_publishing_limit", fields="quota_usage,config")
     d = (lim.get("data") or [{}])[0]
     print(f"публикаций за 24 ч: {d.get('quota_usage')} из {d.get('config', {}).get('quota_total')}")
-    # продление ключа: возможно, когда ключу ≥ 24 ч; новый срок — 60 дней
+    # срок ключа: дата выдачи — threads/token.json (сам ключ — сетевой секрет, скрипт его не видит и продлить не может)
+    tj = os.path.join(ROOT, "threads", "token.json")
+    if os.path.exists(tj):
+        t = json.load(open(tj)); left = (dt.date.fromisoformat(t["issued"]) + dt.timedelta(days=t.get("days", 60)) - dt.date.today()).days
+        print(f"ключ действует ещё ~{left} дн." + (" ПОРА ОБНОВИТЬ: threads/API_SETUP.md, шаги 5–7, потом дату в threads/token.json." if left <= 7 else ""))
+    if not token(): return
+    # продление (только если ключ в переменной окружения): возможно, когда ключу ≥ 24 ч; новый срок — 60 дней
     try:
         r = call("GET", "https://graph.threads.net/refresh_access_token", grant_type="th_refresh_token")
         days = int(r.get("expires_in", 0)) // 86400
