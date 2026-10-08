@@ -343,4 +343,6 @@ def build():
 if __name__ == "__main__":
     {"edit": edit, "vc": vc, "vc2": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS), "composite": composite, "build": build, "patch": patch,
      "vcfast": lambda: vc([(1.0, 0), (.85, 0)]),
+     # слабые куски (< 0.85 после vcfast): ещё 2 попытки только им — укладывается в лимит фоновой задачи
+     "vcweak": lambda: vc(ATTEMPTS, only={int(k) for k, r in json.load(open(os.path.join(VC2, "pieces.json")))["res"].items() if r["best"]["sim"] < .85}),
      "more": lambda: vc(ATTEMPTS + EXTRA_ATTEMPTS + [(.8, 4), (.9, 4)], only={int(v) for v in sys.argv[2].split(",")})}[sys.argv[1]]()
