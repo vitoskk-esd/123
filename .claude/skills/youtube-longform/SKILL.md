@@ -185,6 +185,16 @@ Structure (both references):
 
 ## 4. Visual system (16:9, 1920×1080, 30 fps)
 
+**Since 2026-10-08 (video #2) the long-form engine is «Студия» v6 — `youtube/kit/studio.js` + `studio.css`.** Owner: desk.js
+«выглядит базовым и простым… представь, что ты монтажёр с 10 годами стажа в Альфа-Банке / OpenAI» → studio v6 approved
+(«монтаж нравится, но нужно ещё улучшать, учись каждый день»). Full-frame scenes, one designed composition per beat:
+kinetic typography from the voice (mask-reveal per word, accent word with glow, auto-fit ≤ 1600 px), hero count-ups that grow
+with the value, 3D phone and bank card, bar races, split comparisons, lists with marks, calendar, calc, chat/meme, Telegram CTA,
+summary table, warning stamp; light orbs by meaning (green money / red loss / yellow rule), grain, vignette; cuts on the beat
+(100 BPM), zoom/whip transitions with blur, flash + chromatic hit + camera kick on impacts; every scene has a slow push and drift.
+Fonts must be preloaded (`document.fonts.load`) or auto-fit measures the fallback font. Demo: `youtube/02-bank-earns/studio_v6.mp4`.
+desk.js stays for video #1 and Shorts cut-downs.
+
 **Since v4 (2026-10-07) long-form is edited in the desk language — `youtube/kit/desk.js`, see
 `retention-editing` §"Long-form ≠ reel".** The owner rejected v3 (engine.js: centred cards, karaoke
 captions, emoji, punch every 1.6 s) as «как для рилса». The table below is the old v1–v3 scene list

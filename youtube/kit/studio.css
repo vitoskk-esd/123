@@ -74,3 +74,53 @@ html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05060
 .brs .track i { display: block; height: 100%; width: 0; border-radius: 37px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #000), var(--c)); box-shadow: 0 0 40px color-mix(in srgb, var(--c) 55%, transparent); }
 .brs .bv { font: 900 84px "Unb"; color: var(--c); letter-spacing: -.03em; }
 .brs .bn { font: 600 32px "Mont"; color: #8b96a5; }
+
+/* сравнение */
+.spl { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 50px; }
+.spl .st { font: 900 64px "Unb"; text-transform: uppercase; letter-spacing: -.02em; color: #9aa5b4; }
+.spl .cols { display: flex; align-items: center; gap: 70px; }
+.spl .col { width: 640px; padding: 50px 56px; border-radius: 36px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 45%, transparent), 0 0 90px color-mix(in srgb, var(--c) 16%, transparent); }
+.spl .col small { display: block; font: 700 36px "Mont"; color: #9aa5b4; margin-bottom: 14px; }
+.spl .col b { display: block; font: 900 150px/1 "Unb"; letter-spacing: -.04em; color: var(--c); }
+.spl .col span { display: block; margin-top: 16px; font: 600 32px "Mont"; color: #9aa5b4; }
+.spl .mid { font: 900 90px "Unb"; color: #9aa5b4; }
+/* список */
+.lst { display: flex; flex-direction: column; justify-content: center; padding: 0 220px; gap: 34px; }
+.lst .lt { font: 900 72px "Unb"; text-transform: uppercase; letter-spacing: -.02em; margin-bottom: 20px; }
+.lst .li { display: flex; align-items: center; gap: 36px; font: 800 58px/1.15 "Mont"; }
+.lst .mk { flex: none; width: 96px; height: 96px; border-radius: 28px; display: grid; place-items: center; font: 900 52px "Unb"; color: #050608; background: var(--c); box-shadow: 0 0 40px color-mix(in srgb, var(--c) 50%, transparent); }
+/* календарь */
+.scal .grid { position: absolute; left: 560px; top: 190px; width: 800px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 16px; }
+.scal .grid i { font-style: normal; height: 100px; border-radius: 22px; background: rgba(255,255,255,.05); display: grid; place-items: center; font: 800 38px "Mono"; color: #6f7a89; }
+.scal .grid i.on { background: color-mix(in srgb, #3ddc84 32%, transparent); color: #eef2f6; } .scal .grid i.end { background: #ff4d5e; color: #fff; }
+.scal .cm { position: absolute; padding: 12px 22px; border-radius: 14px; background: var(--c); color: #050608; font: 800 32px "Mont"; white-space: nowrap; transform-origin: 0 100%; }
+.scal .ct { position: absolute; left: 0; right: 0; top: 70px; text-align: center; font: 900 64px "Unb"; text-transform: uppercase; letter-spacing: -.02em; }
+/* расчёт */
+.calc2 { display: flex; flex-direction: column; justify-content: center; padding: 0 260px; gap: 18px; font: 800 72px/1.2 "Mono"; letter-spacing: -2px; }
+.calc2 .cr { margin-top: 30px; font: 900 190px/1 "Unb"; letter-spacing: -.04em; color: var(--c); transform-origin: 0 60%; }
+.calc2 .cn { font: 600 32px "Mont"; color: #8b96a5; letter-spacing: 0; }
+/* чат */
+.cht { display: flex; flex-direction: column; justify-content: center; padding: 0 360px; gap: 30px; }
+.cht .bb { align-self: flex-start; max-width: 1000px; padding: 32px 44px; border-radius: 40px 40px 40px 10px; background: rgba(255,255,255,.07); font: 800 60px/1.15 "Mont"; box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 40%, transparent); }
+.cht .bb.me { align-self: flex-end; border-radius: 40px 40px 10px 40px; background: color-mix(in srgb, var(--c) 22%, transparent); }
+.cht .bb small { display: block; font: 700 30px "Mont"; color: #9aa5b4; margin-bottom: 8px; }
+/* таблица */
+.tbl2 { display: flex; flex-direction: column; justify-content: center; padding: 0 160px; }
+.tbl2 .th, .tbl2 .tr { display: grid; grid-template-columns: 1fr 90px 1fr; align-items: center; }
+.tbl2 .th { font: 800 30px "Mont"; color: #8b96a5; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 20px; }
+.tbl2 .tr { padding: 26px 0; border-top: 2px solid rgba(255,255,255,.08); font: 800 50px/1.1 "Mont"; }
+.tbl2 .l { color: #ff4d5e; } .tbl2 .r { color: #3ddc84; } .tbl2 .ar { color: #6f7a89; text-align: center; font-family: "Unb"; }
+/* штамп */
+.stp { display: grid; place-items: center; }
+.stp .sbox { padding: 40px 70px; border: 12px solid var(--c); border-radius: 30px; text-align: center; box-shadow: 0 0 120px color-mix(in srgb, var(--c) 40%, transparent); }
+.stp .sbox b { display: block; font: 900 120px/1 "Unb"; text-transform: uppercase; color: var(--c); letter-spacing: -.03em; }
+.stp .sbox span { display: block; margin-top: 20px; font: 700 40px "Mont"; color: #eef2f6; }
+/* Telegram */
+.tgs { display: flex; align-items: center; justify-content: center; gap: 90px; }
+.tgc { width: 860px; padding: 44px; border-radius: 44px; background: linear-gradient(160deg, #17212e, #0d141c); box-shadow: 0 60px 140px rgba(0,0,0,.6), 0 0 120px rgba(42,171,238,.22), inset 0 0 0 2px rgba(42,171,238,.4); }
+.tgc .hd { display: flex; align-items: center; gap: 24px; margin-bottom: 28px; }
+.tgc .av { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font: 900 48px "Unb"; color: #08130d; background: linear-gradient(135deg, #3ddc84, #2aabee); }
+.tgc .hd b { display: block; font: 800 44px "Mont"; } .tgc .hd small { font: 600 28px "Mont"; color: #8b96a5; }
+.tgc .pst { font: 800 56px/1.12 "Mont"; margin-bottom: 18px; }
+.tgc .it { font: 700 38px/1.3 "Mont"; color: #c6cfdb; padding: 14px 0; border-top: 2px solid rgba(255,255,255,.07); }
+.tgs .lk { font: 900 80px/1.05 "Unb"; text-transform: uppercase; color: #3ddc84; max-width: 620px; }

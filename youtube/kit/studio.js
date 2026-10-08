@@ -86,6 +86,56 @@
       const bt = el.querySelector(".bt"); if (bt) { const k = out5((t - s.t0) / .5); bt.style.opacity = k; bt.style.transform = `translateY(${(1 - k) * -20}px)`; } },
   };
 
+  // сравнение двух колонок: s.l {k, v, c, at}, s.r {…}, s.mid (текст между), s.title
+  S.split = {
+    build: (s) => $(`<div class="sc spl">${s.title ? `<div class="st">${s.title}</div>` : ""}<div class="cols">${[s.l, s.r].map((c, i) => `<div class="col" data-a="${c.at}" style="--c:${acc(c.c)}"><small>${c.k}</small><b>${c.v}</b>${c.sub ? `<span>${c.sub}</span>` : ""}</div>${i === 0 ? `<div class="mid" data-a="${s.midAt ?? s.r.at}">${s.mid || "→"}</div>` : ""}`).join("")}</div></div>`),
+    tick: (el, s, t) => { el.querySelectorAll("[data-a]").forEach(c => { const a = +c.dataset.a, k = out5((t - a) / .5); c.style.opacity = clamp((t - a) / .25); c.style.transform = `translateY(${(1 - k) * 60}px) scale(${lerp(.92, 1, k)})`; });
+      const st = el.querySelector(".st"); if (st) { const k = out5((t - s.t0) / .5); st.style.opacity = k; } },
+  };
+  // список с отметками: s.title, s.items [{t, at, mk: ok|no|n, c}]
+  S.list = {
+    build: (s) => $(`<div class="sc lst">${s.title ? `<div class="lt">${s.title}</div>` : ""}${s.items.map((it, i) => `<div class="li" data-a="${it.at}" style="--c:${acc(it.c || (it.mk === "no" ? "r" : "g"))}"><span class="mk">${it.mk === "no" ? "✕" : it.mk === "ok" ? "✓" : i + 1}</span><span>${it.t}</span></div>`).join("")}</div>`),
+    tick: (el, s, t) => { el.querySelectorAll(".li").forEach(li => { const a = +li.dataset.a, k = out5((t - a) / .45); li.style.opacity = clamp((t - a) / .2); li.style.transform = `translateX(${(1 - k) * -90}px)`;
+        const mk = li.querySelector(".mk"), km = out5((t - a - .12) / .3); mk.style.transform = `scale(${t < a + .12 ? 0.5 : lerp(1.5, 1, km)})`; });
+      const lt = el.querySelector(".lt"); if (lt) lt.style.opacity = out5((t - s.t0) / .4); },
+  };
+  // календарь (полноэкранный): s.days, s.from, s.to, s.a, s.b, s.marks [{d, text, c, at}]
+  S.cal = {
+    build: (s) => $(`<div class="sc scal"><div class="grid">${Array.from({ length: s.days || 35 }, (_, i) => `<i data-d="${i + 1}">${(i % 31) + 1}</i>`).join("")}</div>${(s.marks || []).map(m => `<div class="cm" data-a="${m.at}" data-d="${m.d}" style="--c:${acc(m.c)}">${m.text}</div>`).join("")}${s.title ? `<div class="ct">${s.title}</div>` : ""}</div>`),
+    tick: (el, s, t) => { const n = Math.round((s.to - s.from + 1) * io3((t - s.a) / (s.b - s.a)));
+      el.querySelectorAll("i").forEach(e => { const d = +e.dataset.d; e.className = d >= s.from && d < s.from + n ? "on" : (d === s.to + 1 && t >= s.b ? "end" : ""); });
+      el.querySelectorAll(".cm").forEach(m => { const a = +m.dataset.a, k = out5((t - a) / .4), d = +m.dataset.d - 1; m.style.left = `${560 + (d % 7) * 116}px`; m.style.top = `${190 + Math.floor(d / 7) * 116 - 40}px`;
+        m.style.opacity = clamp((t - a) / .2); m.style.transform = `translateY(${(1 - k) * -30}px) scale(${lerp(1.3, 1, k)})`; }); },
+  };
+  // расчёт: s.lines [{t, at}], s.res {v, at, c}
+  S.calc = {
+    build: (s) => $(`<div class="sc calc2">${s.lines.map(l => `<div class="cl" data-a="${l.at}">${l.t}</div>`).join("")}${s.res ? `<div class="cr" data-a="${s.res.at}" style="--c:${acc(s.res.c)}">${s.res.v}</div>` : ""}${s.note ? `<div class="cn">${s.note}</div>` : ""}</div>`),
+    tick: (el, s, t) => { el.querySelectorAll(".cl").forEach(l => { const a = +l.dataset.a, k = out5((t - a) / .4); l.style.opacity = clamp((t - a) / .2); l.style.transform = `translateY(${(1 - k) * 30}px)`; });
+      const r = el.querySelector(".cr"); if (r) { const a = +r.dataset.a, k = out5((t - a) / .45); r.style.opacity = t < a ? 0 : 1; r.style.transform = `scale(${lerp(1.6, 1, k)})`; r.style.textShadow = `0 0 ${50 * k}px color-mix(in srgb, var(--c) 50%, transparent)`; } },
+  };
+  // чат/мем: s.msgs [{t, at, me}]
+  S.chat = {
+    build: (s) => $(`<div class="sc cht">${s.msgs.map(m => `<div class="bb ${m.me ? "me" : ""}" data-a="${m.at}" style="--c:${acc(m.c || (m.me ? "b" : "w"))}">${m.who ? `<small>${m.who}</small>` : ""}${m.t}</div>`).join("")}</div>`),
+    tick: (el, s, t) => el.querySelectorAll(".bb").forEach(b => { const a = +b.dataset.a, k = out5((t - a) / .4); b.style.opacity = clamp((t - a) / .15); b.style.transform = `translateY(${(1 - k) * 50}px) scale(${lerp(.85, 1, k)})`; }),
+  };
+  // таблица итогов: s.head [l, r], s.rows [{l, r, at, ra}]
+  S.table = {
+    build: (s) => $(`<div class="sc tbl2"><div class="th"><span>${s.head[0]}</span><span></span><span>${s.head[1]}</span></div>${s.rows.map(r => `<div class="tr" data-a="${r.at}" data-ra="${r.ra ?? r.at + .35}"><span class="l">${r.l}</span><span class="ar">→</span><span class="r">${r.r}</span></div>`).join("")}</div>`),
+    tick: (el, s, t) => el.querySelectorAll(".tr").forEach(r => { const a = +r.dataset.a, ra = +r.dataset.ra, k = out5((t - a) / .4), kr = out5((t - ra) / .4);
+      r.style.opacity = clamp((t - a) / .2); r.style.transform = `translateX(${(1 - k) * -60}px)`; const rr = r.querySelector(".r"); rr.style.filter = `blur(${12 * (1 - kr)}px)`; rr.style.opacity = t < ra ? .3 : 1; }),
+  };
+  // штамп-предупреждение: s.text, s.at, s.c, s.sub
+  S.stamp = {
+    build: (s) => $(`<div class="sc stp" style="--c:${acc(s.c || "r")}"><div class="sbox"><b>${s.text}</b>${s.sub ? `<span>${s.sub}</span>` : ""}</div></div>`),
+    tick: (el, s, t) => { const k = out5((t - s.at) / .22), b = el.querySelector(".sbox"); b.style.opacity = t < s.at ? 0 : 1; b.style.transform = `rotate(-4deg) scale(${lerp(2.2, 1, k)})`; },
+  };
+  // пост Telegram (CTA): s.name, s.post, s.items [{t, at}], s.link
+  S.tg = {
+    build: (s) => $(`<div class="sc tgs"><div class="tgc"><div class="hd"><div class="av">₽</div><div><b>${s.name}</b><small>канал · ссылка в описании</small></div></div><div class="pst">${s.post}</div>${(s.items || []).map(i => `<div class="it" data-a="${i.at}">${i.t}</div>`).join("")}</div>${s.link ? `<div class="lk" data-a="${s.link.at}">${s.link.t}</div>` : ""}</div>`),
+    tick: (el, s, t) => { const c = el.querySelector(".tgc"), k = out5((t - s.t0) / .6); c.style.transform = `perspective(1600px) rotateX(${(1 - k) * 25}deg) rotateY(-8deg) translateY(${(1 - k) * 160}px)`; c.style.opacity = k;
+      el.querySelectorAll("[data-a]").forEach(i => { const a = +i.dataset.a, kk = out5((t - a) / .4); i.style.opacity = clamp((t - a) / .2); i.style.transform = `translateY(${(1 - kk) * 24}px)`; }); },
+  };
+
   // ---------- фон, свет, переходы ----------
   function bg(t, c1, c2) {
     const o1 = document.getElementById("orb1"), o2 = document.getElementById("orb2");
