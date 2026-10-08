@@ -68,11 +68,11 @@ html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05060
 /* столбики */
 .brs { display: flex; flex-direction: column; justify-content: center; padding: 0 200px; gap: 54px; }
 .brs .bt { font: 900 64px "Unb"; text-transform: uppercase; letter-spacing: -.02em; margin-bottom: 10px; }
-.brs .br { display: grid; grid-template-columns: 520px 1fr 260px; align-items: center; gap: 34px; }
+.brs .br { display: grid; grid-template-columns: 480px 1fr 330px; align-items: center; gap: 34px; }
 .brs .bl { font: 800 44px "Mont"; }
 .brs .track { height: 74px; border-radius: 37px; background: rgba(255,255,255,.06); overflow: hidden; }
 .brs .track i { display: block; height: 100%; width: 0; border-radius: 37px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #000), var(--c)); box-shadow: 0 0 40px color-mix(in srgb, var(--c) 55%, transparent); }
-.brs .bv { font: 900 84px "Unb"; color: var(--c); letter-spacing: -.03em; }
+.brs .bv { font: 900 72px "Unb"; white-space: nowrap; color: var(--c); letter-spacing: -.03em; }
 .brs .bn { font: 600 32px "Mont"; color: #8b96a5; }
 
 /* сравнение */
@@ -81,7 +81,7 @@ html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05060
 .spl .cols { display: flex; align-items: center; gap: 70px; }
 .spl .col { width: 640px; padding: 50px 56px; border-radius: 36px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 45%, transparent), 0 0 90px color-mix(in srgb, var(--c) 16%, transparent); }
 .spl .col small { display: block; font: 700 36px "Mont"; color: #9aa5b4; margin-bottom: 14px; }
-.spl .col b { display: block; font: 900 150px/1 "Unb"; letter-spacing: -.04em; color: var(--c); }
+.spl .col b { display: block; font: 900 var(--vs, 150px)/1 "Unb"; white-space: nowrap; letter-spacing: -.04em; color: var(--c); }
 .spl .col span { display: block; margin-top: 16px; font: 600 32px "Mont"; color: #9aa5b4; }
 .spl .mid { font: 900 90px "Unb"; color: #9aa5b4; }
 /* список */
@@ -124,3 +124,16 @@ html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05060
 .tgc .pst { font: 800 56px/1.12 "Mont"; margin-bottom: 18px; }
 .tgc .it { font: 700 38px/1.3 "Mont"; color: #c6cfdb; padding: 14px 0; border-top: 2px solid rgba(255,255,255,.07); }
 .tgs .lk { font: 900 80px/1.05 "Unb"; text-transform: uppercase; color: #3ddc84; max-width: 620px; }
+/* схема-поток */
+.flw { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 70px; }
+.flw .ft { font: 900 64px "Unb"; text-transform: uppercase; letter-spacing: -.02em; color: #9aa5b4; }
+.flw .row { display: flex; align-items: center; }
+.flw .nd { width: 350px; padding: 44px 30px; border-radius: 40px; text-align: center; background: rgba(255,255,255,.045);
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--c) 55%, transparent), 0 0 90px color-mix(in srgb, var(--c) 18%, transparent); }
+.flw .nd b { display: block; font: 900 54px/1.05 "Unb"; text-transform: uppercase; letter-spacing: -.02em; color: var(--c); }
+.flw .nd small { display: block; margin-top: 14px; font: 700 32px "Mont"; color: #9aa5b4; }
+.flw .ar { position: relative; width: 270px; padding: 0 34px 0 14px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.flw .ar span { font: 800 36px "Mont"; color: var(--c); white-space: nowrap; }
+.flw .ar i { position: relative; display: block; width: 100%; height: 14px; border-radius: 7px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 30%, transparent), var(--c)); box-shadow: 0 0 30px color-mix(in srgb, var(--c) 50%, transparent); }
+.flw .ar i::after { content: ""; position: absolute; right: -26px; top: -17px; border: 24px solid transparent; border-left: 30px solid var(--c); border-right: 0; }
+.flw .ar em { position: absolute; top: -9px; width: 32px; height: 32px; margin-left: -16px; border-radius: 50%; background: #fff; box-shadow: 0 0 30px var(--c), 0 0 60px var(--c); }

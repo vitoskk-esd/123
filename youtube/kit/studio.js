@@ -82,13 +82,13 @@
     tick: (el, s, t) => { const mx = s.max || 50;
       el.querySelectorAll(".br").forEach(b => { const a = +b.dataset.a, v = +b.dataset.v, k = io3((t - a) / 1.0);
         b.style.opacity = clamp((t - a + .2) / .3); b.querySelector("i").style.width = `${(v / mx) * 100 * k}%`;
-        b.querySelector(".bv").textContent = (v * k).toFixed(0) + (s.unit || " %") + (b.dataset.plus && k >= 1 ? "+" : ""); });
+        b.querySelector(".bv").textContent = (v * k).toFixed(s.dec || 0).replace(".", ",") + (s.unit || " %") + (b.dataset.plus && k >= 1 ? "+" : ""); });
       const bt = el.querySelector(".bt"); if (bt) { const k = out5((t - s.t0) / .5); bt.style.opacity = k; bt.style.transform = `translateY(${(1 - k) * -20}px)`; } },
   };
 
   // сравнение двух колонок: s.l {k, v, c, at}, s.r {…}, s.mid (текст между), s.title
   S.split = {
-    build: (s) => $(`<div class="sc spl">${s.title ? `<div class="st">${s.title}</div>` : ""}<div class="cols">${[s.l, s.r].map((c, i) => `<div class="col" data-a="${c.at}" style="--c:${acc(c.c)}"><small>${c.k}</small><b>${c.v}</b>${c.sub ? `<span>${c.sub}</span>` : ""}</div>${i === 0 ? `<div class="mid" data-a="${s.midAt ?? s.r.at}">${s.mid || "→"}</div>` : ""}`).join("")}</div></div>`),
+    build: (s) => $(`<div class="sc spl">${s.title ? `<div class="st">${s.title}</div>` : ""}<div class="cols">${[s.l, s.r].map((c, i) => `<div class="col" data-a="${c.at}" style="--c:${acc(c.c)}${c.vs ? `;--vs:${c.vs}px` : ""}"><small>${c.k}</small><b>${c.v}</b>${c.sub ? `<span>${c.sub}</span>` : ""}</div>${i === 0 ? `<div class="mid" data-a="${s.midAt ?? s.r.at}">${s.mid || "→"}</div>` : ""}`).join("")}</div></div>`),
     tick: (el, s, t) => { el.querySelectorAll("[data-a]").forEach(c => { const a = +c.dataset.a, k = out5((t - a) / .5); c.style.opacity = clamp((t - a) / .25); c.style.transform = `translateY(${(1 - k) * 60}px) scale(${lerp(.92, 1, k)})`; });
       const st = el.querySelector(".st"); if (st) { const k = out5((t - s.t0) / .5); st.style.opacity = k; } },
   };
@@ -134,6 +134,19 @@
     build: (s) => $(`<div class="sc tgs"><div class="tgc"><div class="hd"><div class="av">₽</div><div><b>${s.name}</b><small>канал · ссылка в описании</small></div></div><div class="pst">${s.post}</div>${(s.items || []).map(i => `<div class="it" data-a="${i.at}">${i.t}</div>`).join("")}</div>${s.link ? `<div class="lk" data-a="${s.link.at}">${s.link.t}</div>` : ""}</div>`),
     tick: (el, s, t) => { const c = el.querySelector(".tgc"), k = out5((t - s.t0) / .6); c.style.transform = `perspective(1600px) rotateX(${(1 - k) * 25}deg) rotateY(-8deg) translateY(${(1 - k) * 160}px)`; c.style.opacity = k;
       el.querySelectorAll("[data-a]").forEach(i => { const a = +i.dataset.a, kk = out5((t - a) / .4); i.style.opacity = clamp((t - a) / .2); i.style.transform = `translateY(${(1 - kk) * 24}px)`; }); },
+  };
+
+  // схема-поток: s.nodes [{t, sub, at, c}], s.arrows [{t, at, c}] (между соседними узлами), s.title
+  // стрелка «рисуется» слева направо, по ней бежит импульс — деньги текут
+  S.flow = {
+    build: (s) => $(`<div class="sc flw">${s.title ? `<div class="ft">${s.title}</div>` : ""}<div class="row">${s.nodes.map((n, i) =>
+      `<div class="nd" data-a="${n.at}" style="--c:${acc(n.c || "w")}"><b>${n.t}</b>${n.sub ? `<small>${n.sub}</small>` : ""}</div>${i < s.nodes.length - 1 ? `<div class="ar" data-a="${s.arrows[i].at}" style="--c:${acc(s.arrows[i].c)}"><span>${s.arrows[i].t}</span><i><em></em></i></div>` : ""}`).join("")}</div></div>`),
+    tick: (el, s, t) => {
+      el.querySelectorAll(".nd").forEach(n => { const a = +n.dataset.a, k = out5((t - a) / .5); n.style.opacity = clamp((t - a) / .2); n.style.transform = `scale(${lerp(.7, 1, k)}) translateY(${(1 - k) * 40}px)`; });
+      el.querySelectorAll(".ar").forEach(r => { const a = +r.dataset.a, k = io3((t - a) / .6); r.querySelector("i").style.clipPath = `inset(-30px ${(1 - k) * 100}% -30px 0)`;
+        r.querySelector("span").style.opacity = clamp((t - a - .3) / .3); const e = r.querySelector("em"); e.style.left = `${((t - a) * 45) % 100}%`; e.style.opacity = k >= 1 ? 1 : 0; });
+      const ft = el.querySelector(".ft"); if (ft) ft.style.opacity = out5((t - s.t0) / .4);
+    },
   };
 
   // ---------- фон, свет, переходы ----------
