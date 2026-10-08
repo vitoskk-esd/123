@@ -431,7 +431,8 @@ def vc_by_phrases(clean, dst, words, pad=0.3, min_len=3.0):
     if "vc" not in _models:
         _models["vc"] = ChatterboxVC.from_pretrained("cpu")
     vc = _models["vc"]
-    err = subprocess.run(["ffmpeg", "-i", clean, "-af", "silencedetect=n=-40dB:d=0.18", "-f", "null", "-"],
+    # паузы ищем по копии с шумодавом (без него фон записи выше порога и пауз «нет»), VC — по исходной
+    err = subprocess.run(["ffmpeg", "-i", clean, "-af", "afftdn=nf=-25,silencedetect=n=-28dB:d=0.15", "-f", "null", "-"],
                          capture_output=True, text=True).stderr
     st = [float(x) for x in re.findall(r"silence_start: ([0-9.]+)", err)]
     en = [float(x) for x in re.findall(r"silence_end: ([0-9.]+)", err)]
