@@ -11,6 +11,21 @@ from a copy of this one).
 Pipeline: `voice.py` → `timeline.js` → `audio.js` (music+SFX) → `render.js`
 (reel.html → frames) → mux → `add_voice.sh` → `reel_final.mp4`. Full rebuild: `build.sh`.
 
+## Installed agent skills — which to load at which stage (owner, 2026-10-08)
+
+Our own engines stay (`kit/desk.js` for YouTube, `kit/engine.js` for reels); these skills are knowledge for them.
+| Stage | Load | For |
+|---|---|---|
+| Script / hook | `viral-hooks`, `viral-short-form` (reels), `hyperframes-creative` → `references/narration.md`, `story-spine.md` | opening line, beats, pace |
+| Planning scenes | `hyperframes-creative` → `beat-direction.md`, `video-composition.md`, `house-style.md`; `find-animation-opportunities` | rhythm per section, motion verbs, density |
+| Building motion | `hyperframes-animation` (`rules-index.md`, `techniques.md`, `transitions/`), `hyperframes-keyframes`, `animate`, `emil-design-eng` | curves, durations, transitions, camera moves |
+| Type, colour, thumbnails, TG covers | `hyperframes-creative` → `typography.md`; `taste-skill`; `impeccable` (critique/typeset/colorize/bolder) | readable on a phone, not «AI-looking» |
+| Sound | `hyperframes-audio` (ducking, voice carve, fades) | music under the voice |
+| QA (every build) | `review-animations` on engine/timeline changes; `lint_desk.js`; `improve-animations` once per new engine feature | motion craft, small text |
+Not used in our pipeline: `remotion-*` (we don't render with Remotion; only as reference for caption ideas), `embedded-captions` and
+`talking-head-recut` (only if the owner films himself), `slideshow`, `hyperframes-cli`/`hyperframes-registry` (CLI not installed —
+see THIRD_PARTY.md), `faceless-explainer`/`general-video`/`motion-graphics` workflows (HyperFrames projects; read for ideas only).
+
 ## 1. Script — load the writing skills first
 
 - `viral-instagram-reels` (primary surface), `viral-hooks` for the first 3 s,
