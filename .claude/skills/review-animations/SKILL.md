@@ -1,7 +1,6 @@
 ---
 name: review-animations
-description: Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy. Default to flagging; approval is earned.
-disable-model-invocation: true
+description: Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy. Default to flagging; approval is earned. In this repo also use it at the QA stage of every video build — on youtube/kit/desk.js, youtube/kit/engine.js and the generated timeline (timeline_desk.js) after new object kinds, entrances or camera moves were added.
 ---
 
 # Reviewing Animations

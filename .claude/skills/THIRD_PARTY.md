@@ -7,10 +7,10 @@
 | `remotion-best-practices`, `remotion-markup`, `remotion-captions` | [remotion-dev/skills](https://github.com/remotion-dev/skills) | `32b241b` (2026-10-07) | см. репозиторий | Без изменений |
 | `taste-skill` | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) `skills/taste-skill` | `b482f7a` (2026-10-07) | MIT | Без изменений |
 | `impeccable` | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) `.claude/skills/impeccable` | `778c8a7` (2026-10-07) | Apache-2.0 | Только `SKILL.md` и `reference/`; **без `scripts/`** — загрузчик скачивает и запускает сторонний бинарник и ставит хуки. Шаг Setup «run scripts/impeccable context» в этом репозитории пропускается: контекст брать из `PRODUCT.md`/`DESIGN.md`, если они есть, иначе из навыков проекта |
-| `emil-design-eng`, `animate`, `review-animations`, `animation-vocabulary`, `find-animation-opportunities`, `improve-animations` | [emilkowalski/skills](https://github.com/emilkowalski/skills) | `e8a175d` (2026-10-02) | MIT | Без изменений; без `write-swift`, `animate-expo`, `ask-sonner`, `mobile-native`, `pick-ui-library`, `prototype`, `break-ui`, `apple-design` |
+| `emil-design-eng`, `animate`, `review-animations`, `animation-vocabulary`, `find-animation-opportunities`, `improve-animations` | [emilkowalski/skills](https://github.com/emilkowalski/skills) | `e8a175d` (2026-10-02) | MIT | В `review-animations` снят `disable-model-invocation` и дописано в description, когда запускать в этом проекте (по просьбе владельца 2026-10-08 — навык встроен в сборку роликов); остальное без изменений; без `write-swift`, `animate-expo`, `ask-sonner`, `mobile-native`, `pick-ui-library`, `prototype`, `break-ui`, `apple-design` |
 
 Источник набора: рилс владельца от @chingizkhan_yt (2026-10-08), заметки — `youtube/references/agent-skills.md`.
-Установка/обновление: `bash tools/install-agent-skills.sh` из корня репозитория.
+Установка/обновление: `bash tools/install-agent-skills.sh` из корня репозитория (после обновления повторить правку `review-animations`).
 
 **Приоритет в этом проекте.** Собственные скилы (`youtube-longform`, `retention-editing`, `reel-production`) важнее
 сторонних. YouTube-ролики собираются движком `youtube/kit/desk.js` (стиль «рабочий стол», одобрен владельцем),

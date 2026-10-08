@@ -119,6 +119,9 @@ break (warnings) → main.
 - Stills at random times inside long scenes — camera framing never crops key text.
 - The event-gap stat from `build_timeline.py`.
 - Render the first 60 s with sound and send it before the full render.
+- Motion review: run the `review-animations` skill (Emil Kowalski) on any change to `kit/desk.js` / `kit/engine.js`
+  and on new object kinds or camera moves in the timeline. Its web-UI rules (hover, reduced motion, interruption,
+  keyboard) don't apply to a rendered video — skip them; easing, durations, origins, scale(0), stagger, exits do.
 - Readability lint: `node ../kit/lint_desk.js desk.html 0.5 22` — fix every text that stays < 22 px on
   screen for ≥ 1 s (raise font or zoom the camera in) and every text that overflows its plate.
 

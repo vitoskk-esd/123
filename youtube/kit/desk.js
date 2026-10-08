@@ -8,6 +8,7 @@
   const $ = (h) => { const d = document.createElement("div"); d.innerHTML = h.trim(); return d.firstElementChild; };
   const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
   const out3 = (x) => 1 - Math.pow(1 - clamp(x), 3);
+  const out5 = (x) => 1 - Math.pow(1 - clamp(x), 5);   // сильный ease-out ≈ cubic-bezier(0.23,1,0.32,1) (Emil Kowalski)
   const io3 = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
   const back = (x) => { x = clamp(x); const c = 1.4; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
   const fmt = (v) => Math.round(Math.abs(v)).toLocaleString("ru-RU").replace(/\s/g, " ");
@@ -24,7 +25,7 @@
     risk: '<svg viewBox="0 0 24 24" fill="none" stroke="#ff4d5e" stroke-width="2.4" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.5" stroke-linecap="round"/></svg>',
   };
   const fade = (el, t, at, dur = .35, dy = 18) => {              // мягкое появление (без «подскока»)
-    const k = at == null ? 1 : out3((t - at) / dur);
+    const k = at == null ? 1 : out5((t - at) / dur);
     el.style.opacity = at == null ? 1 : clamp((t - at) / (dur * .6));
     el.style.transform = `translateY(${dy * (1 - k)}px)`;
   };
@@ -110,7 +111,7 @@
       ${i.mark ? `<b class="mk ${i.mark.ok ? "ok" : "no"}" data-a="${i.mark.at}">${i.mark.ok ? "✓" : "✕"}</b>` : ""}</div>`).join("")}${b.note ? `<div class="note">${b.note}</div>` : ""}</div>`),
     tick: (el, b, t) => {
       el.querySelectorAll(".rw").forEach(e => fade(e, t, +e.dataset.a, .35, 16));
-      el.querySelectorAll(".mk").forEach(e => { const a = +e.dataset.a, k = back((t - a) / .3); e.style.opacity = clamp((t - a) / .08); e.style.transform = `scale(${t < a ? 0 : .3 + .7 * k})`; });
+      el.querySelectorAll(".mk").forEach(e => { const a = +e.dataset.a, k = back((t - a) / .3); e.style.opacity = clamp((t - a) / .08); e.style.transform = `scale(${t < a ? .5 : .5 + .5 * k})`; });
     },
   };
   // категории кэшбэка: b.items [{name, p, at, img, bad}], b.sel [{i, at}], b.hl {i, at}
@@ -221,7 +222,7 @@
     build: () => $(`<div class="cur"><svg viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1.2L16 21l-3 1.4-3.6-6.8L4 20z" fill="#fff" stroke="#000" stroke-width="1.2"/></svg><div class="rp"></div></div>`),
     tick: (el, o, t) => { const rp = el.querySelector(".rp"); let k = 9; for (const c of o.clicks || []) if (t >= c) k = t - c;
       rp.style.opacity = k < .45 ? 1 - k / .45 : 0; rp.style.transform = `scale(${.3 + 1.2 * out3(k / .45)})`;
-      const press = (o.clicks || []).some(c => t >= c - .05 && t < c + .1); el.querySelector("svg").style.transform = press ? "scale(.85)" : "none"; },
+      const press = (o.clicks || []).some(c => t >= c - .05 && t < c + .1); el.querySelector("svg").style.transform = press ? "scale(.9)" : "none"; },
   };
   K.stamp = {
     build: (o) => $(`<div class="stamp" style="--c:${o.c || "var(--red)"}">${o.text}</div>`),
@@ -249,7 +250,7 @@
       ${o.items ? `<div class="li">${o.items.map(i => `<span data-a="${i.at}">${i.t}</span>`).join("")}</div>` : ""}</div>`),
     tick: (el, o, t) => {
       const lt = t - o.at; el.style.opacity = t < o.at ? 0 : 1;
-      el.querySelector(".lt").style.clipPath = `inset(0 ${100 * (1 - io3(lt / .35))}% 0 0)`;
+      el.querySelector(".lt").style.clipPath = `inset(0 ${100 * (1 - out5(lt / .35))}% 0 0)`;
       el.style.transform = `rotate(${o.rot ?? -2}deg) scale(${1.15 - .15 * out3(lt / .3)})`;
       el.querySelectorAll(".li span").forEach(e => fade(e, t, +e.dataset.a, .35, 14));
     },
@@ -277,14 +278,14 @@
   }
   function enterExit(o, t, L) {
     const lt = t - o.t0, rest = o.t1 - t, di = o.ind || .55, dout = o.outd || .4;
-    const e = 1 - out3(lt / di), x = o.out === "none" ? 0 : io3(1 - rest / dout);
+    const e = 1 - out5(lt / di), x = o.out === "none" ? 0 : io3(1 - rest / dout);
     let dx = 0, dy = 0, sc = 1, op = 1;
     switch (o.in || "up") {
       case "up": dy += 90 * e; op *= 1 - e; break;
       case "down": dy -= 90 * e; op *= 1 - e; break;
       case "left": dx -= 260 * e; op *= 1 - e; break;
       case "right": dx += 260 * e; op *= 1 - e; break;
-      case "scale": sc *= .82 + .18 * (1 - e); op *= 1 - e; break;
+      case "scale": sc *= .92 + .08 * (1 - e); op *= 1 - e; break;
       case "fade": op *= 1 - e; break;
       case "none": break;
     }
@@ -343,7 +344,7 @@
     // смаз камеры по скорости переезда (HyperFrames motion-blur-streak: пик на максимальной скорости, 0 в покое)
     if (TL.mblur !== false) {
       const P = camera(t - 1 / 30, TL), v = Math.hypot((C.x - P.x) * C.s, (C.y - P.y) * C.s) + 900 * Math.abs(C.s - P.s);   // px экрана за кадр
-      const b = Math.min(9, Math.max(0, (v - 12) * .09));
+      const b = Math.min(6, Math.max(0, (v - 12) * .07));
       world.style.filter = b > .3 ? `blur(${b.toFixed(1)}px)` : "";
     }
     world.style.transform = `translate(960px,540px) scale(${C.s}) translate(${-C.x}px,${-C.y}px)`;

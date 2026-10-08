@@ -57,7 +57,7 @@ Never spend hours of render before gates 3–4.
 | 2. Edit voice without denoiser: cut retakes, keep the last clean take | `voice_v2.py edit` (CUTS from step 1) | 5 min |
 | 3. VC «вариант 5», 4 attempts per piece, phrase-level best, phrase patches for anything < 0.93 | `voice_v2.py vc → composite → build → patch → build` | 2–2.5 h |
 | 4. Voice audit: unclear words, repeats, meaning flips, joints | `audit_voice.py` — **repeat until clean; read every flag by hand** | 20 min ×2 |
-| 5. Desk timeline from the words, stills check of every section | copy `build_desk.py` pattern, `render.js --stills` | 40 min |
+| 5. Desk timeline from the words, stills check of every section; motion review (`review-animations` skill on desk.js/engine changes + new timeline kinds) and readability lint (`lint_desk.js`) | copy `build_desk.py` pattern, `render.js --stills` | 45 min |
 | 6. Music/SFX, full render in 4 parallel chunks, mix −14 LUFS | `audio.js`, `render.js`, `mix.sh` | 75 min |
 | 7. QA of the final file: re-transcribe the mix, frame sheet, loudness, duration; `publish.md` with chapters | | 15 min |
 Whole pipeline ≈ 5 h for 7 min of speech, ≈ 9–9.5 h for 13 min, ≈ 10–11 h for 15 min. Latest voice
