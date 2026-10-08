@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ключ Threads — помощник</title>
+<!-- Открывается локально в браузере владельца. Всё происходит между его браузером и Meta: секрет и ключи никуда больше
+     не отправляются и в репозиторий не попадают. -->
+<style>
+  :root { --bg: #0b0d10; --card: #151a20; --text: #eef2f6; --muted: #8b96a5; --acc: #3ddc84; --line: #26303b; }
+  @media (prefers-color-scheme: light) { :root { --bg: #f4f6f8; --card: #fff; --text: #10151b; --muted: #5b6573; --acc: #1a9d57; --line: #dde3ea; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px 16px 60px; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 6px; } p.lead { color: var(--muted); margin: 0 0 20px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  h2 { font-size: 17px; margin: 0 0 8px; } h2 b { color: var(--acc); }
+  label { display: block; font-size: 14px; color: var(--muted); margin: 10px 0 4px; }
+  input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 14px ui-monospace, Consolas, monospace; }
+  button { margin-top: 12px; padding: 10px 16px; border: 0; border-radius: 10px; background: var(--acc); color: #04140b; font-weight: 700; font-size: 15px; cursor: pointer; }
+  code { background: var(--bg); padding: 1px 6px; border-radius: 6px; }
+  .note { font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ключ Threads для автопостинга</h1>
+  <p class="lead">Запасной способ, если Graph API Explorer показывает белый экран. Всё происходит между твоим браузером и Meta.</p>
+
+  <section>
+    <h2><b>0.</b> Один раз: адрес возврата</h2>
+    <p class="note">В приложении: Сценарии использования → Threads API → Настроить → <b>Настройки</b>. В полях
+      «URL-адреса обратного вызова для перенаправления», «URL обратного вызова для удаления» и «URL обратного вызова для отмены установки»
+      впиши <code>https://example.com/</code> и сохрани. Там же возьми <b>ID приложения Threads</b> и <b>секрет приложения Threads</b>.</p>
+  </section>
+
+  <section>
+    <h2><b>1.</b> Разрешить доступ</h2>
+    <label>ID приложения Threads</label><input id="appid" placeholder="например 1234567890123456">
+    <button onclick="auth()">Открыть окно разрешения Threads</button>
+    <p class="note">Нажми «Разрешить». Откроется страница example.com, а в адресной строке будет
+      <code>https://example.com/?code=AQB…#_</code>. Скопируй всё после <code>code=</code> до <code>#_</code> (сами <code>#_</code> не копируй).</p>
+  </section>
+
+  <section>
+    <h2><b>2.</b> Короткий ключ (1 час)</h2>
+    <form id="f1" method="POST" action="https://graph.threads.net/oauth/access_token" target="_blank">
+      <input type="hidden" name="grant_type" value="authorization_code">
+      <input type="hidden" name="redirect_uri" value="https://example.com/">
+      <input type="hidden" name="client_id" id="cid">
+      <label>Секрет приложения Threads</label><input name="client_secret" id="secret" type="password" autocomplete="off">
+      <label>Код из адресной строки (шаг 1)</label><input name="code" id="code" autocomplete="off">
+      <button type="submit" onclick="document.getElementById('cid').value = document.getElementById('appid').value.trim(); document.getElementById('code').value = document.getElementById('code').value.trim().replace(/#_$/, '')">Получить короткий ключ</button>
+    </form>
+    <p class="note">Откроется вкладка с ответом <code>{"access_token":"TH…","user_id":…}</code>. Скопируй значение access_token.</p>
+  </section>
+
+  <section>
+    <h2><b>3.</b> Долгий ключ (60 дней)</h2>
+    <label>Короткий ключ (шаг 2)</label><input id="short" type="password" autocomplete="off">
+    <button onclick="exchange()">Получить долгий ключ</button>
+    <p class="note">Ответ: <code>{"access_token":"TH…","token_type":"bearer","expires_in":5184000}</code>. Значение access_token положи в окружение
+      Claude Code как <code>THREADS_ACCESS_TOKEN</code> (меню окружения в заголовке сессии → Edit). В чат ключ не присылай. После этого закрой вкладки с ответами.</p>
+  </section>
+</main>
+<script>
+  function auth() {
+    const id = document.getElementById("appid").value.trim();
+    if (!id) return alert("Впиши ID приложения Threads");
+    const u = "https://threads.net/oauth/authorize?client_id=" + encodeURIComponent(id) + "&redirect_uri=" + encodeURIComponent("https://example.com/") +
+      "&scope=threads_basic,threads_content_publish&response_type=code";
+    window.open(u, "_blank");
+  }
+  function exchange() {
+    const s = document.getElementById("secret").value.trim(), t = document.getElementById("short").value.trim();
+    if (!s || !t) return alert("Нужны секрет (шаг 2) и короткий ключ");
+    window.open("https://graph.threads.net/access_token?grant_type=th_exchange_token&client_secret=" + encodeURIComponent(s) + "&access_token=" + encodeURIComponent(t), "_blank");
+  }
+</script>
+</body>
+</html>
