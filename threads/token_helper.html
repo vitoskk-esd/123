@@ -36,20 +36,21 @@
   <section>
     <h2><b>1.</b> Разрешить доступ</h2>
     <label>ID приложения Threads</label><input id="appid" placeholder="например 1234567890123456">
+    <label>Адрес возврата — точно как в настройках приложения (можно https://www.google.com/)</label><input id="redir" value="https://example.com/">
     <button onclick="auth()">Открыть окно разрешения Threads</button>
-    <p class="note">Нажми «Разрешить». Откроется страница example.com, а в адресной строке будет
-      <code>https://example.com/?code=AQB…#_</code>. Скопируй всё после <code>code=</code> до <code>#_</code> (сами <code>#_</code> не копируй).</p>
+    <p class="note">Нажми «Разрешить». Откроется адрес возврата (страница может даже не загрузиться — это не важно), а в адресной строке будет
+      <code>…/?code=AQB…#_</code> — нажми на адресную строку, чтобы увидеть адрес целиком. Скопируй всё после <code>code=</code> до <code>#_</code> (сами <code>#_</code> не копируй).</p>
   </section>
 
   <section>
     <h2><b>2.</b> Короткий ключ (1 час)</h2>
     <form id="f1" method="POST" action="https://graph.threads.net/oauth/access_token" target="_blank">
       <input type="hidden" name="grant_type" value="authorization_code">
-      <input type="hidden" name="redirect_uri" value="https://example.com/">
+      <input type="hidden" name="redirect_uri" id="ruri">
       <input type="hidden" name="client_id" id="cid">
       <label>Секрет приложения Threads</label><input name="client_secret" id="secret" type="password" autocomplete="off">
       <label>Код из адресной строки (шаг 1)</label><input name="code" id="code" autocomplete="off">
-      <button type="submit" onclick="document.getElementById('cid').value = document.getElementById('appid').value.trim(); document.getElementById('code').value = document.getElementById('code').value.trim().replace(/#_$/, '')">Получить короткий ключ</button>
+      <button type="submit" onclick="document.getElementById('cid').value = document.getElementById('appid').value.trim(); document.getElementById('ruri').value = document.getElementById('redir').value.trim(); document.getElementById('code').value = document.getElementById('code').value.trim().replace(/#_$/, '')">Получить короткий ключ</button>
     </form>
     <p class="note">Откроется вкладка с ответом <code>{"access_token":"TH…","user_id":…}</code>. Скопируй значение access_token.</p>
   </section>
@@ -66,7 +67,7 @@
   function auth() {
     const id = document.getElementById("appid").value.trim();
     if (!id) return alert("Впиши ID приложения Threads");
-    const u = "https://threads.net/oauth/authorize?client_id=" + encodeURIComponent(id) + "&redirect_uri=" + encodeURIComponent("https://example.com/") +
+    const u = "https://threads.net/oauth/authorize?client_id=" + encodeURIComponent(id) + "&redirect_uri=" + encodeURIComponent(document.getElementById("redir").value.trim()) +
       "&scope=threads_basic,threads_content_publish&response_type=code";
     window.open(u, "_blank");
   }
