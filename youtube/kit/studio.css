@@ -1,0 +1,76 @@
+/* «Студия» v6 — премиальный язык длинного ролика: полноэкранные сцены, кинетическая типографика, 3D, свет. */
+@font-face { font-family: "Mont"; src: url("fonts/Montserrat.ttf"); font-weight: 100 900; }
+@font-face { font-family: "Unb"; src: url("fonts/Unbounded.ttf"); font-weight: 200 900; }
+@font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #050608; color: #eef2f6; font-family: "Mont", sans-serif; }
+#light { position: absolute; inset: 0; overflow: hidden; }
+#orb1, #orb2 { position: absolute; width: 1400px; height: 1400px; border-radius: 50%; filter: blur(40px); }
+#stage { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.sc { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform, filter, opacity; }
+#vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.78)); }
+#grain { position: absolute; inset: -120px; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+#flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle, #fff 0%, rgba(255,255,255,.7) 40%, rgba(255,255,255,0) 80%); mix-blend-mode: screen; }
+#bars { position: absolute; inset: 0; pointer-events: none; }
+#bars::before, #bars::after { content: ""; position: absolute; left: 0; right: 0; height: 0; background: #000; }
+
+/* кинетическая типографика */
+.kin { display: flex; flex-direction: column; justify-content: center; padding: 0 160px; gap: .02em; font: 900 var(--fs)/0.98 "Unb"; text-transform: uppercase; letter-spacing: -.035em; }
+.kin.c { align-items: center; text-align: center; }
+.kin .ln { white-space: nowrap; }
+.kin .m { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 .02em .06em; margin-bottom: -.06em; }
+.kin .w { display: inline-block; will-change: transform; }
+.kin .w.ac { color: var(--c); }
+.kin .sub { margin-top: 36px; font: 600 40px "Mont"; letter-spacing: 0; text-transform: none; color: #8b96a5; }
+
+/* число-герой */
+.cnt { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cnt .big { font: 900 300px/1 "Unb"; letter-spacing: -.04em; color: var(--c); white-space: nowrap; transform-origin: 50% 60%; }
+.cnt .big .u { font-size: .42em; margin-left: .12em; color: #eef2f6; }
+.cnt .lab { margin-top: 30px; font: 700 44px "Mont"; color: #9aa5b4; letter-spacing: .5px; }
+.cnt .rays { position: absolute; left: 50%; top: 50%; width: 2200px; height: 2200px; margin: -1100px 0 0 -1100px; opacity: 0;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--c) 18%, transparent) 0deg 4deg, transparent 4deg 14deg);
+  mask-image: radial-gradient(circle, #000 0%, transparent 60%); -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 60%); }
+
+/* телефон 3D */
+.ph3 { display: flex; align-items: center; justify-content: center; gap: 120px; }
+.phw { transform-style: preserve-3d; }
+.phone3 { position: relative; width: 470px; height: 960px; border-radius: 64px; padding: 120px 26px 26px; background: linear-gradient(160deg, #10151d, #070a0e);
+  box-shadow: 0 0 0 3px #2f3846, 0 0 0 10px #0b0e13, 40px 60px 120px rgba(0,0,0,.7), 0 0 120px rgba(255,77,94,.12); }
+.phone3 .isl { position: absolute; left: 50%; top: 22px; width: 130px; height: 36px; margin-left: -65px; border-radius: 20px; background: #000; }
+.phone3 .tot { position: absolute; top: 70px; left: 32px; right: 32px; }
+.phone3 .tot small { display: block; font: 600 24px "Mont"; color: #8b96a5; }
+.phone3 .tot b { display: block; font: 800 74px "Mono"; letter-spacing: -3px; margin-top: 6px; }
+.phone3 { padding-top: 250px; }
+.phone3 .r { display: flex; align-items: center; gap: 16px; padding: 22px 18px; margin-bottom: 14px; border-radius: 22px; background: rgba(255,255,255,.045); font: 700 27px "Mont"; }
+.phone3 .r .i { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 18%, transparent); color: var(--c); font: 900 26px "Unb"; flex: none; }
+.phone3 .r .am { margin-left: auto; font: 800 27px "Mono"; white-space: nowrap; }
+.phone3 .r.dead .t, .phone3 .r.dead .am { text-decoration: line-through; text-decoration-thickness: 4px; opacity: .45; }
+.ph3 .side { display: flex; flex-direction: column; gap: 26px; max-width: 720px; }
+.ph3 .sd { font: 900 76px/1.02 "Unb"; text-transform: uppercase; letter-spacing: -.03em; color: var(--c); }
+
+/* 3D-карта и заголовок главы */
+.crd { display: flex; align-items: center; justify-content: center; gap: 110px; }
+.cw { transform-style: preserve-3d; }
+.card3 { position: relative; width: 760px; height: 480px; border-radius: 38px; overflow: hidden; padding: 56px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 85%, #fff) 0%, var(--c) 35%, color-mix(in srgb, var(--c) 45%, #000) 100%);
+  box-shadow: 0 60px 140px rgba(0,0,0,.65), 0 0 160px color-mix(in srgb, var(--c) 35%, transparent), inset 0 2px 0 rgba(255,255,255,.35); }
+.card3 .chip { width: 110px; height: 82px; border-radius: 16px; background: linear-gradient(135deg, #f4e3a1, #b99442); box-shadow: inset 0 0 0 2px rgba(0,0,0,.15); }
+.card3 .num { position: absolute; left: 56px; bottom: 120px; font: 700 44px "Mono"; letter-spacing: 3px; color: rgba(255,255,255,.92); text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+.card3 .brand { position: absolute; right: 56px; bottom: 50px; font: 900 40px "Unb"; color: rgba(255,255,255,.9); letter-spacing: 2px; }
+.card3 .sheen { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.55) 47%, transparent 58%); background-size: 260% 100%; mix-blend-mode: overlay; }
+.crd .ttl { display: flex; align-items: center; gap: 40px; }
+.crd .ttl .n { font: 900 380px/0.8 "Unb"; color: var(--c); text-shadow: 0 0 90px color-mix(in srgb, var(--c) 55%, transparent); }
+.crd .ttl small { display: block; font: 700 34px "Mont"; letter-spacing: 8px; text-transform: uppercase; color: #8b96a5; }
+.crd .ttl span { display: block; font: 900 96px/1 "Unb"; text-transform: uppercase; letter-spacing: -.03em; max-width: 760px; }
+
+/* столбики */
+.brs { display: flex; flex-direction: column; justify-content: center; padding: 0 200px; gap: 54px; }
+.brs .bt { font: 900 64px "Unb"; text-transform: uppercase; letter-spacing: -.02em; margin-bottom: 10px; }
+.brs .br { display: grid; grid-template-columns: 520px 1fr 260px; align-items: center; gap: 34px; }
+.brs .bl { font: 800 44px "Mont"; }
+.brs .track { height: 74px; border-radius: 37px; background: rgba(255,255,255,.06); overflow: hidden; }
+.brs .track i { display: block; height: 100%; width: 0; border-radius: 37px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #000), var(--c)); box-shadow: 0 0 40px color-mix(in srgb, var(--c) 55%, transparent); }
+.brs .bv { font: 900 84px "Unb"; color: var(--c); letter-spacing: -.03em; }
+.brs .bn { font: 600 32px "Mont"; color: #8b96a5; }
