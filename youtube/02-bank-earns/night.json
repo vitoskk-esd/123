@@ -1,9 +1,10 @@
 {
  "video": "02-bank-earns",
- "stage": "voice: edit → vcfast → vc → composite → build → audit",
+ "stage": "voice: patch 17 фраз → build (+2 вырезанных скрытых дубля) → audit v2; затем монтаж (build_studio.py), рендер, сведение",
  "voice_received": "2026-10-08T17:12Z",
  "engine": "studio v6",
  "notes": [
-  "16 cuts (retakes/false starts); numbers 3800 and 1200 verified on short clips"
+  "16 cuts (retakes/false starts); numbers 3800 and 1200 verified on short clips",
+  "09.10 ночь: vcfast+vcweak+composite готовы (средняя 0,876); аудит v1 — 16 смысловых искажений и 3 оборванных слова → PATCH_SPANS; найдены 2 дубля, пропущенные распознаванием (96 с и 361–373 с) → POST_CUTS; монтаж 116 сцен, длинные сцены разбиты"
  ]
 }
