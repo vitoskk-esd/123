@@ -24,9 +24,15 @@
    https://graph.threads.net/access_token?grant_type=th_exchange_token&client_secret=(СЕКРЕТ)&access_token=(КОРОТКИЙ_КЛЮЧ)
    ```
    Ответ — `{"access_token":"…","token_type":"bearer","expires_in":5184000}`. Скопируй значение `access_token`.
-7. **Положи ключ в окружение.** В Claude Code открой меню облачного окружения в заголовке сессии → **Edit**. Добавь в
-   секреты (раздел Network secrets или API credentials; если его нет — переменной окружения):
-   имя **`THREADS_ACCESS_TOKEN`**, значение — ключ из шага 6. Сохрани.
+7. **Положи ключ в окружение — сетевым секретом.** Тогда ключ хранится вне сессии, и ни я, ни скрипт его не видим.
+   В Claude Code слева нажми **New**, затем кнопку с облаком **default1** над полем ввода → **Cloud** → наведи на **default1**
+   → шестерёнка ⚙ → окно **Edit environment** → **Network secrets** → **Add secret**:
+   - Credential type: **Bearer**;
+   - Name: `Threads`;
+   - Allowed websites: `graph.threads.net`;
+   - Custom headers: Name `Authorization`, Prefix `Bearer`, Value — ключ из шага 6.
+
+   Нажми **Connect**. Запасной вариант, если раздела Network secrets нет: переменная окружения `THREADS_ACCESS_TOKEN=…`.
 8. Напиши мне **«ключ добавлен»**. Я проверю ключ (аккаунт и лимит, **ничего не публикуя**) и включу расписание.
 
 ## Как будет работать

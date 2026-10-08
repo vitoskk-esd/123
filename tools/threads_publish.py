@@ -2,7 +2,9 @@
 """Автопубликация постов в Threads через официальный Threads API (graph.threads.net).
 
 Очередь — threads/queue.json: [{"id", "at": "2026-10-09T11:05:00+03:00", "text", "status": "queued"}].
-Ключ — переменная окружения THREADS_ACCESS_TOKEN (секрет окружения; в репозиторий и в чат не попадает, в лог не печатается).
+Ключ — СЕТЕВОЙ СЕКРЕТ окружения (Network secrets → Bearer, хост graph.threads.net): прокси Anthropic сам добавляет
+заголовок Authorization к запросам, скрипт ключа не видит. Запасной вариант — переменная THREADS_ACCESS_TOKEN (тогда ключ
+идёт параметром access_token). Ключ не печатается и в репозиторий не попадает.
 
   python3 tools/threads_publish.py --check        проверка ключа (аккаунт, лимит публикаций, продление ключа) — ничего не публикует
   python3 tools/threads_publish.py --due          опубликовать ОДИН самый ранний пост, время которого пришло
@@ -20,13 +22,12 @@ LINK = re.compile(r"https?://|www\.|t\.me/|\b[\w-]+\.(ru|com|net|org|me|io|рф)
 
 
 def token():
-    t = os.environ.get("THREADS_ACCESS_TOKEN", "").strip()
-    if not t: sys.exit("Нет THREADS_ACCESS_TOKEN в окружении — публикация пропущена (см. threads/API_SETUP.md).")
-    return t
+    """Ключ из переменной окружения, если есть; иначе None — его подставит прокси из сетевого секрета."""
+    return os.environ.get("THREADS_ACCESS_TOKEN", "").strip() or None
 
 
 def call(method, path, **params):
-    params["access_token"] = token()
+    if token(): params["access_token"] = token()
     data = urllib.parse.urlencode(params).encode()
     url = f"{API}/{path}" if not path.startswith("http") else path
     req = urllib.request.Request(url + ("?" + data.decode() if method == "GET" else ""), data=None if method == "GET" else data, method=method)
@@ -34,6 +35,8 @@ def call(method, path, **params):
         with urllib.request.urlopen(req, timeout=60) as r: return json.load(r)
     except urllib.error.HTTPError as e:
         body = e.read().decode(errors="replace")
+        if e.code in (400, 401) and '"code":190' in body.replace(" ", "") and not token():
+            sys.exit("Threads не видит ключ: добавь сетевой секрет (Bearer, graph.threads.net) — threads/API_SETUP.md, шаг 7.")
         raise RuntimeError(f"{method} {path}: HTTP {e.code} {body[:300]}") from None
 
 
@@ -73,9 +76,9 @@ def check():
     try:
         r = call("GET", "https://graph.threads.net/refresh_access_token", grant_type="th_refresh_token")
         days = int(r.get("expires_in", 0)) // 86400
-        same = r.get("access_token") == token()
+        same = token() is None or r.get("access_token") == token()
         print(f"ключ продлён: действует ещё {days} дн." + ("" if same else
-              " ВНИМАНИЕ: Meta выдала новый ключ — старый перестанет работать в свой срок; обнови секрет THREADS_ACCESS_TOKEN (threads/API_SETUP.md, шаг 6)."))
+              " ВНИМАНИЕ: Meta выдала новый ключ — старый перестанет работать в свой срок; обнови секрет (threads/API_SETUP.md, шаги 5–7)."))
     except RuntimeError as e:
         print(f"продлить ключ сейчас нельзя (бывает, если ключу < 24 ч): {str(e)[:160]}")
 
