@@ -30,6 +30,33 @@ with `script.md`, `rec/` (gitignored), `sections/<NN>/` builds, `out/`
 4. First 60 s rendered with sound → approval → full render.
 Never spend hours of render before gates 3–4.
 
+## 0b. Night production (owner, 2026-10-08: «вечером выбираю тему, визуалы, записываю голос — к утру ролик готов»)
+
+**Evening, together with the owner (≈ 30–40 min of his time):**
+1. Topic: he picks one (from the morning «3 темы» or his own). Claude replies with 3 titles + the script
+   (`script.md` by the 2026 checklist in §2, ≈ 1 200 words for 8 min) within ~20 min.
+2. Visuals: Claude sends a stills sheet of 6–8 key scenes in the desk style + 3–4 thumbnails;
+   the owner picks the thumbnail and says what to change. Bank logos/real numbers only if verified.
+3. Voice: he records the script in one file (retakes are fine — they are cut automatically) and sends it.
+   **Claude starts the build immediately** — don't wait for the night routine.
+
+**Night pipeline (resumable; state in `youtube/<NN-slug>/night.json`: stage, timestamps, notes):**
+| Stage | Command / tool | ≈ time (7 min of speech) |
+|---|---|---|
+| 1. Transcribe in chunks, find retakes/false starts | Whisper medium by pieces (as `words_v2m.json`) + `audit_voice.py` spots | 15 min |
+| 2. Edit voice without denoiser: cut retakes, keep the last clean take | `voice_v2.py edit` (CUTS from step 1) | 5 min |
+| 3. VC «вариант 5», 4 attempts per piece, phrase-level best, phrase patches for anything < 0.93 | `voice_v2.py vc → composite → build → patch → build` | 2–2.5 h |
+| 4. Voice audit: unclear words, repeats, meaning flips, joints | `audit_voice.py` — **repeat until clean; read every flag by hand** | 20 min ×2 |
+| 5. Desk timeline from the words, stills check of every section | copy `build_desk.py` pattern, `render.js --stills` | 40 min |
+| 6. Music/SFX, full render in 4 parallel chunks, mix −14 LUFS | `audio.js`, `render.js`, `mix.sh` | 75 min |
+| 7. QA of the final file: re-transcribe the mix, frame sheet, loudness, duration; `publish.md` with chapters | | 15 min |
+Start by 23:00 MSK → ready ≈ 05:00. CPU has 4 cores: don't run two Whisper/VC jobs at once; the
+reels lab at 02:47 only does light work (web search, small experiments) while the build runs.
+**Morning deliverables:** `final.mp4` sent via SendUserFile, `thumbnail.jpg`, `publish.md` (title,
+description with chapters, ad-marking placeholders), list of what was cut/fixed in the voice and anything
+that needs a re-record (meaning-changing slips must be reported, never silently "fixed" with invented words).
+**Never publish** — uploading to YouTube is the owner's action.
+
 ## 1. Topic, title, packaging (before the script)
 
 - Formats proven by the references, adapted to the niche:
