@@ -22,3 +22,7 @@ output framework» здесь не действует. CLI HyperFrames (`npx hyp
 `reel-production` — собственный скил проекта: процесс и уроки рилса `reels/bank-bonus-01`.
 
 Плагины из маркетплейсов в облачных сессиях Claude Code не загружаются, поэтому скилы лежат прямо в репозитории.
+
+## three.js (youtube/kit/vendor/three)
+- r169, MIT License (copy in `youtube/kit/vendor/three/LICENSE`). Added 2026-10-08 for real-3D thumbnails and scenes:
+  `three.module.min.js` + addons RoomEnvironment, RoundedBoxGeometry, EffectComposer/RenderPass/UnrealBloomPass/OutputPass (+ deps).

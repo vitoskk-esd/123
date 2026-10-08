@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №2 — сейф 3D</title>
+<!-- Настоящее 3D (three.js, PBR-материалы, отражения окружения, тени, bloom): открытая дверь банковского хранилища,
+     внутри золото и карта «+1 000 ₽», свет падает наружу. Текст — HTML поверх. Снимок: node ../../kit/shot3d.js 02-bank-earns/thumb/vault3d.html thumb/vault.png -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #050505; }
+  canvas { position: absolute; inset: 0; width: 1280px !important; height: 720px !important; }
+  .t { position: absolute; left: 60px; top: 120px; font: 900 100px/.98 "Unb"; text-transform: uppercase; letter-spacing: -.045em; z-index: 5; }
+  .w { color: #f3f6f9; text-shadow: 0 8px 0 rgba(0,0,0,.4), 0 0 40px rgba(0,0,0,.7); }
+  .gold { background: linear-gradient(180deg, #fff6c8 0%, #ffd84a 38%, #e3a10e 62%, #fff0a0 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 8px 0 rgba(0,0,0,.45)) drop-shadow(0 0 30px rgba(255,200,40,.5)); }
+  .plate { position: absolute; left: 62px; top: 470px; z-index: 5; padding: 12px 28px 16px; border-radius: 18px; transform: rotate(-2.5deg);
+    background: linear-gradient(180deg, #5cf0a0, #2bc272); color: #04140b; font: 900 50px "Unb"; text-transform: uppercase; letter-spacing: -.02em;
+    box-shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.5); }
+  .shade { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 38%, transparent 55%); }
+  .vig { position: absolute; inset: 0; z-index: 4; background: radial-gradient(ellipse at 62% 50%, transparent 50%, rgba(0,0,0,.7)); pointer-events: none; }
+  .grain { position: absolute; inset: 0; z-index: 6; opacity: .06; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style>
+<script type="importmap">{ "imports": { "three": "../../kit/vendor/three/three.module.min.js", "three/addons/": "../../kit/vendor/three/addons/" } }</script>
+</head>
+<body>
+<div class="shade"></div><div class="vig"></div><div class="grain"></div>
+<div class="t"><div class="w">Банк</div><div class="w">платит</div><div class="gold">тебе</div></div>
+<div class="plate">5 способов</div>
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+const W = 1280, H = 720, PR = 2;
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setPixelRatio(PR); r.setSize(W, H);
+r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = .9;
+r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(r.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050506);
+const pm = new THREE.PMREMGenerator(r);
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.38;
+
+const cam = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
+cam.position.set(-0.4, 0.8, 13.2); cam.lookAt(1.55, -0.15, 0);
+
+// ---------- процедурные текстуры: шлифовка металла (радиальная и линейная), шум бетона ----------
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+function canvasTex(w, h, draw, repeat = 1) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat, repeat); t.anisotropy = 8; return t;
+}
+const brushedRadial = canvasTex(1024, 1024, (g, w, h) => {
+  g.fillStyle = "#8a8a8a"; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 2600; i++) { const rr = rnd() * w * .5, v = 110 + rnd() * 70; g.strokeStyle = `rgba(${v},${v},${v},.35)`; g.lineWidth = .6 + rnd();
+    g.beginPath(); g.arc(w / 2, h / 2, rr, rnd() * 6.28, rnd() * 6.28 + .5 + rnd() * 2); g.stroke(); }
+});
+const brushedLin = canvasTex(512, 512, (g, w, h) => {
+  g.fillStyle = "#909090"; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 1800; i++) { const y = rnd() * h, v = 100 + rnd() * 90; g.fillStyle = `rgba(${v},${v},${v},.35)`; g.fillRect(0, y, w, .5 + rnd() * 1.2); }
+}, 2);
+const concrete = canvasTex(512, 512, (g, w, h) => {
+  g.fillStyle = "#7a7a7a"; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 26000; i++) { const v = 90 + rnd() * 90; g.fillStyle = `rgba(${v},${v},${v},.25)`; g.fillRect(rnd() * w, rnd() * h, 1 + rnd() * 2, 1 + rnd() * 2); }
+}, 3);
+
+// ---------- материалы ----------
+const steel = new THREE.MeshPhysicalMaterial({ color: 0x8f98a2, metalness: 1, roughness: .36, roughnessMap: brushedRadial, clearcoat: .3, clearcoatRoughness: .25 });
+const steelLin = new THREE.MeshPhysicalMaterial({ color: 0x7e8792, metalness: 1, roughness: .42, roughnessMap: brushedLin });
+const chrome = new THREE.MeshPhysicalMaterial({ color: 0xc8d0d8, metalness: 1, roughness: .16, clearcoat: 1, clearcoatRoughness: .05 });
+const darkSteel = new THREE.MeshStandardMaterial({ color: 0x2a2f36, metalness: .85, roughness: .45, roughnessMap: brushedLin });
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x1c2026, metalness: .55, roughness: .7, roughnessMap: concrete, bumpMap: concrete, bumpScale: .6 });
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x15171a, metalness: .35, roughness: .38, roughnessMap: concrete });
+const gold = new THREE.MeshPhysicalMaterial({ color: 0xffc23a, metalness: 1, roughness: .2, clearcoat: .4, clearcoatRoughness: .2 });
+const goldDim = new THREE.MeshPhysicalMaterial({ color: 0xe0a020, metalness: 1, roughness: .3 });
+const tunnelMat = new THREE.MeshStandardMaterial({ color: 0x8a7a55, metalness: .9, roughness: .35, roughnessMap: brushedLin, side: THREE.BackSide });
+
+const C = new THREE.Vector3(2.3, 0.15, 0);   // центр проёма
+const R0 = 1.85, DEPTH = 2.6, FLOOR = -2.55;
+
+// ---------- стена с круглым проёмом (Shape с отверстием → выдавливание) ----------
+const wallShape = new THREE.Shape(); wallShape.moveTo(-12, FLOOR); wallShape.lineTo(14, FLOOR); wallShape.lineTo(14, 8); wallShape.lineTo(-12, 8); wallShape.lineTo(-12, FLOOR);
+const hole = new THREE.Path(); hole.absarc(C.x, C.y, R0 + .35, 0, Math.PI * 2, true); wallShape.holes.push(hole);
+const wall = new THREE.Mesh(new THREE.ExtrudeGeometry(wallShape, { depth: .6, bevelEnabled: false, curveSegments: 96 }), wallMat);
+wall.position.z = -.6; wall.receiveShadow = true; scene.add(wall);
+// швы панелей на стене
+for (const x of [-6, -2.6, 7.2, 10.5]) { const s = new THREE.Mesh(new THREE.BoxGeometry(.04, 12, .02), darkSteel); s.position.set(x, 2, .01); scene.add(s); }
+for (const y of [4.6]) { const s = new THREE.Mesh(new THREE.BoxGeometry(30, .04, .02), darkSteel); s.position.set(0, y, .01); scene.add(s); }
+
+// ---------- массивная рама проёма (профиль вращения) ----------
+const prof = [[R0 + .35, -.6], [R0 + .35, .05], [R0 + .55, .05], [R0 + .62, .16], [R0 + .55, .28], [R0 + .12, .28], [R0 + .02, .18], [R0, .05], [R0, -.6]].map(([x, y]) => new THREE.Vector2(x, y));
+const frame = new THREE.Mesh(new THREE.LatheGeometry(prof, 160), steelLin);
+frame.rotation.x = Math.PI / 2; frame.position.copy(C); frame.castShadow = frame.receiveShadow = true; scene.add(frame);
+// заклёпки по раме
+for (let i = 0; i < 28; i++) { const a = i / 28 * Math.PI * 2, m = new THREE.Mesh(new THREE.SphereGeometry(.055, 16, 12), chrome);
+  m.position.set(C.x + Math.cos(a) * (R0 + .44), C.y + Math.sin(a) * (R0 + .44), .29); m.scale.z = .5; scene.add(m); }
+
+// ---------- тоннель хранилища и задняя стенка ----------
+const tunnel = new THREE.Mesh(new THREE.CylinderGeometry(R0, R0, DEPTH, 96, 1, true), tunnelMat);
+tunnel.rotation.x = Math.PI / 2; tunnel.position.set(C.x, C.y, -.6 - DEPTH / 2); tunnel.receiveShadow = true; scene.add(tunnel);
+const back = new THREE.Mesh(new THREE.CircleGeometry(R0, 96), new THREE.MeshStandardMaterial({ color: 0x5a4a28, metalness: .8, roughness: .5 }));
+back.position.set(C.x, C.y, -.6 - DEPTH + .01); scene.add(back);
+// полка внутри (пол хранилища)
+const shelf = new THREE.Mesh(new THREE.BoxGeometry(R0 * 1.8, .08, DEPTH), darkSteel);
+shelf.position.set(C.x, C.y - R0 * .42, -.6 - DEPTH / 2); shelf.receiveShadow = true; scene.add(shelf);
+const shelfY = C.y - R0 * .42 + .04;
+
+// ---------- золото внутри: пирамида слитков, столбики монет, карта «+1 000 ₽» ----------
+const barGeo = new RoundedBoxGeometry(.8, .26, .38, 3, .05);
+const bars = [];
+const rows = [[-.66, 0, .66, -.33, .33], [-.33, .33, 0], [0]];
+rows[0] = [-.99, -.33, .33, .99]; rows[1] = [-.66, 0, .66]; rows[2] = [-.33, .33]; rows.push([0]);
+rows.forEach((xs, lvl) => xs.forEach(x => { for (const zz of [-2.25, -1.9]) {
+  const b = new THREE.Mesh(barGeo, gold); b.position.set(C.x + .25 + x * 1.25, shelfY + .13 + lvl * .26, zz + .3 + (lvl % 2) * .04); b.rotation.y = (rnd() - .5) * .06;
+  b.castShadow = b.receiveShadow = true; scene.add(b); bars.push(b); } }));
+const coinGeo = new THREE.CylinderGeometry(.19, .19, .04, 48);
+function stack(x, z, n, y0 = shelfY) { for (let i = 0; i < n; i++) { const c = new THREE.Mesh(coinGeo, i % 2 ? gold : goldDim); c.position.set(x + (rnd() - .5) * .02, y0 + .018 + i * .036, z + (rnd() - .5) * .02);
+  c.rotation.y = rnd() * 3; c.castShadow = c.receiveShadow = true; scene.add(c); } }
+stack(C.x - 1.25, -1.4, 9); stack(C.x - 1.0, -1.15, 6); stack(C.x + 1.2, -1.35, 11); stack(C.x + .95, -1.1, 5);
+
+// карта-бонус: золотой пластик с текстом (CanvasTexture), прислонена в проёме
+const drawCard = (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, "#fff2b0"); gr.addColorStop(.25, "#ffd84a"); gr.addColorStop(.6, "#d99a0b"); gr.addColorStop(1, "#8a5a00");
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = "#e8d28c"; g.beginPath(); g.roundRect(70, 90, 150, 115, 22); g.fill(); g.strokeStyle = "rgba(120,80,0,.6)"; g.lineWidth = 4; g.stroke();
+  g.fillStyle = "rgba(60,35,0,.75)"; g.font = "800 46px Mont"; g.fillText("Б О Н У С", 72, 300);
+  g.fillStyle = "#2a1800"; g.font = "900 150px Unb"; g.fillText("+1 000 ₽", 60, 560);
+};
+// шрифты — до рисования текстуры, иначе canvas возьмёт запасной шрифт
+await document.fonts.load("900 150px Unb"); await document.fonts.load("800 46px Mont");
+const cardTex = canvasTex(1024, 646, drawCard); cardTex.repeat.set(1, 1); cardTex.colorSpace = THREE.SRGBColorSpace;
+const card = new THREE.Group();
+const cardBody = new THREE.Mesh(new RoundedBoxGeometry(2.0, 1.26, .035, 4, .08), gold); card.add(cardBody);
+const cardFace = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 1.17), new THREE.MeshPhysicalMaterial({ map: cardTex, metalness: .85, roughness: .25, clearcoat: 1, clearcoatRoughness: .1 }));
+cardFace.position.z = .02; card.add(cardFace);
+card.position.set(C.x - .75, shelfY + .62, -.15); card.rotation.set(-.12, .2, .1); card.scale.setScalar(.9);
+card.traverse(o => { o.castShadow = true; }); scene.add(card);
+
+// ---------- дверь: толстый диск, ригели по кромке, механизм на внутренней стороне ----------
+const DR = R0 + .3, DT = .7;
+const hinge = new THREE.Group(); hinge.position.set(C.x + R0 + .5, C.y, .35); scene.add(hinge);
+const door = new THREE.Group(); door.position.set(-(R0 + .5), 0, 0); hinge.add(door);
+const disk = new THREE.Mesh(new THREE.CylinderGeometry(DR, DR, DT, 128), [steelLin, steel, steel]);
+disk.rotation.x = Math.PI / 2; disk.castShadow = disk.receiveShadow = true; door.add(disk);
+// ступенчатая внутренняя сторона (обращена к хранилищу, z < 0)
+const plug = new THREE.Mesh(new THREE.CylinderGeometry(R0 - .05, R0 - .05, .35, 128), [steelLin, steel, steel]);
+plug.rotation.x = Math.PI / 2; plug.position.z = -DT / 2 - .17; plug.castShadow = true; door.add(plug);
+// ригели — хромированные цилиндры, торчат из кромки «пробки»
+for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, bolt = new THREE.Mesh(new THREE.CylinderGeometry(.09, .09, .5, 32), chrome);
+  bolt.position.set(Math.cos(a) * (R0 + .1), Math.sin(a) * (R0 + .1), -DT / 2 - .17); bolt.rotation.z = a - Math.PI / 2; bolt.castShadow = true; door.add(bolt); }
+// механизм под стеклом: кольца и тяги
+const glassRing = new THREE.Mesh(new THREE.TorusGeometry(1.05, .05, 24, 96), chrome); glassRing.position.z = -DT / 2 - .36; door.add(glassRing);
+for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, rod = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, 1.5, 20), chrome);
+  rod.position.set(Math.cos(a) * .9, Math.sin(a) * .9, -DT / 2 - .37); rod.rotation.z = a + Math.PI / 2; door.add(rod); }
+const hub = new THREE.Mesh(new THREE.CylinderGeometry(.32, .32, .14, 48), chrome); hub.rotation.x = Math.PI / 2; hub.position.z = -DT / 2 - .38; door.add(hub);
+// наружная сторона: штурвал (видно кромкой)
+const wheel = new THREE.Mesh(new THREE.TorusGeometry(.75, .07, 24, 96), chrome); wheel.position.z = DT / 2 + .45; door.add(wheel);
+for (let i = 0; i < 4; i++) { const sp = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.5, 16), chrome); sp.rotation.z = i * Math.PI / 4; sp.position.z = DT / 2 + .45; door.add(sp); }
+const axle = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .45, 24), chrome); axle.rotation.x = Math.PI / 2; axle.position.z = DT / 2 + .22; door.add(axle);
+hinge.rotation.y = 1.85;   // дверь распахнута к зрителю
+// петли
+for (const y of [-1.1, 1.1]) { const h = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .7, 32), steelLin); h.position.set(C.x + R0 + .5, C.y + y, .35); h.castShadow = true; scene.add(h); }
+
+// ---------- пол и монеты, высыпавшиеся наружу ----------
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = FLOOR; floor.receiveShadow = true; scene.add(floor);
+for (let i = 0; i < 16; i++) { const c = new THREE.Mesh(coinGeo, i % 3 ? gold : goldDim);
+  c.position.set(C.x - 1.6 + rnd() * 2.6, FLOOR + .018 + (i % 4 === 0 ? .03 : 0), .6 + rnd() * 2.2); c.rotation.set((rnd() - .5) * .2, rnd() * 3, (rnd() - .5) * .2); c.castShadow = c.receiveShadow = true; scene.add(c); }
+for (const [x, z, a] of [[C.x - .5, 1.6, .9], [C.x + .7, 2.4, -.6]]) { const c = new THREE.Mesh(coinGeo, gold); c.position.set(x, FLOOR + .15, z); c.rotation.set(Math.PI / 2 - .25, 0, a); c.castShadow = true; scene.add(c); }
+
+// ---------- свет ----------
+scene.add(new THREE.HemisphereLight(0x3a4250, 0x0a0806, .35));
+const key = new THREE.DirectionalLight(0xdfe8ff, 1.6); key.position.set(-6, 7, 8); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8 }); key.shadow.bias = -.0004; scene.add(key);
+const inside = new THREE.PointLight(0xffb84a, 20, 9, 1.6); inside.position.set(C.x, C.y + .9, -1.2); inside.castShadow = true; scene.add(inside);
+const inside2 = new THREE.PointLight(0xffd070, 6, 6, 1.8); inside2.position.set(C.x - .8, C.y - .2, -.4); scene.add(inside2);
+const spill = new THREE.SpotLight(0xffb040, 55, 16, .62, .7, 1.4); spill.position.set(C.x, C.y + .3, -2.2); spill.target.position.set(C.x - .6, FLOOR, 4.5);
+spill.castShadow = true; spill.shadow.mapSize.set(2048, 2048); scene.add(spill, spill.target);
+const rim = new THREE.PointLight(0x7fb0ff, 9, 14, 1.5); rim.position.set(7.5, 3.5, 4); scene.add(rim);
+
+// ---------- лучи света из проёма (аддитивный конус) ----------
+const beam = new THREE.Mesh(new THREE.ConeGeometry(R0 * 1.15, 7, 64, 1, true),
+  new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    uniforms: { c: { value: new THREE.Color(0xffb54a) } },
+    vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }",
+    fragmentShader: "uniform vec3 c; varying vec2 vUv; void main(){ float a = pow(vUv.y, 2.2) * .07 * (.6 + .4 * sin(vUv.x * 60.)); gl_FragColor = vec4(c * a, a); }" }));
+beam.position.set(C.x - .35, C.y - .55, 3.3); beam.rotation.x = -Math.PI / 2 - .32; beam.rotation.z = .12; scene.add(beam);
+
+// ---------- рендер с bloom ----------
+const comp = new EffectComposer(r);
+comp.addPass(new RenderPass(scene, cam));
+comp.addPass(new UnrealBloomPass(new THREE.Vector2(W * PR, H * PR), .32, .5, .92));
+comp.addPass(new OutputPass());
+comp.render();
+requestAnimationFrame(() => { comp.render(); window.__ready = true; });
+</script>
+</body>
+</html>
