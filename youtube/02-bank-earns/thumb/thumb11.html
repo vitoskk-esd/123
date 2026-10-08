@@ -30,10 +30,7 @@
     background: linear-gradient(180deg, #5cf0a0, #2bc272); color: #04140b; font: 900 50px "Unb"; text-transform: uppercase; letter-spacing: -.02em;
     box-shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.5); }
 
-  /* леска, крючок, карта */
-  .line { position: absolute; left: 1168px; top: -10px; width: 3px; height: 62px; background: linear-gradient(180deg, rgba(220,240,250,.2), rgba(235,245,250,.95)); box-shadow: 0 0 10px rgba(200,240,255,.6); z-index: 3; }
-  svg.hook { position: absolute; left: 1025px; top: 36px; z-index: 4; filter: drop-shadow(10px 18px 14px rgba(0,0,0,.55)); }
-  .cw { position: absolute; left: 700px; top: 330px; z-index: 2; transform: perspective(1400px) rotateY(-22deg) rotateX(10deg) rotateZ(-13deg); transform-origin: 70% 10%; }
+  /* карта */
   .card { position: relative; width: 500px; height: 316px; border-radius: 30px; overflow: hidden; padding: 34px;
     background: linear-gradient(135deg, #fff2b0 0%, #ffd84a 22%, #d99a0b 55%, #8a5a00 78%, #e6b73a 100%);
     box-shadow: 0 50px 90px rgba(0,0,0,.65), 0 0 120px rgba(255,200,40,.28), inset 0 3px 0 rgba(255,255,255,.6), inset 0 -4px 0 rgba(0,0,0,.25); }
@@ -41,13 +38,19 @@
   .card .lb { position: absolute; left: 34px; top: 118px; font: 800 26px "Mont"; letter-spacing: 6px; color: rgba(60,35,0,.75); text-transform: uppercase; }
   .card .sum { position: absolute; left: 30px; bottom: 26px; font: 900 82px/1 "Unb"; letter-spacing: -.04em; color: #2a1800;
     text-shadow: 0 2px 0 rgba(255,240,180,.7), 0 -1px 0 rgba(0,0,0,.25); }
-  .card .hole { position: absolute; right: 52px; top: 28px; width: 46px; height: 46px; border-radius: 50%; background: #03080b; box-shadow: inset 0 4px 8px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.5); }
   .card .sheen { position: absolute; inset: 0; background: linear-gradient(112deg, transparent 28%, rgba(255,255,255,.65) 42%, transparent 54%); mix-blend-mode: overlay; }
   .card .brush { position: absolute; inset: 0; opacity: .18; background: repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 1px, transparent 1px 3px); mix-blend-mode: overlay; }
-  .front { position: absolute; z-index: 6; left: 1025px; top: 36px; filter: drop-shadow(4px 8px 6px rgba(0,0,0,.5)); }
   .v { display: none; } .v.on { display: block; }
   .studio-only, .water-only { display: none; }
   body.studio .studio-only, body.water .water-only { display: block; }
+
+  .cw { position: absolute; left: 720px; top: 330px; z-index: 2; transform: perspective(1500px) rotateY(-24deg) rotateX(8deg) rotateZ(-5deg); transform-origin: 50% 0; }
+  .card { -webkit-mask: radial-gradient(circle at 250px 46px, transparent 21px, #000 22.5px); mask: radial-gradient(circle at 250px 46px, transparent 21px, #000 22.5px); }
+  .card .rim { position: absolute; left: 225px; top: 21px; width: 50px; height: 50px; border-radius: 50%; box-shadow: inset 0 3px 3px rgba(0,0,0,.55), inset 0 -2px 2px rgba(255,240,170,.8), 0 0 0 2px rgba(120,80,0,.5); }
+  svg.hk { position: absolute; left: 150px; top: -332px; overflow: visible; }
+  svg.hk.front { z-index: 3; filter: drop-shadow(6px 10px 6px rgba(40,25,0,.55)); }
+  svg.hk.back { z-index: 0; filter: brightness(.8); }
+  .card { z-index: 1; }
 </style>
 </head>
 <body>
@@ -63,26 +66,11 @@
 <div class="t"><div class="w">Бонус —</div><div class="gold">наживка?</div></div>
 <div class="plate" id="plate">как не клюнуть</div>
 
-<div class="line"></div>
-<!-- крючок: металл (градиент поперёк), блик, жало с бородкой; нижний изгиб проходит через отверстие карты -->
-<svg class="hook" width="300" height="430" viewBox="0 0 300 430">
-  <defs>
-    <linearGradient id="met" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#59616c"/><stop offset=".3" stop-color="#f4f7fa"/><stop offset=".5" stop-color="#9aa3ae"/><stop offset=".72" stop-color="#e6ebf0"/><stop offset="1" stop-color="#3f4650"/></linearGradient>
-    <linearGradient id="met2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef2f6"/><stop offset=".5" stop-color="#8a939e"/><stop offset="1" stop-color="#d7dde3"/></linearGradient>
-  </defs>
-  <circle cx="145" cy="34" r="20" fill="none" stroke="url(#met2)" stroke-width="10"/>
-  <path d="M145 54 V250" stroke="url(#met)" stroke-width="18" stroke-linecap="round" fill="none"/>
-  <path d="M146 60 V246" stroke="rgba(255,255,255,.75)" stroke-width="3" fill="none"/>
-</svg>
-<svg class="front" width="300" height="430" viewBox="0 0 300 430">
-  <defs>
-    <linearGradient id="metB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef2f6"/><stop offset=".35" stop-color="#8a939e"/><stop offset=".6" stop-color="#f6f9fb"/><stop offset="1" stop-color="#4a525c"/></linearGradient>
-  </defs>
-  <path d="M145 246 C145 345 52 350 52 262 L52 214" stroke="url(#metB)" stroke-width="18" stroke-linecap="round" fill="none"/>
-  <path d="M52 214 L44 250 L70 236 Z" fill="#dfe5eb" stroke="#7b848f" stroke-width="2"/>
-  <path d="M138 270 C134 330 66 330 62 268" stroke="rgba(255,255,255,.8)" stroke-width="3" fill="none"/>
-</svg>
-<div class="cw"><div class="card"><div class="chip"></div><div class="lb">бонус</div><div class="sum">+1 000 ₽</div><div class="hole"></div><div class="brush"></div><div class="sheen"></div></div></div>
+<div class="cw">
+  <svg class="hk back" width="300" height="460" viewBox="0 0 300 460"><path d="M100 375 C75 375 50 350 50 300 L50 241" stroke="#20252c" stroke-width="24" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M100 375 C75 375 50 350 50 300 L50 241" stroke="#7d8692" stroke-width="20" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M100 375 C75 375 50 350 50 300 L50 241" stroke="#b9c1ca" stroke-width="13" transform="translate(-2,-1.5)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M100 375 C75 375 50 350 50 300 L50 241" stroke="#eef3f7" stroke-width="6" transform="translate(-4,-3)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M100 375 C75 375 50 350 50 300 L50 241" stroke="#ffffff" stroke-width="2" transform="translate(-5,-4)" opacity=".9" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><defs><linearGradient id="tipg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4d555f"/><stop offset=".35" stop-color="#f2f6f9"/><stop offset=".6" stop-color="#a7b0ba"/><stop offset="1" stop-color="#3c434c"/></linearGradient></defs><path d="M38 242 C38 222 44 204 58 186 C57 206 62 224 62 242 Z" fill="url(#tipg)" stroke="#20252c" stroke-width="1.6" stroke-linejoin="round"/><path d="M60 222 C64 230 69 238 74 247 C68 243 63 240 60 238 Z" fill="url(#tipg)" stroke="#20252c" stroke-width="1.6" stroke-linejoin="round"/><path d="M45 236 C45 222 49 207 56 194" stroke="#ffffff" stroke-width="2" fill="none" opacity=".85"/></svg>
+  <div class="card"><div class="chip"></div><div class="lb">бонус</div><div class="sum">+1 000 ₽</div><div class="brush"></div><div class="sheen"></div><div class="rim"></div></div>
+  <svg class="hk front" width="300" height="460" viewBox="0 0 300 460"><path d="M150 20 V-700" stroke="rgba(235,245,250,.95)" stroke-width="3"/><path d="M150 20 V-700" stroke="rgba(200,240,255,.35)" stroke-width="9"/><circle cx="150" cy="40" r="20" fill="none" stroke="#20252c" stroke-width="12"/><circle cx="150" cy="40" r="20" fill="none" stroke="#8b94a0" stroke-width="9"/><path d="M132 33 A20 20 0 0 1 160 22" fill="none" stroke="#f4f7fa" stroke-width="4" stroke-linecap="round"/><path d="M150 62 V300 C150 350 125 375 100 375" stroke="#20252c" stroke-width="24" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 62 V300 C150 350 125 375 100 375" stroke="#7d8692" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 62 V300 C150 350 125 375 100 375" stroke="#b9c1ca" stroke-width="13" transform="translate(-2,-1.5)" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 62 V300 C150 350 125 375 100 375" stroke="#eef3f7" stroke-width="6" transform="translate(-4,-3)" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 62 V300 C150 350 125 375 100 375" stroke="#ffffff" stroke-width="2" transform="translate(-5,-4)" opacity=".9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
 
 <div class="grain"></div><div class="vig"></div>
 <script>

@@ -65,7 +65,7 @@ Never spend hours of render before gates 3–4.
    **Thumbnail rules from the owner (08.10):** it must hook — a metaphor or curiosity gap (mousetrap, bait on a hook,
    «48 % → 0 %»), not a plain statement of fact; give 6+ variants. **No system emoji** («дешёвые смайлики» look cheap and
    spoil the thumbnail). Any icon or object must be premium 3D: lit, with metal or glass materials, highlights and a real
-   shadow. Video #2: the owner liked v11 «Бонус — наживка?» (a card on a fishing hook).
+   shadow. **Reference the owner approved («это то, что я искал, такие превью мне нравятся»):** `youtube/02-bank-earns/thumb/thumb11.html` (v=a) — a metaphor object (a gold bank card hanging on a 3D steel fishing hook threaded through a real hole), 2-line question headline «БОНУС — / НАЖИВКА?» (white plus gold gradient), one green benefit plate («как не клюнуть»), a deep underwater background with light rays, bubbles and grain. New thumbnails: this level of finish — a metaphor, a 3D object with materials, ≤ 6 words.
 3. Voice: he records the script in one file (retakes are fine — they are cut automatically) and sends it.
    **Claude starts the build immediately** — don't wait for the night routine.
 
