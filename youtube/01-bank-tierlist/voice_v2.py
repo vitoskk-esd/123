@@ -178,7 +178,7 @@ def composite(limit=.97):
     norm = lambda w: re.sub(r"[^а-яa-z0-9]", "", w.lower().replace("ё", "е"))
     sim = lambda a, b: __import__("difflib").SequenceMatcher(None, " ".join(norm(x["w"]) for x in a), " ".join(norm(x["w"]) for x in b), autojunk=False).ratio() if a else 1.0
     for i, r in meta["res"].items():
-        if r["best"]["sim"] >= limit or len(r["tries"]) < 2: continue
+        if r["best"]["sim"] >= limit or len(r["tries"]) < 2 or "plan" in r: continue
         x, y = r["x"], r["y"]
         ref = os.path.join(VC2, f"ref_{int(i):03d}.wav")
         src_w = V.transcribe(ref, "medium")
@@ -197,6 +197,7 @@ def composite(limit=.97):
             else: plan.append([round(a, 3), round(b, 3), best])
             tot.append((sc[best], b - a))
         r["plan"] = plan
+        json.dump(meta, open(meta_p, "w"), ensure_ascii=False, indent=0)   # сохраняем по куску: переживает перезапуск
         est = sum(s_ * d for s_, d in tot) / sum(d for _, d in tot)
         print(f"кусок {i}: было {r['best']['sim']:.2f}, фраз {len(cuts) - 1}, план {[(p[0], p[1], p[2]) for p in plan]}, по фразам ~{est:.2f}", flush=True)
     json.dump(meta, open(meta_p, "w"), ensure_ascii=False, indent=0)
