@@ -76,7 +76,16 @@
 <script>
   const v = new URLSearchParams(location.search).get("v") || "a";
   document.body.classList.add(v === "c" ? "studio" : "water");
-  if (v !== "a") document.getElementById("plate").style.display = "none";
+  if (v !== "a" && v !== "e") document.getElementById("plate").style.display = "none";
+  // d — «забери бонус без крючка»: карта уже снята с крючка (пустое отверстие), крючок пустой
+  if (v === "d") { document.getElementById("plate").style.display = "none";
+    document.querySelector(".t").innerHTML = '<div class="w">Забери</div><div class="w">бонус —</div><div class="gold">без крючка</div>';
+    Object.assign(document.querySelector(".t").style, { top: "120px", fontSize: "88px" });
+    document.querySelector(".card").style.transform = "translate(70px, 100px) rotate(6deg)"; document.querySelector(".cw").style.top = "250px";
+    document.querySelector("svg.hk.back").style.zIndex = 2; document.querySelector("svg.hk.back").style.filter = "drop-shadow(6px 10px 6px rgba(0,0,0,.5))"; }
+  // e — «наживка? забери её»: крючок с картой как в a, зритель — тот, кто забирает
+  if (v === "e") { document.getElementById("plate").textContent = "и не попадись";
+    document.querySelector(".t").innerHTML = '<div class="gold">Наживка?</div><div class="w">Забери её</div>'; }
   if (v === "b" || v === "c") { const t = document.querySelector(".t"); t.style.top = "150px"; t.style.fontSize = "104px"; }
 </script>
 </body>
