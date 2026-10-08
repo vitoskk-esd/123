@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Превью ролика №2 — метафоры</title>
+<!-- thumb_alt.html?v=f|g|h|i → 1280×720. Уровень эталона (thumb11.html): объёмный предмет-метафора, свет, ≤ 6 слов, зритель — тот, кто забирает. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #040507; color: #eef2f6; font-family: "Mont"; }
+  .v { display: none; position: absolute; inset: 0; } .v.on { display: block; }
+  .bg { position: absolute; inset: 0; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(30px); }
+  .grain { position: absolute; inset: 0; opacity: .07; mix-blend-mode: overlay; pointer-events: none; z-index: 20;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 45%, transparent 45%, rgba(0,0,0,.8)); pointer-events: none; z-index: 19; }
+  .t { position: absolute; left: 64px; top: 150px; font: 900 104px/.98 "Unb"; text-transform: uppercase; letter-spacing: -.045em; z-index: 10; }
+  .w { color: #f3f6f9; text-shadow: 0 8px 0 rgba(0,0,0,.35), 0 0 40px rgba(0,0,0,.6); }
+  .gold { background: linear-gradient(180deg, #fff6c8 0%, #ffd84a 38%, #e3a10e 62%, #fff0a0 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 8px 0 rgba(0,0,0,.4)) drop-shadow(0 0 30px rgba(255,200,40,.45)); }
+  .green { background: linear-gradient(180deg, #d6ffe8 0%, #5cf0a0 40%, #1fae5e 70%, #b8ffd8 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 8px 0 rgba(0,0,0,.4)) drop-shadow(0 0 30px rgba(61,220,132,.45)); }
+  .plate { position: absolute; left: 66px; z-index: 10; padding: 12px 28px 16px; border-radius: 18px; transform: rotate(-2.5deg);
+    background: linear-gradient(180deg, #5cf0a0, #2bc272); color: #04140b; font: 900 50px "Unb"; text-transform: uppercase; letter-spacing: -.02em;
+    box-shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.5); }
+  .coin { position: absolute; }
+  .coin .edge { position: absolute; inset: 0; border-radius: 50%; transform: translateY(9%); background: linear-gradient(180deg, #8a5a00, #5a3a00); }
+  .coin .face { position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center; font: 900 calc(var(--s, 1) * 46px) "Unb"; color: #7a4d00;
+    background: radial-gradient(circle at 35% 30%, #fff6c8 0%, #ffd84a 30%, #e3a10e 62%, #9a6500 100%);
+    box-shadow: inset 0 0 0 5px rgba(255,240,170,.7), inset 0 0 0 9px rgba(150,95,0,.5); text-shadow: 0 2px 0 rgba(255,240,180,.6); }
+  .card { position: absolute; width: 440px; height: 278px; border-radius: 28px; overflow: hidden; padding: 30px;
+    box-shadow: 0 50px 90px rgba(0,0,0,.65), inset 0 3px 0 rgba(255,255,255,.5), inset 0 -4px 0 rgba(0,0,0,.25); }
+  .card .chip { width: 70px; height: 54px; border-radius: 11px; background: linear-gradient(135deg, #f8ecc0, #b99442 60%, #e8d28c); }
+  .card .sheen { position: absolute; inset: 0; background: linear-gradient(112deg, transparent 28%, rgba(255,255,255,.6) 42%, transparent 54%); mix-blend-mode: overlay; }
+  .card .nm { position: absolute; left: 30px; bottom: 24px; font: 900 40px "Unb"; letter-spacing: 1px; }
+  .gcard { background: linear-gradient(135deg, #fff2b0 0%, #ffd84a 22%, #d99a0b 55%, #8a5a00 78%, #e6b73a 100%); } .gcard .nm { color: #2a1800; }
+  .dcard { background: linear-gradient(135deg, #3a414c 0%, #1a1f26 45%, #0b0e12 100%); } .dcard .nm { color: #9aa5b4; }
+
+  /* f: шахматы — «Обыграй банк» */
+  .f .bg { background: radial-gradient(ellipse 60% 70% at 72% 55%, #2a1f06 0%, #0d0a03 50%, #030304 100%); }
+  .f .board { position: absolute; left: 560px; top: 520px; width: 900px; height: 400px; transform: perspective(900px) rotateX(62deg); transform-origin: 50% 0;
+    background: conic-gradient(#2a2418 25%, #0c0b08 0 50%, #2a2418 0 75%, #0c0b08 0) 0 0/160px 160px; box-shadow: 0 -2px 0 rgba(255,220,120,.25); opacity: .9; }
+  .f svg.k { position: absolute; left: 860px; top: 70px; z-index: 5; filter: drop-shadow(0 40px 30px rgba(0,0,0,.7)) drop-shadow(0 0 50px rgba(255,200,40,.35)); }
+  .f svg.p { position: absolute; left: 1010px; top: 400px; z-index: 4; transform: rotate(78deg); transform-origin: 50% 90%; filter: drop-shadow(0 20px 16px rgba(0,0,0,.7)); }
+  .f .tag { position: absolute; left: 1090px; top: 600px; z-index: 6; font: 900 26px "Unb"; color: #6b7480; letter-spacing: 3px; transform: rotate(-6deg); }
+
+  /* g: магнит — «Притяни деньги банка» */
+  .g .bg { background: radial-gradient(ellipse 60% 70% at 70% 45%, #2a0a10 0%, #0e0406 55%, #030304 100%); }
+  .g svg.m { position: absolute; left: 880px; top: 20px; z-index: 5; transform: rotate(200deg) scale(.85); filter: drop-shadow(20px 40px 30px rgba(0,0,0,.65)); }
+  .g .dcard { left: 860px; top: 470px; transform: perspective(1200px) rotateY(-25deg) rotateZ(10deg); z-index: 2; }
+  .g .field { position: absolute; left: 700px; top: 200px; width: 500px; height: 400px; z-index: 3; opacity: .5;
+    background: repeating-radial-gradient(circle at 20% 10%, transparent 0 34px, rgba(255,120,130,.35) 35px 37px); mask-image: radial-gradient(closest-side, #000, transparent); -webkit-mask-image: radial-gradient(closest-side, #000, transparent); }
+
+  /* h: сейф — «Банк платит тебе» */
+  .h .bg { background: radial-gradient(ellipse 55% 70% at 74% 50%, #3a2a06 0%, #120d02 50%, #030304 100%); }
+  .h .vault { position: absolute; left: 640px; top: 80px; width: 560px; height: 560px; border-radius: 50%; z-index: 2;
+    background: radial-gradient(circle at 50% 50%, #ffe9a0 0%, #ffc21a 30%, #8a5a00 62%, #1a1204 76%);
+    box-shadow: inset 0 0 0 26px #2a2f36, inset 0 0 0 34px #4a525c, inset 0 0 60px rgba(0,0,0,.8), 0 0 140px rgba(255,200,40,.35); }
+  .h svg.door { position: absolute; left: 1170px; top: 70px; z-index: 4; transform: perspective(1400px) rotateY(-62deg); transform-origin: 0 50%; filter: drop-shadow(-30px 30px 40px rgba(0,0,0,.7)); }
+  .h .gcard { left: 760px; top: 230px; transform: perspective(1200px) rotateY(-20deg) rotateZ(-12deg) scale(.82); z-index: 3; }
+
+  /* i: разворот — красная стрелка вниз превращается в зелёную вверх */
+  .i .bg { background: radial-gradient(ellipse 55% 70% at 72% 50%, #062a18 0%, #03110a 50%, #030304 100%); }
+  .i svg.u { position: absolute; left: 790px; top: 70px; transform: scale(.86); transform-origin: 0 0; z-index: 5; filter: drop-shadow(20px 40px 30px rgba(0,0,0,.6)); }
+</style></head><body>
+<div class="v f"><div class="bg"></div><div class="glow" style="left:700px;top:0;width:600px;height:700px;background:radial-gradient(closest-side,rgba(255,200,40,.3),transparent)"></div>
+<div class="board"></div><svg class="k" width="300" height="520" viewBox="0 0 300 520">
+<defs><linearGradient id="kg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a4d00"/><stop offset=".28" stop-color="#ffe9a0"/><stop offset=".45" stop-color="#ffc21a"/><stop offset=".75" stop-color="#b37a00"/><stop offset="1" stop-color="#4a2f00"/></linearGradient>
+<linearGradient id="kv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<path d="M140 10 h20 v26 h24 v20 h-24 v24 h-20 v-24 h-24 v-20 h24 z" fill="url(#kg)" stroke="#5a3a00" stroke-width="2"/>
+<path d="M100 96 C100 80 200 80 200 96 L192 120 L108 120 Z" fill="url(#kg)" stroke="#5a3a00" stroke-width="2"/>
+<path d="M108 124 C 96 200 90 280 112 360 L188 360 C210 280 204 200 192 124 Z" fill="url(#kg)" stroke="#5a3a00" stroke-width="2"/>
+<rect x="96" y="356" width="108" height="22" rx="8" fill="url(#kg)" stroke="#5a3a00" stroke-width="2"/>
+<path d="M84 380 C70 420 70 440 60 470 L240 470 C230 440 230 420 216 380 Z" fill="url(#kg)" stroke="#5a3a00" stroke-width="2"/>
+<rect x="40" y="466" width="220" height="40" rx="14" fill="url(#kg)" stroke="#5a3a00" stroke-width="2"/>
+<path d="M108 124 C 96 200 90 280 112 360 L150 360 L150 124 Z" fill="url(#kv)"/>
+<path d="M126 140 C120 210 118 280 128 350" stroke="#fff6d0" stroke-width="5" fill="none" opacity=".75" stroke-linecap="round"/></svg><svg class="p" width="160" height="260" viewBox="0 0 160 260">
+<defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0b0e12"/><stop offset=".3" stop-color="#5a6370"/><stop offset=".5" stop-color="#262c34"/><stop offset="1" stop-color="#07090c"/></linearGradient></defs>
+<circle cx="80" cy="46" r="36" fill="url(#pg)"/><path d="M50 90 C50 76 110 76 110 90 L104 104 L56 104 Z" fill="url(#pg)"/>
+<path d="M58 106 C52 150 48 180 40 210 L120 210 C112 180 108 150 102 106 Z" fill="url(#pg)"/><rect x="22" y="206" width="116" height="34" rx="12" fill="url(#pg)"/>
+<path d="M62 34 C66 22 78 16 88 16" stroke="#c9d1db" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/></svg><div class="tag">БАНК</div>
+<div class="t"><div class="w">Обыграй</div><div class="gold">банк</div></div><div class="plate" style="top:410px">его же правилами</div></div>
+<div class="v g"><div class="bg"></div><div class="glow" style="left:650px;top:50px;width:700px;height:700px;background:radial-gradient(closest-side,rgba(255,77,94,.28),transparent)"></div>
+<svg class="m" width="380" height="420" viewBox="-10 -60 380 420" style="overflow:visible"><path d="M60 40 V-30" stroke="#2a2f36" stroke-width="92" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V-30" stroke="#8a939e" stroke-width="75" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V-30" stroke="#d7dde3" stroke-width="46" transform="translate(-9,-7)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V-30" stroke="#ffffff" stroke-width="18" transform="translate(-18,-14)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V-30" stroke="#fff" stroke-width="6" opacity=".8" transform="translate(-22,-17)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M300 40 V-30" stroke="#2a2f36" stroke-width="92" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M300 40 V-30" stroke="#8a939e" stroke-width="75" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M300 40 V-30" stroke="#d7dde3" stroke-width="46" transform="translate(-9,-7)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M300 40 V-30" stroke="#ffffff" stroke-width="18" transform="translate(-18,-14)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M300 40 V-30" stroke="#fff" stroke-width="6" opacity=".8" transform="translate(-22,-17)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V200 C60 330 300 330 300 200 V40" stroke="#3a0610" stroke-width="92" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V200 C60 330 300 330 300 200 V40" stroke="#d0142a" stroke-width="75" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V200 C60 330 300 330 300 200 V40" stroke="#ff5a6a" stroke-width="46" transform="translate(-9,-7)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V200 C60 330 300 330 300 200 V40" stroke="#ffc2c8" stroke-width="18" transform="translate(-18,-14)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M60 40 V200 C60 330 300 330 300 200 V40" stroke="#fff" stroke-width="6" opacity=".8" transform="translate(-22,-17)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/></svg><div class="field"></div>
+<div class="card dcard"><div class="chip"></div><div class="nm">БАНК</div><div class="sheen"></div></div>
+<div class="coin" style="left:900px;top:400px;width:110px;height:110px;transform:perspective(600px) rotateX(40deg) rotateZ(10deg);z-index:6"><div class="edge"></div><div class="face">₽</div></div><div class="coin" style="left:1030px;top:350px;width:90px;height:90px;transform:perspective(600px) rotateX(50deg) rotateZ(-20deg);z-index:6"><div class="edge"></div><div class="face">₽</div></div><div class="coin" style="left:1150px;top:410px;width:80px;height:80px;transform:perspective(600px) rotateX(30deg) rotateZ(25deg);z-index:6"><div class="edge"></div><div class="face">₽</div></div><div class="coin" style="left:980px;top:470px;width:70px;height:70px;transform:perspective(600px) rotateX(60deg) rotateZ(5deg);z-index:6"><div class="edge"></div><div class="face">₽</div></div><div class="coin" style="left:820px;top:330px;width:64px;height:64px;transform:perspective(600px) rotateX(35deg) rotateZ(-10deg);z-index:6"><div class="edge"></div><div class="face">₽</div></div>
+<div class="t"><div class="w">Притяни</div><div class="gold">деньги</div><div class="w">банка</div></div></div>
+<div class="v h"><div class="bg"></div><div class="glow" style="left:650px;top:0;width:720px;height:720px;background:radial-gradient(closest-side,rgba(255,200,40,.4),transparent)"></div>
+<div class="vault"></div><div class="card gcard"><div class="chip"></div><div class="nm">+1 000 ₽</div><div class="sheen"></div></div><svg class="door" width="220" height="580" viewBox="0 0 220 580"><defs><linearGradient id="dg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c2128"/><stop offset=".4" stop-color="#6b7480"/><stop offset=".55" stop-color="#cfd6de"/><stop offset=".7" stop-color="#4a525c"/><stop offset="1" stop-color="#14181d"/></linearGradient></defs><rect x="0" y="0" width="220" height="580" rx="40" fill="url(#dg)" stroke="#0b0e12" stroke-width="4"/><circle cx="110" cy="290" r="70" fill="none" stroke="#2a2f36" stroke-width="16"/><circle cx="110" cy="290" r="70" fill="none" stroke="#b9c1ca" stroke-width="6"/><rect x="106" y="200" width="8" height="40" fill="#d7dde3" transform="rotate(0 110 290)"/><rect x="106" y="200" width="8" height="40" fill="#d7dde3" transform="rotate(60 110 290)"/><rect x="106" y="200" width="8" height="40" fill="#d7dde3" transform="rotate(120 110 290)"/><rect x="106" y="200" width="8" height="40" fill="#d7dde3" transform="rotate(180 110 290)"/><rect x="106" y="200" width="8" height="40" fill="#d7dde3" transform="rotate(240 110 290)"/><rect x="106" y="200" width="8" height="40" fill="#d7dde3" transform="rotate(300 110 290)"/><circle cx="40" cy="60" r="9" fill="#d7dde3" stroke="#2a2f36" stroke-width="3"/><circle cx="180" cy="60" r="9" fill="#d7dde3" stroke="#2a2f36" stroke-width="3"/><circle cx="40" cy="520" r="9" fill="#d7dde3" stroke="#2a2f36" stroke-width="3"/><circle cx="180" cy="520" r="9" fill="#d7dde3" stroke="#2a2f36" stroke-width="3"/></svg>
+<div class="coin" style="left:760px;top:560px;width:100px;height:100px;transform:perspective(600px) rotateX(60deg) rotateZ(15deg);z-index:5"><div class="edge"></div><div class="face">₽</div></div><div class="coin" style="left:860px;top:600px;width:80px;height:80px;transform:perspective(600px) rotateX(65deg) rotateZ(-10deg);z-index:5"><div class="edge"></div><div class="face">₽</div></div><div class="coin" style="left:1110px;top:590px;width:90px;height:90px;transform:perspective(600px) rotateX(62deg) rotateZ(20deg);z-index:5"><div class="edge"></div><div class="face">₽</div></div>
+<div class="t"><div class="w">Банк</div><div class="w">платит</div><div class="gold">тебе</div></div><div class="plate" style="top:480px">5 способов</div></div>
+<div class="v i"><div class="bg"></div><div class="glow" style="left:700px;top:50px;width:700px;height:700px;background:radial-gradient(closest-side,rgba(61,220,132,.3),transparent)"></div>
+<svg class="u" width="520" height="640" viewBox="0 0 520 640" style="overflow:visible"><defs><linearGradient id="ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0d5a30"/><stop offset=".35" stop-color="#b8ffd8"/><stop offset=".55" stop-color="#3ddc84"/><stop offset="1" stop-color="#0a4022"/></linearGradient></defs><path d="M80 -200 V300 C80 420 170 470 240 470" stroke="#3a0610" stroke-width="96" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M80 -200 V300 C80 420 170 470 240 470" stroke="#d0142a" stroke-width="79" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M80 -200 V300 C80 420 170 470 240 470" stroke="#ff5a6a" stroke-width="48" transform="translate(-10,-8)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M80 -200 V300 C80 420 170 470 240 470" stroke="#ffc2c8" stroke-width="19" transform="translate(-19,-14)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M80 -200 V300 C80 420 170 470 240 470" stroke="#fff" stroke-width="6" opacity=".8" transform="translate(-23,-17)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M240 470 C320 470 400 420 400 300 V150" stroke="#06301a" stroke-width="96" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M240 470 C320 470 400 420 400 300 V150" stroke="#22b866" stroke-width="79" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M240 470 C320 470 400 420 400 300 V150" stroke="#6ff0a8" stroke-width="48" transform="translate(-10,-8)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M240 470 C320 470 400 420 400 300 V150" stroke="#d6ffe8" stroke-width="19" transform="translate(-19,-14)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M240 470 C320 470 400 420 400 300 V150" stroke="#fff" stroke-width="6" opacity=".8" transform="translate(-23,-17)" fill="none" stroke-linecap="butt" stroke-linejoin="round"/><path d="M400 30 L520 170 L280 170 Z" fill="url(#ah)" stroke="#06301a" stroke-width="4" stroke-linejoin="round"/></svg><div class="t"><div class="w">Разверни</div><div class="green">в свою</div><div class="green">пользу</div></div></div>
+<div class="grain"></div><div class="vig"></div>
+<script>const v = new URLSearchParams(location.search).get("v") || "f"; document.querySelector(".v." + v).classList.add("on");</script>
+</body></html>
