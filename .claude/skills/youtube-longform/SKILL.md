@@ -1,6 +1,6 @@
 ---
 name: youtube-longform
-description: "Production of full-length horizontal YouTube videos (6–15 min, 16:9) for the owner's channel about bank bonuses for 18–25: topic and title research, script with hook and open loops, owner's voice recording + VC, faceless motion-graphics editing in the style of the owner's chosen references, music/SFX, thumbnail, description, chapters, Shorts cut-downs, QA. Use for any task in youtube/ or any request for a 'ролик на ютуб', long-form video, YouTube script, thumbnail or title. For vertical Reels/Shorts use reel-production."
+description: "Production of full-length horizontal YouTube videos (8–20 min, target 12–15, 16:9) for the owner's channel about bank bonuses for 18–25: topic and title research, script with hook and open loops, owner's voice recording + VC, faceless motion-graphics editing in the style of the owner's chosen references, music/SFX, thumbnail, description, chapters, Shorts cut-downs, QA. Use for any task in youtube/ or any request for a 'ролик на ютуб', long-form video, YouTube script, thumbnail or title. For vertical Reels/Shorts use reel-production."
 ---
 
 # YouTube long-form production (this repo)
@@ -20,6 +20,16 @@ Layout: `youtube/<NN-slug>/` per video (e.g. `youtube/01-bonus-tierlist/`),
 with `script.md`, `rec/` (gitignored), `sections/<NN>/` builds, `out/`
 (gitignored), `thumb/`, `publish.md` (title, description, chapters, tags).
 
+## Length rule (owner, 2026-10-08): every video from #2 on is **8–20 min, aim for 12–15**
+
+- Pick topics that genuinely carry 12–15 min (several banks/steps/cases, a full walkthrough, a myth list
+  with proof) — never pad a 6-minute idea. If a topic only holds < 8 min, merge it with a related one.
+- Owner's measured pace (video #1, after cuts): **≈ 160 words/min** → 12 min ≈ 1 900 words,
+  13 min ≈ 2 100, 15 min ≈ 2 400. Write the script to the target, then time a read-through.
+- Long video ≠ slow video: sub-hook every ~3 min, open loop every 1.5–2 min, a chapter every 2–3 min
+  (5–7 chapters), payoff of the title promise in the last third.
+- Video #1 (bank tier list, ≈ 7 min) predates the rule and stays as is.
+
 ## 0. Approval gates (the owner wants to see before the full build)
 
 1. Topic + 3 title options + thumbnail idea → owner picks.
@@ -34,14 +44,14 @@ Never spend hours of render before gates 3–4.
 
 **Evening, together with the owner (≈ 30–40 min of his time):**
 1. Topic: he picks one (from the morning «3 темы» or his own). Claude replies with 3 titles + the script
-   (`script.md` by the 2026 checklist in §2, ≈ 1 200 words for 8 min) within ~20 min.
+   (`script.md` by the 2026 checklist in §2, ≈ 2 100 words for 13 min) within ~30 min.
 2. Visuals: Claude sends a stills sheet of 6–8 key scenes in the desk style + 3–4 thumbnails;
    the owner picks the thumbnail and says what to change. Bank logos/real numbers only if verified.
 3. Voice: he records the script in one file (retakes are fine — they are cut automatically) and sends it.
    **Claude starts the build immediately** — don't wait for the night routine.
 
 **Night pipeline (resumable; state in `youtube/<NN-slug>/night.json`: stage, timestamps, notes):**
-| Stage | Command / tool | ≈ time (7 min of speech) |
+| Stage | Command / tool | ≈ time (7 min of speech; ×1.9 for 13 min) |
 |---|---|---|
 | 1. Transcribe in chunks, find retakes/false starts | Whisper medium by pieces (as `words_v2m.json`) + `audit_voice.py` spots | 15 min |
 | 2. Edit voice without denoiser: cut retakes, keep the last clean take | `voice_v2.py edit` (CUTS from step 1) | 5 min |
@@ -50,7 +60,11 @@ Never spend hours of render before gates 3–4.
 | 5. Desk timeline from the words, stills check of every section | copy `build_desk.py` pattern, `render.js --stills` | 40 min |
 | 6. Music/SFX, full render in 4 parallel chunks, mix −14 LUFS | `audio.js`, `render.js`, `mix.sh` | 75 min |
 | 7. QA of the final file: re-transcribe the mix, frame sheet, loudness, duration; `publish.md` with chapters | | 15 min |
-Start by 23:00 MSK → ready ≈ 05:00. CPU has 4 cores: don't run two Whisper/VC jobs at once; the
+Whole pipeline ≈ 5 h for 7 min of speech, ≈ 9–9.5 h for 13 min, ≈ 10–11 h for 15 min. Latest voice
+arrival for a 07:00 delivery: 8 min → 23:00, 12–13 min → 21:30, 15 min → 21:00, 20 min → 19:30.
+If the voice comes later, say at once when the video will be ready. Speed-ups for long videos:
+first VC pass with 2 attempts [(1.0,0),(.85,0)], extra attempts/patches only for pieces < 0.95;
+render chunks while the final audit is read by hand. CPU has 4 cores: don't run two Whisper/VC jobs at once; the
 reels lab at 02:47 only does light work (web search, small experiments) while the build runs.
 **Morning deliverables:** `final.mp4` sent via SendUserFile, `thumbnail.jpg`, `publish.md` (title,
 description with chapters, ad-marking placeholders), list of what was cut/fixed in the voice and anything
@@ -86,8 +100,8 @@ that needs a re-record (meaning-changing slips must be reported, never silently 
 
 ## 2. Script (`script.md`)
 
-Length: the owner's reading pace × target minutes. References speak 143–174
-words/min; until measured on the owner, assume ~150 → 8 min ≈ 1200 words.
+Length: target 12–15 min (see «Length rule»). Owner's pace ≈ 160 words/min (measured on video #1)
+→ 13 min ≈ 2 100 words. References speak 143–174 words/min.
 
 Before writing (Kallaway, `youtube/references/tutorials.md`): packaging first (idea = viewer's pain,
 title fixed, thumbnail loose) → bullet outline where every point is checked for "is it new to the
