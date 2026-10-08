@@ -62,6 +62,10 @@ Never spend hours of render before gates 3–4.
    (`script.md` by the 2026 checklist in §2, ≈ 2 100 words for 13 min) within ~30 min.
 2. Visuals: Claude sends a stills sheet of 6–8 key scenes in the desk style + 3–4 thumbnails;
    the owner picks the thumbnail and says what to change. Bank logos/real numbers only if verified.
+   **Thumbnail rules from the owner (08.10):** it must hook — a metaphor or curiosity gap (mousetrap, bait on a hook,
+   «48 % → 0 %»), not a plain statement of fact; give 6+ variants. **No system emoji** («дешёвые смайлики» look cheap and
+   spoil the thumbnail). Any icon or object must be premium 3D: lit, with metal or glass materials, highlights and a real
+   shadow. Video #2: the owner liked v11 «Бонус — наживка?» (a card on a fishing hook).
 3. Voice: he records the script in one file (retakes are fine — they are cut automatically) and sends it.
    **Claude starts the build immediately** — don't wait for the night routine.
 

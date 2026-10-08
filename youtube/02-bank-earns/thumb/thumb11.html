@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №2 — «наживка»</title>
+<!-- thumb11.html?v=a|b|c → 1280×720. Выбор владельца — v11 «Бонус — наживка?»; без эмодзи, объекты — объёмные (металл, свет, тень). -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #03080b; color: #eef2f6; font-family: "Mont"; }
+  .bg { position: absolute; inset: 0; }
+  .water { background: radial-gradient(ellipse 70% 60% at 72% 30%, #0f4d5c 0%, #072a33 40%, #020a0e 100%); }
+  .studio { background: radial-gradient(ellipse 55% 70% at 74% 40%, #3a2a06 0%, #120d02 45%, #030405 100%); }
+  .rays { position: absolute; left: 500px; top: -200px; width: 900px; height: 1000px; opacity: .55; filter: blur(14px);
+    background: repeating-linear-gradient(100deg, rgba(160,240,255,.0) 0 40px, rgba(160,240,255,.22) 40px 70px, rgba(160,240,255,0) 70px 130px);
+    mask-image: linear-gradient(180deg, #000 0%, transparent 85%); -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 85%); transform: skewX(-12deg); }
+  .bub { position: absolute; border-radius: 50%; background: radial-gradient(circle at 32% 30%, rgba(255,255,255,.9) 0 8%, rgba(255,255,255,.08) 30%, rgba(160,240,255,.12) 70%, rgba(255,255,255,.5) 100%);
+    box-shadow: 0 0 12px rgba(160,240,255,.3); }
+  .grain { position: absolute; inset: 0; opacity: .07; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 45%, transparent 45%, rgba(0,0,0,.8)); pointer-events: none; }
+
+  .t { position: absolute; left: 64px; top: 150px; font: 900 104px/.98 "Unb"; text-transform: uppercase; letter-spacing: -.045em; z-index: 5; }
+  .t .w { color: #f3f6f9; text-shadow: 0 8px 0 rgba(0,0,0,.35), 0 0 40px rgba(0,0,0,.6); }
+  .t .gold { background: linear-gradient(180deg, #fff6c8 0%, #ffd84a 38%, #e3a10e 62%, #fff0a0 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 8px 0 rgba(0,0,0,.4)) drop-shadow(0 0 30px rgba(255,200,40,.45)); }
+  .plate { position: absolute; left: 66px; top: 450px; z-index: 5; padding: 12px 28px 16px; border-radius: 18px; transform: rotate(-2.5deg);
+    background: linear-gradient(180deg, #5cf0a0, #2bc272); color: #04140b; font: 900 50px "Unb"; text-transform: uppercase; letter-spacing: -.02em;
+    box-shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.5); }
+
+  /* леска, крючок, карта */
+  .line { position: absolute; left: 1168px; top: -10px; width: 3px; height: 62px; background: linear-gradient(180deg, rgba(220,240,250,.2), rgba(235,245,250,.95)); box-shadow: 0 0 10px rgba(200,240,255,.6); z-index: 3; }
+  svg.hook { position: absolute; left: 1025px; top: 36px; z-index: 4; filter: drop-shadow(10px 18px 14px rgba(0,0,0,.55)); }
+  .cw { position: absolute; left: 700px; top: 330px; z-index: 2; transform: perspective(1400px) rotateY(-22deg) rotateX(10deg) rotateZ(-13deg); transform-origin: 70% 10%; }
+  .card { position: relative; width: 500px; height: 316px; border-radius: 30px; overflow: hidden; padding: 34px;
+    background: linear-gradient(135deg, #fff2b0 0%, #ffd84a 22%, #d99a0b 55%, #8a5a00 78%, #e6b73a 100%);
+    box-shadow: 0 50px 90px rgba(0,0,0,.65), 0 0 120px rgba(255,200,40,.28), inset 0 3px 0 rgba(255,255,255,.6), inset 0 -4px 0 rgba(0,0,0,.25); }
+  .card .chip { width: 76px; height: 58px; border-radius: 12px; background: linear-gradient(135deg, #f8ecc0, #b99442 60%, #e8d28c); box-shadow: inset 0 0 0 2px rgba(0,0,0,.18); }
+  .card .lb { position: absolute; left: 34px; top: 118px; font: 800 26px "Mont"; letter-spacing: 6px; color: rgba(60,35,0,.75); text-transform: uppercase; }
+  .card .sum { position: absolute; left: 30px; bottom: 26px; font: 900 82px/1 "Unb"; letter-spacing: -.04em; color: #2a1800;
+    text-shadow: 0 2px 0 rgba(255,240,180,.7), 0 -1px 0 rgba(0,0,0,.25); }
+  .card .hole { position: absolute; right: 52px; top: 28px; width: 46px; height: 46px; border-radius: 50%; background: #03080b; box-shadow: inset 0 4px 8px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.5); }
+  .card .sheen { position: absolute; inset: 0; background: linear-gradient(112deg, transparent 28%, rgba(255,255,255,.65) 42%, transparent 54%); mix-blend-mode: overlay; }
+  .card .brush { position: absolute; inset: 0; opacity: .18; background: repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 1px, transparent 1px 3px); mix-blend-mode: overlay; }
+  .front { position: absolute; z-index: 6; left: 1025px; top: 36px; filter: drop-shadow(4px 8px 6px rgba(0,0,0,.5)); }
+  .v { display: none; } .v.on { display: block; }
+  .studio-only, .water-only { display: none; }
+  body.studio .studio-only, body.water .water-only { display: block; }
+</style>
+</head>
+<body>
+<div class="bg water water-only"></div><div class="bg studio studio-only"></div>
+<div class="rays water-only"></div>
+<div class="water-only">
+  <div class="bub" style="left:1150px;top:520px;width:34px;height:34px"></div><div class="bub" style="left:1185px;top:455px;width:20px;height:20px"></div>
+  <div class="bub" style="left:1160px;top:410px;width:14px;height:14px"></div><div class="bub" style="left:640px;top:600px;width:26px;height:26px"></div>
+  <div class="bub" style="left:668px;top:560px;width:14px;height:14px"></div><div class="bub" style="left:560px;top:120px;width:18px;height:18px"></div>
+</div>
+<div class="studio-only" style="position:absolute;left:640px;top:0;width:700px;height:720px;background:radial-gradient(closest-side,rgba(255,200,40,.25),transparent);filter:blur(20px)"></div>
+
+<div class="t"><div class="w">Бонус —</div><div class="gold">наживка?</div></div>
+<div class="plate" id="plate">как не клюнуть</div>
+
+<div class="line"></div>
+<!-- крючок: металл (градиент поперёк), блик, жало с бородкой; нижний изгиб проходит через отверстие карты -->
+<svg class="hook" width="300" height="430" viewBox="0 0 300 430">
+  <defs>
+    <linearGradient id="met" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#59616c"/><stop offset=".3" stop-color="#f4f7fa"/><stop offset=".5" stop-color="#9aa3ae"/><stop offset=".72" stop-color="#e6ebf0"/><stop offset="1" stop-color="#3f4650"/></linearGradient>
+    <linearGradient id="met2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef2f6"/><stop offset=".5" stop-color="#8a939e"/><stop offset="1" stop-color="#d7dde3"/></linearGradient>
+  </defs>
+  <circle cx="145" cy="34" r="20" fill="none" stroke="url(#met2)" stroke-width="10"/>
+  <path d="M145 54 V250" stroke="url(#met)" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M146 60 V246" stroke="rgba(255,255,255,.75)" stroke-width="3" fill="none"/>
+</svg>
+<svg class="front" width="300" height="430" viewBox="0 0 300 430">
+  <defs>
+    <linearGradient id="metB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef2f6"/><stop offset=".35" stop-color="#8a939e"/><stop offset=".6" stop-color="#f6f9fb"/><stop offset="1" stop-color="#4a525c"/></linearGradient>
+  </defs>
+  <path d="M145 246 C145 345 52 350 52 262 L52 214" stroke="url(#metB)" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M52 214 L44 250 L70 236 Z" fill="#dfe5eb" stroke="#7b848f" stroke-width="2"/>
+  <path d="M138 270 C134 330 66 330 62 268" stroke="rgba(255,255,255,.8)" stroke-width="3" fill="none"/>
+</svg>
+<div class="cw"><div class="card"><div class="chip"></div><div class="lb">бонус</div><div class="sum">+1 000 ₽</div><div class="hole"></div><div class="brush"></div><div class="sheen"></div></div></div>
+
+<div class="grain"></div><div class="vig"></div>
+<script>
+  const v = new URLSearchParams(location.search).get("v") || "a";
+  document.body.classList.add(v === "c" ? "studio" : "water");
+  if (v !== "a") document.getElementById("plate").style.display = "none";
+  if (v === "b" || v === "c") { const t = document.querySelector(".t"); t.style.top = "150px"; t.style.fontSize = "104px"; }
+</script>
+</body>
+</html>
