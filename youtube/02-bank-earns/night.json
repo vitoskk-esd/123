@@ -1,1 +1,9 @@
-{"video": "02-bank-earns", "stage": "transcribe", "voice_received": "2026-10-08T17:12Z", "engine": "studio v6", "notes": []}
+{
+ "video": "02-bank-earns",
+ "stage": "voice: edit → vcfast → vc → composite → build → audit",
+ "voice_received": "2026-10-08T17:12Z",
+ "engine": "studio v6",
+ "notes": [
+  "16 cuts (retakes/false starts); numbers 3800 and 1200 verified on short clips"
+ ]
+}
