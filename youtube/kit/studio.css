@@ -137,3 +137,62 @@ html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05060
 .flw .ar i { position: relative; display: block; width: 100%; height: 14px; border-radius: 7px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 30%, transparent), var(--c)); box-shadow: 0 0 30px color-mix(in srgb, var(--c) 50%, transparent); }
 .flw .ar i::after { content: ""; position: absolute; right: -26px; top: -17px; border: 24px solid transparent; border-left: 30px solid var(--c); border-right: 0; }
 .flw .ar em { position: absolute; top: -9px; width: 32px; height: 32px; margin-left: -16px; border-radius: 50%; background: #fff; box-shadow: 0 0 30px var(--c), 0 0 60px var(--c); }
+
+/* ---------- вертикаль 9:16 (рилсы): body.v; сцены занимают верх, низ — субтитры; справа ~120 px и снизу ~300 px — интерфейс Reels ---------- */
+.v .sc { inset: 150px 0 620px 0; }
+.v .kin { padding: 0 70px; }
+.v .kin .sub { font-size: 36px; }
+.v .cnt .big { font-size: 230px; }
+.v .cnt .lab { font-size: 38px; max-width: 900px; text-align: center; }
+.v .ph3 { flex-direction: column; gap: 70px; }
+.v .phone3 { width: 420px; height: 720px; padding-top: 220px; }
+.v .ph3 .side { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 0 22px; max-width: 960px; }
+.v .ph3 .sd { font-size: 60px; }
+.v .crd { flex-direction: column; gap: 70px; }
+.v .card3 { width: 680px; height: 430px; }
+.v .crd .ttl span { font-size: 84px; max-width: 700px; }
+.v .crd .ttl .n { font-size: 300px; }
+.v .spl .cols { flex-direction: column; gap: 26px; }
+.v .spl .col { width: 880px; padding: 40px 50px; }
+.v .spl .st { font-size: 56px; text-align: center; padding: 0 60px; }
+.v .spl .mid { font-size: 70px; }
+.v .brs { padding: 0 70px; gap: 40px; }
+.v .brs .bt { font-size: 54px; }
+.v .brs .br { grid-template-columns: 1fr 300px; row-gap: 14px; }
+.v .brs .bl { grid-column: 1 / -1; font-size: 40px; }
+.v .lst { padding: 0 70px; gap: 28px; }
+.v .lst .lt { font-size: 60px; }
+.v .lst .li { font-size: 48px; gap: 28px; }
+.v .lst .mk { width: 84px; height: 84px; font-size: 44px; }
+.v .scal .grid { left: 100px; top: 300px; width: 880px; }
+.v .scal .grid i { height: 112px; }
+.v .scal .ct { top: 120px; font-size: 56px; }
+.v .calc2 { padding: 0 70px; font-size: 54px; letter-spacing: -1px; }
+.v .calc2 .cr { font-size: 140px; }
+.v .cht { padding: 0 60px; gap: 24px; }
+.v .cht .bb { max-width: 900px; font-size: 56px; padding: 28px 38px; }
+.v .tbl2 { padding: 0 50px; }
+.v .tbl2 .th, .v .tbl2 .tr { grid-template-columns: 1fr 60px 1fr; }
+.v .tbl2 .tr { font-size: 44px; padding: 22px 0; }
+.v .tbl2 .th { font-size: 24px; letter-spacing: 2px; }
+.v .stp .sbox { max-width: 960px; padding: 36px 50px; }
+.v .stp .sbox b { font-size: 92px; }
+.v .stp .sbox span { font-size: 36px; }
+.v .tgs { flex-direction: column; gap: 50px; }
+.v .tgc { width: 940px; }
+.v .tgs .lk { text-align: center; max-width: 940px; font-size: 72px; }
+.v .flw { gap: 40px; }
+.v .flw .row { flex-direction: column; }
+.v .flw .nd { width: 640px; padding: 30px; }
+.v .flw .ar { width: auto; height: 190px; padding: 10px 0 34px; flex-direction: row-reverse; gap: 26px; }
+.v .flw .ar i { width: 14px; height: 100%; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 30%, transparent), var(--c)); }
+.v .flw .ar i::after { right: auto; left: -17px; top: auto; bottom: -26px; border: 24px solid transparent; border-top: 30px solid var(--c); border-bottom: 0; }
+.v .flw .ar em { left: -9px !important; margin: -16px 0 0; }
+.v .flw .ar span { width: 300px; }
+/* субтитры и прогресс */
+#cap { position: absolute; left: 60px; right: 140px; top: 1370px; text-align: center; font: 900 82px/1.08 "Unb"; text-transform: uppercase; letter-spacing: -.02em;
+  color: #eef2f6; text-shadow: 0 6px 30px rgba(0,0,0,.85), 0 0 2px #000; transform-origin: 50% 50%; }
+#cap span { display: inline-block; transform-origin: 50% 70%; opacity: .55; }
+#cap span.on { opacity: 1; color: #3ddc84; text-shadow: 0 0 30px rgba(61,220,132,.55), 0 6px 30px rgba(0,0,0,.85); }
+#prog { position: absolute; left: 0; right: 0; top: 0; height: 10px; background: rgba(255,255,255,.08); }
+#prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ddc84, #4aa8ff); box-shadow: 0 0 20px rgba(61,220,132,.6); }

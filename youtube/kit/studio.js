@@ -16,6 +16,8 @@
   const fmt = (v) => Math.round(Math.abs(v)).toLocaleString("ru-RU").replace(/\s/g, " ");
   const ACC = { g: "#3ddc84", r: "#ff4d5e", y: "#ffd84a", b: "#4aa8ff", v: "#b77cff", w: "#eef2f6" };
   const acc = (c) => ACC[c] || c || ACC.g;
+  // формат: TL.size = [ширина, высота]; по умолчанию 1920×1080, вертикаль 1080×1920 — рилсы (класс .v на body)
+  const VW = () => (window.TL.size || [1920, 1080])[0], VH = () => (window.TL.size || [1920, 1080])[1], VERT = () => VH() > VW();
 
   // ---------- сцены ----------
   const S = {};
@@ -26,8 +28,8 @@
     tick: (el, s, t) => {
       if (!el.dataset.fit) {   // подгонка: самая длинная строка не шире 1600 px
         el.dataset.fit = 1; let fs = s.size || 150;
-        for (let i = 0; i < 6; i++) { const mx = Math.max(...[...el.querySelectorAll(".ln")].map(l => l.scrollWidth)); if (mx <= 1600) break;
-          fs = Math.floor(fs * Math.min(.97, 1600 / mx)); el.style.setProperty("--fs", `${fs}px`); } }
+        for (let i = 0; i < 6; i++) { const mx = Math.max(...[...el.querySelectorAll(".ln")].map(l => l.scrollWidth)); const lim = VW() - (VERT() ? 140 : 320); if (mx <= lim) break;
+          fs = Math.floor(fs * Math.min(.97, lim / mx)); el.style.setProperty("--fs", `${fs}px`); } }
       el.querySelectorAll(".w").forEach((w, i) => { const a = +w.dataset.a, k = out5((t - a) / .5);
         w.style.transform = `translateY(${(1 - k) * 105}%) rotate(${(1 - k) * 4}deg)`; w.style.opacity = t < a ? 0 : 1;
         if (w.classList.contains("ac")) { const g = out3((t - a - .15) / .5); w.style.textShadow = `0 0 ${40 * g}px color-mix(in srgb, var(--c) ${60 * g}%, transparent)`; } });
@@ -104,7 +106,7 @@
     build: (s) => $(`<div class="sc scal"><div class="grid">${Array.from({ length: s.days || 35 }, (_, i) => `<i data-d="${i + 1}">${(i % 31) + 1}</i>`).join("")}</div>${(s.marks || []).map(m => `<div class="cm" data-a="${m.at}" data-d="${m.d}" style="--c:${acc(m.c)}">${m.text}</div>`).join("")}${s.title ? `<div class="ct">${s.title}</div>` : ""}</div>`),
     tick: (el, s, t) => { const n = Math.round((s.to - s.from + 1) * io3((t - s.a) / (s.b - s.a)));
       el.querySelectorAll("i").forEach(e => { const d = +e.dataset.d; e.className = d >= s.from && d < s.from + n ? "on" : (d === s.to + 1 && t >= s.b ? "end" : ""); });
-      el.querySelectorAll(".cm").forEach(m => { const a = +m.dataset.a, k = out5((t - a) / .4), d = +m.dataset.d - 1; m.style.left = `${560 + (d % 7) * 116}px`; m.style.top = `${190 + Math.floor(d / 7) * 116 - 40}px`;
+      el.querySelectorAll(".cm").forEach(m => { const a = +m.dataset.a, k = out5((t - a) / .4), d = +m.dataset.d - 1; const [gx, gy, st] = VERT() ? [100, 300, 128] : [560, 190, 116]; m.style.left = `${gx + (d % 7) * st}px`; m.style.top = `${gy + Math.floor(d / 7) * st - 40}px`;
         m.style.opacity = clamp((t - a) / .2); m.style.transform = `translateY(${(1 - k) * -30}px) scale(${lerp(1.3, 1, k)})`; }); },
   };
   // расчёт: s.lines [{t, at}], s.res {v, at, c}
@@ -129,9 +131,9 @@
     build: (s) => $(`<div class="sc stp" style="--c:${acc(s.c || "r")}"><div class="sbox"><b>${s.text}</b>${s.sub ? `<span>${s.sub}</span>` : ""}</div></div>`),
     tick: (el, s, t) => { const k = out5((t - s.at) / .22), b = el.querySelector(".sbox"); b.style.opacity = t < s.at ? 0 : 1; b.style.transform = `rotate(-4deg) scale(${lerp(2.2, 1, k)})`; },
   };
-  // пост Telegram (CTA): s.name, s.post, s.items [{t, at}], s.link
+  // пост Telegram (CTA): s.name, s.text, s.items [{t, at}], s.link
   S.tg = {
-    build: (s) => $(`<div class="sc tgs"><div class="tgc"><div class="hd"><div class="av">₽</div><div><b>${s.name}</b><small>канал · ссылка в описании</small></div></div><div class="pst">${s.post}</div>${(s.items || []).map(i => `<div class="it" data-a="${i.at}">${i.t}</div>`).join("")}</div>${s.link ? `<div class="lk" data-a="${s.link.at}">${s.link.t}</div>` : ""}</div>`),
+    build: (s) => $(`<div class="sc tgs"><div class="tgc"><div class="hd"><div class="av">₽</div><div><b>${s.name}</b><small>${s.sub || (VERT() ? "канал · ссылка в профиле" : "канал · ссылка в описании")}</small></div></div><div class="pst">${s.text}</div>${(s.items || []).map(i => `<div class="it" data-a="${i.at}">${i.t}</div>`).join("")}</div>${s.link ? `<div class="lk" data-a="${s.link.at}">${s.link.t}</div>` : ""}</div>`),
     tick: (el, s, t) => { const c = el.querySelector(".tgc"), k = out5((t - s.t0) / .6); c.style.transform = `perspective(1600px) rotateX(${(1 - k) * 25}deg) rotateY(-8deg) translateY(${(1 - k) * 160}px)`; c.style.opacity = k;
       el.querySelectorAll("[data-a]").forEach(i => { const a = +i.dataset.a, kk = out5((t - a) / .4); i.style.opacity = clamp((t - a) / .2); i.style.transform = `translateY(${(1 - kk) * 24}px)`; }); },
   };
@@ -143,8 +145,9 @@
       `<div class="nd" data-a="${n.at}" style="--c:${acc(n.c || "w")}"><b>${n.t}</b>${n.sub ? `<small>${n.sub}</small>` : ""}</div>${i < s.nodes.length - 1 ? `<div class="ar" data-a="${s.arrows[i].at}" style="--c:${acc(s.arrows[i].c)}"><span>${s.arrows[i].t}</span><i><em></em></i></div>` : ""}`).join("")}</div></div>`),
     tick: (el, s, t) => {
       el.querySelectorAll(".nd").forEach(n => { const a = +n.dataset.a, k = out5((t - a) / .5); n.style.opacity = clamp((t - a) / .2); n.style.transform = `scale(${lerp(.7, 1, k)}) translateY(${(1 - k) * 40}px)`; });
-      el.querySelectorAll(".ar").forEach(r => { const a = +r.dataset.a, k = io3((t - a) / .6); r.querySelector("i").style.clipPath = `inset(-30px ${(1 - k) * 100}% -30px 0)`;
-        r.querySelector("span").style.opacity = clamp((t - a - .3) / .3); const e = r.querySelector("em"); e.style.left = `${((t - a) * 45) % 100}%`; e.style.opacity = k >= 1 ? 1 : 0; });
+      el.querySelectorAll(".ar").forEach(r => { const a = +r.dataset.a, k = io3((t - a) / .6), v = VERT();
+        r.querySelector("i").style.clipPath = v ? `inset(0 -30px ${(1 - k) * 100}% -30px)` : `inset(-30px ${(1 - k) * 100}% -30px 0)`;
+        r.querySelector("span").style.opacity = clamp((t - a - .3) / .3); const e = r.querySelector("em"); e.style[v ? "top" : "left"] = `${((t - a) * 45) % 100}%`; e.style.opacity = k >= 1 ? 1 : 0; });
       const ft = el.querySelector(".ft"); if (ft) ft.style.opacity = out5((t - s.t0) / .4);
     },
   };
@@ -154,7 +157,7 @@
     const o1 = document.getElementById("orb1"), o2 = document.getElementById("orb2");
     o1.style.background = `radial-gradient(closest-side, ${c1}, transparent)`; o2.style.background = `radial-gradient(closest-side, ${c2}, transparent)`;
     o1.style.transform = `translate(${-200 + 160 * Math.sin(t * .17)}px, ${-120 + 90 * Math.cos(t * .21)}px) scale(${1 + .08 * Math.sin(t * .3)})`;
-    o2.style.transform = `translate(${1100 + 140 * Math.cos(t * .13)}px, ${380 + 110 * Math.sin(t * .19)}px) scale(${1 + .1 * Math.cos(t * .27)})`;
+    o2.style.transform = `translate(${VW() - 820 + 140 * Math.cos(t * .13)}px, ${VH() - 700 + 110 * Math.sin(t * .19)}px) scale(${1 + .1 * Math.cos(t * .27)})`;
     document.getElementById("grain").style.backgroundPosition = `${(hsh(Math.floor(t * 24)) * 200) | 0}px ${(hsh(Math.floor(t * 24) + 9) * 200) | 0}px`;
   }
   const mix = (a, b, k) => { const h = (c) => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const x = h(a), y = h(b); return `rgb(${x.map((v, i) => Math.round(v + (y[i] - v) * k)).join(",")})`; };
@@ -163,7 +166,33 @@
   // и document.fonts.ready в render.js дождётся их
   ["900 100px Unb", "700 40px Mont", "800 40px Mono"].forEach(f => document.fonts.load(f));
   const ELS = new Map();
+  // субтитры по словам (рилсы): TL.caps [{w, a, d}] -> куски по 1–3 слова, текущее слово подсвечено и «подпрыгивает»
+  let CAPS = null;
+  function capsChunks(ws) {
+    const out = []; let cur = [];
+    ws.forEach((w, i) => { cur.push(w); const nx = ws[i + 1], gap = nx ? nx.a - (w.a + w.d) : 9;
+      if (cur.length >= 3 || /[.,!?—:]$/.test(w.w) || gap > .3 || !nx) { out.push(cur); cur = []; } });
+    return out.map(c => ({ a: c[0].a, b: c[c.length - 1].a + c[c.length - 1].d, ws: c }));
+  }
+  function setup() {
+    if (document.body.dataset.ok) return; document.body.dataset.ok = 1;
+    const W = VW(), H = VH(); [document.documentElement, document.body].forEach(e => { e.style.width = `${W}px`; e.style.height = `${H}px`; });
+    if (VERT()) document.body.classList.add("v");
+    if (window.TL.caps) { CAPS = capsChunks(window.TL.caps); document.body.appendChild($(`<div id="cap"></div>`)); }
+    if (window.TL.progress) document.body.appendChild($(`<div id="prog"><i></i></div>`));
+  }
+  function captions(t) {
+    const box = document.getElementById("cap"); if (!box) return;
+    const ch = CAPS.find(c => t >= c.a - .05 && t < c.b + .25);
+    const key = ch ? ch.a : "";
+    if (box.dataset.k !== String(key)) { box.dataset.k = key; box.innerHTML = ch ? ch.ws.map(w => `<span data-a="${w.a}">${w.w.replace(/[.,!?:;]$/, "")}</span>`).join(" ") : ""; }
+    if (!ch) return;
+    const k = out5((t - ch.a) / .18); box.style.transform = `translateY(${(1 - k) * 30}px) scale(${lerp(.9, 1, k)})`; box.style.opacity = clamp((t - ch.a + .05) / .1);
+    box.querySelectorAll("span").forEach(s => { const a = +s.dataset.a, on = t >= a, kk = out5((t - a) / .2);
+      s.classList.toggle("on", on); s.style.transform = on ? `scale(${lerp(1.18, 1, kk)})` : ""; });
+  }
   window.renderAt = (t) => {
+    setup();
     const TL = window.TL, stage = document.getElementById("stage");
     let cur = null;
     for (const s of TL.scenes) {
@@ -195,5 +224,7 @@
     // общий толчок камеры на долях (TL.kick)
     let kick = 1; for (const k of TL.kick || []) { const d = t - k.t; if (d >= 0 && d < .4) kick *= 1 + (k.a || .04) * (1 - out3(d / .4)); }
     stage.style.transform = `scale(${kick})`;
+    if (CAPS) captions(t);
+    const pg = document.querySelector("#prog i"); if (pg) pg.style.width = `${100 * clamp(t / TL.duration)}%`;
   };
 })();
