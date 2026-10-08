@@ -45,6 +45,7 @@ PATCH_SPANS = [(73.28, 77.6, "Где-то один балл равен рубл�
                (393.62, 395.95, "Это разовый бонус новым клиентам…"), (396.40, 399.98, "Ссылки на карты… ссылка в описании"),
                (89.10, 91.45, "если бонус нельзя получить рублями"), (135.95, 139.85, "А вот где банки платят сразу и заметно больше…"),
                (241.80, 245.80, "у многих программ есть лимиты на количество друзей"), (331.75, 334.90, "Допустим, тебе 18 и у тебя нет ничего…")]
+PATCH_ATTEMPTS2 = [(1.0, 3), (.85, 3), (1.0, 4), (.85, 4), (.9, 5), (.8, 6)]
 PATCH_ATTEMPTS = [(1.0, 0), (.85, 0), (1.0, 1), (.85, 1), (.75, 0), (.9, 2)]
 # попытки: (замедление входа VC, seed). vc_lab: без шумодава лучше всегда; замедление ×0.85 помогает быстрым фразам,
 # но портит часть других — поэтому пробуем оба и берём самую разборчивую (Whisper medium против исходника)
@@ -225,13 +226,18 @@ def patch():
     for x0, x1, why in PATCH_SPANS:
         x, y = snap(a, x0 - .05, .2), snap(a, x1 + .05, .2)
         key = f"{x:.2f}-{y:.2f}"
-        if key in meta["patches"]: continue
+        force = any(f in why for f in os.environ.get("PATCH_FORCE", "").split("|") if f)
+        if key in meta["patches"] and not force: continue
+        if os.environ.get("PATCH_FORCE") and not force: continue
         want = " ".join(w["w"] for w in tr(a[int(x * SR):int(y * SR)]))
         base = V.similarity(want, tr(cur[int(x * SR):int(y * SR)]))
         xa, ya = max(0, x - .3), y + .3
         src = os.path.join(PD, f"src_{key}.wav"); sf.write(src, a[int(xa * SR):int(ya * SR)], SR)
-        best = (base, None)
-        for tempo, seed in PATCH_ATTEMPTS:
+        old = meta["patches"].get(key) or {}
+        best = (old["sim"], old["file"]) if old.get("file") and old.get("sim", 0) > base else (base, None)
+        # повторный прицельный проход (PATCH_FORCE): новые seed, старый лучший результат сохраняется
+        attempts = PATCH_ATTEMPTS2 if force else PATCH_ATTEMPTS
+        for tempo, seed in attempts:
             vin = src
             if tempo != 1.0:
                 vin = src[:-4] + f".t{int(tempo * 100)}.wav"; subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-af", f"atempo={tempo}", vin], check=True)
