@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Прототип B — 3D-мир</title>
+<!-- Направление B: «3D-мир» (Kurzgesagt / Apple). Одна сцена three.js: кредитка, телефон с банком, стопка монет-долга.
+     Платёж улетает из стопки, потом проценты каждый день докладывают монеты обратно. Камера летает внутри сцены; текст — HTML поверх. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #050607; }
+  canvas { position: absolute; inset: 0; }
+  .ov { position: absolute; z-index: 5; opacity: 0; }
+  #t1 { left: 110px; top: 120px; font: 900 108px/.98 "Unb"; color: #f3f6f9; text-transform: uppercase; letter-spacing: -.04em; text-shadow: 0 10px 40px rgba(0,0,0,.8); }
+  #t1 em { font-style: normal; display: block; background: linear-gradient(180deg, #ff8a95, #ff4d5e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .chip { padding: 18px 32px; border-radius: 22px; font: 800 44px "Mont"; color: #04140b; background: linear-gradient(180deg, #5cf0a0, #2bc272); box-shadow: 0 18px 40px rgba(0,0,0,.5); }
+  #ok { left: 1180px; top: 210px; }
+  #cnt { left: 110px; top: 300px; text-align: left !important; text-align: right; color: #f3f6f9; font: 700 34px "Mont"; text-shadow: 0 6px 30px rgba(0,0,0,.8); }
+  #cnt b { display: block; font: 900 120px "Unb"; color: #ff4d5e; letter-spacing: -.03em; text-shadow: 0 0 50px rgba(255,77,94,.45); }
+  #cnt small { display: block; font: 600 24px "Mont"; color: #9aa5b1; margin-top: 6px; }
+  #q { left: 0; right: 0; top: 96px; text-align: center; font: 800 66px "Mont"; color: #f3f6f9; text-shadow: 0 8px 30px rgba(0,0,0,.9); }
+  #q span { position: relative; }
+  #q span i { position: absolute; left: -8px; right: -8px; top: 52%; height: 10px; background: #ff4d5e; border-radius: 5px; transform-origin: 0 50%; transform: scaleX(0); }
+  #a { left: 0; right: 0; top: 196px; text-align: center; font: 900 54px "Unb"; color: #ff4d5e; letter-spacing: -.02em; text-shadow: 0 8px 30px rgba(0,0,0,.9); }
+  #chap { left: 70px; bottom: 56px; font: 700 26px "Mont"; color: #e9eef3; letter-spacing: .04em; display: flex; gap: 16px; align-items: center; opacity: 1; }
+  #chap i { width: 54px; height: 6px; background: #ffd84a; border-radius: 3px; }
+  .vig { position: absolute; inset: 0; z-index: 4; background: radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,.65)); pointer-events: none; }
+  .grain { position: absolute; inset: -50%; z-index: 6; opacity: .06; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style>
+<script type="importmap">{ "imports": { "three": "../../../../youtube/kit/vendor/three/three.module.min.js", "three/addons/": "../../../../youtube/kit/vendor/three/addons/" } }</script>
+</head>
+<body>
+<div class="vig"></div><div class="grain" id="grain"></div>
+<div class="ov" id="t1">Главная ловушка<em id="t1b">минимальный платёж</em></div>
+<div class="ov chip" id="ok">Просрочки нет ✓</div>
+<div class="ov" id="cnt">проценты на остаток<b id="cntv">+0 ₽</b><small>+37 ₽ каждый день · 48 % годовых · пример</small></div>
+<div class="ov" id="q">Минимальный платёж — это не <span>«всё нормально»<i id="strike"></i></span></div>
+<div class="ov" id="a">Это ты платишь банку за то, что не вернул всё</div>
+<div class="ov" id="chap"><i></i>СПОСОБ 1 · ПРОЦЕНТЫ ПО КРЕДИТКЕ</div>
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+window.TL = { duration: 15.4, fps: 30, size: [1920, 1080] };
+const W = 1920, H = 1080;
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)), lerp = (a, b, k) => a + (b - a) * k;
+const io3 = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const out5 = (x) => 1 - Math.pow(1 - clamp(x), 5), out3 = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const outBack = (x) => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setPixelRatio(1); r.setSize(W, H);
+r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.0;
+r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(r.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x07080a); scene.fog = new THREE.Fog(0x07080a, 14, 34);
+const pm = new THREE.PMREMGenerator(r);
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = .45;
+const cam = new THREE.PerspectiveCamera(30, W / H, .1, 100);
+
+// свет: ключевой тёплый сверху-слева, контровой холодный, мягкий заполняющий
+const key = new THREE.SpotLight(0xfff1dc, 260, 40, .55, .6, 1.4); key.position.set(-6, 11, 7); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -.0004; scene.add(key, key.target);
+const rim = new THREE.SpotLight(0x6fb8ff, 90, 40, .6, .7, 1.4); rim.position.set(8, 6, -8); scene.add(rim, rim.target);
+scene.add(new THREE.HemisphereLight(0x8090a0, 0x101010, .35));
+
+// пол: тёмный глянцевый
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshPhysicalMaterial({ color: 0x0d0f12, roughness: .32, metalness: .2, clearcoat: .6, clearcoatRoughness: .3 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+function canvasTex(w, h, draw) { const c = document.createElement("canvas"); c.width = w; c.height = h; const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.redraw = (...a) => { draw(c.getContext("2d"), w, h, ...a); t.needsUpdate = true; }; t.redraw(); return t; }
+const font = (w, s, f = "Mont") => `${w} ${s}px ${f}`;
+
+// ---------- кредитка ----------
+const cardTex = canvasTex(1024, 646, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, "#2a2f38"); gr.addColorStop(.55, "#14171c"); gr.addColorStop(1, "#30353f");
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.strokeStyle = "rgba(255,255,255,.05)"; for (let i = 0; i < 40; i++) { g.beginPath(); g.arc(w * .85, h * 1.1, 120 + i * 18, 0, 7); g.stroke(); }
+  const cg = g.createLinearGradient(0, 0, 0, 100); cg.addColorStop(0, "#f6dc8a"); cg.addColorStop(1, "#b88a2c"); g.fillStyle = cg;
+  g.beginPath(); g.roundRect(90, 230, 150, 115, 18); g.fill();
+  g.fillStyle = "#e9eef3"; g.font = font(700, 54, "Mono"); g.fillText("2200  ••••  ••••  2026", 90, 470);
+  g.font = font(900, 64, "Unb"); g.fillStyle = "#ff4d5e"; g.fillText("CREDIT", 90, 140); g.font = font(600, 34); g.fillStyle = "#9aa5b1"; g.fillText("до 30 000 ₽", 92, 560);
+});
+const card = new THREE.Mesh(new RoundedBoxGeometry(3.4, .06, 2.14, 4, .1), [
+  new THREE.MeshPhysicalMaterial({ color: 0x1b1e24, metalness: .8, roughness: .3 }), new THREE.MeshPhysicalMaterial({ color: 0x1b1e24, metalness: .8, roughness: .3 }),
+  new THREE.MeshPhysicalMaterial({ map: cardTex, metalness: .55, roughness: .28, clearcoat: 1, clearcoatRoughness: .08 }), new THREE.MeshPhysicalMaterial({ color: 0x15181d, metalness: .6, roughness: .4 }),
+  new THREE.MeshPhysicalMaterial({ color: 0x1b1e24, metalness: .8, roughness: .3 }), new THREE.MeshPhysicalMaterial({ color: 0x1b1e24, metalness: .8, roughness: .3 })]);
+card.castShadow = true; card.position.set(-4.2, .6, 1.2); scene.add(card);
+
+// ---------- телефон с экраном-текстурой ----------
+const scr = canvasTex(600, 1240, (g, w, h, st = {}) => {
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#f5f6f8"); gr.addColorStop(1, "#e7eaef"); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = "#000"; g.beginPath(); g.roundRect(w / 2 - 80, 22, 160, 44, 22); g.fill();
+  g.fillStyle = "#7b828c"; g.font = font(600, 28); g.fillText("Кредитная карта", 44, 170);
+  g.fillStyle = "#13161b"; g.font = font(800, 76); g.fillText(st.paid ? "−28 500 ₽" : "−30 000 ₽", 40, 252);
+  const tile = (y, a, b, c) => { g.fillStyle = "#fff"; g.beginPath(); g.roundRect(30, y, w - 60, 150, 30); g.fill(); g.fillStyle = "#6a717c"; g.font = font(600, 28); g.fillText(a, 62, y + 56);
+    g.fillStyle = c || "#13161b"; g.font = font(800, 44); g.fillText(b, 62, y + 112); };
+  tile(320, "Платёж до 25.10", st.paid ? "Внесён ✓" : "1 500 ₽", st.paid ? "#1a9d57" : null); tile(490, "Льготный период", "закончился");
+  if (st.push > 0) { const y = -230 + 330 * st.push; g.fillStyle = "rgba(255,255,255,.97)"; g.shadowColor = "rgba(0,0,0,.25)"; g.shadowBlur = 30; g.beginPath(); g.roundRect(22, y, w - 44, 210, 34); g.fill(); g.shadowBlur = 0;
+    g.fillStyle = "#2bc272"; g.beginPath(); g.roundRect(50, y + 30, 40, 40, 10); g.fill(); g.fillStyle = "#7b828c"; g.font = font(700, 24); g.fillText("БАНК · сейчас", 104, y + 60);
+    if (st.hl) { g.fillStyle = "rgba(255,220,60,.6)"; g.fillRect(48, y + 96, 470, 46); }
+    g.fillStyle = "#13161b"; g.font = font(700, 32); g.fillText("Внесите минимальный платёж", 50, y + 130); g.fillText("1 500 ₽ — и всё в порядке", 50, y + 176); }
+  g.fillStyle = st.paid ? "#13161b" : "#1a9d57"; g.beginPath(); g.roundRect(30, h - 190, w - 60, 120, 34); g.fill();
+  g.fillStyle = "#fff"; g.font = font(800, 40); g.textAlign = "center"; g.fillText(st.paid ? "Платёж внесён ✓" : "Оплатить 1 500 ₽", w / 2, h - 116); g.textAlign = "left";
+  if (st.tap > 0 && st.tap < 1) { g.strokeStyle = `rgba(255,255,255,${1 - st.tap})`; g.lineWidth = 10; g.beginPath(); g.arc(w / 2, h - 130, 40 + 80 * st.tap, 0, 7); g.stroke(); }
+});
+const phone = new THREE.Group();
+const body = new THREE.Mesh(new RoundedBoxGeometry(1.9, 3.9, .16, 6, .26), new THREE.MeshPhysicalMaterial({ color: 0x1a1c20, metalness: .9, roughness: .25, clearcoat: 1 }));
+body.castShadow = true;
+const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.74, 3.6), new THREE.MeshBasicMaterial({ map: scr, color: 0xb8b8b8 }));
+screen.position.z = .085; phone.add(body, screen); phone.position.set(.4, 2.3, .4); scene.add(phone);
+
+// ---------- монеты: стопка долга ----------
+const coinGeo = new THREE.CylinderGeometry(.62, .62, .066, 64);
+const goldMat = new THREE.MeshPhysicalMaterial({ color: 0xffc53d, metalness: 1, roughness: .22, clearcoat: .6 });
+const redMat = new THREE.MeshPhysicalMaterial({ color: 0xd9483b, metalness: 1, roughness: .3, emissive: 0x3a0606, emissiveIntensity: .3 });
+const STACK = new THREE.Vector3(4.4, 0, .6), N0 = 30, NI = 30, H0 = .07;
+const coins = [];
+for (let i = 0; i < N0 + NI; i++) { const m = new THREE.Mesh(coinGeo, i < N0 ? goldMat : redMat); m.castShadow = true; m.receiveShadow = true; scene.add(m); coins.push(m); }
+// 2 монеты (1 500 ₽ из 30 000) уходят платежом; потом 30 «процентных» монет падают на стопку — по одной в день
+const PAID = [N0 - 1, N0 - 2], T_PAY = 5.1, T_INT = 8.3, D_INT = 2.6;
+function coinPos(i, t) {
+  if (i < N0) {
+    const pi = PAID.indexOf(i);
+    const base = new THREE.Vector3(STACK.x + Math.sin(i * 1.7) * .03, .05 + i * H0, STACK.z + Math.cos(i * 2.3) * .03);
+    if (pi < 0) return { p: base, r: i * .4, s: 1 };
+    const k = io3((t - T_PAY - pi * .12) / .7);   // по дуге в телефон
+    const to = phone.position.clone().add(new THREE.Vector3(0, -.6, .3));
+    const p = base.clone().lerp(to, k); p.y += Math.sin(k * Math.PI) * 1.6;
+    return { p, r: i * .4 + k * 9, s: 1 - clamp((k - .55) / .45) };
+  }
+  const j = i - N0, ta = T_INT + D_INT * j / NI;          // процентная монета j
+  const idx = N0 - PAID.length + j;                        // её место в стопке
+  const land = new THREE.Vector3(STACK.x + Math.sin(idx * 1.7) * .03, .05 + idx * H0, STACK.z + Math.cos(idx * 2.3) * .03);
+  if (t < ta - .35) return { p: land.clone().add(new THREE.Vector3(0, 40, 0)), r: 0, s: 0 };
+  const k = clamp((t - (ta - .35)) / .35), bounce = t > ta ? Math.sin(clamp((t - ta) / .18) * Math.PI) * .06 * (1 - clamp((t - ta) / .18)) : 0;
+  const p = land.clone(); p.y += (1 - k * k) * 3 + bounce;
+  return { p, r: idx * .4 + (1 - k) * 4, s: 1 };
+}
+
+// ---------- камера: кадры (позиция, точка взгляда), перелёты ----------
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const SHOTS = [
+  { t: 0,    p: V(-6.8, 2.2, 6.2),  l: V(-4.2, .5, 1.2) },  // кредитка крупно
+  { t: 2.0,  p: V(-5.2, 1.6, 4.6),  l: V(-4.0, .55, 1.2) },
+  { t: 2.7,  p: V(1.4, 2.7, 8.6),   l: V(.4, 2.3, .4) },    // телефон
+  { t: 5.0,  p: V(.9, 2.2, 7.4),    l: V(.4, 2.0, .4) },
+  { t: 6.1,  p: V(1.6, 2.9, 8.4),   l: V(3.4, 1.8, .5) },   // телефон + стопка
+  { t: 8.1,  p: V(9.8, 4.2, 11.0),  l: V(3.6, 2.6, .6) },   // стопка
+  { t: 11.0, p: V(10.6, 5.2, 12.6), l: V(3.4, 2.6, .6) },   // стопка выросла
+  { t: 13.4, p: V(.2, 6.8, 17.5),   l: V(.3, 2.5, .5) },    // общий план
+  { t: 15.4, p: V(.2, 7.4, 19.0),   l: V(.3, 2.6, .5) },
+];
+const FLY = .7;
+function camAt(t) {
+  let i = SHOTS.findIndex((s, k) => k + 1 < SHOTS.length && t < SHOTS[k + 1].t); if (i < 0) i = SHOTS.length - 2;
+  const a = SHOTS[i], b = SHOTS[i + 1], fly = Math.min(FLY, b.t - a.t);
+  const hold = clamp((t - a.t) / Math.max(.1, b.t - a.t - fly)), k = io3((t - (b.t - fly)) / fly);
+  const pa = a.p.clone().lerp(a.p.clone().lerp(a.l, .06), hold);   // медленный наезд в кадре
+  return { p: pa.lerp(b.p, k), l: a.l.clone().lerp(b.l, k) };
+}
+
+const comp = new EffectComposer(r); comp.addPass(new RenderPass(scene, cam));
+comp.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), .3, .5, .93)); comp.addPass(new OutputPass());
+const $ = (id) => document.getElementById(id);
+let lastSt = "";
+window.renderAt = (t) => {
+  const c = camAt(t); cam.position.copy(c.p); cam.lookAt(c.l);
+  card.rotation.set(-.08 + .03 * Math.sin(t * .6), .5 + .06 * Math.sin(t * .4), .05); card.position.y = .6 + .05 * Math.sin(t * .9);
+  phone.rotation.set(-.08, -.25 + .05 * Math.sin(t * .5), .03 * Math.sin(t * .7)); phone.position.y = 2.3 + .06 * Math.sin(t * .8);
+  const st = { push: out5((t - 2.6) / .45), hl: t > 3.2, paid: t > 5.2, tap: (t - 5.05) / .45 };
+  const key2 = JSON.stringify([st.push.toFixed(3), st.hl, st.paid, st.tap > 0 && st.tap < 1 ? st.tap.toFixed(2) : 0]);
+  if (key2 !== lastSt) { scr.redraw(st); lastSt = key2; }
+  coins.forEach((m, i) => { const q = coinPos(i, t); m.position.copy(q.p); m.rotation.set(0, q.r, 0); m.scale.setScalar(Math.max(.001, q.s)); m.visible = q.s > .01; });
+  comp.render();
+  // оверлеи
+  const show = (id, a, b, f = .3) => { const e = $(id); e.style.opacity = clamp((t - a) / f) * (1 - clamp((t - b) / f)); return e; };
+  const t1 = show("t1", .1, 2.3); t1.style.transform = `translateY(${(1 - out5((t - .1) / .6)) * 40}px)`;
+  $("t1b").style.opacity = clamp((t - 1.25) / .25);
+  const ok = show("ok", 6.0, 8.2); ok.style.transform = `scale(${lerp(1.4, 1, out5((t - 6.0) / .35))}) rotate(-3deg)`;
+  show("cnt", 8.2, 13.3); const nd = Math.floor(clamp((t - T_INT) / D_INT) * 30) + (t > T_INT + D_INT ? 0 : 0);
+  $("cntv").textContent = `+${Math.round(nd * 37.5).toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+  show("q", 11.1, 99); $("strike").style.transform = `scaleX(${io3((t - 12.0) / .35)})`;
+  const a = show("a", 13.2, 99); a.style.transform = `translateY(${(1 - out5((t - 13.2) / .5)) * 30}px)`;
+  $("chap").style.opacity = clamp(t / .4) * (1 - clamp((t - 10.9) / .4));
+  $("grain").style.transform = `translate(${(Math.sin(t * 91) * 40) | 0}px, ${(Math.cos(t * 77) * 40) | 0}px)`;
+};
+await document.fonts.ready; await document.fonts.load("900 40px Unb"); await document.fonts.load("700 40px Mono"); await document.fonts.load("800 40px Mont");
+cardTex.redraw(); scr.redraw({});
+renderAt(0); window.__ready = true;
+</script>
+</body>
+</html>

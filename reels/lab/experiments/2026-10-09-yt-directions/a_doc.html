@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Прототип A — документальный</title>
+<!-- Направление A: «документальный» (Т—Ж / Johnny Harris). Один большой стол-мир: договор, телефон с банком, выписка, карточка-вывод.
+     Камера перелетает между предметами (моушн-блюр по скорости, глубина резкости), маркер и ручка рисуются по словам голоса. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0d0b09; }
+  #view { position: absolute; inset: 0; overflow: hidden; }
+  #world { position: absolute; left: 0; top: 0; width: 4400px; height: 2600px; transform-origin: 0 0;
+    background:
+      radial-gradient(1400px 900px at 1700px 900px, rgba(255,214,150,.16), transparent 70%),
+      repeating-linear-gradient(92deg, rgba(255,255,255,.012) 0 3px, transparent 3px 11px),
+      linear-gradient(180deg, #2a2019, #1c1611 60%, #15100c); }
+  .obj { position: absolute; transform-origin: 50% 50%; }
+  .paper { background: #f3efe6; color: #2a2620; border-radius: 6px;
+    box-shadow: 0 2px 0 rgba(0,0,0,.08), 0 40px 80px rgba(0,0,0,.55), 0 10px 24px rgba(0,0,0,.4);
+    background-image: radial-gradient(rgba(0,0,0,.035) 1px, transparent 1px); background-size: 3px 3px; }
+  /* договор */
+  #doc { left: 260px; top: 260px; width: 980px; height: 1260px; padding: 80px 90px; transform: rotate(-3deg); font: 500 26px/1.55 "Mont"; }
+  #doc h1 { font: 800 34px "Mont"; letter-spacing: .06em; margin-bottom: 8px; }
+  #doc .sub { font: 600 20px "Mono"; color: #8a8273; margin-bottom: 40px; }
+  #doc .bar { height: 14px; background: #d8d1c2; border-radius: 3px; margin: 18px 0; }
+  #doc .key { position: relative; font: 700 34px/1.3 "Mont"; margin: 34px 0; padding: 4px 6px; }
+  #doc .key .hl { position: absolute; left: 0; top: 6px; height: 88%; width: 0; background: rgba(255,226,60,.75); mix-blend-mode: multiply; border-radius: 3px; }
+  #doc svg { position: absolute; left: 40px; top: 318px; overflow: visible; }
+  #doc .note { position: absolute; right: 60px; top: 250px; font: 800 italic 54px "Mont"; color: #d42a2a; transform: rotate(-8deg); opacity: 0; }
+  /* телефон */
+  #phone { left: 1560px; top: 300px; width: 470px; height: 960px; border-radius: 70px; background: #0c0d10; padding: 16px;
+    box-shadow: 0 0 0 3px #3a3d44, 0 60px 120px rgba(0,0,0,.7), 0 20px 40px rgba(0,0,0,.5); transform: rotate(4deg); }
+  #screen { position: relative; width: 100%; height: 100%; border-radius: 56px; overflow: hidden; background: linear-gradient(180deg, #f6f7f9, #eceff3); font-family: "Mont"; }
+  #screen .isl { position: absolute; left: 50%; top: 14px; width: 130px; height: 36px; margin-left: -65px; background: #000; border-radius: 20px; z-index: 5; }
+  #screen .top { padding: 90px 34px 20px; }
+  #screen .top small { font: 600 20px "Mont"; color: #7b828c; }
+  #screen .top b { display: block; font: 800 54px "Mont"; color: #13161b; margin-top: 6px; }
+  #screen .tile { margin: 14px 24px; padding: 24px 26px; background: #fff; border-radius: 24px; box-shadow: 0 4px 14px rgba(0,0,0,.06); font: 600 22px "Mont"; color: #4a515b; }
+  #screen .tile b { display: block; font: 800 34px "Mont"; color: #13161b; margin-top: 4px; }
+  #push { position: absolute; left: 18px; right: 18px; top: 70px; padding: 20px 22px; border-radius: 26px; background: rgba(255,255,255,.92);
+    backdrop-filter: blur(10px); box-shadow: 0 18px 40px rgba(0,0,0,.25); font: 600 21px/1.35 "Mont"; color: #20242a; z-index: 4; }
+  #push .h { display: flex; align-items: center; gap: 10px; font: 700 17px "Mont"; color: #7b828c; margin-bottom: 6px; }
+  #push .h i { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #3ddc84, #1a9d57); }
+  #push b { color: #0f1216; }
+  #pay { position: absolute; left: 24px; right: 24px; bottom: 60px; height: 96px; border-radius: 26px; background: #1a9d57; color: #fff;
+    display: flex; align-items: center; justify-content: center; font: 800 30px "Mont"; }
+  #tap { position: absolute; width: 90px; height: 90px; border-radius: 50%; border: 6px solid rgba(255,255,255,.9); left: 50%; bottom: 63px; margin-left: -45px; opacity: 0; }
+  /* выписка */
+  #ledger { left: 2300px; top: 1180px; width: 1260px; height: 1180px; padding: 70px 80px; transform: rotate(2deg); font: 600 30px "Mont"; }
+  #ledger h2 { font: 800 30px "Mont"; letter-spacing: .08em; color: #5d574c; margin-bottom: 30px; }
+  #ledger .row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 2px dashed #d8d1c2; font-family: "Mono"; font-size: 28px; }
+  #ledger .row.big { font: 800 36px "Mont"; border-bottom: 3px solid #2a2620; }
+  #ledger .row .r { color: #c42424; }
+  #ledger .row.ok .r { color: #1a8a4c; }
+  #ledger .rows { height: 430px; overflow: hidden; position: relative; }
+  #ledger .rows .in { position: absolute; left: 0; right: 0; top: 0; }
+  #stamp { position: absolute; right: 70px; top: 30px; padding: 18px 34px; border: 8px solid #1a8a4c; color: #1a8a4c; border-radius: 14px;
+    font: 900 50px "Unb"; transform: rotate(-12deg); opacity: 0; mix-blend-mode: multiply; }
+  #sum { margin-top: 26px; display: flex; justify-content: space-between; align-items: baseline; font: 800 40px "Mont"; }
+  #sum b { font: 900 92px "Unb"; color: #c42424; }
+  #sum small { display: block; font: 600 22px "Mont"; color: #8a8273; }
+  /* карточка-вывод */
+  #card { left: 520px; top: 1700px; width: 1300px; height: 560px; padding: 70px 80px; transform: rotate(-2deg); background: #fffdf5; }
+  #card .q { font: 800 64px/1.15 "Mont"; color: #1d1a16; }
+  #card .q span { position: relative; white-space: nowrap; }
+  #card .q svg { position: absolute; left: -10px; top: 50%; overflow: visible; }
+  #card .a { margin-top: 40px; font: 700 46px/1.25 "Mont"; color: #c42424; opacity: 0; }
+  /* оверлеи */
+  #chap { position: absolute; left: 70px; bottom: 60px; font: 700 26px "Mont"; color: #f3efe6; letter-spacing: .04em; display: flex; gap: 16px; align-items: center;
+    text-shadow: 0 2px 12px rgba(0,0,0,.8); }
+  #chap i { width: 54px; height: 6px; background: #ffd84a; border-radius: 3px; }
+  #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.6)); }
+  #grain { position: absolute; inset: -50%; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style>
+</head>
+<body>
+<div id="view">
+  <div id="world">
+    <div id="doc" class="obj paper">
+      <h1>ДОГОВОР КРЕДИТНОЙ КАРТЫ</h1><div class="sub">ОБЩИЕ УСЛОВИЯ · РАЗДЕЛ 4</div>
+      <div class="bar" style="width:92%"></div><div class="bar" style="width:84%"></div><div class="bar" style="width:88%"></div>
+      <div class="bar" style="width:60%"></div>
+      <div class="key"><span class="hl" id="hl"></span><span style="position:relative">4.3. Минимальный платёж — 5 % от суммы задолженности</span></div>
+      <div class="bar" style="width:90%"></div><div class="bar" style="width:86%"></div><div class="bar" style="width:72%"></div>
+      <div class="bar" style="width:89%"></div><div class="bar" style="width:80%"></div><div class="bar" style="width:91%"></div>
+      <div class="bar" style="width:66%"></div><div class="bar" style="width:84%"></div><div class="bar" style="width:78%"></div>
+      <svg width="900" height="200"><path id="circ" d="M30,90 C40,10 420,-10 840,30 C900,40 890,150 760,160 C520,180 120,190 40,140 C10,120 20,100 60,80"
+        fill="none" stroke="#d42a2a" stroke-width="7" stroke-linecap="round"/></svg>
+      <div class="note" id="note">ловушка</div>
+    </div>
+    <div id="phone" class="obj"><div id="screen"><div class="isl"></div>
+      <div class="top"><small>Кредитная карта</small><b>−30 000 ₽</b></div>
+      <div class="tile">Платёж до 25.10<b id="due">1 500 ₽</b></div>
+      <div class="tile">Льготный период<b>закончился</b></div>
+      <div id="push"><div class="h"><i></i>БАНК · сейчас</div>Внесите <b>минимальный платёж 1 500 ₽</b> до 25.10 — и всё в порядке</div>
+      <div id="pay">Оплатить 1 500 ₽</div><div id="tap"></div>
+    </div></div>
+    <div id="ledger" class="obj paper">
+      <h2>ВЫПИСКА ПО КАРТЕ · ОКТЯБРЬ</h2>
+      <div class="row ok"><span>25.10 Минимальный платёж</span><span class="r">−1 500 ₽ ✓</span></div>
+      <div class="row big"><span>Остаток долга</span><span>28 500 ₽</span></div>
+      <div class="rows"><div class="in" id="days"></div></div>
+      <div id="sum"><div>Проценты за месяц<small>48 % годовых на остаток · пример</small></div><b id="sumv">+0 ₽</b></div>
+      <div id="stamp">ПРОСРОЧЕК НЕТ</div>
+    </div>
+    <div id="card" class="obj paper">
+      <div class="q">Минимальный платёж — это не <span id="ok">«всё нормально»<svg width="560" height="40"><path id="strike" d="M0,10 C150,0 380,20 560,-6" fill="none" stroke="#d42a2a" stroke-width="12" stroke-linecap="round"/></svg></span></div>
+      <div class="a" id="ans">Это ты платишь банку за то, что не вернул всё.</div>
+    </div>
+  </div>
+</div>
+<div id="vig"></div><div id="grain"></div>
+<div id="chap"><i></i>СПОСОБ 1 · ПРОЦЕНТЫ ПО КРЕДИТКЕ</div>
+<script>
+  window.TL = { duration: 15.4, fps: 30, size: [1920, 1080] };
+  const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)), lerp = (a, b, k) => a + (b - a) * k;
+  const io3 = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const out5 = (x) => 1 - Math.pow(1 - clamp(x), 5), out3 = (x) => 1 - Math.pow(1 - clamp(x), 3);
+  const $ = (id) => document.getElementById(id);
+  // строки «проценты за день» в выписке
+  const days = $("days"); for (let d = 0; d < 30; d++) { const r = document.createElement("div"); r.className = "row";
+    r.innerHTML = `<span>${String(26 + d > 31 ? 26 + d - 31 : 26 + d).padStart(2, "0")}.${26 + d > 31 ? "11" : "10"} Проценты за день</span><span class="r">+37 ₽</span>`; days.appendChild(r); }
+  // камера: кадры (центр мира x, y и масштаб); между ними — перелёт с ускорением и торможением
+  const SHOTS = [
+    { t: 0,    x: 760,  y: 760,  s: 1.05, r: -3 },  // договор, строка про минимальный платёж
+    { t: 1.9,  x: 760,  y: 820,  s: 1.25, r: -3 },  // наезд на обведённую строку
+    { t: 2.55, x: 1795, y: 700,  s: 1.15, r: 3 },   // телефон, пуш
+    { t: 5.0,  x: 1795, y: 980,  s: 1.25, r: 3 },   // кнопка «Оплатить»
+    { t: 5.95, x: 2930, y: 1600, s: .95,  r: 2 },   // выписка
+    { t: 8.0,  x: 2930, y: 1880, s: 1.0,  r: 2 },   // строки процентов
+    { t: 11.25,x: 1170, y: 1960, s: 1.05, r: -2 },  // карточка-вывод
+    { t: 14.75, x: 1700, y: 1600, s: .6,  r: 0 },   // отъезд: вывод + стол
+    { t: 15.4, x: 1700, y: 1600, s: .57,  r: 0 },
+  ];
+  const FLY = .55;
+  function cam(t) {
+    let i = SHOTS.findIndex((s, k) => k + 1 < SHOTS.length && t < SHOTS[k + 1].t); if (i < 0) i = SHOTS.length - 2;
+    const a = SHOTS[i], b = SHOTS[i + 1], fly = b.t - a.t > 2.5 ? FLY : Math.min(FLY, (b.t - a.t));
+    // держим кадр a с медленным наездом, перелёт к b занимает последние FLY секунд
+    const k = io3((t - (b.t - fly)) / fly), drift = clamp((t - a.t) / Math.max(.1, b.t - a.t - fly));
+    const s0 = a.s * (1 + .03 * drift);
+    return { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), s: lerp(s0, b.s, k), r: lerp(a.r, b.r, k) * .35, k };
+  }
+  const OBJS = ["doc", "phone", "ledger", "card"].map(id => { const e = $(id); return { e, cx: e.offsetLeft + e.offsetWidth / 2, cy: e.offsetTop + e.offsetHeight / 2 }; });
+  let prev = null, prevT = -1;
+  window.renderAt = (t) => {
+    const c = cam(t), w = $("world");
+    const vx = prev && Math.abs(t - prevT) < .05 ? Math.hypot(c.x - prev.x, c.y - prev.y) * c.s : 0; prev = { x: c.x, y: c.y }; prevT = t;
+    w.style.transform = `translate(960px, 540px) rotate(${-c.r}deg) scale(${c.s}) translate(${-c.x}px, ${-c.y}px)`;
+    w.style.filter = vx > 6 ? `blur(${Math.min(8, vx / 14).toFixed(1)}px)` : "";
+    // глубина резкости: предметы вдали от центра кадра — мягче
+    OBJS.forEach(o => { const d = Math.hypot(o.cx - c.x, o.cy - c.y) * c.s; o.e.style.filter = c.s > .6 && d > 900 ? `blur(${Math.min(6, (d - 900) / 160).toFixed(1)}px)` : ""; });
+    // договор: маркер и обводка
+    $("hl").style.width = `${100 * out3((t - 1.25) / .55)}%`;
+    const circ = $("circ"), L = 2100; circ.style.strokeDasharray = L; circ.style.strokeDashoffset = L * (1 - io3((t - 1.75) / .5));
+    const n = $("note"), kn = out5((t - 2.05) / .3); n.style.opacity = t < 2.05 ? 0 : 1; n.style.transform = `rotate(-8deg) scale(${lerp(1.4, 1, kn)})`;
+    // телефон: пуш, нажатие, оплачено
+    const p = $("push"), kp = out5((t - 2.6) / .45); p.style.transform = `translateY(${(1 - kp) * -220}px)`; p.style.opacity = t < 2.6 ? 0 : 1;
+    p.querySelector("b").style.background = t > 3.2 ? `rgba(255,226,60,${.6 * out3((t - 3.2) / .3)})` : "";
+    const tap = $("tap"), kt = (t - 5.05) / .45; tap.style.opacity = kt > 0 && kt < 1 ? 1 - kt : 0; tap.style.transform = `scale(${.6 + kt})`;
+    const pay = $("pay"); if (t > 5.2) { pay.textContent = "Платёж внесён ✓"; pay.style.background = "#13161b"; } else { pay.textContent = "Оплатить 1 500 ₽"; pay.style.background = "#1a9d57"; }
+    $("due").textContent = t > 5.2 ? "0 ₽ ✓" : "1 500 ₽";
+    // выписка: штамп, проценты каждый день
+    const st = $("stamp"), ks = out5((t - 6.05) / .2); st.style.opacity = t < 6.05 ? 0 : .9; st.style.transform = `rotate(-12deg) scale(${lerp(2, 1, ks)})`;
+    const nd = Math.floor(clamp((t - 8.3) / 2.6) * 30), di = $("days");
+    [...di.children].forEach((r, k) => r.style.opacity = k < nd ? 1 : 0);
+    di.style.transform = `translateY(${-Math.max(0, nd - 6) * 62}px)`;
+    $("sumv").textContent = `+${(nd * 37.5).toLocaleString("ru-RU", { maximumFractionDigits: 0 }).replace(/\s/g, " ")} ₽`;
+    // карточка: зачёркивание и ответ
+    const s = $("strike"), Ls = 600; s.style.strokeDasharray = Ls; s.style.strokeDashoffset = Ls * (1 - io3((t - 12.0) / .35));
+    const a = $("ans"), ka = out5((t - 13.2) / .5); a.style.opacity = clamp((t - 13.2) / .3); a.style.transform = `translateY(${(1 - ka) * 30}px)`;
+    $("chap").style.opacity = clamp(t / .4) * (1 - clamp((t - 13.2) / .4));
+    document.getElementById("grain").style.transform = `translate(${(Math.sin(t * 91) * 40) | 0}px, ${(Math.cos(t * 77) * 40) | 0}px)`;
+  };
+  document.fonts.ready.then(() => { renderAt(0); window.__ready = true; });
+</script>
+</body>
+</html>

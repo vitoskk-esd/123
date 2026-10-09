@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Прототип C — ведущий-аватар</title>
+<!-- Направление C: «ведущий-аватар» (как Fomobase из референсов владельца). Рисованный ведущий слева — якорь: говорит под голос
+     (рот по громкости), моргает, меняет эмоцию по смыслу. Справа окна и плашки меняются каждые 1,5–3 с; неоновая сетка на фоне. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #07060d; font-family: "Mont"; }
+  #bg { position: absolute; inset: 0; background: radial-gradient(1200px 700px at 70% 30%, rgba(124,77,255,.28), transparent 70%), radial-gradient(900px 600px at 10% 90%, rgba(0,229,190,.16), transparent 70%), #07060d; }
+  #grid { position: absolute; left: -50%; right: -50%; bottom: -10%; height: 70%; transform: perspective(700px) rotateX(62deg); transform-origin: 50% 100%;
+    background-image: linear-gradient(rgba(124,77,255,.55) 2px, transparent 2px), linear-gradient(90deg, rgba(124,77,255,.55) 2px, transparent 2px); background-size: 90px 90px;
+    mask-image: linear-gradient(180deg, transparent, #000 40%); -webkit-mask-image: linear-gradient(180deg, transparent, #000 40%); }
+  #host { position: absolute; left: 40px; bottom: -10px; width: 620px; height: 760px; transform-origin: 50% 100%; filter: drop-shadow(0 0 30px rgba(124,77,255,.35)); }
+  .win { position: absolute; left: 720px; top: 110px; width: 1110px; height: 780px; border-radius: 34px; background: rgba(18,16,30,.86); border: 2px solid rgba(160,130,255,.45);
+    box-shadow: 0 0 60px rgba(124,77,255,.35), 0 40px 80px rgba(0,0,0,.6); overflow: hidden; opacity: 0; }
+  .win .bar { height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 22px; background: rgba(255,255,255,.04); border-bottom: 1px solid rgba(255,255,255,.08); }
+  .win .bar i { width: 14px; height: 14px; border-radius: 50%; background: #ff5f57; } .win .bar i:nth-child(2) { background: #febc2e; } .win .bar i:nth-child(3) { background: #28c840; }
+  .win .bar span { margin-left: 14px; font: 600 20px "Mono"; color: #9b93c9; }
+  .neon { position: absolute; font: 900 120px/1 "Unb"; text-transform: uppercase; letter-spacing: -.03em; opacity: 0; white-space: nowrap; }
+  #n1 { left: 760px; top: 250px; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,.4); font-size: 82px; }
+  #n2 { left: 740px; top: 380px; font-size: 56px; color: #ff4d6d; text-shadow: 0 0 20px #ff4d6d, 0 0 60px rgba(255,77,109,.6); padding: 20px 34px; border: 6px solid #ff4d6d; border-radius: 24px;
+    box-shadow: 0 0 30px rgba(255,77,109,.6), inset 0 0 30px rgba(255,77,109,.3); }
+  /* окно с телефоном */
+  #w2 .ph { position: absolute; left: 80px; top: 90px; width: 430px; height: 660px; border-radius: 48px; background: #f5f6f8; border: 10px solid #121318; transform: perspective(1400px) rotateY(18deg) rotateX(4deg); box-shadow: -30px 30px 60px rgba(0,0,0,.5); overflow: hidden; }
+  #w2 .push { position: absolute; left: 14px; right: 14px; top: 40px; padding: 16px; border-radius: 22px; background: #fff; box-shadow: 0 12px 30px rgba(0,0,0,.18); font: 600 24px/1.35 "Mont"; color: #20242a; }
+  #w2 .push small { display: block; font: 700 14px "Mont"; color: #7b828c; margin-bottom: 4px; }
+  #w2 .push b { padding: 0 3px; border-radius: 4px; }
+  #w2 .ph .btn { position: absolute; left: 20px; right: 20px; bottom: 30px; height: 74px; border-radius: 20px; background: #1a9d57; color: #fff; font: 800 24px "Mont"; display: flex; align-items: center; justify-content: center; }
+  #w2 .side { position: absolute; left: 560px; top: 150px; width: 480px; }
+  #w2 .side .big { font: 900 96px "Unb"; color: #fff; letter-spacing: -.03em; }
+  #w2 .side .lab { font: 700 30px "Mont"; color: #9b93c9; margin-top: 8px; }
+  #w2 .side .ok { margin-top: 60px; display: inline-block; padding: 18px 30px; border-radius: 20px; background: #28c840; color: #04140b; font: 900 40px "Unb"; opacity: 0; box-shadow: 0 0 40px rgba(40,200,64,.6); }
+  /* окно с процентами */
+  #w3 .cal { position: absolute; left: 70px; top: 120px; display: grid; grid-template-columns: repeat(6, 92px); gap: 14px; }
+  #w3 .cal i { height: 92px; border-radius: 16px; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.08); font: 700 22px "Mono"; color: #6f6895; display: flex; align-items: center; justify-content: center; font-style: normal; }
+  #w3 .cal i.on { background: rgba(255,77,109,.22); border-color: #ff4d6d; color: #ff9fb0; box-shadow: 0 0 20px rgba(255,77,109,.4); }
+  #w3 .tot { position: absolute; left: 720px; top: 150px; width: 370px; }
+  #w3 .tot small { font: 700 26px "Mont"; color: #9b93c9; display: block; }
+  #w3 .tot b { display: block; font: 900 78px "Unb"; white-space: nowrap; color: #ff4d6d; text-shadow: 0 0 30px rgba(255,77,109,.6); letter-spacing: -.04em; }
+  #w3 .tot span { display: block; margin-top: 30px; font: 800 40px "Mont"; color: #fff; }
+  #w3 .tot em { display: block; font: 600 20px "Mont"; color: #6f6895; font-style: normal; margin-top: 12px; }
+  /* плашки вердикта */
+  #v1 { left: 760px; top: 260px; font-size: 64px; color: #fff; }
+  #v2 { left: 760px; top: 370px; font-size: 76px; color: #ff4d6d; text-shadow: 0 0 20px #ff4d6d, 0 0 60px rgba(255,77,109,.5); }
+  #v2 s { text-decoration: none; position: relative; } #v2 s::after { content: ""; position: absolute; left: -10px; right: var(--r, 100%); top: 50%; height: 14px; background: #fff; border-radius: 7px; box-shadow: 0 0 20px #fff; }
+  #v3 { left: 760px; top: 560px; font: 800 52px/1.2 "Mont"; color: #fff; text-transform: none; letter-spacing: 0; white-space: normal; width: 1050px; }
+  #v3 b { color: #ffd84a; text-shadow: 0 0 20px rgba(255,216,74,.5); }
+  /* стикер-реакция */
+  .stk { position: absolute; padding: 14px 24px; border-radius: 18px; font: 900 34px "Unb"; opacity: 0; transform-origin: 50% 50%; }
+  #s1 { left: 470px; top: 180px; background: #ffd84a; color: #1b1606; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  #chap { position: absolute; left: 720px; top: 40px; font: 700 24px "Mont"; color: #b8b0e8; letter-spacing: .06em; display: flex; gap: 14px; align-items: center; }
+  #chap i { width: 46px; height: 6px; border-radius: 3px; background: #7c4dff; box-shadow: 0 0 12px #7c4dff; }
+  #grain { position: absolute; inset: -50%; opacity: .07; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="grid"></div>
+<div id="chap"><i></i>СПОСОБ 1 · ПРОЦЕНТЫ ПО КРЕДИТКЕ</div>
+<div class="neon" id="n1">Главная ловушка</div>
+<div class="neon" id="n2">минимальный платёж</div>
+<div class="win" id="w2"><div class="bar"><i></i><i></i><i></i><span>bank-app · уведомления</span></div>
+  <div class="ph"><div class="push"><small>БАНК · сейчас</small>Внесите <b id="hl">минимальный платёж 1 500 ₽</b> — и всё в порядке</div><div class="btn" id="btn">Оплатить 1 500 ₽</div></div>
+  <div class="side"><div class="big">1 500 ₽</div><div class="lab">из долга 30 000 ₽</div><div class="ok" id="ok">ПРОСРОЧКИ НЕТ ✓</div></div>
+</div>
+<div class="win" id="w3"><div class="bar"><i></i><i></i><i></i><span>проценты · остаток 28 500 ₽ · 48 % годовых</span></div>
+  <div class="cal" id="cal"></div>
+  <div class="tot"><small>набежало процентов</small><b id="tv">+0 ₽</b><span>+37 ₽ каждый день</span><em>пример: 28 500 ₽ × 48 % ÷ 365</em></div>
+</div>
+<div class="neon" id="v1">Минимальный платёж</div>
+<div class="neon" id="v2">≠ <s id="vs">«всё нормально»</s></div>
+<div class="neon" id="v3">Это ты <b>платишь банку</b> за то, что не вернул всё</div>
+<div class="stk" id="s1" data-base="rotate(-6deg)">ВСЁ ОК?</div>
+<svg id="host" viewBox="0 0 620 760">
+  <defs>
+    <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2f45"/><stop offset="1" stop-color="#14162a"/></linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2c9a5"/><stop offset="1" stop-color="#d9a882"/></linearGradient>
+  </defs>
+  <g id="bodyg">
+    <path d="M60,760 C70,600 150,520 310,520 C470,520 550,600 560,760 Z" fill="url(#hood)" stroke="#7c4dff" stroke-width="4"/>
+    <path d="M230,525 C250,600 370,600 390,525" fill="none" stroke="#3b4060" stroke-width="10"/>
+    <path d="M250,600 L245,700 M370,600 L375,700" stroke="#cfd3ff" stroke-width="6" stroke-linecap="round"/>
+    <rect x="270" y="470" width="80" height="70" rx="20" fill="url(#skin)"/>
+  </g>
+  <g id="head">
+    <ellipse cx="310" cy="330" rx="150" ry="175" fill="url(#skin)" stroke="#7c4dff" stroke-width="3"/>
+    <ellipse cx="160" cy="345" rx="22" ry="38" fill="#e2b48f"/><ellipse cx="460" cy="345" rx="22" ry="38" fill="#e2b48f"/>
+    <path d="M160,300 C150,170 240,120 320,125 C410,128 475,180 462,300 C440,230 400,200 330,205 C260,208 200,230 160,300 Z" fill="#1d1a24"/>
+    <path d="M200,215 C250,150 380,140 440,220" fill="none" stroke="#2c2836" stroke-width="16" stroke-linecap="round"/>
+    <g id="eyes">
+      <ellipse id="eL" cx="255" cy="330" rx="20" ry="24" fill="#1b1a22"/><ellipse id="eR" cx="365" cy="330" rx="20" ry="24" fill="#1b1a22"/>
+      <circle cx="262" cy="322" r="6" fill="#fff"/><circle cx="372" cy="322" r="6" fill="#fff"/>
+    </g>
+    <path id="bL" d="M225,285 Q255,272 285,284" fill="none" stroke="#1d1a24" stroke-width="10" stroke-linecap="round"/>
+    <path id="bR" d="M335,284 Q365,272 395,285" fill="none" stroke="#1d1a24" stroke-width="10" stroke-linecap="round"/>
+    <path d="M310,345 Q300,385 315,392" fill="none" stroke="#c48f6c" stroke-width="6" stroke-linecap="round"/>
+    <g id="mouthg" transform="translate(310 430)"><ellipse id="mouth" cx="0" cy="0" rx="34" ry="6" fill="#5a1f2a"/><path id="smile" d="M-40,-6 Q0,26 40,-6" fill="none" stroke="#5a1f2a" stroke-width="8" stroke-linecap="round" opacity="0"/></g>
+  </g>
+  <g id="arm" opacity="0">
+    <path d="M500,640 C560,560 600,470 600,400" fill="none" stroke="#2b2f45" stroke-width="70" stroke-linecap="round"/>
+    <circle cx="600" cy="380" r="38" fill="url(#skin)"/><path d="M600,350 L600,290" stroke="url(#skin)" stroke-width="22" stroke-linecap="round"/>
+  </g>
+</svg>
+<div id="grain"></div>
+<script src="amp.js"></script>
+<script>
+  window.TL = { duration: 15.4, fps: 30, size: [1920, 1080] };
+  const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)), lerp = (a, b, k) => a + (b - a) * k;
+  const io3 = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const out5 = (x) => 1 - Math.pow(1 - clamp(x), 5), outBack = (x) => { x = clamp(x); const c = 1.8; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+  const $ = (id) => document.getElementById(id);
+  const cal = $("cal"); for (let d = 0; d < 30; d++) { const i = document.createElement("i"); i.textContent = d + 1; cal.appendChild(i); }
+  // вход/выход элемента: «шлепок» с перелётом (pop) и уход вверх
+  function pop(id, a, b, from = .6) { const e = $(id), k = outBack((t0 - a) / .35), q = clamp((t0 - b) / .2);
+    e.style.opacity = t0 < a || t0 > b + .2 ? 0 : 1 - q; e.style.transform = `${e.dataset.base || ""} scale(${lerp(from, 1, k)}) translateY(${-q * 40}px)`; return e; }
+  let t0 = 0;
+  window.renderAt = (t) => {
+    t0 = t;
+    $("grid").style.backgroundPosition = `0 ${(t * 120) % 90}px`;
+    // ведущий: рот по громкости голоса, моргание, покачивание, эмоции
+    const amp = (AMP[Math.floor(t * 30)] || 0), mo = $("mouth");
+    const shock = t > 8.2 && t < 11.0, smug = t > 5.9 && t < 8.0, serious = t > 11.0;
+    mo.setAttribute("ry", (shock ? 14 : 4) + amp * 30); mo.setAttribute("rx", shock ? 26 + amp * 6 : 34 - amp * 6);
+    $("smile").setAttribute("opacity", smug && amp < .25 ? 1 : 0);
+    const blink = [1.4, 4.6, 7.3, 10.2, 13.9].some(b => t > b && t < b + .12);
+    ["eL", "eR"].forEach(id => $(id).setAttribute("ry", blink ? 3 : shock ? 30 : 24));
+    const by = shock ? -16 : serious ? 8 : 0, tilt = serious ? 6 : 0;
+    $("bL").setAttribute("transform", `translate(0 ${by}) rotate(${tilt} 255 285)`); $("bR").setAttribute("transform", `translate(0 ${by}) rotate(${-tilt} 365 285)`);
+    const bob = Math.sin(t * 2.1) * 6 + amp * 10, nod = Math.sin(t * 1.3) * 2.5 + (shock ? -4 : 0);
+    $("head").setAttribute("transform", `translate(0 ${-bob}) rotate(${nod} 310 470)`);
+    $("host").style.transform = `scale(${1 + .02 * Math.sin(t * .7) + (shock ? .03 : 0)})`;
+    // 0–2.2: неон-заголовок
+    pop("n1", .05, 2.15); pop("n2", 1.25, 2.15, 1.6);
+    // 2.2–8.1: окно с телефоном
+    const w2 = pop("w2", 2.25, 8.05, .85);
+    $("hl").style.background = t > 3.2 ? `rgba(255,220,60,${.7 * clamp((t - 3.2) / .25)})` : "transparent";
+    const btn = $("btn"); btn.textContent = t > 5.15 ? "Платёж внесён ✓" : "Оплатить 1 500 ₽"; btn.style.background = t > 5.15 ? "#13161b" : "#1a9d57";
+    btn.style.transform = `scale(${t > 5.0 && t < 5.2 ? .94 : 1})`;
+    const ok = $("ok"); ok.style.opacity = clamp((t - 5.95) / .15); ok.style.transform = `scale(${lerp(1.6, 1, outBack((t - 5.95) / .35))}) rotate(-3deg)`;
+    pop("s1", 6.6, 8.0, 1.5);
+    // 8.2–11: проценты по дням
+    pop("w3", 8.15, 11.0, .85);
+    const nd = Math.floor(clamp((t - 8.4) / 2.4) * 30); [...cal.children].forEach((e, k) => e.className = k < nd ? "on" : "");
+    $("tv").textContent = `+${Math.round(nd * 37.5).toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+    // 11–15.4: вердикт
+    pop("v1", 11.1, 99); pop("v2", 11.6, 99, 1.4); $("vs").style.setProperty("--r", `${100 * (1 - io3((t - 12.0) / .35))}%`);
+    pop("v3", 13.2, 99, .9);
+    $("chap").style.opacity = clamp(t / .4);
+    $("grain").style.transform = `translate(${(Math.sin(t * 91) * 40) | 0}px, ${(Math.cos(t * 77) * 40) | 0}px)`;
+  };
+  document.fonts.ready.then(() => { renderAt(0); window.__ready = true; });
+</script>
+</body>
+</html>
