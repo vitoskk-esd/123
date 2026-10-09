@@ -71,7 +71,9 @@ Per phrase: Chatterbox Multilingual TTS from a 15 s sample of the owner's *live*
 «вариант 5») → Whisper check, best of 3 seeds → Chatterbox VC to «вариант 5» → `tts_v5.humanize` (varied pauses,
 breaths, tempo jitter, room mic). Stress: RUAccent + `STRESS_FIX` in `tools/tts_v5.py`; owner's rule «на́чал/на́чала».
 Check the logged stresses (`N ударения: …`) before trusting the take. No room tone and no progress bar (owner, 09.10: «убери фоновый шум… и полосу сверху») —
-`humanize` has `room_db=None` by default and an `afftdn` denoiser; `TL.progress` stays off in reels. One line = one whole phrase; numbers in words.
+`humanize` has `room_db=None` by default and an `afftdn` denoiser; `TL.progress` stays off in reels. No synthetic breaths either, and every phrase is trimmed (`voice_e.trim`): TTS/VC
+leave junk after the last word (babble, clicks, up to −4 dB) and clicks before the first one — owner, 09.10: «между фразами
+слышатся посторонние звуки». The phrase check runs on the trimmed file, i.e. exactly what goes into the video. One line = one whole phrase; numbers in words.
 First reel on it: `reels/first-steps-09/` (Studio 9:16). The owner's own recording + VC (below) stays as the
 alternative when he wants to record.
 

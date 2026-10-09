@@ -53,7 +53,7 @@ def trim(wav, log=print):
     """Срез «хвоста» фразы. После последнего слова TTS/VC часто дописывает мусор — бормотание, щелчки, придыхание (рилс #9: до
     −14 дБ, владелец: «между фразами слышатся посторонние звуки»). Конец речи — по Whisper (конец последнего слова); сегменты
     энергии, которые начинаются позже него, выкидываем; режем через 40 мс после конца последнего сегмента речи, затухание 30 мс,
-    вход 10 мс. → <wav>.trim.wav"""
+    вход 10 мс. Щелчки и придыхания перед первым словом тоже срезаются. → <wav>.trim.wav"""
     import numpy as np, soundfile as sf, voice as V
     out = wav[:-4] + ".trim.wav"
     y, sr = sf.read(wav); y = y if y.ndim == 1 else y.mean(1)
@@ -67,13 +67,17 @@ def trim(wav, log=print):
             while j < len(on) and (on[j] or (j + 7 < len(on) and on[j:j + 8].any())): j += 1
             segs.append((k * .02, j * .02)); k = j
         else: k += 1
+    # начало: короткие щелчки и придыхания перед первым словом (< 120 мс или тише −40 дБ, отделены паузой) — тоже мусор
+    pk = lambda sg: db[int(sg[0] / .02):max(int(sg[0] / .02) + 1, int(sg[1] / .02))].max()
+    while len(segs) > 1 and (segs[0][1] - segs[0][0] < .12 or pk(segs[0]) < -40): segs.pop(0)
+    start = max(0.0, segs[0][0] - .1) if segs else 0.0       # запас 100 мс: шипящие («Ш» в «Шаг») тише порога
     keep = [s for s in segs if s[0] < end_w - .05] or segs[:1]
     # не раньше конца последнего слова по Whisper + 60 мс: тихие концы слов («годовых», «профиле») ниже порога энергии
     cut = min(len(y) / sr, max(keep[-1][1] + .04 if keep else 0, end_w + .06))
-    full = len(y) / sr; y = y[:int(cut * sr)].copy(); fi, fo = int(.01 * sr), int(.03 * sr)
+    full = len(y) / sr; y = y[int(start * sr):int(cut * sr)].copy(); fi, fo = int(.01 * sr), int(.03 * sr)
     y[:fi] *= np.linspace(0, 1, fi); y[-fo:] *= np.linspace(1, 0, fo)
     dropped = [s for s in segs if s[0] >= end_w - .05]
-    log(f"срез {os.path.basename(wav)}: конец речи {end_w:.2f} с, режу на {cut:.2f} из {full:.2f}"
+    log(f"срез {os.path.basename(wav)}: конец речи {end_w:.2f} с, оставляю {start:.2f}–{cut:.2f} из {full:.2f}"
         + (f", выкинуто мусора: {len(dropped)} (громче всего {max(db[int(a / .02):int(b / .02)].max() for a, b in dropped):.0f} дБ)" if dropped else ""))
     sf.write(out, y, sr); return out
 
@@ -122,7 +126,7 @@ def voice_e(phrases, out_dir, log=print):
         meta[key] = best; parts.append(best["e"]); prev = best["tts"]
         json.dump(meta, open(mp, "w"), ensure_ascii=False, indent=1)
     json.dump(meta, open(mp, "w"), ensure_ascii=False, indent=1)
-    parts = [f if f.endswith(".trim.wav") else trim(f, log=log) for f in parts]
+    parts = [trim(f[:-9] + ".wav" if f.endswith(".trim.wav") else f, log=log) for f in parts]   # всегда свежий срез
     weak = [f"{k}: {m['heard_e']}" for k, m in meta.items() if m.get("sim_e", 1) < MIN_SIM and "heard_e" in m]
     if weak: log("СЛАБЫЕ после всех попыток — проверить на слух:\n  " + "\n  ".join(weak))
     return T.humanize(parts, os.path.join(out_dir, "voice.wav"), breath_db=None)
