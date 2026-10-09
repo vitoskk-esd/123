@@ -180,6 +180,7 @@
     if (VERT()) document.body.classList.add("v");
     if (window.TL.caps) { CAPS = capsChunks(window.TL.caps); document.body.appendChild($(`<div id="cap"></div>`)); }
     if (window.TL.progress) document.body.appendChild($(`<div id="prog"><i></i></div>`));
+    if (window.TL.foot) document.body.appendChild($(`<div id="foot">${window.TL.foot}</div>`));   // дисклеймер на весь ролик (рилсы, ≥ 24 px)
   }
   function captions(t) {
     const box = document.getElementById("cap"); if (!box) return;

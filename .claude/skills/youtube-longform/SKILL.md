@@ -176,6 +176,11 @@ Structure (both references):
 
 ## 3. Voice
 
+- **Default since 2026-10-09: voice «E», no recording** — `tools/voice_e.py` (reel-production §2): script lines →
+  TTS from the owner's live-speech sample → VC «вариант 5» → humanize. ~2–3 min CPU per phrase: a 10-min video is ~120
+  phrases ≈ 5–6 h, run in chunks under the 2 h background limit (the tool skips phrases already voiced). Whisper-check
+  every phrase; stresses come from RUAccent + `STRESS_FIX` — add new problem words there, not in the script.
+- Recorded path (when the owner wants to record):
 - Owner records **per section** (`rec/sec01.m4a`, …): retakes stay local,
   VC and render run per section and in parallel, a bad take re-does one file.
 - Each section goes through the reel pipeline: copy `reels/zero-card-07/voice.py`

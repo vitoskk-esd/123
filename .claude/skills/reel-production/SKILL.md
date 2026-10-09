@@ -58,6 +58,23 @@ in speech, on-screen text and captions:
 
 ## 2. Voice — owner's decision
 
+**Since 2026-10-09 the default is voice «E» — no recording by the owner** (owner: «мне не нравится, что каждый раз
+нужно записывать свой голос» → probes A–E → «мне нравится звук E»):
+
+```bash
+<python-with-chatterbox> tools/voice_e.py <reel>/phrases.txt <reel>/out/voice   # → out/voice/voice.wav, phrases.json
+```
+
+Per phrase: Chatterbox Multilingual TTS from a 15 s sample of the owner's *live* speech (prosody, not his timbre;
+`scratchpad/ref_3.0.wav`, never committed; fallback `tools/voice_e_ref_v5.wav` — the same sample already converted to
+«вариант 5») → Whisper check, best of 3 seeds → Chatterbox VC to «вариант 5» → `tts_v5.humanize` (varied pauses,
+breaths, tempo jitter, room mic). Stress: RUAccent + `STRESS_FIX` in `tools/tts_v5.py`; owner's rule «на́чал/на́чала».
+Check the logged stresses (`N ударения: …`) before trusting the take. One line = one whole phrase; numbers in words.
+First reel on it: `reels/first-steps-09/` (Studio 9:16). The owner's own recording + VC (below) stays as the
+alternative when he wants to record.
+
+Earlier decision, kept for the recorded path:
+
 The owner rejected every synthetic voice as "sounds like AI" (edge-tts Dmitry,
 Microsoft multilingual, Chatterbox TTS incl. a clone of his voice). **Chosen:**
 his own live reading + timbre replaced by Chatterbox VC to
