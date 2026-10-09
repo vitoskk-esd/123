@@ -43,8 +43,9 @@ def check(wav, text):
     said = re.sub(r"\d+", lambda m: NUM.get(m.group(), m.group()), heard.replace("%", " процентов"))
     said = re.sub(r"телеграмм", "телеграм", said, flags=re.I)                # Whisper пишет с двумя «м»
     # по словам, а не по буквам: лишнее «в» или «нуля» вместо «нуле» по буквам почти не заметно (0,98), по словам — 0,93
-    a = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е")) for w in text.split()]
-    b = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е")) for w in said.split()]
+    # слова сравниваем по основе (5 букв): «десяти» / «десять» после перевода «10» в слово — одно и то же
+    a = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е"))[:5] for w in text.split()]
+    b = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е"))[:5] for w in said.split()]
     import difflib
     return difflib.SequenceMatcher(None, [w for w in a if w], [w for w in b if w], autojunk=False).ratio(), heard
 
