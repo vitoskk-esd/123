@@ -78,7 +78,15 @@ def voice_e(phrases, out_dir, log=print):
         best = None
         for vs in (0, 1, 2):                                       # VC тоже размывает слова («гибитовая») — до 3 попыток
             e = os.path.join(out_dir, f"e{i}_{zlib.crc32(f.encode()):08x}_v{vs}.wav"); torch.manual_seed(vs)
-            torchaudio.save(e, vc.generate(audio=f), vc.sr)
+            src, pre = f, 0.0
+            if i and torchaudio.info(f).num_frames / torchaudio.info(f).sample_rate < 4.0:
+                # короткую фразу VC превращает в кашу («От прахи до друбок»): даём контекст — предыдущая фраза + 0,25 с тишины,
+                # после перекраски отрезаем её (VC сохраняет тайминг)
+                a, sr = torchaudio.load(raw[i - 1]); b, sr2 = torchaudio.load(f); assert sr == sr2
+                pre = (a.shape[1] + int(.25 * sr)) / sr
+                src = os.path.join(out_dir, f"ctx{i}.wav"); torchaudio.save(src, torch.cat([a, torch.zeros(1, int(.25 * sr)), b], 1), sr)
+            y = vc.generate(audio=src)
+            torchaudio.save(e, y[:, int((pre - .05) * vc.sr) if pre else 0:], vc.sr)
             sim, got = check(e, phrases[i]); log(f"{i} E v{vs}: {sim:.2f} — {got}")
             if best is None or sim > best[0]: best = (sim, e)
             if sim >= MIN_SIM: break
