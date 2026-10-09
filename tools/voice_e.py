@@ -49,6 +49,35 @@ def check(wav, text):
     return difflib.SequenceMatcher(None, [w for w in a if w], [w for w in b if w], autojunk=False).ratio(), heard
 
 
+def trim(wav, log=print):
+    """Срез «хвоста» фразы. После последнего слова TTS/VC часто дописывает мусор — бормотание, щелчки, придыхание (рилс #9: до
+    −14 дБ, владелец: «между фразами слышатся посторонние звуки»). Конец речи — по Whisper (конец последнего слова); сегменты
+    энергии, которые начинаются позже него, выкидываем; режем через 40 мс после конца последнего сегмента речи, затухание 30 мс,
+    вход 10 мс. → <wav>.trim.wav"""
+    import numpy as np, soundfile as sf, voice as V
+    out = wav[:-4] + ".trim.wav"
+    y, sr = sf.read(wav); y = y if y.ndim == 1 else y.mean(1)
+    f16 = wav[:-4] + ".16.wav"; os.system(f"ffmpeg -v error -y -i {wav} -ar 16000 -ac 1 {f16}")
+    ws = V.transcribe(f16, "medium"); end_w = ws[-1]["a"] + ws[-1]["d"] if ws else len(y) / sr
+    hop = int(.02 * sr); db = np.array([20 * np.log10(np.sqrt(np.mean(y[i:i + hop] ** 2)) + 1e-9) for i in range(0, len(y) - hop, hop)])
+    on = db > -50; segs, k = [], 0
+    while k < len(on):                                          # сегменты речи; паузы короче 150 мс склеиваем
+        if on[k]:
+            j = k
+            while j < len(on) and (on[j] or (j + 7 < len(on) and on[j:j + 8].any())): j += 1
+            segs.append((k * .02, j * .02)); k = j
+        else: k += 1
+    keep = [s for s in segs if s[0] < end_w - .05] or segs[:1]
+    # не раньше конца последнего слова по Whisper + 60 мс: тихие концы слов («годовых», «профиле») ниже порога энергии
+    cut = min(len(y) / sr, max(keep[-1][1] + .04 if keep else 0, end_w + .06))
+    full = len(y) / sr; y = y[:int(cut * sr)].copy(); fi, fo = int(.01 * sr), int(.03 * sr)
+    y[:fi] *= np.linspace(0, 1, fi); y[-fo:] *= np.linspace(1, 0, fo)
+    dropped = [s for s in segs if s[0] >= end_w - .05]
+    log(f"срез {os.path.basename(wav)}: конец речи {end_w:.2f} с, режу на {cut:.2f} из {full:.2f}"
+        + (f", выкинуто мусора: {len(dropped)} (громче всего {max(db[int(a / .02):int(b / .02)].max() for a, b in dropped):.0f} дБ)" if dropped else ""))
+    sf.write(out, y, sr); return out
+
+
 def voice_e(phrases, out_dir, log=print):
     """Каждая фраза: дубль TTS → перекраска VC → проверка ИТОГОВОГО звука. Перекраска детерминирована (тот же дубль —
     та же ошибка), поэтому при ошибке после VC берём новый дубль TTS (следующий seed), а не повторяем VC."""
@@ -85,6 +114,7 @@ def voice_e(phrases, out_dir, log=print):
                 src = os.path.join(out_dir, f"ctx{i}.wav"); torchaudio.save(src, torch.cat([x, torch.zeros(1, int(.25 * sr)), y], 1), sr)
             out = vc.generate(audio=src)
             torchaudio.save(e, out[:, int((pre - .05) * vc.sr) if pre else 0:], vc.sr)
+            e = trim(e, log=log)                                   # проверяем ровно то, что пойдёт в ролик
             se, ge = check(e, p); log(f"{i} E seed {s}: {se:.2f} — {ge}")
             if best is None or se > best["sim_e"]:
                 best = {"text": p, "tts": f, "sim": round(sim, 3), "heard": got, "e": e, "sim_e": round(se, 3), "heard_e": ge}
@@ -92,9 +122,10 @@ def voice_e(phrases, out_dir, log=print):
         meta[key] = best; parts.append(best["e"]); prev = best["tts"]
         json.dump(meta, open(mp, "w"), ensure_ascii=False, indent=1)
     json.dump(meta, open(mp, "w"), ensure_ascii=False, indent=1)
+    parts = [f if f.endswith(".trim.wav") else trim(f, log=log) for f in parts]
     weak = [f"{k}: {m['heard_e']}" for k, m in meta.items() if m.get("sim_e", 1) < MIN_SIM and "heard_e" in m]
     if weak: log("СЛАБЫЕ после всех попыток — проверить на слух:\n  " + "\n  ".join(weak))
-    return T.humanize(parts, os.path.join(out_dir, "voice.wav"))
+    return T.humanize(parts, os.path.join(out_dir, "voice.wav"), breath_db=None)
 
 
 if __name__ == "__main__":

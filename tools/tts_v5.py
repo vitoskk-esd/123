@@ -64,7 +64,7 @@ def synth(text, out_wav, seed=0, exaggeration=.65, cfg_weight=.35, temperature=.
     return out_wav
 
 
-def humanize(parts, out_wav, sr=48000, seed=7, room_db=None, breath_db=-42):
+def humanize(parts, out_wav, sr=48000, seed=7, room_db=None, breath_db=None):
     """Склейка фраз «как живая запись»: паузы разной длины, тихий вдох перед частью фраз, лёгкий разброс темпа,
     цепочка «микрофон в комнате» (срез низа, присутствие 3 кГц, мягкий компрессор, короткое раннее отражение) + шумодав.
     Фон комнаты (room_db) по умолчанию выключен: после компрессора и нормализации −62 дБ превращались в слышное шипение
@@ -83,7 +83,7 @@ def humanize(parts, out_wav, sr=48000, seed=7, room_db=None, breath_db=-42):
     for i, p in enumerate(parts):
         if i:
             gap = rnd.uniform(.22, .5)
-            if rnd.random() < .5:
+            if breath_db is not None and rnd.random() < .5:      # вдохи: по умолчанию выключены (рилс #9 — «посторонние звуки»)
                 b = breath(rnd.uniform(.28, .4)); chunks += [np.zeros(int(.05 * sr)), b, np.zeros(int(max(0, gap - len(b) / sr - .05) * sr))]
             else:
                 chunks.append(np.zeros(int(gap * sr)))
