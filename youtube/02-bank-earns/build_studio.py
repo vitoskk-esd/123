@@ -404,6 +404,22 @@ scene(t, type="tg", acc="g", name="Бонусы банков", text="Банки,
       items=[{"t": "сколько и за что — собираю и обновляю", "at": A("и сколько")}], link={"t": "Ссылка в описании", "at": A("Ссылка в описании")})
 END = round(E("Ссылка в описании") + 3.0, 2)
 
+# ---------------- без пустого экрана: сцена начинается за 0,35 с до своего первого элемента ----------------
+# (раньше сцена открывалась на якоре, а цифра или штамп приходили только со своим словом — до 5 с пустого фона;
+# теперь до этого момента держится предыдущая сцена)
+def first_at(s):
+    ts = [s[k] for k in ("a", "at", "titleAt", "labelAt") if isinstance(s.get(k), (int, float))]
+    for k in ("lines", "items", "msgs", "rows", "bars", "nodes", "arrows", "marks", "side"):
+        for x in s.get(k) or []:
+            if isinstance(x, list): ts += [w["at"] for w in x]
+            elif isinstance(x, dict) and "at" in x: ts.append(x["at"])
+    for k in ("l", "r", "res", "total", "link"):
+        if isinstance(s.get(k), dict): ts += [s[k][q] for q in ("at", "a") if q in s[k]]
+    return min(ts) if ts else None
+for i, s in enumerate(SC[1:], 1):
+    f = first_at(s)
+    if f is not None and f - s["t0"] > .45: s["t0"] = round(f - .35, 3)
+
 # ---------------- переходы, удары, звук ----------------
 for i, s in enumerate(SC):
     s["t1"] = SC[i + 1]["t0"] if i + 1 < len(SC) else END
