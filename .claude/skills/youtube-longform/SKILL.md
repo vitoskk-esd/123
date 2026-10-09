@@ -194,6 +194,13 @@ Structure (both references):
 
 ## 4. Visual system (16:9, 1920×1080, 30 fps)
 
+**Since 2026-10-09 the direction for new long videos is «Ночной офис»** (owner picked documentary A from 3 prototypes, then the
+night-office style from a 6-style carousel: `reels/lab/experiments/2026-10-09-yt-directions/a_doc.html?theme=night`). One big
+night desk-world with real-looking objects (contract with highlighter, phone with the bank app, statement, monitor with charts,
+index-card conclusions); the camera flies between them with motion blur and depth of field. Engine: `youtube/kit/yt/` (being
+built, plan Y1–Y7 in `reels/lab/engine-roadmap.md`). «Студия» below stays for reels and for video #2; don't mix them.
+Show style choices to the owner as a carousel of stills, not test videos (owner, 09.10).
+
 **Since 2026-10-08 (video #2) the long-form engine is «Студия» v6 — `youtube/kit/studio.js` + `studio.css`.** Owner: desk.js
 «выглядит базовым и простым… представь, что ты монтажёр с 10 годами стажа в Альфа-Банке / OpenAI» → studio v6 approved
 («монтаж нравится, но нужно ещё улучшать, учись каждый день»). Full-frame scenes, one designed composition per beat:
