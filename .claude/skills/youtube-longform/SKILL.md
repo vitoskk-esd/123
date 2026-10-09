@@ -288,3 +288,8 @@ History: v1 (one static scene per 4.5 s) — «скучно»; v2/v3 (reel stimu
 - At 48 h and 7 days: `vidiq_video_stats` / channel analytics (check credit cost
   first) → CTR, average view duration, retention dips. Log in
   `youtube/<NN-slug>/README.md` and add lessons here.
+
+**Dead-screen check (09.10, video #2).** In an anchor-driven edit the scene opened on its anchor while its main element (a count,
+a stamp, a list) arrived only with its own word, leaving up to 5 s of empty background. Fixes:
+- `build_studio.py` starts each scene 0.35 s before its first element, and the previous scene holds until then;
+- after rendering, find dark stretches longer than 1 s: `fps=4,signalstats` with YMAX < 130.
