@@ -1,12 +1,12 @@
 // Рендер прототипа (и с three.js, и без): локальный сервер на корень репозитория — ES-модули не грузятся с file://.
-// node render.js <страница.html> --stills 1,5,9          -> out/<имя>_still_<t>.jpg
+// node render.js <страница.html> --stills 1,5,9 [--query theme=board --suffix board]  -> out/<имя>[_suffix]_still_<t>.jpg
 // node render.js <страница.html> --out out/a.mp4 [--from A --to B]
 // Страница: window.TL = {duration, fps, size}, window.renderAt(t) (может вернуть Promise), window.__ready = true после загрузки.
 const http = require("http"), fs = require("fs"), path = require("path"), { spawn } = require("child_process");
 const { chromium } = require("playwright");
 const ROOT = path.resolve(__dirname, "../../../..");
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
-const pagePath = path.resolve(process.argv[2]), name = path.basename(pagePath, ".html");
+const pagePath = path.resolve(process.argv[2]), QUERY = arg("--query", ""), name = path.basename(pagePath, ".html") + (arg("--suffix", "") ? "_" + arg("--suffix") : "");
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".ttf": "font/ttf", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".json": "application/json" };
 const srv = http.createServer((req, res) => {
   const f = path.join(ROOT, decodeURIComponent(req.url.split("?")[0]));
@@ -17,7 +17,7 @@ const srv = http.createServer((req, res) => {
   const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
   p.on("pageerror", e => console.error("pageerror:", e.message));
   p.on("console", m => { if (m.type() === "error") console.error("console:", m.text()); });
-  await p.goto(`http://127.0.0.1:${srv.address().port}/${path.relative(ROOT, pagePath)}`);
+  await p.goto(`http://127.0.0.1:${srv.address().port}/${path.relative(ROOT, pagePath)}${QUERY ? "?" + QUERY : ""}`);
   await p.waitForFunction(() => window.__ready === true, null, { timeout: 180000 });
   await p.evaluate(() => document.fonts.ready);
   const TL = await p.evaluate(() => ({ duration: window.TL.duration, fps: window.TL.fps || 30, size: window.TL.size || [1920, 1080] }));

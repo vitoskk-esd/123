@@ -75,6 +75,53 @@
   #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.6)); }
   #grain { position: absolute; inset: -50%; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  /* ---------- темы (стили документального направления; ?theme=…) ---------- */
+  /* light — «белый стол»: светлая студия, мягкие тени (Apple, Stripe) */
+  [data-theme=light] { background: #e8e5df; }
+  [data-theme=light] #world { background: radial-gradient(1600px 1000px at 1700px 900px, #f7f5f1, transparent 70%), linear-gradient(180deg, #e9e6e0, #d9d5cd); }
+  [data-theme=light] .paper { box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 30px 60px rgba(60,50,30,.18), 0 8px 18px rgba(60,50,30,.12); background-color: #fff; }
+  [data-theme=light] #phone { box-shadow: 0 0 0 3px #c9ccd2, 0 50px 90px rgba(60,50,30,.28); }
+  [data-theme=light] #vig { background: radial-gradient(ellipse at center, transparent 60%, rgba(120,110,90,.25)); }
+  [data-theme=light] #chap { color: #2a2620; text-shadow: none; } [data-theme=light] #chap i { background: #c42424; }
+  /* board — «доска расследования»: пробка, булавки, красные нити (Johnny Harris) */
+  [data-theme=board] #world { background: radial-gradient(1400px 900px at 1800px 900px, rgba(255,220,170,.25), transparent 70%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .38  0 0 0 0 .22  0 0 0 1.2 -.1'/></filter><rect width='300' height='300' fill='%238a6440'/><rect width='300' height='300' filter='url(%23c)' opacity='.7'/></svg>"); }
+  .pin { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ff8a80, #c62828 60%, #7f0000); box-shadow: 0 8px 10px rgba(0,0,0,.45); z-index: 3; }
+  #strings { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 2; }
+  /* news — «газетная вырезка»: бумага с колонками, рваные края, полутон (Vox) */
+  [data-theme=news] #world { background: repeating-linear-gradient(0deg, rgba(0,0,0,.07) 0 6px, transparent 6px 22px) 0 0 / 360px 22px,
+      linear-gradient(90deg, transparent 0 340px, rgba(0,0,0,.12) 340px 342px, transparent 342px 360px) 0 0 / 360px 100%, #d8d2c4; }
+  [data-theme=news] .paper { clip-path: polygon(0 1%, 4% 0, 9% 1.2%, 15% .2%, 22% 1%, 30% 0, 41% 1.1%, 52% .2%, 63% 1%, 74% 0, 86% 1.2%, 100% .3%, 99.2% 50%, 100% 99%, 88% 100%, 75% 99%, 61% 100%, 47% 99.2%, 33% 100%, 18% 99%, 6% 100%, 0 99%, .8% 50%);
+      filter: drop-shadow(0 20px 30px rgba(0,0,0,.35)); background-color: #f1ece0; }
+  [data-theme=news] #phone { filter: grayscale(.2) contrast(1.05); }
+  [data-theme=news] #vig { background: radial-gradient(ellipse at center, transparent 55%, rgba(40,30,10,.45)); }
+  [data-theme=news] #chap { color: #111; text-shadow: none; background: #ffd84a; padding: 10px 18px; } [data-theme=news] #chap i { background: #111; }
+  /* night — «ночной офис»: синий свет монитора, неоновый маркер, сканлайны (финансовый триллер) */
+  [data-theme=night] #world { background: radial-gradient(1500px 900px at 1800px 700px, rgba(60,140,255,.22), transparent 70%), radial-gradient(900px 600px at 900px 1900px, rgba(0,229,190,.10), transparent 70%), linear-gradient(180deg, #0c1220, #070b14); }
+  [data-theme=night] .paper { background-color: #dfe6f2; box-shadow: 0 0 0 1px rgba(120,170,255,.3), 0 40px 80px rgba(0,0,0,.7), 0 0 60px rgba(60,140,255,.18); }
+  [data-theme=night] #doc .key .hl { background: rgba(0,255,190,.55); }
+  [data-theme=night] #phone { box-shadow: 0 0 0 3px #2a3550, 0 0 80px rgba(60,140,255,.35), 0 60px 120px rgba(0,0,0,.7); }
+  [data-theme=night] #vig { background: radial-gradient(ellipse at center, transparent 50%, rgba(0,4,12,.75)), repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 2px, transparent 2px 4px); }
+  [data-theme=night] #chap i { background: #3cf; box-shadow: 0 0 12px #3cf; }
+  /* notebook — «блокнот»: бумага в клетку, стикеры, скотч, стрелки от руки */
+  [data-theme=notebook] #world { background: linear-gradient(rgba(70,110,200,.16) 2px, transparent 2px) 0 0 / 60px 60px, linear-gradient(90deg, rgba(70,110,200,.16) 2px, transparent 2px) 0 0 / 60px 60px, #f6f4ee; }
+  [data-theme=notebook] .paper { box-shadow: 0 10px 25px rgba(60,50,30,.18); }
+  [data-theme=notebook] #card { background: #ffe873; }
+  [data-theme=notebook] #ledger { background-color: #fffdf6; }
+  .tape { position: absolute; width: 190px; height: 54px; background: rgba(255,240,180,.75); box-shadow: 0 2px 6px rgba(0,0,0,.12); z-index: 3; }
+  [data-theme=notebook] #vig { background: radial-gradient(ellipse at center, transparent 60%, rgba(120,110,90,.22)); }
+  [data-theme=notebook] #chap { color: #1d2b55; text-shadow: none; } [data-theme=notebook] #chap i { background: #3a64d8; }
+
+  .clip { position: absolute; background: #f1ece0; padding: 40px 46px; box-shadow: 0 20px 40px rgba(0,0,0,.35); font-family: "Mont"; color: #151515; }
+  .clip h3 { font: 900 64px/1.02 "Unb"; text-transform: uppercase; letter-spacing: -.03em; margin-bottom: 18px; }
+  .clip .ph { height: 230px; margin: 10px 0 18px; background: radial-gradient(circle, #222 30%, transparent 32%) 0 0 / 9px 9px, #b9b2a2; filter: contrast(1.2); }
+  .clip p { font: 500 22px/1.45 "Mont"; columns: 2; column-gap: 30px; color: #333; }
+  .mon { position: absolute; left: 2450px; top: 160px; width: 1500px; height: 880px; border-radius: 26px; background: #0b1424; border: 18px solid #1a2230;
+    box-shadow: 0 0 0 2px #2b3548, 0 0 140px rgba(60,140,255,.35), 0 60px 120px rgba(0,0,0,.8); padding: 50px 60px; font-family: "Mont"; color: #cfe1ff; }
+  .mon h4 { font: 700 30px "Mono"; color: #6fb8ff; letter-spacing: .06em; }
+  .mon .big { font: 900 120px "Unb"; color: #ff5a6e; text-shadow: 0 0 40px rgba(255,90,110,.6); margin: 20px 0 10px; }
+  .mon svg { position: absolute; left: 60px; right: 60px; bottom: 60px; }
 </style>
 </head>
 <body>
@@ -145,10 +192,55 @@
     const s0 = a.s * (1 + .03 * drift);
     return { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), s: lerp(s0, b.s, k), r: lerp(a.r, b.r, k) * .35, k };
   }
+
+  // ---------- тема ----------
+  const THEME = new URLSearchParams(location.search).get("theme") || "desk";
+  document.body.dataset.theme = THEME;
+  (function decorate() {
+    const W = $("world"), ids = ["doc", "phone", "ledger", "card"];
+    const box = id => { const e = $(id); return { x: e.offsetLeft, y: e.offsetTop, w: e.offsetWidth, h: e.offsetHeight }; };
+    if (THEME === "board") {
+      const pts = ids.map(id => { const b = box(id); return [b.x + b.w / 2, b.y + 40]; });
+      pts.forEach(([x, y]) => { const p = document.createElement("div"); p.className = "pin"; p.style.left = x - 17 + "px"; p.style.top = y - 17 + "px"; W.appendChild(p); });
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.id = "strings"; svg.setAttribute("width", 4400); svg.setAttribute("height", 2600);
+      [[0, 1], [1, 2], [0, 3], [3, 2]].forEach(([a, b]) => { const l = document.createElementNS(svg.namespaceURI, "path");
+        const [x1, y1] = pts[a], [x2, y2] = pts[b]; l.setAttribute("d", `M${x1},${y1} Q${(x1 + x2) / 2},${(y1 + y2) / 2 + 120} ${x2},${y2}`);
+        l.setAttribute("stroke", "#d32f2f"); l.setAttribute("stroke-width", 6); l.setAttribute("fill", "none"); l.setAttribute("filter", "drop-shadow(0 6px 4px rgba(0,0,0,.4))"); svg.appendChild(l); });
+      W.appendChild(svg);
+    }
+    if (THEME === "news") {
+      const mk = (x, y, w, r, h, img, txt) => { const c = document.createElement("div"); c.className = "clip"; c.style.left = x + "px"; c.style.top = y + "px"; c.style.width = w + "px";
+        c.style.transform = `rotate(${r}deg)`; c.style.clipPath = "polygon(0 2%, 6% 0, 14% 1.5%, 25% 0, 38% 1.8%, 52% .3%, 66% 1.6%, 80% 0, 92% 1.4%, 100% .5%, 99% 98%, 86% 100%, 70% 98.5%, 55% 100%, 40% 98.6%, 24% 100%, 10% 98.5%, 0 100%)";
+        c.innerHTML = `<h3>${h}</h3>${img ? '<div class="ph"></div>' : ""}<p>${txt}</p>`; W.insertBefore(c, W.firstChild); };
+      const lorem = "Средняя полная стоимость кредита по картам держится на уровне 48 % годовых и выше. Минимальный платёж закрывает проценты, а основной долг почти не уменьшается. Льготный период работает только при полном погашении.";
+      mk(2400, 140, 1250, 3, "Кредитки: ПСК 48 % и выше", true, lorem);
+      mk(3700, 900, 620, -4, "Минимальный платёж", false, lorem + " " + lorem);
+      mk(150, 1650, 330, -6, "Проценты", false, lorem);
+    }
+    if (THEME === "night") {
+      const m = document.createElement("div"); m.className = "mon";
+      m.innerHTML = `<h4>ДОЛГ ПО КАРТЕ · ПРОГНОЗ ПРИ МИНИМАЛЬНОМ ПЛАТЕЖЕ</h4><div class="big">+37 ₽/день</div><div style="font:600 30px Mont;color:#8fa6c8">проценты на остаток 28 500 ₽ · 48 % годовых · пример</div>
+        <svg width="1340" height="330" viewBox="0 0 1340 330"><defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,90,110,.45)"/><stop offset="1" stop-color="rgba(255,90,110,0)"/></linearGradient></defs>
+        <path d="M0,300 C200,290 400,262 600,226 C800,186 1000,128 1340,40 L1340,330 L0,330Z" fill="url(#gA)"/><path d="M0,300 C200,290 400,262 600,226 C800,186 1000,128 1340,40" fill="none" stroke="#ff5a6e" stroke-width="6"/>
+        ${[0,1,2,3].map(i => `<line x1="0" x2="1340" y1="${60 + i * 80}" y2="${60 + i * 80}" stroke="rgba(111,184,255,.12)"/>`).join("")}</svg>`;
+      W.insertBefore(m, W.firstChild);
+    }
+    if (THEME === "notebook") {
+      ["doc", "ledger", "card"].forEach((id, i) => { const b = box(id); [[b.x + 60, b.y - 24, -8], [b.x + b.w - 250, b.y - 20, 6]].forEach(([x, y, r]) => {
+        const t = document.createElement("div"); t.className = "tape"; t.style.left = x + "px"; t.style.top = y + "px"; t.style.transform = `rotate(${r + i * 3}deg)`; W.appendChild(t); }); });
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.id = "strings"; svg.setAttribute("width", 4400); svg.setAttribute("height", 2600);
+      const arrow = (d) => { const l = document.createElementNS(svg.namespaceURI, "path"); l.setAttribute("d", d); l.setAttribute("stroke", "#3a64d8"); l.setAttribute("stroke-width", 9);
+        l.setAttribute("fill", "none"); l.setAttribute("stroke-linecap", "round"); l.setAttribute("stroke-linejoin", "round"); svg.appendChild(l); };
+      arrow("M1280,700 C1380,620 1460,600 1540,640 M1500,600 L1545,642 L1490,672"); arrow("M2060,1200 C2160,1260 2220,1300 2280,1360 M2230,1350 L2285,1365 L2265,1310");
+      arrow("M2300,2000 C2100,2080 1950,2060 1830,2010 M1880,1975 L1825,2008 L1878,2045");
+      W.appendChild(svg);
+    }
+  })();
   const OBJS = ["doc", "phone", "ledger", "card"].map(id => { const e = $(id); return { e, cx: e.offsetLeft + e.offsetWidth / 2, cy: e.offsetTop + e.offsetHeight / 2 }; });
   let prev = null, prevT = -1;
+  const WIDE = new URLSearchParams(location.search).get("wide");
   window.renderAt = (t) => {
-    const c = cam(t), w = $("world");
+    const c = WIDE ? { x: 2200, y: 1250, s: .41, r: 0 } : cam(t), w = $("world");
     const vx = prev && Math.abs(t - prevT) < .05 ? Math.hypot(c.x - prev.x, c.y - prev.y) * c.s : 0; prev = { x: c.x, y: c.y }; prevT = t;
     w.style.transform = `translate(960px, 540px) rotate(${-c.r}deg) scale(${c.s}) translate(${-c.x}px, ${-c.y}px)`;
     w.style.filter = vx > 6 ? `blur(${Math.min(8, vx / 14).toFixed(1)}px)` : "";
