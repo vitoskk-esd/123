@@ -34,6 +34,49 @@
   .paper { position: absolute; background: #f3efe6; box-shadow: 0 30px 60px rgba(0,0,0,.6); }
   .tape { position: absolute; width: 160px; height: 44px; background: rgba(255,240,170,.75); z-index: 5; }
   .stk { position: absolute; padding: 16px 26px; border-radius: 999px; font: 900 36px "Unb"; box-shadow: 0 10px 20px rgba(0,0,0,.35); z-index: 6; }
+
+  /* кадр 11: iOS-Telegram 1:1 по записи экрана владельца (экран 592×1280 в координатах записи) */
+  @font-face { font-family: "SFi"; src: url("../../../assets/fonts/inter-cyrillic-400.woff2"); font-weight: 400; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../../../assets/fonts/inter-latin-400.woff2"); font-weight: 400; }
+  @font-face { font-family: "SFi"; src: url("../../../assets/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../../../assets/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "SFi"; src: url("../../../assets/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../../../assets/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  .iph { position: absolute; left: 250px; top: 300px; width: 624px; height: 1312px; padding: 16px; border-radius: 92px; background: #08080a; border: 3px solid #4a4d55;
+    box-shadow: 0 0 0 2px #1a1b1f, 0 0 140px rgba(60,150,255,.3), 0 60px 120px rgba(0,0,0,.85); transform-origin: 50% 0; z-index: 10; }
+  .tg { width: 592px; height: 1280px; border-radius: 76px; overflow: hidden; position: relative; font-family: "SFi"; color: #fff; -webkit-font-smoothing: antialiased;
+    background: #010002 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><g fill='none' stroke='rgba(255,255,255,.11)' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M30 40c-6-8-20-4-16 6 3 7 16 14 16 14s13-7 16-14c4-10-10-14-16-6z'/><path d='M120 18l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z'/><rect x='190' y='30' width='36' height='28' rx='3'/><path d='M190 42h36M208 30v28M208 30c-6-10-16-6-10 0M208 30c6-10 16-6 10 0'/><circle cx='60' cy='130' r='16'/><path d='M50 126h2M68 126h2M54 136c4 3 8 3 12 0M46 118l-4-8 10 4M74 118l4-8-10 4'/><path d='M150 120c0-10 14-12 18-4 6-6 18-2 16 8 8 2 6 14-2 14h-30c-8 0-10-12-2-18z'/><path d='M230 120a14 14 0 1 0 12 20 11 11 0 0 1-12-20z'/><path d='M20 200c10-6 20 6 30 0s20 6 30 0'/><path d='M110 190l10 10-10 10-10-10z'/><circle cx='185' cy='205' r='4'/><path d='M215 180c6 0 12 6 12 14v10l5 6h-34l5-6v-10c0-8 6-14 12-14zM210 214a5 5 0 0 0 10 0'/><path d='M90 70l4 4M100 64l-2 6M84 80l6-2'/><path d='M240 240c-4-6-14-3-11 4 2 5 11 10 11 10s9-5 11-10c3-7-7-10-11-4z'/></g></svg>") 0 0/260px 260px; }
+  .tg-feed { position: absolute; left: 0; right: 0; top: 0; padding-top: 262px; will-change: transform; }
+  .tg .b { position: relative; margin: 0 115px 14px 16px; width: 461px; border-radius: 20px; background: #1d1c21; overflow: visible; }
+  .tg .b .cv { display: block; width: 461px; height: 461px; border-radius: 20px 20px 0 0; filter: blur(1.6px); }
+  .tg .b .tx { padding: 14px 16px 6px; font: 400 24px/34.5px "SFi"; filter: blur(3.4px); }
+  .tg .b .tx b { font-weight: 600; } .tg .ln { color: #a196f0; }
+  .tg .q { margin-top: 12px; padding: 8px 14px; border-left: 4px solid #a196f0; border-radius: 6px; background: rgba(161,150,240,.12); font-size: 20px; line-height: 28px; }
+  .tg .ft { text-align: right; padding: 0 14px 10px; font: 400 15px "SFi"; color: rgba(255,255,255,.45); display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+  .tg .eye { width: 18px; height: 12px; border: 1.6px solid rgba(255,255,255,.45); border-radius: 50%; position: relative; display: inline-block; }
+  .tg .eye::after { content: ""; position: absolute; left: 5px; top: 2.5px; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.45); }
+  .tg .bl { filter: blur(3px); }
+  .tg .fw { position: absolute; right: -58px; bottom: 6px; width: 44px; height: 44px; border-radius: 50%; background: rgba(40,39,45,.85) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M13 5v4C6 10 4 14 3 19c3-4 6-5 10-5v4l8-6.5z' fill='white'/></svg>") center/24px no-repeat; }
+  .tg .chip { width: max-content; margin: 4px auto 14px; padding: 5px 13px; border-radius: 15px; background: rgba(38,37,42,.8); font: 500 19px "SFi"; }
+  .tg-topfade { position: absolute; left: 0; right: 0; top: 0; height: 270px; background: linear-gradient(#010002 30%, rgba(1,0,2,0)); z-index: 4; }
+  .tg-botfade { position: absolute; left: 0; right: 0; bottom: 0; height: 170px; background: linear-gradient(rgba(1,0,2,0), rgba(1,0,2,.92) 60%); z-index: 4; }
+  .tg .gl { position: absolute; z-index: 6; background: rgba(32,31,36,.78); border: 1px solid rgba(255,255,255,.11); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 24px rgba(0,0,0,.45); backdrop-filter: blur(14px); }
+  .tg-status { position: absolute; left: 62px; right: 34px; top: 22px; z-index: 7; display: flex; justify-content: space-between; align-items: center; font: 600 25px "SFi"; }
+  .tg-island { position: absolute; left: 233px; top: 14px; width: 126px; height: 38px; border-radius: 19px; background: #000; z-index: 8; }
+  .tg-back { left: 26px; top: 88px; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .tg-title { left: 161px; top: 88px; width: 270px; height: 64px; border-radius: 32px; text-align: center; padding-top: 7px; }
+  .tg-title .nm { font: 600 25px/30px "SFi"; } .tg-title .sb { font: 400 16px/20px "SFi"; color: rgba(255,255,255,.5); }
+  .tg-ava { position: absolute; left: 504px; top: 87px; width: 66px; height: 66px; border-radius: 50%; overflow: hidden; z-index: 6; background: #222; }
+  .tg-ava img { width: 120%; height: 120%; margin: -10%; object-fit: cover; }
+  .tg-pin { left: 26px; top: 170px; width: 546px; height: 74px; border-radius: 37px; display: flex; align-items: center; gap: 12px; padding: 0 22px 0 26px; }
+  .tg-pin .bar { width: 3px; height: 50px; background: #fff; border-radius: 2px; display: block; }
+  .tg-pin img { width: 56px; height: 48px; border-radius: 6px; object-fit: cover; }
+  .tg-pin .h { font: 500 21px/26px "SFi"; } .tg-pin .t { font: 400 21px/26px "SFi"; }
+  .tg-pin .x { margin-left: auto; }
+  .tg-down { left: 524px; top: 1078px; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .tg-join { left: 16px; top: 1156px; width: 560px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; font: 600 24px "SFi"; color: #5eb0ff; }
+  .tg-tap { position: absolute; left: 266px; top: 1157px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,.55); box-shadow: 0 0 0 10px rgba(255,255,255,.18); z-index: 9; opacity: 0; }
+  .tg-home { position: absolute; left: 196px; top: 1258px; width: 200px; height: 7px; border-radius: 4px; background: #fff; z-index: 9; }
 </style>
 </head>
 <body>
@@ -141,32 +184,61 @@
   <div class="cap">отправь <span class="k">другу</span></div>
   <div style="position:absolute;left:0;right:0;top:1500px;z-index:57;text-align:center;font:700 28px Mont;color:rgba(255,255,255,.6)">последний кадр = первый: рилс зацикливается</div>
 </div>
-<!-- 11. 0:39 (вариант для кадра 9): телефон крупно с НАСТОЯЩИМ каналом владельца — «Владик Арбузит», аватар, закреп и посты
-     (обложки из tg-posts/), текст постов размыт — «чтобы было интересно перейти» (владелец 10.10). Число подписчиков не показываем. -->
-<div class="s" id="s11" style="background:radial-gradient(900px 900px at 60% 40%, rgba(60,204,255,.25), transparent 70%), #04060b">
-  <div class="phone" style="left:190px;top:120px;width:700px;height:1250px;transform:rotate(3deg)"><div class="scr" style="background:#0e1621">
-    <div style="position:absolute;left:0;right:0;top:0;height:190px;background:#17212b;display:flex;align-items:flex-end;padding:0 30px 22px;gap:20px;z-index:3">
-      <div style="font:700 30px Mont;color:#6ab3f3;margin-bottom:20px">‹</div>
-      <div style="flex:1;margin-bottom:10px"><div style="font:800 36px Mont;color:#fff">Владик Арбузит</div><div style="font:600 24px Mont;color:#7f91a4">канал</div></div>
-      <div style="width:86px;height:86px;border-radius:50%;overflow:hidden;flex:none;background:#000"><img src="../../../assets/tg/avatar.png" style="width:120%;height:120%;margin:-10%;object-fit:cover"></div></div>
-    <div style="position:absolute;left:0;right:0;top:190px;height:86px;background:#1c2733;display:flex;align-items:center;gap:18px;padding:0 30px;z-index:3;border-top:1px solid #0e1621">
-      <div style="width:6px;height:54px;background:#6ab3f3;border-radius:3px"></div><div><div style="font:700 22px Mont;color:#6ab3f3">Закреплённое сообщение</div><div style="font:600 26px Mont;color:#fff">С ЧЕГО НАЧАТЬ</div></div></div>
-    <div style="position:absolute;left:24px;right:80px;top:300px;border-radius:28px;overflow:hidden;background:#182533">
-      <img src="../../../../tg-posts/start-guide/cover_v3.png" style="width:100%;display:block;filter:blur(3px) saturate(1.1)">
-      <div style="padding:18px 22px;filter:blur(5px)"><div style="font:800 28px Mont;color:#fff">С ЧЕГО НАЧАТЬ</div><div style="font:500 24px/1.4 Mont;color:#d6e2ee">Ниже указал несколько банковских продуктов — оформив их, можно заработать первые деньги</div></div></div>
-    <div style="position:absolute;left:230px;top:1000px;padding:6px 18px;border-radius:20px;background:rgba(0,0,0,.35);font:600 20px Mont;color:#fff;z-index:2">6 октября</div>
-    <div style="position:absolute;left:24px;right:80px;top:1040px;border-radius:28px;overflow:hidden;background:#182533;height:200px">
-      <img src="../../../../tg-posts/why-banks-pay/cover_v1.png" style="width:100%;display:block;filter:blur(3px)"></div>
-    <div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:#17212b;display:flex;align-items:center;justify-content:center;font:800 32px Mont;color:#6ab3f3;letter-spacing:.06em;z-index:3">ПОДПИСАТЬСЯ</div>
+<!-- 11. 0:39 (вариант для кадра 9): телефон крупно с НАСТОЯЩИМ каналом владельца «Владик Арбузит» — интерфейс iOS-Telegram 1:1 по записи
+     экрана владельца (стеклянные кнопки, закреп, пузыри, фон с узором, даты-чипы, «поделиться», кнопка вниз). Посты — его обложки из tg-posts/
+     в том порядке, что в канале (4, 6, 7 октября); текст постов и число подписчиков/просмотров размыты — «чтобы было интересно перейти».
+     Анимация 4 с: телефон всплывает → лента прокручивается → тап по «Подписаться». Экран свёрстан в координатах записи (592×1280). -->
+<div class="s" id="s11" style="background:radial-gradient(900px 1000px at 50% 55%, rgba(60,150,255,.28), transparent 70%), #04060b">
+  <div class="cap" style="top:100px;left:40px;right:40px;font-size:62px">всё<br><span class="k" style="white-space:nowrap;color:#3cf;text-shadow:0 0 40px rgba(60,204,255,.6)">в телеграме</span></div>
+  <div class="iph" id="iph"><div class="tg">
+    <div class="tg-feed" id="feed">
+      <div class="b"><img src="../../../../tg-posts/start-guide/cover_v3.png" class="cv">
+        <div class="tx"><b>С ЧЕГО НАЧАТЬ</b><br><br>Ниже я указал несколько банковских продуктов оформив которые по ссылке вы можете заработать свои первые деньги без каких либо вложений<br><br><span class="ln">Кредитная карта</span> +1000₽<br><br>Условия:<br>-Возраст 18+<br>-Совершить любую покупку по терминалу на любую сумму<br><br><span class="ln">Дебетовая карта</span><br>+1000₽<br><br>Условия:<br>-Возраст 18+<br>- 2 транзакции от 500₽ каждая<br><br><b>Итого: +5500₽ за несложные действия</b></div>
+        <div class="ft"><i class="eye"></i><span class="bl">7</span> изменено 16:03</div><div class="fw"></div></div>
+      <div class="chip">6 октября</div>
+      <div class="b"><img src="../../../../tg-posts/why-banks-pay/cover_v1.png" class="cv">
+        <div class="tx">Почему банк платит тебе за то, что ты стал его клиентом?<br><br>Бонус 1 000–2 000 ₽ за новую карту выглядит как подарок. На деле это холодный расчёт — и вот почему.<br><br>Реклама дороже. Банк платит за баннеры и ролики, даже если ты их пролистал. А бонус — только тому, кто реально пришёл.</div>
+        <div class="ft"><i class="eye"></i><span class="bl">5</span> 18:32</div><div class="fw"></div></div>
+      <div class="chip">7 октября</div>
+      <div class="b"><img src="../../../../tg-posts/beginner-mistakes/cover_v2.png" class="cv">
+        <div class="tx">Типичная история: человек оформляет карту ради бонуса 1 000 ₽. Проходит месяц — ничего. Вывод: «Обманули».<br><br>А на деле карта оформлена в приложении, а не по ссылке акции.<br><br><b>Три ошибки — минус бонус.</b> Вот полный список, где новички теряют деньги:<div class="q">-Оформление не по ссылке или без промокода<br>-Переводы, связь, ЖКХ вместо обычной покупки<br>-Пропущенный срок первой покупки</div></div>
+        <div class="ft"><i class="eye"></i><span class="bl">5</span> 20:37</div><div class="fw"></div></div>
+      <div style="height:300px"></div>
+    </div>
+    <div class="tg-topfade"></div><div class="tg-botfade"></div>
+    <div class="tg-status"><span>12:30</span><svg viewBox="0 0 120 24" width="120" height="24"><g fill="#fff"><rect x="0" y="15" width="5" height="7" rx="1.5"/><rect x="8" y="11" width="5" height="11" rx="1.5"/><rect x="16" y="7" width="5" height="15" rx="1.5"/><rect x="24" y="3" width="5" height="19" rx="1.5"/></g><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M41 9.5a14 14 0 0 1 19 0"/><path d="M44.5 13.5a9 9 0 0 1 12 0"/></g><circle cx="50.5" cy="18.5" r="2.4" fill="#fff"/><rect x="72" y="4" width="38" height="18" rx="5.5" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/><rect x="75" y="7" width="26" height="12" rx="3" fill="#fff"/><rect x="112" y="10" width="3" height="6" rx="1.5" fill="rgba(255,255,255,.5)"/></svg></div>
+    <div class="tg-island"></div>
+    <div class="gl tg-back"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M15 4 7 12l8 8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="gl tg-title"><div class="nm">Владик Арбузит</div><div class="sb"><span class="bl">7</span> подписчиков</div></div>
+    <div class="tg-ava"><img src="../../../assets/tg/avatar.png"></div>
+    <div class="gl tg-pin"><i class="bar"></i><img src="../../../../tg-posts/start-guide/cover_v3.png"><div><div class="h">Закреплённое сообщение</div><div class="t">С ЧЕГО НАЧАТЬ</div></div><svg viewBox="0 0 24 24" width="26" height="26" class="x"><path d="M5 5l14 14M19 5 5 19" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="gl tg-down"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M5 9l7 7 7-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="gl tg-join" id="join">Подписаться</div>
+    <div class="tg-tap" id="tap"></div>
+    <div class="tg-home"></div>
   </div></div>
-  <div class="cap" style="top:1420px;left:40px;right:40px;font-size:66px">всё<br><span class="k" style="white-space:nowrap;color:#3cf;text-shadow:0 0 40px rgba(60,204,255,.6)">в телеграме</span></div>
-  <div style="position:absolute;left:0;right:0;top:1640px;z-index:57;text-align:center;font:800 40px Mont;color:#fff;text-shadow:0 4px 20px #000">ссылка в профиле ↑</div>
+  <div style="position:absolute;left:0;right:0;top:1585px;z-index:57;text-align:center;font:800 40px Mont;color:#fff;text-shadow:0 4px 20px #000">ссылка в профиле ↑</div>
 </div>
 <div class="vig"></div><div class="grain"></div><div class="foot">Условия зависят от банка и акции. Не реклама конкретного банка</div>
 <script>
   const sh = new URLSearchParams(location.search).get("shot") || "1";
   document.getElementById("s" + sh).style.display = "block";
   window.TL = { duration: 1, fps: 30, size: [1080, 1920] }; window.renderAt = () => {};
+  if (sh === "11") {
+    // 0–0,5 с телефон всплывает; 0,5–3,1 лента прокручивается от обложки «С чего начать?» к «5 ошибок»; 3,2–3,8 тап по «Подписаться»
+    const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2, cl = x => Math.max(0, Math.min(1, x));
+    const iph = document.getElementById("iph"), feed = document.getElementById("feed"), join = document.getElementById("join"), tap = document.getElementById("tap");
+    TL.duration = 4;
+    window.renderAt = t => {
+      const bs = feed.querySelectorAll(".b"), y1 = bs[2].offsetTop - 262 - 60;
+      const u = 1 - Math.pow(1 - cl(t / .5), 3);
+      iph.style.transform = `translateY(${(1 - u) * 70}px) rotate(${2 - u}deg) scale(.93)`;
+      feed.style.transform = `translateY(${-ease(cl((t - .5) / 2.6)) * y1}px)`;
+      const k = cl((t - 3.2) / .6), p = Math.sin(Math.PI * k);
+      tap.style.opacity = t > 3.2 && t < 3.8 ? p : 0; tap.style.transform = `scale(${1 - .25 * p})`;
+      join.style.transform = `scale(${1 - .04 * p})`; join.style.background = `rgba(${32 + 40 * p},${31 + 60 * p},${36 + 90 * p},.78)`;
+    };
+  }
   document.fonts.ready.then(() => { window.__ready = true; });
 </script>
 </body>
