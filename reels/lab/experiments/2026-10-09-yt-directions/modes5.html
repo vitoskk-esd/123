@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Режимы YouTube — пятый набор</title>
+<!-- Пятый набор (владелец 09.10: «ещё варианты»). Форматы, привычные аудитории 18–25: ?mode=swipe|story|voice|ai|kanban|tier.
+     Интерфейсы обобщённые, без брендов. Цифры — из ролика №2 и его источников. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0b0c10; font-family: "Mont"; }
+  .m { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .grain { position: absolute; inset: 0; opacity: .07; mix-blend-mode: overlay; pointer-events: none; z-index: 50;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .cap { position: absolute; color: #eef1f6; z-index: 20; }
+  .cap small { display: block; font: 700 26px "Mont"; letter-spacing: .14em; color: #9aa5b1; } .cap b { display: block; font: 900 64px/1.05 "Unb"; letter-spacing: -.02em; margin-top: 12px; }
+
+  /* ---------- 1. СВАЙП-КАРТОЧКИ ---------- */
+  #swipe { background: radial-gradient(900px 700px at 50% 50%, #2a1530, #0c0710); }
+  #swipe .c { position: absolute; left: 760px; top: 140px; width: 420px; height: 680px; border-radius: 40px; padding: 40px; color: #fff; box-shadow: 0 40px 80px rgba(0,0,0,.6); display: flex; flex-direction: column; justify-content: flex-end; }
+  #swipe .c b { font: 900 54px/1.05 "Unb"; } #swipe .c span { font: 600 26px/1.35 "Mont"; opacity: .85; margin-top: 14px; }
+  #swipe .stamp { position: absolute; top: 50px; padding: 10px 22px; border: 6px solid; border-radius: 14px; font: 900 48px "Unb"; }
+  #swipe .btn { position: absolute; top: 870px; width: 130px; height: 130px; border-radius: 50%; background: #1b1220; display: flex; align-items: center; justify-content: center; font: 900 60px "Mont"; box-shadow: 0 16px 30px rgba(0,0,0,.5); }
+
+  /* ---------- 2. СТОРИС С ОПРОСОМ ---------- */
+  #story { background: #0b0c10; }
+  #story .bgb { position: absolute; inset: -60px; background: radial-gradient(600px 500px at 30% 30%, #ff5a6e, transparent 70%), radial-gradient(700px 500px at 75% 70%, #7c4dff, transparent 70%), #12101a; filter: blur(60px); opacity: .7; }
+  #story .ph { position: absolute; left: 690px; top: 30px; width: 540px; height: 1020px; border-radius: 40px; overflow: hidden; background: linear-gradient(180deg, #ff6a4d, #ff3c7a 50%, #7c4dff); box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+  #story .bars { position: absolute; left: 20px; right: 20px; top: 20px; display: flex; gap: 8px; } #story .bars i { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.45); } #story .bars i.on { background: #fff; }
+  #story .q { position: absolute; left: 40px; right: 40px; top: 200px; font: 900 56px/1.1 "Unb"; color: #fff; text-align: center; text-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  #story .poll { position: absolute; left: 50px; right: 50px; top: 520px; padding: 30px; border-radius: 30px; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,.3); }
+  #story .poll .opt { position: relative; height: 84px; border-radius: 20px; background: #eef0f4; margin-top: 16px; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; font: 800 30px "Mont"; color: #13161b; }
+  #story .poll .opt i { position: absolute; left: 0; top: 0; bottom: 0; } #story .poll .opt span { position: relative; }
+  #story .side { position: absolute; color: #fff; }
+
+  /* ---------- 3. ГОЛОСОВОЕ СООБЩЕНИЕ ---------- */
+  #voice { background: radial-gradient(900px 700px at 50% 40%, rgba(60,140,255,.2), transparent 70%), #070a10; }
+  #voice .win { position: absolute; left: 330px; top: 150px; width: 1260px; height: 780px; border-radius: 40px; background: #0f1520; border: 1px solid #22304a; padding: 50px; box-shadow: 0 50px 100px rgba(0,0,0,.6); }
+  #voice .msg { display: flex; gap: 26px; align-items: center; padding: 30px 36px; border-radius: 36px; background: #2b6bff; width: 1000px; margin-left: auto; }
+  #voice .play { width: 100px; height: 100px; border-radius: 50%; background: #fff; flex: none; position: relative; } #voice .play::after { content: ""; position: absolute; left: 40px; top: 30px; border-left: 34px solid #2b6bff; border-top: 20px solid transparent; border-bottom: 20px solid transparent; }
+  #voice .wave { display: flex; gap: 7px; align-items: center; height: 100px; flex: 1; overflow: hidden; } #voice .wave i { width: 9px; border-radius: 5px; background: rgba(255,255,255,.9); }
+  #voice .msg span { font: 700 28px "Mono"; color: #dfe8ff; }
+  #voice .tr { margin: 30px 0 0 auto; width: 1000px; padding: 30px 36px; border-radius: 30px; background: #18233a; font: 600 36px/1.4 "Mont"; color: #e6edf8; }
+  #voice .tr small { display: block; font: 700 22px "Mont"; color: #7f9cc8; margin-bottom: 10px; letter-spacing: .1em; } #voice .tr b { color: #ff8a9c; }
+
+  /* ---------- 4. ИИ-АССИСТЕНТ ---------- */
+  #ai { background: #0d0d0f; }
+  #ai .col { position: absolute; left: 400px; top: 70px; width: 1120px; }
+  #ai .me { margin-left: auto; width: fit-content; max-width: 780px; padding: 26px 32px; border-radius: 30px; background: #2a2a2e; font: 600 36px/1.35 "Mont"; color: #f1f1f3; }
+  #ai .bot { display: flex; gap: 26px; margin-top: 50px; } #ai .lg { width: 64px; height: 64px; border-radius: 50%; flex: none; background: conic-gradient(from 0deg, #7c4dff, #00c8ff, #5cf0a0, #ffd84a, #ff5a6e, #7c4dff); }
+  #ai .ans { font: 500 34px/1.5 "Mont"; color: #e8e8ea; } #ai .ans b { color: #fff; } #ai .ans li { margin: 10px 0 0 36px; }
+  #ai .ans .hl { background: rgba(255,90,110,.22); padding: 0 6px; border-radius: 6px; } #ai .ans .ok { background: rgba(92,240,160,.18); padding: 0 6px; border-radius: 6px; }
+  #ai .caret { display: inline-block; width: 18px; height: 38px; background: #e8e8ea; vertical-align: middle; margin-left: 4px; }
+  #ai .inp { position: absolute; left: 400px; bottom: 50px; width: 1120px; padding: 26px 34px; border-radius: 40px; background: #1c1c20; border: 1px solid #333; font: 500 30px "Mont"; color: #77777d; }
+
+  /* ---------- 5. КАНБАН ---------- */
+  #kanban { background: linear-gradient(135deg, #1d3a8a, #3b1d6e); }
+  #kanban .hd { position: absolute; left: 80px; top: 50px; font: 800 44px "Mont"; color: #fff; }
+  #kanban .colm { position: absolute; top: 140px; width: 560px; height: 880px; border-radius: 24px; background: rgba(10,14,30,.55); padding: 26px; }
+  #kanban .colm h4 { font: 800 28px "Mont"; color: #dfe6ff; margin-bottom: 20px; display: flex; justify-content: space-between; } #kanban .colm h4 span { opacity: .6; }
+  #kanban .t { border-radius: 16px; background: #fff; padding: 22px 24px; margin-bottom: 18px; font: 700 30px/1.3 "Mont"; color: #1a1d24; box-shadow: 0 8px 16px rgba(0,0,0,.25); }
+  #kanban .t i { display: inline-block; height: 10px; width: 70px; border-radius: 5px; margin-bottom: 12px; } #kanban .t small { display: block; font: 600 22px "Mont"; color: #6a717c; margin-top: 8px; }
+  #kanban .drag { transform: rotate(4deg) translateY(-10px); box-shadow: 0 30px 50px rgba(0,0,0,.45); }
+
+  /* ---------- 6. ТИР-ЛИСТ ---------- */
+  #tier { background: #111214; }
+  #tier .hd { position: absolute; left: 80px; top: 44px; font: 900 48px "Unb"; color: #fff; letter-spacing: -.02em; }
+  #tier .row { position: absolute; left: 80px; right: 80px; height: 168px; display: flex; border-bottom: 3px solid #111214; }
+  #tier .row .l { width: 170px; display: flex; align-items: center; justify-content: center; font: 900 84px "Unb"; color: #111; }
+  #tier .row .items { flex: 1; background: #1c1d21; display: flex; gap: 16px; align-items: center; padding: 0 20px; }
+  #tier .it { height: 126px; padding: 0 26px; border-radius: 14px; background: #2b2d33; display: flex; flex-direction: column; justify-content: center; font: 800 30px/1.15 "Mont"; color: #fff; }
+  #tier .it small { font: 600 20px "Mont"; color: #9aa5b1; margin-top: 4px; }
+</style>
+</head>
+<body>
+<!-- 1. СВАЙП -->
+<div class="m" id="swipe">
+  <div class="cap" style="left:90px;top:860px;width:600px"><small>КАК ПЛАТИТЬ ПО КРЕДИТКЕ</small><b style="font-size:54px">Свайпни правильно</b></div>
+  <div class="c" style="background:linear-gradient(180deg,#5a2030,#c42a45);transform:translateX(-430px) rotate(-14deg);opacity:.85"><div class="stamp" style="right:30px;border-color:#fff;color:#fff;transform:rotate(14deg)">НЕТ</div><b>Минимальный платёж</b><span>долг почти не уменьшается, проценты каждый день</span></div>
+  <div class="c" style="background:linear-gradient(180deg,#123a26,#1a9d57);transform:rotate(3deg)"><div class="stamp" style="left:30px;border-color:#9dffc8;color:#9dffc8;transform:rotate(-14deg)">ДА</div><b>Вернуть всё до 25.11</b><span>в льготный период — 0 % процентов, бонус за покупку остаётся</span></div>
+  <div class="btn" style="left:800px;color:#ff5a6e">✕</div><div class="btn" style="left:990px;color:#5cf0a0">✓</div>
+  <div class="cap" style="left:1340px;top:330px;width:500px"><small style="color:#5cf0a0">МЭТЧ</small><b style="font-size:52px">Правило<br>полного<br>погашения</b></div>
+</div>
+<!-- 2. СТОРИС -->
+<div class="m" id="story">
+  <div class="bgb"></div>
+  <div class="cap" style="left:90px;top:360px;width:540px"><small style="color:#ffb3c0">СПРОСИЛИ ПОДПИСЧИКОВ</small><b style="font-size:56px">Что ты платишь<br>по кредитке?</b></div>
+  <div class="ph"><div class="bars"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+    <div class="q">Платишь по кредитке…</div>
+    <div class="poll"><div style="font:800 26px Mont;color:#6a717c;text-align:center">ОПРОС</div>
+      <div class="opt"><i style="width:63%;background:#ffd0d8"></i><span>минимальный</span><span>63 %</span></div>
+      <div class="opt"><i style="width:37%;background:#c9f5dc"></i><span>всю сумму</span><span>37 %</span></div></div>
+    <div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font:700 24px Mont;color:rgba(255,255,255,.85)">пример опроса</div></div>
+  <div class="cap" style="left:1300px;top:400px;width:540px"><small style="color:#ffb3c0">ЕСЛИ ТЫ СЛЕВА</small><b style="font-size:48px">банк уже<br>считает твои<br>проценты</b></div>
+</div>
+<!-- 3. ГОЛОСОВОЕ -->
+<div class="m" id="voice">
+  <div class="win">
+    <div style="display:flex;gap:18px;align-items:center;margin-bottom:40px"><div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#ffb06b,#ff6b8b)"></div><div><div style="font:800 32px Mont;color:#fff">Дима</div><div style="font:600 22px Mont;color:#6fd39a">записывает голосовое…</div></div></div>
+    <div class="msg"><div class="play"></div><div class="wave" id="wave"></div><span>0:14</span></div>
+    <div class="tr"><small>РАСШИФРОВКА</small>«Короче, я плачу минимальный платёж, просрочки нет — <b>а долг вообще не уменьшается</b>. Это нормально?»</div>
+  </div>
+</div>
+<!-- 4. ИИ -->
+<div class="m" id="ai">
+  <div class="col"><div class="me">Что будет, если по кредитке платить только минимальный платёж?</div>
+    <div class="bot"><div class="lg"></div><div class="ans"><b>Коротко:</b> просрочки не будет, но <span class="hl">на остаток долга продолжат начисляться проценты</span> — при средней ПСК 48 % годовых это дорого.
+      <ul><li>Минимальный платёж почти не уменьшает сам долг</li><li>Льготный период работает, только если вернуть <span class="ok">всю сумму</span> до его конца</li><li>Тогда процентов <span class="ok">0 ₽</span><span class="caret"></span></li></ul></div></div></div>
+  <div class="inp">Спросите что-нибудь…</div>
+</div>
+<!-- 5. КАНБАН -->
+<div class="m" id="kanban">
+  <div class="hd">Кредитка без процентов · план</div>
+  <div class="colm" style="left:80px"><h4>Сделать <span>2</span></h4>
+    <div class="t"><i style="background:#ffd84a"></i><br>Поставить напоминание на 25.11<small>конец льготного периода</small></div>
+    <div class="t"><i style="background:#5cf0a0"></i><br>Проверить, что обслуживание бесплатное</div></div>
+  <div class="colm" style="left:680px"><h4>В процессе <span>1</span></h4>
+    <div class="t drag"><i style="background:#ff5a6e"></i><br>Вернуть всю сумму, а не минимальный платёж<small>30 000 ₽ до 25.11</small></div></div>
+  <div class="colm" style="left:1280px"><h4>Готово <span>2</span></h4>
+    <div class="t" style="opacity:.75"><i style="background:#2b6bff"></i><br>Оплатить покупку картой — не переводом</div>
+    <div class="t" style="opacity:.75"><i style="background:#b77cff"></i><br>Получить бонус за покупку</div></div>
+</div>
+<!-- 6. ТИР-ЛИСТ -->
+<div class="m" id="tier">
+  <div class="hd">Тир-лист: как платить по кредитке</div>
+  <div class="row" style="top:140px"><div class="l" style="background:#ff7f7f">S</div><div class="items"><div class="it">Вернуть всё в льготный период<small>0 % · бонус твой</small></div></div></div>
+  <div class="row" style="top:310px"><div class="l" style="background:#ffbf7f">A</div><div class="items"><div class="it">Напоминание на дату<small>чтобы не забыть</small></div><div class="it">Только покупки<small>не переводы и наличные</small></div></div></div>
+  <div class="row" style="top:480px"><div class="l" style="background:#ffdf7f">B</div><div class="items"><div class="it">Платить больше минимума<small>долг тает, но проценты есть</small></div></div></div>
+  <div class="row" style="top:650px"><div class="l" style="background:#bfff7f">C</div><div class="items"><div class="it">Минимальный платёж<small>просрочки нет, проценты каждый день</small></div></div></div>
+  <div class="row" style="top:820px"><div class="l" style="background:#7fbfff">D</div><div class="items"><div class="it">Снимать наличные с кредитки<small>льготный период часто не действует</small></div></div></div>
+</div>
+<div class="grain"></div>
+<script>
+  const mode = new URLSearchParams(location.search).get("mode") || "swipe";
+  document.getElementById(mode).style.display = "block";
+  const wv = document.getElementById("wave"); let seed = 5; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 46; i++) { const b = document.createElement("i"); b.style.height = (14 + Math.abs(Math.sin(i * .5)) * 50 + rnd() * 30) + "px"; if (i > 30) b.style.opacity = .45; wv.appendChild(b); }
+  window.TL = { duration: 1, fps: 30, size: [1920, 1080] }; window.renderAt = () => {};
+  document.fonts.ready.then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
