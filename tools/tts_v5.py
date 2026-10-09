@@ -8,7 +8,8 @@
 Импорт: from tts_v5 import stress, synth, humanize."""
 import os, re, random, subprocess, sys
 VOW = "аеёиоуыэюяАЕЁИОУЫЭЮЯ"
-STRESS_FIX = {"начал": "нач+ал", "начала": "начал+а", "начали": "н+ачали", "бонусом": "б+онусом", "звонит": "звон+ит",
+# «на́чал», «на́чала» — так говорит владелец (09.10), хотя по норме «нача́л»
+STRESS_FIX = {"начал": "н+ачал", "начала": "н+ачала", "начали": "н+ачали", "бонусом": "б+онусом", "звонит": "звон+ит",
               "кредитка": "кред+итка", "кредитку": "кред+итку", "кредитки": "кред+итки", "кэшбэк": "кэшб+эк", "кэшбэка": "кэшб+эка",
               "дебетовая": "дебет+овая", "дебетовую": "дебет+овую", "обеспечение": "обесп+ечение", "договор": "догов+ор",
               "процентов": "проц+ентов", "сто": "сто", "мне": "мне"}
@@ -38,7 +39,7 @@ def stress(text):
 _tts = None
 
 
-def synth(text, out_wav, seed=0, exaggeration=.65, cfg_weight=.35, temperature=.9):
+def synth(text, out_wav, seed=0, exaggeration=.65, cfg_weight=.35, temperature=.9, ref=None):
     global _tts
     import torch, torchaudio
     sys.path.insert(0, "/home/user/123/reels/zero-card-07")
@@ -47,7 +48,7 @@ def synth(text, out_wav, seed=0, exaggeration=.65, cfg_weight=.35, temperature=.
         from chatterbox.mtl_tts import ChatterboxMultilingualTTS
         _tts = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
     torch.manual_seed(seed)
-    wav = _tts.generate(stress(text), language_id="ru", audio_prompt_path=V.VC_TARGET,
+    wav = _tts.generate(stress(text), language_id="ru", audio_prompt_path=ref or V.VC_TARGET,
                         exaggeration=exaggeration, cfg_weight=cfg_weight, temperature=temperature)
     torchaudio.save(out_wav, wav, _tts.sr)
     return out_wav
