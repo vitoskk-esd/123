@@ -9,11 +9,13 @@
   python3 tools/threads_publish.py --check        проверка ключа (аккаунт, лимит публикаций, продление ключа) — ничего не публикует
   python3 tools/threads_publish.py --due          опубликовать ОДИН самый ранний пост, время которого пришло
   python3 tools/threads_publish.py --due --dry    то же без публикации (проверка очереди и текста)
+  python3 tools/threads_publish.py --due --jitter 2400   перед публикацией ждать случайно 0–2400 с: время поста не «ровное»
+                                                  (после блокировки аккаунта 09.10 — 2 поста в день, время плавает ±20 мин)
   python3 tools/threads_publish.py --lint         проверить очередь: ≤ 500 символов, без ссылок
 
 Правила (threads/README.md): без ссылок и без призывов оформить продукт конкретного банка — закон о рекламе на ресурсах Meta в РФ.
 """
-import datetime as dt, json, os, re, sys, time, urllib.parse, urllib.request
+import datetime as dt, json, os, random, re, sys, time, urllib.parse, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 QUEUE = os.path.join(ROOT, "threads", "queue.json")
@@ -89,8 +91,11 @@ def check():
         print(f"продлить ключ сейчас нельзя (бывает, если ключу < 24 ч): {str(e)[:160]}")
 
 
-def due(dry=False):
+def due(dry=False, jitter=0):
     q, now = load(), dt.datetime.now(dt.timezone.utc)
+    if jitter and not dry and any(p.get("status") == "queued" and dt.datetime.fromisoformat(p["at"]) <= now for p in q):
+        w = random.randint(0, jitter); print(f"жду {w // 60} мин {w % 60} с (случайное время публикации)", flush=True); time.sleep(w)
+        q, now = load(), dt.datetime.now(dt.timezone.utc)   # за время ожидания очередь могли поправить
     ready = sorted([p for p in q if p.get("status") == "queued" and dt.datetime.fromisoformat(p["at"]) <= now], key=lambda p: p["at"])
     if not ready: print("нечего публиковать: время постов ещё не пришло"); return
     p = ready[0]
@@ -113,5 +118,5 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if "--lint" in a: sys.exit(1 if lint() else 0)
     if "--check" in a: check()
-    elif "--due" in a: due(dry="--dry" in a)
+    elif "--due" in a: due(dry="--dry" in a, jitter=int(a[a.index("--jitter") + 1]) if "--jitter" in a else 0)
     else: print(__doc__)
