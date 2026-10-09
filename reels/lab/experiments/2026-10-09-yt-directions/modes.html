@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Режимы YouTube — ночной мир</title>
+<!-- Владелец 09.10: «ночной офис — единственное, что мне сейчас нравится; создай ещё несколько режимов, чтобы было интересно
+     смотреть меняющиеся режимы/кадры». Все режимы — места одного ночного мира (как «Ночной офис»): живой свет, глубина, фактура.
+     ?mode=street|sheet|phone|board|chat|receipt — кадры-стиллы на моментах главы «Способ 1» ролика №2. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05070c; font-family: "Mont"; }
+  .m { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .grain { position: absolute; inset: 0; opacity: .1; mix-blend-mode: overlay; pointer-events: none; z-index: 50;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .vig { position: absolute; inset: 0; z-index: 49; pointer-events: none; background: radial-gradient(ellipse at center, transparent 50%, rgba(0,2,8,.72)); }
+  .chap { position: absolute; left: 70px; bottom: 56px; z-index: 48; font: 700 24px "Mont"; color: #cfe1ff; letter-spacing: .06em; display: flex; gap: 14px; align-items: center; text-shadow: 0 2px 10px #000; }
+  .chap i { width: 50px; height: 6px; border-radius: 3px; background: #3cf; box-shadow: 0 0 12px #3cf; }
+
+  /* ---------- 1. НОЧНАЯ УЛИЦА: неоновая вывеска главы, мокрый асфальт, дождь ---------- */
+  #street { background: linear-gradient(180deg, #050914 0%, #0b1530 55%, #0a0d16 62%, #04060b 100%); }
+  #street .bld { position: absolute; bottom: 418px; background: #070b16; box-shadow: inset 0 0 0 1px rgba(120,160,255,.06); }
+  #street .bld i { position: absolute; width: 16px; height: 22px; border-radius: 2px; }
+  #street .sign { position: absolute; left: 470px; top: 120px; width: 980px; padding: 40px 50px 46px; border-radius: 22px; background: rgba(10,14,28,.85);
+    box-shadow: 0 0 0 4px rgba(60,204,255,.9), 0 0 50px rgba(60,204,255,.65), 0 0 140px rgba(60,204,255,.35), inset 0 0 40px rgba(60,204,255,.25); text-align: center; z-index: 3; }
+  #street .sign .n { font: 900 80px "Unb"; color: #ff4d6d; text-shadow: 0 0 10px #ff4d6d, 0 0 30px #ff4d6d, 0 0 80px rgba(255,77,109,.7); letter-spacing: .02em; }
+  #street .sign .t { font: 800 66px/1.1 "Unb"; color: #eaf6ff; text-shadow: 0 0 8px #3cf, 0 0 26px #3cf, 0 0 70px rgba(60,204,255,.6); margin-top: 14px; }
+  #street .refl { position: absolute; left: 470px; top: 680px; width: 980px; height: 330px; transform: scaleY(-1); opacity: .35; filter: blur(10px); z-index: 2;
+    background: radial-gradient(400px 120px at 50% 85%, rgba(60,204,255,.9), transparent 70%), radial-gradient(260px 80px at 50% 60%, rgba(255,77,109,.8), transparent 70%); }
+  #street .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 418px;
+    background: linear-gradient(180deg, rgba(20,30,60,.6), #04060b), repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 3px, transparent 3px 9px); }
+  #street .puddle { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, rgba(60,204,255,.25), transparent 70%); filter: blur(6px); }
+  #street .rain { position: absolute; inset: -100px; z-index: 10; opacity: .35; transform: rotate(12deg);
+    background: repeating-linear-gradient(90deg, transparent 0 37px, rgba(200,220,255,.5) 37px 38px, transparent 38px 91px), linear-gradient(180deg, transparent, transparent); mask-image: repeating-linear-gradient(180deg, #000 0 60px, transparent 60px 140px); -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 60px, transparent 60px 140px); }
+  #street .bok { position: absolute; border-radius: 50%; filter: blur(16px); z-index: 11; }
+
+  /* ---------- 2. НОУТБУК С ТАБЛИЦЕЙ: экран под углом, формула, выделенная ячейка, курсор ---------- */
+  #sheet { background: radial-gradient(1200px 800px at 55% 40%, rgba(60,140,255,.25), transparent 70%), #04070d; perspective: 2200px; }
+  #sheet .lap { position: absolute; left: 230px; top: 70px; width: 1500px; height: 900px; border-radius: 28px; background: #0c0f15; padding: 26px; border: 3px solid #252a35;
+    transform: rotateY(-14deg) rotateX(6deg) rotateZ(-1deg); box-shadow: 0 0 160px rgba(60,140,255,.25), 0 80px 140px rgba(0,0,0,.8); }
+  #sheet .scr { width: 100%; height: 100%; border-radius: 10px; background: #f7f8fa; overflow: hidden; font-family: "Mont"; position: relative; }
+  #sheet .tb { height: 64px; background: #1e7145; color: #fff; display: flex; align-items: center; padding: 0 24px; gap: 30px; font: 700 22px "Mont"; }
+  #sheet .fx { height: 58px; display: flex; align-items: center; gap: 18px; padding: 0 20px; border-bottom: 2px solid #d9dde3; font: 600 24px "Mono"; color: #20242a; background: #fff; }
+  #sheet .fx b { background: #e8f0fe; padding: 4px 12px; border-radius: 6px; color: #1a56c4; }
+  #sheet table { border-collapse: collapse; position: absolute; left: 0; top: 122px; }
+  #sheet td, #sheet th { border: 1px solid #dde1e7; height: 72px; padding: 0 18px; font: 600 28px "Mont"; color: #20242a; white-space: nowrap; }
+  #sheet th { background: #f0f2f5; color: #6a717c; font: 700 20px "Mono"; height: 40px; text-align: center; }
+  #sheet td.rh { background: #f0f2f5; color: #6a717c; font: 700 20px "Mono"; text-align: center; width: 60px; padding: 0; }
+  #sheet td.num { text-align: right; font-family: "Mono"; }
+  #sheet td.hot { background: #fff1f1; color: #d42a2a; font: 900 40px "Unb"; outline: 5px solid #d42a2a; outline-offset: -3px; box-shadow: 0 0 0 8px rgba(212,42,42,.18); }
+  #sheet .cur { position: absolute; width: 0; height: 0; border-left: 22px solid #111; border-top: 14px solid transparent; border-bottom: 14px solid transparent; transform: rotate(-38deg); filter: drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
+  #sheet .glare { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.18) 48%, transparent 56%); pointer-events: none; }
+  #sheet .keys { position: absolute; left: 160px; right: 120px; bottom: -120px; height: 220px; border-radius: 30px; background: linear-gradient(180deg, #151922, #0a0c11); transform: rotateX(70deg); filter: blur(3px); }
+
+  /* ---------- 3. ТЕЛЕФОН КРУПНО: оплата покупки, палец, малая глубина резкости ---------- */
+  #phone { background: radial-gradient(900px 700px at 60% 50%, rgba(60,140,255,.22), transparent 70%), #04060b; perspective: 2000px; }
+  #phone .bk { position: absolute; border-radius: 50%; filter: blur(30px); }
+  #phone .ph { position: absolute; left: 640px; top: -120px; width: 760px; height: 1500px; border-radius: 110px; background: #0b0c10; padding: 24px; border: 4px solid #2a2f3a;
+    transform: rotateZ(-8deg) rotateX(14deg) rotateY(8deg); box-shadow: 0 0 120px rgba(60,140,255,.25), 0 80px 160px rgba(0,0,0,.85); }
+  #phone .scr { width: 100%; height: 100%; border-radius: 88px; background: #f5f6f8; overflow: hidden; position: relative; padding: 230px 46px 0; }
+  #phone .scr h3 { font: 800 38px "Mont"; color: #7b828c; } #phone .scr .item { margin-top: 26px; display: flex; gap: 26px; align-items: center; }
+  #phone .scr .img { width: 170px; height: 170px; border-radius: 32px; background: linear-gradient(135deg, #2a2f3a, #4c5566); position: relative; }
+  #phone .scr .img::after { content: ""; position: absolute; left: 50px; top: 22px; width: 70px; height: 126px; border-radius: 16px; background: #0d0f14; border: 4px solid #8a93a3; }
+  #phone .scr .nm { font: 700 40px/1.2 "Mont"; color: #13161b; } #phone .scr .pr { white-space: nowrap; font: 900 60px "Unb"; color: #13161b; letter-spacing: -.03em; margin-top: 8px; }
+  #phone .scr .card { margin-top: 50px; padding: 30px 34px; border-radius: 34px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.08); font: 600 32px "Mont"; color: #4a515b; }
+  #phone .scr .card b { color: #13161b; } #phone .scr .card .g { color: #1a9d57; font-weight: 800; }
+  #phone .scr .pay { position: absolute; left: 46px; right: 46px; bottom: 520px; height: 150px; border-radius: 40px; background: #13161b; color: #fff; font: 800 46px "Mont"; display: flex; align-items: center; justify-content: center; }
+  #phone .finger { position: absolute; left: 1180px; top: 860px; width: 260px; height: 360px; border-radius: 130px 130px 110px 110px; background: radial-gradient(circle at 40% 30%, #e9b896, #b97c58 70%); filter: blur(10px); opacity: .92; transform: rotate(-24deg); z-index: 5; }
+  #phone .ring { position: absolute; left: 1120px; top: 820px; width: 180px; height: 180px; border-radius: 50%; border: 8px solid rgba(255,255,255,.75); z-index: 4; transform: rotate(-8deg); }
+  #phone .dof { position: absolute; inset: 0; z-index: 6; pointer-events: none; backdrop-filter: blur(9px); -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 26%, transparent 66%, #000 100%); mask-image: linear-gradient(180deg, #000 0%, transparent 26%, transparent 66%, #000 100%); }
+  #phone .side { position: absolute; left: 110px; top: 380px; z-index: 7; color: #eaf2ff; }
+  #phone .side small { font: 700 26px "Mont"; color: #8fb3e8; letter-spacing: .12em; } #phone .side b { display: block; font: 900 92px "Unb"; letter-spacing: -.03em; text-shadow: 0 0 40px rgba(60,140,255,.5); }
+
+  /* ---------- 4. МАРКЕРНАЯ ДОСКА В ПЕРЕГОВОРКЕ: схема льготного периода от руки ---------- */
+  #board { background: linear-gradient(90deg, #04060b, #0a1222 40%, #04060b); }
+  #board .win { position: absolute; left: 0; top: 0; width: 360px; height: 1080px; background: repeating-linear-gradient(0deg, rgba(255,210,140,.35) 0 6px, transparent 6px 34px), linear-gradient(180deg, #0b1630, #050a14); filter: blur(5px); opacity: .7; }
+  #board .wb { position: absolute; left: 300px; top: 110px; width: 1500px; height: 830px; background: linear-gradient(160deg, #f4f6f8, #dfe3e8); border-radius: 10px; border: 18px solid #b9c0c8;
+    box-shadow: 0 50px 100px rgba(0,0,0,.7), inset 0 0 120px rgba(0,0,0,.08); transform: perspective(2400px) rotateY(-10deg); }
+  #board .wb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 42%, transparent 52%); }
+  #board svg { position: absolute; inset: 0; overflow: visible; }
+  #board .hw { position: absolute; font: 800 italic 40px "Mont"; }
+  #board .tray { position: absolute; left: 330px; top: 950px; width: 1420px; height: 26px; background: #9aa2ab; border-radius: 6px; transform: perspective(2400px) rotateY(-10deg); }
+  #board .mk { position: absolute; top: 925px; width: 150px; height: 30px; border-radius: 10px; }
+
+  /* ---------- 5. ПЕРЕПИСКА: тёмный мессенджер поверх размытого ночного офиса ---------- */
+  #chat { background: radial-gradient(1000px 700px at 30% 30%, rgba(60,140,255,.22), transparent 70%), radial-gradient(800px 600px at 80% 80%, rgba(0,229,190,.10), transparent 70%), #04070d; }
+  #chat .blur { position: absolute; inset: -40px; filter: blur(22px); opacity: .55; }
+  #chat .blur div { position: absolute; background: #dfe6f2; border-radius: 8px; }
+  #chat .win { position: absolute; left: 460px; top: 90px; width: 1000px; height: 900px; border-radius: 40px; background: rgba(14,20,32,.9); border: 2px solid rgba(120,170,255,.25);
+    box-shadow: 0 0 120px rgba(60,140,255,.2), 0 60px 120px rgba(0,0,0,.7); overflow: hidden; }
+  #chat .hd { height: 110px; display: flex; align-items: center; gap: 22px; padding: 0 36px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  #chat .av { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #ffb06b, #ff6b8b); }
+  #chat .hd b { font: 800 32px "Mont"; color: #eef3fa; } #chat .hd small { display: block; font: 600 22px "Mont"; color: #6fd39a; }
+  #chat .bb { position: absolute; max-width: 700px; padding: 26px 32px; border-radius: 34px; font: 600 38px/1.3 "Mont"; }
+  #chat .in { left: 40px; background: #1e2a3d; color: #eef3fa; border-bottom-left-radius: 10px; }
+  #chat .out { right: 40px; background: linear-gradient(135deg, #2f7bff, #1a56c4); color: #fff; border-bottom-right-radius: 10px; }
+  #chat .tm { font: 600 20px "Mont"; opacity: .55; margin-left: 14px; }
+  #chat .typing { position: absolute; right: 40px; bottom: 60px; padding: 24px 30px; border-radius: 30px; background: #1a56c4; display: flex; gap: 12px; }
+  #chat .typing i { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,.8); }
+
+  /* ---------- 6. ТЕРМИНАЛ И ЧЕК: свет лампы, термобумага ---------- */
+  #receipt { background: radial-gradient(700px 600px at 50% 30%, rgba(255,214,150,.30), transparent 70%), linear-gradient(180deg, #120d0a, #080605); }
+  #receipt .term { position: absolute; left: 700px; top: 520px; width: 520px; height: 640px; border-radius: 60px 60px 40px 40px; background: linear-gradient(160deg, #2a2d33, #121418); box-shadow: 0 60px 120px rgba(0,0,0,.8), inset 0 2px 0 rgba(255,255,255,.12); transform: perspective(1800px) rotateX(18deg); }
+  #receipt .term .sc { position: absolute; left: 60px; right: 60px; top: 70px; height: 170px; border-radius: 16px; background: #0d2a1c; color: #5cf0a0; font: 800 46px "Mono"; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 20px rgba(92,240,160,.7); }
+  #receipt .term .keys { position: absolute; left: 70px; right: 70px; top: 290px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  #receipt .term .keys i { height: 56px; border-radius: 14px; background: #2f333b; box-shadow: inset 0 -4px 0 rgba(0,0,0,.4); }
+  #receipt .paper { position: absolute; left: 690px; top: -40px; width: 540px; height: 620px; background: #f4f1ea; padding: 60px 36px 30px; font: 700 24px/1.6 "Mono"; white-space: nowrap; color: #2a2620;
+    box-shadow: 0 30px 60px rgba(0,0,0,.6); transform: perspective(1800px) rotateX(-8deg) rotateZ(-2deg);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 60px); mask-image: linear-gradient(180deg, transparent 0, #000 60px); }
+  #receipt .paper .c { text-align: center; } #receipt .paper .row { display: flex; justify-content: space-between; } #receipt .paper hr { border: 0; border-top: 3px dashed #8a8273; margin: 14px 0; }
+  #receipt .paper .big { font: 900 50px "Unb"; color: #1a8a4c; text-align: center; margin-top: 10px; }
+  #receipt .side { position: absolute; left: 110px; top: 330px; width: 520px; color: #f4efe6; }
+  #receipt .side small { font: 700 26px "Mont"; letter-spacing: .14em; color: #ffd27a; } #receipt .side b { display: block; font: 900 74px/1.05 "Unb"; margin-top: 16px; text-shadow: 0 0 40px rgba(255,210,120,.35); }
+</style>
+</head>
+<body>
+<!-- 1. УЛИЦА -->
+<div class="m" id="street">
+  <div class="bld" style="left:0;width:420px;height:560px"></div><div class="bld" style="left:380px;width:200px;height:700px"></div>
+  <div class="bld" style="left:1340px;width:260px;height:640px"></div><div class="bld" style="left:1560px;width:400px;height:520px"></div>
+  <div class="bld" style="left:520px;width:880px;height:420px;background:#0a1020"></div>
+  <div class="sign"><div class="n">СПОСОБ 1</div><div class="t">ПРОЦЕНТЫ<br>ПО КРЕДИТКЕ</div></div>
+  <div class="ground"></div><div class="refl"></div>
+  <div class="puddle" style="left:380px;top:820px;width:600px;height:90px"></div><div class="puddle" style="left:1100px;top:900px;width:520px;height:70px"></div>
+  <div class="rain"></div>
+  <div class="bok" style="left:120px;top:780px;width:120px;height:120px;background:rgba(255,170,80,.5)"></div><div class="bok" style="left:1700px;top:820px;width:150px;height:150px;background:rgba(255,77,109,.4)"></div>
+  <div class="bok" style="left:1520px;top:180px;width:90px;height:90px;background:rgba(120,180,255,.4)"></div>
+</div>
+<!-- 2. ТАБЛИЦА -->
+<div class="m" id="sheet">
+  <div class="keys"></div>
+  <div class="lap"><div class="scr">
+    <div class="tb"><span>Кредитка_расчёт.xlsx</span><span style="opacity:.7">Файл</span><span style="opacity:.7">Вставка</span><span style="opacity:.7">Формулы</span></div>
+    <div class="fx"><span style="color:#6a717c">D4</span><b>fx</b><span>=B2*B3</span><span style="margin-left:auto;font:600 20px Mont;color:#6a717c">проценты за год, если долг почти не уменьшается</span></div>
+    <table>
+      <tr><th></th><th style="width:520px">A</th><th style="width:300px">B</th><th style="width:60px">C</th><th style="width:500px">D</th></tr>
+      <tr><td class="rh">1</td><td style="font-weight:800">Что</td><td class="num" style="font-weight:800">Сумма</td><td></td><td></td></tr>
+      <tr><td class="rh">2</td><td>Телефон в кредитку</td><td class="num">30 000 ₽</td><td></td><td></td></tr>
+      <tr><td class="rh">3</td><td>ПСК (средняя, ОКБ 2026)</td><td class="num">48 %</td><td></td><td></td></tr>
+      <tr><td class="rh">4</td><td>Проценты за год</td><td></td><td></td><td class="hot">+10 000 ₽</td></tr>
+      <tr><td class="rh">5</td><td>Итого заплатишь</td><td></td><td></td><td class="num" style="font-weight:800">≈ 40 000 ₽</td></tr>
+      <tr><td class="rh">6</td><td style="color:#1a8a4c;font-weight:800">Если вернуть всё в льготный период</td><td></td><td></td><td class="num" style="color:#1a8a4c;font-weight:900">0 ₽</td></tr>
+      <tr><td class="rh">7</td><td></td><td></td><td></td><td></td></tr>
+    </table>
+    <div class="cur" style="left:1240px;top:430px"></div><div class="glare"></div>
+  </div></div>
+</div>
+<!-- 3. ТЕЛЕФОН -->
+<div class="m" id="phone">
+  <div class="bk" style="left:120px;top:120px;width:220px;height:220px;background:rgba(255,190,110,.35)"></div><div class="bk" style="left:1600px;top:700px;width:260px;height:260px;background:rgba(60,204,255,.3)"></div>
+  <div class="side"><small>ВОЗЬМЁШЬ НА ТЕЛЕФОН</small><b>30 000 ₽</b><small style="display:block;margin-top:14px;letter-spacing:.04em;font-size:28px;color:#cfe1ff">с кредитки</small></div>
+  <div class="ph"><div class="scr">
+    <h3>Оформление заказа</h3>
+    <div class="item"><div class="img"></div><div><div class="nm">Смартфон<br>128 ГБ</div><div class="pr">30 000 ₽</div></div></div>
+    <div class="card">Оплата<br><b>Кредитная карта •• 2026</b><br><span class="g">0 % до 25.11</span></div>
+    <div class="pay">Оплатить 30 000 ₽</div>
+  </div></div>
+  <div class="ring"></div><div class="finger"></div><div class="dof"></div>
+</div>
+<!-- 4. ДОСКА -->
+<div class="m" id="board">
+  <div class="win"></div>
+  <div class="wb">
+    <svg width="1500" height="830"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M90,420 C400,416 800,424 1350,418" stroke="#1d2b55" stroke-width="9"/><path d="M1330,398 L1362,418 L1328,440" stroke="#1d2b55" stroke-width="9"/>
+      <path d="M140,395 L140,445" stroke="#1d2b55" stroke-width="9"/><path d="M780,395 L780,445" stroke="#1d2b55" stroke-width="9"/>
+      <path d="M150,330 C400,250 620,250 772,330" stroke="#1a8a4c" stroke-width="10"/>
+      <path d="M800,470 C950,560 1100,600 1300,640" stroke="#d42a2a" stroke-width="10"/><path d="M1272,612 L1306,642 L1262,656" stroke="#d42a2a" stroke-width="10"/>
+      <ellipse cx="460" cy="190" rx="230" ry="62" stroke="#1a8a4c" stroke-width="7"/>
+    </g></svg>
+    <div class="hw" style="left:90px;top:460px;color:#1d2b55">покупка</div>
+    <div class="hw" style="left:690px;top:460px;color:#1d2b55">25.11</div>
+    <div class="hw" style="left:300px;top:160px;color:#1a8a4c">вернул всё → 0 %</div>
+    <div class="hw" style="left:420px;top:280px;color:#1a8a4c;font-size:30px">льготный период</div>
+    <div class="hw" style="left:930px;top:650px;color:#d42a2a">минимальный платёж<br>→ 48 % годовых</div>
+    <div class="hw" style="left:1000px;top:90px;color:#1d2b55;font-size:34px;transform:rotate(-3deg)">правило:<br>потратил → вернул<br>целиком до конца<br>периода</div>
+  </div>
+  <div class="tray"></div>
+  <div class="mk" style="left:560px;background:linear-gradient(90deg,#1a8a4c 0 30%,#e9edf2 30%)"></div><div class="mk" style="left:760px;background:linear-gradient(90deg,#d42a2a 0 30%,#e9edf2 30%)"></div><div class="mk" style="left:960px;background:linear-gradient(90deg,#1d2b55 0 30%,#e9edf2 30%)"></div>
+</div>
+<!-- 5. ПЕРЕПИСКА -->
+<div class="m" id="chat">
+  <div class="blur"><div style="left:120px;top:200px;width:420px;height:560px;transform:rotate(-4deg)"></div><div style="left:1500px;top:520px;width:480px;height:420px;transform:rotate(3deg)"></div></div>
+  <div class="win">
+    <div class="hd"><div class="av"></div><div><b>Дима</b><small>в сети</small></div></div>
+    <div class="bb in" style="top:170px">Слушай, если кредитка такая ловушка — зачем её вообще брать?<span class="tm">23:41</span></div>
+    <div class="bb out" style="top:420px">Вот разворот. У кредитки есть льготный период<span class="tm">23:42</span></div>
+    <div class="bb out" style="top:590px">Вернул всё до конца — процентов ноль. А бонус остаётся тебе<span class="tm">23:42</span></div>
+    <div class="typing" style="display:none"><i></i><i></i><i></i></div>
+  </div>
+</div>
+<!-- 6. ЧЕК -->
+<div class="m" id="receipt">
+  <div class="side"><small>ПРАВИЛО ГЛАВЫ</small><b>Полное<br>погашение</b><div style="font:600 30px/1.4 Mont;color:#d9cfbf;margin-top:20px">потратил → вернул целиком<br>до конца льготного периода</div></div>
+  <div class="paper"><div class="c" style="font-size:22px">КРЕДИТНАЯ КАРТА •• 2026</div><div class="c" style="font-size:20px;color:#8a8273">ВЫПИСКА ЗА ПЕРИОД</div><hr>
+    <div class="row"><span>ПОКУПКА</span><span>30 000,00</span></div><div class="row"><span>ВЕРНУЛ ДО 25.11</span><span>30 000,00</span></div><hr>
+    <div class="row"><span>ДОЛГ</span><span>0,00</span></div><div class="row"><span>ПРОЦЕНТЫ</span><span>0,00</span></div><hr>
+    <div class="big">0 ₽ БАНКУ</div><div class="c" style="font-size:20px;margin-top:10px">бонус за покупку — твой</div></div>
+  <div class="term"><div class="sc">ОДОБРЕНО</div><div class="keys"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+</div>
+<div class="vig"></div><div class="grain"></div><div class="chap"><i></i>СПОСОБ 1 · ПРОЦЕНТЫ ПО КРЕДИТКЕ</div>
+<script>
+  const mode = new URLSearchParams(location.search).get("mode") || "street";
+  document.getElementById(mode).style.display = "block";
+  if (mode === "street") {
+    document.querySelector(".chap").style.display = "none";
+    let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    document.querySelectorAll("#street .bld").forEach(b => { const w = b.offsetWidth, h = b.offsetHeight;
+      for (let y = 30; y < h - 40; y += 46) for (let x = 22; x < w - 30; x += 34) { if (rnd() > .34) continue; const i = document.createElement("i");
+        i.style.left = x + "px"; i.style.top = y + "px"; const warm = rnd() > .3; i.style.background = warm ? `rgba(255,${190 + rnd() * 40 | 0},120,${.35 + rnd() * .5})` : `rgba(140,190,255,${.3 + rnd() * .4})`;
+        i.style.boxShadow = `0 0 12px ${warm ? "rgba(255,200,120,.35)" : "rgba(140,190,255,.3)"}`; b.appendChild(i); } });
+  }
+  window.TL = { duration: 1, fps: 30, size: [1920, 1080] };
+  window.renderAt = () => {};
+  document.fonts.ready.then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
