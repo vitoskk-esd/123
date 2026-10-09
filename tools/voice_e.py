@@ -14,7 +14,7 @@
   python3 tools/voice_e.py phrases.txt out_dir        (одна фраза — одна строка) → out_dir/voice.wav, out_dir/phrases.json
   Переозвучить фразу: поставить "redo": true у неё в phrases.json (или поменять текст); SEEDS=3,7,13 — другие попытки.
 """
-import json, os, sys, zlib
+import json, os, re, sys, zlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "reels", "zero-card-07"))
 import tts_v5 as T
@@ -23,7 +23,9 @@ SCRATCH = "/tmp/claude-0/-home-user-123/8ca4fbe8-9858-5867-9610-cc1983112730/scr
 REF_LIVE = os.path.join(SCRATCH, "ref_3.0.wav")
 REF_V5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "voice_e_ref_v5.wav")
 PARAMS = dict(exaggeration=.55, cfg_weight=.4, temperature=.85)       # проба 3, «D»
-SEEDS, MIN_SIM = (2, 5, 11), .88          # Whisper пишет числа цифрами («18») — сходство чуть ниже 1 даже у чистого дубля
+SEEDS, MIN_SIM = (2, 5, 11), .99
+NUM = {"0": "ноль", "1": "один", "2": "два", "3": "три", "5": "пять", "10": "десять", "15": "пятнадцать", "18": "восемнадцать",
+       "20": "двадцать", "30": "тридцать", "50": "пятьдесят", "100": "сто"}
 
 
 def ref():
@@ -35,7 +37,10 @@ def check(wav, text):
     f16 = wav[:-4] + ".16.wav"
     os.system(f"ffmpeg -v error -y -i {wav} -ar 16000 -ac 1 {f16}")
     got = V.transcribe(f16, "medium")
-    return V.similarity(text, got), " ".join(w["w"] for w in got)
+    heard = " ".join(w["w"] for w in got)
+    # Whisper пишет числа цифрами («18», «50 %») — переводим в слова, иначе чистый дубль получает 0,74
+    said = re.sub(r"\d+", lambda m: NUM.get(m.group(), m.group()), heard.replace("%", " процентов"))
+    return V.similarity(text, [{"w": said}]), heard
 
 
 def voice_e(phrases, out_dir, log=print):
