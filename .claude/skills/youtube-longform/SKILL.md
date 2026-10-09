@@ -198,7 +198,8 @@ Structure (both references):
 «Ночной офис» look (documentary A, night style from the 6-style carousel: `reels/lab/experiments/2026-10-09-yt-directions/a_doc.html?theme=night`)
 is great «в определённом отрезке». So: «Ночной офис» (night desk-world with real-looking documents, phone, statement, monitor;
 camera flies between them) for 1–2 deep-dive segments of 30–90 s per video; around it — full-screen kinetic type and data
-(«Студия» 16:9), 3D hero moments, phone screens, summary tables. No mode runs longer than ~90 s in a row. Engine: `youtube/kit/yt/`
+(«Студия» 16:9), phone screens, summary tables. **No 3D scenes in videos** (owner, 09.10: «3д убери, мне не нравится») —
+three.js stays only for thumbnails. No mode runs longer than ~90 s in a row. Engine: `youtube/kit/yt/`
 (plan Y0–Y7 in `reels/lab/engine-roadmap.md`).
 Show style choices to the owner as a carousel of stills, not test videos (owner, 09.10).
 
