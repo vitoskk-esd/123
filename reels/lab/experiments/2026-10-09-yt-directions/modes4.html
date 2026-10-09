@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Режимы YouTube — четвёртый набор</title>
+<!-- Четвёртый набор (владелец 09.10 взял «поиск» и «скрапбук», «нужны ещё варианты»). В духе выбранных: рукотворное + настоящие интерфейсы.
+     ?mode=slider|paper|metro|math|post|notes. Цифры — из ролика №2 и его источников (publish.md). Пост в соцсети — пример, помечен. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0b0c10; font-family: "Mont"; }
+  .m { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .grain { position: absolute; inset: 0; opacity: .08; mix-blend-mode: overlay; pointer-events: none; z-index: 50;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  /* ---------- 1. ШТОРКА «ДО / ПОСЛЕ» ---------- */
+  #slider .half { position: absolute; top: 0; bottom: 0; padding: 120px 100px; }
+  #slider .l { left: 0; width: 1100px; background: #1a0d10; color: #ffd6dc; } #slider .r { left: 1100px; right: 0; background: #0c1a12; color: #d6ffe6; }
+  #slider small { font: 800 28px "Mont"; letter-spacing: .14em; } #slider .t { font: 900 70px/1.05 "Unb"; margin: 20px 0 50px; color: #fff; }
+  #slider .row { display: flex; justify-content: space-between; font: 700 36px "Mont"; padding: 20px 0; border-bottom: 2px solid rgba(255,255,255,.1); width: 820px; }
+  #slider .big { font: 900 130px "Unb"; letter-spacing: -.04em; margin-top: 50px; }
+  #slider .r .row { width: 640px; }
+  #slider .handle { position: absolute; left: 1100px; top: 0; bottom: 0; width: 6px; margin-left: -3px; background: #fff; box-shadow: 0 0 30px rgba(255,255,255,.6); z-index: 5; }
+  #slider .handle::after { content: "‹ ›"; position: absolute; left: 50%; top: 50%; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; background: #fff; color: #111;
+    font: 900 40px "Mont"; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+
+  /* ---------- 2. ПЕРВАЯ ПОЛОСА ГАЗЕТЫ ---------- */
+  #paper { background: #2a2622; }
+  #paper .pg { position: absolute; left: 170px; top: 40px; width: 1580px; height: 1100px; background: #f1ece0; padding: 50px 70px; transform: rotate(-1.5deg); box-shadow: 0 50px 100px rgba(0,0,0,.6); color: #141414; }
+  #paper .mast { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 6px double #141414; padding-bottom: 14px; }
+  #paper .mast b { white-space: nowrap; font: 900 60px "Unb"; letter-spacing: -.03em; } #paper .mast span { font: 700 22px "Mono"; color: #555; }
+  #paper h1 { width: 1060px; font: 900 82px/1.02 "Unb"; letter-spacing: -.04em; margin: 34px 0 20px; }
+  #paper h1 em { font-style: normal; background: #ffd84a; padding: 0 10px; }
+  #paper .lead { font: 600 34px/1.35 "Mont"; width: 1060px; } #paper .src { font: 700 22px "Mono"; color: #666; margin-top: 16px; }
+  #paper .cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-top: 34px; }
+  #paper .cols div { height: 300px; background: repeating-linear-gradient(0deg, #bdb6a6 0 10px, transparent 10px 26px); opacity: .7; }
+  #paper .photo { position: absolute; right: 70px; top: 190px; width: 330px; height: 330px; background: radial-gradient(circle, #141414 35%, transparent 37%) 0 0 / 10px 10px, #c9c2b2; }
+
+  /* ---------- 3. СХЕМА МЕТРО ---------- */
+  #metro { background: #f7f7f5; }
+  #metro svg { position: absolute; inset: 0; }
+  #metro .st { position: absolute; font: 800 32px/1.15 "Mont"; color: #151515; }
+  #metro .st small { display: block; font: 600 22px "Mont"; color: #666; margin-top: 4px; }
+  #metro .hd { position: absolute; left: 90px; top: 70px; font: 900 54px "Unb"; color: #151515; letter-spacing: -.02em; }
+  #metro .lg { position: absolute; right: 90px; top: 80px; font: 700 24px "Mont"; color: #333; }
+  #metro .lg i { display: inline-block; width: 50px; height: 12px; border-radius: 6px; vertical-align: middle; margin: 0 10px 0 30px; }
+
+  /* ---------- 4. ТЕТРАДЬ В КЛЕТКУ: расчёт столбиком ---------- */
+  #math { background: radial-gradient(800px 600px at 50% 40%, rgba(255,214,150,.3), transparent 70%), #120d0a; }
+  #math .pg { position: absolute; left: 330px; top: 60px; width: 1260px; height: 980px; background: #fdfdf8;
+    background-image: linear-gradient(rgba(80,120,200,.22) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(80,120,200,.22) 1.5px, transparent 1.5px); background-size: 48px 48px;
+    transform: rotate(2deg); box-shadow: 0 40px 90px rgba(0,0,0,.7); }
+  #math .hw { position: absolute; font: 700 italic 56px/1 "Mont"; color: #1d2b55; }
+  #math .rd { color: #d42a2a; } #math .gr { color: #1a8a4c; }
+  #math svg { position: absolute; inset: 0; overflow: visible; }
+
+  /* ---------- 5. ПОСТ В СОЦСЕТИ С КОММЕНТАРИЯМИ ---------- */
+  #post { background: radial-gradient(900px 700px at 50% 30%, rgba(124,77,255,.18), transparent 70%), #0a0a0f; }
+  #post .card { position: absolute; left: 360px; top: 80px; width: 1200px; border-radius: 34px; background: #16161d; border: 1px solid #2a2a33; padding: 40px 46px; color: #eceef3; box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+  #post .u { display: flex; gap: 18px; align-items: center; } #post .av { width: 70px; height: 70px; border-radius: 50%; }
+  #post .u b { font: 800 30px "Mont"; } #post .u small { display: block; font: 600 22px "Mont"; color: #8a8a99; }
+  #post .txt { font: 600 40px/1.35 "Mont"; margin: 26px 0 22px; } #post .act { display: flex; gap: 40px; font: 700 24px "Mont"; color: #8a8a99; }
+  #post .cm { margin-top: 20px; padding: 22px 26px; border-radius: 22px; background: #1e1e27; display: flex; gap: 16px; font: 600 28px/1.35 "Mont"; }
+  #post .cm .av { width: 50px; height: 50px; flex: none; } #post .cm b { color: #fff; }
+  #post .tag { position: absolute; right: 380px; top: 96px; padding: 8px 16px; border-radius: 10px; background: #2a2a33; font: 700 20px "Mont"; color: #8a8a99; }
+
+  /* ---------- 6. ЗАМЕТКИ С ЧЕКБОКСАМИ (Notion-подобно) ---------- */
+  #notes { background: #191919; }
+  #notes .side { position: absolute; left: 0; top: 0; bottom: 0; width: 360px; background: #202020; padding: 40px 28px; font: 600 24px "Mont"; color: #9b9b9b; }
+  #notes .side div { padding: 12px 14px; border-radius: 10px; } #notes .side .on { background: #2c2c2c; color: #eee; }
+  #notes .doc { position: absolute; left: 520px; top: 90px; width: 1180px; color: #e9e9e9; }
+  #notes .doc .em { font-size: 90px; } #notes .doc h1 { font: 800 72px "Mont"; margin: 10px 0 30px; letter-spacing: -.01em; }
+  #notes .call { padding: 26px 30px; border-radius: 14px; background: #2b2417; color: #f1d9a6; font: 600 32px/1.4 "Mont"; display: flex; gap: 20px; }
+  #notes .call i { width: 36px; height: 36px; flex: none; border-radius: 8px; background: #f1b84a; margin-top: 4px; }
+  #notes .todo { display: flex; gap: 22px; align-items: center; font: 600 40px "Mont"; margin-top: 30px; }
+  #notes .todo i { width: 44px; height: 44px; border-radius: 8px; border: 3px solid #8a8a8a; flex: none; display: flex; align-items: center; justify-content: center; font: 900 30px "Mont"; font-style: normal; }
+  #notes .todo.ok i { background: #2383e2; border-color: #2383e2; color: #fff; } #notes .todo.ok span { color: #8a8a8a; text-decoration: line-through; }
+  #notes .todo.no i { border-color: #e03e3e; color: #e03e3e; } #notes .todo b { color: #e03e3e; }
+  #notes .cur { position: absolute; left: 1000px; top: 760px; width: 4px; height: 52px; background: #e9e9e9; }
+</style>
+</head>
+<body>
+<!-- 1. ШТОРКА -->
+<div class="m" id="slider">
+  <div class="half l"><small style="color:#ff8a9c">ПЛАТИШЬ МИНИМАЛЬНЫЙ ПЛАТЁЖ</small><div class="t">Долг тянется,<br>проценты капают</div>
+    <div class="row"><span>Телефон</span><span>30 000 ₽</span></div><div class="row"><span>Платишь в месяц</span><span>1 500 ₽</span></div><div class="row"><span>Ставка</span><span style="color:#ff5a6e">48 %</span></div>
+    <div class="big" style="color:#ff5a6e">+10 000 ₽</div><div style="font:600 26px Mont;opacity:.7">проценты за год · пример</div></div>
+  <div class="half r"><small style="color:#7dffb3">ВЕРНУЛ ВСЁ В ЛЬГОТНЫЙ ПЕРИОД</small><div class="t">Банк остался<br>ни с чем</div>
+    <div class="row"><span>Телефон</span><span>30 000 ₽</span></div><div class="row"><span>Вернул до 25.11</span><span>30 000 ₽</span></div><div class="row"><span>Ставка</span><span style="color:#5cf0a0">0 %</span></div>
+    <div class="big" style="color:#5cf0a0">0 ₽</div><div style="font:600 26px Mont;opacity:.7">процентов · бонус остался тебе</div></div>
+  <div class="handle"></div>
+</div>
+<!-- 2. ГАЗЕТА -->
+<div class="m" id="paper">
+  <div class="pg"><div class="mast"><b>ФИНАНСОВЫЙ ВЕСТНИК</b><span>ОКТЯБРЬ 2026 · ПРОГНОЗ ЦБ</span></div>
+    <h1>Банки заработают <em>4 трлн ₽</em><br>за 2026 год</h1>
+    <div class="lead">Прогноз ЦБ по чистой прибыли банков на 2026 год — 3,9–4,4 трлн ₽. За первое полугодие — 2,3 трлн ₽, на 36 % больше, чем годом ранее.</div>
+    <div class="src">Источник: прогноз Банка России, 2026 · оформление — стилизация</div>
+    <div class="cols"><div></div><div></div><div></div></div>
+    <div class="photo"></div></div>
+</div>
+<!-- 3. МЕТРО -->
+<div class="m" id="metro">
+  <div class="hd">Маршрут: кредитка без процентов</div>
+  <div class="lg"><i style="background:#1a9d57"></i>правильно<i style="background:#e03e3e"></i>ловушка</div>
+  <svg width="1920" height="1080"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M180,540 L620,540 L820,340 L1700,340" stroke="#1a9d57" stroke-width="26"/>
+    <path d="M620,540 L820,740 L1300,740 L1500,900" stroke="#e03e3e" stroke-width="26"/></g>
+    <g fill="#fff" stroke="#151515" stroke-width="8"><circle cx="180" cy="540" r="30"/><circle cx="620" cy="540" r="40"/><circle cx="1100" cy="340" r="30"/><circle cx="1700" cy="340" r="40"/>
+    <circle cx="1000" cy="740" r="30"/><circle cx="1500" cy="900" r="40"/></g>
+    <circle cx="620" cy="540" r="18" fill="#151515"/></svg>
+  <div class="st" style="left:110px;top:600px">Покупка<small>картой, не перевод</small></div>
+  <div class="st" style="left:520px;top:420px">Развилка<small>как будешь гасить?</small></div>
+  <div class="st" style="left:1010px;top:250px">Льготный период<small>до 25.11</small></div>
+  <div class="st" style="left:1620px;top:400px;color:#1a9d57">0 %<small>вернул всё — бонус твой</small></div>
+  <div class="st" style="left:900px;top:790px;color:#e03e3e">Минимальный платёж<small>просрочки нет…</small></div>
+  <div class="st" style="left:1440px;top:960px;color:#e03e3e">48 % годовых<small>проценты каждый день</small></div>
+</div>
+<!-- 4. ТЕТРАДЬ -->
+<div class="m" id="math">
+  <div class="pg">
+    <div class="hw" style="left:110px;top:90px;font-size:44px">Телефон в кредитку, платим минимум:</div>
+    <div class="hw" style="left:200px;top:220px">30 000</div><div class="hw" style="left:140px;top:300px">×</div><div class="hw rd" style="left:270px;top:300px">0,48</div>
+    <div class="hw" style="left:200px;top:420px">≈ 14 400 <span style="font-size:36px;color:#6a6a6a">в год, если долг не уменьшается</span></div>
+    <div class="hw rd" style="left:200px;top:540px">реально: <b>больше 10 000</b></div>
+    <div class="hw" style="left:200px;top:650px;font-size:34px;color:#6a6a6a">(долг понемногу гасится минимальными платежами)</div>
+    <div class="hw gr" style="left:110px;top:760px;font-size:50px">Вернул всё до 25.11 → 0 ₽</div>
+    <svg width="1260" height="980"><g fill="none" stroke-linecap="round"><path d="M180,395 L520,392" stroke="#1d2b55" stroke-width="6"/><ellipse cx="500" cy="565" rx="320" ry="58" stroke="#d42a2a" stroke-width="6" transform="rotate(-2 560 565)"/>
+      <path d="M90,840 C300,830 700,850 900,836" stroke="#1a8a4c" stroke-width="7"/></g></svg>
+  </div>
+</div>
+<!-- 5. ПОСТ -->
+<div class="m" id="post">
+  <div class="card"><div class="u"><div class="av" style="background:linear-gradient(135deg,#6ad1ff,#7c4dff)"></div><div><b>@nikita_19</b><small>2 ч</small></div></div>
+    <div class="txt">Год платил по кредитке «минимальный платёж», думал всё ок. Посмотрел выписку — банку ушло почти 10 тысяч процентов. Как так?</div>
+    <div class="act"><span>♡ 1,2 тыс.</span><span>○ 348</span><span>↻ 96</span></div>
+    <div class="cm"><div class="av" style="background:#ffb06b"></div><div><b>@lena_k</b> минимальный платёж почти не трогает долг, на остаток капают проценты</div></div>
+    <div class="cm"><div class="av" style="background:#5cf0a0"></div><div><b>@max.fin</b> гаси всё до конца льготного периода — и процентов ноль</div></div>
+  </div>
+  <div class="tag">пример · ник вымышленный</div>
+</div>
+<!-- 6. ЗАМЕТКИ -->
+<div class="m" id="notes">
+  <div class="side"><div>Поиск</div><div>Входящие</div><div style="margin-top:20px;color:#6f6f6f;font-size:20px">ЛИЧНОЕ</div><div>Бюджет октябрь</div><div class="on">Кредитка без процентов</div><div>Бонусы банков</div></div>
+  <div class="doc"><div class="em" style="width:90px;height:90px;border-radius:20px;background:linear-gradient(135deg,#ff5a6e,#7c4dff)"></div><h1>Кредитка без процентов</h1>
+    <div class="call"><i></i><span>Льготный период работает, только если вернуть <b>всю</b> сумму до его конца</span></div>
+    <div class="todo ok"><i>✓</i><span>Платить картой покупки, а не переводы и наличные</span></div>
+    <div class="todo ok"><i>✓</i><span>Поставить напоминание на 25.11</span></div>
+    <div class="todo"><i></i><span>Вернуть всю сумму, а не <b>минимальный платёж</b></span></div>
+    <div class="todo"><i></i><span>Проверить, что обслуживание бесплатное</span></div></div>
+</div>
+<div class="grain"></div>
+<script>
+  const mode = new URLSearchParams(location.search).get("mode") || "slider";
+  document.getElementById(mode).style.display = "block";
+  window.TL = { duration: 1, fps: 30, size: [1920, 1080] }; window.renderAt = () => {};
+  document.fonts.ready.then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
