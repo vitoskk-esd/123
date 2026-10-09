@@ -64,7 +64,7 @@
   .tg-status { position: absolute; left: 62px; right: 34px; top: 22px; z-index: 7; display: flex; justify-content: space-between; align-items: center; font: 600 25px "SFi"; }
   .tg-island { position: absolute; left: 233px; top: 14px; width: 126px; height: 38px; border-radius: 19px; background: #000; z-index: 8; }
   .tg-back { left: 26px; top: 88px; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .tg-title { left: 161px; top: 88px; width: 270px; height: 64px; border-radius: 32px; text-align: center; padding-top: 7px; }
+  .tg-title { left: 161px; top: 88px; width: 270px; height: 64px; border-radius: 32px; display: flex; align-items: center; justify-content: center; }
   .tg-title .nm { font: 600 25px/30px "SFi"; } .tg-title .sb { font: 400 16px/20px "SFi"; color: rgba(255,255,255,.5); }
   .tg-ava { position: absolute; left: 504px; top: 87px; width: 66px; height: 66px; border-radius: 50%; overflow: hidden; z-index: 6; background: #222; }
   .tg-ava img { width: 120%; height: 120%; margin: -10%; object-fit: cover; }
@@ -186,7 +186,7 @@
 </div>
 <!-- 11. 0:39 (вариант для кадра 9): телефон крупно с НАСТОЯЩИМ каналом владельца «Владик Арбузит» — интерфейс iOS-Telegram 1:1 по записи
      экрана владельца (стеклянные кнопки, закреп, пузыри, фон с узором, даты-чипы, «поделиться», кнопка вниз). Посты — его обложки из tg-posts/
-     в том порядке, что в канале (4, 6, 7 октября); текст постов и число подписчиков/просмотров размыты — «чтобы было интересно перейти».
+     в том порядке, что в канале (4, 6, 7 октября); текст постов и просмотры размыты, строки с числом подписчиков нет (владелец 10.10: «количество подписчиков убери») — «чтобы было интересно перейти».
      Анимация 4 с: телефон всплывает → лента прокручивается → тап по «Подписаться». Экран свёрстан в координатах записи (592×1280). -->
 <div class="s" id="s11" style="background:radial-gradient(900px 1000px at 50% 55%, rgba(60,150,255,.28), transparent 70%), #04060b">
   <div class="cap" style="top:100px;left:40px;right:40px;font-size:62px">всё<br><span class="k" style="white-space:nowrap;color:#3cf;text-shadow:0 0 40px rgba(60,204,255,.6)">в телеграме</span></div>
@@ -209,7 +209,7 @@
     <div class="tg-status"><span>12:30</span><svg viewBox="0 0 120 24" width="120" height="24"><g fill="#fff"><rect x="0" y="15" width="5" height="7" rx="1.5"/><rect x="8" y="11" width="5" height="11" rx="1.5"/><rect x="16" y="7" width="5" height="15" rx="1.5"/><rect x="24" y="3" width="5" height="19" rx="1.5"/></g><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M41 9.5a14 14 0 0 1 19 0"/><path d="M44.5 13.5a9 9 0 0 1 12 0"/></g><circle cx="50.5" cy="18.5" r="2.4" fill="#fff"/><rect x="72" y="4" width="38" height="18" rx="5.5" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/><rect x="75" y="7" width="26" height="12" rx="3" fill="#fff"/><rect x="112" y="10" width="3" height="6" rx="1.5" fill="rgba(255,255,255,.5)"/></svg></div>
     <div class="tg-island"></div>
     <div class="gl tg-back"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M15 4 7 12l8 8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="gl tg-title"><div class="nm">Владик Арбузит</div><div class="sb"><span class="bl">7</span> подписчиков</div></div>
+    <div class="gl tg-title"><div class="nm">Владик Арбузит</div></div>
     <div class="tg-ava"><img src="../../../assets/tg/avatar.png"></div>
     <div class="gl tg-pin"><i class="bar"></i><img src="../../../../tg-posts/start-guide/cover_v3.png"><div><div class="h">Закреплённое сообщение</div><div class="t">С ЧЕГО НАЧАТЬ</div></div><svg viewBox="0 0 24 24" width="26" height="26" class="x"><path d="M5 5l14 14M19 5 5 19" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
     <div class="gl tg-down"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M5 9l7 7 7-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
