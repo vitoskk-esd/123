@@ -12,8 +12,9 @@
 (tools/voice_e_ref_v5.wav, это голос «варианта 5», а не владельца).
 
   python3 tools/voice_e.py phrases.txt out_dir        (одна фраза — одна строка) → out_dir/voice.wav, out_dir/phrases.json
+  Переозвучить фразу: поставить "redo": true у неё в phrases.json (или поменять текст); SEEDS=3,7,13 — другие попытки.
 """
-import json, os, sys
+import json, os, sys, zlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "reels", "zero-card-07"))
 import tts_v5 as T
@@ -44,11 +45,12 @@ def voice_e(phrases, out_dir, log=print):
     raw = []
     for i, p in enumerate(phrases):
         key = f"{i}"
-        if meta.get(key, {}).get("text") == p and os.path.exists(meta[key]["tts"]):
-            raw.append(meta[key]["tts"]); continue                 # уже озвучено — не пересобираем
+        done = next((m for m in meta.values() if m.get("text") == p and os.path.exists(m["tts"]) and not m.get("redo")), None)
+        if done:                                                   # уже озвучено (ищем по тексту — строки можно вставлять)
+            meta[key] = done; raw.append(done["tts"]); continue
         best = None; log(f"{i} ударения: {T.stress(p)}")
-        for s in SEEDS:
-            f = os.path.join(out_dir, f"t{i}_s{s}.wav")
+        for s in [int(x) for x in os.environ["SEEDS"].split(",")] if os.environ.get("SEEDS") else SEEDS:
+            f = os.path.join(out_dir, f"t{zlib.crc32(p.encode()):08x}_s{s}.wav")
             T.synth(p, f, seed=s, ref=ref(), **PARAMS)
             sim, got = check(f, p); log(f"{i} seed {s}: {sim:.2f} — {got}")
             if best is None or sim > best[0]: best = (sim, f, got)
