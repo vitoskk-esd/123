@@ -57,6 +57,10 @@ in speech, on-screen text and captions:
 - Before publishing a sensitive topic, the owner can check «Статус аккаунта» and
   use trial reels.
 
+**Format frozen (owner, 2026-10-09: «рилсы отлично, оставь»):** reels = «Студия» 9:16 (`youtube/kit/studio.js`, full-screen scenes,
+word captions, no progress bar) + voice «E». Don't redesign the reel format; engine experiments go to the YouTube engine
+(`youtube/kit/yt/`), and `studio.js` gets only fixes so reels don't break.
+
 ## 2. Voice — owner's decision
 
 **Since 2026-10-09 the default is voice «E» — no recording by the owner** (owner: «мне не нравится, что каждый раз
