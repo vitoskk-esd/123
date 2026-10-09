@@ -70,7 +70,8 @@ Per phrase: Chatterbox Multilingual TTS from a 15 s sample of the owner's *live*
 `scratchpad/ref_3.0.wav`, never committed; fallback `tools/voice_e_ref_v5.wav` — the same sample already converted to
 «вариант 5») → Whisper check, best of 3 seeds → Chatterbox VC to «вариант 5» → `tts_v5.humanize` (varied pauses,
 breaths, tempo jitter, room mic). Stress: RUAccent + `STRESS_FIX` in `tools/tts_v5.py`; owner's rule «на́чал/на́чала».
-Check the logged stresses (`N ударения: …`) before trusting the take. One line = one whole phrase; numbers in words.
+Check the logged stresses (`N ударения: …`) before trusting the take. No room tone and no progress bar (owner, 09.10: «убери фоновый шум… и полосу сверху») —
+`humanize` has `room_db=None` by default and an `afftdn` denoiser; `TL.progress` stays off in reels. One line = one whole phrase; numbers in words.
 First reel on it: `reels/first-steps-09/` (Studio 9:16). The owner's own recording + VC (below) stays as the
 alternative when he wants to record.
 

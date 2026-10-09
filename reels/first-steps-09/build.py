@@ -164,7 +164,8 @@ music.append({"t": r2(SC[-2]["t0"]), "part": "outro"})
 caps = [{"w": re.sub(r"^(восемнадцать)", "18", re.sub(r"^ноль$", "0", w["w"].lower())).replace("пятьдесят", "50"), "a": w["a"], "d": w["d"]}
         for w in W.ws_all]
 tl = {"size": [1080, 1920], "duration": END, "fps": 30, "scenes": SC, "hits": hits, "kick": kick, "music": music, "sfx": sfx,
-      "bpm": 104, "hats": .7, "caps": caps, "progress": True,
+      "bpm": 104, "hats": .7, "caps": caps, "progress": False,   # полоса прогресса убрана по просьбе владельца (09.10)
+     
       "foot": "Условия зависят от банка и акции. Не реклама конкретного банка"}
 open(os.path.join(DIR, "timeline.js"), "w").write("window.TL = " + json.dumps(tl, ensure_ascii=False) + ";\n")
 lens = [s["t1"] - s["t0"] for s in SC]
