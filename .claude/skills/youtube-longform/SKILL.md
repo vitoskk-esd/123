@@ -199,7 +199,10 @@ Structure (both references):
 is great «в определённом отрезке». So: «Ночной офис» (night desk-world with real-looking documents, phone, statement, monitor;
 camera flies between them) for 1–2 deep-dive segments of 30–90 s per video; around it — full-screen kinetic type and data
 («Студия» 16:9), phone screens, summary tables. **No 3D scenes in videos** (owner, 09.10: «3д убери, мне не нравится») —
-three.js stays only for thumbnails. No mode runs longer than ~90 s in a row. Engine: `youtube/kit/yt/`
+three.js stays only for thumbnails. No mode runs longer than ~90 s in a row. **The owner's mode set (09.10, picked from 30 variants shown as still carousels):**
+Ночной офис, журнальная инфографика, телефон крупно, маркерная доска, поиск, коллаж-скрапбук, свайп-карточки, голосовое
+сообщение, ИИ-ассистент — reference pages and what each is for: table in `reels/lab/engine-roadmap.md` («Набор режимов»).
+Anything else (3D, «Студия», glass, terminal, cinematic titles, game UI, tier list…) only if the owner asks. Engine: `youtube/kit/yt/`
 (plan Y0–Y7 in `reels/lab/engine-roadmap.md`).
 Show style choices to the owner as a carousel of stills, not test videos (owner, 09.10).
 
