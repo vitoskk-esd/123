@@ -72,9 +72,18 @@ def voice_e(phrases, out_dir, log=print):
     vc = ChatterboxVC.from_pretrained("cpu"); vc.set_target_voice(V.VC_TARGET)
     parts = []
     for i, f in enumerate(raw):
-        e = os.path.join(out_dir, f"e{i}.wav"); torch.manual_seed(0)
-        torchaudio.save(e, vc.generate(audio=f), vc.sr); parts.append(e)
-        sim, got = check(e, phrases[i]); meta[f"{i}"].update(sim_e=round(sim, 3)); log(f"{i} E: {sim:.2f} — {got}")
+        m = meta[f"{i}"]
+        if m.get("e_of") == f and os.path.exists(m.get("e", "")) and m.get("sim_e", 0) >= MIN_SIM:
+            parts.append(m["e"]); continue                         # перекраска этого дубля уже готова и чистая
+        best = None
+        for vs in (0, 1, 2):                                       # VC тоже размывает слова («гибитовая») — до 3 попыток
+            e = os.path.join(out_dir, f"e{i}_{zlib.crc32(f.encode()):08x}_v{vs}.wav"); torch.manual_seed(vs)
+            torchaudio.save(e, vc.generate(audio=f), vc.sr)
+            sim, got = check(e, phrases[i]); log(f"{i} E v{vs}: {sim:.2f} — {got}")
+            if best is None or sim > best[0]: best = (sim, e)
+            if sim >= MIN_SIM: break
+        m.update(e=best[1], e_of=f, sim_e=round(best[0], 3)); parts.append(best[1])
+        json.dump(meta, open(os.path.join(out_dir, "phrases.json"), "w"), ensure_ascii=False, indent=1)
     json.dump(meta, open(os.path.join(out_dir, "phrases.json"), "w"), ensure_ascii=False, indent=1)
     return T.humanize(parts, os.path.join(out_dir, "voice.wav"))
 
