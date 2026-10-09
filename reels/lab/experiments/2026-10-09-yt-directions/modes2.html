@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Режимы YouTube — ночной мир, второй набор</title>
+<!-- Второй набор режимов (владелец 09.10 взял «телефон крупно» и «маркерную доску», «давай ещё варианты»).
+     ?mode=atm|shelf|calendar|notebook|letter|jars — кадры-стиллы на моментах ролика №2. Цифры — только из ролика и его источников. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05070c; font-family: "Mont"; }
+  .m { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .grain { position: absolute; inset: 0; opacity: .1; mix-blend-mode: overlay; pointer-events: none; z-index: 50;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .vig { position: absolute; inset: 0; z-index: 49; pointer-events: none; background: radial-gradient(ellipse at center, transparent 48%, rgba(0,2,8,.75)); }
+  .chap { position: absolute; left: 70px; bottom: 56px; z-index: 48; font: 700 24px "Mont"; color: #cfe1ff; letter-spacing: .06em; display: flex; gap: 14px; align-items: center; text-shadow: 0 2px 10px #000; }
+  .chap i { width: 50px; height: 6px; border-radius: 3px; background: #3cf; box-shadow: 0 0 12px #3cf; }
+  .cap { position: absolute; z-index: 30; color: #eef3fa; }
+  .cap small { display: block; font: 700 26px "Mont"; letter-spacing: .14em; color: #8fb3e8; }
+  .cap b { display: block; font: 900 78px/1.04 "Unb"; letter-spacing: -.03em; margin-top: 12px; text-shadow: 0 0 40px rgba(60,140,255,.35); }
+
+  /* ---------- 1. БАНКОМАТ: экран и клавиатура крупно, свет экрана на металле ---------- */
+  #atm { background: radial-gradient(900px 700px at 62% 40%, rgba(60,140,255,.25), transparent 70%), #04060b; }
+  #atm .body { position: absolute; left: 760px; top: 40px; width: 1040px; height: 1100px; border-radius: 40px; background: linear-gradient(160deg, #3a3f48, #1b1e24 40%, #121418);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 60px 120px rgba(0,0,0,.8); transform: perspective(2200px) rotateY(-12deg); }
+  #atm .scr { position: absolute; left: 110px; top: 90px; width: 820px; height: 520px; border-radius: 18px; background: linear-gradient(180deg, #0e2a5c, #0a1d40); border: 14px solid #0b0d11;
+    box-shadow: 0 0 80px rgba(60,140,255,.5), inset 0 0 60px rgba(0,0,0,.4); padding: 46px 54px; color: #e6f0ff; }
+  #atm .scr h4 { font: 800 34px "Mont"; color: #9cc3ff; } #atm .scr .w { margin-top: 30px; padding: 26px 30px; border-radius: 16px; background: rgba(255,90,110,.16); border: 2px solid rgba(255,90,110,.6); font: 700 34px/1.35 "Mont"; color: #ffd6dc; }
+  #atm .scr .btns { position: absolute; left: 54px; right: 54px; bottom: 40px; display: flex; gap: 24px; } #atm .scr .btns span { flex: 1; padding: 20px; border-radius: 14px; background: rgba(255,255,255,.1); font: 700 28px "Mont"; text-align: center; }
+  #atm .scr .scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 2px, transparent 2px 5px); }
+  #atm .slot { position: absolute; left: 300px; top: 680px; width: 440px; height: 34px; border-radius: 17px; background: #050608; box-shadow: inset 0 4px 10px #000, 0 0 30px rgba(60,255,150,.35); }
+  #atm .card { position: absolute; left: 380px; top: 610px; width: 280px; height: 110px; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, #d42a3a, #7a0f1d); box-shadow: 0 -10px 30px rgba(0,0,0,.4); }
+  #atm .pad { position: absolute; left: 300px; top: 780px; display: grid; grid-template-columns: repeat(3, 120px); gap: 18px; }
+  #atm .pad i { height: 74px; border-radius: 12px; background: linear-gradient(180deg, #c9ced6, #8d939c); box-shadow: inset 0 -5px 0 rgba(0,0,0,.25); font: 800 34px "Mono"; color: #2a2e35; font-style: normal; display: flex; align-items: center; justify-content: center; }
+
+  /* ---------- 2. ПОЛКА МАГАЗИНА: ценник с кэшбэком, ночной свет витрины ---------- */
+  #shelf { background: linear-gradient(180deg, #0b0f18, #06080d); }
+  #shelf .sh { position: absolute; left: -40px; right: -40px; height: 40px; background: linear-gradient(180deg, #d9dde3, #8b919a); box-shadow: 0 20px 40px rgba(0,0,0,.6); }
+  #shelf .box { position: absolute; border-radius: 10px; filter: blur(2px); }
+  #shelf .tag { position: absolute; left: 640px; top: 520px; width: 700px; padding: 34px 40px; background: #fffbe6; border-radius: 8px; transform: rotate(-3deg);
+    box-shadow: 0 30px 60px rgba(0,0,0,.6); color: #1b1b1b; z-index: 5; }
+  #shelf .tag .nm { font: 700 34px "Mont"; } #shelf .tag .pr { font: 900 120px "Unb"; letter-spacing: -.04em; line-height: 1; margin-top: 10px; }
+  #shelf .tag .bar { height: 50px; margin-top: 18px; background: repeating-linear-gradient(90deg, #1b1b1b 0 3px, transparent 3px 6px, #1b1b1b 6px 7px, transparent 7px 11px); width: 260px; }
+  #shelf .stk { position: absolute; left: 1290px; top: 400px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #6dffb1, #1fbf6a 70%); transform: rotate(12deg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: #04140b; box-shadow: 0 20px 40px rgba(0,0,0,.5); z-index: 6; }
+  #shelf .stk b { font: 900 64px "Unb"; } #shelf .stk span { font: 800 26px "Mont"; text-align: center; line-height: 1.15; }
+  #shelf .light { position: absolute; left: 0; right: 0; top: 0; height: 300px; background: linear-gradient(180deg, rgba(200,230,255,.25), transparent); }
+
+  /* ---------- 3. ОТРЫВНОЙ КАЛЕНДАРЬ: листы с датами, обведённое 25-е ---------- */
+  #calendar { background: radial-gradient(800px 700px at 50% 40%, rgba(255,210,150,.18), transparent 70%), linear-gradient(180deg, #0a0c12, #050608); }
+  #calendar .wall { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 2px, transparent 2px 120px); }
+  #calendar .pad { position: absolute; left: 700px; top: 120px; width: 520px; height: 700px; z-index: 3; }
+  #calendar .sheet { position: absolute; inset: 0; background: #f4f1ea; border-radius: 6px; box-shadow: 0 30px 70px rgba(0,0,0,.7); text-align: center; padding-top: 70px; }
+  #calendar .sheet .mo { font: 800 40px "Mont"; color: #c42424; letter-spacing: .12em; } #calendar .sheet .d { font: 900 300px/1 "Unb"; color: #1b1b1b; margin-top: 20px; letter-spacing: -.05em; }
+  #calendar .sheet .wd { font: 700 34px "Mont"; color: #8a8273; margin-top: 10px; }
+  #calendar .ring { position: absolute; left: 70px; top: 150px; width: 380px; height: 330px; border-radius: 50%; border: 10px solid #d42a2a; transform: rotate(-8deg); opacity: .9; }
+  #calendar .fly { position: absolute; width: 420px; height: 560px; background: #f4f1ea; border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,.6); text-align: center; padding-top: 60px; filter: blur(3px); }
+  #calendar .fly .d { font: 900 220px/1 "Unb"; color: #1b1b1b; }
+  #calendar .top { position: absolute; left: 690px; top: 100px; width: 540px; height: 60px; border-radius: 10px; background: #2a2d33; z-index: 4; }
+  #calendar .note { position: absolute; left: 110px; top: 640px; z-index: 5; font: 800 italic 48px/1.25 "Mont"; color: #ffd27a; transform: rotate(-4deg); text-shadow: 0 0 30px rgba(255,210,120,.35); }
+
+  /* ---------- 4. БЛОКНОТ ПОД ЛАМПОЙ: список условий от руки, ручка ---------- */
+  #notebook { background: radial-gradient(700px 600px at 45% 45%, rgba(255,214,150,.35), transparent 70%), linear-gradient(180deg, #120d0a, #070504); }
+  #notebook .nb { position: absolute; left: 420px; top: 90px; width: 1000px; height: 900px; background: #fbf8f0; border-radius: 10px;
+    background-image: linear-gradient(rgba(70,110,200,.25) 2px, transparent 2px), linear-gradient(90deg, transparent 110px, rgba(212,42,42,.45) 110px 113px, transparent 113px);
+    background-size: 100% 62px, 100% 100%; background-position: 0 40px, 0 0; box-shadow: 0 40px 90px rgba(0,0,0,.75); transform: rotate(-4deg); padding: 90px 80px 0 150px; }
+  #notebook .nb h2 { font: 900 italic 56px "Mont"; color: #1d2b55; line-height: 62px; }
+  #notebook .nb .it { font: 700 italic 40px/62px "Mont"; color: #1d2b55; margin-top: 62px; display: flex; gap: 22px; }
+  #notebook .nb .it i { font-style: normal; color: #d42a2a; font-weight: 900; }
+  #notebook .nb .it s { text-decoration-color: #d42a2a; text-decoration-thickness: 5px; }
+  #notebook .pen { position: absolute; left: 1210px; top: 640px; width: 560px; height: 34px; border-radius: 17px; background: linear-gradient(180deg, #2e3540, #0d1015); transform: rotate(-38deg); box-shadow: 0 20px 30px rgba(0,0,0,.5); }
+  #notebook .pen::after { content: ""; position: absolute; left: -40px; top: 7px; border-right: 44px solid #c9a35a; border-top: 10px solid transparent; border-bottom: 10px solid transparent; }
+  #notebook .coffee { position: absolute; left: 1480px; top: 120px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, #2a170b 52%, #e9e4dc 54%, #cfc8bc 64%, transparent 66%); filter: blur(4px); box-shadow: 0 30px 50px rgba(0,0,0,.5); }
+
+  /* ---------- 5. ПИСЬМО ИЗ БАНКА: конверт, лист с маркером ---------- */
+  #letter { background: radial-gradient(900px 700px at 50% 40%, rgba(60,140,255,.18), transparent 70%), #05070c; }
+  #letter .env { position: absolute; left: 260px; top: 560px; width: 900px; height: 520px; background: linear-gradient(160deg, #e8e0cf, #cfc4ae); transform: rotate(-6deg); box-shadow: 0 40px 80px rgba(0,0,0,.7); filter: blur(1.5px); }
+  #letter .env::before { content: ""; position: absolute; left: 0; top: 0; border-left: 450px solid transparent; border-right: 450px solid transparent; border-top: 280px solid #d9cfba; }
+  #letter .pp { position: absolute; left: 640px; top: 70px; width: 900px; height: 980px; background: #fbfaf7; padding: 80px 90px; transform: rotate(3deg); box-shadow: 0 40px 90px rgba(0,0,0,.7); font: 500 28px/1.6 "Mont"; color: #2a2620; }
+  #letter .pp .hd { display: flex; justify-content: space-between; font: 700 22px "Mono"; color: #8a8273; } #letter .pp h3 { font: 800 40px/1.2 "Mont"; margin: 40px 0 30px; color: #13161b; }
+  #letter .pp .bar { height: 14px; background: #e3ddd0; border-radius: 3px; margin: 18px 0; }
+  #letter .pp .hl { background: linear-gradient(transparent 20%, rgba(255,226,60,.8) 20%, rgba(255,226,60,.8) 85%, transparent 85%); font-weight: 800; color: #13161b; }
+  #letter .pp .circ { position: absolute; left: 50px; top: 395px; width: 820px; height: 170px; border: 8px solid #d42a2a; border-radius: 50%; transform: rotate(-2deg); }
+
+  /* ---------- 6. БАНКИ-КОПИЛКИ НА ПОЛКЕ: куда утекают деньги ---------- */
+  #jars { background: radial-gradient(1000px 600px at 50% 30%, rgba(255,214,150,.22), transparent 70%), linear-gradient(180deg, #0c0a09, #060505); }
+  #jars .plank { position: absolute; left: 140px; right: 140px; top: 820px; height: 50px; background: linear-gradient(180deg, #6b4a2f, #3b2717); border-radius: 6px; box-shadow: 0 30px 50px rgba(0,0,0,.7); }
+  #jars .jar { position: absolute; bottom: 260px; width: 360px; height: 470px; border-radius: 50px 50px 40px 40px; background: linear-gradient(90deg, rgba(255,255,255,.18), rgba(255,255,255,.05) 30%, rgba(255,255,255,.02) 70%, rgba(255,255,255,.14));
+    border: 3px solid rgba(255,255,255,.35); overflow: hidden; box-shadow: inset 0 0 40px rgba(255,255,255,.06); }
+  #jars .jar::before { content: ""; position: absolute; left: 60px; right: 60px; top: -10px; height: 46px; border-radius: 10px; background: linear-gradient(180deg, #9aa2ab, #5d646d); }
+  #jars .coins { position: absolute; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 30%, #ffe08a 10px, transparent 11px) 0 0 / 46px 30px, radial-gradient(circle at 60% 70%, #e9b43a 12px, transparent 13px) 0 0 / 52px 34px, linear-gradient(180deg, #d6a13a, #9a6a17); }
+  #jars .lab { position: absolute; left: 30px; right: 30px; top: 120px; padding: 18px 10px; background: #fffbe6; border-radius: 6px; text-align: center; font: 800 28px/1.2 "Mont"; color: #1b1b1b; transform: rotate(-2deg); box-shadow: 0 6px 14px rgba(0,0,0,.3); }
+  #jars .lab b { display: block; font: 900 40px "Unb"; margin-top: 4px; }
+  #jars .crack { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 47%, rgba(255,255,255,.5) 48%, transparent 49%), linear-gradient(60deg, transparent 58%, rgba(255,255,255,.35) 59%, transparent 60%); }
+</style>
+</head>
+<body>
+<!-- 1. БАНКОМАТ -->
+<div class="m" id="atm">
+  <div class="cap" style="left:100px;top:300px;width:620px"><small>ВНИМАНИЕ</small><b>Наличные<br>с кредитки</b><div style="font:600 30px/1.4 Mont;color:#cfe1ff;margin-top:20px">льготный период часто<br>на них не действует</div></div>
+  <div class="body"><div class="scr"><h4>Снятие наличных · кредитная карта</h4>
+    <div class="w">Льготный период на эту операцию не распространяется. Проценты начисляются со дня снятия.</div>
+    <div class="btns"><span>Отмена</span><span>Продолжить</span></div><div class="scan"></div></div>
+    <div class="card"></div><div class="slot"></div>
+    <div class="pad"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i></div></div>
+</div>
+<!-- 2. ПОЛКА -->
+<div class="m" id="shelf">
+  <div class="light"></div>
+  <div class="box" style="left:80px;top:150px;width:260px;height:330px;background:#2b4a7a"></div><div class="box" style="left:380px;top:190px;width:200px;height:290px;background:#7a2b3a"></div>
+  <div class="box" style="left:1480px;top:160px;width:240px;height:320px;background:#2b6a4a"></div><div class="box" style="left:1740px;top:210px;width:200px;height:270px;background:#6a5a2b"></div>
+  <div class="sh" style="top:480px"></div><div class="sh" style="top:940px"></div>
+  <div class="box" style="left:140px;top:640px;width:300px;height:300px;background:#3a3f6a"></div><div class="box" style="left:1560px;top:620px;width:280px;height:320px;background:#6a3a5a"></div>
+  <div class="tag"><div class="nm">Наушники беспроводные</div><div class="pr">5 990 ₽</div><div class="bar"></div></div>
+  <div class="stk"><span>кэшбэк<br>рублями</span><b>5 %</b><span>в своей<br>категории*</span></div>
+  <div class="cap" style="left:640px;top:880px;width:1000px"><small style="color:#9be7c0">* пример · ставка кэшбэка зависит от банка и категории</small></div>
+</div>
+<!-- 3. КАЛЕНДАРЬ -->
+<div class="m" id="calendar">
+  <div class="wall"></div>
+  <div class="fly" style="left:1240px;top:300px;transform:rotate(18deg)"><div class="d">24</div></div>
+  <div class="fly" style="left:1480px;top:520px;transform:rotate(34deg);opacity:.7"><div class="d">23</div></div>
+  <div class="top"></div>
+  <div class="pad"><div class="sheet"><div class="mo">НОЯБРЬ</div><div class="d">25</div><div class="wd">конец льготного периода</div></div><div class="ring"></div></div>
+  <div class="note">вернуть всё<br>до этого дня<br>→ 0 %</div>
+  <div class="cap" style="left:100px;top:360px;width:560px"><small>ЛЬГОТНЫЙ ПЕРИОД</small><b>Дни<br>уходят</b></div>
+</div>
+<!-- 4. БЛОКНОТ -->
+<div class="m" id="notebook">
+  <div class="coffee"></div>
+  <div class="nb"><h2>Кредитка без процентов — 3 условия</h2>
+    <div class="it"><i>1.</i><span>Только покупки — не <s>переводы</s> и не <s>наличные</s></span></div>
+    <div class="it"><i>2.</i><span>Гасить всю сумму, а не минимальный платёж</span></div>
+    <div class="it"><i>3.</i><span>Обслуживание не должно съесть бонус</span></div></div>
+  <div class="pen"></div>
+</div>
+<!-- 5. ПИСЬМО -->
+<div class="m" id="letter">
+  <div class="env"></div>
+  <div class="pp"><div class="hd"><span>БАНК</span><span>№ 4417-2026</span></div>
+    <h3>Уведомление об изменении тарифа по карте</h3>
+    <div class="bar" style="width:92%"></div><div class="bar" style="width:86%"></div><div class="bar" style="width:70%"></div>
+    <p style="margin-top:30px">С 1-го числа следующего месяца <span class="hl">стоимость обслуживания карты составит 199 ₽ в месяц</span>, если сумма покупок за месяц меньше условия тарифа.</p>
+    <div class="bar" style="width:90%;margin-top:40px"></div><div class="bar" style="width:82%"></div><div class="bar" style="width:88%"></div><div class="bar" style="width:60%"></div>
+    <div class="circ"></div></div>
+  <div class="cap" style="left:90px;top:200px;width:520px"><small>СПОСОБ 4 · КОМИССИИ</small><b>Мелким<br>шрифтом</b><div style="font:600 26px/1.4 Mont;color:#8fb3e8;margin-top:16px">пример письма · сумма условная</div></div>
+</div>
+<!-- 6. КОПИЛКИ -->
+<div class="m" id="jars">
+  <div class="cap" style="left:0;right:0;top:70px;text-align:center"><small>КУДА УХОДЯТ ТВОИ ДЕНЬГИ</small><b style="font-size:64px">Банк · проценты · комиссии</b></div>
+  <div class="jar" style="left:260px"><div class="coins" style="height:65%"></div><div class="lab">проценты<br>по кредитке<b>48 %</b></div></div>
+  <div class="jar" style="left:780px"><div class="coins" style="height:40%"></div><div class="lab">обслуживание,<br>СМС<b>−₽/мес</b></div></div>
+  <div class="jar" style="left:1300px"><div class="coins" style="height:18%"></div><div class="lab">твой<br>кэшбэк<b>до 5 %</b></div><div class="crack"></div></div>
+  <div class="plank"></div>
+</div>
+<div class="vig"></div><div class="grain"></div><div class="chap"><i></i><span id="chapt">СПОСОБ 1 · ПРОЦЕНТЫ ПО КРЕДИТКЕ</span></div>
+<script>
+  const mode = new URLSearchParams(location.search).get("mode") || "atm";
+  document.getElementById(mode).style.display = "block";
+  const CH = { shelf: "СПОСОБ 3 · КАЖДАЯ ТВОЯ ПОКУПКА", letter: "СПОСОБ 4 · КОМИССИИ И МЕЛКИЕ ПЛАТЕЖИ", jars: "ИТОГ · БАНК ЗАРАБАТЫВАЕТ → ТЫ РАЗВОРАЧИВАЕШЬ" };
+  if (CH[mode]) document.getElementById("chapt").textContent = CH[mode];
+  window.TL = { duration: 1, fps: 30, size: [1920, 1080] }; window.renderAt = () => {};
+  document.fonts.ready.then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
