@@ -41,7 +41,11 @@ def check(wav, text):
     heard = " ".join(w["w"] for w in got)
     # Whisper пишет числа цифрами («18», «50 %») — переводим в слова, иначе чистый дубль получает 0,74
     said = re.sub(r"\d+", lambda m: NUM.get(m.group(), m.group()), heard.replace("%", " процентов"))
-    return V.similarity(text, [{"w": said}]), heard
+    # по словам, а не по буквам: лишнее «в» или «нуля» вместо «нуле» по буквам почти не заметно (0,98), по словам — 0,93
+    a = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е")) for w in text.split()]
+    b = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е")) for w in said.split()]
+    import difflib
+    return difflib.SequenceMatcher(None, [w for w in a if w], [w for w in b if w], autojunk=False).ratio(), heard
 
 
 def voice_e(phrases, out_dir, log=print):
