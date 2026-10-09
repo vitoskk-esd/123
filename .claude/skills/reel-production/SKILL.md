@@ -38,6 +38,7 @@ see THIRD_PARTY.md), `faceless-explainer`/`general-video`/`motion-graphics` work
 - Finance/referral content in RF is advertising: «Реклама», advertiser, erid in
   posts; no bank names or exact amounts in video unless verified; disclaimer on
   screen. Never promise virality or income.
+- Voice «E» mispronounces «дебетовая» as «дебютовая» (5 seeds of 5, 09.10; Whisper hears the owner fine) — say «обычная карта» in voice, keep «Дебетовая» on screen.
 - Write voiceover phrases short; mark stress with `+` before the vowel when
   synthesis is used (`пл+атишь`).
 
