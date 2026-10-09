@@ -2,3 +2,5 @@ out/
 out_log.txt
 tts_sample.wav
 *.m4a
+out2/
+out2_log.txt
