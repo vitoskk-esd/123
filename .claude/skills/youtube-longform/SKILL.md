@@ -293,3 +293,11 @@ History: v1 (one static scene per 4.5 s) — «скучно»; v2/v3 (reel stimu
 a stamp, a list) arrived only with its own word, leaving up to 5 s of empty background. Fixes:
 - `build_studio.py` starts each scene 0.35 s before its first element, and the previous scene holds until then;
 - after rendering, find dark stretches longer than 1 s: `fps=4,signalstats` with YMAX < 130.
+
+**Retake check with short windows (09.10, video #2).** Whisper on long chunks (~40 s) swallows repeated takes: «Запомни одну
+мысль. Запомни одну мысль», «Возьмёшь на телефон 30 тысяч» ×2, «И первый самый рот. И первый самый дорогой». The owner caught
+them after delivery. Before VC, always run `youtube/02-bank-earns/recheck_cuts.py` and `recheck_analyze.py`:
+- source transcription in 3–7 s windows cut at quiet points;
+- alignment against read.txt, flagging repeated n-grams within 20 s, insertions and cut-off words;
+- the flag list is read by hand. "…" at a window boundary is a false alarm, and so is a repeat that the script itself
+  contains. Every real flag is cut via CUTS/POST_CUTS.

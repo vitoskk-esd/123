@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Голос «вариант 5» без записи владельца: Chatterbox Multilingual TTS (MIT) по образцу voice_target_v5.wav.
+
+Ударения: RUAccent (словарь + модель омографов) → знак ударения U+0301 после ударной гласной (так обучена модель);
+у односложных слов знак снимаем (иначе синтез их выделяет); ручные исправления — STRESS_FIX (слово → с «+» перед ударной).
+Пишите сложные слова в тексте сразу с «+»: «нач+ал» — такое ударение не трогается.
+
+Импорт: from tts_v5 import stress, synth, humanize."""
+import os, re, random, subprocess, sys
+VOW = "аеёиоуыэюяАЕЁИОУЫЭЮЯ"
+STRESS_FIX = {"начал": "нач+ал", "начала": "начал+а", "начали": "н+ачали", "бонусом": "б+онусом", "звонит": "звон+ит",
+              "кредитка": "кред+итка", "кредитку": "кред+итку", "кредитки": "кред+итки", "кэшбэк": "кэшб+эк", "кэшбэка": "кэшб+эка",
+              "дебетовая": "дебет+овая", "дебетовую": "дебет+овую", "обеспечение": "обесп+ечение", "договор": "догов+ор",
+              "процентов": "проц+ентов", "сто": "сто", "мне": "мне"}
+_acc = None
+
+
+def stress(text):
+    """«Шаг первый» → «Ша́г пе́рвый» (знак U+0301), ё не трогаем, у односложных слов знак снимаем."""
+    global _acc
+    if _acc is None:
+        from ruaccent import RUAccent
+        _acc = RUAccent(); _acc.load(omograph_model_size="turbo3.1", use_dictionary=True, tiny_mode=False)
+    W = r"[+А-Яа-яЁё]+"
+    plain = re.sub(r"\+", "", text)
+    auto = re.findall(W, _acc.process_all(plain))           # слова с ударениями от словаря, по порядку
+    orig = re.findall(W, text)
+    if len(auto) != len(orig): auto = orig                  # на всякий случай: не сбиваем порядок
+    it = iter(zip(orig, auto))
+    def one(m):
+        o, a = next(it)
+        w = o if "+" in o else STRESS_FIX.get(o.lower(), a)
+        if sum(ch in VOW for ch in w) <= 1: w = w.replace("+", "")
+        return re.sub("\\+([" + VOW + "])", lambda k: k.group(1) + "\u0301", w).replace("+", "")
+    return re.sub(W, one, text)
+
+
+_tts = None
+
+
+def synth(text, out_wav, seed=0, exaggeration=.65, cfg_weight=.35, temperature=.9):
+    global _tts
+    import torch, torchaudio
+    sys.path.insert(0, "/home/user/123/reels/zero-card-07")
+    import voice as V
+    if _tts is None:
+        from chatterbox.mtl_tts import ChatterboxMultilingualTTS
+        _tts = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
+    torch.manual_seed(seed)
+    wav = _tts.generate(stress(text), language_id="ru", audio_prompt_path=V.VC_TARGET,
+                        exaggeration=exaggeration, cfg_weight=cfg_weight, temperature=temperature)
+    torchaudio.save(out_wav, wav, _tts.sr)
+    return out_wav
+
+
+def humanize(parts, out_wav, sr=48000, seed=7):
+    """Склейка фраз «как живая запись»: паузы разной длины, тихий вдох перед частью фраз, лёгкий разброс темпа,
+    цепочка «микрофон в комнате» (срез низа, присутствие 3 кГц, мягкий компрессор, короткое раннее отражение, фон комнаты −62 дБ)."""
+    import numpy as np, soundfile as sf
+    rnd = random.Random(seed); chunks = []
+    def load(p, tempo):
+        tmp = p[:-4] + ".h.wav"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", p, "-af", f"atempo={tempo:.3f}", "-ar", str(sr), "-ac", "1", tmp], check=True)
+        return sf.read(tmp)[0]
+    def breath(dur):
+        n = int(dur * sr); x = np.random.default_rng(rnd.randint(0, 9999)).standard_normal(n)
+        # «шум вдоха»: полоса 400–3500 Гц, огибающая подъём-спад
+        X = np.fft.rfft(x); f = np.fft.rfftfreq(n, 1 / sr); X[(f < 400) | (f > 3500)] = 0; x = np.fft.irfft(X, n)
+        env = np.sin(np.linspace(0, np.pi, n)) ** 1.6; x = x * env; return x / (np.abs(x).max() + 1e-9) * 10 ** (-34 / 20)
+    for i, p in enumerate(parts):
+        if i:
+            gap = rnd.uniform(.22, .5)
+            if rnd.random() < .5:
+                b = breath(rnd.uniform(.28, .4)); chunks += [np.zeros(int(.05 * sr)), b, np.zeros(int(max(0, gap - len(b) / sr - .05) * sr))]
+            else:
+                chunks.append(np.zeros(int(gap * sr)))
+        chunks.append(load(p, rnd.uniform(.97, 1.03)))
+    y = np.concatenate(chunks); y = y / (np.abs(y).max() + 1e-9) * .8
+    room = np.random.default_rng(1).standard_normal(len(y)) * 10 ** (-62 / 20)
+    raw = out_wav[:-4] + ".raw.wav"; sf.write(raw, y + room, sr)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af",
+                    "highpass=f=85,equalizer=f=3000:t=q:w=1.2:g=2.5,equalizer=f=220:t=q:w=1:g=1.5,"
+                    "acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120,aecho=0.85:0.5:23|37:0.10|0.06,"
+                    "loudnorm=I=-16:TP=-1.5", out_wav], check=True)
+    os.remove(raw); return out_wav
+
+
+if __name__ == "__main__":
+    print(stress(" ".join(sys.argv[1:]) or "Если бы мне снова было восемнадцать, я бы начал с этих трёх шагов."))
