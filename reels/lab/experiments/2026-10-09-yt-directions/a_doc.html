@@ -240,7 +240,8 @@
   let prev = null, prevT = -1;
   const WIDE = new URLSearchParams(location.search).get("wide");
   window.renderAt = (t) => {
-    const c = WIDE ? { x: 2200, y: 1250, s: .41, r: 0 } : cam(t), w = $("world");
+    const CAMQ = new URLSearchParams(location.search).get("cam");   // ?cam=x,y,s — зафиксировать камеру (кадры для раскадровки)
+    const c = CAMQ ? (([x, y, s]) => ({ x, y, s, r: 0 }))(CAMQ.split(",").map(Number)) : WIDE ? { x: 2200, y: 1250, s: .41, r: 0 } : cam(t), w = $("world");
     const vx = prev && Math.abs(t - prevT) < .05 ? Math.hypot(c.x - prev.x, c.y - prev.y) * c.s : 0; prev = { x: c.x, y: c.y }; prevT = t;
     w.style.transform = `translate(960px, 540px) rotate(${-c.r}deg) scale(${c.s}) translate(${-c.x}px, ${-c.y}px)`;
     w.style.filter = vx > 6 ? `blur(${Math.min(8, vx / 14).toFixed(1)}px)` : "";
