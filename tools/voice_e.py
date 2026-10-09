@@ -23,7 +23,7 @@ SCRATCH = "/tmp/claude-0/-home-user-123/8ca4fbe8-9858-5867-9610-cc1983112730/scr
 REF_LIVE = os.path.join(SCRATCH, "ref_3.0.wav")
 REF_V5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "voice_e_ref_v5.wav")
 PARAMS = dict(exaggeration=.55, cfg_weight=.4, temperature=.85)       # проба 3, «D»
-SEEDS, MIN_SIM = (2, 5, 11), .96
+SEEDS, MIN_SIM = (2, 5, 11, 17, 23), .96
 NUM = {"0": "ноль", "1": "первый", "2": "второй", "3": "третий",     # «Шаг 1» — так Whisper пишет «Шаг первый»
        "5": "пять", "10": "десять", "15": "пятнадцать", "18": "восемнадцать",
        "20": "двадцать", "30": "тридцать", "50": "пятьдесят", "100": "сто"}
@@ -41,6 +41,7 @@ def check(wav, text):
     heard = " ".join(w["w"] for w in got)
     # Whisper пишет числа цифрами («18», «50 %») — переводим в слова, иначе чистый дубль получает 0,74
     said = re.sub(r"\d+", lambda m: NUM.get(m.group(), m.group()), heard.replace("%", " процентов"))
+    said = re.sub(r"телеграмм", "телеграм", said, flags=re.I)                # Whisper пишет с двумя «м»
     # по словам, а не по буквам: лишнее «в» или «нуля» вместо «нуле» по буквам почти не заметно (0,98), по словам — 0,93
     a = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е")) for w in text.split()]
     b = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е")) for w in said.split()]
@@ -49,50 +50,50 @@ def check(wav, text):
 
 
 def voice_e(phrases, out_dir, log=print):
+    """Каждая фраза: дубль TTS → перекраска VC → проверка ИТОГОВОГО звука. Перекраска детерминирована (тот же дубль —
+    та же ошибка), поэтому при ошибке после VC берём новый дубль TTS (следующий seed), а не повторяем VC."""
     import torch, torchaudio, voice as V
+    from chatterbox.vc import ChatterboxVC
     os.makedirs(out_dir, exist_ok=True)
-    meta = json.load(open(os.path.join(out_dir, "phrases.json"))) if os.path.exists(os.path.join(out_dir, "phrases.json")) else {}
-    raw = []
+    mp = os.path.join(out_dir, "phrases.json")
+    meta = json.load(open(mp)) if os.path.exists(mp) else {}
+    vc = None
+    seeds = [int(x) for x in os.environ["SEEDS"].split(",")] if os.environ.get("SEEDS") else SEEDS
+    parts, prev = [], None
     for i, p in enumerate(phrases):
         key = f"{i}"
-        done = next((m for m in meta.values() if m.get("text") == p and os.path.exists(m["tts"]) and not m.get("redo")), None)
-        if done:                                                   # уже озвучено (ищем по тексту — строки можно вставлять)
-            meta[key] = done; raw.append(done["tts"]); continue
-        best = None; log(f"{i} ударения: {T.stress(p)}")
-        for s in [int(x) for x in os.environ["SEEDS"].split(",")] if os.environ.get("SEEDS") else SEEDS:
-            f = os.path.join(out_dir, f"t{zlib.crc32(p.encode()):08x}_s{s}.wav")
-            T.synth(p, f, seed=s, ref=ref(), **PARAMS)
-            sim, got = check(f, p); log(f"{i} seed {s}: {sim:.2f} — {got}")
-            if best is None or sim > best[0]: best = (sim, f, got)
-            if sim >= MIN_SIM: break
-        meta[key] = {"text": p, "tts": best[1], "sim": round(best[0], 3), "heard": best[2]}
-        json.dump(meta, open(os.path.join(out_dir, "phrases.json"), "w"), ensure_ascii=False, indent=1)
-        raw.append(best[1])
-    from chatterbox.vc import ChatterboxVC
-    vc = ChatterboxVC.from_pretrained("cpu"); vc.set_target_voice(V.VC_TARGET)
-    parts = []
-    for i, f in enumerate(raw):
-        m = meta[f"{i}"]
-        if m.get("e_of") == f and os.path.exists(m.get("e", "")) and m.get("sim_e", 0) >= MIN_SIM:
-            parts.append(m["e"]); continue                         # перекраска этого дубля уже готова и чистая
+        done = next((m for m in meta.values() if m.get("text") == p and os.path.exists(m.get("e", "")) and not m.get("redo")
+                     and m.get("sim_e", 0) >= MIN_SIM), None)
+        if done:                                                   # уже готово (по тексту — строки можно вставлять)
+            meta[key] = done; parts.append(done["e"]); prev = done["tts"]; continue
+        log(f"{i} ударения: {T.stress(p)}")
+        if vc is None:
+            vc = ChatterboxVC.from_pretrained("cpu"); vc.set_target_voice(V.VC_TARGET)
         best = None
-        for vs in (0, 1, 2):                                       # VC тоже размывает слова («гибитовая») — до 3 попыток
-            e = os.path.join(out_dir, f"e{i}_{zlib.crc32(f.encode()):08x}_v{vs}.wav"); torch.manual_seed(vs)
+        for s in seeds:
+            f = os.path.join(out_dir, f"t{zlib.crc32(p.encode()):08x}_s{s}.wav")
+            if not os.path.exists(f): T.synth(p, f, seed=s, ref=ref(), **PARAMS)
+            sim, got = check(f, p); log(f"{i} seed {s}: {sim:.2f} — {got}")
+            if sim < MIN_SIM - .08 and s != seeds[-1]: continue        # дубль уже кривой — перекрашивать незачем
+            e = os.path.join(out_dir, f"e{i}_{zlib.crc32(f.encode()):08x}.wav"); torch.manual_seed(0)
             src, pre = f, 0.0
-            if i and torchaudio.info(f).num_frames / torchaudio.info(f).sample_rate < 4.0:
-                # короткую фразу VC превращает в кашу («От прахи до друбок»): даём контекст — предыдущая фраза + 0,25 с тишины,
-                # после перекраски отрезаем её (VC сохраняет тайминг)
-                a, sr = torchaudio.load(raw[i - 1]); b, sr2 = torchaudio.load(f); assert sr == sr2
-                pre = (a.shape[1] + int(.25 * sr)) / sr
-                src = os.path.join(out_dir, f"ctx{i}.wav"); torchaudio.save(src, torch.cat([a, torch.zeros(1, int(.25 * sr)), b], 1), sr)
-            y = vc.generate(audio=src)
-            torchaudio.save(e, y[:, int((pre - .05) * vc.sr) if pre else 0:], vc.sr)
-            sim, got = check(e, phrases[i]); log(f"{i} E v{vs}: {sim:.2f} — {got}")
-            if best is None or sim > best[0]: best = (sim, e)
-            if sim >= MIN_SIM: break
-        m.update(e=best[1], e_of=f, sim_e=round(best[0], 3)); parts.append(best[1])
-        json.dump(meta, open(os.path.join(out_dir, "phrases.json"), "w"), ensure_ascii=False, indent=1)
-    json.dump(meta, open(os.path.join(out_dir, "phrases.json"), "w"), ensure_ascii=False, indent=1)
+            if prev and torchaudio.info(f).num_frames / torchaudio.info(f).sample_rate < 4.0:
+                # короткую фразу VC превращает в кашу («От прахи до друбок»): даём контекст — предыдущая фраза + 0,25 с
+                # тишины, после перекраски отрезаем её (VC сохраняет тайминг)
+                x, sr = torchaudio.load(prev); y, sr2 = torchaudio.load(f); assert sr == sr2
+                pre = (x.shape[1] + int(.25 * sr)) / sr
+                src = os.path.join(out_dir, f"ctx{i}.wav"); torchaudio.save(src, torch.cat([x, torch.zeros(1, int(.25 * sr)), y], 1), sr)
+            out = vc.generate(audio=src)
+            torchaudio.save(e, out[:, int((pre - .05) * vc.sr) if pre else 0:], vc.sr)
+            se, ge = check(e, p); log(f"{i} E seed {s}: {se:.2f} — {ge}")
+            if best is None or se > best["sim_e"]:
+                best = {"text": p, "tts": f, "sim": round(sim, 3), "heard": got, "e": e, "sim_e": round(se, 3), "heard_e": ge}
+            if se >= MIN_SIM: break
+        meta[key] = best; parts.append(best["e"]); prev = best["tts"]
+        json.dump(meta, open(mp, "w"), ensure_ascii=False, indent=1)
+    json.dump(meta, open(mp, "w"), ensure_ascii=False, indent=1)
+    weak = [f"{k}: {m['heard_e']}" for k, m in meta.items() if m.get("sim_e", 1) < MIN_SIM and "heard_e" in m]
+    if weak: log("СЛАБЫЕ после всех попыток — проверить на слух:\n  " + "\n  ".join(weak))
     return T.humanize(parts, os.path.join(out_dir, "voice.wav"))
 
 
