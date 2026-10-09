@@ -46,8 +46,13 @@ def check(wav, text):
     # слова сравниваем по основе (5 букв): «десяти» / «десять» после перевода «10» в слово — одно и то же
     a = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е"))[:5] for w in text.split()]
     b = [re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е"))[:5] for w in said.split()]
+    # числа: Whisper пишет «1000», «2000», «10 000», а в тексте «тысячи», «двух тысяч» — сверяем остальные слова, числа выкидываем
+    # с обеих сторон (сами числа проверять по распознаванию бессмысленно: формы и записи разные)
+    NUMW = ("ноль", "один", "одна", "одну", "два", "двух", "две", "три", "трех", "четыр", "пять", "пяти", "шест", "семь", "семи", "восем",
+            "девят", "десят", "двадц", "тридц", "сорок", "пятьд", "шесть", "сто", "двест", "тысяч", "милли", "полто")
+    isnum = lambda w: w.isdigit() or any(w.startswith(n[:5]) for n in NUMW)
     import difflib
-    return difflib.SequenceMatcher(None, [w for w in a if w], [w for w in b if w], autojunk=False).ratio(), heard
+    return difflib.SequenceMatcher(None, [w for w in a if w and not isnum(w)], [w for w in b if w and not isnum(w)], autojunk=False).ratio(), heard
 
 
 def trim(wav, log=print):
