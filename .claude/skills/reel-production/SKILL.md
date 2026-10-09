@@ -57,6 +57,12 @@ in speech, on-screen text and captions:
 - Before publishing a sensitive topic, the owner can check «Статус аккаунта» and
   use trial reels.
 
+**Reels v2 from reel #11 (owner, 2026-10-10):** scenes use the YouTube modes in 9:16 — scrapbook collage, search, editorial
+infographic, AI assistant, night-office document with highlighter, phone close-up with **the owner's real Telegram channel**
+(real name, avatar, 2–3 slightly blurred posts — ask him for them; never invent a channel name); cut every 1.5–2 s; captions
+v2 (2–3 words, key word bigger and coloured). Lock-screen hook, swipe cards, marker board and the lock-screen loop were
+rejected. Reference frames and rules: `reels/lab/experiments/2026-10-10-reels-v2/README.md`.
+
 **Format frozen (owner, 2026-10-09: «рилсы отлично, оставь»):** reels = «Студия» 9:16 (`youtube/kit/studio.js`, full-screen scenes,
 word captions, no progress bar) + voice «E». Don't redesign the reel format; engine experiments go to the YouTube engine
 (`youtube/kit/yt/`), and `studio.js` gets only fixes so reels don't break.
