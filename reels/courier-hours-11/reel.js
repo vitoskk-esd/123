@@ -94,7 +94,7 @@
     const ci = s.capOff ? -1 : caps.findIndex(c => t >= c.t0 && t < c.t1);
     if (ci !== capCur) { cap.innerHTML = ci >= 0 ? caps[ci].html : ""; capCur = ci; }
     cap.className = s.dark ? "dark" : "";
-    if (ci >= 0) { const k = clamp((t - caps[ci].t0) / .14); cap.style.opacity = clamp((t - caps[ci].t0) / .05); cap.style.transform = `scale(${lerp(1.12, 1, out3(k))})`; }
+    if (ci >= 0) { const k = clamp((t - caps[ci].t0) / .14); cap.style.opacity = caps[ci].t0 <= 0 ? 1 : clamp((t - caps[ci].t0) / .05);   // кадр 0 — уже с подписью cap.style.transform = `scale(${lerp(1.12, 1, out3(k))})`; }
     foot.className = "foot" + (s.dark ? " dark" : "");
     $("grain").style.transform = `translate(${(Math.sin(t * 91) * 40) | 0}px, ${(Math.cos(t * 77) * 40) | 0}px)`;
   };
