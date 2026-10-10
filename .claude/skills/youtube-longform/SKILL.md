@@ -20,6 +20,13 @@ Layout: `youtube/<NN-slug>/` per video (e.g. `youtube/01-bonus-tierlist/`),
 with `script.md`, `rec/` (gitignored), `sections/<NN>/` builds, `out/`
 (gitignored), `thumb/`, `publish.md` (title, description, chapters, tags).
 
+## Visual format from video #3 (owner, 2026-10-10)
+
+Video #3 and later are built on the **YouTube engine «режимы»** (`youtube/kit/yt/`, README there): a timeline of segments, each
+shown in one of the 9 owner-chosen modes, transitions flash / zoom-through / match cut, rhythm lint (≤ 90 s per mode, «Ночной
+офис» ≤ 2 segments). Owner watched `demo.html` (69 s) and said «видео номер 3 на ютуб сделаем в таком формате как ты скинул».
+`script.md` marks the mode for every line; the build maps lines to segments by voice anchors.
+
 ## Length rule (owner, 2026-10-08): every video from #2 on is **8–20 min, aim for 12–15**
 
 - Pick topics that genuinely carry 12–15 min (several banks/steps/cases, a full walkthrough, a myth list
