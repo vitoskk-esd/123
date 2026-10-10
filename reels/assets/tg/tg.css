@@ -1,0 +1,44 @@
+/* Telegram iOS 1:1 (по записи экрана владельца, 10.10) — общий для рилсов: кадр-финал «всё в телеграме».
+   Разметка — reels/lab/experiments/2026-10-10-reels-v2/reel_v2.html, кадр 11. Шрифт Inter (OFL) — reels/assets/fonts. */
+  /* кадр 11: iOS-Telegram 1:1 по записи экрана владельца (экран 592×1280 в координатах записи) */
+  @font-face { font-family: "SFi"; src: url("../fonts/inter-cyrillic-400.woff2"); font-weight: 400; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../fonts/inter-latin-400.woff2"); font-weight: 400; }
+  @font-face { font-family: "SFi"; src: url("../fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "SFi"; src: url("../fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../fonts/inter-latin-600.woff2"); font-weight: 600; }
+  .iph { position: absolute; left: 250px; top: 300px; width: 624px; height: 1312px; padding: 16px; border-radius: 92px; background: #08080a; border: 3px solid #4a4d55;
+    box-shadow: 0 0 0 2px #1a1b1f, 0 0 140px rgba(60,150,255,.3), 0 60px 120px rgba(0,0,0,.85); transform-origin: 50% 0; z-index: 10; }
+  .tg { width: 592px; height: 1280px; border-radius: 76px; overflow: hidden; position: relative; font-family: "SFi"; color: #fff; -webkit-font-smoothing: antialiased;
+    background: #010002 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><g fill='none' stroke='rgba(255,255,255,.11)' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M30 40c-6-8-20-4-16 6 3 7 16 14 16 14s13-7 16-14c4-10-10-14-16-6z'/><path d='M120 18l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z'/><rect x='190' y='30' width='36' height='28' rx='3'/><path d='M190 42h36M208 30v28M208 30c-6-10-16-6-10 0M208 30c6-10 16-6 10 0'/><circle cx='60' cy='130' r='16'/><path d='M50 126h2M68 126h2M54 136c4 3 8 3 12 0M46 118l-4-8 10 4M74 118l4-8-10 4'/><path d='M150 120c0-10 14-12 18-4 6-6 18-2 16 8 8 2 6 14-2 14h-30c-8 0-10-12-2-18z'/><path d='M230 120a14 14 0 1 0 12 20 11 11 0 0 1-12-20z'/><path d='M20 200c10-6 20 6 30 0s20 6 30 0'/><path d='M110 190l10 10-10 10-10-10z'/><circle cx='185' cy='205' r='4'/><path d='M215 180c6 0 12 6 12 14v10l5 6h-34l5-6v-10c0-8 6-14 12-14zM210 214a5 5 0 0 0 10 0'/><path d='M90 70l4 4M100 64l-2 6M84 80l6-2'/><path d='M240 240c-4-6-14-3-11 4 2 5 11 10 11 10s9-5 11-10c3-7-7-10-11-4z'/></g></svg>") 0 0/260px 260px; }
+  .tg-feed { position: absolute; left: 0; right: 0; top: 0; padding-top: 262px; will-change: transform; }
+  .tg .b { position: relative; margin: 0 115px 14px 16px; width: 461px; border-radius: 20px; background: #1d1c21; overflow: visible; }
+  .tg .b .cv { display: block; width: 461px; height: 461px; border-radius: 20px 20px 0 0; filter: blur(1.6px); }
+  .tg .b .tx { padding: 14px 16px 6px; font: 400 24px/34.5px "SFi"; filter: blur(3.4px); }
+  .tg .b .tx b { font-weight: 600; } .tg .ln { color: #a196f0; }
+  .tg .q { margin-top: 12px; padding: 8px 14px; border-left: 4px solid #a196f0; border-radius: 6px; background: rgba(161,150,240,.12); font-size: 20px; line-height: 28px; }
+  .tg .ft { text-align: right; padding: 0 14px 10px; font: 400 15px "SFi"; color: rgba(255,255,255,.45); display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+  .tg .eye { width: 18px; height: 12px; border: 1.6px solid rgba(255,255,255,.45); border-radius: 50%; position: relative; display: inline-block; }
+  .tg .eye::after { content: ""; position: absolute; left: 5px; top: 2.5px; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.45); }
+  .tg .bl { filter: blur(3px); }
+  .tg .fw { position: absolute; right: -58px; bottom: 6px; width: 44px; height: 44px; border-radius: 50%; background: rgba(40,39,45,.85) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M13 5v4C6 10 4 14 3 19c3-4 6-5 10-5v4l8-6.5z' fill='white'/></svg>") center/24px no-repeat; }
+  .tg .chip { width: max-content; margin: 4px auto 14px; padding: 5px 13px; border-radius: 15px; background: rgba(38,37,42,.8); font: 500 19px "SFi"; }
+  .tg-topfade { position: absolute; left: 0; right: 0; top: 0; height: 270px; background: linear-gradient(#010002 30%, rgba(1,0,2,0)); z-index: 4; }
+  .tg-botfade { position: absolute; left: 0; right: 0; bottom: 0; height: 170px; background: linear-gradient(rgba(1,0,2,0), rgba(1,0,2,.92) 60%); z-index: 4; }
+  .tg .gl { position: absolute; z-index: 6; background: rgba(32,31,36,.78); border: 1px solid rgba(255,255,255,.11); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 24px rgba(0,0,0,.45); backdrop-filter: blur(14px); }
+  .tg-status { position: absolute; left: 62px; right: 34px; top: 22px; z-index: 7; display: flex; justify-content: space-between; align-items: center; font: 600 25px "SFi"; }
+  .tg-island { position: absolute; left: 233px; top: 14px; width: 126px; height: 38px; border-radius: 19px; background: #000; z-index: 8; }
+  .tg-back { left: 26px; top: 88px; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .tg-title { left: 161px; top: 88px; width: 270px; height: 64px; border-radius: 32px; display: flex; align-items: center; justify-content: center; }
+  .tg-title .nm { font: 600 25px/30px "SFi"; } .tg-title .sb { font: 400 16px/20px "SFi"; color: rgba(255,255,255,.5); }
+  .tg-ava { position: absolute; left: 504px; top: 87px; width: 66px; height: 66px; border-radius: 50%; overflow: hidden; z-index: 6; background: #222; }
+  .tg-ava img { width: 120%; height: 120%; margin: -10%; object-fit: cover; }
+  .tg-pin { left: 26px; top: 170px; width: 546px; height: 74px; border-radius: 37px; display: flex; align-items: center; gap: 12px; padding: 0 22px 0 26px; }
+  .tg-pin .bar { width: 3px; height: 50px; background: #fff; border-radius: 2px; display: block; }
+  .tg-pin img { width: 56px; height: 48px; border-radius: 6px; object-fit: cover; }
+  .tg-pin .h { font: 500 21px/26px "SFi"; } .tg-pin .t { font: 400 21px/26px "SFi"; }
+  .tg-pin .x { margin-left: auto; }
+  .tg-down { left: 524px; top: 1078px; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .tg-join { left: 16px; top: 1156px; width: 560px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; font: 600 24px "SFi"; color: #5eb0ff; }
+  .tg-tap { position: absolute; left: 266px; top: 1157px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,.55); box-shadow: 0 0 0 10px rgba(255,255,255,.18); z-index: 9; opacity: 0; }
+  .tg-home { position: absolute; left: 196px; top: 1258px; width: 200px; height: 7px; border-radius: 4px; background: #fff; z-index: 9; }
