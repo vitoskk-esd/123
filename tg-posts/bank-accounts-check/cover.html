@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Обложка «Где ты уже клиент?»</title>
+<!-- Пост «Как за 2 минуты узнать, клиентом каких банков ты уже был» (10.10.2026). Стиль — как у прошлых обложек канала
+     (why-banks-pay, start-guide): тёмный фон, неон лайм/циан, крупный заголовок. Банки на панели — обобщённые, без названий.
+     ?v=1 — панель «Сведения о банковских счетах» с отметками; ?v=2 — лупа над списком. Рендер: node shot.js -->
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root { --bg: #04050a; --ink: #eef3ff; --cyan: #3df5ff; --lime: #c8ff3d; --violet: #8b5cff; --red: #ff3b5c; --muted: #8f9bb8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 1280px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  canvas { position: absolute; inset: 0; }
+  .v { position: absolute; inset: 0; display: none; }
+  .glow-l { color: var(--lime); text-shadow: 0 0 22px rgba(200,255,61,.75), 0 0 80px rgba(200,255,61,.35); }
+  .glow-c { color: var(--cyan); text-shadow: 0 0 22px rgba(61,245,255,.7), 0 0 80px rgba(61,245,255,.35); }
+  .h { text-transform: uppercase; letter-spacing: -5px; line-height: .92; }
+  .sub { font-size: 42px; line-height: 1.15; color: #c9d3ee; letter-spacing: -.5px; }
+  .tag { display: inline-block; font-family: "Tek"; font-size: 32px; letter-spacing: 6px; padding: 12px 28px; border-radius: 40px;
+         border: 3px solid var(--lime); color: var(--lime); box-shadow: 0 0 30px rgba(200,255,61,.35), inset 0 0 20px rgba(200,255,61,.15); }
+  .panel { position: absolute; padding: 40px 44px; background: rgba(14,20,34,.9); border: 2px solid rgba(61,245,255,.55); border-radius: 34px;
+           box-shadow: 0 0 70px rgba(61,245,255,.25), 0 40px 80px rgba(0,0,0,.6); font-family: Mono; }
+  .panel .t { font-family: Tek; font-size: 30px; letter-spacing: 4px; color: var(--cyan); }
+  .panel .s { font: 26px "Display"; color: var(--muted); margin-top: 6px; }
+  .row { display: flex; align-items: center; gap: 24px; margin-top: 26px; padding: 22px 26px; border-radius: 22px; background: rgba(255,255,255,.04); border: 2px solid rgba(255,255,255,.08); }
+  .row .bk { width: 64px; height: 64px; border-radius: 16px; flex: none; }
+  .row .nm { flex: 1; font-size: 32px; color: #dfe6f8; letter-spacing: -1px; } .row .nm small { display: block; font-size: 22px; color: var(--muted); margin-top: 6px; letter-spacing: 0; }
+  .row .st { font-family: Tek; font-size: 30px; letter-spacing: 2px; padding: 10px 18px; border-radius: 14px; white-space: nowrap; }
+  .row.no { border-color: rgba(255,59,92,.5); } .row.no .st { color: var(--red); background: rgba(255,59,92,.12); }
+  .row.ok { border-color: rgba(200,255,61,.7); box-shadow: 0 0 40px rgba(200,255,61,.25); } .row.ok .st { color: var(--lime); background: rgba(200,255,61,.12); }
+  .vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.6)); }
+  .scan { position: absolute; inset: 0; pointer-events: none; opacity: .1; background: repeating-linear-gradient(0deg, rgba(255,255,255,.1) 0 2px, transparent 2px 5px); }
+</style>
+</head>
+<body>
+<canvas id="bg" width="1280" height="1280"></canvas>
+
+<!-- В1: заголовок + панель «Сведения о банковских счетах» -->
+<div class="v" id="v1">
+  <div style="position:absolute;left:70px;top:64px"><span class="tag">ЛАЙФХАК · 2 МИНУТЫ</span></div>
+  <div class="h" style="position:absolute;left:70px;top:150px;font-size:118px">Где ты<br><span class="glow-l">уже клиент?</span></div>
+  <div class="sub" style="position:absolute;left:70px;top:395px;width:1100px">Проверь до оформления карты — иначе бонуса нет</div>
+  <div class="panel" style="left:110px;top:520px;width:1060px;transform:rotate(-2deg)">
+    <div class="t">СВЕДЕНИЯ О БАНКОВСКИХ СЧЕТАХ</div><div class="s">личный кабинет налогоплательщика · пример</div>
+    <div class="row no"><i class="bk" style="background:linear-gradient(135deg,#ff6b6b,#b3122e)"></i><div class="nm">Банк №1<small>счёт открыт 03.2021 · действующий</small></div><div class="st">✕ НЕ НОВИЧОК</div></div>
+    <div class="row no"><i class="bk" style="background:linear-gradient(135deg,#ffd84a,#c79100)"></i><div class="nm">Банк №2<small>счёт закрыт 09.2024</small></div><div class="st">? ЧИТАЙ ПРАВИЛА</div></div>
+    <div class="row ok"><i class="bk" style="background:linear-gradient(135deg,#3df5ff,#2b6bff)"></i><div class="nm">Банк №3<small>счетов нет</small></div><div class="st">✓ БОНУС ТВОЙ</div></div>
+  </div>
+</div>
+
+<!-- В2: лупа над списком счетов -->
+<div class="v" id="v2">
+  <div class="h" style="position:absolute;left:70px;top:80px;font-size:120px">Ты точно<br><span class="glow-c">новый клиент?</span></div>
+  <div class="sub" style="position:absolute;left:70px;top:340px;width:760px">Все твои счета видит налоговая. Посмотри и ты — за 2 минуты</div>
+  <div class="panel" style="left:90px;top:560px;width:760px;transform:rotate(3deg)">
+    <div class="t">СЧЕТА · ВСЕ БАНКИ</div>
+    <div class="row no"><i class="bk" style="background:linear-gradient(135deg,#ff6b6b,#b3122e)"></i><div class="nm">Банк №1<small>карта для стипендии · 2021</small></div></div>
+    <div class="row no"><i class="bk" style="background:linear-gradient(135deg,#8b5cff,#4b1fd1)"></i><div class="nm">Банк №2<small>зарплатная · 2023</small></div></div>
+    <div class="row"><i class="bk" style="background:linear-gradient(135deg,#ffd84a,#c79100)"></i><div class="nm">Банк №3<small>детская карта · 2017</small></div></div>
+  </div>
+  <svg style="position:absolute;left:0;top:0" width="1280" height="1280">
+    <defs><filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <circle cx="900" cy="760" r="190" fill="rgba(200,255,61,.08)" stroke="#c8ff3d" stroke-width="16" filter="url(#gl)"/>
+    <path d="M1035,895 L1170,1030" stroke="#c8ff3d" stroke-width="42" stroke-linecap="round" filter="url(#gl)"/>
+  </svg>
+  <div style="position:absolute;left:775px;top:705px;width:250px;text-align:center;font-family:Tek;font-size:46px;letter-spacing:2px;color:#c8ff3d;text-shadow:0 0 20px rgba(200,255,61,.7);transform:rotate(-6deg)">с 2014<br>года</div>
+  <div style="position:absolute;left:70px;top:1140px"><span class="tag">ЛАЙФХАК · ДО ОФОРМЛЕНИЯ КАРТЫ</span></div>
+</div>
+<div class="scan"></div><div class="vig"></div>
+<script>
+const V = (new URLSearchParams(location.search)).get("v") || "1";
+document.getElementById("v" + V).style.display = "block";
+const cx = document.getElementById("bg").getContext("2d");
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+cx.fillStyle = "#04050a"; cx.fillRect(0, 0, 1280, 1280);
+const glows = { "1": [[640, 900, "rgba(61,245,255,.3)"], [300, 260, "rgba(200,255,61,.22)"]], "2": [[900, 760, "rgba(200,255,61,.25)"], [250, 400, "rgba(139,92,255,.35)"]] }[V];
+for (const [x, y, c] of glows) { const g = cx.createRadialGradient(x, y, 20, x, y, 700); g.addColorStop(0, c); g.addColorStop(1, "rgba(4,5,10,0)"); cx.fillStyle = g; cx.fillRect(0, 0, 1280, 1280); }
+for (let i = 0; i < 200; i++) {
+  const x = rnd(i) * 1280, y = rnd(i + 500) * 1280, z = .3 + rnd(i + 900) * .7, h = rnd(i + 77);
+  cx.fillStyle = h > .8 ? `rgba(200,255,61,${.2 + z * .6})` : (h > .55 ? `rgba(139,92,255,${.2 + z * .6})` : `rgba(61,245,255,${.2 + z * .6})`);
+  cx.beginPath(); cx.arc(x, y, 1 + z * 2.6, 0, 6.283); cx.fill();
+}
+</script>
+</body>
+</html>
