@@ -2,7 +2,9 @@
 // предметы (договор, телефон, выписка, карточка-вывод, монитор, стикер), камера перелетает между ними по кадрам shots.
 // Моушн-блюр — по скорости камеры (считается аналитически из cam(t) и cam(t − 1/30), без состояния между кадрами),
 // глубина резкости — предметы далеко от центра кадра мягче. Все события — в секундах от начала отрезка.
-// data: { objects: [{id, type, x, y, w, h, r, match, ...}] (mon: head, big, sub, line, draw; doc: title, sub, key{text, hl, circle, note}; phone; ledger; card; sticky), shots: [{t, to: id | [x, y], s, r, dx, dy}], fly }
+// data: { objects: [{id, type, x, y, w, h, r, match, ...}] (mon: head, big, sub, line, draw; doc: title, sub, key{text, hl, circle, note}; phone; ledger; card; sticky;
+//   receipt: title, lines [[l, r, green]], total [l, r], linesT, gap, totalT; calendar: title, sub, first, days, marks [{day, t, label, lx, ly, color}];
+//   letter: from, title, text, textT, wps), shots: [{t, to: id | [x, y], s, r, dx, dy}], fly }
 YT.mode("office", {
   css: `
   .yt-office { background: #04070d; }
@@ -50,6 +52,21 @@ YT.mode("office", {
   .yt-office .mon .sub { font: 600 30px "Mont"; color: #8fa6c8; }
   .yt-office .mon svg { position: absolute; left: 60px; bottom: 60px; }
   .yt-office .sticky { padding: 40px 44px; background: #ffe873; color: #1d1a10; font: 800 44px/1.2 "Mont"; box-shadow: 0 20px 40px rgba(0,0,0,.5); }
+  .yt-office .receipt { padding: 50px 46px 70px; background: #f4f6fa; color: #1d2230; font: 700 30px "Mono"; border-radius: 6px 6px 0 0;
+    box-shadow: 0 40px 80px rgba(0,0,0,.7); clip-path: polygon(0 0, 100% 0, 100% 97%, 95% 100%, 90% 97%, 85% 100%, 80% 97%, 75% 100%, 70% 97%, 65% 100%, 60% 97%, 55% 100%, 50% 97%, 45% 100%, 40% 97%, 35% 100%, 30% 97%, 25% 100%, 20% 97%, 15% 100%, 10% 97%, 5% 100%, 0 97%); }
+  .yt-office .receipt .t { text-align: center; font: 800 34px "Mono"; letter-spacing: .1em; margin-bottom: 26px; }
+  .yt-office .receipt .ln { display: flex; justify-content: space-between; margin-top: 16px; opacity: 0; } .yt-office .receipt .ln b { color: #1a8a4c; }
+  .yt-office .receipt hr { border: 0; border-top: 3px dashed #9aa3b4; margin: 26px 0 8px; }
+  .yt-office .receipt .tot { display: flex; justify-content: space-between; font: 800 40px "Mono"; margin-top: 14px; opacity: 0; } .yt-office .receipt .tot b { color: #1a8a4c; }
+  .yt-office .calendar { padding: 46px; background: #f4f6fa; color: #1d2230; border-radius: 18px; box-shadow: 0 40px 80px rgba(0,0,0,.7); }
+  .yt-office .calendar .t { font: 800 40px "Mont"; margin-bottom: 20px; display: flex; justify-content: space-between; } .yt-office .calendar .t span { color: #6f7a8e; font-weight: 600; }
+  .yt-office .calendar .g { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .yt-office .calendar .g div { height: 86px; border-radius: 12px; background: #e3e8f1; font: 700 28px "Mont"; padding: 10px 12px; position: relative; color: #4d5568; }
+  .yt-office .calendar .g div i { position: absolute; inset: -4px; border: 6px solid #d42a2a; border-radius: 50%; opacity: 0; }
+  .yt-office .calendar .lab { position: absolute; font: 800 italic 40px "Mont"; color: #d42a2a; white-space: nowrap; opacity: 0; }
+  .yt-office .letter { padding: 70px 80px; background: #fbfcfe; color: #1d2230; font: 500 30px/1.55 "Mont"; box-shadow: 0 40px 80px rgba(0,0,0,.7); border-top: 18px solid #2b6bff; }
+  .yt-office .letter .from { font: 700 24px "Mono"; color: #6f7a8e; letter-spacing: .08em; } .yt-office .letter h3 { font: 800 46px/1.15 "Mont"; margin: 20px 0 26px; }
+  .yt-office .letter .w { opacity: 0; }
   .yt-office .scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 2px, transparent 2px 4px); }
   .yt-office .lamp { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,4,12,.75)); }
   `,
@@ -95,6 +112,22 @@ YT.mode("office", {
         P.ln = e.querySelector(".ln"); P.ar = e.querySelector(".ar"); P.big = e.querySelector(".big");
       }
       if (o.type === "sticky") e.innerHTML = o.text;
+      if (o.type === "receipt") {   // чек: строки появляются по очереди, итог — отдельно
+        e.innerHTML = `<div class="t">${o.title || "КАССОВЫЙ ЧЕК"}</div>`;
+        P.lines = (o.lines || []).map(([l, r, g]) => U.el("div", "ln", `<span>${l}</span>${g ? `<b>${r}</b>` : `<span>${r}</span>`}`, e));
+        if (o.total) { U.el("hr", null, null, e); P.tot = U.el("div", "tot", `<span>${o.total[0]}</span><b>${o.total[1]}</b>`, e); }
+      }
+      if (o.type === "calendar") {  // календарь месяца: обводки дат и подписи от руки
+        const first = o.first ?? 3, days = o.days ?? 31;
+        e.innerHTML = `<div class="t">${o.title}<span>${o.sub || ""}</span></div><div class="g">` + Array.from({ length: first }, () => '<div style="background:none"></div>').join("") +
+          Array.from({ length: days }, (_, i) => `<div>${i + 1}<i></i></div>`).join("") + "</div>";
+        P.marks = (o.marks || []).map(m => ({ m, ring: e.querySelectorAll(".g div")[first + m.day - 1].querySelector("i"),
+          lab: (() => { const l = U.el("div", "lab", m.label || "", e); Object.assign(l.style, { left: (m.lx ?? 60) + "px", top: (m.ly ?? 700) + "px", color: m.color || "" }); return l; })() }));
+      }
+      if (o.type === "letter") {    // письмо банка: текст проявляется по словам
+        e.innerHTML = `<div class="from">${o.from || "ОТ: БАНК · УВЕДОМЛЕНИЕ"}</div><h3>${o.title}</h3><p>${o.text}</p>`;
+        P.ws = U.words(e.querySelector("p"));
+      }
       root._objs[o.id] = { o, e, P, cx: o.x + o.w / 2, cy: o.y + (o.h || 600) / 2 };
     });
     U.el("div", "scan", null, root); U.el("div", "lamp", null, root);
@@ -138,6 +171,15 @@ YT.mode("office", {
       }
       if (o.type === "mon") { const k = U.io3((t - (o.draw ?? 0)) / (o.drawDur || 1.4)); U.draw(P.ln, k); P.ar.setAttribute("opacity", U.clamp((k - .6) / .4)); }
       if (o.type === "sticky") { const k = U.back((t - (o.t ?? 0)) / .45); e.style.opacity = t < (o.t ?? 0) ? 0 : 1; e.style.transform = `rotate(${o.r || 0}deg) scale(${U.lerp(1.3, 1, k)})`; }
+      if (o.type === "receipt") {
+        const t0 = o.linesT ?? 0, gap = o.gap ?? .3;
+        P.lines.forEach((l, i) => { const k = U.out3((t - t0 - i * gap) / .25); l.style.opacity = k; l.style.transform = `translateY(${(1 - k) * -12}px)`; });
+        if (P.tot) { const k = U.out5((t - (o.totalT ?? t0 + P.lines.length * gap + .3)) / .35); P.tot.style.opacity = k; P.tot.style.transform = `scale(${U.lerp(1.15, 1, k)})`; }
+      }
+      if (o.type === "calendar") P.marks.forEach(({ m, ring, lab }) => { const k = U.out5((t - m.t) / .4);
+        ring.style.opacity = t < m.t ? 0 : 1; ring.style.transform = `scale(${U.lerp(1.6, 1, k)}) rotate(${-8 * (1 - k)}deg)`; ring.style.borderColor = m.color || "";
+        lab.style.opacity = U.clamp((t - m.t - .2) / .25); lab.style.clipPath = `inset(-20% ${(100 * (1 - U.clamp((t - m.t - .2) / .5))).toFixed(1)}% -20% -5%)`; });
+      if (o.type === "letter") U.showWords(P.ws, Math.floor((t - (o.textT ?? 0)) * (o.wps || 8)));
     });
   },
 });

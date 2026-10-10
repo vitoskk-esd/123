@@ -1,6 +1,7 @@
 // Режим «Свайп-карточки» (образец modes5.html?mode=swipe): стопка карточек как в приложении знакомств; на каждую — штамп
 // «ДА»/«НЕТ», и карточка улетает вправо или влево, кнопка снизу «нажимается». В конце — «мэтч»: правило главы.
-// data: { cap: {small, big}, cards: [{title, text, ok, t}], match: {small, big, t} }   t — момент свайпа карточки.
+// data: { cap: {small, big}, cards: [{title, text, ok, t}], match: {small, big, t}, keepLast }   t — момент свайпа карточки;
+//   keepLast — последняя карточка (правило главы) не улетает, а остаётся со штампом.
 YT.mode("swipe", {
   css: `
   .yt-swipe { background: radial-gradient(900px 700px at 50% 50%, #2a1530, #0c0710); }
@@ -33,7 +34,10 @@ YT.mode("swipe", {
     const press = { no: 0, yes: 0 };
     root._cards.forEach(({ c, e, i, st }) => {
       const k = U.clamp((t - c.t) / .45), depth = i - front;
-      if (t >= c.t) { const dir = c.ok ? 1 : -1, e3 = U.in3(k);
+      const keep = d.keepLast && i === d.cards.length - 1;   // последняя карточка-правило остаётся в кадре: «мэтч», а не пустой стол
+      if (t >= c.t && keep) { const b = U.bell(U.clamp((t - c.t) / .35)); e.style.transform = `scale(${1 + .06 * b}) rotate(${-2 * b}deg)`; e.style.opacity = 1;
+        press.yes = Math.max(press.yes, b); }
+      else if (t >= c.t) { const dir = c.ok ? 1 : -1, e3 = U.in3(k);
         e.style.transform = `translateX(${dir * 1100 * e3}px) rotate(${dir * (4 + 26 * e3)}deg)`; e.style.opacity = 1 - U.clamp((k - .7) / .3);
         press[c.ok ? "yes" : "no"] = Math.max(press[c.ok ? "yes" : "no"], U.bell(k)); }
       else if (depth >= 0) {

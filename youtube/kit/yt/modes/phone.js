@@ -26,7 +26,7 @@ YT.mode("phone", {
   .yt-phone .donut .c b { font: 900 56px "Unb"; color: #13161b; letter-spacing: -.03em; }
   .yt-phone .lg { margin-top: 30px; } .yt-phone .lg div { display: flex; justify-content: space-between; align-items: center; padding: 14px 6px; font: 700 32px "Mont"; color: #13161b; border-radius: 18px; }
   .yt-phone .lg i { width: 26px; height: 26px; border-radius: 8px; margin-right: 18px; display: inline-block; vertical-align: -3px; }
-  .yt-phone .push { position: absolute; left: 30px; right: 30px; top: 70px; padding: 26px 30px; border-radius: 36px; background: rgba(255,255,255,.95); z-index: 4;
+  .yt-phone .push { position: absolute; left: 30px; right: 30px; top: 250px; padding: 26px 30px; border-radius: 36px; background: rgba(255,255,255,.95); z-index: 4;
     box-shadow: 0 24px 50px rgba(0,0,0,.28); font: 600 30px/1.35 "Mont"; color: #20242a; opacity: 0; }
   .yt-phone .push .h { display: flex; align-items: center; gap: 12px; font: 700 24px "Mont"; color: #7b828c; margin-bottom: 8px; }
   .yt-phone .push .h i { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, #3ddc84, #1a9d57); }

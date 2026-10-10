@@ -4,7 +4,7 @@
 // Правило ритма (владелец 09.10): один режим не дольше ~90 с подряд, «Ночной офис» — 1–2 отрезка на ролик.
 // Подключение: <link yt.css> <script yt.js> <script modes/*.js> … YT.play({size, foot, chapters, segs}).
 // Отрезок: {mode, t0, t1, data, tin: {type: "flash"|"zoom"|"match"|"cut", dur, at: [x, y], key}, marks: {ключ: селектор}}.
-// ?label=1 — подпись режима и времени в углу (для каруселей-раскадровок).
+// ?label=1 — подпись режима и времени в углу (для каруселей-раскадровок). data.beats: [t…] — рывки камеры на ключевых словах.
 (function () {
   const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)), lerp = (a, b, k) => a + (b - a) * k;
   const U = {
@@ -89,7 +89,11 @@
     const half = (s) => (s && s.tin && s.tin.type !== "cut" && s.tin.type !== "match" ? (s.tin.dur || .6) / 2 : 0);
     const matchCache = {};
     function renderSeg(s, lt) { const r = s.root; r.style.transform = ""; r.style.opacity = ""; r.style.filter = ""; r.style.transformOrigin = "";
-      MODES[s.mode].render(r, lt, s.data || {}, s.ctx); }
+      MODES[s.mode].render(r, lt, s.data || {}, s.ctx);
+      // акценты (beats): рывок камеры +3 % за 0,2 с на ключевых словах — смена плана каждые 1,5–2 с, как в рилсах v2
+      const bs = (s.data || {}).beats;
+      if (bs && bs.length) { let k = 0; bs.forEach(b => { if (lt >= b) k += U.out5((lt - b) / .2); });
+        if (!r.style.transformOrigin) r.style.transformOrigin = "50% 50%"; r.style.transform = (r.style.transform || "") + ` scale(${1 + .03 * k})`; } }
 
     window.renderAt = (t) => {
       let cur = segs.findIndex(s => t < s.t1); if (cur < 0) cur = segs.length - 1;
