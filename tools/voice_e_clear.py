@@ -13,6 +13,8 @@
 fx="clean" (без шумодава и эха «комнаты») и ровным темпом TEMPO (по умолчанию 0,96, чуть медленнее — чётче).
 
   <python с chatterbox> tools/voice_e_clear.py <рилс>/out/voice     → voice.wav (старый — voice_prev.wav), clear.json
+  ONLY=0,3 — переотобрать только эти фразы (остальные берутся из clear.json, если текст не менялся); фразе с новым текстом
+  сначала досинтезируется TTS_MIN дублей (по умолчанию 3).
 """
 import glob, json, os, re, shutil, subprocess, sys, zlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -21,6 +23,8 @@ import voice_e as E, tts_v5 as T
 
 VC_SEEDS = [int(x) for x in os.environ.get("VC_SEEDS", "0,1,2,3").split(",")]
 TEMPO = float(os.environ.get("TEMPO", ".96"))
+ONLY = set(os.environ["ONLY"].split(",")) if os.environ.get("ONLY") else None
+TTS_MIN, TTS_SEEDS = int(os.environ.get("TTS_MIN", "3")), (31, 37, 41, 43, 47)
 
 
 def main(out_dir):
@@ -41,14 +45,18 @@ def main(out_dir):
         return sim * prob, sim, prob, heard
 
     vc = ChatterboxVC.from_pretrained("cpu"); vc.set_target_voice(V.VC_TARGET)
+    cj = os.path.join(out_dir, "clear.json"); old = json.load(open(cj)) if os.path.exists(cj) else {}
     res, parts, prev = {}, [], None
     first_ctx = "/home/user/123/" + meta[max(meta, key=int)]["tts"] if not meta[max(meta, key=int)]["tts"].startswith("/") else meta[max(meta, key=int)]["tts"]
     for k in sorted(meta, key=int):
         text = meta[k]["text"]; crc = f"{zlib.crc32(text.encode()):08x}"
+        if ONLY is not None and k not in ONLY and old.get(k, {}).get("text") == text and os.path.exists(old[k]["e"]):
+            res[k] = old[k]; parts.append(old[k]["e"]); prev = old[k]["tts"]; print(f"{k} из clear.json", flush=True); continue
         takes = sorted(f for f in glob.glob(os.path.join(out_dir, f"t{crc}_s*.wav")) if re.search(r"_s\d+\.wav$", f))
-        if len(takes) < 2:
-            f = os.path.join(out_dir, f"t{crc}_s31.wav")
-            if not os.path.exists(f): T.synth(text, f, seed=31, ref=E.ref(), **E.PARAMS)
+        for sd in TTS_SEEDS:
+            if len(takes) >= TTS_MIN: break
+            f = os.path.join(out_dir, f"t{crc}_s{sd}.wav")
+            if not os.path.exists(f): T.synth(text, f, seed=sd, ref=E.ref(), **E.PARAMS)
             takes = sorted(set(takes + [f]))
         tts = sorted(((score(t, text), t) for t in takes), reverse=True)[:2]
         print(f"{k} дубли TTS: " + ", ".join(f"{os.path.basename(t)} {s[0]:.3f}" for s, t in tts), flush=True)
