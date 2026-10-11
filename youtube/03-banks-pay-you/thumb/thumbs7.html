@@ -44,29 +44,29 @@
 const v = new URLSearchParams(location.search).get("v") || "1";
 const nfc = (c) => `<svg class="nfc" width="34" height="34" viewBox="0 0 34 34">${[8, 14, 20].map(r => `<path d="M${6 + r * .35} ${17 - r * .55} A ${r} ${r} 0 0 1 ${6 + r * .35} ${17 + r * .55}" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`).join("")}</svg>`;
 // упрощённые знаки банков (не точные копии логотипов): Альфа — красная карта и белая «А» с чертой; Т — чёрная карта и жёлтый щит;
-// Уралсиб — тёмно-синяя карта и надпись
+// Уралсиб — переливающаяся карта (светло-лиловый → розовый → фиолетовый), как их текущие карты «Мир»
 const CARDS = {
   alfa: `<div style="position:absolute;inset:0;background:linear-gradient(135deg,#ff3b30,#ef3124 50%,#c41d14)"></div>
     <div style="position:absolute;left:30px;top:22px;display:flex;align-items:center;gap:12px;color:#fff"><div style="position:relative;width:40px;height:50px">
       <div style="font:700 50px/1 I;color:#fff;position:absolute;left:3px;top:-4px">А</div><div style="position:absolute;left:4px;bottom:0;width:32px;height:6px;background:#fff"></div></div>
       <div style="font:700 24px I;letter-spacing:.01em">Альфа-Банк</div></div>
-    <div class="chip"></div>${nfc("rgba(255,255,255,.85)")}<div class="num4" style="color:#fff">•••• 4412</div><div class="ps" style="color:#fff">MIR</div>`,
+    <div class="chip"></div>${nfc("rgba(255,255,255,.85)")}<div class="num4" style="color:#fff">•••• 4412</div><div class="ps" style="color:#fff;font-style:normal;font-weight:700">МИР</div>`,
   tbank: `<div style="position:absolute;inset:0;background:linear-gradient(135deg,#2b2c30,#141518 55%,#050506)"></div>
     <div style="position:absolute;left:30px;top:20px;display:flex;align-items:center;gap:12px"><svg width="44" height="50" viewBox="0 0 44 50"><path d="M2 2 H42 V26 C42 38 32 46 22 48 C12 46 2 38 2 26 Z" fill="#ffdd2d"/>
       <path d="M12 12 H32 V18 H25 V36 H19 V18 H12 Z" fill="#111"/></svg><div style="font:700 26px I;color:#fff">Т-Банк</div></div>
     <div style="position:absolute;right:28px;top:26px;font:700 22px I;color:#fff;letter-spacing:.06em">BLACK</div>
-    <div class="chip"></div>${nfc("rgba(255,255,255,.8)")}<div class="num4" style="color:#fff">•••• 2026</div><div class="ps" style="color:#fff">MIR</div>`,
-  ural: `<div style="position:absolute;inset:0;background:linear-gradient(135deg,#3b4dc8,#24308f 55%,#151c5c)"></div>
-    <div style="position:absolute;left:-60px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(120,150,255,.35),transparent 70%)"></div>
-    <div style="position:absolute;left:30px;top:24px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font:700 26px I;color:#24308f">У</div>
-      <div style="font:700 26px I;color:#fff;letter-spacing:.06em">УРАЛСИБ</div></div>
-    <div class="chip"></div>${nfc("rgba(255,255,255,.85)")}<div class="num4" style="color:#fff">•••• 7730</div><div class="ps" style="color:#fff">MIR</div>`,
+    <div class="chip"></div>${nfc("rgba(255,255,255,.8)")}<div class="num4" style="color:#fff">•••• 2026</div><div class="ps" style="color:#fff;font-style:normal;font-weight:700">МИР</div>`,
+  ural: `<div style="position:absolute;inset:0;background:linear-gradient(118deg,#f1ecff 0%,#d9cfff 18%,#c58df0 34%,#e2559e 50%,#7b3fd6 68%,#3a23a8 84%,#24187a 100%)"></div>
+    <div style="position:absolute;left:120px;top:-40px;width:160px;height:380px;transform:rotate(28deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);filter:blur(6px)"></div>
+    <div style="position:absolute;left:30px;top:24px;display:flex;align-items:center;gap:10px"><svg width="34" height="34" viewBox="0 0 34 34"><path d="M17 4 C 11 10, 11 22, 17 30 M17 4 C 23 10, 23 22, 17 30 M9 9 C 5 15, 6 24, 11 29 M25 9 C 29 15, 28 24, 23 29" fill="none" stroke="#1d1a4a" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <div style="font:600 26px I;color:#1d1a4a">Уралсиб</div></div>
+    <div class="chip" style="background:linear-gradient(135deg,#e9e9ef,#b9bac6 55%,#dcdce4)"></div>${nfc("rgba(29,26,74,.8)")}<div class="num4" style="color:#fff">•••• 7730</div><div class="ps" style="color:#fff;font-style:normal;font-weight:700">МИР</div>`,
 };
 // расположение трёх карт: [банк, x, y, поворот, масштаб]; первая — сзади
 const LAY = {
   1: [["ural", 830, 300, 22, .9, 1], ["alfa", 800, 320, 6, .9, 1], ["tbank", 770, 340, -10, .92, 1]],
   2: [["ural", 860, 235, -6, .85], ["alfa", 810, 325, -6, .88], ["tbank", 760, 415, -6, .9]],
-  3: [["alfa", 690, 270, -16, .9], ["ural", 900, 290, 12, .9], ["tbank", 790, 400, -3, .95]],
+  3: [["ural", 740, 270, -16, .9], ["alfa", 900, 290, 12, .9], ["tbank", 790, 400, -3, .95]],
 }[v];
 document.getElementById("cards").innerHTML = LAY.map(([b, x, y, r, s, pivot]) => `<div class="card" style="left:${x}px;top:${y}px;transform-origin:${pivot ? "50% 120%" : "50% 50%"};transform:rotate(${r}deg) scale(${s})">${CARDS[b]}</div>`).join("");
 const S = [["Бонус новому клиенту", "+2 000 ₽"], ["Бонус за друга", "+1 000 ₽"], ["Проценты за 3 месяца", "+387 ₽"]];
