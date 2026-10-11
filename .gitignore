@@ -22,3 +22,5 @@ data/covers/
 data/logs/
 *.tmp
 youtube/03-banks-pay-you/voice/out/
+youtube/03-banks-pay-you/data_*.js
+youtube/03-banks-pay-you/video_*.html
