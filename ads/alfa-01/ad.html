@@ -105,12 +105,13 @@ window.renderAt = (t) => {
   }
   if (s === SC[4]) {          // 5: призыв — «Оформи бесплатно», кнопка «по ссылке в описании»
     const sp = (t * 40) % 360;
-    h += `<div style="position:absolute;left:${540 - 300}px;top:${430 + Math.sin(t * 2) * 14}px;filter:drop-shadow(0 40px 50px rgba(0,0,0,.3));transform:rotate(${-8 + Math.sin(t * 1.5) * 4}deg) scale(${back(lt / .6, 1.2)})">${card(600, { id: 2, shine: lerp(-.4, 1.4, ((lt * .5) % 1)) })}</div>`;
-    const a = out5((lt - .3) / .5); h += `<div class="t" style="top:900px;font:900 120px/1 'Unb';color:#fff;letter-spacing:-.03em;opacity:${a};transform:scale(${lerp(1.4, 1, a)})">Оформи</div>`;
-    const b = out5((lt - .55) / .5); h += `<div class="t" style="top:1040px;font:900 120px/1 'Unb';color:#fff;letter-spacing:-.03em;opacity:${b};transform:scale(${lerp(1.4, 1, b)})">бесплатно</div>`;
-    const c = back((lt - 1.1) / .5), bob = Math.sin(t * 6) * 8;
-    h += `<div style="position:absolute;left:540px;top:${1260}px;transform:translateX(-50%) scale(${Math.max(0, c)});background:#fff;color:${RED};font:800 54px 'Mont';padding:30px 54px;border-radius:70px;white-space:nowrap;box-shadow:0 20px 40px rgba(0,0,0,.2)">по ссылке в описании <span style="display:inline-block;transform:translateY(${bob}px)">↓</span></div>`;
-    h += `<div class="t" style="top:1450px;font:700 34px 'Mont';color:#fff;opacity:${out3((lt - 1.6) / .4)}">кэшбэк до 50 % у партнёров · обслуживание 0 ₽</div>`;
+    h += `<div style="position:absolute;left:${540 - 300}px;top:${250 + Math.sin(t * 2) * 14}px;filter:drop-shadow(0 40px 50px rgba(0,0,0,.3));transform:rotate(${-8 + Math.sin(t * 1.5) * 4}deg) scale(${back(lt / .6, 1.2)})">${card(600, { id: 2, shine: lerp(-.4, 1.4, ((lt * .5) % 1)) })}</div>`;
+    // финальная фраза (владелец 11.10): «Оформи сейчас на лучших условиях» — большими белыми буквами
+    ["ОФОРМИ", "СЕЙЧАС", "НА ЛУЧШИХ", "УСЛОВИЯХ"].forEach((w, i) => { const a = out5((lt - .3 - i * .18) / .5);
+      h += `<div class="t" style="top:${740 + i * 124}px;font:900 108px/1 'Unb';color:#fff;letter-spacing:-.03em;opacity:${a};transform:scale(${lerp(1.4, 1, a)})">${w}</div>`; });
+    const c = back((lt - 1.3) / .5), bob = Math.sin(t * 6) * 8;
+    h += `<div style="position:absolute;left:540px;top:${1300}px;transform:translateX(-50%) scale(${Math.max(0, c)});background:#fff;color:${RED};font:800 54px 'Mont';padding:30px 54px;border-radius:70px;white-space:nowrap;box-shadow:0 20px 40px rgba(0,0,0,.2)">по ссылке в описании <span style="display:inline-block;transform:translateY(${bob}px)">↓</span></div>`;
+    h += `<div class="t" style="top:1480px;font:700 34px 'Mont';color:#fff;opacity:${out3((lt - 1.6) / .4)}">кэшбэк до 50 % у партнёров · обслуживание 0 ₽</div>`;
   }
   // постоянные элементы: метка «Реклама», знак банка, юридический текст
   h += `<div class="tag" style="background:${dark ? "#F2F3F5" : "rgba(255,255,255,.18)"};color:${fg}">Реклама</div>`;
