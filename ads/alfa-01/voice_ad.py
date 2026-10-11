@@ -19,16 +19,24 @@ PH = [("Лучшие условия — в Альфа-Банке!", .15, 2.3),
       ("Кэшбэк до пятидесяти процентов у партнёров банка.", 5.55, 8.5),
       ("Кэшбэк в категориях — выбираешь сам.", 8.75, 11.3),
       ("Оформляй бесплатно — напиши менеджеру!", 11.6, 14.6)]
-PARAMS = dict(exaggeration=.6, cfg_weight=.45, temperature=.8)
+PARAMS = dict(exaggeration=.5, cfg_weight=.5, temperature=.75)
+# v2 (владелец: «сделай звук чище и приятнее, а то как будто в подъезде, голос грубее, «менеджеру» читается неправильно»):
+# образец — сухой «вариант 5» вместо записи в комнате (эхо комнаты синтез переносил в голос); синтезу — произношение по звучанию;
+# после — ниже на ~2 полутона с сохранением формант, тёплый низ, гейт срезает хвосты эха
+import voice as V
+REF = V.VC_TARGET
+SAY = {"менеджеру": "мэнэджэру"}
+T.STRESS_FIX.update({"мэнэджэру": "м+энэджэру"})
 dur = lambda f: float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f], capture_output=True, text=True).stdout)
 
 res = []
 for i, (text, a, b) in enumerate(PH):
-    print(i, "ударения:", T.stress(text), flush=True)
+    say = " ".join(SAY.get(w.strip("!.,—").lower(), w.strip("!.,—")) + w[len(w.strip("!.,—")):] if w.strip("!.,—").lower() in SAY else w for w in text.split())
+    print(i, "ударения:", T.stress(say), flush=True)
     best = None
     for s in (3, 7, 13, 21):
-        f = os.path.join(OUT, f"p{i}_s{s}.wav")
-        if not os.path.exists(f): T.synth(text, f, seed=s, ref=E.ref(), **PARAMS)
+        f = os.path.join(OUT, f"v2p{i}_s{s}.wav")
+        if not os.path.exists(f): T.synth(say, f, seed=s, ref=REF, **PARAMS)
         f = E.trim(f, log=lambda x: None)
         sim, heard = E.check(f, text)
         print(f"{i} seed {s}: {sim:.3f} {dur(f):.2f} с — {heard}", flush=True)
@@ -45,7 +53,7 @@ for k, r in enumerate(res):
     inputs += ["-i", r["file"]]
     filt.append(f"[{k}:a]aresample=48000,atempo={tempo:.3f},adelay={int(r['a'] * 1000)}|{int(r['a'] * 1000)}[v{k}]")
     print(f"{k}: {r['d']:.2f} с в слот {r['b'] - r['a']:.2f} с → темп {tempo:.2f} · {r['sim']:.3f} «{r['heard']}»")
-filt.append("".join(f"[v{k}]" for k in range(len(res))) + f"amix=inputs={len(res)}:normalize=0,highpass=f=80,equalizer=f=3500:t=q:w=1.4:g=3,acompressor=threshold=-18dB:ratio=3:attack=5:release=80,apad,atrim=0:15[vo]")
+filt.append("".join(f"[v{k}]" for k in range(len(res))) + f"amix=inputs={len(res)}:normalize=0,rubberband=pitch=0.89:formant=preserved,highpass=f=70,equalizer=f=140:t=q:w=1:g=3,equalizer=f=350:t=q:w=1.2:g=-2,equalizer=f=3200:t=q:w=1.4:g=2,agate=threshold=0.02:ratio=3:attack=3:release=80,acompressor=threshold=-18dB:ratio=3:attack=5:release=80,apad,atrim=0:15[vo]")
 voice = os.path.join(OUT, "voice.wav")
 subprocess.run(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(filt), "-map", "[vo]", "-ac", "1", voice], check=True)
 # сведение: музыка приседает под голос, итог −14 LUFS
