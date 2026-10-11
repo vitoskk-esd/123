@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №3 — новые форматы</title>
+<!-- Владелец 11.10: «превью не нравятся, давай другие варианты, ищи новые форматы». Восемь форматов, которых ещё не было
+     (раньше: тёмное 3D, светлые, плашки + телефон, инфографика): 1 тир-лист, 2 переписка, 3 заметки, 4 поиск с подсказками,
+     5 выписка с обводкой, 6 калькулятор, 7 огромная сумма, 8 мем из двух кадров. ?v=1…8. Без логотипов и брендов. -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "S"; src: url("../../kit/fonts/playfair-cyrillic-600-italic.woff2"); font-style: italic; font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  .v { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .pl { position: absolute; display: inline-block; font: 700 96px/1 "O"; text-transform: uppercase; padding: 6px 22px 12px; white-space: nowrap; }
+  .wb { background: #fff; color: #111; } .bw { background: #111; color: #fff; } .rw { background: #e8202a; color: #fff; } .gw { background: #13b85a; color: #fff; } .yb { background: #ffd60a; color: #111; }
+  .ring { position: absolute; border: 8px solid #e8202a; border-radius: 50%; }
+  .photo { position: absolute; background: url("rider.jpg") no-repeat; }
+</style>
+</head>
+<body>
+
+<!-- 1. Тир-лист: курьер — в самом низу, верхний ряд скрыт -->
+<div class="v" id="v1" style="background:#15161a">
+  <div style="position:absolute;left:40px;top:28px;font:700 64px O;color:#fff;text-transform:uppercase">Тир-лист: где платят больше</div>
+  <div id="tiers" style="position:absolute;left:40px;top:120px;width:1200px"></div>
+</div>
+
+<!-- 2. Переписка -->
+<div class="v" id="v2" style="background:linear-gradient(135deg,#7fb6ff,#b49cff)">
+  <div style="position:absolute;left:700px;top:40px;width:540px;height:640px;border-radius:40px;background:#e9edf3;box-shadow:0 30px 70px rgba(30,30,80,.3);overflow:hidden">
+    <div style="height:84px;background:#fff;display:flex;align-items:center;gap:16px;padding:0 26px;font:600 28px I;color:#111"><i style="width:52px;height:52px;border-radius:50%;background:#ff9f0a;display:inline-block"></i>Друг</div>
+    <div id="chat" style="padding:20px 22px"></div></div>
+  <div class="pl bw" style="left:40px;top:120px;font-size:104px">Где ты</div>
+  <div class="pl wb" style="left:40px;top:250px;font-size:80px;transform:rotate(-2deg)">подрабатываешь?</div>
+  <div style="position:absolute;left:46px;top:420px;font:700 40px/1.2 O;color:#fff;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.25)">банк платит больше,<br>чем смена курьером</div>
+</div>
+
+<!-- 3. Заметки -->
+<div class="v" id="v3" style="background:#f6f1e3">
+  <div style="position:absolute;left:640px;top:30px;width:560px;height:660px;border-radius:36px;background:#fffdf6;box-shadow:0 30px 60px rgba(80,60,10,.18);padding:40px 44px">
+    <div style="font:600 24px I;color:#d4a20a">‹ Заметки</div>
+    <div style="font:700 50px/1.1 I;color:#111;margin-top:20px;letter-spacing:-.02em">Деньги без подработки</div>
+    <div style="font:500 22px I;color:#999;margin-top:6px">октябрь</div>
+    <div id="notes" style="margin-top:22px"></div></div>
+  <div class="pl bw" style="left:40px;top:140px;font-size:110px">Список</div>
+  <div class="pl yb" style="left:40px;top:280px;font-size:110px;transform:rotate(-2deg)">на месяц</div>
+  <div style="position:absolute;left:46px;top:450px;font:600 italic 46px S;color:#111">вместо смен курьером</div>
+</div>
+
+<!-- 4. Поиск с подсказками -->
+<div class="v" id="v4" style="background:#fff">
+  <div style="position:absolute;left:90px;top:70px;width:1100px;border-radius:40px;box-shadow:0 10px 40px rgba(0,0,0,.14);border:1px solid #e3e3e3;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:22px;padding:30px 36px;font:500 44px I;color:#111"><svg width="40" height="40" viewBox="0 0 46 46"><circle cx="19" cy="19" r="13" fill="none" stroke="#666" stroke-width="5"/><path d="M29 29 L40 40" stroke="#666" stroke-width="6" stroke-linecap="round"/></svg>подработка для студента|</div>
+    <div id="sugg" style="border-top:1px solid #eee;padding:10px 0"></div></div>
+  <div class="ring" style="left:96px;top:345px;width:900px;height:116px;transform:rotate(-2deg)"></div>
+  <svg style="position:absolute;left:1010px;top:400px" width="260" height="200" viewBox="0 0 260 200"><path d="M240 180 C 200 120, 120 80, 40 60" fill="none" stroke="#e8202a" stroke-width="14" stroke-linecap="round"/><path d="M80 30 L35 58 L75 95" fill="none" stroke="#e8202a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="pl rw" style="left:90px;top:600px;font-size:72px;transform:rotate(-1deg)">мало кто знает</div>
+</div>
+
+<!-- 5. Выписка с обводкой -->
+<div class="v" id="v5" style="background:#e8edf3">
+  <div style="position:absolute;left:600px;top:-20px;width:600px;height:780px;background:#fff;box-shadow:0 30px 60px rgba(20,30,60,.2);padding:50px 46px;transform:rotate(3deg)">
+    <div style="font:700 34px I;color:#111">Выписка по счёту</div><div style="font:500 22px I;color:#888;margin-top:6px">октябрь · пример</div>
+    <div id="stmt" style="margin-top:26px"></div></div>
+  <div class="ring" style="left:600px;top:362px;width:620px;height:96px;transform:rotate(3deg)"></div>
+  <div class="ring" style="left:596px;top:442px;width:620px;height:96px;transform:rotate(3deg)"></div>
+  <div class="pl bw" style="left:40px;top:150px;font-size:110px">Это не</div>
+  <div class="pl rw" style="left:40px;top:290px;font-size:110px;transform:rotate(-2deg)">зарплата</div>
+  <div style="position:absolute;left:46px;top:460px;font:700 40px/1.2 O;color:#111;text-transform:uppercase">так банки платят<br>новым клиентам</div>
+</div>
+
+<!-- 6. Калькулятор -->
+<div class="v" id="v6" style="background:radial-gradient(800px 600px at 30% 40%,#ff8a3d,#e8452a)">
+  <div style="position:absolute;left:760px;top:30px;width:420px;height:660px;border-radius:50px;background:#0b0b0c;padding:30px;box-shadow:0 30px 60px rgba(60,10,0,.4)">
+    <div style="text-align:right;color:#8a8a8f;font:500 40px I;margin-top:40px">2 000 ÷ 350 =</div>
+    <div style="text-align:right;color:#fff;font:300 140px/1 I;margin-top:6px;letter-spacing:-.04em">5,7</div>
+    <div id="keys" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px"></div></div>
+  <div class="pl bw" style="left:40px;top:120px;font-size:120px">5,7 часа</div>
+  <div class="pl wb" style="left:40px;top:270px;font-size:96px;transform:rotate(-2deg)">курьером</div>
+  <div class="pl yb" style="left:40px;top:410px;font-size:96px">= 1 бонус</div>
+</div>
+
+<!-- 7. Огромная сумма -->
+<div class="v" id="v7" style="background:linear-gradient(135deg,#0d6b3a,#13b85a 60%,#7dffb0)">
+  <div style="position:absolute;left:40px;top:60px;font:900 230px/1 Unb;letter-spacing:-.07em;color:#fff;text-shadow:0 18px 50px rgba(0,40,10,.4)">+3 387₽</div>
+  <div class="pl bw" style="left:50px;top:330px;font-size:84px">за месяц от банков</div>
+  <div style="position:absolute;left:56px;top:460px;display:flex;gap:14px;flex-wrap:wrap;width:760px" id="chips"></div>
+  <div style="position:absolute;left:880px;top:430px;width:330px;height:208px;border-radius:22px;transform:rotate(-14deg);background:linear-gradient(135deg,#1b1d22,#3a3d46 55%,#111);box-shadow:0 30px 60px rgba(0,30,10,.45)">
+    <i style="position:absolute;left:28px;top:70px;width:56px;height:42px;border-radius:9px;background:linear-gradient(135deg,#f1dc98,#c9a44a)"></i></div>
+  <div style="position:absolute;left:58px;top:660px;font:500 20px I;color:rgba(255,255,255,.75)">пример: бонус за карту + за друга + проценты</div>
+</div>
+
+<!-- 8. Мем из двух кадров -->
+<div class="v" id="v8" style="background:#fff">
+  <div style="position:absolute;left:0;top:0;width:1280px;height:360px;background:#fbe3e3"></div>
+  <div class="photo" style="left:0;top:0;width:520px;height:360px;background-size:900px auto;background-position:-160px -230px;filter:grayscale(1)"></div>
+  <div style="position:absolute;left:540px;top:126px;font:700 84px/1 O;text-transform:uppercase;color:#111">Искать подработку</div>
+  <svg style="position:absolute;left:1120px;top:110px" width="120" height="120" viewBox="0 0 120 120"><path d="M20 20 L100 100 M100 20 L20 100" stroke="#e8202a" stroke-width="22" stroke-linecap="round"/></svg>
+  <div style="position:absolute;left:0;top:360px;width:1280px;height:360px;background:#dff7e8"></div>
+  <div style="position:absolute;left:30px;top:410px;width:460px;border-radius:30px;background:#fff;padding:22px 26px;box-shadow:0 14px 30px rgba(0,60,20,.15)">
+    <div style="display:flex;align-items:center;gap:10px;font:600 22px I;color:#555"><i style="width:34px;height:34px;border-radius:9px;background:#13b85a;display:inline-block"></i>Банк · СМС<span style="margin-left:auto;color:#999;font-size:18px">сейчас</span></div>
+    <div style="font:700 26px I;margin-top:8px">Бонус новому клиенту</div><div style="font:700 64px I;color:#0f9d4f;letter-spacing:-.02em">+2 000 ₽</div></div>
+  <div style="position:absolute;left:540px;top:486px;font:700 84px/1 O;text-transform:uppercase;color:#111">Забрать бонус</div>
+  <svg style="position:absolute;left:1120px;top:460px" width="120" height="120" viewBox="0 0 120 120"><path d="M15 65 L48 98 L108 25" fill="none" stroke="#13b85a" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div style="position:absolute;left:0;top:356px;width:1280px;height:8px;background:#111"></div>
+</div>
+
+<script>
+const v = new URLSearchParams(location.search).get("v") || "1";
+document.getElementById("v" + v).style.display = "block";
+const $ = (id) => document.getElementById(id);
+if (v === "1") $("tiers").innerHTML = [["S", "#ff5a6e", ["???"]], ["A", "#ff9f43", ["Бонус за карту", "Приведи друга"]], ["B", "#ffd60a", ["Проценты на счёте"]],
+  ["C", "#6be675", ["Кэшбэк"]], ["D", "#5aa9ff", ["Курьер 6 часов"]]].map(([t, c, items]) => `<div style="display:flex;height:108px;margin-top:6px">
+  <div style="width:130px;background:${c};display:flex;align-items:center;justify-content:center;font:700 72px O;color:#111">${t}</div>
+  <div style="flex:1;background:#24262c;display:flex;align-items:center;gap:14px;padding:0 16px">${items.map(x => `<span style="padding:16px 24px;border-radius:14px;background:${x === "???" ? "#3a3d46" : "#fff"};
+  font:700 38px O;text-transform:uppercase;color:${x === "???" ? "#fff" : x.startsWith("Курьер") ? "#e8202a" : "#111"};${x === "???" ? "filter:blur(1px);letter-spacing:.2em" : ""}">${x}</span>`).join("")}</div></div>`).join("");
+if (v === "2") $("chat").innerHTML = [["her", "Ты где сейчас подрабатываешь?"], ["me", "Нигде. Банк сам платит"], ["sms", ""], ["her", "Это законно??"], ["me", "Да, это бонусы новым клиентам"]].map(([w, t]) =>
+  w === "sms" ? `<div style="margin:10px 0 10px auto;width:380px;border-radius:20px;background:#fff;padding:14px 18px;box-shadow:0 8px 20px rgba(0,0,0,.12)"><div style="font:600 18px I;color:#777">Банк · СМС</div><div style="font:700 22px I">Бонус новому клиенту</div><div style="font:700 44px I;color:#0f9d4f">+2 000 ₽</div></div>`
+  : `<div style="max-width:420px;margin:10px ${w === "me" ? "0 10px auto" : "auto 10px 0"};padding:16px 22px;border-radius:24px;font:500 28px/1.3 I;background:${w === "me" ? "#3d7bff" : "#fff"};color:${w === "me" ? "#fff" : "#111"};width:fit-content">${t}</div>`).join("");
+if (v === "3") $("notes").innerHTML = [[1, "Бонус за карту", "+2 000 ₽"], [1, "Приведи друга", "+1 000 ₽"], [1, "Проценты на счёте", "+387 ₽"], [0, "Кэшбэк", "проверить категории"], [0, "Кредитка", "только с планом"]].map(([d, a, b]) =>
+  `<div style="display:flex;align-items:center;gap:18px;margin-top:18px"><span style="width:40px;height:40px;border-radius:50%;border:3px solid ${d ? "#d4a20a" : "#bbb"};background:${d ? "#d4a20a" : "transparent"};display:flex;align-items:center;justify-content:center;color:#fff;font:700 24px I">${d ? "✓" : ""}</span>
+  <span style="font:600 32px I;color:${d ? "#999" : "#111"};${d ? "text-decoration:line-through" : ""}">${a}</span><span style="margin-left:auto;font:700 30px I;color:${b.startsWith("+") ? "#0f9d4f" : "#999"};white-space:nowrap">${b}</span></div>`).join("");
+if (v === "4") $("sugg").innerHTML = ["подработка для студента без опыта", "подработка курьером", "подработка для студента — банк платит сам", "подработка на выходные"].map((s, i) =>
+  `<div style="display:flex;align-items:center;gap:22px;padding:18px 36px;font:${i === 2 ? "700" : "500"} 38px I;color:${i === 2 ? "#0f9d4f" : "#444"};background:${i === 2 ? "#effaf3" : "transparent"}"><svg width="30" height="30" viewBox="0 0 46 46"><circle cx="19" cy="19" r="13" fill="none" stroke="#aaa" stroke-width="5"/><path d="M29 29 L40 40" stroke="#aaa" stroke-width="6" stroke-linecap="round"/></svg>${s}</div>`).join("");
+if (v === "5") $("stmt").innerHTML = [["Кофе", "−250 ₽"], ["Проезд", "−70 ₽"], ["Продукты", "−560 ₽"], ["Бонус новому клиенту", "+2 000 ₽"], ["Бонус за друга", "+1 000 ₽"], ["Проценты на остаток", "+129 ₽"], ["Подписка", "−199 ₽"], ["Кафе", "−430 ₽"]].map(([a, b]) =>
+  `<div style="display:flex;justify-content:space-between;padding:22px 4px;border-bottom:2px solid #eef0f4;font:${b.startsWith("+") ? "700" : "500"} 30px I;color:${b.startsWith("+") ? "#0f9d4f" : "#333"}"><span>${a}</span><span>${b}</span></div>`).join("");
+if (v === "6") $("keys").innerHTML = ["AC", "±", "%", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+"].map(k =>
+  `<div style="height:72px;border-radius:36px;display:flex;align-items:center;justify-content:center;font:500 34px I;background:${["÷", "×", "−", "+"].includes(k) ? "#ff9f0a" : ["AC", "±", "%"].includes(k) ? "#a5a5a5" : "#333"};color:${["AC", "±", "%"].includes(k) ? "#111" : "#fff"}">${k}</div>`).join("");
+if (v === "7") $("chips").innerHTML = [["Бонус за карту", "+2 000 ₽"], ["Приведи друга", "+1 000 ₽"], ["Проценты", "+387 ₽"]].map(([a, b]) =>
+  `<div style="padding:14px 22px;border-radius:18px;background:rgba(255,255,255,.92);font:700 32px O;text-transform:uppercase;color:#111">${a} <span style="color:#0f9d4f">${b}</span></div>`).join("");
+document.fonts.ready.then(() => { const img = new Image(); img.onload = img.onerror = () => { window.__ready = true; }; img.src = "rider.jpg"; });
+</script>
+</body>
+</html>
