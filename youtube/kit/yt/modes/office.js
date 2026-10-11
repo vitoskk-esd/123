@@ -4,7 +4,14 @@
 // глубина резкости — предметы далеко от центра кадра мягче. Все события — в секундах от начала отрезка.
 // data: { objects: [{id, type, x, y, w, h, r, match, ...}] (mon: head, big, sub, line, draw; doc: title, sub, key{text, hl, circle, note}; phone; ledger; card; sticky;
 //   receipt: title, lines [[l, r, green]], total [l, r], linesT, gap, totalT; calendar: title, sub, first, days, marks [{day, t, label, lx, ly, color}];
-//   letter: from, title, text, textT, wps), shots: [{t, to: id | [x, y], s, r, dx, dy}], fly }
+//   letter: from, title, text, textT, wps), shots: [{t, to: id | [x, y], s, r, dx, dy, push, dolly: [dx, dy]}], fly }
+// Y2 (11.10): doc key.strike — зачёркивание; phone ops [[подпись, сумма, зелёная]] с opsT/opsGap — история операций;
+//   mon count {from, to, t0, t1, prefix, suffix} — счётчик в большой цифре, mon color — цвет цифры и графика.
+// Y3 (11.10) — свет: мониторы светят на бумаги (цвет mon.glow или data.light [{t, color, i}] — смена по сцене), лампа data.lamp
+//   {x, y, r, i} тёплым пятном, блик на экране телефона едет при движении камеры.
+// Y4 (11.10) — камера-оператор: shot.push — сила наезда при удержании (0,03 по умолчанию; деталь — 0,1), shot.dolly — проезд вдоль
+//   стола за время удержания; data.fg [{kind: pen|cup|cable|plant, x, y, w, h, r}] — предметы переднего плана (ближе к камере,
+//   размыты, едут быстрее стола); data.shake — ручная тряска в px (0,4 по умолчанию, 0 — выкл.).
 YT.mode("office", {
   css: `
   .yt-office { background: #04070d; }
@@ -67,9 +74,38 @@ YT.mode("office", {
   .yt-office .letter { padding: 70px 80px; background: #fbfcfe; color: #1d2230; font: 500 30px/1.55 "Mont"; box-shadow: 0 40px 80px rgba(0,0,0,.7); border-top: 18px solid #2b6bff; }
   .yt-office .letter .from { font: 700 24px "Mono"; color: #6f7a8e; letter-spacing: .08em; } .yt-office .letter h3 { font: 800 46px/1.15 "Mont"; margin: 20px 0 26px; }
   .yt-office .letter .w { opacity: 0; }
+  .yt-office .lit { position: absolute; inset: 0; pointer-events: none; border-radius: inherit; mix-blend-mode: screen; z-index: 6; }
+  .yt-office .shade { position: absolute; inset: 0; pointer-events: none; border-radius: inherit; mix-blend-mode: multiply; z-index: 6; }
+  .yt-office .glint { position: absolute; inset: 0; pointer-events: none; z-index: 8; border-radius: inherit;
+    background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.22) 47%, rgba(255,255,255,.06) 52%, transparent 60%); background-size: 320% 100%; }
+  .yt-office .lampglow { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }
+  .yt-office .fg { position: absolute; left: 0; top: 0; width: 4400px; height: 2600px; transform-origin: 0 0; pointer-events: none; }
+  .yt-office .fg > div { position: absolute; }
+  .yt-office .key s { position: relative; text-decoration: none; } .yt-office .key .strk { position: absolute; left: -6px; top: 50%; overflow: visible; }
+  .yt-office .scr .op { display: flex; justify-content: space-between; margin: 0 24px; padding: 18px 8px; border-bottom: 1px solid #e1e5ea; font: 600 24px "Mont"; color: #4a515b; opacity: 0; }
+  .yt-office .scr .op b { color: #c42424; } .yt-office .scr .op.g b { color: #1a8a4c; }
   .yt-office .scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 2px, transparent 2px 4px); }
   .yt-office .lamp { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,4,12,.75)); }
   `,
+  // Y5: звуки предметов по событиям отрезка (секунды от начала отрезка) — без DOM, вызывается из yt/sfx.js
+  events(d, dur) {
+    const E = { mark: [], pen: [], notif: [], chip: [], thud: [], ticks: [], keys: [], paper: [], slide: [], pan: [], hum: [[0, dur]] };
+    (d.objects || []).forEach(o => {
+      if (o.type === "doc" && o.key) { if (o.key.hl != null) E.mark.push(o.key.hl); if (o.key.circle != null) E.pen.push([o.key.circle, .5]);
+        if (o.key.strike != null) E.pen.push([o.key.strike, .35]); if (o.key.note) E.pen.push([o.key.note.t, .3]); }
+      if (o.type === "phone") { if (o.push) E.notif.push(o.push.t); (o.ops || []).forEach((_, i) => E.chip.push((o.opsT ?? 0) + i * (o.opsGap ?? .35))); }
+      if (o.type === "ledger") { (o.rows || []).forEach((_, i) => E.chip.push((o.rowsT ?? 0) + i * (o.rowsGap ?? .25))); if (o.stamp) E.thud.push(o.stamp.t); if (o.sum) E.ticks.push([o.sum.t0, o.sum.t1]); }
+      if (o.type === "mon" && o.count) E.ticks.push([o.count.t0, o.count.t1]);
+      if (o.type === "card" && o.strike != null) E.pen.push([o.strike, .35]);
+      if (o.type === "sticky") E.slide.push(o.t ?? 0);
+      if (o.type === "receipt") (o.lines || []).forEach((_, i) => E.chip.push((o.linesT ?? 0) + i * (o.gap ?? .3)));
+      if (o.type === "calendar") (o.marks || []).forEach(m => E.pen.push([m.t, .45]));
+      if (o.type === "letter") { const n = (o.text || "").split(/\s+/).length; E.keys.push([o.textT ?? 0, (o.textT ?? 0) + n / (o.wps || 8)]); E.paper.push(Math.max(0, (o.textT ?? 0) - .4)); }
+    });
+    const sh = d.shots || [], fly = d.fly || .6;
+    sh.slice(1).forEach(s => { E.pan.push(s.t - Math.min(fly, .6) / 2); E.paper.push(s.t - .05); });   // перелёт камеры: воздух + лист «лёг» в кадр
+    return E;
+  },
   build(root, d, ctx) {
     const { U } = ctx, w = U.el("div", "world", null, root); this._w = w;
     root._objs = {};
@@ -110,6 +146,8 @@ YT.mode("office", {
           <path class="ar" d="${o.line || `M0,40 C${W * .25},60 ${W * .45},120 ${W * .6},170 C${W * .75},220 ${W * .85},250 ${W},290`} L${W},${H} L0,${H}Z" fill="url(#g${o.id})" opacity="0"/>
           <path class="ln" d="${o.line || `M0,40 C${W * .25},60 ${W * .45},120 ${W * .6},170 C${W * .75},220 ${W * .85},250 ${W},290`}" fill="none" stroke="#ff5a6e" stroke-width="6"/></svg>`;
         P.ln = e.querySelector(".ln"); P.ar = e.querySelector(".ar"); P.big = e.querySelector(".big");
+        if (o.color) { P.big.style.color = o.color; P.big.style.textShadow = `0 0 40px ${o.color}99`; P.ln.setAttribute("stroke", o.color);   // цвет графика (зелёный — деньги растут)
+          e.querySelectorAll("stop").forEach((st, j) => st.setAttribute("stop-color", o.color + (j ? "00" : "73"))); }
       }
       if (o.type === "sticky") e.innerHTML = o.text;
       if (o.type === "receipt") {   // чек: строки появляются по очереди, итог — отдельно
@@ -128,37 +166,84 @@ YT.mode("office", {
         e.innerHTML = `<div class="from">${o.from || "ОТ: БАНК · УВЕДОМЛЕНИЕ"}</div><h3>${o.title}</h3><p>${o.text}</p>`;
         P.ws = U.words(e.querySelector("p"));
       }
+      if (o.type === "doc" && o.key && o.key.strike != null) {   // Y2: зачёркивание ключевой фразы
+        const k = e.querySelector(".key span[style]"); k.insertAdjacentHTML("beforeend", `<svg class="strk" width="10" height="10"><path d="M0,4 C200,-6 ${o.w * .6},10 ${o.w - 220},-4" fill="none" stroke="#d42a2a" stroke-width="9" stroke-linecap="round"/></svg>`);
+        P.strk = k.querySelector(".strk path"); }
+      if (o.type === "phone") {
+        if (o.ops) P.ops = o.ops.map(([l, v, g]) => U.el("div", "op" + (g ? " g" : ""), `<span>${l}</span><b>${v}</b>`, e.firstChild));
+        P.glint = U.el("div", "glint", null, e.firstChild);   // Y3: блик на стекле
+      }
+      if (["doc", "ledger", "card", "receipt", "calendar", "letter", "sticky"].includes(o.type)) { P.lit = U.el("div", "lit", null, e); P.shade = U.el("div", "shade", null, e); }
       root._objs[o.id] = { o, e, P, cx: o.x + o.w / 2, cy: o.y + (o.h || 600) / 2 };
     });
+    if (d.lamp) { const L = d.lamp, g = U.el("div", "lampglow", null, w), R = L.r || 900;   // Y3: тёплое пятно настольной лампы
+      Object.assign(g.style, { left: (L.x - R) + "px", top: (L.y - R) + "px", width: 2 * R + "px", height: 2 * R + "px",
+        background: `radial-gradient(closest-side, rgba(255,190,110,${.32 * (L.i ?? 1)}), rgba(255,160,80,${.12 * (L.i ?? 1)}) 55%, transparent)` }); root._lampEl = g; }
+    if (d.fg) { const f = U.el("div", "fg", null, root); root._fg = f;   // Y4: передний план
+      const ART = {
+        pen: (o) => `<div style="width:100%;height:100%;border-radius:${o.h / 2}px;background:linear-gradient(180deg,#3a3f4a,#16181d 60%,#0b0c0f);box-shadow:0 30px 60px rgba(0,0,0,.6)"><i style="position:absolute;left:12%;top:-18%;width:22%;height:46%;border-radius:6px;background:linear-gradient(180deg,#e6ebf2,#8d96a3)"></i><i style="position:absolute;right:-2%;top:30%;width:8%;height:40%;border-radius:0 40% 40% 0;background:#c9a44a"></i></div>`,
+        cup: (o) => `<div style="width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 50% 50%,#3a2414 0 52%,#efe9df 53% 66%,#d7d0c4 67% 70%,transparent 71%);box-shadow:0 40px 80px rgba(0,0,0,.6)"></div>`,
+        cable: (o) => `<svg width="${o.w}" height="${o.h}" viewBox="0 0 ${o.w} ${o.h}"><path d="M0,${o.h * .7} C${o.w * .3},${o.h * .1} ${o.w * .6},${o.h * 1.1} ${o.w},${o.h * .3}" fill="none" stroke="#0d0f14" stroke-width="${o.thick || 40}" stroke-linecap="round"/></svg>`,
+        plant: (o) => `<div style="width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 40% 40%,#2f6b3a,#123a1e 60%,transparent 72%)"></div>`,
+      };
+      d.fg.forEach(o => { const e = U.el("div", null, ART[o.kind](o), f);
+        Object.assign(e.style, { left: o.x + "px", top: o.y + "px", width: o.w + "px", height: o.h + "px", transform: `rotate(${o.r || 0}deg)`, filter: `blur(${o.blur ?? 16}px)`, opacity: o.o ?? .95 }); }); }
     U.el("div", "scan", null, root); U.el("div", "lamp", null, root);
     root._w = w;
   },
   render(root, t, d, ctx) {
     const { U, W, H } = ctx, O = root._objs, shots = (d.shots || []).map(s => {
       const o = typeof s.to === "string" ? O[s.to] : null;
-      return { t: s.t, x: (o ? o.cx : s.to[0]) + (s.dx || 0), y: (o ? o.cy : s.to[1]) + (s.dy || 0), s: s.s || 1, r: s.r ?? (o ? o.o.r || 0 : 0) };
+      return { t: s.t, x: (o ? o.cx : s.to[0]) + (s.dx || 0), y: (o ? o.cy : s.to[1]) + (s.dy || 0), s: s.s || 1, r: s.r ?? (o ? o.o.r || 0 : 0), push: s.push, dolly: s.dolly };
     });
     const FLY = d.fly || .6;
     const cam = (t) => {
       if (shots.length === 1) return { ...shots[0] };
       let i = shots.findIndex((s, k) => k + 1 < shots.length && t < shots[k + 1].t); if (i < 0) i = shots.length - 2;
       const a = shots[i], b = shots[i + 1], fly = Math.min(FLY, b.t - a.t);
-      const k = U.io3((t - (b.t - fly)) / fly), drift = U.clamp((t - a.t) / Math.max(.1, b.t - a.t - fly));
-      const s0 = a.s * (1 + .03 * drift);   // медленный наезд, пока держим кадр
-      return { x: U.lerp(a.x, b.x, k), y: U.lerp(a.y, b.y, k), s: U.lerp(s0, b.s, k), r: U.lerp(a.r, b.r, k) * .35 };
+      const k = U.io3((t - (b.t - fly)) / fly), drift = U.io3(U.clamp((t - a.t) / Math.max(.1, b.t - a.t - fly)));
+      const s0 = a.s * (1 + (a.push ?? .03) * drift);   // наезд, пока держим кадр (деталь — push 0,1)
+      const ax = a.x + (a.dolly ? a.dolly[0] * drift : 0), ay = a.y + (a.dolly ? a.dolly[1] * drift : 0);   // проезд вдоль стола
+      return { x: U.lerp(ax, b.x, k), y: U.lerp(ay, b.y, k), s: U.lerp(s0, b.s, k), r: U.lerp(a.r, b.r, k) * .35 };
     };
     const c = cam(t), p = cam(t - 1 / 30), v = Math.hypot(c.x - p.x, c.y - p.y) * c.s + Math.abs(c.s - p.s) * 900;
     const w = root._w;
-    w.style.transform = `translate(${W / 2}px, ${H / 2}px) rotate(${-c.r}deg) scale(${c.s}) translate(${-c.x}px, ${-c.y}px)`;
+    // ручная тряска: сумма медленных синусов, доли пикселя — «держит оператор», а не штатив
+    const A = d.shake ?? .4, hx = A * (Math.sin(t * 1.7) + .6 * Math.sin(t * 3.1 + 1) + .3 * Math.sin(t * 7.3 + 2)) / 1.9,
+      hy = A * (Math.cos(t * 1.3 + .5) + .6 * Math.sin(t * 2.7 + 2) + .3 * Math.cos(t * 6.1)) / 1.9, hr = A * .02 * Math.sin(t * 1.1);
+    w.style.transform = `translate(${W / 2 + hx}px, ${H / 2 + hy}px) rotate(${-c.r + hr}deg) scale(${c.s}) translate(${-c.x}px, ${-c.y}px)`;
     w.style.filter = v > 6 ? `blur(${Math.min(8, v / 14).toFixed(1)}px)` : "";
+    if (root._fg) {   // передний план ближе к камере: крупнее и едет в 1,6 раза быстрее стола
+      const P = 1.6; root._fg.style.transform = `translate(${W / 2 + hx * 2}px, ${H / 2 + hy * 2}px) rotate(${-c.r}deg) scale(${c.s * P}) translate(${-c.x}px, ${-c.y}px)`;
+      root._fg.style.filter = v > 6 ? `blur(${Math.min(10, v / 10).toFixed(1)}px)` : ""; }
+    // Y3: источники света — мониторы (их цвет может меняться по сцене) и лампа
+    const lightAt = (L) => { if (!L.t) return { color: L.color, i: L.i ?? 1 };
+      let cur = L.t[0]; L.t.forEach(p => { if (t >= p.t) cur = p; }); const prev = L.t[Math.max(0, L.t.indexOf(cur) - 1)], k = U.clamp((t - cur.t) / .6);
+      const mix = (a, b) => { const pa = a.match(/\w\w/g).map(h => parseInt(h, 16)), pb = b.match(/\w\w/g).map(h => parseInt(h, 16)); return pa.map((v, j) => Math.round(U.lerp(v, pb[j], k))); };
+      return { rgb: mix(prev.color.slice(1), cur.color.slice(1)), i: U.lerp(prev.i ?? 1, cur.i ?? 1, k) }; };
+    const LS = Object.values(O).filter(x => x.o.type === "mon").map(x => ({ x: x.cx, y: x.cy, r: x.o.lightR || 2200, ...(d.light ? lightAt({ t: d.light }) : lightAt({ color: x.o.glow || "#3c8cff" })) }));
+    if (d.lamp) LS.push({ x: d.lamp.x, y: d.lamp.y, r: d.lamp.r || 900, color: "#ffb36b", i: .8 * (d.lamp.i ?? 1) });
+    const rgbOf = (L) => L.rgb || L.color.slice(1).match(/\w\w/g).map(h => parseInt(h, 16));
     Object.values(O).forEach(({ o, e, P, cx, cy }) => {
       const dd = Math.hypot(cx - c.x, cy - c.y) * c.s;
       e.style.filter = c.s > .6 && dd > 900 ? `blur(${Math.min(6, (dd - 900) / 160).toFixed(1)}px)` : "";
+      if (P.lit) {   // свет падает со стороны источника: светлое пятно у ближнего края, тень у дальнего
+        const g = [], sh = [];
+        LS.forEach(L => { const dx = L.x - cx, dy = L.y - cy, dist = Math.hypot(dx, dy), f = U.clamp(1 - dist / L.r) * L.i; if (f <= .02) return;
+          const a = Math.atan2(dy, dx) - (o.r || 0) * Math.PI / 180, px = 50 + Math.cos(a) * 75, py = 50 + Math.sin(a) * 75, [R, G, B] = rgbOf(L);
+          g.push(`radial-gradient(120% 120% at ${px.toFixed(0)}% ${py.toFixed(0)}%, rgba(${R},${G},${B},${(.42 * f).toFixed(3)}), transparent 70%)`);
+          sh.push(`radial-gradient(130% 130% at ${(100 - px).toFixed(0)}% ${(100 - py).toFixed(0)}%, rgba(10,16,40,${(.28 * f).toFixed(3)}), transparent 70%)`); });
+        P.lit.style.background = g.join(",") || "none"; P.shade.style.background = sh.join(",") || "none";
+      }
+      if (P.glint) P.glint.style.backgroundPosition = `${(50 + (c.x - cx) / 18 + t * 2).toFixed(1)}% 0`;
       if (o.type === "doc" && o.key) {
         if (P.hl) P.hl.style.width = `${100 * U.out3((t - (o.key.hl ?? 1e9)) / .55)}%`;
         if (P.circ) U.draw(P.circ, U.io3((t - (o.key.circle ?? 1e9)) / .5));
+        if (P.strk) U.draw(P.strk, U.io3((t - o.key.strike) / .35));
         if (P.note) { const kn = U.out5((t - o.key.note.t) / .3); P.note.style.opacity = t < o.key.note.t ? 0 : 1; P.note.style.transform = `rotate(-8deg) scale(${U.lerp(1.4, 1, kn)})`; }
       }
+      if (o.type === "phone" && P.ops) { const t0 = o.opsT ?? 0, gap = o.opsGap ?? .35;
+        P.ops.forEach((r, i) => { const k = U.out3((t - t0 - i * gap) / .3); r.style.opacity = k; r.style.transform = `translateX(${(1 - k) * 40}px)`; }); }
       if (o.type === "phone" && P.push) { const kp = U.out5((t - o.push.t) / .45); P.push.style.transform = `translateY(${(1 - kp) * -220}px)`; P.push.style.opacity = t < o.push.t ? 0 : 1; }
       if (o.type === "ledger") {
         const r0 = o.rowsT ?? 0, gap = o.rowsGap ?? .25; P.rows.forEach((r, i) => { const k = U.out3((t - r0 - i * gap) / .3); r.style.opacity = k; r.style.transform = `translateX(${(1 - k) * 30}px)`; });
@@ -169,7 +254,8 @@ YT.mode("office", {
         if (P.strike) U.draw(P.strike, U.io3((t - (o.strike ?? 1e9)) / .35));
         if (P.a) { const ka = U.out5((t - o.a.t) / .5); P.a.style.opacity = U.clamp((t - o.a.t) / .3); P.a.style.transform = `translateY(${(1 - ka) * 30}px)`; }
       }
-      if (o.type === "mon") { const k = U.io3((t - (o.draw ?? 0)) / (o.drawDur || 1.4)); U.draw(P.ln, k); P.ar.setAttribute("opacity", U.clamp((k - .6) / .4)); }
+      if (o.type === "mon") { const k = U.io3((t - (o.draw ?? 0)) / (o.drawDur || 1.4)); U.draw(P.ln, k); P.ar.setAttribute("opacity", U.clamp((k - .6) / .4));
+        if (o.count) { const q = o.count, kc = U.io3((t - q.t0) / (q.t1 - q.t0)); P.big.textContent = (q.prefix || "") + U.fmt(U.lerp(q.from, q.to, kc)) + (q.suffix ?? " ₽"); } }
       if (o.type === "sticky") { const k = U.back((t - (o.t ?? 0)) / .45); e.style.opacity = t < (o.t ?? 0) ? 0 : 1; e.style.transform = `rotate(${o.r || 0}deg) scale(${U.lerp(1.3, 1, k)})`; }
       if (o.type === "receipt") {
         const t0 = o.linesT ?? 0, gap = o.gap ?? .3;

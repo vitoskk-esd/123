@@ -4,6 +4,8 @@
 // TL.sfx: { whoosh:[], pop:[], impact:[], coin:[], tick:[] } — моменты эффектов.
 // v4 («рабочий стол», тихий тактильный звук лонга): ui, pan, notif, mark, click, thud, chip, sting, ticks:[[a,b]];
 // часть "stop" — музыка замолкает (выделить момент), "intro" — только пэд.
+// Y5 (11.10, звуки предметов «Ночного офиса»): paper — шелест листа, slide — лист/стикер скользит по столу, pen: [[t, dur]] — ручка
+// (обводка, зачёркивание, пометка), keys: [[a, b]] — клавиатура, hum: [[a, b]] — тихий гул монитора. TL.sfxGain — общая громкость SFX.
 const fs = require("fs");
 const path = require("path");
 const tlPath = path.resolve(process.argv[2] || "timeline.js");
@@ -121,6 +123,34 @@ function sting(t0) {  // заставка уровня: удар + светлы�
   for (let i = 0; i < SR * 1.6; i++) { const t = i / SR; let v = 0; for (const f of [440, 554.4, 659.3, 880]) v += Math.sin(2 * Math.PI * f * t) + .3 * Math.sin(4 * Math.PI * f * t);
     add(s + i, v * Math.exp(-t * 2.2) * .03 * Math.min(1, t * 60)); }
 }
+// --- Y5: звуки предметов ---
+function paper(t0) {  // шелест листа: полосовой шум с потрескиванием
+  const s = Math.floor(t0 * SR), len = .38; let lp = 0, lp2 = 0;
+  for (let i = 0; i < SR * len; i++) { const x = i / (SR * len), n = noise(); lp += (n - lp) * .35; lp2 += (lp - lp2) * .08; const bp = lp - lp2;
+    const crack = (i * 7919) % 997 < 6 ? noise() * 1.5 : 0; const env = Math.sin(Math.PI * Math.min(1, x * 1.3)) ** 2;
+    add(s + i, (bp * 1.1 + crack * .3) * env * .16, -.1); }
+}
+function slide(t0) {  // лист скользит по столу: длинный мягкий шорох
+  const s = Math.floor(t0 * SR), len = .3; let lp = 0;
+  for (let i = 0; i < SR * len; i++) { const x = i / (SR * len), n = noise(); lp += (n - lp) * (.06 + .1 * (1 - x)); add(s + i, lp * Math.sin(Math.PI * x) * .3, .05); }
+}
+function pen(t0, dur = .4) {  // ручка по бумаге: скрип-шорох, модуляция по скорости штриха
+  const s = Math.floor(t0 * SR), len = Math.max(.15, dur); let lp = 0;
+  for (let i = 0; i < SR * len; i++) { const x = i / (SR * len), n = noise(); lp += (n - lp) * .7; const hp = n - lp;
+    const env = Math.min(1, x * 12) * Math.min(1, (1 - x) * 8) * (.55 + .45 * Math.abs(Math.sin(x * len * 22)));
+    add(s + i, hp * env * .055 + Math.sin(2 * Math.PI * 3100 * i / SR) * hp * env * .012, .2); }
+}
+function keys(a, b) {  // клавиатура: щелчки с неровным шагом (нажатие + отпускание)
+  let t = a, k = 0;
+  while (t < b) { const s = Math.floor(t * SR), g = .7 + .3 * Math.sin(k * 1.7), f = 1800 + (k * 337) % 900;
+    for (let i = 0; i < SR * .03; i++) { const tt = i / SR; add(s + i, (noise() * .6 + Math.sin(2 * Math.PI * f * tt) * .4) * Math.exp(-tt * 260) * .07 * g, (k % 3 - 1) * .15); }
+    const u = s + Math.floor(SR * .045); for (let i = 0; i < SR * .02; i++) { const tt = i / SR; add(u + i, noise() * Math.exp(-tt * 300) * .025 * g, 0); }
+    t += .075 + ((k * 7919) % 70) / 1000; k++; }
+}
+function hum(a, b) {  // гул монитора: очень тихо, 100 + 200 Гц, вход/выход по 0,6 с
+  const s = Math.floor(a * SR), n = Math.floor((b - a) * SR);
+  for (let i = 0; i < n; i++) { const t = i / SR, f = Math.min(1, t / .6, (b - a - t) / .6); add(s + i, (Math.sin(2 * Math.PI * 100 * t) * .6 + Math.sin(2 * Math.PI * 200 * t) * .25 + noise() * .05) * .012 * f); }
+}
 tonal();
 for (let t = 0; t < DUR - .5; t += BEAT / 2) {
   if (!drumsOn(t)) continue;
@@ -135,6 +165,7 @@ const S = TL.sfx || {};
 (S.riser || []).forEach(([a, b]) => riser(a, b)); (S.glitch || []).forEach(glitch); (S.swish || []).forEach(swish);
 (S.ui || []).forEach(ui); (S.pan || []).forEach(pan); (S.notif || []).forEach(notif); (S.mark || []).forEach(mark); (S.click || []).forEach(click);
 (S.thud || []).forEach(thud); (S.chip || []).forEach(chip); (S.sting || []).forEach(sting); (S.ticks || []).forEach(([a, b]) => ticks(a, b));
+(S.paper || []).forEach(paper); (S.slide || []).forEach(slide); (S.pen || []).forEach(([a, d]) => pen(a, d)); (S.keys || []).forEach(([a, b]) => keys(a, b)); (S.hum || []).forEach(([a, b]) => hum(a, b));
 
 let peak = 0;
 for (let i = 0; i < N; i++) { const t = i / SR, f = Math.min(1, t / .5, (DUR - t) / 1.5); L[i] = Math.tanh(L[i]) * f; R[i] = Math.tanh(R[i]) * f; peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); }
