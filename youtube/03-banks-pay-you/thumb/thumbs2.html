@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №3 — стиль русского YouTube</title>
+<!-- Третий заход по превью ролика №3 (владелец 11.10: светлые варианты «никакие не понравились, нужны ещё»).
+     По образцам, которые сейчас перерабатывают свои каналы в русской нише денег/подработки (vidIQ outliers, 11.10):
+     2–3 слова узким жирным шрифтом на плашках (белый/чёрный/красный/жёлтый), живое фото, крупный телефон с СМС о
+     зачислении, красный крест, толстые стрелки, контрастные цвета. ?v=1…6. Фото rider.jpg — CC0. Шрифт Oswald — OFL. -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; background: #111; }
+  .v { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .photo { position: absolute; background: url("rider.jpg") no-repeat; }
+  .pl { position: absolute; display: inline-block; font: 700 104px/1 "O"; text-transform: uppercase; letter-spacing: -.005em; padding: 6px 22px 12px; white-space: nowrap; }
+  .pl.s { font-size: 74px; }
+  .wb { background: #fff; color: #111; } .bw { background: #111; color: #fff; } .rw { background: #e8202a; color: #fff; } .yb { background: #ffd60a; color: #111; } .gw { background: #13b85a; color: #fff; }
+  /* телефон с СМС */
+  .phone { position: absolute; width: 360px; height: 720px; border-radius: 56px; background: #0c0d10; padding: 14px; box-shadow: 0 40px 80px rgba(0,0,0,.55), inset 0 0 0 3px #2b2e35; }
+  .phone .scr { width: 100%; height: 100%; border-radius: 44px; overflow: hidden; position: relative; background: linear-gradient(180deg, #2a3350, #0b0f1c); }
+  .phone .time { position: absolute; left: 0; right: 0; top: 70px; text-align: center; color: #fff; font: 700 96px/1 "I"; letter-spacing: -.03em; }
+  .sms { position: absolute; left: 14px; right: 14px; border-radius: 26px; background: rgba(245,246,250,.93); padding: 16px 18px; color: #111; box-shadow: 0 10px 24px rgba(0,0,0,.35); }
+  .sms .h { display: flex; align-items: center; gap: 10px; font: 600 18px "I"; color: #555; } .sms .h i { width: 30px; height: 30px; border-radius: 8px; background: #13b85a; flex: none; }
+  .sms .h span { margin-left: auto; font-size: 16px; color: #888; }
+  .sms b { display: block; font: 700 22px "I"; margin-top: 8px; } .sms em { display: block; font: 700 40px "I"; font-style: normal; color: #0f9d4f; letter-spacing: -.02em; }
+  .big { position: absolute; transform-origin: 0 0; }
+  .x { position: absolute; }
+</style>
+</head>
+<body>
+
+<!-- 1. Фото курьера + красный крест на сумке + «ХВАТИТ / РАБОТАТЬ КУРЬЕРОМ» + крупное СМС -->
+<div class="v" id="v1">
+  <div class="photo" style="inset:0;background-size:1500px auto;background-position:-180px -330px;filter:saturate(1.15) contrast(1.05) brightness(.9)"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.6),rgba(0,0,0,.05) 55%)"></div>
+  <svg class="x" style="left:310px;top:250px" width="300" height="300" viewBox="0 0 300 300"><path d="M30 30 L270 270 M270 30 L30 270" stroke="#e8202a" stroke-width="40" stroke-linecap="round"/></svg>
+  <div class="pl rw" style="left:40px;top:40px;transform:rotate(-2deg)">ХВАТИТ</div>
+  <div class="pl wb s" style="left:40px;top:170px;transform:rotate(-1deg)">РАБОТАТЬ КУРЬЕРОМ</div>
+  <div class="sms" style="left:760px;right:auto;width:460px;top:330px;padding:22px 26px;transform:rotate(-3deg)"><div class="h"><i></i>Банк · СМС<span>сейчас</span></div><b>Пополнение: бонус новому клиенту</b><em style="font-size:64px">+2 000 ₽</em></div>
+</div>
+
+<!-- 2. Жёлтый фон, большой телефон с тремя СМС, «БАНКИ ПЛАТЯТ / ЗА ЭТО» + стрелка -->
+<div class="v" id="v2" style="background:#ffd60a">
+  <div class="pl bw" style="left:50px;top:110px;font-size:120px">БАНКИ ПЛАТЯТ</div>
+  <div class="pl wb" style="left:50px;top:265px;font-size:120px;transform:rotate(-2deg)">ЗА ЭТО</div>
+  <div style="position:absolute;left:56px;top:450px;font:700 40px/1.2 O;color:#111;text-transform:uppercase">5 способов<br>без подработки</div>
+  <svg style="position:absolute;left:520px;top:330px" width="300" height="220" viewBox="0 0 300 220"><path d="M20 200 C 90 190, 200 150, 250 50" fill="none" stroke="#111" stroke-width="22" stroke-linecap="round"/><path d="M200 60 L255 35 L270 95" fill="none" stroke="#111" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="phone" style="left:900px;top:20px;transform:rotate(6deg) scale(.86);transform-origin:50% 0"><div class="scr"><div class="time">9:41</div>
+    <div class="sms" style="top:230px"><div class="h"><i></i>Банк · СМС<span>сейчас</span></div><b>Бонус новому клиенту</b><em>+2 000 ₽</em></div>
+    <div class="sms" style="top:385px"><div class="h"><i></i>Банк · СМС<span>2 мин</span></div><b>Бонус за друга</b><em>+1 000 ₽</em></div>
+    <div class="sms" style="top:540px"><div class="h"><i style="background:#ffb000"></i>Банк · СМС<span>1 ч</span></div><b>Проценты за 3 месяца</b><em>+387 ₽</em></div></div></div>
+</div>
+
+<!-- 3. Сплит красное / зелёное: «6 ЧАСОВ» против «10 МИНУТ», посередине «2 000 ₽» -->
+<div class="v" id="v3">
+  <div class="photo" style="left:0;top:0;width:640px;height:720px;background-size:1300px auto;background-position:-200px -200px;filter:grayscale(1) contrast(1.1) brightness(.75)"></div>
+  <div style="position:absolute;left:0;top:0;width:640px;height:720px;background:rgba(200,20,30,.45);mix-blend-mode:multiply"></div>
+  <div style="position:absolute;left:640px;top:0;width:640px;height:720px;background:radial-gradient(600px 500px at 60% 40%,#2ee07a,#0b9a4a)"></div>
+  <div class="pl rw" style="left:40px;top:40px">6 ЧАСОВ</div><div class="pl wb s" style="left:40px;top:170px">КУРЬЕРОМ</div>
+  <div class="pl wb" style="left:690px;top:40px;color:#0b8a42">10 МИНУТ</div><div class="pl bw s" style="left:690px;top:170px">КАРТА БАНКА</div>
+  <div class="pl yb" style="left:390px;top:450px;font-size:150px;padding:4px 36px 16px;transform:rotate(-3deg);box-shadow:0 20px 40px rgba(0,0,0,.4)">= 2 000 ₽</div>
+</div>
+
+<!-- 4. Тёмно-зелёный, график вверх, крупно «+5 500 ₽ В МЕСЯЦ», телефон -->
+<div class="v" id="v4" style="background:radial-gradient(900px 700px at 70% 40%,#0f5c34,#062716)">
+  <svg style="position:absolute;left:0;top:200px" width="1280" height="520" viewBox="0 0 1280 520"><polyline points="0,480 180,430 330,450 480,350 620,380 780,250 930,270 1100,110 1280,60" fill="none" stroke="#2ee07a" stroke-width="10" stroke-linejoin="round" opacity=".55"/>
+    <polygon points="0,480 180,430 330,450 480,350 620,380 780,250 930,270 1100,110 1280,60 1280,520 0,520" fill="rgba(46,224,122,.12)"/></svg>
+  <div class="pl gw" style="left:50px;top:70px;font-size:150px;padding:4px 30px 14px">+5 500 ₽</div>
+  <div class="pl wb" style="left:50px;top:270px">ЗА МЕСЯЦ</div>
+  <div class="pl bw s" style="left:54px;top:420px">ОТ БАНКОВ, А НЕ СМЕН</div>
+  <div class="phone" style="left:870px;top:70px;transform:rotate(-5deg) scale(.9)"><div class="scr"><div class="time">9:41</div>
+    <div class="sms" style="top:240px"><div class="h"><i></i>Банк · СМС<span>сейчас</span></div><b>Бонус зачислен</b><em>+2 000 ₽</em></div>
+    <div class="sms" style="top:395px"><div class="h"><i></i>Банк · СМС<span>вчера</span></div><b>Бонус за друга</b><em>+1 000 ₽</em></div></div></div>
+  <div style="position:absolute;left:58px;top:560px;font:600 26px I;color:rgba(255,255,255,.6)">пример плана на первый месяц</div>
+</div>
+
+<!-- 5. Курьер ч/б с «6 ЧАСОВ», толстая зелёная стрелка к СМС «10 МИНУТ» -->
+<div class="v" id="v5" style="background:#0b0b0d">
+  <div class="photo" style="left:0;top:0;width:760px;height:720px;background-size:1400px auto;background-position:-230px -280px;filter:grayscale(1) brightness(.7)"></div>
+  <div style="position:absolute;left:0;top:0;width:760px;height:720px;background:linear-gradient(90deg,transparent 60%,#0b0b0d)"></div>
+  <div class="pl yb" style="left:40px;top:40px;font-size:130px">6 ЧАСОВ</div>
+  <div class="pl wb s" style="left:44px;top:200px">ИЛИ</div>
+  <svg style="position:absolute;left:440px;top:300px" width="420" height="200" viewBox="0 0 420 200"><path d="M20 150 C 140 160, 260 120, 360 60" fill="none" stroke="#2ee07a" stroke-width="34" stroke-linecap="round"/><path d="M290 40 L375 50 L345 130" fill="none" stroke="#2ee07a" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="pl gw" style="left:800px;top:40px;font-size:104px">10 МИНУТ</div>
+  <div class="sms" style="left:790px;right:auto;width:440px;top:300px;padding:22px 26px;transform:rotate(-3deg)"><div class="h"><i></i>Банк · СМС<span>сейчас</span></div><b>Бонус новому клиенту</b><em style="font-size:60px">+2 000 ₽</em></div>
+</div>
+
+<!-- 6. Светлый фон: «БАНК ПЛАТИТ ЛУЧШЕ, чем смена курьером», фото курьера с красной печатью «+2 000 ₽» -->
+<div class="v" id="v6" style="background:#f2f2f2">
+  <div class="photo" style="left:640px;top:0;width:640px;height:720px;background-size:1300px auto;background-position:-180px -240px;filter:saturate(1.1)"></div>
+  <div style="position:absolute;left:640px;top:0;width:640px;height:720px;box-shadow:inset 30px 0 40px -20px rgba(0,0,0,.35)"></div>
+  <div class="pl bw" style="left:50px;top:90px;font-size:124px">БАНК ПЛАТИТ</div>
+  <div class="pl rw" style="left:50px;top:250px;font-size:124px;transform:rotate(-2deg)">ЛУЧШЕ</div>
+  <div style="position:absolute;left:56px;top:430px;font:700 46px/1.15 O;color:#111;text-transform:uppercase">чем смена курьером</div>
+  <div style="position:absolute;left:700px;top:330px;padding:10px 30px 14px;border:10px solid #e8202a;color:#e8202a;font:700 92px/1 O;transform:rotate(-14deg);background:rgba(255,255,255,.75);letter-spacing:.04em">+2 000 ₽</div>
+</div>
+
+<script>
+const v = new URLSearchParams(location.search).get("v") || "1";
+document.getElementById("v" + v).style.display = "block";
+document.fonts.ready.then(() => { const img = new Image(); img.onload = img.onerror = () => { window.__ready = true; }; img.src = "rider.jpg"; });
+</script>
+</body>
+</html>
