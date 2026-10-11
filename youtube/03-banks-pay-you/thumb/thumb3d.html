@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №3 — 3D</title>
+<!-- Превью ролика №3 «Хватит искать подработку: 5 способов, где банки платят тебе сами». Настоящее 3D (three.js, PBR, отражения,
+     тени, bloom) по правилам владельца: метафора / разрыв любопытства, ≤ 6 слов, без эмодзи, объект с материалами и светом,
+     правый нижний угол свободен (плашка длительности). Варианты ?v=a…f. Снимок (из youtube/):
+     node kit/shot3d.js 03-banks-pay-you/thumb/thumb3d.html 03-banks-pay-you/thumb/thumb_a.png 1280 720 v=a -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); font-weight: 700 800; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #050505; }
+  canvas { position: absolute; inset: 0; width: 1280px !important; height: 720px !important; }
+  .t { position: absolute; left: 56px; top: 92px; font: 900 96px/.98 "Unb"; text-transform: uppercase; letter-spacing: -.045em; z-index: 5; }
+  .t div { white-space: nowrap; }
+  .w { color: #f3f6f9; text-shadow: 0 8px 0 rgba(0,0,0,.4), 0 0 40px rgba(0,0,0,.7); }
+  .gold { background: linear-gradient(180deg, #fff6c8 0%, #ffd84a 38%, #e3a10e 62%, #fff0a0 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 8px 0 rgba(0,0,0,.45)) drop-shadow(0 0 30px rgba(255,200,40,.45)); }
+  .red { color: #ff4d4d; text-shadow: 0 8px 0 rgba(0,0,0,.4), 0 0 40px rgba(255,60,60,.35); }
+  .plate { position: absolute; left: 58px; z-index: 5; padding: 12px 28px 16px; border-radius: 18px; transform: rotate(-2.5deg);
+    background: linear-gradient(180deg, #5cf0a0, #2bc272); color: #04140b; font: 900 46px "Unb"; text-transform: uppercase; letter-spacing: -.02em;
+    box-shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.5); white-space: nowrap; }
+  .shade { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.4) 40%, transparent 58%); }
+  .vig { position: absolute; inset: 0; z-index: 4; background: radial-gradient(ellipse at 66% 50%, transparent 48%, rgba(0,0,0,.72)); pointer-events: none; }
+  .grain { position: absolute; inset: 0; z-index: 6; opacity: .06; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style>
+<script type="importmap">{ "imports": { "three": "../../kit/vendor/three/three.module.min.js", "three/addons/": "../../kit/vendor/three/addons/" } }</script>
+</head>
+<body>
+<div class="shade"></div><div class="vig"></div><div class="grain"></div>
+<div class="t" id="t"></div><div class="plate" id="plate"></div>
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+const V = new URLSearchParams(location.search).get("v") || "a";
+// заголовок (≤ 6 слов вместе с плашкой): строки [текст, класс], плашка, её высота
+const COPY = {
+  a: [[["8 часов", "w"], ["или 1 карта?", "gold"]], "банк платит сам", 330],
+  b: [[["Зарплата", "w"], ["от банка?", "gold"]], "5 способов", 330],
+  c: [[["5 карт", "gold"], ["вместо смен", "w"]], "законно", 330],
+  d: [[["Смена", "w"], ["= 1 покупка", "gold"]], "банк платит сам", 330],
+  e: [[["Хватит", "red"], ["доставлять", "w"]], "пусть платит банк", 330],
+  f: [[["Пуш", "gold"], ["лучше смены", "w"]], "5 способов", 330],
+}[V];
+document.getElementById("t").innerHTML = COPY[0].map(([s, c]) => `<div class="${c}">${s}</div>`).join("");
+const pl = document.getElementById("plate"); pl.textContent = COPY[1]; pl.style.top = COPY[2] + "px";
+
+const W = 1280, H = 720, PR = 2;
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setPixelRatio(PR); r.setSize(W, H);
+r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = .95;
+r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(r.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060607);
+const pm = new THREE.PMREMGenerator(r);
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = .45;
+const cam = new THREE.PerspectiveCamera(30, W / H, .1, 100);
+cam.position.set(0, 1.5, 12.5); cam.lookAt(1.9, .2, 0);
+scene.fog = new THREE.Fog(0x060607, 13, 24);   // пол уходит в темноту, без видимого края
+
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+function canvasTex(w, h, draw, repeat = 1) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat, repeat); t.anisotropy = 8; return t;
+}
+await Promise.all(["900 200px Unb", "800 60px Mont", "700 60px Mono"].map(f => document.fonts.load(f)));
+const brushedLin = canvasTex(512, 512, (g, w, h) => { g.fillStyle = "#909090"; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 1800; i++) { const y = rnd() * h, v = 100 + rnd() * 90; g.fillStyle = `rgba(${v},${v},${v},.35)`; g.fillRect(0, y, w, .5 + rnd() * 1.2); } }, 2);
+const weave = canvasTex(256, 256, (g, w, h) => { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h);   // ткань сумки: переплетение
+  for (let y = 0; y < h; y += 4) for (let x = 0; x < w; x += 4) { const v = ((x + y) / 4) % 2 ? 150 : 100; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(x, y, 3, 3); } }, 10);
+const crinkle = canvasTex(512, 512, (g, w, h) => { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h);   // фольга-утеплитель внутри
+  for (let i = 0; i < 900; i++) { const v = 60 + rnd() * 140; g.strokeStyle = `rgba(${v},${v},${v},.5)`; g.lineWidth = 1 + rnd() * 3; g.beginPath();
+    let x = rnd() * w, y = rnd() * h; g.moveTo(x, y); for (let k = 0; k < 4; k++) { x += (rnd() - .5) * 80; y += (rnd() - .5) * 80; g.lineTo(x, y); } g.stroke(); } }, 2);
+
+// ---------- материалы ----------
+const chrome = new THREE.MeshPhysicalMaterial({ color: 0xd0d6dd, metalness: 1, roughness: .14, clearcoat: 1, clearcoatRoughness: .05 });
+const steel = new THREE.MeshPhysicalMaterial({ color: 0x8f98a2, metalness: 1, roughness: .34, roughnessMap: brushedLin });
+const gold = new THREE.MeshPhysicalMaterial({ color: 0xffc23a, metalness: 1, roughness: .2, clearcoat: .4, clearcoatRoughness: .2 });
+const bagMat = new THREE.MeshPhysicalMaterial({ color: 0xf2b705, roughness: .82, metalness: 0, bumpMap: weave, bumpScale: .9, sheen: .6, sheenColor: new THREE.Color(0xfff0b0), sheenRoughness: .6 });
+const bagDark = new THREE.MeshPhysicalMaterial({ color: 0x1c1d20, roughness: .7, bumpMap: weave, bumpScale: .5 });
+const reflective = new THREE.MeshPhysicalMaterial({ color: 0xc9ccd2, roughness: .25, metalness: .6, clearcoat: .8 });
+const foil = new THREE.MeshPhysicalMaterial({ color: 0xc8ccd2, metalness: 1, roughness: .28, bumpMap: crinkle, bumpScale: 2.5, side: THREE.BackSide });
+const floorMat = new THREE.MeshPhysicalMaterial({ color: 0x0d0e10, metalness: .2, roughness: .32, clearcoat: .6, clearcoatRoughness: .25 });
+
+// ---------- студия: пол-зеркало и тёмный задник ----------
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = -2.2; floor.receiveShadow = true; scene.add(floor);
+const FLOOR = -2.2;
+
+// ---------- монета с «₽» ----------
+const faceCanvas = (relief) => canvasTex(512, 512, (g, w, h) => {
+  g.fillStyle = relief ? "#808080" : "#d9a42a"; g.fillRect(0, 0, w, h);
+  const ring = (rr, lw, c) => { g.strokeStyle = c; g.lineWidth = lw; g.beginPath(); g.arc(w / 2, h / 2, rr, 0, 6.283); g.stroke(); };
+  ring(238, 26, relief ? "#fff" : "#ffe08a");
+  for (let i = 0; i < 72; i++) { const a = i / 72 * 6.283; g.fillStyle = relief ? "#e0e0e0" : "#f5c95a"; g.beginPath(); g.arc(w / 2 + Math.cos(a) * 205, h / 2 + Math.sin(a) * 205, 4, 0, 6.283); g.fill(); }
+  ring(190, 4, relief ? "#c8c8c8" : "#c88f1c");
+  g.fillStyle = relief ? "#fff" : "#ffd25a"; g.font = "900 230px Unb"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("₽", w / 2 + 6, h / 2 + 10);
+});
+const sideCanvas = (relief) => canvasTex(1024, 32, (g, w, h) => { g.fillStyle = relief ? "#606060" : "#c99325"; g.fillRect(0, 0, w, h);
+  for (let x = 0; x < w; x += 8) { g.fillStyle = relief ? "#fff" : "#ffd870"; g.fillRect(x, 0, 4, h); } });
+const coinFace = new THREE.MeshPhysicalMaterial({ color: 0xffd36a, map: faceCanvas(false), bumpMap: faceCanvas(true), bumpScale: 2.2, metalness: 1, roughness: .24, clearcoat: .3 });
+coinFace.map.colorSpace = THREE.SRGBColorSpace;
+const coinSide = new THREE.MeshPhysicalMaterial({ color: 0xffcf60, map: sideCanvas(false), bumpMap: sideCanvas(true), bumpScale: 1.5, metalness: 1, roughness: .3 });
+coinSide.map.colorSpace = THREE.SRGBColorSpace;
+const CR = .26, CT = .055, coinGeo = new THREE.CylinderGeometry(CR, CR, CT, 72);
+function coin(parent, x, y, z, rx = 0, ry = 0, rz = 0, s = 1) { const c = new THREE.Mesh(coinGeo, [coinSide, coinFace, coinFace]); c.position.set(x, y, z); c.rotation.set(rx, ry, rz); c.scale.setScalar(s);
+  c.castShadow = c.receiveShadow = true; parent.add(c); return c; }
+function stack(parent, x, z, n, y0 = FLOOR, s = 1) { for (let i = 0; i < n; i++) coin(parent, x + (rnd() - .5) * .03 * s, y0 + CT * s / 2 + i * CT * s * 1.02, z + (rnd() - .5) * .03 * s, 0, rnd() * 6, 0, s); }
+
+// ---------- банковская карта (85,6×54), надпись и цвет задаются ----------
+const CW = 2048, CH = 1292;
+function makeCard({ top = "БОНУС НОВОМУ КЛИЕНТУ", big = "+2 000 ₽", tone = "gold" } = {}) {
+  const TONES = { gold: ["#f7e3a0", "#e9c35a", "#c99327", "#9a6a10", "#3a2400", "rgba(60,35,0,.8)", "#fff3c8"],
+    black: ["#3a3d44", "#22252b", "#15171b", "#0b0c0e", "#f2f3f5", "rgba(230,232,236,.7)", "#d9dce2"],
+    green: ["#9df5c4", "#3fd387", "#1f9e5a", "#0d5c33", "#04140b", "rgba(4,30,15,.75)", "#e8fff2"],
+    silver: ["#f4f5f7", "#d4d7dd", "#a9aeb8", "#7c818c", "#1a1c20", "rgba(30,32,36,.7)", "#ffffff"] }[tone];
+  const draw = (relief) => (g, w, h) => {
+    if (!relief) { const gr = g.createLinearGradient(0, 0, w, h); [0, .3, .62, 1].forEach((s, i) => gr.addColorStop(s, TONES[i])); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      g.strokeStyle = "rgba(255,255,255,.08)"; g.lineWidth = 2; for (let i = 0; i < 40; i++) { g.beginPath(); g.ellipse(w * .78, h * .2, 200 + i * 26, 120 + i * 18, -.4, 0, 6.283); g.stroke(); }
+    } else { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h); }
+    if (!relief) { const cg = g.createLinearGradient(170, 330, 450, 540); cg.addColorStop(0, "#fbeab0"); cg.addColorStop(.5, "#c9a24a"); cg.addColorStop(1, "#f0d48a");
+      g.fillStyle = cg; g.beginPath(); g.roundRect(170, 330, 280, 215, 34); g.fill(); g.strokeStyle = "rgba(110,75,10,.75)"; g.lineWidth = 6;
+      g.beginPath(); g.moveTo(170, 400); g.lineTo(265, 400); g.moveTo(170, 475); g.lineTo(265, 475); g.moveTo(355, 400); g.lineTo(450, 400); g.moveTo(355, 475); g.lineTo(450, 475);
+      g.moveTo(265, 330); g.lineTo(265, 545); g.moveTo(355, 330); g.lineTo(355, 545); g.rect(265, 400, 90, 75); g.stroke(); }
+    g.strokeStyle = relief ? "#c0c0c0" : TONES[5]; g.lineWidth = 14; g.lineCap = "round";
+    for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(520, 437, 34 + i * 30, -.75, .75); g.stroke(); }
+    g.textBaseline = "alphabetic";
+    g.fillStyle = relief ? "#909090" : TONES[5]; g.font = "800 64px Mont"; g.fillText(top, 170, 220);
+    g.fillStyle = relief ? "#ffffff" : TONES[4]; g.font = "900 250px Unb"; g.fillText(big, 150, 860);
+    g.font = "700 92px Mono"; g.fillStyle = relief ? "#f0f0f0" : TONES[6]; g.fillText("2200  0000  1000  2026", 170, 1060);
+    g.font = "700 54px Mono"; g.fillText("10/29", 170, 1180);
+  };
+  const map = canvasTex(CW, CH, draw(false)), bump = canvasTex(CW, CH, draw(true)); map.colorSpace = THREE.SRGBColorSpace;
+  const cw = 1.712, ch = 1.08, ct = .03, rad = .1, cs = new THREE.Shape(); { const x = -cw / 2, y = -ch / 2;
+    cs.moveTo(x + rad, y); cs.lineTo(x + cw - rad, y); cs.quadraticCurveTo(x + cw, y, x + cw, y + rad); cs.lineTo(x + cw, y + ch - rad); cs.quadraticCurveTo(x + cw, y + ch, x + cw - rad, y + ch);
+    cs.lineTo(x + rad, y + ch); cs.quadraticCurveTo(x, y + ch, x, y + ch - rad); cs.lineTo(x, y + rad); cs.quadraticCurveTo(x, y, x + rad, y); }
+  const geo = new THREE.ExtrudeGeometry(cs, { depth: ct, bevelEnabled: true, bevelThickness: .006, bevelSize: .006, bevelSegments: 3, curveSegments: 24 });
+  { const pos = geo.attributes.position, uv = geo.attributes.uv; for (let i = 0; i < pos.count; i++) uv.setXY(i, (pos.getX(i) + cw / 2) / cw, (pos.getY(i) + ch / 2) / ch); }
+  geo.translate(0, 0, -ct / 2);
+  const face = new THREE.MeshPhysicalMaterial({ map, bumpMap: bump, bumpScale: 3, metalness: tone === "gold" ? .85 : .55, roughness: .34, roughnessMap: brushedLin, clearcoat: .5, clearcoatRoughness: .25 });
+  const edge = new THREE.MeshPhysicalMaterial({ color: tone === "gold" ? 0xb98a2a : 0x8a8f99, metalness: 1, roughness: .3 });
+  const m = new THREE.Mesh(geo, [face, edge]); m.castShadow = m.receiveShadow = true; return m;
+}
+
+// ---------- термосумка курьера (без логотипов): ткань, светоотражающая полоса, молния, ручка; open — крышка откинута ----------
+function makeBag({ open = false } = {}) {
+  const g = new THREE.Group(), BW = 2.3, BH = 2.5, BD = 1.5;
+  const body = new THREE.Mesh(new RoundedBoxGeometry(BW, BH, BD, 6, .18), bagMat); body.castShadow = body.receiveShadow = true; g.add(body);
+  // карман спереди
+  const pocket = new THREE.Mesh(new RoundedBoxGeometry(BW * .78, BH * .42, .22, 5, .08), bagMat); pocket.position.set(0, -BH * .2, BD / 2 + .06); pocket.castShadow = true; g.add(pocket);
+  const pz = new THREE.Mesh(new THREE.BoxGeometry(BW * .7, .035, .03), bagDark); pz.position.set(0, -BH * .2 + BH * .21 - .05, BD / 2 + .18); g.add(pz);
+  // светоотражающая полоса
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(BW + .02, .16, BD + .02), reflective); strip.position.y = BH * .14; g.add(strip);
+  // окантовка рёбер (тёмный кант)
+  for (const [x, y] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) { const e = new THREE.Mesh(new THREE.BoxGeometry(.05, .05, BD - .2), bagDark); e.position.set(x * (BW / 2 - .02), y * (BH / 2 - .02), 0); g.add(e); }
+  // ручка сверху
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(.42, .07, 16, 48, Math.PI), bagDark); handle.position.set(0, BH / 2 + (open ? 0 : 0), 0); handle.rotation.y = Math.PI / 2;
+  if (!open) g.add(handle);
+  if (!open) { const z = new THREE.Mesh(new THREE.BoxGeometry(BW - .3, .04, .04), bagDark); z.position.set(0, BH / 2 - .02, BD / 2 - .2); g.add(z); }
+  if (open) {
+    // внутри фольга, крышка откинута назад на петле у задней кромки
+    const inner = new THREE.Mesh(new THREE.BoxGeometry(BW - .2, BH - .1, BD - .2), foil); inner.position.y = .06; g.add(inner);
+    body.geometry = new RoundedBoxGeometry(BW, BH - .02, BD, 6, .18);
+    const rim = new THREE.Mesh(new THREE.BoxGeometry(BW - .16, .02, BD - .16), new THREE.MeshBasicMaterial({ color: 0x000000 })); rim.position.y = BH / 2 + .002;   // проём
+    rim.material = new THREE.MeshStandardMaterial({ color: 0x0b0b0c, roughness: 1 }); g.add(rim);
+    const lidG = new THREE.Group(); lidG.position.set(0, BH / 2, -BD / 2); g.add(lidG);
+    const lid = new THREE.Mesh(new RoundedBoxGeometry(BW, .22, BD, 5, .1), bagMat); lid.position.set(0, .11, BD / 2); lid.castShadow = true; lidG.add(lid);
+    const lidIn = new THREE.Mesh(new THREE.PlaneGeometry(BW - .2, BD - .2), new THREE.MeshPhysicalMaterial({ color: 0xc8ccd2, metalness: 1, roughness: .3, bumpMap: crinkle, bumpScale: 2 }));
+    lidIn.rotation.x = Math.PI / 2; lidIn.position.set(0, -.005, BD / 2); lidG.add(lidIn);
+    lidG.rotation.x = -1.9;
+  }
+  return g;
+}
+
+// ---------- весы: хромовая колонна, коромысло, две чаши на цепях ----------
+function makeScale(tilt) {
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.3, .3, 64), chrome); base.position.y = FLOOR + .15; base.castShadow = true; g.add(base);
+  const col = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, 4.2, 32), chrome); col.position.y = FLOOR + 2.4; col.castShadow = true; g.add(col);
+  const top = new THREE.Mesh(new THREE.SphereGeometry(.22, 32, 16), gold); top.position.y = FLOOR + 4.55; g.add(top);
+  const beamG = new THREE.Group(); beamG.position.y = FLOOR + 4.45; beamG.rotation.z = tilt; g.add(beamG);
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(4.6, .12, .16), chrome); beam.castShadow = true; beamG.add(beam);
+  const pans = [];
+  for (const s of [-1, 1]) {
+    const pivot = new THREE.Group(); pivot.position.set(s * 2.2, 0, 0); beamG.add(pivot);
+    const hang = new THREE.Group(); hang.rotation.z = -tilt; pivot.add(hang);   // чаша висит отвесно
+    for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2, L = 2.3, ch = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, L, 8), chrome);
+      const bx = Math.cos(a) * .95, bz = Math.sin(a) * .95; ch.position.set(bx / 2, -L / 2, bz / 2); ch.lookAt(new THREE.Vector3(bx, -L, bz).applyMatrix4(new THREE.Matrix4()));
+      ch.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(-bx, L, -bz).normalize()); hang.add(ch); }
+    const pan = new THREE.Mesh(new THREE.LatheGeometry([[0, 0], [.9, .04], [1.05, .22], [1.08, .26]].map(([x, y]) => new THREE.Vector2(x, y)), 64), gold);
+    pan.position.y = -2.3; pan.castShadow = pan.receiveShadow = true; hang.add(pan);
+    pans.push(hang);
+  }
+  return { g, pans };
+}
+
+// ---------- будильник: корпус, циферблат «8:00», два звонка ----------
+function makeClock() {
+  const g = new THREE.Group();
+  const face = canvasTex(1024, 1024, (c, w, h) => { c.fillStyle = "#f6f2e8"; c.fillRect(0, 0, w, h); c.translate(w / 2, h / 2);
+    for (let i = 0; i < 60; i++) { c.save(); c.rotate(i / 60 * 6.283); c.fillStyle = "#1b1b1b"; c.fillRect(-(i % 5 ? 3 : 7), -470, i % 5 ? 6 : 14, i % 5 ? 30 : 60); c.restore(); }
+    c.fillStyle = "#1b1b1b"; c.font = "800 110px Mont"; c.textAlign = "center"; c.textBaseline = "middle";
+    for (let i = 1; i <= 12; i++) { const a = i / 12 * 6.283 - Math.PI / 2; c.fillText(String(i), Math.cos(a) * 330, Math.sin(a) * 330); }
+    c.fillStyle = "#e5484d"; c.font = "900 64px Unb"; c.fillText("СМЕНА", 0, 170);
+    const hand = (a, L, wdt, col) => { c.save(); c.rotate(a); c.fillStyle = col; c.beginPath(); c.roundRect(-wdt / 2, -L, wdt, L + 40, wdt / 2); c.fill(); c.restore(); };
+    hand(8 / 12 * 6.283, 230, 34, "#1b1b1b"); hand(0, 330, 22, "#1b1b1b"); c.fillStyle = "#c99327"; c.beginPath(); c.arc(0, 0, 30, 0, 6.283); c.fill(); });
+  face.colorSpace = THREE.SRGBColorSpace; face.repeat.set(1, 1);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, .7, 96), [new THREE.MeshPhysicalMaterial({ color: 0xc62f35, metalness: .6, roughness: .25, clearcoat: 1 }),
+    new THREE.MeshPhysicalMaterial({ map: face, roughness: .5 }), chrome]);
+  body.rotation.x = Math.PI / 2; body.castShadow = true; g.add(body);
+  const bezel = new THREE.Mesh(new THREE.TorusGeometry(1.25, .08, 24, 96), chrome); bezel.position.z = .36; g.add(bezel);
+  const glass = new THREE.Mesh(new THREE.CircleGeometry(1.2, 96), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 1, roughness: .02, thickness: .1, transparent: true, opacity: .25, clearcoat: 1 }));
+  glass.position.z = .37; g.add(glass);
+  for (const s of [-1, 1]) { const bell = new THREE.Mesh(new THREE.SphereGeometry(.5, 48, 24, 0, 6.283, 0, Math.PI / 2), chrome); bell.position.set(s * .8, 1.25, 0); bell.rotation.z = -s * .5; bell.castShadow = true; g.add(bell);
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(.07, .05, .5, 16), chrome); leg.position.set(s * .75, -1.35, 0); leg.rotation.z = s * .4; g.add(leg); }
+  const hammer = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, .9, 12), chrome); hammer.position.set(0, 1.45, 0); hammer.rotation.z = Math.PI / 2; g.add(hammer);
+  const knob = new THREE.Mesh(new THREE.TorusGeometry(.25, .05, 16, 48), chrome); knob.position.set(0, 1.55, -.1); g.add(knob);
+  return g;
+}
+
+// ---------- телефон с пушем ----------
+function makePhone() {
+  const g = new THREE.Group();
+  const scr = canvasTex(900, 1900, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#1b2a4a"); gr.addColorStop(1, "#06080f"); c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    c.fillStyle = "#fff"; c.textAlign = "center"; c.font = "300 220px Mont"; c.fillText("9:41", w / 2, 470); c.font = "600 48px Mont"; c.fillStyle = "rgba(255,255,255,.7)"; c.fillText("понедельник, 12 октября", w / 2, 560);
+    const card = (y, t1, t2, acc) => { c.fillStyle = "rgba(255,255,255,.16)"; c.beginPath(); c.roundRect(50, y, w - 100, 230, 46); c.fill();
+      c.fillStyle = acc; c.beginPath(); c.roundRect(90, y + 45, 110, 110, 28); c.fill(); c.fillStyle = "#04140b"; c.font = "900 70px Unb"; c.fillText("₽", 145, y + 125);
+      c.textAlign = "left"; c.fillStyle = "#fff"; c.font = "800 50px Mont"; c.fillText(t1, 235, y + 95); c.font = "600 44px Mont"; c.fillStyle = "rgba(255,255,255,.85)"; c.fillText(t2, 235, y + 165); c.textAlign = "center"; };
+    card(760, "Бонус зачислен", "+2 000 ₽ новому клиенту", "#5cf0a0"); card(1020, "Бонус за друга", "+1 000 ₽ на счёт", "#5cf0a0"); card(1280, "Проценты", "+387 ₽ за 3 месяца", "#ffd84a"); });
+  scr.colorSpace = THREE.SRGBColorSpace; scr.repeat.set(1, 1);
+  const body = new THREE.Mesh(new RoundedBoxGeometry(2.2, 4.5, .26, 8, .32), new THREE.MeshPhysicalMaterial({ color: 0x1a1c20, metalness: .9, roughness: .25, clearcoat: 1 }));
+  body.castShadow = true; g.add(body);
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(2.04, 4.32), new THREE.MeshPhysicalMaterial({ map: scr, emissive: 0xffffff, emissiveMap: scr, emissiveIntensity: .9, roughness: .05, clearcoat: 1 }));
+  screen.position.z = .135; g.add(screen);
+  const island = new THREE.Mesh(new RoundedBoxGeometry(.6, .16, .01, 4, .08), new THREE.MeshBasicMaterial({ color: 0x000000 })); island.position.set(0, 1.98, .142); g.add(island);
+  return g;
+}
+
+// ---------- композиции вариантов ----------
+const X0 = 4.1;   // центр объекта справа (текст слева)
+const lights = () => {
+  scene.add(new THREE.HemisphereLight(0x3a4250, 0x0a0806, .35));
+  const key = new THREE.DirectionalLight(0xfff2dd, 2.2); key.position.set(-4, 8, 7); key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+  Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9 }); key.shadow.bias = -.0004; scene.add(key);
+  const rim = new THREE.PointLight(0x6fa8ff, 30, 16, 1.5); rim.position.set(X0 + 4, 3, -3); scene.add(rim);
+  const warm = new THREE.PointLight(0xffb84a, 14, 12, 1.6); warm.position.set(X0 - 3, 1, 4); scene.add(warm);
+};
+lights();
+const MARK = scene.children.length;   // всё, что добавят варианты, потом переносится в группу героя (масштаб вокруг точки на полу)
+const glow = (x, y, z, c, I = 30, d = 8) => { const p = new THREE.PointLight(c, I * .45, d, 1.6); p.position.set(x, y, z); scene.add(p); return p; };
+
+if (V === "a") {   // весы: сумка курьера легче одной золотой карты
+  const { g, pans } = makeScale(-.16); g.position.x = X0; scene.add(g);
+  const bag = makeBag(); bag.scale.setScalar(.62); bag.position.set(0, .26 + 2.5 * .62 / 2 - 2.3 + .02, 0); pans[0].add(bag);
+  const card = makeCard({ big: "+2 000 ₽" }); card.scale.setScalar(.9); card.rotation.set(-1.15, .2, 0); card.position.set(0, -2.3 + .3, .1); pans[1].add(card);
+  coin(pans[1], -.5, -2.3 + .3, -.3, 0, 1); coin(pans[1], .45, -2.3 + .3, -.35, 0, 2);
+  glow(X0 + 2.2, -.5, 3, 0xffc040, 20);
+} else if (V === "b") {   // открытая термосумка, внутри золото и карта, свет из сумки
+  const bag = makeBag({ open: true }); bag.position.set(X0, FLOOR + 1.25, 0); bag.rotation.y = -.35; scene.add(bag);
+  const card = makeCard({ big: "+2 000 ₽" }); card.scale.setScalar(1.15); card.position.set(X0 - .1, FLOOR + 2.6, .1); card.rotation.set(-.2, -.35, .08); scene.add(card);
+  for (let i = 0; i < 9; i++) coin(scene, X0 - .9 + rnd() * 1.6, FLOOR + 2.45 + rnd() * .3, -.35 + rnd() * .5, (rnd() - .5) * 1.2, rnd() * 6, (rnd() - .5) * 1.2);
+  glow(X0, FLOOR + 2.3, 0, 0xffb84a, 60, 6);
+  stack(scene, X0 - 2.2, 1.2, 7); stack(scene, X0 + 1.9, 1.5, 4); for (let i = 0; i < 10; i++) coin(scene, X0 - 1.6 + rnd() * 3.5, FLOOR + CT / 2, .9 + rnd() * 1.8, 0, rnd() * 6);
+  // лучи из сумки
+  const beam = new THREE.Mesh(new THREE.ConeGeometry(1.5, 5, 48, 1, true), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    uniforms: { c: { value: new THREE.Color(0xffb54a) } }, vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }",
+    fragmentShader: "uniform vec3 c; varying vec2 vUv; void main(){ float a = pow(1.-vUv.y, 2.) * .1 * (.6 + .4 * sin(vUv.x * 50.)); gl_FragColor = vec4(c * a, a); }" }));
+  beam.position.set(X0, FLOOR + 5.1, 0); scene.add(beam);
+} else if (V === "c") {   // веер из 5 карт — 5 способов
+  const T = [["СПОСОБ 1 · НОВЫЙ КЛИЕНТ", "+2 000 ₽", "black"], ["СПОСОБ 2 · ПРИВЕДИ ДРУГА", "+1 000 ₽", "silver"], ["СПОСОБ 3 · СТАВКА", "+387 ₽", "green"],
+    ["СПОСОБ 4 · КЭШБЭК", "+5 %", "silver"], ["СПОСОБ 5 · КРЕДИТКА", "120 дней", "gold"]];
+  T.forEach(([top, big, tone], i) => { const c = makeCard({ top, big, tone }); c.scale.setScalar(1.9); const a = (i - 2) * .22;
+    c.position.set(X0 + Math.sin(a) * 2.2 - .2, .1 + Math.cos(a) * 2.2 - 2.2 + i * .01, i * .06); c.rotation.set(-.08, -.15, -a); scene.add(c); });
+  stack(scene, X0 - 2.3, 1.4, 8); stack(scene, X0 + 2.4, 1.2, 5); glow(X0, 0, 3, 0xffd070, 22);
+} else if (V === "d") {   // будильник «смена» против столбиков монет
+  const cl = makeClock(); cl.position.set(X0 - 1.2, FLOOR + 1.7, 0); cl.rotation.y = .25; scene.add(cl);
+  stack(scene, X0 + 1.4, .2, 14); stack(scene, X0 + 2.1, .7, 9); stack(scene, X0 + 1.0, .9, 6);
+  const card = makeCard({ big: "+2 000 ₽" }); card.scale.setScalar(1.2); card.position.set(X0 + 1.6, FLOOR + .9, 1.3); card.rotation.set(-.35, -.4, .1); scene.add(card);
+  glow(X0 + 1.6, 0, 2.5, 0xffc040, 22);
+} else if (V === "e") {   // сумка курьера перечёркнута, рядом карта с монетами
+  const bag = makeBag(); bag.position.set(X0 - .9, FLOOR + 1.25, -.6); bag.rotation.y = .4; scene.add(bag);
+  const bar = new THREE.Mesh(new RoundedBoxGeometry(4.4, .32, .3, 4, .12), new THREE.MeshPhysicalMaterial({ color: 0xe5272e, roughness: .3, clearcoat: 1, emissive: 0x5a0000 }));
+  bar.position.set(X0 - .9, FLOOR + 1.3, 1.1); bar.rotation.z = .62; bar.castShadow = true; scene.add(bar);
+  const card = makeCard({ big: "+2 000 ₽" }); card.scale.setScalar(1.35); card.position.set(X0 + 1.9, FLOOR + 1.1, 1.6); card.rotation.set(-.5, -.35, .12); scene.add(card);
+  stack(scene, X0 + 2.6, 2.6, 6); for (let i = 0; i < 8; i++) coin(scene, X0 + .6 + rnd() * 2.8, FLOOR + CT / 2, 2.2 + rnd() * 1.5, 0, rnd() * 6);
+  glow(X0 + 2, 0, 3.4, 0xffc040, 20);
+} else {   // f: телефон с пушами о выплатах, сумка курьера в темноте сзади
+  const ph = makePhone(); ph.position.set(X0 + .3, .2, 1.2); ph.rotation.set(-.08, -.32, .06); scene.add(ph);
+  const bag = makeBag(); bag.position.set(X0 + 2.6, FLOOR + 1.25, -3.2); bag.rotation.y = -.5; scene.add(bag);
+  stack(scene, X0 - 1.8, 1.4, 6); stack(scene, X0 + 1.9, 2.0, 4); glow(X0, .5, 3.5, 0x8fd0ff, 14);
+}
+
+{ const S = { a: [1.12, .2], b: [1.45, 0], c: [1.2, 0], d: [1.5, -.3], e: [1.3, -.1], f: [1.3, 0] }[V];
+  const hero = new THREE.Group(); hero.position.set(X0 + S[1], FLOOR, 0); hero.scale.setScalar(S[0]);
+  for (const o of scene.children.slice(MARK)) { o.position.x -= X0; o.position.y -= FLOOR; if (o.target) { o.target.position.x -= X0; o.target.position.y -= FLOOR; } hero.add(o); }
+  scene.add(hero); }
+const comp = new EffectComposer(r);
+comp.addPass(new RenderPass(scene, cam));
+comp.addPass(new UnrealBloomPass(new THREE.Vector2(W * PR, H * PR), .22, .45, .96));
+comp.addPass(new OutputPass());
+comp.render();
+requestAnimationFrame(() => { comp.render(); window.__ready = true; });
+</script>
+</body>
+</html>

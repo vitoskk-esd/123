@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №3 — современные стили</title>
+<!-- Превью ролика №3. Владелец 11.10: тёмные 3D-обложки «больше не нравятся — давай что-то другое, более эстетичное и в
+     современном привлекательном стиле». Шесть разных стилей (?v=1…6), светлые и чистые: живое фото курьера (CC0, rider.jpg —
+     WordPress Photo Directory), интерфейсы, типографика. ≤ 6 слов, без эмодзи, правый нижний угол свободен.
+     Снимок (из youtube/): node kit/shot3d.js 03-banks-pay-you/thumb/thumbs.html 03-banks-pay-you/thumb/m1.png 1280 720 v=1 -->
+<style>
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "S"; src: url("../../kit/fonts/playfair-cyrillic-600-italic.woff2"); font-style: italic; font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "S"; src: url("../../kit/fonts/playfair-latin-600-italic.woff2"); font-style: italic; font-weight: 600; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  .v { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .grain::after { content: ""; position: absolute; inset: 0; opacity: .07; mix-blend-mode: multiply; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .photo { position: absolute; background: url("rider.jpg") 38% 62% / cover; }
+  /* пуш iOS */
+  .push { position: absolute; display: flex; gap: 20px; align-items: center; padding: 22px 26px; border-radius: 30px; background: rgba(250,250,252,.82); backdrop-filter: blur(24px);
+    box-shadow: 0 30px 60px rgba(20,25,40,.25), inset 0 1px 0 rgba(255,255,255,.9); color: #111; }
+  .push .ic { width: 72px; height: 72px; border-radius: 18px; flex: none; background: linear-gradient(135deg, #2bd17e, #0d9e57); display: flex; align-items: center; justify-content: center; font: 700 40px "I"; color: #fff; }
+  .push b { display: block; font: 600 26px "I"; } .push span { display: block; font: 500 24px "I"; color: #4a4f5c; margin-top: 2px; } .push em { font-style: normal; font: 700 40px "I"; color: #0d9e57; display: block; margin-top: 4px; letter-spacing: -.02em; }
+  .push small { position: absolute; right: 24px; top: 20px; font: 500 20px "I"; color: #8a8f9c; }
+</style>
+</head>
+<body>
+
+<!-- 1. Светлый и чистый: заголовок с маркером, фото-карточка, пуш поверх, стрелка от руки -->
+<div class="v grain" id="v1" style="background:#f4f1ea">
+  <div style="position:absolute;left:64px;top:96px;font:700 92px/1.02 I;letter-spacing:-.045em;color:#111">Банк платит<br><span style="position:relative;display:inline-block"><i style="position:absolute;left:-10px;right:-12px;top:48%;height:46%;background:#ffd84a;transform:skew(-8deg) rotate(-1.5deg);border-radius:6px;z-index:-1"></i>больше,</span><br>чем смена</div>
+  <div style="position:absolute;left:68px;top:470px;font:500 30px/1.35 I;color:#5d6270">5 законных способов —<br>без собеседования и смен</div>
+  <div class="photo" style="background-size:1200px auto;background-position:-240px -260px;left:700px;top:60px;width:480px;height:540px;border-radius:34px;transform:rotate(3deg);box-shadow:0 30px 70px rgba(30,30,50,.25);border:10px solid #fff"></div>
+  <div class="push" style="left:600px;top:470px;width:500px;transform:rotate(-2deg)"><div class="ic">₽</div><div><b>Бонус зачислен</b><span>Новому клиенту за покупку</span><em>+2 000 ₽</em></div><small>сейчас</small></div>
+  <svg style="position:absolute;left:470px;top:400px" width="150" height="120" viewBox="0 0 150 120"><path d="M8 20 C 60 0, 110 30, 120 92" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"/><path d="M100 80 L121 96 L134 72" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<!-- 2. До / после: серое фото смены против зелёного «+2 000 ₽» -->
+<div class="v" id="v2">
+  <div class="photo" style="background-size:1320px auto;background-position:-198px -160px;left:0;top:0;width:660px;height:720px;filter:grayscale(1) contrast(1.05) brightness(.8)"></div>
+  <div style="position:absolute;left:0;top:0;width:660px;height:720px;background:linear-gradient(0deg,rgba(0,0,0,.75),rgba(0,0,0,.1) 55%)"></div>
+  <div style="position:absolute;left:640px;top:0;right:0;bottom:0;background:radial-gradient(700px 600px at 70% 30%,#3df5a0,#0cbf6a 55%,#068a4c)"></div>
+  <div style="position:absolute;left:640px;top:0;width:8px;height:720px;background:#fff"></div>
+  <div style="position:absolute;left:54px;top:470px;color:#fff"><div style="font:700 120px/1 I;letter-spacing:-.05em">6 часов</div><div style="font:500 36px I;opacity:.85;margin-top:10px">смены курьером</div></div>
+  <div style="position:absolute;left:720px;top:70px;color:#04140b"><div style="font:700 120px/1 I;letter-spacing:-.05em">1 карта</div><div style="font:500 36px I;opacity:.75;margin-top:10px">и одна покупка</div></div>
+  <div class="push" style="left:720px;top:330px;width:480px"><div class="ic">₽</div><div><b>Бонус зачислен</b><span>Новому клиенту</span><em>+2 000 ₽</em></div><small>сейчас</small></div>
+  <div style="position:absolute;left:584px;top:300px;width:120px;height:120px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:700 64px I;color:#111;box-shadow:0 10px 30px rgba(0,0,0,.3)">=</div>
+</div>
+
+<!-- 3. Яркий цветной блок: огромная сумма, карта, наклейки -->
+<div class="v grain" id="v3" style="background:radial-gradient(900px 700px at 80% 20%,#5b7bff,#2b4dff 55%,#1a33d6)">
+  <div style="position:absolute;left:64px;top:70px;padding:12px 22px;border-radius:40px;background:#c8ff3d;font:700 30px I;color:#0b1a00;transform:rotate(-2deg)">без подработки</div>
+  <div style="position:absolute;left:56px;top:160px;font:900 168px/1 Unb;letter-spacing:-.06em;color:#fff;text-shadow:0 14px 40px rgba(0,0,40,.35)">2 000 ₽</div>
+  <div style="position:absolute;left:66px;top:390px;font:600 58px/1.05 I;letter-spacing:-.03em;color:#fff">за одну покупку<br><span style="opacity:.75">по новой карте</span></div>
+  <div style="position:absolute;left:760px;top:360px;width:400px;height:252px;border-radius:26px;transform:rotate(-12deg);background:linear-gradient(135deg,#1b1d22,#3a3d46 55%,#111);box-shadow:0 40px 70px rgba(0,0,40,.45), inset 0 1px 0 rgba(255,255,255,.2)">
+    <div style="position:absolute;left:34px;top:80px;width:66px;height:50px;border-radius:10px;background:linear-gradient(135deg,#f1dc98,#c9a44a)"></div>
+    <div style="position:absolute;left:34px;bottom:34px;font:700 26px Mono;letter-spacing:.12em;color:#d9dce2">•••• 2026</div>
+    <div style="position:absolute;right:30px;top:28px;font:700 22px I;color:#c8ff3d">+2 000 ₽</div></div>
+  <div style="position:absolute;left:960px;top:60px;width:240px;height:240px;border-radius:50%;background:#fff;transform:rotate(10deg);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 20px 40px rgba(0,0,40,.3)">
+    <div style="font:900 70px Unb;color:#2b4dff;letter-spacing:-.04em">×5</div><div style="font:600 26px I;color:#111;text-align:center;line-height:1.1">способов,<br>где банк платит</div></div>
+</div>
+
+<!-- 4. Скрапбук: крафт, рваная бумага, скотч, фото, маркер -->
+<div class="v grain" id="v4" style="background:#e9dcc5">
+  <div style="position:absolute;left:720px;top:40px;width:480px;height:600px;background:#fff;transform:rotate(4deg);box-shadow:0 18px 40px rgba(60,40,10,.25);padding:20px 20px 90px">
+    <div class="photo" style="position:relative;width:100%;height:100%;inset:auto;background-size:1100px auto;background-position:-220px -243px"></div>
+    <div style="position:absolute;left:0;right:0;bottom:22px;text-align:center;font:600 italic 40px S;color:#222">смена, 6 часов</div></div>
+  <i style="position:absolute;left:880px;top:20px;width:170px;height:46px;background:rgba(255,236,170,.75);transform:rotate(-6deg)"></i>
+  <div style="position:absolute;left:56px;top:96px">
+    <div style="display:inline-block;background:#111;color:#fff;font:900 76px Unb;letter-spacing:-.04em;padding:8px 22px;transform:rotate(-2deg)">ХВАТИТ</div><br>
+    <div style="display:inline-block;background:#fff;color:#111;font:900 62px Unb;letter-spacing:-.04em;padding:8px 22px;margin-top:14px;transform:rotate(1.5deg);box-shadow:0 8px 20px rgba(60,40,10,.2)">ИСКАТЬ</div><br>
+    <div style="display:inline-block;background:#fff;color:#111;font:900 62px Unb;letter-spacing:-.04em;padding:8px 22px;margin-top:14px;transform:rotate(-1deg);box-shadow:0 8px 20px rgba(60,40,10,.2)">ПОДРАБОТКУ</div></div>
+  <div style="position:absolute;left:70px;top:440px;font:600 italic 64px S;color:#d7261e;transform:rotate(-4deg)">банк платит сам</div>
+  <svg style="position:absolute;left:60px;top:520px" width="520" height="50" viewBox="0 0 520 50"><path d="M10 30 C 140 8, 330 6, 500 22 M40 42 C 200 26, 360 26, 470 36" fill="none" stroke="#d7261e" stroke-width="5" stroke-linecap="round"/></svg>
+  <div style="position:absolute;left:620px;top:470px;padding:16px 26px;background:#5cf0a0;font:700 44px I;color:#04140b;transform:rotate(-6deg);box-shadow:0 10px 24px rgba(60,40,10,.25)">+2 000 ₽</div>
+  <i style="position:absolute;left:650px;top:452px;width:110px;height:34px;background:rgba(255,255,255,.6);transform:rotate(-20deg)"></i>
+</div>
+
+<!-- 5. Жидкое стекло на мягком градиенте: 5 способов карточками -->
+<div class="v" id="v5" style="background:#f3eefe">
+  <i style="position:absolute;left:-120px;top:-160px;width:700px;height:700px;border-radius:50%;background:#ffb199;filter:blur(90px);opacity:.8"></i>
+  <i style="position:absolute;left:600px;top:-200px;width:800px;height:700px;border-radius:50%;background:#b9a3ff;filter:blur(100px);opacity:.8"></i>
+  <i style="position:absolute;left:300px;top:380px;width:800px;height:600px;border-radius:50%;background:#8fd3ff;filter:blur(110px);opacity:.75"></i>
+  <div style="position:absolute;left:64px;top:110px;font:700 96px/1 I;letter-spacing:-.05em;color:#14121f">5 способов,</div>
+  <div style="position:absolute;left:66px;top:220px;font:600 italic 76px/1.05 S;color:#14121f">где банк<br>платит тебе</div>
+  <div id="glass" style="position:absolute;left:700px;top:70px;width:470px"></div>
+</div>
+
+<!-- 6. Чек: смена против карты -->
+<div class="v grain" id="v6" style="background:#d6f0e3">
+  <div style="position:absolute;left:64px;top:120px;font:700 104px/1 I;letter-spacing:-.05em;color:#0e2a1d">Где<br>выгоднее?</div>
+  <div style="position:absolute;left:68px;top:360px;font:500 32px/1.35 I;color:#2f5a45">Сравнил смену курьером<br>и бонус банка за карту</div>
+  <div id="rc" style="position:absolute;left:700px;top:40px;width:430px;background:#fffdf7;padding:40px 40px 50px;font:700 24px/1.6 Mono;color:#222;transform:rotate(2.5deg);box-shadow:0 30px 60px rgba(10,50,30,.25);
+    clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),95% 100%,90% calc(100% - 14px),85% 100%,80% calc(100% - 14px),75% 100%,70% calc(100% - 14px),65% 100%,60% calc(100% - 14px),55% 100%,50% calc(100% - 14px),45% 100%,40% calc(100% - 14px),35% 100%,30% calc(100% - 14px),25% 100%,20% calc(100% - 14px),15% 100%,10% calc(100% - 14px),5% 100%,0 calc(100% - 14px))">
+    <div style="text-align:center;font-size:30px;letter-spacing:.1em">ЧЕК</div><div style="text-align:center;color:#888;font-size:20px">пример, Москва, 2026</div>
+    <div style="border-top:3px dashed #bbb;margin:18px 0"></div>
+    <div style="display:flex;justify-content:space-between"><span>СМЕНА КУРЬЕРОМ</span><span>6 Ч</span></div>
+    <div style="display:flex;justify-content:space-between"><span>ОПЛАТА</span><span>2 000 ₽</span></div>
+    <div style="border-top:3px dashed #bbb;margin:18px 0"></div>
+    <div style="display:flex;justify-content:space-between"><span>КАРТА + ПОКУПКА</span><span>10 МИН</span></div>
+    <div style="display:flex;justify-content:space-between"><span>БОНУС</span><span>2 000 ₽</span></div>
+    <div style="border-top:3px dashed #bbb;margin:18px 0"></div>
+    <div style="display:flex;justify-content:space-between;font-size:30px"><span>РАЗНИЦА</span><span>5 Ч 50 МИН</span></div></div>
+  <div style="position:absolute;left:600px;top:500px;padding:12px 26px;border:6px solid #0d9e57;color:#0d9e57;font:900 44px Unb;transform:rotate(-10deg);border-radius:10px;background:rgba(255,255,255,.6)">ВЫГОДНЕЕ</div>
+</div>
+
+<script>
+const v = new URLSearchParams(location.search).get("v") || "1";
+document.getElementById("v" + v).style.display = "block";
+const G = [["Бонус за карту", "+2 000 ₽"], ["Приведи друга", "+1 000 ₽"], ["Проценты", "+387 ₽"], ["Кэшбэк", "каждый месяц"], ["Кредитка", "0 % 120 дней"]];
+document.getElementById("glass").innerHTML = G.map(([a, b], i) => `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:${i ? 14 : 0}px;padding:22px 28px;border-radius:26px;
+  background:rgba(255,255,255,.5);backdrop-filter:blur(20px);border:1.5px solid rgba(255,255,255,.8);box-shadow:0 14px 40px rgba(60,40,120,.12);transform:translateX(${[0, 30, 10, 40, 20][i]}px)">
+  <span style="font:600 30px I;color:#14121f;white-space:nowrap"><b style="display:inline-block;width:44px;color:#7a5cff">${i + 1}</b>${a}</span><span style="font:700 30px I;white-space:nowrap;color:${b.startsWith("+") ? "#0d9e57" : "#14121f"}">${b}</span></div>`).join("");
+document.fonts.ready.then(() => { const img = new Image(); img.onload = img.onerror = () => { window.__ready = true; }; img.src = "rider.jpg"; });
+</script>
+</body>
+</html>
