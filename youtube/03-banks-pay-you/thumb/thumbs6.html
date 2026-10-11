@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №3 — доработка «калькулятор» и «огромная сумма»</title>
+<!-- Владелец 11.10 из восьми форматов (f1–f8) выбрал 6 (калькулятор) и 7 (огромная сумма): «доработай их».
+     ?v=6a/6b/6c — калькулятор (оранжевый / тёмный / фото курьера), ?v=7a/7b/7c — сумма (зелёный / чёрный / жёлтый).
+     Карты и монеты — настоящее 3D (thumb3d.html ?v=asset_*, PNG с прозрачным фоном). Суммы — примеры из сценария. -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  .v { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .pl { position: absolute; display: inline-block; font: 700 110px/1 "O"; text-transform: uppercase; padding: 6px 24px 14px; white-space: nowrap; }
+  .wb { background: #fff; color: #111; } .bw { background: #111; color: #fff; } .gw { background: #13b85a; color: #fff; } .yb { background: #ffd60a; color: #111; }
+  .asset { position: absolute; pointer-events: none; }
+  .grain::after { content: ""; position: absolute; inset: 0; opacity: .08; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  /* калькулятор */
+  .calc { position: absolute; width: 430px; height: 690px; border-radius: 58px; background: #050505; padding: 30px 28px; box-shadow: 0 40px 80px rgba(0,0,0,.5), inset 0 0 0 4px #26272b, inset 0 2px 0 rgba(255,255,255,.12); }
+  .calc .ex { text-align: right; color: #8a8a8f; font: 500 40px "I"; margin-top: 46px; }
+  .calc .res { text-align: right; color: #fff; font: 300 150px/1 "I"; letter-spacing: -.04em; margin-top: 4px; position: relative; }
+  .calc .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 30px; }
+  .calc .keys div { height: 76px; border-radius: 38px; display: flex; align-items: center; justify-content: center; font: 500 36px "I"; background: #333; color: #fff; }
+  .calc .keys .op { background: #ff9f0a; } .calc .keys .fn { background: #a5a5a5; color: #111; } .calc .keys .on { background: #fff; color: #ff9f0a; }
+  /* СМС-плашка */
+  .sms { position: absolute; border-radius: 24px; background: rgba(250,250,252,.95); padding: 14px 20px; color: #111; box-shadow: 0 16px 34px rgba(0,0,0,.3); }
+  .sms .h { display: flex; align-items: center; gap: 10px; font: 600 18px "I"; color: #555; } .sms .h i { width: 28px; height: 28px; border-radius: 8px; background: #13b85a; flex: none; }
+  .sms .h span { margin-left: auto; font-size: 16px; color: #999; }
+  .sms b { display: block; font: 700 21px "I"; margin-top: 4px; } .sms em { display: block; font: 700 38px "I"; font-style: normal; color: #0f9d4f; letter-spacing: -.02em; }
+  .num { position: absolute; font: 900 250px/1 "Unb"; letter-spacing: -.07em; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- 6a. Калькулятор, оранжевый: обводка результата, стрелка к заголовку, 3D-карта у «= 1 бонус» -->
+<div class="v grain" id="v6a" style="background:radial-gradient(900px 700px at 30% 35%,#ff9a4d,#ef5a24 60%,#d43d17)">
+  <div class="pl bw" style="left:40px;top:70px;font-size:128px">5,7 часа</div>
+  <div class="pl wb" style="left:40px;top:225px;font-size:104px;transform:rotate(-2deg)">курьером</div>
+  <div class="pl gw" style="left:40px;top:375px;font-size:104px">= 1 бонус</div>
+  <img class="asset" src="asset_card1.png" style="left:250px;top:430px;width:560px;transform:rotate(-6deg)">
+  <div class="calc" style="left:790px;top:15px;transform:rotate(3deg)"><div class="ex">2 000 ÷ 350 =</div><div class="res">5,7</div><div class="keys"></div></div>
+  <svg style="position:absolute;left:930px;top:110px" width="300" height="190" viewBox="0 0 300 190"><ellipse cx="150" cy="95" rx="132" ry="74" fill="none" stroke="#ffd60a" stroke-width="9" transform="rotate(-6 150 95)"/></svg>
+</div>
+
+<!-- 6b. Калькулятор, тёмный: жёлтые плашки, свечение, монеты -->
+<div class="v grain" id="v6b" style="background:radial-gradient(800px 600px at 72% 45%,#3a2a08,#0d0d0f 70%)">
+  <div class="pl yb" style="left:40px;top:70px;font-size:128px">5,7 часа</div>
+  <div class="pl wb" style="left:40px;top:225px;font-size:104px;transform:rotate(-2deg)">курьером</div>
+  <div class="pl gw" style="left:40px;top:375px;font-size:104px">= 1 бонус</div>
+  <img class="asset" src="asset_coins.png" style="left:0px;top:205px;width:1000px">
+  <div class="calc" style="left:790px;top:15px;transform:rotate(3deg);box-shadow:0 0 120px rgba(255,159,10,.35),0 40px 80px rgba(0,0,0,.6),inset 0 0 0 4px #26272b"><div class="ex">2 000 ÷ 350 =</div><div class="res">5,7</div><div class="keys"></div></div>
+  <svg style="position:absolute;left:930px;top:110px" width="300" height="190" viewBox="0 0 300 190"><ellipse cx="150" cy="95" rx="132" ry="74" fill="none" stroke="#ffd60a" stroke-width="9" transform="rotate(-6 150 95)"/></svg>
+</div>
+
+<!-- 6c. Калькулятор на фото курьера: слева тёмное фото, справа калькулятор, СМС поверх -->
+<div class="v" id="v6c" style="background:#111">
+  <div style="position:absolute;inset:0;background:url(rider.jpg) no-repeat;background-size:1500px auto;background-position:-220px -330px;filter:grayscale(.3) brightness(.55)"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.7),rgba(0,0,0,.2) 60%)"></div>
+  <div class="pl yb" style="left:40px;top:70px;font-size:128px">5,7 часа</div>
+  <div class="pl wb" style="left:40px;top:225px;font-size:104px;transform:rotate(-2deg)">курьером</div>
+  <div class="pl gw" style="left:40px;top:375px;font-size:104px">= 1 бонус</div>
+  <div class="calc" style="left:790px;top:15px;transform:rotate(3deg)"><div class="ex">2 000 ÷ 350 =</div><div class="res">5,7</div><div class="keys"></div></div>
+  <div class="sms" style="left:340px;top:530px;width:410px;transform:rotate(-3deg)"><div class="h"><i></i>Банк · СМС<span>сейчас</span></div><b>Бонус новому клиенту</b><em>+2 000 ₽</em></div>
+</div>
+
+<!-- 7a. Сумма, зелёный: объёмные цифры, веер 3D-карт, разбивка -->
+<div class="v grain" id="v7a" style="background:radial-gradient(1000px 700px at 30% 30%,#2ee07a,#11a653 55%,#0a7a3c)">
+  <div class="num" style="left:36px;top:40px;color:#fff;text-shadow:0 4px 0 #0b8a44,0 8px 0 #0a7a3c,0 12px 0 #096c35,0 16px 0 #075a2c,0 30px 50px rgba(0,40,10,.45)">+3 387 ₽</div>
+  <div class="pl bw" style="left:44px;top:320px;font-size:72px">за месяц от банков</div>
+  <img class="asset" src="asset_cards.png" style="left:690px;top:215px;width:690px">
+  <div id="sum7a" style="position:absolute;left:46px;top:450px"></div>
+</div>
+
+<!-- 7b. Сумма, чёрный: зелёный градиент и свечение -->
+<div class="v grain" id="v7b" style="background:radial-gradient(900px 600px at 30% 30%,#0f2a1b,#060708 70%)">
+  <div class="num" style="left:36px;top:40px;background:linear-gradient(180deg,#b8ffd6,#2ee07a 55%,#0f9d4f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 40px rgba(46,224,122,.45))">+3 387 ₽</div>
+  <div class="pl wb" style="left:44px;top:320px;font-size:72px">за месяц от банков</div>
+  <img class="asset" src="asset_cards.png" style="left:690px;top:215px;width:690px">
+  <div id="sum7b" style="position:absolute;left:46px;top:450px"></div>
+</div>
+
+<!-- 7c. Сумма, жёлтый (как выбранный раньше формат): чёрные цифры, плашки -->
+<div class="v grain" id="v7c" style="background:#ffd60a">
+  <div class="num" style="left:36px;top:40px;color:#111;text-shadow:6px 6px 0 #fff,12px 12px 0 rgba(0,0,0,.12)">+3 387 ₽</div>
+  <div class="pl bw" style="left:44px;top:320px;font-size:72px">за месяц от банков</div>
+  <img class="asset" src="asset_cards.png" style="left:690px;top:215px;width:690px">
+  <div id="sum7c" style="position:absolute;left:46px;top:450px"></div>
+</div>
+
+<script>
+const v = new URLSearchParams(location.search).get("v") || "6a";
+const el = document.getElementById("v" + v); el.style.display = "block";
+el.querySelectorAll(".keys").forEach(k => k.innerHTML = [["AC", "fn"], ["±", "fn"], ["%", "fn"], ["÷", "on"], ["7"], ["8"], ["9"], ["×", "op"], ["4"], ["5"], ["6"], ["−", "op"], ["1"], ["2"], ["3"], ["+", "op"]]
+  .map(([t, c]) => `<div class="${c || ""}">${t}</div>`).join(""));
+// разбивка суммы: три строки-СМС в столбик
+const S = [["Бонус новому клиенту", "+2 000 ₽"], ["Бонус за друга", "+1 000 ₽"], ["Проценты за 3 месяца", "+387 ₽"]];
+const sum = document.getElementById("sum" + v);
+if (sum) sum.innerHTML = S.map(([a, b], i) => `<div style="display:flex;align-items:center;gap:14px;width:520px;margin-top:${i ? 10 : 0}px;padding:12px 18px;border-radius:18px;background:rgba(255,255,255,.95);box-shadow:0 10px 24px rgba(0,0,0,.18)">
+  <i style="width:30px;height:30px;border-radius:8px;background:${i === 2 ? "#ffb000" : "#13b85a"};flex:none"></i><span style="font:600 26px I;color:#111">${a}</span><span style="margin-left:auto;font:700 30px I;color:#0f9d4f">${b}</span></div>`).join("") +
+  `<div style="font:500 18px I;color:${v === "7b" ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.55)"};margin-top:10px">пример: суммы из ролика, условия у каждого банка свои</div>`;
+const imgs = [...el.querySelectorAll("img"), Object.assign(new Image(), { src: "rider.jpg" })];
+Promise.all([document.fonts.ready, ...imgs.map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))]).then(() => { window.__ready = true; });
+</script>
+</body>
+</html>

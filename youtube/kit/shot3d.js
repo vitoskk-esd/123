@@ -18,6 +18,6 @@ const srv = http.createServer((req, res) => {
   await p.goto(`http://127.0.0.1:${srv.address().port}/${page}${query ? "?" + query : ""}`);
   await p.waitForFunction(() => window.__ready === true, null, { timeout: 180000 });
   await p.evaluate(() => document.fonts.ready);
-  await p.screenshot({ path: path.resolve(out) });
+  await p.screenshot({ path: path.resolve(out), omitBackground: !!process.env.OMIT });   // OMIT=1 — PNG с прозрачным фоном
   await b.close(); srv.close();
 });

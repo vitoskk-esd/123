@@ -43,6 +43,10 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 const V = new URLSearchParams(location.search).get("v") || "a";
+// ?v=asset_cards | asset_coins | asset_card1 — отдельный 3D-объект на прозрачном фоне (PNG для превью из HTML, thumbs6.html)
+const ASSET = V.startsWith("asset");
+if (ASSET) { document.documentElement.style.background = document.body.style.background = "transparent";
+  document.querySelectorAll(".shade,.vig,.grain,.plate").forEach(e => e.remove()); }
 // заголовок (≤ 6 слов вместе с плашкой): строки [текст, класс], плашка, её высота
 const COPY = {
   a: [[["8 часов", "w"], ["или 1 карта?", "gold"]], "банк платит сам", 330],
@@ -51,24 +55,24 @@ const COPY = {
   d: [[["Смена", "w"], ["= 1 покупка", "gold"]], "банк платит сам", 330],
   e: [[["Хватит", "red"], ["доставлять", "w"]], "пусть платит банк", 330],
   f: [[["Пуш", "gold"], ["лучше смены", "w"]], "5 способов", 330],
-}[V];
+}[V] || [[], "", 0];
 document.getElementById("t").innerHTML = COPY[0].map(([s, c]) => `<div class="${c}">${s}</div>`).join("");
-const pl = document.getElementById("plate"); pl.textContent = COPY[1]; pl.style.top = COPY[2] + "px";
+const pl = document.getElementById("plate"); if (pl) { pl.textContent = COPY[1]; pl.style.top = COPY[2] + "px"; }
 
 const W = 1280, H = 720, PR = 2;
-const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: ASSET });
 r.setPixelRatio(PR); r.setSize(W, H);
 r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = .95;
 r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.prepend(r.domElement);
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x060607);
+scene.background = ASSET ? null : new THREE.Color(0x060607);
 const pm = new THREE.PMREMGenerator(r);
 scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = .45;
 const cam = new THREE.PerspectiveCamera(30, W / H, .1, 100);
 cam.position.set(0, 1.5, 12.5); cam.lookAt(1.9, .2, 0);
-scene.fog = new THREE.Fog(0x060607, 13, 24);   // пол уходит в темноту, без видимого края
+if (!ASSET) scene.fog = new THREE.Fog(0x060607, 13, 24);   // пол уходит в темноту, без видимого края
 
 let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 function canvasTex(w, h, draw, repeat = 1) {
@@ -95,7 +99,7 @@ const foil = new THREE.MeshPhysicalMaterial({ color: 0xc8ccd2, metalness: 1, rou
 const floorMat = new THREE.MeshPhysicalMaterial({ color: 0x0d0e10, metalness: .2, roughness: .32, clearcoat: .6, clearcoatRoughness: .25 });
 
 // ---------- студия: пол-зеркало и тёмный задник ----------
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = -2.2; floor.receiveShadow = true; scene.add(floor);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = -2.2; floor.receiveShadow = true; if (!ASSET) scene.add(floor);
 const FLOOR = -2.2;
 
 // ---------- монета с «₽» ----------
@@ -260,7 +264,19 @@ lights();
 const MARK = scene.children.length;   // всё, что добавят варианты, потом переносится в группу героя (масштаб вокруг точки на полу)
 const glow = (x, y, z, c, I = 30, d = 8) => { const p = new THREE.PointLight(c, I * .45, d, 1.6); p.position.set(x, y, z); scene.add(p); return p; };
 
-if (V === "a") {   // весы: сумка курьера легче одной золотой карты
+if (ASSET) {   // объекты по центру кадра, камера прямо
+  cam.position.set(0, .6, 11); cam.lookAt(0, 0, 0);
+  if (V === "asset_cards") {
+    [["ПРОЦЕНТЫ НА ОСТАТОК", "+387 ₽", "green", -.42, -1.5, .5], ["БОНУС ЗА ДРУГА", "+1 000 ₽", "gold", -.12, -.4, .25], ["БОНУС НОВОМУ КЛИЕНТУ", "+2 000 ₽", "black", .2, .8, 0]]
+      .forEach(([top, big, tone, rz, x, y], i) => { const c = makeCard({ top, big, tone }); c.scale.setScalar(2.4); c.position.set(x, y - .4, i * .7); c.rotation.set(-.12, -.18, rz); scene.add(c); });
+  } else if (V === "asset_card1") {
+    const c = makeCard({ big: "+2 000 ₽", tone: "black" }); c.scale.setScalar(3.2); c.rotation.set(-.15, -.3, .14); scene.add(c);
+  } else {
+    stack(scene, -1.1, 0, 12, -1.6, 2.2); stack(scene, .9, .4, 8, -1.6, 2.2); stack(scene, -.1, 1.2, 5, -1.6, 2.2);
+    for (let i = 0; i < 6; i++) coin(scene, -2 + rnd() * 4, -1.6 + CT, 1.6 + rnd() * 1.2, (rnd() - .5) * .3, rnd() * 6, (rnd() - .5) * .3, 2.2);
+  }
+  glow(-5, 5, 7, 0xfff0d0, 18, 20); scene.environmentIntensity = .7;
+} else if (V === "a") {   // весы: сумка курьера легче одной золотой карты
   const { g, pans } = makeScale(-.16); g.position.x = X0; scene.add(g);
   const bag = makeBag(); bag.scale.setScalar(.62); bag.position.set(0, .26 + 2.5 * .62 / 2 - 2.3 + .02, 0); pans[0].add(bag);
   const card = makeCard({ big: "+2 000 ₽" }); card.scale.setScalar(.9); card.rotation.set(-1.15, .2, 0); card.position.set(0, -2.3 + .3, .1); pans[1].add(card);
@@ -301,7 +317,7 @@ if (V === "a") {   // весы: сумка курьера легче одной 
   stack(scene, X0 - 1.8, 1.4, 6); stack(scene, X0 + 1.9, 2.0, 4); glow(X0, .5, 3.5, 0x8fd0ff, 14);
 }
 
-{ const S = { a: [1.12, .2], b: [1.45, 0], c: [1.2, 0], d: [1.5, -.3], e: [1.3, -.1], f: [1.3, 0] }[V];
+if (!ASSET) { const S = { a: [1.12, .2], b: [1.45, 0], c: [1.2, 0], d: [1.5, -.3], e: [1.3, -.1], f: [1.3, 0] }[V];
   const hero = new THREE.Group(); hero.position.set(X0 + S[1], FLOOR, 0); hero.scale.setScalar(S[0]);
   for (const o of scene.children.slice(MARK)) { o.position.x -= X0; o.position.y -= FLOOR; if (o.target) { o.target.position.x -= X0; o.target.position.y -= FLOOR; } hero.add(o); }
   scene.add(hero); }
@@ -309,8 +325,9 @@ const comp = new EffectComposer(r);
 comp.addPass(new RenderPass(scene, cam));
 comp.addPass(new UnrealBloomPass(new THREE.Vector2(W * PR, H * PR), .22, .45, .96));
 comp.addPass(new OutputPass());
-comp.render();
-requestAnimationFrame(() => { comp.render(); window.__ready = true; });
+const draw = () => ASSET ? r.render(scene, cam) : comp.render();
+draw();
+requestAnimationFrame(() => { draw(); window.__ready = true; });
 </script>
 </body>
 </html>
