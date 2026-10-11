@@ -14,7 +14,16 @@
   // подъём снизу из размытия
   const rise = (e, t, at, dy = 60) => { const k = out5((t - at) / .5); e.style.opacity = clamp((t - at) / .2); e.style.transform = `translateY(${(1 - k) * dy}px)`;
     e.style.filter = `blur(${(10 * (1 - k)).toFixed(1)}px)`; };
-  let shake = 0, flash = 0;   // выставляют сцены, применяет renderAt
+  let shake = 0, flash = 0;
+  // тема (?theme=dark|paper|mono) — взрослые стили без мультяшности (владелец: «выглядит так, как будто рилс для детей»)
+  const THEME = new URLSearchParams(location.search).get("theme") || "";
+  if (THEME) document.body.classList.add("th-" + THEME);
+  const PAL = {
+    "": { gosOn: "#12a150", gosOnTx: "#fff", gosOff: "#e7eefc", gosTx: "#2b5bd7", ok: "18,161,80", btn: "#3d6cff", btnOn: "#2b5bd7", btnTx: "#fff", ring: "61,108,255" },
+    dark: { gosOn: "#c8ff3d", gosOnTx: "#07080a", gosOff: "rgba(255,255,255,.08)", gosTx: "#f2f3f5", ok: "200,255,61", btn: "#c8ff3d", btnOn: "#a6e01f", btnTx: "#07080a", ring: "200,255,61" },
+    paper: { gosOn: "#111", gosOnTx: "#efe9dd", gosOff: "#fffdf8", gosTx: "#111", ok: "215,38,30", btn: "#111", btnOn: "#d7261e", btnTx: "#efe9dd", ring: "215,38,30" },
+    mono: { gosOn: "#1d1d1f", gosOnTx: "#fff", gosOff: "#f2f2f4", gosTx: "#0071e3", ok: "0,113,227", btn: "#0071e3", btnOn: "#0060c0", btnTx: "#fff", ring: "0,113,227" },
+  }[THEME] || {};   // выставляют сцены, применяет renderAt
 
   // ---------- фоны: облака и звёзды ----------
   const clouds = [];
@@ -133,7 +142,7 @@
     s_cab(t, e) {
       const w = $("cab_win"); rise(w, t, 0, 160); if (t > .5) w.style.transform = `translateY(${(Math.sin(t * 1.3) * 6).toFixed(1)}px)`;
       const gb = $("c_gos"), on = t > e.gos;
-      gb.style.background = on ? "#12a150" : "#e7eefc"; gb.style.color = on ? "#fff" : "#2b5bd7"; gb.textContent = on ? "Вход выполнен ✓" : "Войти через Госуслуги";
+      gb.style.background = on ? PAL.gosOn : PAL.gosOff; gb.style.color = on ? PAL.gosOnTx : PAL.gosTx; gb.textContent = on ? "Вход выполнен ✓" : "Войти через Госуслуги";
       gb.style.transform = `scale(${1 - .06 * Math.sin(Math.PI * clamp((t - e.gos + .05) / .25))})`;
       const it = $("c_item"); it.className = t > e.open ? "on" : ""; it.style.transform = `scale(${1 + .05 * back(clamp((t - e.open) / .35)) * (t > e.open ? 1 : 0)})`;
     },
@@ -149,7 +158,7 @@
     s_ok(t, e) {
       rise($("k1"), t, .05, 30); rise($("k2"), t, .25, 30); rise($("k3"), t, Math.max(.45, e.new - .25), 30);
       const g = $("k3"), p = Math.sin(Math.PI * clamp((t - e.new) / .45));
-      g.style.transform += ` scale(${1 + .06 * p})`; g.style.boxShadow = t > e.new ? "0 0 0 5px #12a150, 0 24px 60px rgba(18,161,80,.35)" : "";
+      g.style.transform += ` scale(${1 + .06 * p})`; g.style.boxShadow = t > e.new ? `0 0 0 5px rgb(${PAL.ok}), 0 24px 60px rgba(${PAL.ok},.35)` : "";
       pop($("k_hero"), t, e.mine, 1.6, -3, 16);
       const m = $("k_mascot"); pop(m, t, e.new, 1.5, 0, 8);
       if (t > e.new + .35) m.style.transform += ` translateY(${(-Math.abs(Math.sin((t - e.new) * 6)) * 60).toFixed(1)}px)`;
@@ -163,8 +172,8 @@
       const a = document.querySelector("#s_end .ava"); pop(a, t, 0, .4, 0, 10);
       const o = $("e_orbit"); o.style.opacity = clamp((t - .2) / .3); o.style.transform = `rotate(${(t * 90).toFixed(1)}deg)`;
       const b = $("e_btn"), pr = Math.sin(Math.PI * clamp((t - e.link) / .3)), ring = (t * 1.2) % 1;
-      b.style.transform = `scale(${1 - .06 * pr})`; b.style.background = t > e.link ? "#2b5bd7" : "#3d6cff";
-      b.style.boxShadow = `0 0 0 ${(ring * 40).toFixed(1)}px rgba(61,108,255,${(.5 * (1 - ring)).toFixed(2)}), 0 20px 60px rgba(61,108,255,.6)`;
+      b.style.transform = `scale(${1 - .06 * pr})`; b.style.background = t > e.link ? PAL.btnOn : PAL.btn; b.style.color = PAL.btnTx;
+      b.style.boxShadow = `0 0 0 ${(ring * 40).toFixed(1)}px rgba(${PAL.ring},${(.5 * (1 - ring)).toFixed(2)}), 0 20px 60px rgba(${PAL.ring},.45)`;
     },
     s_none() {},
   };
@@ -181,7 +190,7 @@
     BGS.forEach(b => { $("bg_" + b).style.opacity = b === s.bg ? (pb === s.bg ? 1 : kb) : (b === pb ? 1 - kb : 0); });
     clouds.forEach(({ e, w, x0, v }) => { e.style.left = (((x0 + v * t) % (1080 + 2 * w)) - w).toFixed(1) + "px"; });
     stars.forEach(({ e, f, ph }) => { e.style.opacity = (.3 + .7 * Math.abs(Math.sin(t * f + ph))).toFixed(2); });
-    const light = s.bg === "space"; $("foot").className = "foot" + (light ? " light" : "");
+    const light = THEME === "dark" || s.bg === "space"; $("foot").className = "foot" + (light ? " light" : "");
     shake = 0; flash = 0;
     const ev = Object.fromEntries(Object.entries(s.ev || {}).map(([k, v]) => [k, v - s.t0]));
     SC[s.id](lt, ev, s);
