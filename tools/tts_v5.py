@@ -64,11 +64,13 @@ def synth(text, out_wav, seed=0, exaggeration=.65, cfg_weight=.35, temperature=.
     return out_wav
 
 
-def humanize(parts, out_wav, sr=48000, seed=7, room_db=None, breath_db=None):
+def humanize(parts, out_wav, sr=48000, seed=7, room_db=None, breath_db=None, fx="room", tempo=None):
     """Склейка фраз «как живая запись»: паузы разной длины, тихий вдох перед частью фраз, лёгкий разброс темпа,
     цепочка «микрофон в комнате» (срез низа, присутствие 3 кГц, мягкий компрессор, короткое раннее отражение) + шумодав.
     Фон комнаты (room_db) по умолчанию выключен: после компрессора и нормализации −62 дБ превращались в слышное шипение
-    в паузах (владелец, рилс #9: «убери фоновый шум, очень чётко слышен»)."""
+    в паузах (владелец, рилс #9: «убери фоновый шум, очень чётко слышен»).
+    fx="clean" — без шумодава и раннего отражения (они смазывают согласные; рилс #12: «слова жуются»), tempo — ровный темп
+    вместо разброса 0,97–1,03."""
     import numpy as np, soundfile as sf
     rnd = random.Random(seed); chunks = []
     def load(p, tempo):
@@ -87,11 +89,13 @@ def humanize(parts, out_wav, sr=48000, seed=7, room_db=None, breath_db=None):
                 b = breath(rnd.uniform(.28, .4)); chunks += [np.zeros(int(.05 * sr)), b, np.zeros(int(max(0, gap - len(b) / sr - .05) * sr))]
             else:
                 chunks.append(np.zeros(int(gap * sr)))
-        chunks.append(load(p, rnd.uniform(.97, 1.03)))
+        jit = rnd.uniform(.97, 1.03); chunks.append(load(p, tempo or jit))
     y = np.concatenate(chunks); y = y / (np.abs(y).max() + 1e-9) * .8
     room = np.random.default_rng(1).standard_normal(len(y)) * 10 ** (room_db / 20) if room_db else 0
     raw = out_wav[:-4] + ".raw.wav"; sf.write(raw, y + room, sr)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af",
+    chain = ("highpass=f=80,equalizer=f=3500:t=q:w=1.4:g=3,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120,"
+             "loudnorm=I=-16:TP=-1.5") if fx == "clean" else None
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", chain or
                     "afftdn=nr=14:nf=-60,highpass=f=85,equalizer=f=3000:t=q:w=1.2:g=2.5,equalizer=f=220:t=q:w=1:g=1.5,"
                     "acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120,aecho=0.85:0.5:23|37:0.10|0.06,"
                     "loudnorm=I=-16:TP=-1.5", out_wav], check=True)

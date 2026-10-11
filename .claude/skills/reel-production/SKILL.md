@@ -84,7 +84,14 @@ Check the logged stresses (`N ударения: …`) before trusting the take. 
 `humanize` has `room_db=None` by default and an `afftdn` denoiser; `TL.progress` stays off in reels. No synthetic breaths either, and every phrase is trimmed (`voice_e.trim`): TTS/VC
 leave junk after the last word (babble, clicks, up to −4 dB) and clicks before the first one — owner, 09.10: «между фразами
 слышатся посторонние звуки». The phrase check runs on the trimmed file, i.e. exactly what goes into the video. One line = one whole phrase; numbers in words.
-First reel on it: `reels/first-steps-09/` (Studio 9:16). The owner's own recording + VC (below) stays as the
+First reel on it: `reels/first-steps-09/` (Studio 9:16).
+
+**Clarity (owner, reel #12, 11.10: «слова в звуке не внятные и жуются»).** Whisper medium guesses smeared words, so the
+`voice_e.py` check (medium, fuzzy) passed «chewed» takes. Measured with a weak ear (Whisper base/small, share of correct
+words): TTS 0.972 → after VC 0.917; the `afftdn` + `aecho` chain and tempo jitter smear consonants too; the VC seed changes
+the result (0.934…0.953 on one phrase). After `voice_e.py`, always run
+`tools/voice_e_clear.py <reel>/out/voice` (2 best TTS takes × VC seeds 0–3, scored by Whisper small, glued with
+`humanize(fx="clean", tempo=.96)`), then re-run `build.py words`. Report the small-model score before/after to the owner. The owner's own recording + VC (below) stays as the
 alternative when he wants to record.
 
 Earlier decision, kept for the recorded path:
