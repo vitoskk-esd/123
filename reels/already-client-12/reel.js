@@ -22,6 +22,9 @@
     "": { gosOn: "#12a150", gosOnTx: "#fff", gosOff: "#e7eefc", gosTx: "#2b5bd7", ok: "18,161,80", btn: "#3d6cff", btnOn: "#2b5bd7", btnTx: "#fff", ring: "61,108,255" },
     dark: { gosOn: "#c8ff3d", gosOnTx: "#07080a", gosOff: "rgba(255,255,255,.08)", gosTx: "#f2f3f5", ok: "200,255,61", btn: "#c8ff3d", btnOn: "#a6e01f", btnTx: "#07080a", ring: "200,255,61" },
     paper: { gosOn: "#111", gosOnTx: "#efe9dd", gosOff: "#fffdf8", gosTx: "#111", ok: "215,38,30", btn: "#111", btnOn: "#d7261e", btnTx: "#efe9dd", ring: "215,38,30" },
+    aurora: { gosOn: "linear-gradient(90deg,#7c5cff,#00c8ff)", gosOnTx: "#fff", gosOff: "rgba(255,255,255,.1)", gosTx: "#fff", ok: "125,227,255", btn: "linear-gradient(90deg,#7c5cff,#00c8ff)", btnOn: "linear-gradient(90deg,#6a48ff,#00b0e0)", btnTx: "#fff", ring: "125,227,255" },
+    poster: { gosOn: "#111", gosOnTx: "#ffe14d", gosOff: "#fff", gosTx: "#111", ok: "17,17,17", btn: "#ffe14d", btnOn: "#ff3d00", btnTx: "#111", ring: "255,225,77" },
+    wrapped: { gosOn: "#111", gosOnTx: "#c6ff00", gosOff: "#f1f1f1", gosTx: "#111", ok: "198,255,0", btn: "#c6ff00", btnOn: "#a8e000", btnTx: "#111", ring: "198,255,0" },
     mono: { gosOn: "#1d1d1f", gosOnTx: "#fff", gosOff: "#f2f2f4", gosTx: "#0071e3", ok: "0,113,227", btn: "#0071e3", btnOn: "#0060c0", btnTx: "#fff", ring: "0,113,227" },
   }[THEME] || {};   // выставляют сцены, применяет renderAt
 
@@ -190,7 +193,7 @@
     BGS.forEach(b => { $("bg_" + b).style.opacity = b === s.bg ? (pb === s.bg ? 1 : kb) : (b === pb ? 1 - kb : 0); });
     clouds.forEach(({ e, w, x0, v }) => { e.style.left = (((x0 + v * t) % (1080 + 2 * w)) - w).toFixed(1) + "px"; });
     stars.forEach(({ e, f, ph }) => { e.style.opacity = (.3 + .7 * Math.abs(Math.sin(t * f + ph))).toFixed(2); });
-    const light = THEME === "dark" || s.bg === "space"; $("foot").className = "foot" + (light ? " light" : "");
+    const light = ["dark", "aurora", "wrapped"].includes(THEME) || s.bg === "space"; $("foot").className = "foot" + (light ? " light" : "");
     shake = 0; flash = 0;
     const ev = Object.fromEntries(Object.entries(s.ev || {}).map(([k, v]) => [k, v - s.t0]));
     SC[s.id](lt, ev, s);
