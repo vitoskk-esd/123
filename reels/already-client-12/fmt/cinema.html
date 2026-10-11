@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс 12 — формат «кино»</title>
+<!-- Формат по референсу владельца №2 (DePX9XMgDXx): настоящие фото на весь кадр (горы на закате, облака, закатное небо),
+     крупный белый текст с одним словом-акцентом (курсив с засечками или голубая плашка «выделения»), ноутбук и окна,
+     висящие в облаках, вставка-постер с крупной антиквой, тёмный кадр с горизонтом, финал — аватар и кнопка на светлом.
+     Фото — CC0 (photos/README.md). Время — ../timeline.js. -->
+<style>
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "S"; src: url("../../assets/fonts/playfair-cyrillic-600-italic.woff2"); font-weight: 600; font-style: italic; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "S"; src: url("../../assets/fonts/playfair-latin-600-italic.woff2"); font-weight: 600; font-style: italic; }
+  @font-face { font-family: "SR"; src: url("../../assets/fonts/playfair-cyrillic-400-italic.woff2"); font-style: italic; unicode-range: U+0400-045F, U+2116; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; font-family: "I"; color: #fff; -webkit-font-smoothing: antialiased; }
+  .sc { position: absolute; inset: 0; visibility: hidden; overflow: hidden; }
+  .ph { position: absolute; inset: -60px; background-size: cover; background-position: 50% 50%; }
+  .canvas { position: absolute; inset: 0; background: radial-gradient(900px 700px at 20% 15%, #dfe4ff, transparent 70%), radial-gradient(900px 900px at 90% 90%, #f3e8ff, transparent 70%), #f1f2fa; }
+  #txt { position: absolute; left: 70px; right: 70px; text-align: center; font: 600 84px/1.12 "I"; letter-spacing: -.03em; z-index: 20; text-shadow: 0 4px 40px rgba(0,0,0,.35); }
+  #txt.dark { color: #15161c; text-shadow: none; }
+  #txt .w { display: inline-block; white-space: pre; }
+  #txt .s, #txt .sr, #txt .sg { font: italic 600 1.12em/1 "S"; letter-spacing: 0; }
+  #txt .k { background: rgba(61,108,255,.85); border-radius: 10px; padding: 0 .14em; text-shadow: none; color: #fff; }
+  .glass { position: absolute; background: rgba(255,255,255,.72); backdrop-filter: blur(24px); border: 1.5px solid rgba(255,255,255,.9); border-radius: 40px; box-shadow: 0 40px 100px rgba(20,40,90,.3); color: #15161c; }
+  .lap { position: absolute; width: 760px; }
+  .lap .scr { width: 760px; height: 480px; background: #0b0b0d; border-radius: 26px 26px 6px 6px; padding: 18px; box-shadow: 0 50px 100px rgba(10,30,80,.35); }
+  .lap .scr > div { width: 100%; height: 100%; border-radius: 8px; background: #fff; overflow: hidden; position: relative; color: #15161c; }
+  .lap .base { width: 900px; height: 34px; margin-left: -70px; border-radius: 4px 4px 30px 30px; background: linear-gradient(180deg, #e9eaee, #b9bcc4 60%, #8e9199); position: relative; }
+  .lap .base::before { content: ""; position: absolute; left: 50%; top: 0; width: 150px; height: 12px; margin-left: -75px; border-radius: 0 0 12px 12px; background: #a6a9b1; }
+  .sbar { position: absolute; left: 60px; right: 60px; top: 180px; padding: 22px 30px; border-radius: 40px; box-shadow: 0 8px 30px rgba(0,0,0,.12); font: 500 26px "I"; color: #333; }
+  .row { display: flex; justify-content: space-between; padding: 16px 20px; border-radius: 12px; font: 500 24px "I"; margin-top: 8px; background: #f3f4f8; }
+  .row.on { background: #3d6cff; color: #fff; }
+  .shot { position: absolute; width: 420px; height: 560px; border-radius: 28px; overflow: hidden; background-size: cover; box-shadow: 0 40px 90px rgba(30,40,90,.3); color: #fff; }
+  .shot b { position: absolute; left: 30px; bottom: 30px; font: 600 38px "I"; text-shadow: 0 2px 20px rgba(0,0,0,.4); }
+  .shot i { position: absolute; right: 26px; top: 26px; font: 600 24px "I"; font-style: normal; padding: 6px 14px; border-radius: 14px; background: rgba(255,255,255,.25); backdrop-filter: blur(8px); }
+  .poster { position: absolute; inset: 0; }
+  .hz { position: absolute; left: -400px; right: -400px; top: 1300px; height: 1600px; border-radius: 50%; border-top: 5px solid #6f95ff; box-shadow: 0 -10px 60px rgba(111,149,255,.9), 0 -40px 160px rgba(80,120,255,.5); background: #000; }
+  .ava { width: 220px; height: 220px; border-radius: 50%; overflow: hidden; margin: 0 auto; box-shadow: 0 0 0 8px #fff, 0 20px 50px rgba(20,20,60,.18); }
+  .ava img { width: 120%; height: 120%; margin: -10%; object-fit: cover; }
+  #cur { position: absolute; left: 0; top: 0; width: 64px; height: 64px; z-index: 30; opacity: 0; filter: drop-shadow(0 6px 10px rgba(0,0,0,.3)); }
+  .foot { position: absolute; left: 0; right: 0; top: 50px; text-align: center; font: 500 24px "I"; color: rgba(255,255,255,.6); z-index: 25; }
+  .foot.dark { color: rgba(20,20,30,.4); }
+  #fade { position: absolute; inset: 0; background: #fff; opacity: 0; z-index: 40; pointer-events: none; }
+</style>
+</head>
+<body>
+<!-- 1. горы на закате -->
+<div class="sc" id="s_card"><div class="ph" id="c_ph" style="background-image:url(../photos/mountains.jpg)"></div></div>
+<!-- 2. облака: стеклянное уведомление и «0 ₽» -->
+<div class="sc" id="s_push"><div class="ph" id="p_ph" style="background-image:url(../photos/clouds.jpg)"></div>
+  <div class="glass" id="p_ban" style="left:80px;right:80px;top:520px;padding:34px 40px;display:flex;gap:26px;align-items:center">
+    <i style="width:90px;height:90px;border-radius:22px;background:#15161c;flex:none"></i>
+    <div><b style="display:block;font:600 40px I">Бонус не начислен</b><span style="display:block;font:500 32px/1.3 I;color:#5a5f6e;margin-top:6px">Вы уже были клиентом банка</span></div></div>
+  <div id="p_zero" style="position:absolute;left:0;right:0;top:760px;text-align:center;font:600 300px/1 I;letter-spacing:-.05em;text-shadow:0 10px 60px rgba(20,40,90,.35)">0 ₽</div></div>
+<!-- 3. светлый холст: «скриншоты» забытых карт -->
+<div class="sc" id="s_list"><div class="canvas"></div>
+  <div class="shot" id="l1" style="left:-40px;top:720px;background-image:url(../photos/clouds_pink.jpg)"><i>2021</i><b>для стипендии</b></div>
+  <div class="shot" id="l2" style="left:330px;top:680px;background-image:url(../photos/sunset.jpg)"><i>2023</i><b>зарплатная</b></div>
+  <div class="shot" id="l3" style="left:700px;top:720px;background-image:url(../photos/skyline.jpg)"><i>2017</i><b>детская</b></div></div>
+<!-- 4. облака: ноутбук с поиском -->
+<div class="sc" id="s_search"><div class="ph" id="q_ph" style="background-image:url(../photos/clouds.jpg)"></div>
+  <div class="lap" id="q_lap" style="left:160px;top:640px"><div class="scr"><div><div style="position:absolute;left:0;right:0;top:80px;text-align:center;font:600 54px I;letter-spacing:-.03em">Поиск</div>
+    <div class="sbar" id="q_bar"><span id="q_tx"></span><span id="q_car" style="color:#3d6cff">|</span></div></div></div><div class="base"></div></div></div>
+<!-- 5. внутрь экрана: кабинет -->
+<div class="sc" id="s_cab"><div class="ph" style="background-image:url(../photos/clouds.jpg);filter:blur(6px)"></div>
+  <div class="glass" id="c_win" style="left:90px;right:90px;top:520px;padding:44px">
+    <div style="font:600 24px I;color:#8a8fa0;letter-spacing:.08em">ЛИЧНЫЙ КАБИНЕТ · ПРИМЕР</div>
+    <div class="row" id="c_gos" style="margin-top:22px">Вход через Госуслуги<span id="c_ok"></span></div>
+    <div class="row" id="c_item">Сведения о банковских счетах</div><div class="row" style="color:#9aa">Налоги</div></div></div>
+<!-- 6. постер: закат и крупная антиква -->
+<div class="sc" id="s_tbl"><div class="poster"><div class="ph" id="t_ph" style="background-image:url(../photos/sunset.jpg)"></div>
+  <div style="position:absolute;left:0;right:0;top:230px;text-align:center;font:400 46px SR;font-style:italic;letter-spacing:.02em;opacity:.92">Сведения о банковских счетах</div>
+  <div id="t_big" style="position:absolute;left:0;right:0;top:420px;text-align:center;font:600 300px/1 S;font-style:italic;letter-spacing:-.02em;text-shadow:0 10px 60px rgba(80,20,0,.35)">2014</div>
+  <div class="glass" id="t_card" style="left:120px;right:120px;top:820px;padding:30px 36px;background:rgba(255,255,255,.8)">
+    <div class="row">Банк №1<span>открыт 03.2021</span></div><div class="row">Банк №2<span>закрыт 09.2024</span></div><div class="row">Банк №3<span>открыт 06.2017</span></div></div></div></div>
+<!-- 7. тёмный кадр с горизонтом -->
+<div class="sc" id="s_ok" style="background:#000"><div class="hz"></div></div>
+<!-- 8. светлый холст: аватар и кнопка -->
+<div class="sc" id="s_end"><div class="canvas"></div>
+  <div id="e_box" style="position:absolute;left:0;right:0;top:520px;text-align:center;color:#15161c">
+    <div class="ava"><img src="../../assets/tg/avatar.png"></div>
+    <div style="font:600 52px I;margin-top:40px;letter-spacing:-.02em">Владик Арбузит</div>
+    <div style="font:500 32px I;color:#7a7f8e;margin-top:8px">канал в Telegram</div>
+    <div id="e_btn" style="display:inline-block;margin-top:40px;padding:26px 50px;border-radius:44px;background:#3d6cff;color:#fff;font:600 38px I;box-shadow:0 20px 50px rgba(61,108,255,.4)">Ссылка в профиле</div></div></div>
+<!-- 9. снова горы → петля -->
+<div class="sc" id="s_none"><div class="ph" id="n_ph" style="background-image:url(../photos/mountains.jpg)"></div></div>
+
+<div id="txt"></div>
+<svg id="cur" viewBox="0 0 32 32"><path d="M6 3 L6 25 L11.5 19.5 L15.5 28 L19 26.5 L15 18.2 L22.5 18.2 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+<div class="foot" id="foot">Условия зависят от банка и акции. Не реклама конкретного банка</div>
+<div id="fade"></div>
+<script src="../timeline.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { TL, $, clamp, lerp, out3, out5, io3, back } = F;
+  // положение текста и светлый/тёмный фон по сценам
+  const TXT = { s_card: [820, 0], s_push: [1230, 0], s_list: [300, 1], s_search: [330, 0], s_cab: [1180, 0], s_tbl: [1420, 0], s_ok: [820, 0], s_end: [1240, 1], s_none: [820, 0] };
+  const kb = (e, t, z0 = 1.04, z1 = 1.16, dx = -30) => { e.style.transform = `translateX(${(dx * t / 6).toFixed(1)}px) scale(${(z0 + (z1 - z0) * clamp(t / 7)).toFixed(4)})`; };   // медленный «кен бёрнс»
+  function cursor(t, id, at) { const c = $("cur"); c.style.opacity = 0; if (t < at - .8 || t > at + .6) return;
+    const r = $(id).getBoundingClientRect(), tx = r.left + r.width * .6, ty = r.top + r.height / 2, k = io3((t - at + .8) / .7);
+    c.style.opacity = clamp((t - at + .8) / .2) * (1 - clamp((t - at - .45) / .15)); c.style.transform = `translate(${lerp(tx + 200, tx, k) - 8}px, ${lerp(ty + 260, ty, k) - 6}px)`; }
+  const SC = {
+    s_card(t) { kb($("c_ph"), t, 1.02, 1.12, -40); },
+    s_push(t, e) { kb($("p_ph"), t, 1.05, 1.15, 30); const b = $("p_ban"), k = out5((t - e.no) / .6); b.style.opacity = clamp((t - e.no) / .2);
+      b.style.transform = `translateY(${((1 - k) * 80 + Math.sin(t * 1.3) * 8).toFixed(1)}px)`; b.style.filter = `blur(${(10 * (1 - k)).toFixed(1)}px)`;
+      const z = $("p_zero"), kz = out5((t - e.no - .5) / .6); z.style.opacity = clamp((t - e.no - .5) / .25); z.style.transform = `scale(${lerp(1.2, 1, kz)})`; z.style.filter = `blur(${(14 * (1 - kz)).toFixed(1)}px)`; },
+    s_list(t, e) { [["l1", e.a, -8], ["l2", e.b, 0], ["l3", e.c, 8]].forEach(([id, at, r]) => { const el = $(id), k = out5((t - at) / .6);
+      el.style.opacity = clamp((t - at) / .2); el.style.transform = `translateY(${((1 - k) * 300 + Math.sin(t * 1.2 + r) * 6).toFixed(1)}px) rotate(${r * k}deg)`; el.style.filter = `blur(${(12 * (1 - k)).toFixed(1)}px)`; }); },
+    s_search(t, e) { kb($("q_ph"), t, 1.04, 1.14, -20); const l = $("q_lap"), k = out5(t / .7); l.style.transform = `translateY(${((1 - k) * 260 + Math.sin(t * 1.1) * 10).toFixed(1)}px) scale(${lerp(.9, 1, k)})`;
+      const q = TL.query, t1 = Math.max(.6, e.min - .3), n = Math.round(clamp((t - .3) / (t1 - .3)) * q.length); $("q_tx").textContent = q.slice(0, n);
+      $("q_car").style.opacity = Math.floor(t * 2.2) % 2 ? 1 : 0; },
+    s_cab(t, e) { const w = $("c_win"), k = out5(t / .6); w.style.transform = `translateY(${((1 - k) * 120).toFixed(1)}px) scale(${lerp(1.15, 1, k)})`; w.style.opacity = clamp(t / .25);
+      $("c_gos").className = "row" + (t > e.gos && t < e.open ? " on" : ""); $("c_ok").textContent = t > e.gos ? "✓" : ""; $("c_item").className = "row" + (t > e.open ? " on" : "");
+      cursor(t, t < e.gos + .6 ? "c_gos" : "c_item", t < e.gos + .6 ? e.gos : e.open); },
+    s_tbl(t, e) { kb($("t_ph"), t, 1.03, 1.12, 20); const b = $("t_big"), k = out5((t - e.year) / .7); b.style.opacity = clamp((t - e.year) / .25); b.style.transform = `scale(${lerp(1.25, 1, k)})`;
+      b.style.filter = `blur(${(16 * (1 - k)).toFixed(1)}px)`; const c = $("t_card"), kc = out5((t - e.banks) / .6); c.style.opacity = clamp((t - e.banks) / .2); c.style.transform = `translateY(${(1 - kc) * 120}px)`; },
+    s_ok() {},
+    s_end(t, e) { const b = $("e_box"), k = out5(t / .6); b.style.transform = `translateY(${(1 - k) * 80}px)`; b.style.opacity = clamp(t / .25);
+      const p = Math.sin(Math.PI * clamp((t - e.link) / .3)); $("e_btn").style.transform = `scale(${1 - .06 * p})`; cursor(t, "e_btn", e.link); },
+    s_none(t) { kb($("n_ph"), t, 1.12, 1.02, 30); },
+  };
+  window.renderAt = (t) => {
+    const S = F.scene(t);
+    TL.scenes.forEach((s, k) => { $(s.id).style.visibility = k === S.i ? "visible" : "hidden"; });
+    $("cur").style.opacity = 0; SC[S.id](S.lt, S.ev);
+    const [ty, dark] = TXT[S.id], tx = $("txt"); tx.style.top = ty + "px"; tx.style.fontSize = S.id === "s_ok" ? "124px" : ""; tx.className = dark ? "dark" : ""; $("foot").className = "foot" + (dark ? " dark" : "");
+    F.words(tx, t, (s, k, out) => { s.style.opacity = clamp(k * 2) * (1 - out); s.style.filter = `blur(${(12 * (1 - out3(k)) + 10 * out).toFixed(1)}px)`;
+      s.style.transform = `translateY(${((1 - out3(k)) * 24).toFixed(1)}px) scale(${lerp(1.08, 1, out3(k)).toFixed(3)})`; });
+    // переход: мягкая белая засветка, как у референса (кадр «выгорает» и проявляется следующий)
+    const fin = S.s.t0 > 0 ? 1 - clamp(S.lt / .35) : 0, fout = S.last ? 0 : clamp((S.lt - (S.d - .2)) / .2);
+    $("fade").style.opacity = (Math.max(fin, fout) * .85).toFixed(2);
+  };
+  document.fonts.ready.then(() => { window.renderAt(0); window.__ready = true; });
+})();
+</script>
+</body>
+</html>

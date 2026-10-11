@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс 12 — формат «монитор в комнате»</title>
+<!-- Формат по референсу владельца №1 (DeHs7L9RUfM): «как будто снято на телефон» — тёмная комната, окно с вечерним городом,
+     монитор с программой монтажа (окно просмотра + дорожки таймлайна, бегунок), в окне просмотра — тёмная графика со свечением
+     одного цвета; сверху белая плашка-стикер. Лёгкая «ручная» камера. Город за окном — фото CC0 (photos/README.md). -->
+<style>
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050506; font-family: "I"; color: #fff; -webkit-font-smoothing: antialiased; }
+  #world { position: absolute; left: -60px; top: -80px; width: 1200px; height: 2080px; transform-origin: 50% 45%; }
+  #win { position: absolute; left: 0; top: 0; width: 1200px; height: 1150px; background: url("../photos/skyline.jpg") 50% 62% / cover; filter: saturate(1.05) brightness(.95); }
+  #win::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 85%, #050506); }
+  .mull { position: absolute; background: #0b0b0c; box-shadow: 0 0 30px rgba(0,0,0,.6); }
+  #room { position: absolute; left: 0; right: 0; top: 1100px; bottom: 0; background: linear-gradient(180deg, #050506, #0d0d0f 40%, #050506); }
+  #desk { position: absolute; left: 0; right: 0; top: 1610px; height: 500px; background: linear-gradient(180deg, #19191c, #0a0a0b 40%); }
+  #glow { position: absolute; left: 100px; right: 100px; top: 1560px; height: 300px; border-radius: 50%; background: radial-gradient(closest-side, rgba(124,255,79,.22), transparent); filter: blur(30px); }
+  #mon { position: absolute; left: 70px; width: 1060px; top: 900px; height: 660px; background: #040404; border-radius: 16px; padding: 14px; box-shadow: 0 30px 80px rgba(0,0,0,.8); }
+  #neck { position: absolute; left: 570px; width: 120px; top: 1556px; height: 120px; background: linear-gradient(90deg, #111, #1d1d20, #0d0d0e); }
+  #base { position: absolute; left: 470px; width: 320px; top: 1664px; height: 30px; border-radius: 50%; background: #141416; }
+  #scr { position: relative; width: 100%; height: 100%; background: #1a1a1c; border-radius: 4px; overflow: hidden; }
+  #scr::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(255,255,255,.07), transparent 35%, transparent 70%, rgba(255,255,255,.03)); pointer-events: none; }
+  .bar { position: absolute; left: 0; right: 0; top: 0; height: 30px; background: #232326; display: flex; align-items: center; justify-content: center; gap: 30px; font: 500 12px "I"; color: #8b8b92; }
+  .side { position: absolute; top: 40px; width: 200px; height: 330px; background: #202023; border-radius: 4px; padding: 10px; }
+  .side i { display: block; height: 12px; margin: 10px 4px; border-radius: 3px; background: #2e2e33; }
+  #view { position: absolute; left: 230px; top: 40px; width: 572px; height: 322px; background: #070707; overflow: hidden; }
+  .v { position: absolute; inset: 0; visibility: hidden; display: flex; align-items: center; justify-content: center; }
+  .gl { position: absolute; left: 50%; top: 58%; width: 420px; height: 300px; margin: -150px 0 0 -210px; border-radius: 50%; background: radial-gradient(closest-side, rgba(124,255,79,.75), rgba(124,255,79,.18) 55%, transparent); filter: blur(18px); }
+  #vt { position: absolute; left: 20px; right: 20px; top: 136px; text-align: center; font: 700 30px/1.15 "I"; letter-spacing: -.02em; z-index: 5; }
+  #vt .w { display: inline-block; white-space: pre; }
+  #tl { position: absolute; left: 0; right: 0; top: 372px; bottom: 0; background: #151517; }
+  .ruler { position: absolute; left: 0; right: 0; top: 0; height: 24px; background: repeating-linear-gradient(90deg, #3a3a40 0 1px, transparent 1px 24px) 0 12px / 100% 12px no-repeat, #1d1d20; }
+  .trk { position: absolute; left: 70px; right: 0; height: 26px; }
+  .trk b { position: absolute; top: 0; height: 26px; border-radius: 4px; border: 1px solid rgba(0,0,0,.4); }
+  .lbl { position: absolute; left: 8px; width: 54px; height: 26px; border-radius: 3px; background: #26262a; }
+  #ph { position: absolute; top: 0; bottom: 0; width: 2px; background: #ff4b4b; z-index: 3; }
+  #ph::before { content: ""; position: absolute; left: -7px; top: 0; border: 8px solid transparent; border-top: 10px solid #ff4b4b; }
+  #stk { position: absolute; left: 50%; top: 380px; transform: translateX(-50%); background: #fff; color: #000; border-radius: 16px; padding: 16px 26px; font: 700 50px "I"; letter-spacing: -.02em; white-space: nowrap; z-index: 10; display: flex; align-items: center; gap: 16px; }
+  #vig { position: absolute; inset: 0; background: radial-gradient(1200px 1600px at 50% 45%, transparent 55%, rgba(0,0,0,.55)); pointer-events: none; z-index: 9; }
+  .foot { position: absolute; left: 0; right: 0; bottom: 60px; text-align: center; font: 500 24px "I"; color: rgba(255,255,255,.35); z-index: 11; }
+  /* содержимое окна просмотра */
+  .card { width: 210px; height: 132px; border-radius: 16px; background: linear-gradient(135deg, #1c1c1f, #303036); border: 1px solid rgba(255,255,255,.18); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,.6); }
+  .card::before { content: ""; position: absolute; left: 18px; top: 38px; width: 34px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, #e6e6ea, #8e9098); }
+  .phone { width: 130px; height: 262px; border-radius: 24px; background: #000; border: 3px solid #2c2c30; position: relative; overflow: hidden; }
+  .push { position: absolute; left: 7px; right: 7px; top: 34px; border-radius: 12px; background: rgba(40,40,44,.95); padding: 8px; font: 500 9px/1.3 "I"; color: #ddd; }
+  .push b { display: block; font: 700 10px "I"; color: #fff; }
+  .ui { width: 300px; border-radius: 12px; background: rgba(24,24,27,.92); border: 1px solid rgba(255,255,255,.1); padding: 10px; font: 500 12px "I"; color: #ddd; }
+  .ui .r { display: flex; justify-content: space-between; align-items: center; padding: 7px 8px; border-radius: 6px; margin-top: 4px; background: rgba(255,255,255,.04); }
+  .ui .r.on { background: rgba(124,255,79,.18); color: #b9ff9e; }
+  .gbtn { padding: 14px 30px; border-radius: 30px; border: 2px solid rgba(255,255,255,.85); font: 700 18px "I"; color: #fff; background: rgba(124,255,79,.25); box-shadow: 0 0 40px rgba(124,255,79,.8); }
+</style>
+</head>
+<body>
+<div id="world">
+  <div id="win"></div>
+  <div class="mull" style="left:880px;top:0;width:46px;height:1150px"></div><div class="mull" style="left:0;top:1080px;width:1200px;height:40px"></div>
+  <div id="room"></div><div id="desk"></div><div id="glow"></div>
+  <div id="neck"></div><div id="base"></div>
+  <div id="mon"><div id="scr">
+    <div class="bar"><span>Медиа</span><span>Монтаж</span><span>Цвет</span><span>Звук</span><span>Экспорт</span></div>
+    <div class="side" style="left:10px"><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i><i></i><i style="width:80%"></i><i></i><i style="width:60%"></i></div>
+    <div class="side" style="right:10px"><i style="width:60%"></i><i></i><i style="width:75%"></i><i></i><i style="width:50%"></i><i></i></div>
+    <div id="view">
+      <div class="v" id="v_card"><div class="gl"></div><div class="card" id="m_card"></div></div>
+      <div class="v" id="v_push"><div class="gl"></div><div class="phone" id="m_phone"><div class="push" id="m_push"><b>Бонус не начислен</b>Вы уже были клиентом банка</div></div></div>
+      <div class="v" id="v_list"><div class="gl"></div><div class="ui" id="m_list"><div style="color:#888">Мои карты</div>
+        <div class="r" id="m_l1">Для стипендии<span>2021</span></div><div class="r" id="m_l2">Зарплатная<span>2023</span></div><div class="r" id="m_l3">Детская<span>2017</span></div></div></div>
+      <div class="v" id="v_search"><div class="gl"></div><div class="ui" id="m_q" style="width:360px;border-radius:30px;padding:12px 18px;font-size:14px"><svg width="14" height="14" viewBox="0 0 46 46" style="vertical-align:-2px;margin-right:6px"><circle cx="19" cy="19" r="13" fill="none" stroke="#9dff7a" stroke-width="6"/><path d="M29 29 L40 40" stroke="#9dff7a" stroke-width="7" stroke-linecap="round"/></svg><span id="m_qt"></span></div></div>
+      <div class="v" id="v_cab"><div class="gl"></div><div class="ui" id="m_cab"><div style="color:#888">Личный кабинет · пример</div>
+        <div class="r" id="m_c1">Вход через Госуслуги<span id="m_c1s"></span></div><div class="r" id="m_c2">Сведения о банковских счетах</div><div class="r">Налоги</div></div></div>
+      <div class="v" id="v_tbl"><div class="gl"></div><div class="ui" id="m_tbl"><div style="color:#888">Счета · пример</div>
+        <div class="r">Банк №1<span>03.2021</span></div><div class="r">Банк №2<span>09.2024</span></div><div class="r">Банк №3<span>06.2017</span></div></div></div>
+      <div class="v" id="v_ok"><div class="gl" id="m_okg"></div></div>
+      <div class="v" id="v_end"><div class="gl"></div><div class="gbtn" id="m_btn">ссылка в профиле</div></div>
+      <div class="v" id="v_none"><div class="gl" style="opacity:.5"></div></div>
+      <div id="vt"></div>
+    </div>
+    <div id="tl"><div class="ruler"></div><div id="tracks"></div><div id="ph"></div></div>
+  </div></div>
+  <div id="vig"></div>
+</div>
+<div id="stk">Где ты уже клиент? <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="19" cy="19" r="13" fill="none" stroke="#000" stroke-width="6"/><path d="M29 29 L40 40" stroke="#000" stroke-width="7" stroke-linecap="round"/></svg></div>
+<div class="foot">Условия зависят от банка и акции. Не реклама конкретного банка</div>
+<script src="../timeline.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { TL, $, clamp, lerp, out3, out5, io3, back } = F;
+  // дорожки таймлайна: клипы разных цветов (как в программе монтажа)
+  let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const COL = ["#b5e61d", "#22c3e6", "#ff6ec7", "#ffd43b", "#3b82f6"], PX = 26;   // 1 с = 26 px
+  const tr = $("tracks");
+  COL.forEach((c, k) => { const row = document.createElement("div"); row.className = "trk"; row.style.top = (34 + k * 32) + "px";
+    const l = document.createElement("div"); l.className = "lbl"; l.style.left = "-62px"; row.appendChild(l);
+    let x = rnd() * 40; while (x < 2400) { const w = 40 + rnd() * 150, b = document.createElement("b"); b.style.left = x + "px"; b.style.width = w + "px";
+      b.style.background = k === 4 ? "#2a62d8" : c; if (k === 4) b.style.backgroundImage = "repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 2px, transparent 2px 5px)"; row.appendChild(b); x += w + 4 + rnd() * 30; }
+    tr.appendChild(row); });
+  const V = { s_card: "v_card", s_push: "v_push", s_list: "v_list", s_search: "v_search", s_cab: "v_cab", s_tbl: "v_tbl", s_ok: "v_ok", s_end: "v_end", s_none: "v_none" };
+  // где текст в окне просмотра (верх строки), чтобы не лезть на предмет
+  const VT = { s_card: 236, s_push: 120, s_list: 30, s_search: 210, s_cab: 26, s_tbl: 26, s_ok: 128, s_end: 210, s_none: 128 };
+  const SC = {
+    s_card(t, e) { const c = $("m_card"); c.style.transform = `translateY(${(Math.sin(t * 1.5) * 4 - 40).toFixed(1)}px) rotate(-6deg) scale(${lerp(.6, 1, out5(t / .6))})`;
+      c.style.filter = t > e.old ? `grayscale(1) brightness(.7)` : ""; },
+    s_push(t, e) { const p = $("m_phone"); p.style.transform = `translateX(-140px) scale(${lerp(.7, 1, out5(t / .5))})`;
+      const n = $("m_push"), k = out5((t - e.no) / .45); n.style.opacity = clamp((t - e.no) / .1); n.style.transform = `translateY(${(1 - k) * -60}px)`; },
+    s_list(t, e) { const u = $("m_list"); u.style.transform = `translateY(50px) scale(${lerp(.8, 1, out5(t / .5))})`;
+      [["m_l1", e.a], ["m_l2", e.b], ["m_l3", e.c]].forEach(([id, at]) => { $(id).className = "r" + (t >= at ? " on" : ""); $(id).style.opacity = t >= at - 2 ? 1 : .5; }); },
+    s_search(t, e) { const q = TL.query, n = Math.round(clamp((t - .2) / Math.max(.3, e.min - .6)) * q.length); $("m_qt").textContent = q.slice(0, n);
+      $("m_q").style.transform = `translateY(-40px) scale(${lerp(1.4, 1, out5(t / .5))})`; },
+    s_cab(t, e) { $("m_cab").style.transform = `translateY(40px) scale(${lerp(.85, 1, out5(t / .5))})`; $("m_c1s").textContent = t > e.gos ? "✓" : "";
+      $("m_c1").className = "r" + (t > e.gos && t < e.open ? " on" : ""); $("m_c2").className = "r" + (t > e.open ? " on" : ""); },
+    s_tbl(t, e) { $("m_tbl").style.transform = `translateY(40px) scale(${lerp(.85, 1, out5(t / .5))}) translateY(${-t * 4}px)`; $("m_tbl").style.opacity = 1 - .5 * clamp((t - e.year + .2) / .3); },
+    s_ok(t, e) { $("m_okg").style.transform = `scale(${1 + .3 * Math.sin(Math.PI * clamp((t - e.mine) / .6))})`; },
+    s_end(t, e) { const b = $("m_btn"), p = Math.sin(Math.PI * clamp((t - e.link) / .3)); b.style.transform = `translateY(60px) scale(${lerp(.6, 1, back(t / .5)) * (1 - .06 * p)})`; },
+    s_none() {},
+  };
+  window.renderAt = (t) => {
+    const S = F.scene(t);
+    Object.entries(V).forEach(([sid, vid]) => { $(vid).style.visibility = sid === S.id ? "visible" : "hidden"; });
+    SC[S.id](S.lt, S.ev);
+    // окно просмотра: смена кадров — короткая вспышка свечения; текст — по словам, текущее слово зелёное
+    const kin = S.s.t0 > 0 ? out3(S.lt / .3) : 1; $(V[S.id]).style.opacity = kin; $(V[S.id]).style.transform = `scale(${lerp(1.08, 1, kin)})`;
+    const vt = $("vt"); vt.style.top = VT[S.id] + "px";
+    F.words(vt, t, (s, k, out, w) => { s.style.opacity = clamp(k * 2.5) * (1 - out); s.style.filter = `blur(${(5 * (1 - k) + 5 * out).toFixed(1)}px)`;
+      const red = w.c === "sr" || w.c === "r", acc = w.c && !red; s.style.color = red ? "#ff6b6b" : acc ? "#9dff7a" : "#fff";
+      s.style.textShadow = acc ? "0 0 18px rgba(124,255,79,.8)" : "none"; s.style.transform = `translateY(${((1 - out3(k)) * 8).toFixed(1)}px)`; });
+    // таймлайн едет, бегунок стоит у трети
+    tr.style.transform = `translateX(${(260 - t * PX).toFixed(1)}px)`; $("ph").style.left = "330px";
+    // «ручная» камера: лёгкое покачивание и медленный наезд на монитор
+    const z = 1 + .07 * clamp(t / TL.duration), sx = Math.sin(t * .9) * 6 + Math.sin(t * 2.3) * 2, sy = Math.cos(t * .7) * 5 + Math.sin(t * 1.9) * 2;
+    $("world").style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px) scale(${z.toFixed(4)}) rotate(${(Math.sin(t * .5) * .3).toFixed(2)}deg)`;
+    $("glow").style.opacity = .7 + .3 * Math.sin(t * 2);
+  };
+  document.fonts.ready.then(() => { window.renderAt(0); window.__ready = true; });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс 12 — формат «белый минимал»</title>
+<!-- Формат по референсу владельца №3 (Dc3nz54I0J0): белый фон, мелкий аккуратный текст по словам (новое слово сначала голубое,
+     потом чёрное), огромные надписи, обрезанные краем кадра и плывущие вбок, строка поиска и панель «как в Drive» с рукой-курсором,
+     слова-замены по центру, быстрые горизонтальные пролёты между сценами. Время — ../timeline.js. -->
+<style>
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-cyrillic-400.woff2"); font-weight: 400; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-latin-400.woff2"); font-weight: 400; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../assets/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f6f6f9; font-family: "I"; color: #111; -webkit-font-smoothing: antialiased; }
+  #cam { position: absolute; inset: 0; }
+  .sc { position: absolute; inset: 0; visibility: hidden; }
+  #txt { position: absolute; left: 70px; right: 70px; top: 900px; text-align: center; font: 500 70px/1.15 "I"; letter-spacing: -.02em; z-index: 20; }
+  #txt .w { display: inline-block; white-space: pre; }
+  .huge { position: absolute; white-space: nowrap; font: 600 520px/1 "I"; letter-spacing: -.06em; }
+  .pill { position: absolute; display: flex; align-items: center; gap: 26px; background: #fff; border-radius: 80px; box-shadow: 0 18px 50px rgba(20,20,60,.10), 0 2px 6px rgba(20,20,60,.06); }
+  .panel { position: absolute; background: #fff; border-radius: 56px; box-shadow: 0 30px 80px rgba(20,20,60,.12); padding: 54px 50px; overflow: hidden; }
+  .panel .hd { display: flex; justify-content: space-between; align-items: center; font: 400 64px "I"; color: #8a8f9c; margin-bottom: 22px; }
+  .panel .r { display: flex; align-items: center; gap: 22px; padding: 18px 20px; border-radius: 14px; font: 400 40px "I"; color: #222; }
+  .panel .r i { width: 46px; height: 36px; border-radius: 6px; background: #4a8af4; flex: none; position: relative; }
+  .panel .r i::before { content: ""; position: absolute; left: 0; top: -7px; width: 20px; height: 10px; border-radius: 4px 4px 0 0; background: #4a8af4; }
+  .panel .r small { margin-left: auto; font: 400 32px "I"; color: #9aa0ac; }
+  .panel .r.on { background: #c9dbff; }
+  .lens { width: 50px; height: 50px; border: 6px solid #111; border-radius: 50%; position: relative; flex: none; }
+  .lens::after { content: ""; position: absolute; width: 6px; height: 22px; background: #111; right: -11px; bottom: -18px; transform: rotate(-45deg); border-radius: 3px; }
+  .ban { position: absolute; left: 50px; right: 50px; display: flex; gap: 26px; align-items: center; padding: 30px 34px; background: rgba(255,255,255,.92); border-radius: 44px; box-shadow: 0 20px 60px rgba(20,20,60,.12); }
+  .ban b { display: block; font: 600 38px "I"; } .ban span { display: block; font: 400 32px/1.3 "I"; color: #6b7080; margin-top: 4px; }
+  .ban .ap { width: 90px; height: 90px; border-radius: 22px; background: #111; flex: none; display: flex; align-items: center; justify-content: center; color: #fff; font: 600 44px "I"; }
+  .swap { position: absolute; left: 0; right: 0; text-align: center; font: 500 110px/1 "I"; letter-spacing: -.03em; }
+  .chip { position: absolute; padding: 18px 32px; border-radius: 40px; font: 500 40px "I"; white-space: nowrap; }
+  #hand { position: absolute; left: 0; top: 0; width: 84px; height: 84px; z-index: 30; opacity: 0; filter: drop-shadow(0 6px 10px rgba(0,0,0,.18)); }
+  .foot { position: absolute; left: 0; right: 0; bottom: 70px; text-align: center; font: 400 24px "I"; color: #b2b6c0; z-index: 25; }
+  .ava { width: 200px; height: 200px; border-radius: 50%; overflow: hidden; margin: 0 auto; box-shadow: 0 0 0 8px #fff, 0 20px 50px rgba(20,20,60,.15); }
+  .ava img { width: 120%; height: 120%; margin: -10%; object-fit: cover; }
+</style>
+</head>
+<body>
+<div id="cam">
+  <div class="sc" id="s_card"><div class="chip" id="w_old" style="left:50%;top:1080px;color:#e5484d;border:3px solid #e5484d;background:#fff">статус: старый клиент</div></div>
+  <div class="sc" id="s_push">
+    <div class="ban" id="w_ban" style="top:180px"><div class="ap">₽</div><div><b>Бонус не начислен</b><span>Вы уже были клиентом банка — акция только для новых</span></div></div>
+    <div class="huge" id="w_zero" style="top:420px;font-size:640px">0 ₽</div>
+  </div>
+  <div class="sc" id="s_list">
+    <div class="swap" id="w_sw1" style="top:620px">стипендиальная</div><div class="swap" id="w_sw2" style="top:620px">зарплатная</div><div class="swap" id="w_sw3" style="top:620px">детская</div>
+  </div>
+  <div class="sc" id="s_search">
+    <div class="huge" id="w_min" style="top:330px;color:#2f6bff">2 минуты · 2 минуты</div>
+    <div class="pill" id="w_bar" style="left:60px;right:60px;top:1150px;padding:34px 42px;font:400 44px I"><i class="lens"></i><span id="w_q"></span><i id="w_car" style="width:4px;height:54px;background:#2f6bff"></i></div>
+  </div>
+  <div class="sc" id="s_cab">
+    <div class="panel" id="w_cab" style="left:130px;right:130px;top:420px">
+      <div class="hd">Кабинет <i class="lens" style="border-color:#8a8f9c;transform:scale(.8)"></i></div>
+      <div class="r" id="w_r0"><i></i>Профиль</div><div class="r" id="w_r1"><i></i>Сведения о счетах</div><div class="r"><i></i>Налоги</div><div class="r"><i></i>Документы</div></div>
+  </div>
+  <div class="sc" id="s_tbl">
+    <div class="panel" id="w_tbl" style="left:130px;right:130px;top:330px">
+      <div class="hd">Счета <i class="lens" style="border-color:#8a8f9c;transform:scale(.8)"></i></div>
+      <div class="r" id="w_t1"><i></i>Банк №1<small>с 03.2021</small></div><div class="r" id="w_t2"><i></i>Банк №2<small>закрыт</small></div>
+      <div class="r" id="w_t3"><i></i>Банк №3<small>с 06.2017</small></div><div class="r" id="w_t4"><i></i>Банк №4<small>с 01.2025</small></div></div>
+    <div class="huge" id="w_year" style="top:1230px;font-size:470px">2014</div>
+  </div>
+  <div class="sc" id="s_ok">
+    <div class="swap" id="w_o1" style="top:620px">нет в списке</div><div class="swap" id="w_o2" style="top:620px">новичок</div><div class="swap" id="w_o3" style="top:620px;color:#2f6bff">бонус твой</div>
+  </div>
+  <div class="sc" id="s_end">
+    <div style="position:absolute;left:0;right:0;top:520px;text-align:center" id="w_end">
+      <div class="ava"><img src="../../assets/tg/avatar.png"></div>
+      <div style="font:600 52px I;margin-top:40px;letter-spacing:-.02em">Владик Арбузит</div>
+      <div class="pill" id="w_btn" style="position:relative;display:inline-flex;margin-top:40px;padding:26px 46px;font:500 38px I;background:#2f6bff;color:#fff">Ссылка в профиле</div>
+    </div>
+  </div>
+  <div class="sc" id="s_none"></div>
+  <div id="txt"></div>
+</div>
+<svg id="hand" viewBox="0 0 32 32"><path d="M11 3.5c1.2 0 2 .9 2 2v8.2l.6-.1V11c0-1.1.9-2 2-2s2 .9 2 2v2.6l.6-.1v-1.6c0-1.1.9-2 2-2s2 .9 2 2v2l.4-.1c0-1.1.9-1.9 2-1.9s2 .9 2 2v6.6c0 4.6-3.4 8.5-8 8.5h-2c-2.6 0-4.6-1.3-6-3.3l-4.3-6.5c-.6-.9-.4-2.1.5-2.7.9-.6 2-.4 2.7.4L9 19V5.5c0-1.1.9-2 2-2z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg>
+<div class="foot">Условия зависят от банка и акции. Не реклама конкретного банка</div>
+<script src="../timeline.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { TL, $, clamp, lerp, out3, out5, io3, back } = F;
+  // где текст в каждой сцене (y верхней строки) и его размер
+  const TXT = { s_card: [900, 70], s_push: [1350, 64], s_list: [420, 52], s_search: [960, 64], s_cab: [1300, 60], s_tbl: [1020, 56], s_ok: [420, 52], s_end: [1250, 56], s_none: [900, 70] };
+  const swap = (ids, t, ats) => ids.forEach((id, i) => { const e = $(id), at = ats[i], nx = ats[i + 1] ?? 1e9;
+    const k = out5((t - at) / .35), o = clamp((t - nx) / .2);
+    e.style.opacity = t < at ? 0 : 1 - o; e.style.transform = `scale(${lerp(1.5, 1, k) * lerp(1, .6, o)})`; e.style.filter = `blur(${(10 * (1 - k) + 10 * o).toFixed(1)}px)`;
+    e.style.color = i === ids.length - 1 && id === "w_o3" ? "#2f6bff" : (k < 1 ? `rgb(${lerp(140, 17, k)|0},${lerp(170, 17, k)|0},${lerp(255, 17, k)|0})` : "#111"); });
+  const pan = (e, t, v, x0) => { e.style.transform = `translateX(${(x0 - v * t).toFixed(1)}px)`; };
+  function hand(t, clicks, fallback) {
+    const h = $("hand"); h.style.opacity = 0; if (!clicks.length) return;
+    const i = clicks.findIndex(c => t < c.t + .6); if (i < 0) return;
+    const c = clicks[i], r = $(c.id).getBoundingClientRect(), tx = r.left + r.width * (c.fx || .5), ty = r.top + r.height / 2;
+    const k = io3((t - (c.t - .7)) / .6), x = lerp(tx + 240, tx, k), y = lerp(ty + 380, ty, k), p = Math.sin(Math.PI * clamp((t - c.t + .08) / .2));
+    h.style.opacity = clamp((t - c.t + .9) / .2) * (1 - clamp((t - c.t - .45) / .15));
+    h.style.transform = `translate(${x - 30}px, ${y - 8}px) scale(${1 - .15 * p})`;
+  }
+  const SC = {
+    s_card(t, e) { const c = $("w_old"), k = back(clamp((t - e.old - .2) / .4)); c.style.opacity = t < e.old + .2 ? 0 : 1; c.style.transform = `translateX(-50%) scale(${lerp(.6, 1, k)})`; },
+    s_push(t, e) { const b = $("w_ban"), k = out5((t - e.no) / .5); b.style.opacity = clamp((t - e.no) / .15); b.style.transform = `translateY(${(1 - k) * -260}px)`;
+      const z = $("w_zero"); z.style.opacity = clamp((t - e.no - .4) / .25); pan(z, t - e.no, 90, 140); },
+    s_list(t, e) { swap(["w_sw1", "w_sw2", "w_sw3"], t, [e.a, e.b, e.c]); },
+    s_search(t, e) { pan($("w_min"), t, 240, 160); const q = TL.query, t1 = Math.max(.6, e.min - .4), n = Math.round(clamp((t - .2) / (t1 - .2)) * q.length);
+      $("w_q").textContent = q.slice(0, n); $("w_car").style.opacity = t < t1 || Math.floor(t * 2.2) % 2 ? 1 : 0;
+      const b = $("w_bar"), k = out5(t / .5); b.style.transform = `translateY(${(1 - k) * 120}px)`; b.style.opacity = clamp(t / .2); },
+    s_cab(t, e) { const p = $("w_cab"), k = out5(t / .5); p.style.transform = `translateY(${(1 - k) * 200}px) scale(${lerp(1, 1.08, io3((t - e.open) / .6))})`; p.style.opacity = clamp(t / .2);
+      $("w_r0").className = "r" + (t > e.gos && t < e.open ? " on" : ""); $("w_r1").className = "r" + (t > e.open ? " on" : ""); },
+    s_tbl(t, e) { const p = $("w_tbl"), k = out5(t / .5); p.style.transform = `translateY(${(1 - k) * 200}px)`; p.style.opacity = clamp(t / .2);
+      ["w_t1", "w_t2", "w_t3", "w_t4"].forEach((id, i) => { const kk = out3((t - e.banks - i * .2) / .4); $(id).style.opacity = kk; $(id).style.transform = `translateX(${(1 - kk) * 40}px)`; });
+      const y = $("w_year"); y.style.opacity = clamp((t - e.year) / .25); pan(y, t - e.year, 110, 40); y.style.filter = `blur(${(8 * (1 - out3((t - e.year) / .4))).toFixed(1)}px)`; },
+    s_ok(t, e) { swap(["w_o1", "w_o2", "w_o3"], t, [.05, e.new, e.mine - .1]); },
+    s_end(t, e) { const w = $("w_end"), k = out5(t / .5); w.style.transform = `translateY(${(1 - k) * 80}px)`; w.style.opacity = clamp(t / .2);
+      const p = Math.sin(Math.PI * clamp((t - e.link) / .3)); $("w_btn").style.transform = `scale(${1 - .06 * p})`; },
+    s_none() {},
+  };
+  // клики рукой: строка поиска, пункт меню, кнопка
+  const CL = { s_search: (e) => [{ t: e.min - .1, id: "w_bar", fx: .85 }], s_cab: (e) => [{ t: e.gos, id: "w_r0", fx: .4 }, { t: e.open, id: "w_r1", fx: .5 }], s_end: (e) => [{ t: e.link, id: "w_btn" }] };
+  window.renderAt = (t) => {
+    const S = F.scene(t);
+    TL.scenes.forEach((s, k) => { $(s.id).style.visibility = k === S.i ? "visible" : "hidden"; });
+    SC[S.id](S.lt, S.ev);
+    // текст: новое слово голубое и размытое, через 0,3 с — чёрное
+    const [ty, fs] = TXT[S.id]; const tx = $("txt"); tx.style.top = ty + "px"; tx.style.fontSize = fs + "px";
+    tx.style.opacity = S.id === "s_ok" || (S.id === "s_list" && S.lt > S.ev.a - .1) ? 0 : 1;   // там говорят слова-замены по центру
+    F.words(tx, t, (s, k, out, w) => { s.style.opacity = clamp(k * 2.5) * (1 - out);
+      const red = w.c === "sr" || w.c === "r", blue = w.c === "k" || w.c === "s" || w.c === "sg";
+      s.style.color = k < 1 ? `rgb(${lerp(150, red ? 229 : blue ? 47 : 17, k)|0},${lerp(178, red ? 72 : blue ? 107 : 17, k)|0},${lerp(255, red ? 77 : blue ? 255 : 17, k)|0})` : (red ? "#e5484d" : blue ? "#2f6bff" : "#111");
+      s.style.transform = `translateX(${((1 - out3(k)) * 26).toFixed(1)}px)`; s.style.filter = `blur(${(6 * (1 - k) + 8 * out).toFixed(1)}px)`; });
+    hand(S.lt, CL[S.id] ? CL[S.id](S.ev) : []);
+    // камера: быстрый горизонтальный пролёт между сценами (уход влево, вход справа) с размытием
+    const kin = S.s.t0 > 0 ? out5(S.lt / .35) : 1, kout = S.last ? 0 : io3(clamp((S.lt - (S.d - .22)) / .22));
+    const cam = $("cam"); cam.style.transform = `translateX(${((1 - kin) * 700 - kout * 900).toFixed(1)}px)`; cam.style.filter = `blur(${(14 * (1 - kin) + 16 * kout).toFixed(1)}px)`;
+  };
+  document.fonts.ready.then(() => { window.renderAt(0); window.__ready = true; });
+})();
+</script>
+</body>
+</html>
