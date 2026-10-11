@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс 12 — «Где ты уже клиент?»</title>
+<!-- Рилс #12 «Где ты уже клиент?» (11.10.2026). Монтаж — по референсам владельца (3 рилса, «он мне нравится, примени его»):
+     светлый «эппловский» фон, кинетическая типографика — на экране ровно те слова, что звучат, по одному, из размытия; ключевое
+     слово синим или курсивом с засечками; карточки интерфейса (карта, пуш, список, поиск, кабинет, таблица), курсор с кликом;
+     между сценами — плавный наезд с размытием вместо жёсткой склейки; финал — карточка владельца с кнопкой Telegram; петля в начало.
+     Время — timeline.js (build.py по словам голоса «E»). Банки на кадрах — обобщённые, интерфейс кабинета — обобщённый («пример»). -->
+<style>
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-cyrillic-400.woff2"); font-weight: 400; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-latin-400.woff2"); font-weight: 400; }
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "SFi"; src: url("../assets/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "Serif"; src: url("../assets/fonts/playfair-cyrillic-600-italic.woff2"); font-weight: 600; font-style: italic; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "Serif"; src: url("../assets/fonts/playfair-latin-600-italic.woff2"); font-weight: 600; font-style: italic; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f6fb; font-family: "SFi"; color: #0f1115; -webkit-font-smoothing: antialiased; }
+  #bg { position: absolute; inset: -200px; }
+  #bg i { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; }
+  .grain { position: absolute; inset: -50%; opacity: .045; mix-blend-mode: multiply; pointer-events: none; z-index: 60;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .foot { position: absolute; left: 60px; right: 60px; top: 50px; z-index: 58; text-align: center; font: 500 24px "SFi"; color: rgba(15,17,21,.42); }
+  /* сцены (карточки интерфейса) */
+  .sc { position: absolute; inset: 0; visibility: hidden; transform-origin: 50% 40%; }
+  .sc > * { margin-top: 170px; }   /* карточки ближе к центру кадра, текст — под ними */
+  .card { position: absolute; left: 90px; right: 90px; background: rgba(255,255,255,.92); border-radius: 44px; box-shadow: 0 30px 80px rgba(40,60,120,.16), 0 4px 14px rgba(40,60,120,.08);
+    border: 1px solid rgba(255,255,255,.9); padding: 44px 48px; }
+  .card h4 { font: 600 30px "SFi"; color: #7a8294; letter-spacing: .01em; }
+  .bank { position: absolute; left: 210px; top: 330px; width: 660px; height: 410px; border-radius: 40px; padding: 44px; color: #fff; overflow: hidden;
+    background: linear-gradient(135deg, #3d6cff, #7c4dff 60%, #c06bff); box-shadow: 0 40px 90px rgba(61,108,255,.35); }
+  .bank::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.28) 45%, transparent 60%); }
+  .bank .chip { width: 96px; height: 72px; border-radius: 14px; background: linear-gradient(135deg, #f1dc98, #c9a44a); margin-top: 60px; }
+  .bank .num { position: absolute; left: 44px; bottom: 44px; font: 600 36px "SFi"; letter-spacing: .14em; opacity: .9; }
+  .stamp { position: absolute; padding: 18px 30px; border: 10px solid #e5484d; color: #e5484d; border-radius: 22px; font: 700 64px "SFi"; letter-spacing: .02em; white-space: nowrap; background: rgba(255,255,255,.85); }
+  .push { display: flex; gap: 26px; align-items: flex-start; } .push .ic { width: 84px; height: 84px; border-radius: 22px; flex: none; }
+  .push b { display: block; font: 700 40px/1.2 "SFi"; } .push span { display: block; font: 500 34px/1.35 "SFi"; color: #4a5162; margin-top: 8px; }
+  .row { display: flex; align-items: center; gap: 24px; padding: 24px 26px; border-radius: 26px; margin-top: 14px; font: 600 38px "SFi"; }
+  .row .ic { width: 64px; height: 64px; border-radius: 18px; flex: none; } .row small { margin-left: auto; font: 500 30px "SFi"; color: #8a91a2; }
+  .row.hl { background: #eef2ff; }
+  .row .mk { margin-left: 18px; font: 700 34px "SFi"; padding: 8px 16px; border-radius: 14px; white-space: nowrap; }
+  .search { display: flex; align-items: center; gap: 24px; padding: 30px 36px; border-radius: 60px; background: #fff; box-shadow: 0 20px 60px rgba(40,60,120,.14); font: 500 40px "SFi"; }
+  .search .lens { width: 44px; height: 44px; border: 6px solid #9aa1b1; border-radius: 50%; flex: none; position: relative; }
+  .search .lens::after { content: ""; position: absolute; width: 6px; height: 20px; background: #9aa1b1; right: -10px; bottom: -16px; transform: rotate(-45deg); border-radius: 3px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 30px 44px; border-radius: 40px; font: 600 38px "SFi"; }
+  .menu div { padding: 30px 30px; border-radius: 26px; margin-top: 14px; background: #f3f5fa; font: 600 38px "SFi"; color: #2a3040; }
+  .menu div.on { background: #3d6cff; color: #fff; }
+  .tbl div { display: flex; justify-content: space-between; padding: 22px 6px; border-bottom: 2px solid #eef0f5; font: 500 32px "SFi"; } .tbl div b { font-weight: 700; }
+  .badge { position: absolute; padding: 18px 30px; border-radius: 40px; background: #0f1115; color: #fff; font: 700 44px "SFi"; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  .ava { width: 220px; height: 220px; border-radius: 50%; overflow: hidden; margin: 0 auto; box-shadow: 0 0 0 10px #fff, 0 0 0 16px #3d6cff, 0 30px 70px rgba(61,108,255,.35); }
+  .ava img { width: 120%; height: 120%; margin: -10%; object-fit: cover; }
+  /* кинетический текст */
+  #txt { position: absolute; left: 70px; right: 70px; z-index: 50; text-align: center; font: 700 100px/1.08 "SFi"; letter-spacing: -.035em; color: #0f1115; }
+  #txt .w { display: inline-block; white-space: pre; }
+  #txt .k { color: #3d6cff; }
+  #txt .s { font: italic 600 1.12em/1 "Serif"; letter-spacing: -.01em; color: #3d6cff; }
+  #txt .sr { font: italic 600 1.12em/1 "Serif"; letter-spacing: -.01em; color: #e5484d; }
+  #txt .sg { font: italic 600 1.12em/1 "Serif"; letter-spacing: -.01em; color: #12a150; }
+  #txt .r { color: #e5484d; } #txt .g { color: #12a150; }
+  #cur { position: absolute; left: 0; top: 0; width: 64px; height: 64px; z-index: 55; opacity: 0; }
+  #ring { position: absolute; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 6px solid rgba(61,108,255,.6); z-index: 54; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="bg"><i style="left:-100px;top:200px;width:700px;height:700px;background:#9fb6ff"></i><i style="left:600px;top:900px;width:800px;height:800px;background:#d8c4ff"></i><i style="left:200px;top:1500px;width:700px;height:600px;background:#bfe4ff"></i></div>
+<div class="foot">Условия зависят от банка и акции. Не реклама конкретного банка</div>
+
+<!-- 1. карта + штамп «старый клиент» -->
+<div class="sc" id="s_card">
+  <div class="bank" id="c_bank"><div style="font:600 32px SFi;opacity:.9">новая карта</div><div class="chip"></div><div class="num">•••• 2026</div></div>
+  <div class="stamp" id="c_stamp" style="left:250px;top:620px;transform:rotate(-8deg)">старый клиент</div>
+</div>
+<!-- 2. пуш «бонус не начислен» -->
+<div class="sc" id="s_push">
+  <div class="card push" id="p_card" style="top:420px"><i class="ic" style="background:linear-gradient(135deg,#ff7a7a,#e5484d)"></i><div><b>Бонус не начислен</b><span>Вы уже были клиентом банка. Условие акции — только для новых клиентов</span></div></div>
+</div>
+<!-- 3. список забытых карт -->
+<div class="sc" id="s_list">
+  <div class="card" style="top:300px"><h4>МОИ СТАРЫЕ КАРТЫ</h4>
+    <div class="row" id="l1"><i class="ic" style="background:linear-gradient(135deg,#3d6cff,#7c4dff)"></i>Для стипендии<small>2021</small></div>
+    <div class="row" id="l2"><i class="ic" style="background:linear-gradient(135deg,#12a150,#0b6b37)"></i>Зарплатная<small>2023</small></div>
+    <div class="row" id="l3"><i class="ic" style="background:linear-gradient(135deg,#ffcf4a,#e0a100)"></i>Детская<small>2017</small></div></div>
+</div>
+<!-- 4. поиск -->
+<div class="sc" id="s_search">
+  <div class="search" id="q_bar" style="position:absolute;left:70px;right:70px;top:470px"><i class="lens"></i><span id="q_tx"></span><i id="q_car" style="width:4px;height:50px;background:#3d6cff"></i></div>
+  <div class="badge" id="q_badge" style="left:330px;top:640px">⏱ 2 минуты</div>
+</div>
+<!-- 5. кабинет (обобщённо) -->
+<div class="sc" id="s_cab">
+  <div class="card" style="top:260px"><h4>ЛИЧНЫЙ КАБИНЕТ НАЛОГОПЛАТЕЛЬЩИКА · ПРИМЕР</h4>
+    <div class="btn" id="c_gos" style="margin-top:28px;background:#e7eefc;color:#2b5bd7">Войти через Госуслуги</div>
+    <div class="menu"><div>Профиль</div><div id="c_item">Сведения о банковских счетах</div><div style="color:#a3a9b6">Налоги</div></div></div>
+</div>
+<!-- 6. таблица счетов -->
+<div class="sc" id="s_tbl">
+  <div class="card tbl" style="top:280px"><h4>СВЕДЕНИЯ О БАНКОВСКИХ СЧЕТАХ · ПРИМЕР</h4>
+    <div id="t1"><b>Банк №1</b><span>открыт 03.2021</span></div><div id="t2"><b>Банк №2</b><span>закрыт 09.2024</span></div>
+    <div id="t3"><b>Банк №3</b><span>открыт 06.2017</span></div><div id="t4"><b>Банк №4</b><span>открыт 01.2025</span></div></div>
+  <div class="badge" id="t_badge" style="left:300px;top:900px;background:#3d6cff">с 1 июля 2014</div>
+</div>
+<!-- 7. вердикт -->
+<div class="sc" id="s_ok">
+  <div class="card" style="top:300px"><h4>ТВОИ БАНКИ</h4>
+    <div class="row" id="k1"><i class="ic" style="background:#ffd5d6"></i>Банк №1<span class="mk" style="color:#e5484d;background:#fdecec;margin-left:auto">не новичок</span></div>
+    <div class="row" id="k2"><i class="ic" style="background:#ffd5d6"></i>Банк №2<span class="mk" style="color:#e5484d;background:#fdecec;margin-left:auto">не новичок</span></div>
+    <div class="row hl" id="k3"><i class="ic" style="background:#c9f2d9"></i>Банк №5<span class="mk" style="color:#12a150;background:#e3f7eb;margin-left:auto">✓ бонус твой</span></div></div>
+</div>
+<!-- 8. финал: карточка владельца -->
+<div class="sc" id="s_end">
+  <div style="position:absolute;left:0;right:0;top:300px;text-align:center">
+    <div class="ava"><img src="../assets/tg/avatar.png"></div>
+    <div style="font:700 56px SFi;margin-top:44px;letter-spacing:-.02em">Владик Арбузит</div>
+    <div style="font:500 34px SFi;color:#7a8294;margin-top:10px">канал в Telegram</div>
+    <div class="btn" id="e_btn" style="margin-top:40px;background:#3d6cff;color:#fff;box-shadow:0 20px 50px rgba(61,108,255,.4)">Telegram · ссылка в профиле</div>
+  </div>
+</div>
+<!-- 9. петля: только текст (сцена пустая) -->
+<div class="sc" id="s_none"></div>
+
+<div id="txt"></div>
+<div id="ring"></div>
+<svg id="cur" viewBox="0 0 32 32"><path d="M6 3 L6 25 L11.5 19.5 L15.5 28 L19 26.5 L15 18.2 L22.5 18.2 Z" fill="#0f1115" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+<div class="grain" id="grain"></div>
+<script src="timeline.js"></script>
+<script src="reel.js"></script>
+</body>
+</html>
