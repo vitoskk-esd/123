@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Альфа-Карта — рекламный ролик 9:16</title>
+<!-- Рекламный ролик Альфа-Карты (владелец 11.10: «видео для рекламы банковских продуктов Альфа-Банка: лучшие условия, до 50 %
+     кэшбэка, найди условия, сделай в стилистике банка, чтобы привлекало внимание»). 1080×1920, 20 с, 30 к/с, без голоса.
+     ?v=safe — заголовок без превосходной степени («Выгодные условия»): «лучшие» в рекламе требует доказательства (38-ФЗ, ст. 5).
+     Рендер: node youtube/kit/yt/render.js ads/alfa-01/ad.html --out ads/alfa-01/out/video.mp4 [--query v=safe]
+     Условия (проверено 11.10.2026 по страницам alfabank.ru в поисковой выдаче): кэшбэк у партнёров до 50 %; Альфа-Карта бесплатная;
+     кэшбэк в категориях на выбор. erid и точные условия — из партнёрской программы перед публикацией. -->
+<style>
+  @font-face { font-family: "Mont"; src: url("/youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("/youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #EF3124; font-family: "Mont"; }
+  #st { position: absolute; inset: 0; overflow: hidden; }
+  .lay { position: absolute; inset: 0; }
+  .t { position: absolute; left: 0; right: 0; text-align: center; white-space: nowrap; }
+  .legal { position: absolute; left: 60px; right: 60px; bottom: 54px; font: 500 23px/1.35 "Mont"; text-align: left; z-index: 20; }
+  .tag { position: absolute; left: 60px; top: 60px; font: 700 26px "Mont"; padding: 8px 18px; border-radius: 10px; z-index: 20; }
+  .logo { position: absolute; right: 60px; top: 48px; display: flex; align-items: center; gap: 16px; z-index: 20; font: 800 36px "Mont"; }
+</style></head>
+<body><div id="st"></div>
+<script>
+const W = 1080, H = 1920, DUR = 20, RED = "#EF3124", INK = "#0B0B0B";
+const SAFE = /v=safe/.test(location.search);
+window.TL = { duration: DUR, fps: 30, size: [W, H] };
+const cl = (x) => Math.max(0, Math.min(1, x)), lerp = (a, b, k) => a + (b - a) * k;
+const out3 = (x) => 1 - Math.pow(1 - cl(x), 3), out5 = (x) => 1 - Math.pow(1 - cl(x), 5), in3 = (x) => Math.pow(cl(x), 3);
+const back = (x, s = 1.6) => { x = cl(x) - 1; return x * x * ((s + 1) * x + s) + 1; };
+const io = (x) => { x = cl(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const st = document.getElementById("st");
+// фирменный знак: «А» с полосой снизу (упрощённо), цвет — по фону
+const mark = (s, c, bg) => `<svg width="${64 * s}" height="${64 * s}" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="${bg}"/><path d="M32 9 L49 47 h-8.5 l-3.4 -8 h-10.2 l-3.4 8 H15z M32 22 l-3.6 9.6 h7.2z" fill="${c}"/><rect x="15" y="51" width="34" height="5" rx="1" fill="${c}"/></svg>`;
+const card = (w, o = {}) => { const h = w * .63; return `<svg width="${w}" height="${h}" viewBox="0 0 1000 630" style="overflow:visible">
+  <defs><linearGradient id="cg${o.id || 0}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF4B33"/><stop offset=".55" stop-color="#EF3124"/><stop offset="1" stop-color="#B8180F"/></linearGradient>
+  <linearGradient id="sh${o.id || 0}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <clipPath id="cc${o.id || 0}"><rect width="1000" height="630" rx="56"/></clipPath></defs>
+  <rect width="1000" height="630" rx="56" fill="url(#cg${o.id || 0})"/>
+  <g clip-path="url(#cc${o.id || 0})"><circle cx="880" cy="-40" r="420" fill="#fff" opacity=".07"/><circle cx="1040" cy="660" r="300" fill="#000" opacity=".08"/>
+    <rect x="${(o.shine ?? -2) * 1000}" y="-200" width="260" height="1100" fill="url(#sh${o.id || 0})" transform="rotate(20 500 315)"/></g>
+  <g transform="translate(70 70) scale(1.7)"><path d="M32 9 L49 47 h-8.5 l-3.4 -8 h-10.2 l-3.4 8 H15z M32 22 l-3.6 9.6 h7.2z" fill="#fff"/><rect x="15" y="51" width="34" height="5" rx="1" fill="#fff"/></g>
+  <rect x="80" y="290" width="130" height="96" rx="16" fill="#F4D27A"/><path d="M80 338 h130 M145 290 v96" stroke="#C9A24A" stroke-width="4"/>
+  <text x="80" y="540" font-family="Mont" font-weight="700" font-size="54" fill="#fff" letter-spacing="6">•••• 0050</text>
+  <text x="920" y="140" text-anchor="end" font-family="Mont" font-weight="800" font-size="56" fill="#fff">Альфа-Карта</text></svg>`; };
+const coinSvg = (r) => `<svg width="${r * 2}" height="${r * 2}" viewBox="-50 -50 100 100"><circle r="48" fill="#C9A24A"/><circle r="44" fill="#FFD95A"/><circle r="34" fill="none" stroke="#C9A24A" stroke-width="4"/><text y="17" text-anchor="middle" font-family="Unb" font-weight="900" font-size="46" fill="#B07D00">%</text></svg>`;
+const ICONS = {
+  cart: `<path d="M-30 -18 h8 l8 34 h34 l8 -24 h-44" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="-6" cy="26" r="5" fill="currentColor"/><circle cx="16" cy="26" r="5" fill="currentColor"/>`,
+  cup: `<path d="M-26 -14 h40 v22 a20 20 0 0 1 -40 0z M14 -6 h8 a9 9 0 0 1 0 18 h-8" stroke="currentColor" stroke-width="7" fill="none"/><path d="M-14 -30 q4 6 0 12 M0 -30 q4 6 0 12" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+  car: `<path d="M-34 10 v-12 l10 -18 h48 l10 18 v12z" stroke="currentColor" stroke-width="7" fill="none" stroke-linejoin="round"/><circle cx="-18" cy="16" r="7" fill="currentColor"/><circle cx="18" cy="16" r="7" fill="currentColor"/>`,
+  shirt: `<path d="M-14 -28 l-22 12 l8 16 l8 -4 v34 h40 v-34 l8 4 l8 -16 l-22 -12 q-14 12 -28 0z" stroke="currentColor" stroke-width="6" fill="none" stroke-linejoin="round"/>`,
+  pill: `<rect x="-30" y="-14" width="60" height="28" rx="14" stroke="currentColor" stroke-width="7" fill="none" transform="rotate(-35)"/><path d="M0 -14 v28" stroke="currentColor" stroke-width="6" transform="rotate(-35)"/>`,
+  fuel: `<rect x="-26" y="-28" width="34" height="58" rx="6" stroke="currentColor" stroke-width="7" fill="none"/><path d="M8 -10 l14 8 v26 a6 6 0 0 0 12 0 v-30 l-10 -10" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="-18" y="-18" width="18" height="14" fill="currentColor"/>`,
+};
+const icon = (k, size, col) => `<svg width="${size}" height="${size}" viewBox="-50 -50 100 100" style="color:${col}">${ICONS[k]}</svg>`;
+
+// сцены по времени: [начало, конец, фон]
+const SC = [[0, 3.2, RED], [3.2, 7.4, "#FFFFFF"], [7.4, 11.8, RED], [11.8, 15.4, "#FFFFFF"], [15.4, DUR, RED]];
+const LEGAL = "Реклама. АО «Альфа-Банк», ИНН 7728168971. Генеральная лицензия Банка России № 1326. Кэшбэк у партнёров — до 50 % по условиям акций партнёров, лимиты и полные условия — на alfabank.ru. erid: ____________";
+
+window.renderAt = (t) => {
+  const si = SC.findIndex(s => t < s[1]), s = SC[si < 0 ? SC.length - 1 : si], lt = t - s[0], bg = s[2], dark = bg !== RED;
+  const fg = dark ? INK : "#fff";
+  let h = `<div class="lay" style="background:${bg}"></div>`;
+  // переход: круг цвета следующей сцены раскрывается из центра последние 0,35 с сцены
+  const nxt = SC[SC.indexOf(s) + 1], tr = nxt ? cl((t - (s[1] - .35)) / .35) : 0;
+  // общий «дыхательный» наезд кадра
+  const push = 1.025 + .02 * Math.sin(t * .9);
+
+  if (s === SC[0]) {          // 1: заголовок слэмом
+    const L = SAFE ? ["ВЫГОДНЫЕ", "УСЛОВИЯ"] : ["ЛУЧШИЕ", "УСЛОВИЯ"];
+    L.forEach((w, i) => { const k = out5((lt - .15 - i * .35) / .45), sc = lerp(2.6, 1, k), sh = lt > .15 + i * .35 + .45 && lt < .15 + i * .35 + .6 ? Math.sin(lt * 120) * 8 : 0;
+      h += `<div class="t" style="top:${660 + i * 210}px;font:900 ${SAFE ? 128 : 148}px/1 'Unb';color:#fff;letter-spacing:-.03em;opacity:${cl(k * 2)};transform:translateX(${sh}px) scale(${sc})">${w}</div>`; });
+    const kb = out3((lt - 1.1) / .5); h += `<div style="position:absolute;left:${540 - 380 * kb}px;top:1120px;width:${760 * kb}px;height:14px;background:#fff;border-radius:7px"></div>`;
+    h += `<div class="t" style="top:1180px;font:700 52px 'Mont';color:#fff;opacity:${out3((lt - 1.4) / .4)};transform:translateY(${(1 - out3((lt - 1.4) / .4)) * 30}px)">для тех, кто любит кэшбэк</div>`;
+    // вспышка в начале
+    if (lt < .25) h += `<div class="lay" style="background:#fff;opacity:${1 - lt / .25}"></div>`;
+  }
+  if (s === SC[1]) {          // 2: карта прилетает, блик, «обслуживание 0 ₽»
+    const k = back((lt - .1) / .8, 1.3), rot = lerp(-28, -6, out3((lt - .1) / .9)) + Math.sin(t * 1.4) * 2, y = lerp(1500, 520, out5((lt - .1) / .8)) + Math.sin(t * 1.8) * 10;
+    h += `<div style="position:absolute;left:${540 - 450}px;top:${y - 280}px;filter:drop-shadow(0 50px 60px rgba(0,0,0,.28));transform:rotate(${rot}deg) scale(${Math.max(.01, k)});transform-origin:450px 280px">${card(900, { id: 1, shine: lerp(-.4, 1.4, cl((lt - 1) / 1.1)) })}</div>`;
+    const a = out5((lt - 1.0) / .5); h += `<div class="t" style="top:960px;font:900 118px/1 'Unb';color:${INK};letter-spacing:-.03em;opacity:${a};transform:translateY(${(1 - a) * 60}px)">Альфа-Карта</div>`;
+    const b = back((lt - 1.7) / .5); h += `<div style="position:absolute;left:540px;top:1180px;transform:translateX(-50%) scale(${Math.max(0, b)});background:${RED};color:#fff;font:800 58px 'Mont';padding:26px 46px;border-radius:60px;white-space:nowrap">обслуживание 0 ₽</div>`;
+    const c = out3((lt - 2.3) / .5); h += `<div class="t" style="top:1370px;font:600 40px 'Mont';color:#555;opacity:${c}">оформление онлайн, доставка курьером</div>`;
+  }
+  if (s === SC[2]) {          // 3: до 50 % — счётчик, монеты разлетаются, партнёры
+    const k = io((lt - .2) / 1.3), v = Math.round(50 * k), pulse = lt > 1.5 ? 1 + .04 * Math.sin((lt - 1.5) * 10) * Math.exp(-(lt - 1.5) * 1.5) : 1;
+    h += `<div class="t" style="top:430px;font:700 70px 'Mont';color:#fff;opacity:${out3(lt / .3)}">кэшбэк</div>`;
+    h += `<div class="t" style="top:540px;font:900 120px/1 'Unb';color:#fff;opacity:${out3((lt - .1) / .3)}">до</div>`;
+    h += `<div class="t" style="top:660px;font:900 380px/1 'Unb';color:#fff;letter-spacing:-.05em;transform:scale(${pulse})">${v}<span style="font-size:260px">%</span></div>`;
+    h += `<div class="t" style="top:1080px;font:800 62px 'Mont';color:#fff;opacity:${out3((lt - 1.4) / .4)};transform:translateY(${(1 - out3((lt - 1.4) / .4)) * 40}px)">у партнёров банка</div>`;
+    // монеты-проценты разлетаются от числа
+    for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2 + .3, kk = out3((lt - 1.45) / 1.4), r = 200 + 560 * kk + (i % 3) * 40, x = 540 + Math.cos(a) * r * 1.0, y = 860 + Math.sin(a) * r * .9;
+      if (lt > 1.45) h += `<div style="position:absolute;left:${x - 50}px;top:${y - 50}px;opacity:${1 - cl((lt - 2.6) / 1)};transform:rotate(${(lt * 200 + i * 40) % 360}deg) scale(${.6 + (i % 3) * .25})">${coinSvg(50)}</div>`; }
+    // плитки категорий партнёров снизу
+    ["cart", "cup", "car", "shirt"].forEach((ic, i) => { const kk = back((lt - 2.1 - i * .12) / .5); if (kk <= 0) return;
+      h += `<div style="position:absolute;left:${130 + i * 220}px;top:${1300 + Math.sin(t * 2 + i) * 10}px;width:180px;height:180px;border-radius:40px;background:#fff;display:flex;align-items:center;justify-content:center;transform:scale(${kk});box-shadow:0 20px 40px rgba(0,0,0,.18)">${icon(ic, 120, RED)}</div>`; });
+  }
+  if (s === SC[3]) {          // 4: категории на выбор — плитки, три отмечаются
+    const a = out5(lt / .45); h += `<div class="t" style="top:300px;font:900 92px/1.05 'Unb';color:${INK};letter-spacing:-.03em;opacity:${a};transform:translateY(${(1 - a) * 50}px)">кэшбэк<br>в категориях</div>`;
+    const b = out5((lt - .3) / .45); h += `<div class="t" style="top:520px;font:900 92px/1 'Unb';color:${RED};letter-spacing:-.03em;opacity:${b};transform:translateY(${(1 - b) * 50}px)">на выбор</div>`;
+    const C = [["cart", "Супермаркеты"], ["cup", "Кафе"], ["car", "Такси"], ["shirt", "Одежда"], ["fuel", "АЗС"], ["pill", "Аптеки"]], pick = [0, 2, 3];
+    C.forEach(([ic, lab], i) => { const col = i % 2, row = Math.floor(i / 2), kk = back((lt - .6 - i * .1) / .5), on = pick.includes(i) && lt > 1.6 + pick.indexOf(i) * .3;
+      const x = 120 + col * 440, y = 740 + row * 240;
+      h += `<div style="position:absolute;left:${x}px;top:${y}px;width:400px;height:200px;border-radius:40px;background:${on ? RED : "#F2F3F5"};color:${on ? "#fff" : INK};display:flex;align-items:center;gap:20px;padding-left:34px;box-sizing:border-box;transform:scale(${Math.max(0, kk)});transition:none">
+        ${icon(ic, 80, on ? "#fff" : RED)}<span style="font:800 34px 'Mont'">${lab}</span>${on ? `<svg style="position:absolute;right:22px;top:22px" width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="27" fill="#fff"/><path d="M15 28 l8 8 l16 -18" stroke="${RED}" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}</div>`; });
+    const c = out3((lt - 2.5) / .4); h += `<div class="t" style="top:1500px;font:700 44px 'Mont';color:#555;opacity:${c}">выбирай каждый месяц в приложении</div>`;
+  }
+  if (s === SC[4]) {          // 5: призыв — «Оформи бесплатно», кнопка «по ссылке в описании»
+    const sp = (t * 40) % 360;
+    h += `<div style="position:absolute;left:${540 - 300}px;top:${430 + Math.sin(t * 2) * 14}px;filter:drop-shadow(0 40px 50px rgba(0,0,0,.3));transform:rotate(${-8 + Math.sin(t * 1.5) * 4}deg) scale(${back(lt / .6, 1.2)})">${card(600, { id: 2, shine: lerp(-.4, 1.4, ((lt * .5) % 1)) })}</div>`;
+    const a = out5((lt - .3) / .5); h += `<div class="t" style="top:900px;font:900 120px/1 'Unb';color:#fff;letter-spacing:-.03em;opacity:${a};transform:scale(${lerp(1.4, 1, a)})">Оформи</div>`;
+    const b = out5((lt - .55) / .5); h += `<div class="t" style="top:1040px;font:900 120px/1 'Unb';color:#fff;letter-spacing:-.03em;opacity:${b};transform:scale(${lerp(1.4, 1, b)})">бесплатно</div>`;
+    const c = back((lt - 1.1) / .5), bob = Math.sin(t * 6) * 8;
+    h += `<div style="position:absolute;left:540px;top:${1260}px;transform:translateX(-50%) scale(${Math.max(0, c)});background:#fff;color:${RED};font:800 54px 'Mont';padding:30px 54px;border-radius:70px;white-space:nowrap;box-shadow:0 20px 40px rgba(0,0,0,.2)">по ссылке в описании <span style="display:inline-block;transform:translateY(${bob}px)">↓</span></div>`;
+    h += `<div class="t" style="top:1450px;font:700 34px 'Mont';color:#fff;opacity:${out3((lt - 1.6) / .4)}">кэшбэк до 50 % у партнёров · обслуживание 0 ₽</div>`;
+  }
+  // постоянные элементы: метка «Реклама», знак банка, юридический текст
+  h += `<div class="tag" style="background:${dark ? "#F2F3F5" : "rgba(255,255,255,.18)"};color:${fg}">Реклама</div>`;
+  h += `<div class="logo" style="color:${fg}">${mark(.9, dark ? "#fff" : RED, dark ? RED : "#fff")}Альфа-Банк</div>`;
+  h += `<div class="legal" style="color:${dark ? "#555" : "rgba(255,255,255,.85)"}">${LEGAL}</div>`;
+  // круговой переход в цвет следующей сцены
+  if (tr > 0) { const r = in3(tr) * 1300; h += `<div style="position:absolute;left:${540 - r}px;top:${960 - r}px;width:${2 * r}px;height:${2 * r}px;border-radius:50%;background:${nxt[2]}"></div>`; }
+  st.innerHTML = `<div class="lay" style="transform:scale(${push});transform-origin:50% 45%">${h}</div>`;
+};
+document.fonts.ready.then(() => { window.renderAt(0); window.__ready = true; });
+</script></body></html>
