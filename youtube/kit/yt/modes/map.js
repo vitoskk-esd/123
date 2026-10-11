@@ -82,7 +82,7 @@
     .yt-map .cap { position: absolute; left: 90px; bottom: 120px; color: #f3efe6; }
     .yt-map .cap.top { bottom: auto; top: 70px; }
     .yt-map .cap .ln { display: block; white-space: nowrap; overflow: hidden; } .yt-map .cap .ln span { display: inline-block; }
-    .yt-map .cap .a { font: 900 70px/1.08 "Unb"; letter-spacing: -.03em; } .yt-map .cap .b { font: 900 86px/1.12 "Unb"; color: #ffd60a; letter-spacing: -.03em; }
+    .yt-map .cap .c { font: 600 30px/1.6 "Mont"; color: #9fb0dd; } .yt-map .cap .a { font: 900 70px/1.08 "Unb"; letter-spacing: -.03em; } .yt-map .cap .b { font: 900 86px/1.12 "Unb"; color: #ffd60a; letter-spacing: -.03em; }
     .yt-map .shade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 60%, transparent 55%, rgba(0,0,0,.6)); }
     `,
     build(root, d, ctx) {

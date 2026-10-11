@@ -1,8 +1,9 @@
 // Y5: собирает звуки предметов из отрезков ролика (режимы с events(d, dur), сейчас — «Ночной офис») и пишет timeline для audio.js.
-// node yt/sfx.js <data.js> <out_timeline.js>   (data.js: window.SEGS = [...] — те же отрезки, что в YT.play; window.TLX = {music, bpm, sfx} — добавки)
+// node yt/sfx.js <data.js> <out_timeline.js> [scenes.js …]   (data.js: window.SEGS = [...] — те же отрезки, что в YT.play; window.TLX = {music, bpm, sfx} — добавки)
 const path = require("path"), fs = require("fs");
 global.window = {}; global.document = { createElement: () => ({ set textContent(v) {} }), head: { appendChild() {} } };
 require("./yt.js"); global.YT = window.YT; fs.readdirSync(path.join(__dirname, "modes")).forEach(f => require("./modes/" + f));
+process.argv.slice(4).forEach(f => require(path.resolve(f)));   // добавки до данных: сцены ролика (window.SCENES) и т. п.
 require(path.resolve(process.argv[2]));
 const segs = window.SEGS, X = window.TLX || {}, sfx = JSON.parse(JSON.stringify(X.sfx || {}));
 segs.forEach(s => { const def = window.YT.MODES[s.mode]; if (!def || !def.events) return;
