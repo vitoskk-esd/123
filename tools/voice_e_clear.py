@@ -42,9 +42,10 @@ def main(out_dir):
 
     vc = ChatterboxVC.from_pretrained("cpu"); vc.set_target_voice(V.VC_TARGET)
     res, parts, prev = {}, [], None
+    first_ctx = "/home/user/123/" + meta[max(meta, key=int)]["tts"] if not meta[max(meta, key=int)]["tts"].startswith("/") else meta[max(meta, key=int)]["tts"]
     for k in sorted(meta, key=int):
         text = meta[k]["text"]; crc = f"{zlib.crc32(text.encode()):08x}"
-        takes = sorted(glob.glob(os.path.join(out_dir, f"t{crc}_s*.wav")))
+        takes = sorted(f for f in glob.glob(os.path.join(out_dir, f"t{crc}_s*.wav")) if re.search(r"_s\d+\.wav$", f))
         if len(takes) < 2:
             f = os.path.join(out_dir, f"t{crc}_s31.wav")
             if not os.path.exists(f): T.synth(text, f, seed=31, ref=E.ref(), **E.PARAMS)
@@ -54,10 +55,10 @@ def main(out_dir):
         best = None
         for (_, t) in tts:
             for sd in VC_SEEDS:
-                src, pre = t, 0.0
-                if prev and torchaudio.info(t).num_frames / torchaudio.info(t).sample_rate < 4.0:   # короткая фраза — с контекстом, как в voice_e
-                    x, sr = torchaudio.load(prev); y, _ = torchaudio.load(t); pre = (x.shape[1] + int(.25 * sr)) / sr
-                    src = os.path.join(out_dir, f"cctx{k}.wav"); torchaudio.save(src, torch.cat([x, torch.zeros(1, int(.25 * sr)), y], 1), sr)
+                # каждая фраза — с контекстом: перед ней предыдущая фраза (у первой — последняя, ролик закольцован) и 0,25 с тишины.
+                # Без контекста VC жуёт начало файла: «Ты оформил» → «Тебе фоллию», «Тиафолю» на всех seed
+                x, sr = torchaudio.load(prev or first_ctx); y, sr2 = torchaudio.load(t); assert sr == sr2; pre = (x.shape[1] + int(.25 * sr)) / sr
+                src = os.path.join(out_dir, f"cctx{k}.wav"); torchaudio.save(src, torch.cat([x, torch.zeros(1, int(.25 * sr)), y], 1), sr)
                 torch.manual_seed(sd); out = vc.generate(audio=src)
                 e = os.path.join(out_dir, f"c{k}_{zlib.crc32(t.encode()):08x}_v{sd}.wav")
                 torchaudio.save(e, out[:, int((pre - .05) * vc.sr) if pre else 0:], vc.sr)
