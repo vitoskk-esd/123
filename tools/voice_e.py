@@ -102,8 +102,10 @@ def voice_e(phrases, out_dir, log=print):
     parts, prev = [], None
     for i, p in enumerate(phrases):
         key = f"{i}"
+        # RESUME=1 (продолжение после обрыва): готовые фразы не переозвучиваем даже при сходстве < MIN_SIM — слабые потом
+        # переотбирает voice_e_clear.py (ONLY=…); иначе каждый перезапуск заново тратит по 5 попыток на «хэдхантера»
         done = next((m for m in meta.values() if m.get("text") == p and os.path.exists(m.get("e", "")) and not m.get("redo")
-                     and m.get("sim_e", 0) >= MIN_SIM), None)
+                     and (m.get("sim_e", 0) >= MIN_SIM or os.environ.get("RESUME"))), None)
         if done:                                                   # уже готово (по тексту — строки можно вставлять)
             meta[key] = done; parts.append(done["e"]); prev = done["tts"]; continue
         log(f"{i} ударения: {T.stress(p)}")
