@@ -1,6 +1,7 @@
 // YouTube-движок «режимы» (Y0). Ролик = таймлайн из отрезков {mode, t0, t1, data, tin}; каждый режим — модуль в modes/*.js,
 // который строит свой слой (build) и рисует его детерминированно от локального времени (render). Между отрезками — переходы
-// без 3D: засветка (flash), пролёт сквозь экран (zoom), склейка по предмету (match), просто склейка (cut).
+// без 3D: засветка (flash), пролёт сквозь экран (zoom), склейка по предмету (match), просто склейка (cut),
+// фигуры (моушн-графика, 11.10): «шторка» с наклоном (wipe, tin.color) и круг (iris, tin.at — центр, tin.color).
 // Правило ритма (владелец 09.10): один режим не дольше ~90 с подряд, «Ночной офис» — 1–2 отрезка на ролик.
 // Подключение: <link yt.css> <script yt.js> <script modes/*.js> … YT.play({size, foot, chapters, segs}).
 // Отрезок: {mode, t0, t1, data, tin: {type: "flash"|"zoom"|"match"|"cut", dur, at: [x, y], key}, marks: {ключ: селектор}}.
@@ -38,7 +39,7 @@
   };
   const MODES = {};
   const NAMES = { office: "Ночной офис", editorial: "Журнальная инфографика", phone: "Телефон крупно", board: "Маркерная доска",
-    search: "Поиск", scrap: "Коллаж-скрапбук", swipe: "Свайп-карточки", voice: "Голосовое сообщение", ai: "ИИ-ассистент" };
+    search: "Поиск", scrap: "Коллаж-скрапбук", swipe: "Свайп-карточки", voice: "Голосовое сообщение", ai: "ИИ-ассистент", motion: "Моушн-графика", cine: "Кино-титры" };
 
   function mode(name, def) {
     MODES[name] = def;
@@ -77,6 +78,7 @@
       s.root.style.visibility = "hidden";
     });
     // оверлеи: свет перехода, виньетка, зерно, плашка-дисклеймер, подпись главы, отладочная подпись режима
+    const shape = U.el("div", "yt-shape", null, stage); Object.assign(shape.style, { position: "absolute", inset: 0, zIndex: 39, pointerEvents: "none", opacity: 0 });
     const leak = U.el("div", "yt-leak", null, stage), vig = U.el("div", "yt-vig", null, stage), grain = U.el("div", "yt-grain", null, stage);
     const foot = tl.foot ? U.el("div", "yt-foot", tl.foot, stage) : null;
     const chap = U.el("div", "yt-chap", "<i></i><span></span>", stage);
@@ -98,7 +100,7 @@
     window.renderAt = (t) => {
       let cur = segs.findIndex(s => t < s.t1); if (cur < 0) cur = segs.length - 1;
       segs.forEach(s => { s.root.style.visibility = "hidden"; }); stage.style.background = "";
-      leak.style.opacity = 0;
+      leak.style.opacity = 0; shape.style.opacity = 0;
       const s = segs[cur], prev = segs[cur - 1], next = segs[cur + 1];
       // какие слои видны: текущий; предыдущий — пока идёт вторая половина перехода в текущий; следующий — первая половина перехода
       const show = [[s, t - s.t0]];
@@ -113,6 +115,23 @@
           const e = U.bell(k); leak.style.opacity = e; leak.style.background = tin.color ||
             "radial-gradient(1200px 900px at 70% 30%, rgba(255,236,200,1), rgba(255,170,90,.85) 45%, rgba(255,90,60,.0) 80%), rgba(255,240,220,.55)";
           on.root.style.filter = `brightness(${1 + 1.1 * e}) saturate(${1 - .4 * e}) blur(${(4 * e).toFixed(1)}px)`;
+        } else if (tin.type === "wipe" || tin.type === "iris") {
+          // фигура закрывает старый кадр, на середине — смена, фигура уходит и открывает новый
+          const on = k < .5 ? a : b; renderSeg(on, t - on.t0); on.root.style.visibility = "visible";
+          shape.style.opacity = 1; shape.style.background = tin.color || "#2ee07a";
+          if (tin.type === "wipe") {
+            const S = W * .18, e1 = U.io3(k / .5), e2 = U.io3((k - .5) / .5);
+            const xl = k < .5 ? -S : lerp(-S, W + S, e2), xr = k < .5 ? lerp(-S, W + 2 * S, e1) : W + 2 * S;
+            shape.style.webkitMaskImage = shape.style.maskImage = "none";
+            shape.style.clipPath = `polygon(${xl + S}px 0, ${xr + S}px 0, ${xr - S}px ${H}px, ${xl - S}px ${H}px)`;
+            on.root.style.transform = `translateX(${(k < .5 ? -e1 : 1 - e2) * 60}px)`;
+          } else {
+            const [ox, oy] = tin.at || [W / 2, H / 2], D = Math.hypot(Math.max(ox, W - ox), Math.max(oy, H - oy)) + 20;
+            shape.style.clipPath = "none";
+            if (k < .5) { const r = D * U.in3(k / .5); shape.style.webkitMaskImage = shape.style.maskImage = `radial-gradient(circle at ${ox}px ${oy}px, #000 ${r}px, transparent ${r + 1}px)`; }
+            else { const r = D * U.out3((k - .5) / .5); shape.style.webkitMaskImage = shape.style.maskImage = `radial-gradient(circle at ${ox}px ${oy}px, transparent ${r}px, #000 ${r + 1}px)`;
+              on.root.style.transformOrigin = `${ox}px ${oy}px`; on.root.style.transform = `scale(${lerp(1.08, 1, U.out3((k - .5) / .5))})`; }
+          }
         } else if (tin.type === "zoom") {
           // пролёт сквозь точку (экран телефона / монитора): старый слой разгоняется в точку, новый вылетает из неё и тормозит
           const [ox, oy] = tin.at || [W / 2, H / 2], on = k < .5 ? a : b; renderSeg(on, t - on.t0); on.root.style.visibility = "visible";
@@ -149,7 +168,7 @@
         chap.style.opacity = o; chap.style.transform = `translateX(${(1 - e) * -40}px)`; chap.querySelector("span").textContent = ch.label;
         chap.querySelector("i").style.width = `${54 * e}px`; } else chap.style.opacity = 0;
       grain.style.transform = `translate(${(Math.sin(t * 91) * 40) | 0}px, ${(Math.cos(t * 77) * 40) | 0}px)`;
-      if (lab) { const on = segs[cur]; lab.textContent = `${NAMES[on.mode] || on.mode} · ${Math.floor(t / 60)}:${(t % 60).toFixed(1).padStart(4, "0")}` + (tr ? ` · переход: ${({ flash: "засветка", zoom: "пролёт сквозь экран" })[tr.tin.type]}` : (prev && s.tin && s.tin.type === "match" && t - s.t0 < (s.tin.dur || .7) ? " · склейка по предмету" : "")); }
+      if (lab) { const on = segs[cur]; lab.textContent = `${NAMES[on.mode] || on.mode} · ${Math.floor(t / 60)}:${(t % 60).toFixed(1).padStart(4, "0")}` + (tr ? ` · переход: ${({ flash: "засветка", zoom: "пролёт сквозь экран", wipe: "шторка", iris: "круг" })[tr.tin.type]}` : (prev && s.tin && s.tin.type === "match" && t - s.t0 < (s.tin.dur || .7) ? " · склейка по предмету" : "")); }
     };
     document.fonts.ready.then(() => { window.renderAt(0); window.__ready = true; });
   }
