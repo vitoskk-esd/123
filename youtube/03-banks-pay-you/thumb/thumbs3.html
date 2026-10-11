@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №3 — вариации «Банки платят за это»</title>
+<!-- Владелец 11.10 выбрал направление r2.png (жёлтый фон, «БАНКИ ПЛАТЯТ / ЗА ЭТО», стрелка к телефону с тремя СМС):
+     «что-то типа такого, покидай варианты в таком подобии». Вариации ?v=1…6: цвет фона, заголовок, сторона телефона,
+     содержимое СМС, наклейка-фото курьера. Шрифты Oswald / Inter (OFL), фото rider.jpg — CC0. -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  #bg { position: absolute; inset: 0; }
+  .pl { position: absolute; display: inline-block; font: 700 128px/1 "O"; text-transform: uppercase; padding: 6px 24px 14px; white-space: nowrap; }
+  .wb { background: #fff; color: #111; } .bw { background: #111; color: #fff; } .rw { background: #e8202a; color: #fff; } .yb { background: #ffd60a; color: #111; } .gw { background: #13b85a; color: #fff; }
+  .sub { position: absolute; font: 700 42px/1.15 "O"; text-transform: uppercase; }
+  .phone { position: absolute; width: 360px; height: 720px; border-radius: 56px; background: #0c0d10; padding: 14px; box-shadow: 0 40px 80px rgba(0,0,0,.45), inset 0 0 0 3px #2b2e35; transform-origin: 50% 0; }
+  .phone .scr { width: 100%; height: 100%; border-radius: 44px; overflow: hidden; position: relative; background: linear-gradient(180deg, #2a3350, #0b0f1c); }
+  .phone .time { position: absolute; left: 0; right: 0; top: 70px; text-align: center; color: #fff; font: 700 96px/1 "I"; letter-spacing: -.03em; }
+  .sms { position: absolute; left: 14px; right: 14px; border-radius: 26px; background: rgba(245,246,250,.94); padding: 14px 18px; color: #111; box-shadow: 0 10px 24px rgba(0,0,0,.35); }
+  .sms .h { display: flex; align-items: center; gap: 10px; font: 600 18px "I"; color: #555; } .sms .h i { width: 30px; height: 30px; border-radius: 8px; background: #13b85a; flex: none; }
+  .sms .h span { margin-left: auto; font-size: 16px; color: #888; }
+  .sms b { display: block; font: 700 22px "I"; margin-top: 6px; } .sms em { display: block; font: 700 40px "I"; font-style: normal; color: #0f9d4f; letter-spacing: -.02em; }
+  .sms.sm { padding: 10px 16px; } .sms.sm b { font-size: 19px; margin-top: 2px; } .sms.sm em { font-size: 30px; }
+  .pol { position: absolute; background: #fff; padding: 12px 12px 46px; box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+  .pol div { width: 100%; height: 100%; background: url("rider.jpg") no-repeat; background-size: 900px auto; background-position: -200px -300px; filter: grayscale(.2); }
+  .pol span { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font: 700 26px "O"; text-transform: uppercase; color: #111; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="root"></div>
+<script>
+const v = new URLSearchParams(location.search).get("v") || "1";
+const SMS3 = [["Бонус новому клиенту", "+2 000 ₽", "сейчас"], ["Бонус за друга", "+1 000 ₽", "2 мин"], ["Проценты за 3 месяца", "+387 ₽", "1 ч", "#ffb000"]];
+const SMS5 = [["Бонус новому клиенту", "+2 000 ₽", "сейчас"], ["Бонус за друга", "+1 000 ₽", "2 мин"], ["Проценты за 3 месяца", "+387 ₽", "1 ч", "#ffb000"],
+  ["Кэшбэк за месяц", "+5 %", "вчера", "#3d6cff"], ["Кредитка", "0 % 120 дней", "вчера", "#e8202a"]];
+// заголовок: плашки [текст, класс, x, y, размер, поворот]; sub — подпись; phone — x, поворот, СМС; arrow — svg; extra — html
+const V = {
+  1: { bg: "#ffd60a", pl: [["Вместо", "bw", 50, 100, 124], ["подработки", "wb", 50, 255, 116, -2]], sub: ["банк платит сам", 56, 460, "#111"],
+       phone: [900, 6, SMS3], arrow: [540, 420, "#111", 0] },
+  2: { bg: "radial-gradient(900px 700px at 70% 40%, #3df08a, #12b55a)", pl: [["Банки платят", "bw", 50, 100, 120], ["тебе", "wb", 50, 255, 140, -2]],
+       sub: ["5 способов<br>без подработки", 56, 450, "#06301a"], phone: [900, 6, SMS3], arrow: [500, 330, "#06301a", 0] },
+  3: { bg: "radial-gradient(900px 700px at 70% 30%, #4f6dff, #2340e6)", pl: [["5 способов", "yb", 50, 90, 124], ["банк платит сам", "wb", 50, 250, 92, -2]],
+       sub: ["законно и без смен", 56, 440, "#fff"], phone: [900, 5, SMS5, true], arrow: [560, 360, "#fff", 0] },
+  4: { bg: "#ffd60a", pl: [["Бонус", "bw", 640, 120, 150], ["за 10 минут", "wb", 600, 290, 116, 2]], sub: ["а смена курьером —<br>6 часов", 646, 470, "#111"],
+       phone: [60, -6, SMS3], arrow: [400, 450, "#111", 1] },
+  5: { bg: "#ffd60a", pl: [["Не курьером,", "bw", 50, 70, 116], ["а так", "rw", 50, 220, 140, -3]], sub: null,
+       phone: [900, 6, SMS3], arrow: [470, 300, "#111", 0],
+       extra: `<div class="pol" style="left:70px;top:400px;width:300px;height:290px;transform:rotate(-6deg)"><div></div><span>6 часов смены</span></div>
+               <svg style="position:absolute;left:80px;top:400px" width="290" height="250" viewBox="0 0 290 250"><path d="M20 20 L270 230 M270 20 L20 230" stroke="#e8202a" stroke-width="22" stroke-linecap="round"/></svg>` },
+  6: { bg: "#ff5a1f", pl: [["Пока ты", "bw", 50, 100, 128], ["на смене…", "wb", 50, 255, 128, -2]], sub: ["банки платят<br>другим за это", 56, 460, "#fff"],
+       phone: [900, 6, SMS3], arrow: [520, 340, "#fff", 0] },
+}[v];
+document.getElementById("bg").style.background = V.bg;
+let h = V.pl.map(([t, c, x, y, s, r = 0]) => `<div class="pl ${c}" style="left:${x}px;top:${y}px;font-size:${s}px;transform:rotate(${r}deg)">${t}</div>`).join("");
+if (V.sub) h += `<div class="sub" style="left:${V.sub[1]}px;top:${V.sub[2]}px;color:${V.sub[3]}">${V.sub[0]}</div>`;
+const [px, pr, list, small] = V.phone;
+h += `<div class="phone" style="left:${px}px;top:20px;transform:rotate(${pr}deg) scale(.86)"><div class="scr">${small ? "" : '<div class="time">9:41</div>'}` +
+  list.map(([b, e, t, c], i) => `<div class="sms${small ? " sm" : ""}" style="top:${small ? 70 + i * 122 : 230 + i * 155}px"><div class="h"><i${c ? ` style="background:${c}"` : ""}></i>Банк · СМС<span>${t}</span></div><b>${b}</b><em${e.startsWith("+") ? "" : ' style="color:#111"'}>${e}</em></div>`).join("") + `</div></div>`;
+const [ax, ay, ac, flip] = V.arrow;
+h += `<svg style="position:absolute;left:${ax}px;top:${ay}px;transform:${flip ? "scaleX(-1)" : "none"}" width="300" height="220" viewBox="0 0 300 220"><path d="M20 200 C 90 190, 200 150, 250 50" fill="none" stroke="${ac}" stroke-width="22" stroke-linecap="round"/><path d="M200 60 L255 35 L270 95" fill="none" stroke="${ac}" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+h += V.extra || "";
+document.getElementById("root").innerHTML = h;
+document.fonts.ready.then(() => { const img = new Image(); img.onload = img.onerror = () => { window.__ready = true; }; img.src = "rider.jpg"; });
+</script>
+</body>
+</html>
