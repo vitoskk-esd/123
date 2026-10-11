@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Ролик №3 — карусель кадров</title>
+<!-- Карусель ключевых кадров ролика №3 (владелец 11.10: «создай карусель для ютуб видео, если понравится — создашь ролик»).
+     Кадр: ?f=N (1920×1080). Арт-библиотека — art.js, кадры — frames.js. Кадр 1 — сцена «Карта» движка (yt/mg/map.html). -->
+<style>
+  @font-face { font-family: "Mont"; src: url("../../kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mono"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #070b17; }
+  svg { display: block; }
+</style>
+<script src="art.js"></script><script src="frames.js"></script></head>
+<body><script>
+  const f = +(new URLSearchParams(location.search).get("f") || 2);
+  document.body.innerHTML = `<svg width="1920" height="1080" viewBox="0 0 1920 1080">${A.defs()}${FRAMES[f]()}${A.finish()}</svg>`;
+  document.fonts.ready.then(() => requestAnimationFrame(() => { window.__ready = true; }));
+</script></body></html>
