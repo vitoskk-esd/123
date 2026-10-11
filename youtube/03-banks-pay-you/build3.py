@@ -207,7 +207,8 @@ def build(name):
     chapters = [dict(t=round(starts[k], 2), label=f"Способ {s['num']}") for k, s in enumerate(P[:-1]) if s.get("scene") == "chapter"]
     out = os.path.join(HERE, f"data_{name}.js")
     open(out, "w").write("// собрано build3.py — не править руками\nwindow.SEGS = " + json.dumps(segs, ensure_ascii=False) + ";\nwindow.CHAPTERS = " + json.dumps(chapters, ensure_ascii=False) +
-                         ";\nwindow.TLX = " + json.dumps(dict(music=[dict(t=0, part="intro"), dict(t=round(starts[1], 2), part="main")], bpm=96), ensure_ascii=False) + ";\n")
+                         ";\nwindow.TLX = " + json.dumps(dict(music=[dict(t=0, part="intro"), dict(t=round(starts[1], 2), part="main")], bpm=96,
+                         sfx=dict(whoosh=[round(x["t0"] - .2, 2) for x in segs if x.get("tin") and x["tin"]["type"] != "cut"])), ensure_ascii=False) + ";\n")
     html = os.path.join(HERE, f"video_{name}.html")
     open(html, "w").write(f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><title>Ролик №3 — {name}</title>
