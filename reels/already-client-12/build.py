@@ -73,19 +73,19 @@ def P(phrase):
     i, j = W._find(phrase); W.cur = i; return round(W.ws[i]["a"], 3)
 
 SC = []
-def scene(id, start, pos="low", clicks=None, **ev):
-    SC.append({"id": id, "t0": 0 if not SC else round(start - .15, 3), "ev": ev, "pos": pos, **({"clicks": clicks} if clicks else {})})
+def scene(id, start, bg, pos="low", clicks=None, **ev):
+    SC.append({"id": id, "t0": 0 if not SC else round(start - .15, 3), "bg": bg, "ev": ev, "pos": pos, **({"clicks": clicks} if clicks else {})})
 
-p = P("Ты оформил"); scene("s_card", p, card=A("карту"), old=A("старым"))
-p = P("И бонуса не"); scene("s_push", p, no=A("бонуса не"))
+p = P("Ты оформил"); scene("s_card", p, "sky", card=A("карту"), old=A("старым"))
+p = P("И бонуса не"); scene("s_push", p, "space", pos="top", no=A("бонуса не"), sad=A("его платят"))
 p = P("Самое обидное"); a, b, c = A("карта для"), A("зарплатная"), A("или детская")
-scene("s_list", p, a=a, b=b, c=c, clicks=[{"t": a + .2, "id": "l1", "click": False}, {"t": b + .1, "id": "l2", "click": False}, {"t": c + .2, "id": "l3", "click": False}])
-p = P("Узнать это"); m = A("за две"); scene("s_search", p, min=m, clicks=[{"t": m - .15, "id": "q_bar"}])
-p = P("Заходишь через"); g, o = A("Госуслуги"), A("Сведения о"); scene("s_cab", p, gos=g, open=o, clicks=[{"t": g, "id": "c_gos"}, {"t": o, "id": "c_item"}])
-p = P("Там все"); scene("s_tbl", p, banks=A("все твои"), year=A("начиная с"))
-p = P("Банка нет"); scene("s_ok", p, new=A("новичок"), mine=A("бонус твой"))
-p = P("Подробная инструкция"); l = A("ссылка в"); scene("s_end", p, link=l, clicks=[{"t": l, "id": "e_btn"}])
-p = P("Так что"); scene("s_none", p, pos="mid")
+scene("s_list", p, "white", a=a, b=b, c=c)
+p = P("Узнать это"); m = A("за две"); scene("s_search", p, "white", min=m, clicks=[{"t": m - .15, "id": "q_bar"}])
+p = P("Заходишь через"); g, o = A("Госуслуги"), A("Сведения о"); scene("s_cab", p, "sky", gos=g, open=o, clicks=[{"t": g, "id": "c_gos"}, {"t": o, "id": "c_item"}])
+p = P("Там все"); scene("s_tbl", p, "white", pos="top", banks=A("все твои"), year=A("начиная с"))
+p = P("Банка нет"); scene("s_ok", p, "warm", pos="top", new=A("новичок"), mine=A("бонус твой"))
+p = P("Подробная инструкция"); l = A("ссылка в"); scene("s_end", p, "space", link=l, clicks=[{"t": l, "id": "e_btn"}])
+p = P("Так что"); scene("s_none", p, "sky", pos="mid")
 for i, s in enumerate(SC): s["t1"] = SC[i + 1]["t0"] if i + 1 < len(SC) else END
 
 # куски текста: от первого слова до первого слова следующего куска; позиция — как у сцены

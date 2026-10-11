@@ -85,7 +85,7 @@ def trim(wav, log=print):
     y[:fi] *= np.linspace(0, 1, fi); y[-fo:] *= np.linspace(1, 0, fo)
     dropped = [s for s in segs if s[0] >= end_w - .05]
     log(f"срез {os.path.basename(wav)}: конец речи {end_w:.2f} с, оставляю {start:.2f}–{cut:.2f} из {full:.2f}"
-        + (f", выкинуто мусора: {len(dropped)} (громче всего {max(db[int(a / .02):int(b / .02)].max() for a, b in dropped):.0f} дБ)" if dropped else ""))
+        + (f", выкинуто мусора: {len(dropped)} (громче всего {max(pk(sg) for sg in dropped):.0f} дБ)" if dropped else ""))
     sf.write(out, y, sr); return out
 
 
