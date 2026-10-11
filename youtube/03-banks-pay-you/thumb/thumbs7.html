@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №3 — «+3 387 ₽» с картами банков</title>
+<!-- Владелец 11.10 выбрал p7a.png и попросил: «не используй 3д объекты, замени 3д объекты на карты Альфа-Банка, Т-Банка и
+     Уралсиба». Карты нарисованы плоско (CSS) в фирменных цветах банков, логотипы — упрощённые знаки, без сумм на картах:
+     суммы в списке слева — примеры из сценария, не обещание конкретного банка. ?v=1 веер справа, ?v=2 карты лесенкой,
+     ?v=3 карты россыпью под наклоном. -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  #bg { position: absolute; inset: 0; background: radial-gradient(1000px 700px at 30% 30%, #2ee07a, #11a653 55%, #0a7a3c); }
+  #bg::after { content: ""; position: absolute; inset: 0; opacity: .08; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .num { position: absolute; left: 36px; top: 40px; font: 900 250px/1 "Unb"; letter-spacing: -.07em; white-space: nowrap; color: #fff;
+    text-shadow: 0 4px 0 #0b8a44, 0 8px 0 #0a7a3c, 0 12px 0 #096c35, 0 16px 0 #075a2c, 0 30px 50px rgba(0,40,10,.45); }
+  .pl { position: absolute; left: 44px; top: 320px; display: inline-block; font: 700 72px/1 "O"; text-transform: uppercase; padding: 6px 24px 14px; background: #111; color: #fff; white-space: nowrap; }
+  /* карта: 85,6 × 54 → 430 × 271 */
+  .card { position: absolute; width: 430px; height: 271px; border-radius: 22px; overflow: hidden; box-shadow: 0 26px 50px rgba(0,40,10,.4), inset 0 1px 0 rgba(255,255,255,.25); }
+  .card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(255,255,255,.18), transparent 38%, transparent 70%, rgba(255,255,255,.06)); }
+  .card .chip { position: absolute; left: 32px; top: 104px; width: 62px; height: 46px; border-radius: 9px; background: linear-gradient(135deg, #f3e2a6, #c9a44a 55%, #f0d48a); }
+  .card .nfc { position: absolute; left: 106px; top: 110px; }
+  .card .num4 { position: absolute; left: 32px; bottom: 26px; font: 600 22px "I"; letter-spacing: .18em; opacity: .85; }
+  .card .ps { position: absolute; right: 28px; bottom: 22px; font: 700 26px "I"; font-style: italic; opacity: .9; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div class="num">+3 387 ₽</div>
+<div class="pl">за месяц от банков</div>
+<div id="sum" style="position:absolute;left:46px;top:450px"></div>
+<div id="cards"></div>
+<script>
+const v = new URLSearchParams(location.search).get("v") || "1";
+const nfc = (c) => `<svg class="nfc" width="34" height="34" viewBox="0 0 34 34">${[8, 14, 20].map(r => `<path d="M${6 + r * .35} ${17 - r * .55} A ${r} ${r} 0 0 1 ${6 + r * .35} ${17 + r * .55}" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`).join("")}</svg>`;
+// упрощённые знаки банков (не точные копии логотипов): Альфа — красная карта и белая «А» с чертой; Т — чёрная карта и жёлтый щит;
+// Уралсиб — тёмно-синяя карта и надпись
+const CARDS = {
+  alfa: `<div style="position:absolute;inset:0;background:linear-gradient(135deg,#ff3b30,#ef3124 50%,#c41d14)"></div>
+    <div style="position:absolute;left:30px;top:22px;display:flex;align-items:center;gap:12px;color:#fff"><div style="position:relative;width:40px;height:50px">
+      <div style="font:700 50px/1 I;color:#fff;position:absolute;left:3px;top:-4px">А</div><div style="position:absolute;left:4px;bottom:0;width:32px;height:6px;background:#fff"></div></div>
+      <div style="font:700 24px I;letter-spacing:.01em">Альфа-Банк</div></div>
+    <div class="chip"></div>${nfc("rgba(255,255,255,.85)")}<div class="num4" style="color:#fff">•••• 4412</div><div class="ps" style="color:#fff">MIR</div>`,
+  tbank: `<div style="position:absolute;inset:0;background:linear-gradient(135deg,#2b2c30,#141518 55%,#050506)"></div>
+    <div style="position:absolute;left:30px;top:20px;display:flex;align-items:center;gap:12px"><svg width="44" height="50" viewBox="0 0 44 50"><path d="M2 2 H42 V26 C42 38 32 46 22 48 C12 46 2 38 2 26 Z" fill="#ffdd2d"/>
+      <path d="M12 12 H32 V18 H25 V36 H19 V18 H12 Z" fill="#111"/></svg><div style="font:700 26px I;color:#fff">Т-Банк</div></div>
+    <div style="position:absolute;right:28px;top:26px;font:700 22px I;color:#fff;letter-spacing:.06em">BLACK</div>
+    <div class="chip"></div>${nfc("rgba(255,255,255,.8)")}<div class="num4" style="color:#fff">•••• 2026</div><div class="ps" style="color:#fff">MIR</div>`,
+  ural: `<div style="position:absolute;inset:0;background:linear-gradient(135deg,#3b4dc8,#24308f 55%,#151c5c)"></div>
+    <div style="position:absolute;left:-60px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(120,150,255,.35),transparent 70%)"></div>
+    <div style="position:absolute;left:30px;top:24px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font:700 26px I;color:#24308f">У</div>
+      <div style="font:700 26px I;color:#fff;letter-spacing:.06em">УРАЛСИБ</div></div>
+    <div class="chip"></div>${nfc("rgba(255,255,255,.85)")}<div class="num4" style="color:#fff">•••• 7730</div><div class="ps" style="color:#fff">MIR</div>`,
+};
+// расположение трёх карт: [банк, x, y, поворот, масштаб]; первая — сзади
+const LAY = {
+  1: [["ural", 830, 300, 22, .9, 1], ["alfa", 800, 320, 6, .9, 1], ["tbank", 770, 340, -10, .92, 1]],
+  2: [["ural", 860, 235, -6, .85], ["alfa", 810, 325, -6, .88], ["tbank", 760, 415, -6, .9]],
+  3: [["alfa", 690, 270, -16, .9], ["ural", 900, 290, 12, .9], ["tbank", 790, 400, -3, .95]],
+}[v];
+document.getElementById("cards").innerHTML = LAY.map(([b, x, y, r, s, pivot]) => `<div class="card" style="left:${x}px;top:${y}px;transform-origin:${pivot ? "50% 120%" : "50% 50%"};transform:rotate(${r}deg) scale(${s})">${CARDS[b]}</div>`).join("");
+const S = [["Бонус новому клиенту", "+2 000 ₽"], ["Бонус за друга", "+1 000 ₽"], ["Проценты за 3 месяца", "+387 ₽"]];
+document.getElementById("sum").innerHTML = S.map(([a, b], i) => `<div style="display:flex;align-items:center;gap:14px;width:520px;margin-top:${i ? 10 : 0}px;padding:12px 18px;border-radius:18px;background:rgba(255,255,255,.95);box-shadow:0 10px 24px rgba(0,0,0,.18)">
+  <i style="width:30px;height:30px;border-radius:8px;background:${i === 2 ? "#ffb000" : "#13b85a"};flex:none"></i><span style="font:600 26px I;color:#111">${a}</span><span style="margin-left:auto;font:700 30px I;color:#0f9d4f">${b}</span></div>`).join("") +
+  `<div style="font:500 18px I;color:rgba(0,0,0,.55);margin-top:10px">пример: суммы из ролика, условия у каждого банка свои</div>`;
+document.fonts.ready.then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
