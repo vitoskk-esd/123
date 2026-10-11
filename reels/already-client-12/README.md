@@ -7,8 +7,12 @@
 веер забытых карт, пролёт камеры внутрь поиска и окна кабинета, барабан цифр «2014», пиксельная монетка (грустит → радуется),
 конфетти, тряска и вспышка на штампе. Голос «E». Тема — пост в ТГ от 10.10 (рилс ведёт на него).
 
+**Стиль — A «тёмный финтех» (`?theme=dark`).** Владелец на карусель v2: «выглядит так, как будто рилс для аудитории детей» →
+три взрослых стиля (`styles/dark.jpg`, `paper.jpg`, `mono.jpg`: без монетки, конфетти и облаков, один акцент); владелец выбрал
+A — графит, сетка, лаймовый акцент `#c8ff3d`, красный для «старым» и штампа. Без `?theme` страница показывает исходную v2.
+
 Сборка: `voice_e.py phrases.txt out/voice` → `build.py words` → `build.py` → `node youtube/kit/audio.js timeline.js` →
-`node youtube/kit/yt/render.js reel.html --out out/reel_video.mp4` → `youtube/02-bank-earns/mix.sh … reel_final.mp4` (−14 LUFS).
+`node youtube/kit/yt/render.js reel.html --query theme=dark --out out/reel_video.mp4` → `youtube/02-bank-earns/mix.sh … reel_final.mp4` (−14 LUFS).
 Разметка текста на экране — `CHUNKS` в build.py (см. docstring).
 
 | # | Фраза | Сцена |
