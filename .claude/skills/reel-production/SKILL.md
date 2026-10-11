@@ -91,7 +91,7 @@ First reel on it: `reels/first-steps-09/` (Studio 9:16).
 words): TTS 0.972 → after VC 0.917; the `afftdn` + `aecho` chain and tempo jitter smear consonants too; the VC seed changes
 the result (0.934…0.953 on one phrase). After `voice_e.py`, always run
 `tools/voice_e_clear.py <reel>/out/voice` (2 best TTS takes × VC seeds 0–3, scored by Whisper small, glued with
-`humanize(fx="clean", tempo=.96)`), then re-run `build.py words`. Report the small-model score before/after to the owner. The owner's own recording + VC (below) stays as the
+`humanize(fx="clean", tempo=.96)`), then re-run `build.py words`. Report the small-model score before/after to the owner. On reel #12 the owner heard A (VC, strict selection, 0.935) and B (same TTS without VC, 0.963) and **chose A** — keep the «вариант 5» timbre; fix clarity by selection and wording (avoid «Ты о-», «ради бонуса»-type joints), not by dropping VC. The owner's own recording + VC (below) stays as the
 alternative when he wants to record.
 
 Earlier decision, kept for the recorded path:
