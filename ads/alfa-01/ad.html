@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><title>Альфа-Карта — рекламный ролик 9:16</title>
 <!-- Рекламный ролик Альфа-Карты (владелец 11.10: «видео для рекламы банковских продуктов Альфа-Банка: лучшие условия, до 50 %
-     кэшбэка, найди условия, сделай в стилистике банка, чтобы привлекало внимание»). 1080×1920, 20 с, 30 к/с, без голоса.
+     кэшбэка, найди условия, сделай в стилистике банка, чтобы привлекало внимание»). 1080×1920, 15 с (монтаж на 20 с, ускорен), 30 к/с, без голоса.
      ?v=safe — заголовок без превосходной степени («Выгодные условия»): «лучшие» в рекламе требует доказательства (38-ФЗ, ст. 5).
      Рендер: node youtube/kit/yt/render.js ads/alfa-01/ad.html --out ads/alfa-01/out/video.mp4 [--query v=safe]
      Условия (проверено 11.10.2026 по страницам alfabank.ru в поисковой выдаче): кэшбэк у партнёров до 50 %; Альфа-Карта бесплатная;
@@ -21,7 +21,9 @@
 <script>
 const W = 1080, H = 1920, DUR = 20, RED = "#EF3124", INK = "#0B0B0B";
 const SAFE = /v=safe/.test(location.search);
-window.TL = { duration: DUR, fps: 30, size: [W, H] };
+// владелец 11.10: «ничего не меняем, только сократи ролик до 15 секунд» — тот же монтаж, время ускорено 20 → 15 с
+const OUT = 15;
+window.TL = { duration: OUT, fps: 30, size: [W, H] };
 const cl = (x) => Math.max(0, Math.min(1, x)), lerp = (a, b, k) => a + (b - a) * k;
 const out3 = (x) => 1 - Math.pow(1 - cl(x), 3), out5 = (x) => 1 - Math.pow(1 - cl(x), 5), in3 = (x) => Math.pow(cl(x), 3);
 const back = (x, s = 1.6) => { x = cl(x) - 1; return x * x * ((s + 1) * x + s) + 1; };
@@ -55,7 +57,8 @@ const icon = (k, size, col) => `<svg width="${size}" height="${size}" viewBox="-
 const SC = [[0, 3.2, RED], [3.2, 7.4, "#FFFFFF"], [7.4, 11.8, RED], [11.8, 15.4, "#FFFFFF"], [15.4, DUR, RED]];
 const LEGAL = "Реклама. АО «Альфа-Банк», ИНН 7728168971. Генеральная лицензия Банка России № 1326. Кэшбэк у партнёров — до 50 % по условиям акций партнёров, лимиты и полные условия — на alfabank.ru. erid: ____________";
 
-window.renderAt = (t) => {
+window.renderAt = (t) => draw(Math.min(DUR, t * DUR / OUT));
+const draw = (t) => {
   const si = SC.findIndex(s => t < s[1]), s = SC[si < 0 ? SC.length - 1 : si], lt = t - s[0], bg = s[2], dark = bg !== RED;
   const fg = dark ? INK : "#fff";
   let h = `<div class="lay" style="background:${bg}"></div>`;

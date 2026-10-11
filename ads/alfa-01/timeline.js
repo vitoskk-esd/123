@@ -1,4 +1,4 @@
 // звук рекламного ролика Альфа-Карты: node youtube/kit/audio.js ads/alfa-01/timeline.js music.wav → ads/alfa-01/out/music.wav
-window.TL = { duration: 20, bpm: 112, music: [{ t: 0, part: "main" }, { t: 19, part: "outro" }],
-  sfx: { impact: [0.12, 0.5, 8.9], whoosh: [3.0, 7.2, 11.6, 15.2], swish: [0.85, 4.2, 12.1], pop: [5.0, 9.5, 9.62, 9.74, 9.86, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 16.6],
-    coin: [8.9, 9.1, 9.3], ticks: [[7.6, 8.9]], click: [13.4, 13.7, 14.0], riser: [[14.0, 15.4]], notif: [16.7] } };
+window.TL = { duration: 15, bpm: 112, music: [{ t: 0, part: "main" }, { t: 14.2, part: "outro" }],
+  sfx: { impact: [0.09, 0.38, 6.68], whoosh: [2.25, 5.4, 8.7, 11.4], swish: [0.64, 3.15, 9.07], pop: [3.75, 7.12, 7.21, 7.3, 7.39, 9.3, 9.38, 9.45, 9.52, 9.6, 9.68, 12.45],
+    coin: [6.68, 6.82, 6.98], ticks: [[5.7, 6.68]], click: [10.05, 10.27, 10.5], riser: [[10.5, 11.55]], notif: [12.52] } };
