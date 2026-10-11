@@ -80,6 +80,7 @@ def main(out_dir):
         print(f"{k} ВЫБРАН {os.path.basename(e)} {sc[0]:.3f} — {sc[3]}", flush=True)
         parts.append(e); prev = t
         json.dump(res, open(os.path.join(out_dir, "clear.json"), "w"), ensure_ascii=False, indent=1)
+    json.dump(res, open(os.path.join(out_dir, "clear.json"), "w"), ensure_ascii=False, indent=1)   # и фразы, взятые из clear.json без изменений
     dst = os.path.join(out_dir, "voice.wav")
     if os.path.exists(dst) and not os.path.exists(os.path.join(out_dir, "voice_prev.wav")): shutil.copy(dst, os.path.join(out_dir, "voice_prev.wav"))
     print(T.humanize(parts, dst, breath_db=None, fx="clean", tempo=TEMPO))
