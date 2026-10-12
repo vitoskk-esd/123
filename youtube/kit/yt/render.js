@@ -13,15 +13,25 @@ const srv = http.createServer((req, res) => {
   if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { "Content-Type": TYPES[path.extname(f)] || "application/octet-stream" }); fs.createReadStream(f).pipe(res);
 }).listen(0, "127.0.0.1", async () => {
-  // растр на CPU (--disable-gpu) в 2,6 раза быстрее эмуляции GPU (swiftshader) при той же картинке (замер 12.10: 1,19 с против 3,13 с на кадр);
-  // RENDER_GL=1 — старый путь через swiftshader
-  const b = await chromium.launch({ args: process.env.RENDER_GL ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] : ["--disable-gpu"] });
-  const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
-  p.on("pageerror", e => console.error("pageerror:", e.message));
-  p.on("console", m => { if (m.type() === "error") console.error("console:", m.text()); });
-  await p.goto(`http://127.0.0.1:${srv.address().port}/${path.relative(ROOT, pagePath)}${QUERY ? "?" + QUERY : ""}`);
-  await p.waitForFunction(() => window.__ready === true, null, { timeout: 180000 });
-  await p.evaluate(() => document.fonts.ready);
+  // растр на CPU (--disable-gpu) в 2,6 раза быстрее эмуляции GPU (swiftshader) при той же картинке (замер 12.10: 1,19 с против 3,13 с на кадр),
+  // НО в нём не рисуются фигуры над 3D-картой (режим map, вид nav: perspective + rotateX) — владелец 12.10: «на карте просто нет курьера».
+  // Поэтому: если в нужном отрезке есть карта — браузер перезапускается через swiftshader. RENDER_GL=1 — всегда swiftshader.
+  const GL = ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"];
+  const open = async (gl) => {
+    const b = await chromium.launch({ args: gl ? GL : ["--disable-gpu"] });
+    const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
+    p.on("pageerror", e => console.error("pageerror:", e.message));
+    p.on("console", m => { if (m.type() === "error") console.error("console:", m.text()); });
+    await p.goto(`http://127.0.0.1:${srv.address().port}/${path.relative(ROOT, pagePath)}${QUERY ? "?" + QUERY : ""}`);
+    await p.waitForFunction(() => window.__ready === true, null, { timeout: 180000 });
+    await p.evaluate(() => document.fonts.ready);
+    return { b, p };
+  };
+  let { b, p } = await open(!!process.env.RENDER_GL);
+  const stillsArg = arg("--stills"), span = stillsArg ? [Math.min(...stillsArg.split(",").map(Number)), Math.max(...stillsArg.split(",").map(Number)) + .01]
+    : [+arg("--from", 0), +arg("--to", 1e9)];
+  const needGL = await p.evaluate(([a, z]) => (window.SEGS || []).some(s => s.mode === "map" && s.t1 > a && s.t0 < z), span);
+  if (needGL && !process.env.RENDER_GL) { await b.close(); ({ b, p } = await open(true)); console.error(`${name}: в отрезке есть 3D-карта — рендер через swiftshader`); }
   const TL = await p.evaluate(() => ({ duration: window.TL.duration, fps: window.TL.fps || 30, size: window.TL.size || [1920, 1080] }));
   await p.setViewportSize({ width: TL.size[0], height: TL.size[1] });
   const dir = path.join(path.dirname(pagePath), "out"); fs.mkdirSync(dir, { recursive: true });
