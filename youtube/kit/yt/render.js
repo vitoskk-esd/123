@@ -49,7 +49,7 @@ const srv = http.createServer((req, res) => {
     const n0 = Math.round(from * TL.fps), n1 = Math.round(to * TL.fps);
     for (let i = n0; i < n1; i++) {
       await p.evaluate(t => window.renderAt(t), i / TL.fps);
-      const buf = await p.screenshot({ type: "jpeg", quality: 92 });
+      const buf = await p.screenshot({ type: "jpeg", quality: 92, timeout: 120000 });   // swiftshader под нагрузкой бывает медленнее 30 с
       if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once("drain", r));
       if ((i - n0) % 90 === 0) process.stderr.write(`${name}: кадр ${i - n0}/${n1 - n0}\n`);
     }
