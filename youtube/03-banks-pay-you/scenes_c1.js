@@ -124,7 +124,8 @@
       s += S.POP(h, "коммуналку", 2760, 260, `<rect x="-150" y="-40" width="300" height="80" rx="40" fill="#f5f1e8"/><text y="12" text-anchor="middle" font-family="Mont" font-weight="800" font-size="32" fill="#1a1d29">коммуналка</text>`, { rot: 5 });
       // 3: герой идёт не в ту дверь
       if (h.on("Третья")) { const k = h.io("Третья", 1.6), sw = Math.sin(t * 7) * 12 * (k < 1 ? 1 : 0);
-        s += a.person({ x: lerp(200, 630, k), y: 2040, s: 1.1, back: true, pose: { ll: [[-22, -96 - Math.max(0, sw)], [-30, -6]], rl: [[24, -96 - Math.max(0, -sw)], [30, -6]] } }); }
+        s += a.person({ x: lerp(200, 630, k), y: 2040, s: 1.1, pose: { ll: [[-22, -96 - Math.max(0, sw)], [-30, -6]], rl: [[24, -96 - Math.max(0, -sw)], [30, -6]],   // лицом к зрителю, смотрит на дверь
+          look: k < 1 ? 1 : .4, eyes: S.blink(t), mouth: h.on("незачем") ? "sad" : "smile", tilt: h.on("незачем") ? -6 : 0 } }); }
       if (h.on("незачем")) s += S.POP(h, "незачем", 630, 1300, `<circle r="90" fill="#ff3d4f"/><path d="M-40 -40 l80 80 M40 -40 l-80 80" stroke="#fff" stroke-width="16" stroke-linecap="round"/>`);
       // 4: карта в ящике, календарь 6 недель, бонус сгорает
       if (h.on("ящик")) s += `<g transform="translate(2870 1830) rotate(-4)">${a.card(0, 0, 300, { c1: "#ffb000", c2: "#ff6a00", num: "0001" })}</g>`;

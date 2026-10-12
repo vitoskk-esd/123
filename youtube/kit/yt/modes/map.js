@@ -6,7 +6,7 @@
 // v2 (владелец: «ролик курьера неплохо, сделать более живым и вид на него снизу»): view "nav" — как в навигаторе: карта
 // наклонена, курьер внизу кадра идёт от нас (вид со спины), камера разворачивается по ходу движения; фигуры стоят вертикально.
 // data: { view: "nav"|"top", grid: 300, nx, ny, seed, route: [[i, j, "pick"|"drop"|null], …] (перекрёстки; углы вставляются сами),
-//   speed (px/с), pause, t0, earn: [суммы на каждой выдаче], clock: {from, to} (минуты), clockT, rain, park: [[i, j]], river: ряд,
+//   speed (px/с), pause, pauseDrop (стоянка на выдаче — курьер оборачивается лицом), t0, earn: [суммы на каждой выдаче], clock: {from, to} (минуты), clockT, rain, park: [[i, j]], river: ряд,
 //   zoom, zoomOutT, tilt (°, для nav), lines: [[текст, класс, t]] — подпись, capOut — когда подпись уходит, cars, people, order }
 (function () {
   // идёт только по улицам: если соседние точки не на одной улице, вставляем угол (сначала по горизонтали)
@@ -16,7 +16,7 @@
   const plan = (d) => { const G = d.grid || 300, V = d.speed || 900, PA = d.pause ?? .55, pts = expand(d.route).map(([i, j, k]) => ({ x: i * G, y: j * G, k }));
     let tt = d.t0 ?? .3; const keys = [{ t: tt, x: pts[0].x, y: pts[0].y }], stops = [];
     for (let n = 1; n < pts.length; n++) { const a = pts[n - 1], b = pts[n]; tt += Math.hypot(b.x - a.x, b.y - a.y) / V; keys.push({ t: tt, x: b.x, y: b.y });
-      if (b.k) { const L = Math.hypot(b.x - a.x, b.y - a.y) || 1; stops.push({ t: tt, k: b.k, x: b.x, y: b.y, dx: (b.x - a.x) / L, dy: (b.y - a.y) / L }); tt += PA; keys.push({ t: tt, x: b.x, y: b.y }); } }
+      if (b.k) { const L = Math.hypot(b.x - a.x, b.y - a.y) || 1; stops.push({ t: tt, k: b.k, x: b.x, y: b.y, dx: (b.x - a.x) / L, dy: (b.y - a.y) / L }); const pa = b.k === "drop" ? (d.pauseDrop ?? PA) : PA; stops[stops.length - 1].pa = pa; tt += pa; keys.push({ t: tt, x: b.x, y: b.y }); } }
     return { keys, stops }; };
   const hash = (a, b) => { const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return s - Math.floor(s); };
   // курьер сбоку (вид сверху) и со спины (навигатор): короб, руки и ноги двигаются от фазы шага
@@ -33,11 +33,19 @@
     <g class="bd">
       <g class="a1"><rect x="-44" y="-150" width="16" height="66" rx="8" fill="#2a3760"/><circle cx="-36" cy="-82" r="9" fill="#e9bd94"/></g>
       <g class="a2"><rect x="28" y="-150" width="16" height="66" rx="8" fill="#2a3760"/><circle cx="36" cy="-82" r="9" fill="#e9bd94"/></g>
-      <rect x="-32" y="-158" width="64" height="86" rx="18" fill="#2c3a63"/>
+      <g class="bk"><rect x="-32" y="-158" width="64" height="86" rx="18" fill="#2c3a63"/>
       <circle cx="0" cy="-176" r="22" fill="#e9bd94"/><path d="M-23 -178 a23 23 0 0 1 46 0 v4 h-46z" fill="#141b30"/>
       <rect x="-40" y="-164" width="80" height="76" rx="10" fill="#ffd60a"/><rect x="-40" y="-164" width="80" height="12" rx="6" fill="#ffe55c"/>
       <rect x="-40" y="-130" width="80" height="7" fill="#d6b000"/><rect x="-12" y="-110" width="24" height="12" rx="3" fill="#d6b000"/>
-      <rect class="lid" x="-40" y="-170" width="80" height="12" rx="5" fill="#ffe55c" style="transform-box:view-box;transform-origin:-40px -164px"/>
+      <rect class="lid" x="-40" y="-170" width="80" height="12" rx="5" fill="#ffe55c" style="transform-box:view-box;transform-origin:-40px -164px"/></g>
+      <g class="fr" style="display:none"><rect x="-40" y="-172" width="80" height="22" rx="8" fill="#ffd60a"/><rect x="-40" y="-172" width="80" height="8" rx="4" fill="#ffe55c"/>
+      <rect x="-32" y="-158" width="64" height="86" rx="18" fill="#2c3a63"/><path d="M-21 -156 L-17 -104 M21 -156 L17 -104" stroke="#ffd60a" stroke-width="7" stroke-linecap="round"/>
+      <path d="M0 -150 v62" stroke="#1d2747" stroke-width="3"/><rect x="-9" y="-160" width="18" height="10" rx="4" fill="#d9a77e"/>
+      <circle cx="0" cy="-176" r="22" fill="#e9bd94"/><circle cx="-22" cy="-175" r="5" fill="#d9a77e"/><circle cx="22" cy="-175" r="5" fill="#d9a77e"/>
+      <path d="M-23 -180 a23 23 0 0 1 46 0z" fill="#141b30"/><rect x="-25" y="-184" width="50" height="7" rx="3.5" fill="#0b1124"/>
+      <g class="eyes"><ellipse cx="-8" cy="-172" rx="2.8" ry="3.4" fill="#22150e"/><ellipse cx="8" cy="-172" rx="2.8" ry="3.4" fill="#22150e"/></g>
+      <path class="mo" d="M-7 -164 q7 7 14 0" stroke="#7a3b22" stroke-width="2.6" fill="#7a3b22" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="-14" cy="-166" r="4.5" fill="#ff7a7a" opacity=".3"/><circle cx="14" cy="-166" r="4.5" fill="#ff7a7a" opacity=".3"/></g>
     </g></svg>`;
   const BAG = `<svg width="52" height="60" viewBox="0 0 52 60"><path d="M6 18h40l-4 40H10z" fill="#c98b4a"/><path d="M6 18h40l-2 8H8z" fill="#a8703a"/><path d="M17 20v-6a9 9 0 0 1 18 0v6" fill="none" stroke="#7a4f27" stroke-width="4"/></svg>`;
   const GUEST = `<svg width="110" height="190" viewBox="-55 -185 110 190" style="position:absolute;left:-55px;top:-185px;overflow:visible">
@@ -130,7 +138,7 @@
         return bb(`<div class="pop" style="background:${bg}">${txt}</div>`); });
       // курьер: тень и свечение лежат на земле, фигура стоит (в навигаторе — вид со спины)
       const c = P.c = bb(nav ? BACK : SIDE);
-      ["lg1", "lg2", "ar", "a1", "a2", "bd", "lid"].forEach(k => P[k] = c.querySelector("." + k)); P.fig = c.querySelector(".fig");
+      ["lg1", "lg2", "ar", "a1", "a2", "bd", "lid", "bk", "fr", "eyes"].forEach(k => P[k] = c.querySelector("." + k)); P.fig = c.querySelector(".fig");
       P.bags = P.stops.map(() => bb(`<div class="bag">${BAG}</div>`));
       if (nav) U.el("div", "fog", null, root);
       if (d.rain) P.rain = U.el("div", "rain", null, root);
@@ -168,6 +176,12 @@
         P.bd.setAttribute("transform", `translate(0 ${(-Math.abs(Math.cos(ph)) * 6 * p.mv).toFixed(1)}) rotate(${(sw * 2.5).toFixed(2)} 0 -80)`);
         const pk = P.stops.find(st => st.k === "pick" && t >= st.t - .1 && t < st.t + .7); P.lid.style.transform = `rotate(${pk ? (-40 * U.bell((t - pk.t + .1) / .8)).toFixed(1) : 0}deg)`;
         P.c.style.transform = up(p.x, p.y, `scale(${(S / s).toFixed(3)})`);
+        // на доставке курьер оборачивается к зрителю лицом (владелец 12.10: «поверни лицом во всех сценах»): разворот через сжатие по ширине
+        const last = P.stops[P.stops.length - 1], dr = P.stops.find(st => st.k === "drop" && t >= st.t && (t < st.t + st.pa || st === last));
+        const f = dr ? U.clamp(Math.min(t - dr.t - .1, dr === last ? 1 : dr.t + dr.pa - .08 - t) / .16) : 0;   // на последней выдаче так и стоит лицом к нам
+        P.fr.style.display = f > .5 ? "" : "none"; P.bk.style.display = f > .5 ? "none" : "";
+        P.fig.style.transform = `scaleX(${Math.max(.04, Math.abs(1 - 2 * f)).toFixed(3)})`;
+        if (P.eyes) P.eyes.setAttribute("transform", (t % 2.7) < .12 ? "translate(0 -172) scale(1 .15) translate(0 172)" : "");
       } else {
         const swd = sw * 28;
         P.lg1.setAttribute("transform", `rotate(${swd} 0 80)`); P.lg2.setAttribute("transform", `rotate(${-swd} 0 80)`);
@@ -191,16 +205,16 @@
         const x = lag.x + (hash(i, c) - .5) * 900, y = lag.y + (hash(c, i + 7) - .5) * 900;
         e.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px) scale(${(.3 + k * 1.2).toFixed(2)})`; e.style.opacity = ((1 - k) * .8).toFixed(2); });
       // точки, клиенты, пакеты, всплывашки
-      P.pins.forEach((e, i) => { const st = P.stops[i], k = U.back((t - (st.t - 1.4)) / .45); e.style.opacity = t < st.t - 1.4 ? 0 : (nav ? 1 - U.clamp((t - st.t - (d.pause ?? .55)) / .3) : (t > st.t + 1.4 ? .4 : 1));
+      P.pins.forEach((e, i) => { const st = P.stops[i], k = U.back((t - (st.t - 1.4)) / .45); e.style.opacity = t < st.t - 1.4 ? 0 : (nav ? 1 - U.clamp((t - st.t - st.pa) / .3) : (t > st.t + 1.4 ? .4 : 1));
         e.style.transform = up(st.px, st.py, `scale(${U.lerp(.3, 1, k).toFixed(3)})`); });
-      P.guests.forEach((e, i) => { if (!e) return; const st = P.stops[i], k = U.back((t - (st.t - .5)) / .4), out = U.clamp((t - st.t - (d.pause ?? .55) + .2) / .3);
+      P.guests.forEach((e, i) => { if (!e) return; const st = P.stops[i], k = U.back((t - (st.t - .5)) / .4), out = U.clamp((t - st.t - st.pa + .2) / .3);
         e.style.opacity = t < st.t - .5 ? 0 : 1 - out; e.style.transform = up(st.gx, st.gy, `scale(${(U.lerp(.2, 1, k) * (1 - .3 * out)).toFixed(3)})`);
         e.querySelector(".wave").setAttribute("transform", t > st.t + .35 ? `rotate(${(-150 + 18 * Math.sin(t * 14)).toFixed(1)} 29 -136)` : ""); });
       P.bags.forEach((e, i) => { const st = P.stops[i], a0 = st.k === "pick" ? st.t - .1 : st.t, k = U.io3((t - a0) / .45);
         e.style.opacity = t < a0 || k >= 1 ? 0 : 1;
         const [fx, fy, tx, ty] = st.k === "pick" ? [st.px, st.py, p.x, p.y] : [p.x, p.y, st.gx, st.gy];
         e.style.transform = up(U.lerp(fx, tx, k), U.lerp(fy, ty, k), `translateY(${(-80 - 180 * U.bell(k)).toFixed(1)}px) rotate(${(k * 360).toFixed(0)}deg)`); });
-      P.pops.forEach((e, i) => { const st = P.stops[i], k = U.out5((t - st.t) / .4); e.style.opacity = t < st.t ? 0 : 1 - U.clamp((t - st.t - Math.min(1.2, (d.pause ?? .55) - .1)) / .3);
+      P.pops.forEach((e, i) => { const st = P.stops[i], k = U.out5((t - st.t) / .4); e.style.opacity = t < st.t ? 0 : 1 - U.clamp((t - st.t - Math.min(1.2, st.pa - .1)) / .3);
         e.style.transform = up(st.px, st.py, `translate(-40px, ${nav ? -270 : -150}px) translateY(${((1 - k) * 30 - U.clamp((t - st.t) / 1.4) * 40).toFixed(1)}px) scale(${U.lerp(.6, 1, U.back((t - st.t) / .35)).toFixed(3)})`); });
       // монеты от курьера летят в счётчик заработка
       P.coins.forEach(({ s: st, q, e }) => { const a0 = st.t + .25 + q * .12, k = U.io3((t - a0) / .7);

@@ -186,11 +186,11 @@ def build(name):
         t0, t1 = starts[k], starts[k + 1]; dur = t1 - t0; lt = lambda m: round(T(*m) - t0, 3)
         if s["mode"] == "map":
             data = dict(view="nav", nx=22, ny=19, park=[[12, 8], [12, 9], [13, 8], [13, 9], [6, 10]], river=13,
-                        route=[[6, 9], [8, 9, "pick"], [8, 13, "drop"], [11, 13, "pick"], [13, 10, "drop"]], pause=.7, t0=.3, earn=[120, 110],
+                        route=[[6, 9], [8, 9, "pick"], [8, 13, "drop"], [11, 13, "pick"], [13, 10, "drop"]], pause=.5, pauseDrop=1.0, t0=.3, earn=[120, 110],   # на доставке курьер оборачивается лицом
                         clock=dict({"from": 0, "to": 40}), clockT=.3, rain=True, zoom=1.2,
                         lines=[[a, b, lt(m)] for a, b, m in s["lines"]])
             blocks = 2 + 4 + 3 + 5          # длина маршрута в кварталах
-            data["speed"] = round(blocks * 300 / max(2, dur - .3 - 4 * .7 - .3), 1)
+            data["speed"] = round(blocks * 300 / max(2, dur - .3 - 2 * .5 - 2 * 1.0 - .3), 1)
         else:
             data = {k2: v for k2, v in s.items() if k2 not in ("mode", "start", "at", "cam", "tin", "hook_end")}
             data["at"] = {k2: lt(v) for k2, v in s.get("at", {}).items()}
