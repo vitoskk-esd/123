@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Голос ролика №3 через Yandex SpeechKit, голос madirus (владелец 12.10: «озвучивай ролик номер 3 голосом мадируса»).
+"""Голос ролика №3 через Yandex SpeechKit, голос — YA_VOICE (по умолчанию madirus; владелец 12.10: «давай всё-таки поменяем голос на другой»).
 Ударения — наш словарь (tts_v5.stress + STRESS_FIX), «+» перед ударной гласной; фраза длиннее 240 знаков делится по предложениям
 (лимит запроса — 250). Каждая фраза сверяется Whisper medium (voice_e.check), слабые — в отчёт voice/ya/report.txt.
 Склейка — tts_v5.humanize(fx="clean", темп 1,0) → voice/out/voice.wav.
@@ -23,7 +23,7 @@ def chunks(s, lim=240):
 
 for i, p in enumerate(P):
     f = os.path.join(D, f"p{i:03d}.wav"); m = meta.get(str(i))
-    if m and m.get("text") == p and os.path.exists(f): continue
+    if m and m.get("text") == p and m.get("voice") == Y.VOICE and os.path.exists(f): continue
     said = Y.to_plus(T.stress(p)); parts = chunks(said)
     if len(parts) == 1: Y.synth(said, f, stressed=True)
     else:                                                    # длинная фраза — куски подряд с паузой 0,25 с
@@ -33,7 +33,7 @@ for i, p in enumerate(P):
         flt = "".join(f"[{k}:a]apad=pad_dur=0.25[a{k}];" for k in range(len(fs))) + "".join(f"[a{k}]" for k in range(len(fs))) + f"concat=n={len(fs)}:v=0:a=1[o]"
         subprocess.run(["ffmpeg", "-v", "error", "-y", *sum((["-i", g] for g in fs), []), "-filter_complex", flt, "-map", "[o]", f], check=True)
     sim, heard = E.check(f, p)
-    meta[str(i)] = dict(text=p, said=said, sim=round(sim, 3), heard=heard, e=f)
+    meta[str(i)] = dict(text=p, voice=Y.VOICE, said=said, sim=round(sim, 3), heard=heard, e=f)
     json.dump(meta, open(meta_f, "w"), ensure_ascii=False, indent=1)
     print(f"{i} {sim:.2f} — {heard}", flush=True)
 

@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 PY=/tmp/claude-0/-home-user-123/8ca4fbe8-9858-5867-9610-cc1983112730/scratchpad/cbx/bin/python; CH=4
 log() { echo "$(date +%H:%M:%S) $*" | tee -a out/full_log.txt; }
 mkdir -p out
-if [ ! -f out/.yv ]; then $PY voice/ya_voice.py >> out/full_log.txt 2>&1 || { log "голос: ошибка"; exit 1; }; rm -f voice/words.json; touch out/.yv; log "голос Яндекса склеен"; fi
+if [ ! -f out/.yv ]; then YA_VOICE=${YA_VOICE:-madirus} $PY voice/ya_voice.py >> out/full_log.txt 2>&1 || { log "голос: ошибка"; exit 1; }; rm -f voice/words.json; touch out/.yv; log "голос Яндекса склеен"; fi
 if [ ! -f voice/words.json ]; then $PY build3.py words >> out/full_log.txt 2>&1; log "слова голоса: $(python3 -c "import json; print(len(json.load(open('voice/words.json'))))")"; fi
 python3 build3.py full >> out/full_log.txt 2>&1
 node ../kit/yt/sfx.js data_full.js timeline_full.js scenes.js scenes_c1.js scenes_c2.js scenes_c3.js >> out/full_log.txt 2>&1
