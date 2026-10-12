@@ -24,6 +24,7 @@ REF_LIVE = os.path.join(SCRATCH, "ref_3.0.wav")
 REF_V5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "voice_e_ref_v5.wav")
 PARAMS = dict(exaggeration=.55, cfg_weight=.4, temperature=.85)       # проба 3, «D»
 SEEDS, MIN_SIM = (2, 5, 11, 17, 23), .99      # все слова на месте: «больше, своим» (без «чем») давало 0,96 и смысл наоборот
+MIN_SIM = float(os.environ.get("MIN_SIM", MIN_SIM))   # MIN_SIM=.97 — быстрее (ролик №3: слабее 0,97 потом всё равно переотбирает full_build)
 NUM = {"0": "ноль", "1": "первый", "2": "второй", "3": "третий",     # «Шаг 1» — так Whisper пишет «Шаг первый»
        "5": "пять", "10": "десять", "15": "пятнадцать", "18": "восемнадцать",
        "20": "двадцать", "30": "тридцать", "50": "пятьдесят", "100": "сто"}
