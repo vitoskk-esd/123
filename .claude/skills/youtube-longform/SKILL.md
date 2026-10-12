@@ -33,6 +33,8 @@ shown in one of the 9 owner-chosen modes, transitions flash / zoom-through / mat
   with proof) — never pad a 6-minute idea. If a topic only holds < 8 min, merge it with a related one.
 - Owner's measured pace (video #1, after cuts): **≈ 160 words/min** → 12 min ≈ 1 900 words,
   13 min ≈ 2 100, 15 min ≈ 2 400. Write the script to the target, then time a read-through.
+- **Yandex LiveTTS «vasily»/sales (voice of video #3, 12.10) reads faster: ≈ 189 words/min including gaps** (2 075 words →
+  11:00, so video #3 came out under the 12-min target). For this voice: 12 min ≈ 2 270 words, 13 min ≈ 2 450, 15 min ≈ 2 850.
 - Long video ≠ slow video: sub-hook every ~3 min, open loop every 1.5–2 min, a chapter every 2–3 min
   (5–7 chapters), payoff of the title promise in the last third.
 - Video #1 (bank tier list, ≈ 7 min) predates the rule and stays as is.
