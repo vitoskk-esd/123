@@ -6,7 +6,7 @@
 """
 import base64, json, os, re, sys, urllib.request
 URL = "https://tts.api.cloud.yandex.net/tts/v3/utteranceSynthesis"
-VOICE = os.environ.get("YA_VOICE", "madirus")
+VOICE = os.environ.get("YA_VOICE", "anton")   # владелец 12.10: голос Антона (до этого — madirus)
 
 
 def to_plus(text):
