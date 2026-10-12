@@ -13,7 +13,9 @@ const srv = http.createServer((req, res) => {
   if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { "Content-Type": TYPES[path.extname(f)] || "application/octet-stream" }); fs.createReadStream(f).pipe(res);
 }).listen(0, "127.0.0.1", async () => {
-  const b = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+  // растр на CPU (--disable-gpu) в 2,6 раза быстрее эмуляции GPU (swiftshader) при той же картинке (замер 12.10: 1,19 с против 3,13 с на кадр);
+  // RENDER_GL=1 — старый путь через swiftshader
+  const b = await chromium.launch({ args: process.env.RENDER_GL ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] : ["--disable-gpu"] });
   const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
   p.on("pageerror", e => console.error("pageerror:", e.message));
   p.on("console", m => { if (m.type() === "error") console.error("console:", m.text()); });
