@@ -259,17 +259,28 @@
       s += `<g transform="translate(${DX} 0)"><path d="M860 470 h200 v314 h-200z" fill="#ffcf87"/><path d="M860 470 a100 100 0 0 1 200 0z" fill="#ffd9a0"/><rect x="860" y="470" width="200" height="314" fill="#fff3d6" opacity="${(.5 * gl).toFixed(2)}" filter="url(#b14)"/>
         <circle cx="960" cy="640" r="320" fill="#ffb25c" opacity="${(.3 * gl).toFixed(2)}" filter="url(#b60)"/><path d="M860 784 L1060 784 L1300 964 L620 964Z" fill="url(#spill5)" opacity="${(.8 * gl).toFixed(2)}"/></g>`;
       // очередь новичков на ступенях
-      const q = [[1180, 960, "#ff8a3d"], [1080, 975, "#4a8dff"], [1490, 975, "#8a5cf6"]];   // у двери — левый нижний угол свободен под подписи
-      q.forEach(([x, y, c], i) => { if (!h.on("новым")) return; const k = h.U.back((h.since("новым") - i * .12) / .5);
-        // на «тому» двое у двери поднимаются и заходят внутрь — к финальной надписи низ кадра свободен
+      // очередь новичков на ступенях — лицом к зрителю (владелец 12.10: «сделай лица на этих людях»), у каждого свой вид
+      const blink = (i) => ((t + i * 1.37) % 3.6) < .13 ? "closed" : "open";
+      const wow = h.on("пришли") && h.since("пришли") < 1.8;                          // монеты летят — рты открыты
+      const q = [[1180, 960, { top: "#ff8a3d", topD: "#d86a22", topL: "#ffd2a8", hair: "#5a3418", skin: "#f4c99a", skinD: "#dca673" }, {}, -.4],
+                 [1080, 975, { top: "#4a8dff", topD: "#2f6ad6", topL: "#bcd6ff", hair: "#17100b", skin: "#e2ab78", skinD: "#c48a57" }, { hair: "long" }, .6],
+                 [1490, 975, { top: "#8a5cf6", topD: "#6a3fd4", topL: "#d7c6ff", hair: "#b0652a", skin: "#f6d2a8", skinD: "#e0ae7c" }, { hair: "bun" }, -1]];   // у двери — левый нижний угол свободен под подписи
+      q.forEach(([x, y, c, o, look], i) => { if (!h.on("новым")) return; const k = h.U.back((h.since("новым") - i * .12) / .5);
+        // на «тому» двое у двери поворачиваются и заходят внутрь — к финальной надписи низ кадра свободен
         const go = i < 2 && h.on("тому") ? out3(((h.since("тому") - i * .25) / 1.8)) : 0; if (go >= 1) return;
         x = lerp(x, 1140 + i * 30, go); y = lerp(y, 800, go);
-        s += `<g opacity="${(1 - cl((go - .7) / .3)).toFixed(3)}" transform="translate(${x} ${y}) scale(${Math.max(0, k * .62 * (1 - .35 * go)).toFixed(3)})">${a.person({ back: true, c: { top: c, topD: c, topL: "#fff" }, noShadow: false, pose: { la: [[-62, -214], [-60, -150]], ra: [[62, -214], [60, -150]], tilt: Math.sin(t * 2 + i) * 3 } })}</g>`; });
-      // герой поднимается по ступеням и тянет руку к монете
+        const up = wow ? -(.3 + .2 * Math.sin(t * 3 + i)) : 0;                         // смотрят вверх на монеты
+        s += `<g opacity="${(1 - cl((go - .7) / .3)).toFixed(3)}" transform="translate(${x} ${y}) scale(${Math.max(0, k * .62 * (1 - .35 * go)).toFixed(3)})">${a.person({ ...o, back: go > 0, c, noShadow: false,
+          pose: { la: [[-62, -214], [-60, -150]], ra: wow && i === 1 ? [[66, -230], [80, -300]] : [[62, -214], [60, -150]], tilt: Math.sin(t * 2 + i) * 3 + up * 10, look: look + Math.sin(t * .9 + i * 2) * .15,
+                  eyes: blink(i), mouth: wow ? "open" : "smile" } })}</g>`; });
+      // герой поднимается по ступеням лицом к нам и тянет руку к монете; получил — смотрит в камеру и улыбается
       const k = h.io("новым", 2.2), hx = lerp(1700, 1420, k), hy = lerp(1060, 920, k), ph = t * 6 * (k < 1 ? 1 : 0), sw = Math.sin(ph) * 14;
       const reach = h.on("пришли") ? out3(h.since("пришли") / .4) : 0;
-      s += a.person({ x: hx, y: hy, s: 1.2, back: true, pose: { la: [[-62, -214], [-64 + sw * .4, -150]], ra: [[lerp(62, 70, reach), lerp(-214, -260, reach)], [lerp(60, 92, reach), lerp(-150, -320, reach)]],
-        ll: [[-22, -96 - Math.max(0, sw)], [-30, -6 - Math.max(0, sw) * 2]], rl: [[24, -96 - Math.max(0, -sw)], [30, -6 - Math.max(0, -sw) * 2]] } });
+      const hLook = h.on("бесплатная") ? lerp(.8, 0, out3(h.since("бесплатная") / .4)) : h.on("пришли") ? .8 : -.5;
+      const hMouth = h.on("бесплатная") ? "open" : wow ? "open" : "smile";
+      s += a.person({ x: hx, y: hy, s: 1.2, c: { hair: "#2b1a10" }, pose: { la: [[-62, -214], [-64 + sw * .4, -150]], ra: [[lerp(62, 70, reach), lerp(-214, -260, reach)], [lerp(60, 92, reach), lerp(-150, -320, reach)]],
+        ll: [[-22, -96 - Math.max(0, sw)], [-30, -6 - Math.max(0, sw) * 2]], rl: [[24, -96 - Math.max(0, -sw)], [30, -6 - Math.max(0, -sw) * 2]],
+        look: hLook, eyes: blink(5), mouth: hMouth, tilt: reach * 4 } });
       // монеты из двери к герою
       for (let i = 0; i < 4; i++) s += coinFly(h, "пришли", 1140, 620, hx + 90, hy - 380, 26 + i * 4, { delay: i * .14, d: .7, arc: 160 + i * 20 });
       // три вида бонуса над дверью
