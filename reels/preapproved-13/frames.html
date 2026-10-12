@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Рилс 13 — раскадровка</title>
+<!-- Раскадровка рилса #13 «Предодобрено — не одобрено» (владелец 12.10: «сделаем тему следующего рилса и его дизайн»).
+     ?style=dark — стиль A «тёмный финтех» (как рилс #12: графит, сетка, лаймовый акцент); ?style=illu — живая иллюстрация
+     (как карусель ролика №3, которую владелец одобрил). ?f=1..6 — кадр. Снимки: node reels/preapproved-13/shoot.js -->
+<style>
+  @font-face { font-family: "Mont"; src: url("/youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("/youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #07080a; }
+  svg { display: block; }
+</style>
+<script src="/youtube/03-banks-pay-you/carousel/art.js"></script>
+</head><body>
+<svg id="c" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>
+<div id="cap" style="position:absolute;left:60px;right:140px;top:1225px;display:flex;flex-wrap:nowrap;justify-content:center;align-items:baseline;gap:26px;font-family:Unb;font-weight:900;letter-spacing:-.02em;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.8);white-space:nowrap"></div>
+<script>
+const q = new URLSearchParams(location.search), STYLE = q.get("style") || "dark", F = +(q.get("f") || 1), A = window.A;
+const LIME = "#c8ff3d", RED = "#ff4d5e", BLUE = "#5fd0ff";
+// субтитры v2: 2–3 слова, Unbounded 92, ключевое слово ×1,28 и цветом, низ кадра ≈ 1270 px (правее 140 px — интерфейс Reels)
+const CAP = []; const cap = (words) => { CAP.push(...words); return ""; };
+const foot = `<text x="540" y="1868" text-anchor="middle" font-family="Mont" font-weight="600" font-size="24" fill="rgba(255,255,255,.45)">Познавательный ролик. Не реклама банка и не финансовая рекомендация</text>`;
+const defs = `${A.defs()}<defs><filter id="capS" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity=".75"/></filter>
+  <radialGradient id="vigV" cx="50%" cy="45%" r="75%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>
+  <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" stroke="#fff" stroke-opacity=".05" stroke-width="2"/></pattern>
+  <linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060a18"/><stop offset="1" stop-color="#16244a"/></linearGradient></defs>`;
+const phoneNotif = (x, y, w, title, sub, o = {}) => A.notif(x, y, w, { title, sub, app: o.app || "Банк · 01:07", icon: o.icon || "₽", ic: o.ic || LIME, bg: o.bg, h: o.h || 170, rot: o.rot });
+const doc = (x, y, rows, o = {}) => { let s = `<g transform="translate(${x} ${y}) rotate(${o.rot || 0})"><rect width="760" height="${190 + rows.length * 96}" rx="26" fill="${o.paper || "#f3f1ea"}"/>
+    <text x="48" y="92" font-family="Unb" font-weight="900" font-size="46" fill="#14161c">Кредитная история</text><text x="48" y="136" font-family="Mont" font-weight="600" font-size="26" fill="#6b6f7a">раздел: заявки · пример</text>`;
+  rows.forEach((r, i) => { const yy = 180 + i * 96; if (r.hl) s += `<rect x="30" y="${yy - 8}" width="700" height="78" rx="10" fill="${r.hl}" opacity=".85"/>`;
+    s += `<text x="48" y="${yy + 46}" font-family="Mont" font-weight="700" font-size="34" fill="#14161c">Заявка на кредитку</text><text x="712" y="${yy + 46}" text-anchor="end" font-family="Mont" font-weight="600" font-size="30" fill="#55596a">${r.d}</text>
+      <path d="M40 ${yy + 82} H720" stroke="#14161c" stroke-opacity=".08" stroke-width="2"/>`; });
+  return s + `</g>`; };
+const tg = (x, y) => `<g transform="translate(${x} ${y})"><rect width="760" height="420" rx="40" fill="#17212b" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>
+  <clipPath id="av"><circle cx="110" cy="110" r="62"/></clipPath><image href="/reels/assets/tg/avatar.png" x="48" y="48" width="124" height="124" clip-path="url(#av)" preserveAspectRatio="xMidYMid slice"/>
+  <text x="200" y="102" font-family="Mont" font-weight="800" font-size="42" fill="#fff">Владик Арбузит</text><text x="200" y="146" font-family="Mont" font-weight="600" font-size="28" fill="#7d8b99">канал</text>
+  <rect x="48" y="210" width="664" height="34" rx="10" fill="#fff" opacity=".12"/><rect x="48" y="258" width="520" height="34" rx="10" fill="#fff" opacity=".08"/>
+  <rect x="48" y="320" width="664" height="72" rx="20" fill="#2aabee"/><text x="380" y="368" text-anchor="middle" font-family="Mont" font-weight="800" font-size="34" fill="#fff">Подписаться</text></g>`;
+
+const DARK = {
+  bg: `<rect width="1080" height="1920" fill="#0b0c0f"/><rect width="1080" height="1920" fill="url(#grid)"/>`,
+  1: () => `<circle cx="540" cy="620" r="420" fill="${LIME}" opacity=".08" filter="url(#b60)"/>
+    <text x="540" y="330" text-anchor="middle" font-family="Unb" font-weight="900" font-size="210" fill="#fff" letter-spacing="-.04em">01:07</text>
+    <text x="540" y="400" text-anchor="middle" font-family="Mont" font-weight="700" font-size="34" fill="rgba(255,255,255,.5)">понедельник, ночь</text>
+    ${phoneNotif(110, 520, 860, "Вам предодобрена", "кредитная карта. Оформите за 2 минуты", { h: 190 })}
+    <text x="540" y="1010" text-anchor="middle" font-family="Unb" font-weight="900" font-size="104" fill="${LIME}" letter-spacing="-.03em">ЭТО НЕ</text>
+    <text x="540" y="1120" text-anchor="middle" font-family="Unb" font-weight="900" font-size="104" fill="${LIME}" letter-spacing="-.03em">ПОДАРОК</text>
+    ${cap([["Пуш"], ["от", 0], ["банка", BLUE]])}`,
+  2: () => `<text x="540" y="470" text-anchor="middle" font-family="Unb" font-weight="900" font-size="112" fill="#fff" letter-spacing="-.04em">ПРЕДО</text>
+    <text x="540" y="590" text-anchor="middle" font-family="Unb" font-weight="900" font-size="112" fill="#fff" letter-spacing="-.04em">ДОБРЕНО</text>
+    <text x="540" y="790" text-anchor="middle" font-family="Unb" font-weight="900" font-size="220" fill="${RED}">≠</text>
+    <text x="540" y="960" text-anchor="middle" font-family="Unb" font-weight="900" font-size="112" fill="${LIME}" letter-spacing="-.04em">ОДОБРЕНО</text>
+    ${cap([["не"], ["одобрено", RED]])}`,
+  3: () => { let s = ""; for (let i = 0; i < 7; i++) s += phoneNotif(120 + i * 18, 300 + i * 92, 840 - i * 36, "Вам предодобрена", "кредитная карта", { rot: (i - 3) * 1.6, bg: `rgba(${24 + i * 6},${28 + i * 6},${36 + i * 6},.95)` });
+    return s + `<rect x="300" y="1030" width="480" height="96" rx="48" fill="${LIME}"/><text x="540" y="1092" text-anchor="middle" font-family="Unb" font-weight="900" font-size="46" fill="#07080a">РАССЫЛКА</text>
+    ${cap([["просто"], ["маркетинг", LIME]])}`; },
+  4: () => `<rect x="300" y="250" width="480" height="120" rx="60" fill="${LIME}"/><text x="540" y="328" text-anchor="middle" font-family="Unb" font-weight="900" font-size="50" fill="#07080a">Оформить</text>
+    <circle cx="700" cy="350" r="44" fill="#fff" opacity=".9"/><circle cx="700" cy="350" r="70" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="6"/>
+    <path d="M540 410 V500" stroke="${LIME}" stroke-width="8" stroke-dasharray="14 12"/><path d="M516 482 L540 512 L564 482" stroke="${LIME}" stroke-width="8" fill="none"/>
+    ${doc(160, 540, [{ d: "12.10 · 01:08", hl: LIME }])}
+    ${cap([["это"], ["заявка", BLUE]])}`,
+  5: () => `${doc(160, 230, [{ d: "12.10", hl: "#ffb3bb" }, { d: "14.10", hl: "#ffb3bb" }, { d: "15.10", hl: "#ffb3bb" }, { d: "15.10", hl: "#ffb3bb" }, { d: "18.10", hl: "#ffb3bb" }], { rot: -2 })}
+    <g transform="translate(540 960) rotate(-8)"><rect x="-300" y="-70" width="600" height="140" rx="20" fill="none" stroke="${RED}" stroke-width="10"/>
+    <text y="22" text-anchor="middle" font-family="Unb" font-weight="900" font-size="54" fill="${RED}">ТРЕВОЖНЫЙ СИГНАЛ</text></g>
+    ${cap([["много"], ["заявок", RED]])}`,
+  6: () => `<text x="540" y="330" text-anchor="middle" font-family="Unb" font-weight="900" font-size="78" fill="#fff" letter-spacing="-.03em">Кредитка без</text>
+    <text x="540" y="430" text-anchor="middle" font-family="Unb" font-weight="900" font-size="78" fill="${LIME}" letter-spacing="-.03em">процентов</text>
+    ${tg(160, 560)}<text x="540" y="1100" text-anchor="middle" font-family="Mont" font-weight="700" font-size="36" fill="rgba(255,255,255,.7)">ссылка в профиле ↑</text>
+    ${cap([["в"], ["телеграме", BLUE]])}`,
+};
+
+const ILLU = {
+  bg: `<rect width="1080" height="1920" fill="url(#night)"/>${A.bokeh(13, 18, [0, 0, 1080, 1100], ["#7fb6ff", "#ffcf87"], { blur: "b14", r0: 6, r1: 26 })}`,
+  // спальня ночью: окно с городом, кровать, герой сидит и смотрит в телефон; свет от экрана на лице
+  room: (lamp = true) => { let s = `<rect x="90" y="180" width="420" height="520" rx="14" fill="#0d1530" stroke="#3a2a1c" stroke-width="22"/>`;
+    for (let i = 0; i < 26; i++) { const r = A.rnd(i + 3); s += `<rect x="${110 + r() * 370}" y="${420 + r() * 250}" width="14" height="20" fill="#ffd27a" opacity="${.4 + r() * .5}"/>`; }
+    s += `<clipPath id="win"><rect x="101" y="191" width="398" height="498"/></clipPath><g clip-path="url(#win)">${A.rain(5, 300)}</g><path d="M300 180 V700 M90 440 H510" stroke="#3a2a1c" stroke-width="14"/>
+      <rect x="0" y="1180" width="1080" height="740" fill="#0a0f22"/><rect x="60" y="1010" width="960" height="230" rx="40" fill="#2b3a6b"/><rect x="60" y="960" width="300" height="120" rx="40" fill="#e9edf8"/>
+      <rect x="40" y="1200" width="1000" height="60" rx="20" fill="#1c2750"/>`;
+    if (lamp) s += `<circle cx="900" cy="300" r="260" fill="#ffb25c" opacity=".12" filter="url(#b60)"/><path d="M840 240 h120 l30 90 h-180z" fill="#f4d79b"/><rect x="893" y="330" width="14" height="300" fill="#2a2a33"/>`;
+    return s; },
+  hero: (o = {}) => `<circle cx="600" cy="760" r="180" fill="${BLUE}" opacity=".18" filter="url(#b60)"/>${A.person({ x: 600, y: 1210, s: 1.25, phone: "ra", phoneScreen: BLUE, c: { top: "#2ec4b6" },
+    pose: Object.assign({ ra: [[62, -200], [28, -262]], la: [[-62, -214], [-30, -190]], ll: [[-30, -96], [-90, -6]], rl: [[30, -96], [70, -6]], look: .5, mouth: "flat" }, o) })}`,
+  1: () => `${ILLU.room()}${ILLU.hero({ mouth: "open" })}
+    ${phoneNotif(150, 470, 780, "Вам предодобрена", "кредитная карта", { app: "Банк · 01:07", bg: "rgba(18,24,44,.92)" })}
+    <text x="540" y="200" text-anchor="middle" font-family="Unb" font-weight="900" font-size="90" fill="#fff" filter="url(#capS)">01:07</text>
+    ${cap([["Это"], ["не"], ["подарок", "#ffd60a"]])}`,
+  2: () => `${ILLU.room(false)}${ILLU.hero({ mouth: "sad", look: -.3 })}
+    <g transform="translate(300 420) rotate(-8)"><rect x="-230" y="-80" width="460" height="160" rx="22" fill="none" stroke="#ffd60a" stroke-width="10"/><text y="22" text-anchor="middle" font-family="Unb" font-weight="900" font-size="50" fill="#ffd60a">ПРЕДОДОБРЕНО</text></g>
+    <text x="540" y="560" text-anchor="middle" font-family="Unb" font-weight="900" font-size="150" fill="${RED}" filter="url(#capS)">≠</text>
+    <g transform="translate(780 700) rotate(6)"><rect x="-210" y="-80" width="420" height="160" rx="22" fill="none" stroke="#2ee07a" stroke-width="10"/><text y="22" text-anchor="middle" font-family="Unb" font-weight="900" font-size="54" fill="#2ee07a">ОДОБРЕНО</text></g>
+    ${cap([["не"], ["одобрено", RED]])}`,
+  3: () => { let s = `<rect x="140" y="180" width="800" height="1000" fill="#121a36"/><path d="M120 180 L540 60 L960 180Z" fill="#1a2550"/>`;
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 4; c++) { const x = 190 + c * 190, y = 230 + r * 155; s += `<rect x="${x}" y="${y}" width="130" height="110" rx="8" fill="#ffd27a" opacity=".55"/>
+      <g transform="translate(${x + 65} ${y + 45})"><rect x="-44" y="-26" width="88" height="52" rx="12" fill="#12182c"/><rect x="-36" y="-16" width="20" height="20" rx="5" fill="#ffd60a"/><rect x="-8" y="-12" width="44" height="8" rx="4" fill="#fff" opacity=".8"/><rect x="-8" y="2" width="32" height="7" rx="3" fill="#fff" opacity=".5"/></g>`; }
+    return s + `<rect x="0" y="1180" width="1080" height="740" fill="#0a0f22"/><rect x="290" y="1060" width="500" height="100" rx="50" fill="#ffd60a"/><text x="540" y="1126" text-anchor="middle" font-family="Unb" font-weight="900" font-size="48" fill="#141007">РАССЫЛКА</text>
+    ${cap([["одна"], ["на всех", "#ffd60a"]])}`; },
+  4: () => `${ILLU.room(false)}<g transform="translate(540 170)"><rect x="-170" y="0" width="340" height="560" rx="44" fill="#11151f"/><rect x="-154" y="16" width="308" height="528" rx="32" fill="#1a2240"/>
+      ${phoneNotif(-140, 60, 280, "Предодобрена", "", { h: 120, app: "Банк", ic: "#ffd60a" }).replace('font-size="36"', 'font-size="26"')}
+      <rect x="-120" y="420" width="240" height="80" rx="40" fill="#ffd60a"/><text y="472" text-anchor="middle" font-family="Unb" font-weight="900" font-size="32" fill="#141007">Оформить</text>
+      <circle cx="60" cy="470" r="34" fill="#fff" opacity=".9"/><circle cx="60" cy="470" r="54" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="5"/></g>
+    ${doc(160, 790, [{ d: "12.10 · 01:08", hl: "#ffe58a" }], { paper: "#f6efe0" })}
+    ${cap([["это"], ["заявка", BLUE]])}`,
+  5: () => `<rect x="0" y="1180" width="1080" height="740" fill="#0a0f22"/>${A.person({ x: 820, y: 1220, s: 1.15, c: { top: "#3a4a7a", topD: "#2a3760", hair: "#5a5a5a" }, pose: { look: -.8, mouth: "flat", la: [[-62, -214], [-120, -260]], tilt: -6 } })}
+    <g transform="translate(40 260) scale(.82)">${doc(0, 0, [{ d: "12.10", hl: "#ffb3bb" }, { d: "14.10", hl: "#ffb3bb" }, { d: "15.10", hl: "#ffb3bb" }, { d: "15.10", hl: "#ffb3bb" }, { d: "18.10", hl: "#ffb3bb" }], { rot: -3, paper: "#f6efe0" })}</g>
+    ${cap([["тревожный"], ["сигнал", RED]])}`,
+  6: () => `${ILLU.room()}
+    <text x="540" y="230" text-anchor="middle" font-family="Unb" font-weight="900" font-size="74" fill="#fff" filter="url(#capS)">Кредитка</text>
+    <text x="540" y="320" text-anchor="middle" font-family="Unb" font-weight="900" font-size="74" fill="#ffd60a" filter="url(#capS)">без процентов</text>
+    ${tg(160, 380)}${cap([["в"], ["телеграме", BLUE]])}`,
+};
+
+const S = STYLE === "illu" ? ILLU : DARK;
+document.getElementById("c").innerHTML = defs + S.bg + S[F]() + `<rect width="1080" height="1920" fill="url(#vigV)"/>` + foot;
+const capEl = document.getElementById("cap");
+capEl.innerHTML = CAP.map(([t, c]) => `<span style="font-size:${c ? 118 : 92}px;color:${c || "#fff"}">${t}</span>`).join("");
+document.fonts.ready.then(() => { let k = 1; while (capEl.scrollWidth > capEl.clientWidth + 1 && k > .5) { k -= .04;
+    capEl.querySelectorAll("span").forEach((e, i) => e.style.fontSize = (CAP[i][1] ? 118 : 92) * k + "px"); }
+  requestAnimationFrame(() => { window.__ready = true; }); });
+</script>
+</body></html>
