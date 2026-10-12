@@ -18,3 +18,5 @@
   [Финуслуги: перевод с кредитки](https://finuslugi.ru/navigator/kak-ehto-rabotaet/stat_perevod-s-kreditnoy-karty),
   [ВБР](https://www.vbr.ru/novosti/banki/2023/01/30/120-dnei-na-pokypki-i-snyatie-nalicnih/).
 - Просрочка лишает льготного периода — [Финуслуги](https://finuslugi.ru/navigator/kak-ehto-rabotaet/stat_lgotnyy-period-po-kreditnoy-karte).
+
+**Выбрана обложка — `cover_fun_v3.png` «Скрапбук» (владелец 12.10: «вариант 3 прикольный»), копия — `cover.png`.**
