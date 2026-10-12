@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Обложка «Кредитка без процентов»</title>
+<!-- Пост «Кредитка без процентов: как это работает и где все попадаются» (12.10.2026). Стиль канала (как bank-accounts-check):
+     тёмный фон, неон лайм/циан. ?v=1 — шкала «30 + 25 = до 55 дней»; ?v=2 — карта и «5 ловушек»; ?v=3 — «минимальный платёж ≠ без процентов».
+     Рендер: node tg-posts/credit-grace/shot.js -->
+<style>
+  @font-face { font-family: "Display"; src: url("fonts/LiberationSans-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("fonts/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Mono"; src: url("fonts/GeistMono-Bold.ttf"); }
+  :root { --bg: #04050a; --ink: #eef3ff; --cyan: #3df5ff; --lime: #c8ff3d; --violet: #8b5cff; --red: #ff3b5c; --muted: #8f9bb8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 1280px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Display", sans-serif; color: var(--ink); }
+  canvas { position: absolute; inset: 0; }
+  .v { position: absolute; inset: 0; display: none; }
+  .glow-l { color: var(--lime); text-shadow: 0 0 22px rgba(200,255,61,.75), 0 0 80px rgba(200,255,61,.35); }
+  .glow-c { color: var(--cyan); text-shadow: 0 0 22px rgba(61,245,255,.7), 0 0 80px rgba(61,245,255,.35); }
+  .h { text-transform: uppercase; letter-spacing: -5px; line-height: .92; }
+  .sub { font-size: 42px; line-height: 1.15; color: #c9d3ee; letter-spacing: -.5px; }
+  .tag { display: inline-block; font-family: "Tek"; font-size: 32px; letter-spacing: 6px; padding: 12px 28px; border-radius: 40px;
+         border: 3px solid var(--lime); color: var(--lime); box-shadow: 0 0 30px rgba(200,255,61,.35), inset 0 0 20px rgba(200,255,61,.15); }
+  .panel { position: absolute; padding: 40px 44px; background: rgba(14,20,34,.9); border: 2px solid rgba(61,245,255,.55); border-radius: 34px;
+           box-shadow: 0 0 70px rgba(61,245,255,.25), 0 40px 80px rgba(0,0,0,.6); font-family: Mono; }
+  .panel .t { font-family: Tek; font-size: 30px; letter-spacing: 4px; color: var(--cyan); }
+  .panel .s { font: 26px "Display"; color: var(--muted); margin-top: 6px; }
+  .row { display: flex; align-items: center; gap: 24px; margin-top: 26px; padding: 22px 26px; border-radius: 22px; background: rgba(255,255,255,.04); border: 2px solid rgba(255,255,255,.08); }
+  .row .bk { width: 64px; height: 64px; border-radius: 16px; flex: none; }
+  .row .nm { flex: 1; font-size: 32px; color: #dfe6f8; letter-spacing: -1px; } .row .nm small { display: block; font-size: 22px; color: var(--muted); margin-top: 6px; letter-spacing: 0; }
+  .row .st { font-family: Tek; font-size: 30px; letter-spacing: 2px; padding: 10px 18px; border-radius: 14px; white-space: nowrap; }
+  .row.no { border-color: rgba(255,59,92,.5); } .row.no .st { color: var(--red); background: rgba(255,59,92,.12); }
+  .row.ok { border-color: rgba(200,255,61,.7); box-shadow: 0 0 40px rgba(200,255,61,.25); } .row.ok .st { color: var(--lime); background: rgba(200,255,61,.12); }
+  .vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.6)); }
+  .scan { position: absolute; inset: 0; pointer-events: none; opacity: .1; background: repeating-linear-gradient(0deg, rgba(255,255,255,.1) 0 2px, transparent 2px 5px); }
+  .bar { position: absolute; height: 120px; border-radius: 26px; display: flex; align-items: center; justify-content: center; font-family: Tek; font-size: 40px; letter-spacing: 2px; }
+  .trap { font-size: 40px; color: #dfe6f8; letter-spacing: -1px; margin-top: 22px; display: flex; gap: 22px; align-items: baseline; }
+  .trap b { font-family: Tek; color: var(--red); font-size: 40px; }
+</style>
+</head>
+<body>
+<canvas id="bg" width="1280" height="1280"></canvas>
+
+<!-- В1: заголовок + шкала льготного периода -->
+<div class="v" id="v1">
+  <div style="position:absolute;left:70px;top:64px"><span class="tag">ГАЙД · 5 ЛОВУШЕК</span></div>
+  <div class="h" style="position:absolute;left:70px;top:150px;font-size:126px">Кредитка<br><span class="glow-l">без процентов</span></div>
+  <div class="sub" style="position:absolute;left:70px;top:420px;width:1100px">Одно правило — и банк не возьмёт ни рубля</div>
+  <div class="panel" style="left:70px;top:620px;width:1140px">
+    <div class="t">ЛЬГОТНЫЙ ПЕРИОД · ПРИМЕР</div>
+    <div style="position:relative;height:300px;margin-top:30px">
+      <div class="bar" style="left:0;top:0;width:600px;background:rgba(61,245,255,.14);border:3px solid var(--cyan);color:var(--cyan)">30 ДНЕЙ · ТРАТИШЬ</div>
+      <div class="bar" style="left:620px;top:0;width:440px;background:rgba(200,255,61,.14);border:3px solid var(--lime);color:var(--lime);font-size:34px">25 · ВОЗВРАЩАЕШЬ</div>
+      <div style="position:absolute;left:0;top:160px;font-size:64px;letter-spacing:-2px">= до <span class="glow-l">55 дней</span> без процентов</div>
+    </div>
+  </div>
+  <div class="sub" style="position:absolute;left:70px;top:1150px;font-size:34px;color:var(--muted)">условия у каждого банка свои · не реклама</div>
+</div>
+
+<!-- В2: карта + 5 ловушек -->
+<div class="v" id="v2">
+  <div class="h" style="position:absolute;left:70px;top:80px;font-size:112px">Кредитка<br><span class="glow-c">без процентов</span></div>
+  <div class="sub" style="position:absolute;left:70px;top:340px;width:700px">5 ловушек, где все попадаются</div>
+  <div style="position:absolute;left:850px;top:330px;width:350px;height:220px;border-radius:28px;transform:rotate(8deg);background:linear-gradient(135deg,#2a2f3a,#0e1118);border:2px solid rgba(200,255,61,.6);box-shadow:0 0 60px rgba(200,255,61,.3),0 40px 80px rgba(0,0,0,.6)">
+    <div style="position:absolute;left:36px;top:40px;width:70px;height:52px;border-radius:10px;background:#d8c27a"></div>
+    <div style="position:absolute;right:36px;bottom:30px;font-family:Tek;font-size:64px;color:var(--lime);text-shadow:0 0 20px rgba(200,255,61,.7)">0 %</div>
+  </div>
+  <div class="panel" style="left:70px;top:620px;width:1140px">
+    <div class="trap"><b>01</b>Минимальный платёж — не «без процентов»</div>
+    <div class="trap"><b>02</b>Наличные и переводы с кредитки</div>
+    <div class="trap"><b>03</b>Просрочка даже на один день</div>
+    <div class="trap"><b>04</b>«Бесплатное» обслуживание с условием</div>
+    <div class="trap"><b>05</b>«Нечестный» льготный период</div>
+  </div>
+</div>
+
+<!-- В3: минимальный платёж ≠ без процентов -->
+<div class="v" id="v3">
+  <div style="position:absolute;left:70px;top:64px"><span class="tag">КРЕДИТКА · ЛОВУШКА №1</span></div>
+  <div class="h" style="position:absolute;left:70px;top:190px;font-size:132px">Минимальный<br>платёж</div>
+  <div style="position:absolute;left:70px;top:430px;font-family:Tek;font-size:220px;line-height:1;color:var(--red);text-shadow:0 0 30px rgba(255,59,92,.7)">≠</div>
+  <div class="h" style="position:absolute;left:70px;top:680px;font-size:132px"><span class="glow-l">без процентов</span></div>
+  <div class="sub" style="position:absolute;left:70px;top:900px;width:1100px">Что на самом деле нужно вносить, чтобы не платить банку, — и ещё 4 ловушки</div>
+  <div class="sub" style="position:absolute;left:70px;top:1150px;font-size:34px;color:var(--muted)">условия у каждого банка свои · не реклама</div>
+</div>
+<div class="scan"></div><div class="vig"></div>
+<script>
+const V = (new URLSearchParams(location.search)).get("v") || "1";
+document.getElementById("v" + V).style.display = "block";
+const cx = document.getElementById("bg").getContext("2d");
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+cx.fillStyle = "#04050a"; cx.fillRect(0, 0, 1280, 1280);
+const glows = { "1": [[640, 900, "rgba(61,245,255,.3)"], [300, 260, "rgba(200,255,61,.22)"]], "2": [[980, 260, "rgba(200,255,61,.25)"], [250, 900, "rgba(139,92,255,.35)"]], "3": [[300, 560, "rgba(255,59,92,.28)"], [900, 800, "rgba(200,255,61,.2)"]] }[V];
+for (const [x, y, c] of glows) { const g = cx.createRadialGradient(x, y, 20, x, y, 700); g.addColorStop(0, c); g.addColorStop(1, "rgba(4,5,10,0)"); cx.fillStyle = g; cx.fillRect(0, 0, 1280, 1280); }
+for (let i = 0; i < 200; i++) {
+  const x = rnd(i) * 1280, y = rnd(i + 500) * 1280, z = .3 + rnd(i + 900) * .7, h = rnd(i + 77);
+  cx.fillStyle = h > .8 ? `rgba(200,255,61,${.2 + z * .6})` : (h > .55 ? `rgba(139,92,255,${.2 + z * .6})` : `rgba(61,245,255,${.2 + z * .6})`);
+  cx.beginPath(); cx.arc(x, y, 1 + z * 2.6, 0, 6.283); cx.fill();
+}
+</script>
+</body>
+</html>
