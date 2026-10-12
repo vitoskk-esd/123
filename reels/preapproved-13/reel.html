@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Рилс 13 — Предодобрено</title>
+<!-- Рилс #13 «Предодобрено — не одобрено», стиль A «тёмный финтех» (владелец 12.10: «голос как в ролике номер 3, вариант номер 1»).
+     Кадр в момент t: window.renderAt(t); время — timeline.js (build.py по словам голоса). Всё детерминировано от t.
+     Рендер: node youtube/kit/yt/render.js reels/preapproved-13/reel.html --out reels/preapproved-13/out/reel_video.mp4 -->
+<style>
+  @font-face { font-family: "Mont"; src: url("/youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Unb"; src: url("/youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #0b0c0f; }
+  svg { display: block; position: absolute; left: 0; top: 0; }
+  #cap { position: absolute; left: 60px; right: 140px; top: 1235px; display: flex; justify-content: center; align-items: baseline; gap: 24px;
+    font-family: Unb; font-weight: 900; letter-spacing: -.02em; color: #fff; text-shadow: 0 6px 22px rgba(0,0,0,.85); white-space: nowrap; }
+  #cap span { display: inline-block; }
+</style>
+<script src="/youtube/03-banks-pay-you/carousel/art.js"></script>
+<script src="timeline.js"></script>
+</head><body>
+<svg id="c" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>
+<div id="cap"></div>
+<script>
+(function () {
+const TL = window.TL, A = window.A, $ = (id) => document.getElementById(id);
+const LIME = "#c8ff3d", RED = "#ff4d5e", BLUE = "#5fd0ff", COL = { k: BLUE, g: LIME, r: RED };
+const cl = (x) => Math.max(0, Math.min(1, x)), lerp = (a, b, k) => a + (b - a) * k;
+const out3 = (x) => 1 - Math.pow(1 - cl(x), 3), out5 = (x) => 1 - Math.pow(1 - cl(x), 5);
+const back = (x) => { x = cl(x); const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const bell = (x) => Math.sin(Math.PI * cl(x));
+const defs = `${A.defs()}<defs><radialGradient id="vigV" cx="50%" cy="45%" r="75%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>
+  <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" stroke="#fff" stroke-opacity=".05" stroke-width="2"/></pattern></defs>`;
+const foot = `<text x="540" y="1868" text-anchor="middle" font-family="Mont" font-weight="600" font-size="24" fill="rgba(255,255,255,.45)">Познавательный ролик. Не реклама банка и не финансовая рекомендация</text>`;
+const notif = (x, y, w, o = {}) => A.notif(x, y, w, { title: o.title || "Вам предодобрена", sub: o.sub ?? "кредитная карта", app: "Банк · 01:07", icon: "₽", ic: LIME, h: o.h || 170, rot: o.rot, bg: o.bg });
+const T = (x, y, s, size, color = "#fff", o = {}) => `<text x="${x}" y="${y}" text-anchor="${o.anchor || "middle"}" font-family="${o.font || "Unb"}" font-weight="${o.w || 900}" font-size="${size}" fill="${color}" letter-spacing="${o.ls ?? "-.03em"}" opacity="${o.op ?? 1}" ${o.extra || ""}>${s}</text>`;
+// появление: снизу + прозрачность, ease-out; k — 0..1
+const enter = (k, inner, dy = 60) => k <= 0 ? "" : `<g transform="translate(0 ${((1 - out5(k)) * dy).toFixed(1)})" opacity="${out3(k * 1.4).toFixed(3)}">${inner}</g>`;
+const pop = (k, cx, cy, inner) => k <= 0 ? "" : `<g transform="translate(${cx} ${cy}) scale(${back(k).toFixed(3)}) translate(${-cx} ${-cy})" opacity="${cl(k * 3).toFixed(3)}">${inner}</g>`;
+const rows5 = ["12.10", "14.10", "15.10", "15.10", "18.10"];
+const doc = (x, y, n, t, t0, o = {}) => { let s = `<g transform="translate(${x} ${y}) rotate(${o.rot || 0})"><rect width="760" height="${190 + n * 96}" rx="26" fill="#f3f1ea"/>
+    ${T(48, 92, "Кредитная история", 46, "#14161c", { anchor: "start", ls: "-.02em" })}${T(48, 136, "раздел: заявки · пример", 26, "#6b6f7a", { anchor: "start", font: "Mont", w: 600, ls: 0 })}`;
+  for (let i = 0; i < n; i++) { const k = o.rowsAt ? cl((t - o.rowsAt[i]) / .3) : 1; if (k <= 0) continue; const yy = 180 + i * 96;
+    const hk = o.hlAt != null ? cl((t - o.hlAt[i]) / .35) : 0;
+    s += `<g opacity="${out3(k)}" transform="translate(${(1 - out5(k)) * 40} 0)">${hk > 0 ? `<rect x="30" y="${yy - 8}" width="${(700 * out3(hk)).toFixed(1)}" height="78" rx="10" fill="${o.hl}" opacity=".9"/>` : ""}
+      ${T(48, yy + 46, "Заявка на кредитку", 34, "#14161c", { anchor: "start", font: "Mont", w: 700, ls: 0 })}${T(712, yy + 46, o.dates ? o.dates[i] : rows5[i], 30, "#55596a", { anchor: "end", font: "Mont", w: 600, ls: 0 })}
+      <path d="M40 ${yy + 82} H720" stroke="#14161c" stroke-opacity=".08" stroke-width="2"/></g>`; }
+  return s + `</g>`; };
+const tap = (t, t0, x, y) => { const k = (t - t0) / .5; if (k < -.4 || k > 1.2) return ""; const press = k < 0 ? 1 + k * .5 : 1;
+  return `<circle cx="${x}" cy="${y}" r="${44 * (k < 0 ? press : 1 - .15 * bell(k * 2))}" fill="#fff" opacity="${k < 0 ? cl(1 + k * 2.5) * .9 : (1 - cl(k)) * .9}"/>${k > 0 ? `<circle cx="${x}" cy="${y}" r="${44 + 90 * out3(k)}" fill="none" stroke="#fff" stroke-width="6" opacity="${(1 - cl(k)) * .6}"/>` : ""}`; };
+const tg = (t, btnAt) => `<g transform="translate(160 560)"><rect width="760" height="420" rx="40" fill="#17212b" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>
+  <clipPath id="av"><circle cx="110" cy="110" r="62"/></clipPath><image href="/reels/assets/tg/avatar.png" x="48" y="48" width="124" height="124" clip-path="url(#av)" preserveAspectRatio="xMidYMid slice"/>
+  ${T(200, 102, "Владик Арбузит", 42, "#fff", { anchor: "start", font: "Mont", w: 800, ls: 0 })}${T(200, 146, "канал", 28, "#7d8b99", { anchor: "start", font: "Mont", w: 600, ls: 0 })}
+  <rect x="48" y="210" width="664" height="34" rx="10" fill="#fff" opacity=".12"/><rect x="48" y="258" width="520" height="34" rx="10" fill="#fff" opacity=".08"/>
+  <g transform="translate(380 356) scale(${(1 - .06 * bell((t - btnAt) / .3)).toFixed(3)}) translate(-380 -356)"><rect x="48" y="320" width="664" height="72" rx="20" fill="#2aabee"/>${T(380, 368, "Подписаться", 34, "#fff", { font: "Mont", w: 800, ls: 0 })}</g>
+  ${tap(t, btnAt, 520, 356)}</g>`;
+
+const SCENES = {
+  s_hook: (t, e, s) => { const ping = bell((t - e.push) / .5);
+    return `<circle cx="540" cy="620" r="${420 + 40 * ping}" fill="${LIME}" opacity="${.08 + .06 * ping}" filter="url(#b60)"/>
+      ${T(540, 330, "01:07", 210)}${T(540, 400, "понедельник, ночь", 34, "rgba(255,255,255,.5)", { font: "Mont", w: 700, ls: 0 })}
+      <g transform="translate(540 615) scale(${(1 + .05 * ping).toFixed(3)}) translate(-540 -615)">${notif(110, 520, 860, { sub: "кредитная карта. Оформите за 2 минуты", h: 190 })}</g>
+      <g transform="translate(540 1060) scale(${(1 + .07 * bell((t - e.gift) / .4)).toFixed(3)}) translate(-540 -1060)">${T(540, 1010, "ЭТО НЕ", 104, LIME)}${T(540, 1120, "ПОДАРОК", 104, LIME)}</g>`; },
+  s_ne: (t, e, s) => { const k1 = (t - s.t0) / .4, k2 = (t - e.ne) / .35;
+    return `${enter(k1, T(540, 470, "ПРЕДО", 112) + T(540, 590, "ДОБРЕНО", 112))}
+      ${k2 > 0 ? `<rect width="1080" height="1920" fill="${RED}" opacity="${(.22 * (1 - cl(k2 * 2))).toFixed(3)}"/>` : ""}${pop(k2, 540, 720, T(540, 790, "≠", 220, RED))}
+      ${enter(k2 - .2, T(540, 960, "ОДОБРЕНО", 112, LIME))}`; },
+  s_fan: (t, e, s) => { let o = "";
+    for (let i = 0; i < 7; i++) { const k = (t - s.t0 - .05 - i * .12) / .45;
+      o += enter(k, notif(120 + i * 18, 300 + i * 92, 840 - i * 36, { rot: (i - 3) * 1.6 + Math.sin(t * .8 + i) * .6, bg: `rgba(${24 + i * 6},${28 + i * 6},${36 + i * 6},.95)` }), 120); }
+    return o + pop((t - e.chip) / .45, 540, 1078, `<rect x="300" y="1030" width="480" height="96" rx="48" fill="${LIME}"/>${T(540, 1092, "РАССЫЛКА", 46, "#07080a")}`)
+      + enter((t - e.data) / .4, T(540, 1180, "по общим данным", 38, "rgba(255,255,255,.7)", { font: "Mont", w: 700, ls: 0 }), 20); },
+  s_apply: (t, e, s) => { const kb = (t - s.t0) / .35, ka = cl((t - e.tap - .2) / .35), kd = (t - e.tap - .25) / .45, glow = bell((t - e.hist) / .8), seen = (t - e.seen) / .4;
+    return `${pop(kb, 540, 310, `<rect x="300" y="250" width="480" height="120" rx="60" fill="${LIME}"/>${T(540, 328, "Оформить", 50, "#07080a")}`)}${tap(t, e.tap, 700, 330)}
+      <path d="M540 410 V${410 + 90 * ka}" stroke="${LIME}" stroke-width="8" stroke-dasharray="14 12"/>${ka > .95 ? `<path d="M516 482 L540 512 L564 482" stroke="${LIME}" stroke-width="8" fill="none"/>` : ""}
+      ${enter(kd, `<g filter="${glow > .05 ? "url(#soft)" : ""}">${doc(160, 540, 1, t, 0, { hl: LIME, hlAt: [e.row], dates: ["12.10 · 01:08"] })}</g>`, 80)}
+      ${glow > 0 ? `<rect x="150" y="530" width="780" height="300" rx="34" fill="none" stroke="${LIME}" stroke-width="6" opacity="${(glow * .8).toFixed(3)}"/>` : ""}
+      ${pop(seen, 540, 900, `<rect x="330" y="860" width="420" height="80" rx="40" fill="rgba(255,255,255,.1)" stroke="#fff" stroke-opacity=".3" stroke-width="2"/>${T(540, 912, "видно в истории", 34, "#fff", { font: "Mont", w: 800, ls: 0 })}`)}`; },
+  s_many: (t, e, s) => { const at = [0, 1, 2, 3, 4].map(i => s.t0 + .1 + i * .28), kst = (t - e.stamp) / .3, shake = kst > 0 && kst < 1.2 ? Math.sin(kst * 40) * 10 * (1 - cl(kst)) : 0;
+    return `<g transform="translate(${shake.toFixed(1)} 0)">${doc(160, 230, 5, t, 0, { rot: -2, rowsAt: at, hl: "#ffb3bb", hlAt: at.map(a => a + .15) })}</g>
+      ${kst > 0 ? `<g transform="translate(540 960) rotate(-8) scale(${(1 + 1.2 * (1 - out5(kst))).toFixed(3)})" opacity="${cl(kst * 3)}"><rect x="-300" y="-70" width="600" height="140" rx="20" fill="none" stroke="${RED}" stroke-width="10"/>${T(0, 22, "ТРЕВОЖНЫЙ СИГНАЛ", 54, RED, { ls: "-.02em" })}</g>` : ""}`; },
+  s_self: (t, e, s) => { const kc = (t - s.t0) / .5, ks = (t - e.self_) / .4, kn = (t - e.night) / .4, fl = Math.sin(t * 1.6) * 8;
+    return `${enter(kc, `<g transform="translate(0 ${fl.toFixed(1)}) rotate(-6 540 520)">${A.card(540, 520, 600, { c1: "#2a2f3a", c2: "#11141a", num: "0013" })}</g>`, 100)}
+      ${enter(kc - .3, T(540, 860, "Открывай, когда", 70, "#fff"), 40)}${pop(ks, 540, 960, T(540, 1000, "РЕШИЛ САМ", 112, LIME))}
+      ${kn > 0 ? `<g opacity="${out3(kn)}">${T(540, 1140, "а не в 01:07", 46, "rgba(255,255,255,.6)", { font: "Mont", w: 800, ls: 0 })}<path d="M${380} 1126 H${380 + 330 * out3((t - e.night - .25) / .3)}" stroke="${RED}" stroke-width="7"/></g>` : ""}`; },
+  s_tg: (t, e, s) => { const k = (t - s.t0) / .45;
+    return `${enter(k, T(540, 330, "Кредитка без", 78) + T(540, 430, "процентов", 78, LIME))}${enter(k - .25, tg(t, e.btn), 120)}
+      ${enter((t - e.btn + .6) / .4, T(540, 1100, "ссылка в профиле ↑", 40, "rgba(255,255,255,.75)", { font: "Mont", w: 700, ls: 0 }), 20)}`; },
+};
+
+const capEl = $("cap"); let lastChunk = -1;
+window.renderAt = (t) => {
+  const sc = TL.scenes.find(s => t >= s.t0 && t < s.t1) || TL.scenes[TL.scenes.length - 1];
+  const e = sc.ev, kIn = (t - sc.t0) / .25, push = 1 + .03 * Math.min(1, (t - sc.t0) / 5);
+  const drift = (t * 14) % 60;
+  const body = `<g transform="translate(540 960) scale(${push.toFixed(4)}) translate(-540 -960)">${SCENES[sc.id](t, e, sc)}</g>`;
+  const cut = sc === TL.scenes[0] ? body : `<g transform="translate(0 ${((1 - out5(kIn)) * 90).toFixed(1)})" opacity="${cl(kIn * 2).toFixed(3)}">${body}</g>`;
+  $("c").innerHTML = defs + `<rect width="1080" height="1920" fill="#0b0c0f"/><g transform="translate(0 ${-drift.toFixed(1)})"><rect y="0" width="1080" height="1980" fill="url(#grid)"/></g>` + cut + `<rect width="1080" height="1920" fill="url(#vigV)"/>` + foot;
+  // субтитры v2: кусок 2–3 слова; слово появляется в момент, когда его говорят; ключевое — крупнее и цветом
+  const ci = TL.chunks.findIndex(c => t >= c.t0 && t < c.t1), c = TL.chunks[ci < 0 ? TL.chunks.length - 1 : ci];
+  if (ci !== lastChunk) { capEl.innerHTML = TL.words.slice(c.i0, c.i1 + 1).map(w => `<span style="font-size:${w.c ? 118 : 92}px;color:${COL[w.c] || "#fff"}">${w.w}</span>`).join("");
+    let k = 1; const sp = capEl.querySelectorAll("span"); const ws = TL.words.slice(c.i0, c.i1 + 1);
+    while (capEl.scrollWidth > capEl.clientWidth + 1 && k > .45) { k -= .04; sp.forEach((el, i) => el.style.fontSize = (ws[i].c ? 118 : 92) * k + "px"); }
+    lastChunk = ci; }
+  capEl.querySelectorAll("span").forEach((el, i) => { const w = TL.words[c.i0 + i], kk = w.a < .1 ? 1 : (t - w.a + .06) / .22;
+    el.style.opacity = out3(kk).toFixed(3); el.style.transform = `translateY(${((1 - out5(kk)) * 26).toFixed(1)}px) scale(${(.92 + .08 * out5(kk)).toFixed(3)})`; });
+};
+document.fonts.ready.then(() => { window.renderAt(0); window.__ready = true; });
+})();
+</script>
+</body></html>

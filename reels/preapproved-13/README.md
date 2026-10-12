@@ -21,3 +21,24 @@ Instagram — ресурс Meta, реклама там запрещена с 01.
 ## Раскадровка
 
 `frames.html?style=dark|illu&f=1..6`, снимки — `node reels/preapproved-13/shoot.js` → `carousel/dark_0N.jpg`, `carousel/illu_0N.jpg`.
+
+## Сборка (12.10.2026, стиль A, голос Василия)
+
+`python3 voice.py` (LiveTTS vasily/sales, 3 запроса) → `<python с whisper> build.py words` → `python3 build.py` → `node youtube/kit/audio.js timeline.js music_sfx.wav`
+→ `node youtube/kit/yt/render.js reels/preapproved-13/reel.html --out reels/preapproved-13/out/reel_video.mp4`
+→ `bash youtube/02-bank-earns/mix.sh out/reel_video.mp4 out/voice/voice.wav out/music_sfx.wav reel_final.mp4`. Итог: 30,6 с, −14 LUFS.
+Озвучка: «и заявка останется в ней» заменено на «и это будет в ней видно» — дословно по 218-ФЗ не подтверждено поиском.
+
+## Подпись к публикации
+
+```
+«Вам предодобрена кредитная карта» — и это не подарок.
+
+Предодобрено ≠ одобрено: это рассылка по общим данным. А нажал «Оформить» — уже заявка, и банк запросит твою кредитную историю.
+Много заявок подряд выглядит для банков тревожно.
+
+Кредитка бывает полезной — если открыть её осознанно и гасить вовремя. Как пользоваться кредиткой без процентов — в моём
+телеграме, ссылка в профиле.
+
+#кредитнаякарта #кредитнаяистория #финансоваяграмотность #личныефинансы #деньги
+```
