@@ -259,9 +259,12 @@
       s += `<g transform="translate(${DX} 0)"><path d="M860 470 h200 v314 h-200z" fill="#ffcf87"/><path d="M860 470 a100 100 0 0 1 200 0z" fill="#ffd9a0"/><rect x="860" y="470" width="200" height="314" fill="#fff3d6" opacity="${(.5 * gl).toFixed(2)}" filter="url(#b14)"/>
         <circle cx="960" cy="640" r="320" fill="#ffb25c" opacity="${(.3 * gl).toFixed(2)}" filter="url(#b60)"/><path d="M860 784 L1060 784 L1300 964 L620 964Z" fill="url(#spill5)" opacity="${(.8 * gl).toFixed(2)}"/></g>`;
       // очередь новичков на ступенях
-      const q = [[860, 960, "#ff8a3d"], [760, 975, "#4a8dff"], [1490, 975, "#8a5cf6"]];
+      const q = [[1180, 960, "#ff8a3d"], [1080, 975, "#4a8dff"], [1490, 975, "#8a5cf6"]];   // у двери — левый нижний угол свободен под подписи
       q.forEach(([x, y, c], i) => { if (!h.on("новым")) return; const k = h.U.back((h.since("новым") - i * .12) / .5);
-        s += `<g transform="translate(${x} ${y}) scale(${Math.max(0, k * .62).toFixed(3)})">${a.person({ back: true, c: { top: c, topD: c, topL: "#fff" }, noShadow: false, pose: { la: [[-62, -214], [-60, -150]], ra: [[62, -214], [60, -150]], tilt: Math.sin(t * 2 + i) * 3 } })}</g>`; });
+        // на «тому» двое у двери поднимаются и заходят внутрь — к финальной надписи низ кадра свободен
+        const go = i < 2 && h.on("тому") ? out3(((h.since("тому") - i * .25) / 1.8)) : 0; if (go >= 1) return;
+        x = lerp(x, 1140 + i * 30, go); y = lerp(y, 800, go);
+        s += `<g opacity="${(1 - cl((go - .7) / .3)).toFixed(3)}" transform="translate(${x} ${y}) scale(${Math.max(0, k * .62 * (1 - .35 * go)).toFixed(3)})">${a.person({ back: true, c: { top: c, topD: c, topL: "#fff" }, noShadow: false, pose: { la: [[-62, -214], [-60, -150]], ra: [[62, -214], [60, -150]], tilt: Math.sin(t * 2 + i) * 3 } })}</g>`; });
       // герой поднимается по ступеням и тянет руку к монете
       const k = h.io("новым", 2.2), hx = lerp(1700, 1420, k), hy = lerp(1060, 920, k), ph = t * 6 * (k < 1 ? 1 : 0), sw = Math.sin(ph) * 14;
       const reach = h.on("пришли") ? out3(h.since("пришли") / .4) : 0;
@@ -280,13 +283,13 @@
       // бесплатная тысяча: монета в руке героя
       if (h.on("бесплатная")) s += POP(h, "бесплатная", hx + 92, hy - 360, a.coin(0, 0, 54) + `<text y="-80" text-anchor="middle" font-family="Unb" font-weight="900" font-size="48" fill="#2ee07a" filter="url(#soft)">+1 000 ₽</text>`);
       return s; },
-    hud(t, d, h) { let s = `<path d="M0 560 Q420 640 640 1080 H0Z" fill="#03050b" opacity=".6" filter="url(#b60)"/>`;
-      s += T(h, "пришли", 80, 640, [{ t: "Банк платит", size: 96 }, { t: "за то, что ты пришёл", size: 58, color: "#ffd60a" }], { out: "Реклама" });
+    hud(t, d, h) { let s = `<path d="M0 520 Q700 600 1060 1080 H0Z" fill="#03050b" opacity=".7" filter="url(#b60)"/>`;
+      s += T(h, "пришли", 80, 640, [{ t: "Банк платит", size: 96 }, { t: "за то, что ты пришёл", size: 58, color: "#ffd60a" }], { out: "Зачем" });
       if (h.on("тысячи")) s += POP(h, "тысячи", 1640, 150, A().pill(-200, 0, "+1 000–2 000 ₽", { size: 44 }) + A().note(-192, 80, "бонус новичку · пример, октябрь 2026", { size: 22 }), { out: "Реклама" });
-      s += T(h, "Зачем", 960, 380, [{ t: "Зачем банку это?", size: 90 }], { anchor: "middle", out: "Реклама" });
+      s += T(h, "Зачем", 80, 680, [{ t: "Зачем банку это?", size: 90, d: .3 }], { out: "Реклама" });   // после ухода «Банк платит» — не наслаиваются
       s += T(h, "дорого", 80, 760, [{ t: "Реклама — дорого", size: 80, color: "#ff8fa0" }], { out: "тому" });
       s += T(h, "дешевле", 80, 760, [{ t: "Бонус — дешевле", size: 80, color: "#2ee07a" }, { t: "баннера в метро", size: 50 }], { out: "бесплатная" });
-      s += T(h, "бесплатная", 80, 800, [{ t: "Тебе — бесплатная тысяча", size: 70, color: "#ffd60a" }]);
+      s += T(h, "бесплатная", 80, 800, [{ t: "Тебе — бесплатная тысяча", size: 70, color: "#ffd60a", d: .45 }]);
       s += A().foot();
       return s; },
     events(d) { const at = d.at || {}, E = { pop: [], coin: [], whoosh: [], thud: [] }; if (at["пришли"] != null) for (let i = 0; i < 4; i++) E.coin.push(at["пришли"] + .7 + i * .14);
