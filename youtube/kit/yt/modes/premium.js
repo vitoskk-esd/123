@@ -66,7 +66,7 @@ YT.mode("premium", {
   .yt-premium .back .bv { position: absolute; left: 54px; bottom: 54px; font: 800 120px/1 "Unb"; letter-spacing: -.04em; }
   .yt-premium .back .bl { position: absolute; left: 58px; top: 170px; font: 700 30px "Mont"; opacity: .85; letter-spacing: .04em; text-transform: uppercase; }
   /* крупный акцент значения (сцены строк без карты и телефона) */
-  .yt-premium .callout { position: absolute; left: 1010px; top: 300px; width: 820px; height: 480px; border-radius: 40px; overflow: hidden;
+  .yt-premium .callout { position: absolute; left: 990px; top: 300px; width: 730px; height: 460px; border-radius: 40px; overflow: hidden;
     background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 60px 120px rgba(0,0,0,.5); }
   .yt-premium .callout .cg { position: absolute; inset: -30%; background: radial-gradient(circle at 70% 30%, var(--acc, #7d8bff) 0%, transparent 55%); opacity: .45; }
   .yt-premium .callout .ck { position: absolute; left: 56px; top: 56px; right: 56px; font: 700 34px "Mont"; color: #c9ccd3; }
@@ -183,7 +183,7 @@ YT.mode("premium", {
     if (P.rays) P.rays.style.transform = `rotate(${t * 4}deg)`;
     if (P.ringEls) P.ringEls.forEach((c, i) => { c.setAttribute("transform", `rotate(${(i % 2 ? -1 : 1) * t * (6 + i * 3)} 900 900)`); });
     // камера-оператор: смена плана каждые 2–3 с (shots), плавные переходы, лёгкий дрейф между ними
-    const F = { center: [960, 540], co: [1420, 540], rowsL: [520, 520], hero: [470, 532], heroC: [960, 500], rows: [1400, 560], quote: [960, 430], phone: [960, 580], phoneL: [565, 580], fan: [960, 560], line: [960, 540] };
+    const F = { center: [960, 540], co: [1300, 540], rowsL: [760, 500], hero: [470, 532], heroC: [960, 500], rows: [1400, 560], quote: [960, 430], phone: [960, 580], phoneL: [565, 580], fan: [960, 560], line: [960, 540] };
     const shots = P.shots || (P.shots = (() => { const ts = [0], add = (x) => { if (typeof x === "number" && x > .3 && x < dur - .6) ts.push(x); };
       (d.pulses || []).forEach(add); if (d.rows) d.rows.items.forEach(it => add(it.at)); if (d.phone) d.phone.rows.forEach(r => add(r.at)); if (d.line) (d.line.dots || []).forEach(o => add(o.at));
       if (d.compare) (d.compare.tags || []).forEach(g => add(g.at)); ts.sort((a, b) => a - b);
@@ -194,7 +194,7 @@ YT.mode("premium", {
       if (d.quote && !d.hero) fs.push("quote"); if (d.fan) fs.push("fan"); if (d.line) fs.push("line"); if (!fs.length) fs.push("center");
       const seed = Math.round((d.seed || 1) * 31);
       return out.map((x, i) => { const kind = ["wide", "push", "detail", "pan", "push", "tilt"][(i + seed) % 6], f = i === 0 ? "center" : fs[(i + seed) % fs.length];
-        const sc = { wide: 1.0, push: 1.09, detail: 1.2, pan: 1.06, tilt: 1.08 }[kind];
+        const sc = { wide: 1.0, push: 1.08, detail: (d.hero || d.phone ? 1.18 : 1.12), pan: 1.05, tilt: 1.07 }[kind];
         return { t: x, f: F[f], s: sc, dx: kind === "pan" ? ((i % 2) ? 70 : -70) : 0, r: kind === "tilt" ? ((i % 2) ? .9 : -.9) : 0 }; }); })());
     function hasHeroSide() { return !!(d.rows || d.phone) && !(d.hero && d.hero.side === "center"); }
     let si = 0; while (si + 1 < shots.length && shots[si + 1].t <= t) si++;
@@ -236,7 +236,7 @@ YT.mode("premium", {
         if (ci >= 0) { const it = r.items[ci], a0 = it.at ?? (r.at || 0) + .3 + ci * .35, ks = k(a0, .55), v = it.v || "", m = v.match(/^(\D*?)(\d[\d ]*)(?![\d,])(.*)$/);
           P.coN.textContent = String(ci + 1).padStart(2, "0") + " / " + String(r.items.length).padStart(2, "0"); P.coK.textContent = it.k;
           P.coV.className = "cv" + (it.c ? " " + it.c : ""); P.coV.textContent = m && !/[,.]\d/.test(v) ? m[1] + U.fmt(+m[2].replace(/ /g, "") * U.out3(k(a0, .8))).replace(/\s/g, " ") + m[3] : v;
-          const fit = Math.min(1, 720 / Math.max(1, P.coV.scrollWidth)); P.coV.style.transformOrigin = "0 100%";
+          const fit = Math.min(1, 640 / Math.max(1, P.coV.scrollWidth)); P.coV.style.transformOrigin = "0 100%";
           P.coV.style.transform = `translateY(${(1 - U.out5(ks)) * 60}px) scale(${fit})`; P.coV.style.opacity = U.out3(ks * 1.4); P.coV.style.filter = ks < 1 ? `blur(${((1 - U.out3(ks)) * 10).toFixed(1)}px)` : "";
           P.coK.style.opacity = U.out3(ks * 1.6); } }
       const rt = P.rows.querySelector(".rt"); if (rt) rise(rt, k(r.at, .5), 30);
