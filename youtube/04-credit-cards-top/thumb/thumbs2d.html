@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №4 — 2D</title>
+<!-- Владелец 13.10: «убери 3д из превью, это не красиво и больше не используй никогда». Только 2D: формула выбранного превью ролика №3
+     (03-banks-pay-you/thumb/b2.png): яркий фон, огромное число, чёрная плашка Oswald, плоские карты в цветах банков (упрощённые знаки,
+     не копии логотипов), список с цифрами. Цифры — из сценария ролика №4 (агрегаторы на 13.10.2026), пример.
+     ?v=1…6. Снимок из youtube/: node kit/shot3d.js 04-credit-cards-top/thumb/thumbs2d.html 04-credit-cards-top/thumb/t1.png 1280 720 v=1 -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  #bg { position: absolute; inset: 0; }
+  #bg::after { content: ""; position: absolute; inset: 0; opacity: .08; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .big { position: absolute; font: 900 230px/1 "Unb"; letter-spacing: -.07em; white-space: nowrap; color: #fff; }
+  .pl { position: absolute; display: inline-block; font: 700 70px/1 "O"; text-transform: uppercase; padding: 6px 24px 14px; background: #111; color: #fff; white-space: nowrap; }
+  .card { position: absolute; width: 430px; height: 271px; border-radius: 22px; overflow: hidden; box-shadow: 0 26px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+  .card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(255,255,255,.18), transparent 38%, transparent 70%, rgba(255,255,255,.06)); }
+  .chip { position: absolute; left: 32px; top: 104px; width: 62px; height: 46px; border-radius: 9px; background: linear-gradient(135deg, #f3e2a6, #c9a44a 55%, #f0d48a); }
+  .n4 { position: absolute; left: 32px; bottom: 26px; font: 600 22px "I"; letter-spacing: .18em; opacity: .85; color: #fff; }
+  .ps { position: absolute; right: 28px; bottom: 22px; font: 700 26px "I"; color: #fff; }
+  .days { position: absolute; right: 26px; top: 22px; font: 900 44px/1 "Unb"; letter-spacing: -.04em; color: #fff; text-align: right; }
+  .days small { display: block; font: 700 15px "I"; letter-spacing: .04em; opacity: .85; margin-top: 4px; }
+  .row { display: flex; align-items: center; gap: 14px; width: 540px; margin-top: 10px; padding: 12px 18px; border-radius: 18px; background: rgba(255,255,255,.96); box-shadow: 0 10px 24px rgba(0,0,0,.18); }
+  .row i { width: 34px; height: 34px; border-radius: 9px; flex: none; display: flex; align-items: center; justify-content: center; font: 900 20px "Unb"; color: #fff; font-style: normal; }
+  .row span { font: 600 26px "I"; color: #111; } .row b { margin-left: auto; font: 700 30px "I"; color: #0f9d4f; white-space: nowrap; }
+  .note { font: 600 17px "I"; margin-top: 10px; }
+  .medal { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c8, #ffd84a 45%, #d99a0b); box-shadow: 0 14px 30px rgba(0,0,0,.35), inset 0 0 0 7px rgba(255,255,255,.35);
+    display: flex; align-items: center; justify-content: center; font: 900 46px "Unb"; color: #7a4f05; letter-spacing: -.04em; }
+  .arrow { position: absolute; }
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="root"></div>
+<script>
+const v = +(new URLSearchParams(location.search).get("v") || 1);
+const nfc = `<svg style="position:absolute;left:106px;top:110px" width="34" height="34" viewBox="0 0 34 34">${[8, 14, 20].map(r => `<path d="M${6 + r * .35} ${17 - r * .55} A ${r} ${r} 0 0 1 ${6 + r * .35} ${17 + r * .55}" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3" stroke-linecap="round"/>`).join("")}</svg>`;
+// упрощённые знаки банков (не копии логотипов), фирменные цвета
+const C = {
+  ya: { bg: "linear-gradient(135deg,#1c1c20,#0a0a0c 60%,#2a1010)", mark: `<svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="#fc3f1d"/><text x="22" y="31" text-anchor="middle" font-family="I" font-weight="700" font-size="26" fill="#fff">Я</text></svg>`, name: "Яндекс Банк", d: 180 },
+  psb: { bg: "linear-gradient(135deg,#f26c1b,#e2541a 45%,#26357e)", mark: `<svg width="44" height="44" viewBox="0 0 44 44"><rect x="2" y="2" width="40" height="40" rx="10" fill="#fff"/><text x="22" y="30" text-anchor="middle" font-family="I" font-weight="700" font-size="17" fill="#26357e">ПСБ</text></svg>`, name: "ПСБ", d: 180 },
+  sber: { bg: "linear-gradient(135deg,#2cc24c,#13a538 50%,#0b7a2a)", mark: `<svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="#fff" stroke-width="4"/><path d="M13 22 L20 29 L33 15" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`, name: "Сбер", d: 120 },
+  ural: { bg: "linear-gradient(118deg,#f1ecff 0%,#d9cfff 18%,#c58df0 34%,#e2559e 50%,#7b3fd6 68%,#3a23a8 84%,#24187a 100%)", mark: `<svg width="36" height="36" viewBox="0 0 34 34"><path d="M17 4 C 11 10, 11 22, 17 30 M17 4 C 23 10, 23 22, 17 30 M9 9 C 5 15, 6 24, 11 29 M25 9 C 29 15, 28 24, 23 29" fill="none" stroke="#1d1a4a" stroke-width="2.6" stroke-linecap="round"/></svg>`, name: "Уралсиб", ink: "#1d1a4a", d: 120 },
+  alfa: { bg: "linear-gradient(135deg,#ff3b30,#ef3124 50%,#c41d14)", mark: `<div style="position:relative;width:40px;height:50px"><div style="font:700 50px/1 I;color:#fff;position:absolute;left:3px;top:-4px">А</div><div style="position:absolute;left:4px;bottom:0;width:32px;height:6px;background:#fff"></div></div>`, name: "Альфа-Банк", d: 60 },
+  t: { bg: "linear-gradient(135deg,#2b2c30,#141518 55%,#050506)", mark: `<svg width="44" height="50" viewBox="0 0 44 50"><path d="M2 2 H42 V26 C42 38 32 46 22 48 C12 46 2 38 2 26 Z" fill="#ffdd2d"/><path d="M12 12 H32 V18 H25 V36 H19 V18 H12 Z" fill="#111"/></svg>`, name: "Т-Банк", d: 55 },
+};
+const card = (k, x, y, r = 0, s = 1, days = true) => { const c = C[k];
+  return `<div class="card" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});background:${c.bg}">
+    <div style="position:absolute;left:30px;top:22px;display:flex;align-items:center;gap:12px">${c.mark}<div style="font:700 26px I;color:${c.ink || "#fff"}">${c.name}</div></div>
+    ${days ? `<div class="days" style="top:auto;bottom:62px;color:${c.ink && false ? c.ink : "#fff"}">${c.d}<small>ДНЕЙ БЕЗ %</small></div>` : ""}
+    <div class="chip"></div>${nfc}<div class="n4">•••• 2026</div><div class="ps">МИР</div></div>`; };
+const rows = (items, note, col = "rgba(0,0,0,.55)") => items.map(([ic, a, b, bc]) => `<div class="row"><i style="background:${ic}">${""}</i><span>${a}</span><b style="${bc ? "color:" + bc : ""}">${b}</b></div>`).join("") + (note ? `<div class="note" style="color:${col}">${note}</div>` : "");
+const bg = document.getElementById("bg"), R = document.getElementById("root");
+const shadow = (c) => `text-shadow: 0 4px 0 ${c}, 0 8px 0 ${c}, 0 12px 0 ${c}, 0 16px 0 ${c}, 0 30px 50px rgba(0,0,0,.35)`;
+
+if (v === 1) {   // зелёный: «180 ДНЕЙ / БЕЗ ПРОЦЕНТОВ», лесенка Яндекс–ПСБ–Сбер
+  bg.style.background = "radial-gradient(1000px 700px at 30% 30%, #2ee07a, #11a653 55%, #0a7a3c)";
+  R.innerHTML = `<div class="big" style="left:36px;top:46px;font-size:190px;${shadow("#0a7a3c")}">180 дней</div><div class="pl" style="left:44px;top:320px">без процентов</div>
+    <div style="position:absolute;left:46px;top:430px">${rows([["#fc3f1d", "Яндекс Банк", "180 дн"], ["#f26c1b", "ПСБ", "180 дн"], ["#13a538", "Сбер", "120 дн"]], "условия на 13.10.2026 · проверяй на сайте банка")}</div>
+    ${card("sber", 880, 265, -6, .82)}${card("psb", 830, 350, -6, .85)}${card("ya", 780, 435, -6, .88)}`;
+}
+if (v === 2) {   // жёлтый: «ТОП-7 КРЕДИТОК», первая тройка, медаль
+  bg.style.background = "radial-gradient(1000px 700px at 30% 30%, #ffe45c, #ffc800 55%, #e9a600)";
+  R.innerHTML = `<div style="position:absolute;left:44px;top:40px;font:700 200px/1 O;text-transform:uppercase;color:#111;letter-spacing:-.01em">Топ-7</div>
+    <div class="pl" style="left:44px;top:250px">кредиток 2026</div>
+    <div style="position:absolute;left:46px;top:370px">${rows([["#ffb000", "1 место", "?", "#111"], ["#c9ccd3", "2 место", "ПСБ", "#111"], ["#cd7f32", "3 место", "Сбер", "#111"]], "кто первый — в ролике")}</div>
+    ${card("psb", 830, 120, 8, .82)}${card("sber", 760, 260, -4, .86)}${card("ya", 740, 400, -8, .95)}<div class="medal" style="left:1110px;top:380px">№1</div>`;
+}
+if (v === 3) {   // «0 % или 60 %»: две половины
+  bg.style.background = "linear-gradient(90deg, #12b25a 0%, #12b25a 50%, #e5383b 50%, #e5383b 100%)";
+  R.innerHTML = `<div class="big" style="left:0;width:640px;text-align:center;top:70px;font-size:200px;${shadow("#0b7a3c")}">0 %</div><div class="big" style="left:640px;width:640px;text-align:center;top:70px;font-size:200px;${shadow("#9e1b1e")}">60 %</div>
+    <div class="pl" style="left:50%;top:330px;transform:translateX(-50%)">одна кредитка</div>
+    <div style="position:absolute;left:0;right:0;top:440px;text-align:center;font:700 54px O;color:#fff;text-transform:uppercase;text-shadow:0 4px 18px rgba(0,0,0,.35)">разница — одно правило</div>
+    ${card("ya", 425, 520, -4, .9, false)}`;
+}
+if (v === 4) {   // чёрный: «ЛУЧШИЕ КРЕДИТКИ 2026», веер из 6 карт
+  bg.style.background = "radial-gradient(900px 600px at 70% 60%, #24262e, #0b0c10 60%, #000)";
+  R.innerHTML = `<div style="position:absolute;left:44px;top:46px;font:700 150px/1 O;text-transform:uppercase;color:#fff">Лучшие</div>
+    <div style="position:absolute;left:44px;top:196px;font:700 150px/1 O;text-transform:uppercase;background:linear-gradient(180deg,#fff6c8,#ffd84a 45%,#e3a10e);-webkit-background-clip:text;color:transparent">кредитки</div>
+    <div class="pl" style="left:48px;top:380px;background:#ffd84a;color:#111">2026 · для 18–25</div>
+    ${["t", "alfa", "ural", "sber", "psb", "ya"].map((k, i) => card(k, 700 + i * 40, 150 + i * 60, -18 + i * 6, .78)).join("")}`;
+}
+if (v === 5) {   // синий: «0 ₽ ПЕРЕПЛАТЫ»
+  bg.style.background = "radial-gradient(1000px 700px at 30% 30%, #4f8bff, #2160e8 55%, #1442b0)";
+  R.innerHTML = `<div class="big" style="left:36px;top:40px;${shadow("#1442b0")}">0 ₽</div><div class="pl" style="left:44px;top:320px;font-size:60px">переплаты по кредитке</div>
+    <div style="position:absolute;left:46px;top:430px">${rows([["#13b85a", "Купил", "40 000 ₽", "#111"], ["#13b85a", "Вернул до срока", "40 000 ₽", "#111"], ["#ffb000", "Проценты", "0 ₽"]], "пример · если гасить всё в льготный период", "rgba(255,255,255,.8)")}</div>
+    ${card("ya", 860, 120, 8, .82)}${card("psb", 820, 410, -6, .82)}`;
+}
+if (v === 6) {   // оранжевый: «7 КРЕДИТОК — 1 ЛОВУШКА»
+  bg.style.background = "radial-gradient(1000px 700px at 30% 30%, #ff9a3d, #ff6a00 55%, #d94e00)";
+  R.innerHTML = `<div style="position:absolute;left:44px;top:40px;font:700 150px/1 O;text-transform:uppercase;color:#fff;text-shadow:0 8px 0 #b83f00">7 кредиток</div>
+    <div class="pl" style="left:44px;top:240px">и 1 ловушка у всех</div>
+    <div style="position:absolute;left:46px;top:350px">${rows([["#e5383b", "Наличные и переводы", "без льготного", "#e5383b"], ["#13b85a", "Покупки картой", "до 180 дн"]], "условия на 13.10.2026")}</div>
+    ${card("alfa", 880, 190, 10, .78)}${card("sber", 820, 320, -2, .8)}${card("t", 800, 450, -10, .84)}`;
+}
+document.fonts.ready.then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
