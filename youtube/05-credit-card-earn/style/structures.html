@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ролик №5 — структуры монтажа</title>
+<!-- Владелец 13.10 на «Кино-свет»: «ты просто добавил чуть-чуть красок, нужно заменить структуру, покидай ещё вариантов».
+     Не палитра, а грамматика кадра. Один и тот же фрагмент голоса («тратишь 30 000 → платишь кредиткой, деньги на счёте → под 15,5 % →
+     ≈ 388 ₽ в месяц») в 5 структурах, по 4 кадра-раскадровки с подписью движения:
+       s=1 «Предметная съёмка» — каждая фраза = один предмет крупным планом, почти без текста
+       s=2 «Бесконечный холст» — схема-карта, камера летает по стрелкам между узлами
+       s=3 «Кинетическая типографика» — голос превращается в огромные слова и цифры на весь кадр
+       s=4 «Жизнь в экране» — всё происходит в приложениях телефона: пуши, переводы, счета
+       s=5 «Сплит-экран» — два мира рядом: «без схемы» и «со схемой», меняются синхронно
+     Снимок из youtube/: node kit/shot3d.js 05-credit-card-earn/style/structures.html 05-credit-card-earn/style/out/s1_1.png 1920 1080 "s=1&f=1" -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "GM"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "PF"; src: url("../../kit/fonts/playfair-cyrillic-600-italic.woff2"); font-weight: 600; font-style: italic; unicode-range: U+0400-045F; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; font-family: "I"; -webkit-font-smoothing: antialiased; color: #fff; }
+  .a { position: absolute; }
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: .1; mix-blend-mode: overlay; z-index: 90;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .sb { position: absolute; left: 0; right: 0; bottom: 0; z-index: 99; padding: 22px 44px; background: linear-gradient(0deg, rgba(0,0,0,.92), rgba(0,0,0,.7)); display: flex; gap: 26px; align-items: baseline; }
+  .sb b { font: 700 30px "I"; color: #ffd34d; white-space: nowrap; } .sb span { font: 600 28px/1.3 "I"; color: #e8e8ee; }
+  .vo { position: absolute; top: 28px; left: 44px; z-index: 98; font: 600 24px "I"; color: rgba(255,255,255,.55); letter-spacing: .02em; }
+  .card { position: absolute; width: 640px; height: 404px; border-radius: 34px; overflow: hidden; box-shadow: 0 60px 110px rgba(0,0,0,.6); }
+  .chip { position: absolute; width: 94px; height: 72px; border-radius: 13px; background: linear-gradient(135deg, #fff4c4 0%, #d9b45a 30%, #8c6a1f 52%, #f1d98a 70%, #b38a2e 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+  .chip::before { content: ""; position: absolute; inset: 12px 10px; border-radius: 7px; background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(70,50,10,.45) 18px 20px), repeating-linear-gradient(0deg, transparent 0 15px, rgba(70,50,10,.45) 15px 17px); }
+  .sheen { position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.34) 46%, rgba(255,255,255,.06) 52%, transparent 60%); }
+</style>
+</head>
+<body>
+<div id="R"></div><div class="grain"></div>
+<script>
+const q = new URLSearchParams(location.search), S = +(q.get("s") || 1), F = +(q.get("f") || 1);
+const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h);
+const VO = ["«Допустим, ты тратишь тридцать тысяч в месяц…»", "«…платишь кредиткой, а свои деньги лежат на счёте…»", "«…под пятнадцать с половиной процентов…»", "«…это примерно триста девяносто рублей в месяц»"];
+const sb = (n, t) => P(`<div class="vo">голос: ${VO[F - 1]}</div><div class="sb"><b>${n} · кадр ${F}/4</b><span>${t}</span></div>`);
+const ALFA = "radial-gradient(120% 140% at 15% 0%, #ff6a5c 0%, #ef3124 38%, #b8160d 75%, #7d0b05 100%)";
+const card = (x, y, r = 0, s = 1, extra = "") => `<div class="card" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});${extra}"><div class="a" style="inset:0;background:${ALFA}"></div><div class="sheen"></div>
+   <img src="../../assets/logos/alfa.svg" style="position:absolute;left:56px;top:50px;height:50px;filter:brightness(0) invert(1)"><div class="chip" style="left:56px;top:158px"></div>
+   <div class="a" style="left:56px;top:266px;font:600 36px I;letter-spacing:.16em">2200 •••• •••• 2026</div><div class="a" style="right:46px;bottom:36px;font:700 42px I">МИР</div></div>`;
+const coin = (x, y, d, bl = 0, r = 0) => `<div class="a" style="left:${x}px;top:${y}px;width:${d}px;height:${d}px;border-radius:50%;transform:rotate(${r}deg);filter:blur(${bl}px) drop-shadow(0 14px 18px rgba(0,0,0,.5));background:radial-gradient(circle at 34% 28%,#fffbe0 0%,#ffe27a 28%,#e2a514 62%,#8f6006 100%);display:flex;align-items:center;justify-content:center;font:900 ${d * .5}px Unb;color:#8a5a05;box-shadow:inset 0 0 0 ${d * .07}px rgba(255,240,180,.45)">₽</div>`;
+const note = (x, y, r, s = 1, bl = 0) => `<div class="a" style="left:${x}px;top:${y}px;width:520px;height:236px;transform:rotate(${r}deg) scale(${s});filter:blur(${bl}px) drop-shadow(0 26px 30px rgba(0,0,0,.55));border-radius:10px;overflow:hidden;background:linear-gradient(120deg,#f8c39c 0%,#ef9563 35%,#d96c37 70%,#f3b086 100%)">
+   <div class="a" style="inset:14px;border:3px solid rgba(110,40,10,.35);border-radius:6px"></div><div class="a" style="left:30px;top:22px;font:900 64px/1 Unb;color:#6e2a0a;letter-spacing:-.04em">5000</div>
+   <div class="a" style="right:30px;bottom:16px;font:900 90px/1 Unb;color:rgba(110,40,10,.4)">₽</div><div class="a" style="left:230px;top:40px;width:190px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.45),transparent 68%)"></div></div>`;
+
+/* ===== 1. ПРЕДМЕТНАЯ СЪЁМКА ===== */
+if (S === 1) {
+  const N = "Предметная съёмка";
+  const stage = (c1, c2) => P(`<div class="a" style="inset:0;background:radial-gradient(1500px 900px at 50% 30%, ${c1}, ${c2} 55%, #020304 100%)"></div>`);
+  if (F === 1) { stage("#3a2a18", "#110b06");
+    P(note(260, 280, -14, 1.4, 3) + note(520, 330, -4, 1.5) + note(800, 380, 8, 1.6, 0) + note(1260, 200, 16, 1.3, 6));
+    P(`<div class="a" style="left:120px;top:820px;font:900 120px/1 Unb;letter-spacing:-.06em">30 000 ₽</div><div class="a" style="left:128px;top:950px;font:600 30px I;color:#fff9">в месяц</div>`);
+    sb(N, "Макро: веер купюр, камера медленно проезжает вдоль, глубина резкости. Одна подпись внизу — никаких списков."); }
+  if (F === 2) { stage("#2a0c0a", "#0b0303");
+    P(card(380, 120, -18, 2.1, "filter:drop-shadow(0 0 60px rgba(255,80,60,.35))"));
+    P(`<div class="a" style="left:120px;top:820px;font:700 96px/1 O;text-transform:uppercase">платишь кредиткой</div>`);
+    sb(N, "Склейка на слове «кредиткой»: сверхкрупный план карты — чип и номер, по ним бежит блик. Кадр живёт 2–3 с."); }
+  if (F === 3) { stage("#0e3324", "#03100a");
+    P(`<div class="a" style="left:640px;top:120px;width:640px;height:740px;border-radius:60px 60px 90px 90px;background:linear-gradient(90deg,rgba(255,255,255,.12),rgba(255,255,255,.04) 30%,rgba(255,255,255,.02) 70%,rgba(255,255,255,.14));box-shadow:inset 0 0 0 3px rgba(255,255,255,.25),0 50px 100px rgba(0,0,0,.6)"></div>`);
+    for (let i = 0; i < 26; i++) P(coin(690 + (i % 5) * 108 + (Math.floor(i / 5) % 2) * 50, 760 - Math.floor(i / 5) * 70 - (i % 3) * 8, 120, 0, i * 13));
+    P(coin(900, 40, 120, 0, 20) + coin(1060, -20, 90, 3));
+    P(`<div class="a" style="left:700px;top:330px;width:520px;text-align:center;font:900 130px/1 Unb;letter-spacing:-.06em;color:#eafff3;text-shadow:0 0 40px rgba(87,240,162,.5)">15,5%</div>
+       <div class="a" style="left:120px;top:880px;font:600 34px I;color:#fffa">накопительный счёт</div>`);
+    sb(N, "Банка-копилка наполняется монетами под стук монет в звуке; на стекле — гравировка ставки. Монеты падают сверху в такт словам."); }
+  if (F === 4) { stage("#1f3a2a", "#040a06");
+    P(coin(760, 240, 420, 0, -12) + coin(300, 160, 120, 8) + coin(1520, 640, 160, 6) + coin(1400, 140, 80, 10));
+    P(`<div class="a" style="left:0;right:0;top:720px;text-align:center;font:900 160px/1 Unb;letter-spacing:-.07em;background:linear-gradient(180deg,#fff,#d9ffe9 45%,#57f0a2);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 40px rgba(87,240,162,.45))">+388 ₽</div>`);
+    sb(N, "Одна большая монета крутится в свете, камера наезжает; цифра «+388 ₽» поднимается снизу. Следующая склейка — «за год 3 400 ₽» на стопке монет."); }
+}
+
+/* ===== 2. БЕСКОНЕЧНЫЙ ХОЛСТ ===== */
+if (S === 2) {
+  const N = "Бесконечный холст";
+  const cam = { 1: [1.6, 520, 330], 2: [1.0, 0, 0], 3: [1.7, -560, -150], 4: [.72, 0, 40] }[F];
+  P(`<div class="a" style="inset:0;background:#0b0d14;background-image:radial-gradient(rgba(255,255,255,.12) 2px,transparent 2px);background-size:44px 44px"></div>`);
+  const node = (x, y, w, h, t, v, c, sub = "") => `<div class="a" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:30px;background:#151a26;box-shadow:0 0 0 2px ${c}66,0 30px 60px rgba(0,0,0,.5),0 0 60px ${c}33;padding:30px 34px">
+     <div style="font:600 26px I;color:#8a96b4">${t}</div><div style="font:800 52px/1.1 Unb;letter-spacing:-.04em;color:${c};margin-top:10px;white-space:nowrap">${v}</div><div style="font:600 24px I;color:#8a96b4;margin-top:10px">${sub}</div></div>`;
+  const arrow = (d, c = "#ffffff55", lbl = "", lx = 0, ly = 0) => `<path d="${d}" fill="none" stroke="${c}" stroke-width="5" stroke-dasharray="14 12" marker-end="url(#ah)"/>${lbl ? `<text x="${lx}" y="${ly}" fill="#c9d2ea" font-family="I" font-weight="600" font-size="26">${lbl}</text>` : ""}`;
+  P(`<div class="a" id="world" style="left:0;top:0;width:1920px;height:1080px;transform-origin:960px 540px;transform:translate(${cam[1]}px,${cam[2]}px) scale(${cam[0]})">
+     <svg class="a" style="left:0;top:0" width="1920" height="1080"><defs><marker id="ah" markerWidth="12" markerHeight="12" refX="8" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#ffffffaa"/></marker></defs>
+       ${arrow("M560 330 C 700 330, 760 250, 880 230", "#57f0a2aa", "свои деньги", 610, 280)}${arrow("M560 380 C 700 400, 760 560, 880 600", "#ff7a7aaa", "покупки", 620, 520)}
+       ${arrow("M1260 300 C 1360 330, 1400 420, 1460 450", "#ffd34daa", "проценты", 1300, 360)}${arrow("M1160 640 C 1240 560, 1220 380, 1180 330", "#ffffff55", "гасишь в конце срока", 1210, 520)}</svg>
+     ${node(170, 250, 390, 190, "Стипендия", "30 000 ₽", "#ffffff", "в месяц")}${node(880, 150, 380, 190, "Накопительный", "15,5 %", "#57f0a2", "лежит и растёт")}
+     ${node(880, 520, 380, 190, "Кредитка", "−30 000", "#ff7a7a", "все покупки")}${node(1460, 380, 340, 190, "Тебе остаётся", "+388 ₽", "#ffd34d", "в месяц")}</div>`);
+  const tx = { 1: "Старт крупно на узле «Стипендия 30 000 ₽»; узел собирается из линий.", 2: "Камера отъезжает: от узла рисуются две стрелки — «свои деньги» к счёту и «покупки» к кредитке.",
+    3: "Перелёт по стрелке к узлу «Накопительный 15,5 %», внутри узла крутится счётчик.", 4: "Финальный отъезд: вся схема целиком, узел «+388 ₽» вспыхивает. Каждая следующая глава дорисовывает схему." }[F];
+  sb(N, tx);
+}
+
+/* ===== 3. КИНЕТИЧЕСКАЯ ТИПОГРАФИКА ===== */
+if (S === 3) {
+  const N = "Кинетическая типографика";
+  if (F === 1) { P(`<div class="a" style="inset:0;background:#0b0b0d"></div>
+      <div class="a" style="left:60px;top:190px;font:600 60px I;color:#8d929c">допустим, ты тратишь</div>
+      <div class="a" style="left:40px;top:260px;font:900 380px/1 Unb;letter-spacing:-.08em;color:#fff">30 000</div>
+      <div class="a" style="left:1700px;top:300px;font:900 160px/1 Unb;color:#ffd34d">₽</div><div class="a" style="left:66px;top:700px;font:700 64px I;color:#fff">в месяц</div>`);
+    sb(N, "Слова голоса появляются крупно по одному; «30 000» въезжает слева и заполняет кадр, ₽ «щёлкает» на ударении."); }
+  if (F === 2) { P(`<div class="a" style="inset:0;background:#0b0b0d"></div>
+      <div class="a" style="left:60px;top:120px;font:900 210px/1 Unb;letter-spacing:-.07em;color:#ff5a6e">КРЕДИТКОЙ</div>
+      <div class="a" style="left:80px;top:360px;font:600 56px I;color:#8d929c">платишь — а свои деньги</div>
+      <div class="a" style="left:60px;top:450px;font:900 210px/1 Unb;letter-spacing:-.07em;color:transparent;-webkit-text-stroke:5px #57f0a2">НА СЧЁТЕ</div>
+      <div class="a" style="left:1300px;top:760px;font:600 40px I;color:#57f0a2">лежат и растут ↗</div>`);
+    sb(N, "Две строки: «КРЕДИТКОЙ» сплошным красным, «НА СЧЁТЕ» контуром, который заливается зелёным, пока звучит фраза."); }
+  if (F === 3) { P(`<div class="a" style="inset:0;background:#57f0a2"></div>
+      <div class="a" style="left:0;right:0;top:120px;text-align:center;font:900 560px/1 Unb;letter-spacing:-.09em;color:#0b0b0d">15,5</div>
+      <div class="a" style="left:0;right:0;top:700px;text-align:center;font:700 64px I;color:#0b0b0d">процентов годовых</div>`);
+    sb(N, "Резкая смена фона на зелёный (вспышка), огромные «15,5» сжимаются из-за кадра. Каждая цифра — отдельный кадр-удар."); }
+  if (F === 4) { P(`<div class="a" style="inset:0;background:#0b0b0d"></div>
+      <div class="a" style="left:60px;top:150px;font:600 54px I;color:#8d929c">это примерно</div>
+      <div class="a" style="left:40px;top:220px;font:900 420px/1 Unb;letter-spacing:-.08em;color:#57f0a2">388</div>
+      <div class="a" style="left:1120px;top:440px;font:900 110px/1 Unb;color:#fff">₽ / мес</div>
+      <div class="a" style="left:66px;top:720px;font:700 54px I;color:#ffd34d">за год ≈ 3 400 ₽</div>`);
+    sb(N, "Счётчик «388» набегает, ₽/мес прилетает справа, под ним появляется годовая сумма. Без карточек и панелей — только текст и ритм."); }
+}
+
+/* ===== 4. ЖИЗНЬ В ЭКРАНЕ ===== */
+if (S === 4) {
+  const N = "Жизнь в экране";
+  P(`<div class="a" style="inset:0;background:radial-gradient(1400px 900px at 50% 40%, #1d1f2a, #08090d 70%)"></div>`);
+  const phone = (x, y, r, inner, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;width:500px;height:1000px;border-radius:76px;transform:rotate(${r}deg) scale(${s});background:#0d0d11;box-shadow:0 0 0 12px #1c1c22,0 0 0 14px #3a3a44,0 70px 120px rgba(0,0,0,.7);overflow:hidden">
+     <div class="a" style="left:180px;top:22px;width:140px;height:40px;border-radius:20px;background:#000;z-index:3"></div>${inner}</div>`;
+  if (F === 1) { P(phone(710, 40, 0, `<div class="a" style="inset:0;background:linear-gradient(180deg,#2b1e5a,#0d0d11 70%)"></div>
+      <div class="a" style="left:40px;top:120px;font:600 26px I;color:#fff9">Обычная карта</div><div class="a" style="left:36px;top:160px;font:800 80px I;letter-spacing:-.04em">30 000 ₽</div>
+      <div class="a" style="left:24px;top:300px;right:24px;padding:24px;border-radius:28px;background:rgba(255,255,255,.92);color:#111"><div style="font:600 20px I;color:#666">БАНК · сейчас</div><div style="font:700 28px I;margin-top:6px">Зачисление стипендии +30 000 ₽</div></div>`));
+    P(`<div class="a" style="left:1300px;top:420px;font:700 44px I;color:#fffa">тап по пушу →</div>`);
+    sb(N, "Экран телефона на весь кадр: приходит пуш о стипендии, палец-курсор тапает — переход внутрь приложения."); }
+  if (F === 2) { P(phone(360, 40, -4, `<div class="a" style="inset:0;background:#0d0d11"></div><div class="a" style="left:40px;top:110px;font:700 40px I">Перевод себе</div>
+      <div class="a" style="left:40px;top:200px;right:40px;padding:26px;border-radius:26px;background:#1b1b22"><div style="font:600 22px I;color:#8a8a94">Куда</div><div style="font:700 32px I;margin-top:6px">Накопительный счёт</div></div>
+      <div class="a" style="left:40px;top:360px;font:800 96px I;letter-spacing:-.04em">30 000 ₽</div>
+      <div class="a" style="left:40px;bottom:80px;right:40px;height:110px;border-radius:30px;background:#57f0a2;color:#06341c;display:flex;align-items:center;justify-content:center;font:700 38px I">Перевести</div>`, .95)
+      + phone(1060, 60, 5, `<div class="a" style="inset:0;background:linear-gradient(180deg,#3a0f16,#0d0d11 60%)"></div><div class="a" style="left:40px;top:110px;font:600 26px I;color:#fff9">Кредитка</div>
+      <div class="a" style="left:36px;top:150px;font:800 80px I;letter-spacing:-.04em">−2 340 ₽</div><div class="a" style="left:40px;top:260px;font:600 26px I;color:#fff9">Продукты · кофе · проезд</div>`, .95));
+    sb(N, "Свайп: слева перевод «на накопительный», справа появляется второй экран — кредитка и первые покупки. Два телефона «разговаривают»."); }
+  if (F === 3) { P(phone(710, 40, 0, `<div class="a" style="inset:0;background:linear-gradient(180deg,#0f3a28,#0d0d11 70%)"></div><div class="a" style="left:40px;top:110px;font:600 26px I;color:#fff9">Накопительный счёт</div>
+      <div class="a" style="left:36px;top:150px;font:800 80px I;letter-spacing:-.04em">30 000 ₽</div><div class="a" style="left:40px;top:260px;padding:10px 20px;border-radius:999px;background:#57f0a2;color:#06341c;font:700 30px I">15,5 % годовых</div>
+      <svg class="a" style="left:30px;top:380px" width="440" height="260" viewBox="0 0 440 260"><path d="M0 230 C 120 220, 240 160, 440 30" fill="none" stroke="#57f0a2" stroke-width="6"/><path d="M0 230 C 120 220, 240 160, 440 30 L440 260 L0 260 Z" fill="rgba(87,240,162,.18)"/></svg>`));
+    P(`<div class="a" style="left:250px;top:420px;font:900 120px/1 Unb;letter-spacing:-.06em;color:#57f0a2">15,5%</div>`);
+    sb(N, "Экран счёта: ставка-таблетка загорается, график дохода прорисовывается; ставка «вылетает» из экрана крупно в сторону."); }
+  if (F === 4) { P(phone(710, 40, 0, `<div class="a" style="inset:0;background:linear-gradient(180deg,#151a2a,#0d0d11)"></div><div class="a" style="left:0;right:0;top:140px;text-align:center;font:800 120px I;letter-spacing:-.04em">20:00</div>
+      <div class="a" style="left:24px;top:330px;right:24px;padding:26px;border-radius:30px;background:rgba(255,255,255,.92);color:#111"><div style="font:600 20px I;color:#666">НАКОПИТЕЛЬНЫЙ · сейчас</div><div style="font:700 30px I;margin-top:6px">Начислены проценты</div><div style="font:900 52px Unb;color:#0a8f4f;margin-top:4px">+388 ₽</div></div>
+      <div class="a" style="left:24px;top:560px;right:24px;padding:26px;border-radius:30px;background:rgba(255,255,255,.7);color:#111"><div style="font:600 20px I;color:#666">КРЕДИТКА · 2 дня</div><div style="font:700 28px I;margin-top:6px">Автоплатёж 30 000 ₽ · долг 0</div></div>`));
+    sb(N, "Экран блокировки: два пуша — «начислены проценты +388 ₽» и «автоплатёж, долг 0». Весь ролик — как запись экрана жизни."); }
+}
+
+/* ===== 5. СПЛИТ-ЭКРАН ===== */
+if (S === 5) {
+  const N = "Сплит-экран";
+  P(`<div class="a" style="left:0;top:0;width:958px;height:1080px;background:linear-gradient(180deg,#2a2c33,#15161a)"></div><div class="a" style="left:962px;top:0;width:958px;height:1080px;background:linear-gradient(180deg,#0f3a28,#06140d)"></div>
+     <div class="a" style="left:0;width:958px;top:60px;text-align:center;font:700 52px O;text-transform:uppercase;color:#c9ccd3">без схемы</div><div class="a" style="left:962px;width:958px;top:60px;text-align:center;font:700 52px O;text-transform:uppercase;color:#57f0a2">со схемой</div>`);
+  const bar = (x, y, label, val, w, c) => `<div class="a" style="left:${x}px;top:${y}px;width:760px"><div style="display:flex;justify-content:space-between;font:600 30px I;color:#c9ccd3"><span>${label}</span><span style="color:#fff;font-weight:700">${val}</span></div>
+     <div style="margin-top:14px;height:34px;border-radius:17px;background:rgba(255,255,255,.1);overflow:hidden"><div style="width:${w}%;height:100%;border-radius:17px;background:${c}"></div></div></div>`;
+  const st = { 1: [[100, 100], [0, 0]], 2: [[0, 100], [100, 100]], 3: [[0, 100], [100, 100]], 4: [[0, 100], [100, 100]] }[F];
+  P(bar(100, 220, "Деньги на карте", F === 1 ? "30 000 ₽" : "0 ₽", st[0][0], "#9aa0ab") + bar(1062, 220, "На накопительном", F === 1 ? "30 000 ₽" : "30 000 ₽", F === 1 ? 100 : 100, "#57f0a2"));
+  if (F >= 2) P(bar(100, 360, "Потрачено с карты", "30 000 ₽", 100, "#ff7a7a") + bar(1062, 360, "Потрачено кредиткой", "30 000 ₽", 100, "#ff7a7a"));
+  if (F >= 3) P(`<div class="a" style="left:1062px;top:520px;width:760px;padding:30px;border-radius:30px;background:rgba(87,240,162,.12);box-shadow:inset 0 0 0 2px rgba(87,240,162,.4)"><div style="font:600 30px I;color:#c9ccd3">Ставка счёта</div><div style="font:900 110px/1 Unb;color:#57f0a2;margin-top:10px">15,5 %</div></div>
+     <div class="a" style="left:100px;top:520px;width:760px;padding:30px;border-radius:30px;background:rgba(255,255,255,.05)"><div style="font:600 30px I;color:#8d929c">Ставка</div><div style="font:900 110px/1 Unb;color:#5d616b;margin-top:10px">0 %</div></div>`);
+  if (F === 4) P(`<div class="a" style="left:0;right:0;top:760px;height:200px;background:rgba(0,0,0,.55)"></div>
+     <div class="a" style="left:0;width:958px;top:780px;text-align:center;font:900 130px/1 Unb;color:#8d929c">0 ₽</div><div class="a" style="left:962px;width:958px;top:780px;text-align:center;font:900 130px/1 Unb;color:#57f0a2;text-shadow:0 0 40px rgba(87,240,162,.45)">+388 ₽</div>`);
+  const tx = { 1: "Экран делится пополам: слева «без схемы», справа «со схемой». Одни и те же 30 000 ₽ — в двух мирах.", 2: "Слева деньги сразу уходят с карты (полоса пустеет); справа тратится кредитка, а свои деньги остаются на счёте.",
+    3: "Справа загорается ставка 15,5 %, слева — серые 0 %. Всё, что звучит, показано как разница двух сторон.", 4: "Итог внизу через весь кадр: «0 ₽» против «+388 ₽». Каждая глава ролика — новая пара «до / после»." }[F];
+  sb(N, tx);
+}
+Promise.all([document.fonts.ready, ...[...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))]).then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
