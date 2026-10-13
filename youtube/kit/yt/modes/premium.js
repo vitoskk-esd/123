@@ -99,6 +99,53 @@ YT.mode("premium", {
   .yt-premium .tag { position: absolute; left: 0; right: 0; text-align: center; font: 800 54px "Unb"; letter-spacing: -.03em; color: #ff6b6b; }
   .yt-premium .pod { position: absolute; width: 420px; border-radius: 24px 24px 0 0; background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.02)); border-top: 2px solid rgba(255,255,255,.45); }
   .yt-premium .pod b { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font: 800 110px "Unb"; color: rgba(255,255,255,.22); }
+  /* ТЕМА «КИНО-СВЕТ» (data.theme = "cine"; владелец 13.10, ролик №5: «берём это» — youtube/05-credit-card-earn/style/out/cine_sheet.jpg) */
+  .yt-premium.cine .spot { background: radial-gradient(1500px 950px at 50% 16%, var(--st1, #1b2738) 0%, var(--st2, #0b1018) 52%, #030406 100%); }
+  .yt-premium.cine .bg > *:not(.cone) { display: none; }
+  .yt-premium.cine .cone { position: absolute; top: -320px; width: 1000px; height: 1500px; margin-left: -500px; filter: blur(14px); mix-blend-mode: screen; }
+  .yt-premium.cine .floor { top: 770px; bottom: 0; height: auto; background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(0,0,0,0) 45%); border-top: 1px solid rgba(255,255,255,.07); }
+  .yt-premium.cine .streak { background: linear-gradient(90deg, transparent, rgba(255,236,190,0), rgba(255,236,190,.28), rgba(255,236,190,0), transparent); }
+  .yt-premium.cine .ghost { position: absolute; left: -200px; right: -200px; top: 150px; text-align: center; font: 900 330px/1 "Unb"; letter-spacing: -.08em; color: transparent; -webkit-text-stroke: 3px rgba(255,214,120,.34); white-space: nowrap; }
+  .yt-premium.cine .card { background: none !important; box-shadow: 0 60px 110px rgba(0,0,0,.65), 0 0 0 1.5px var(--rim, rgba(255,255,255,.1)), 0 0 70px var(--rim, rgba(255,255,255,0)); }
+  .yt-premium.cine .card .base { position: absolute; inset: 0; }
+  .yt-premium.cine .card .tex { position: absolute; inset: 0; opacity: .2; mix-blend-mode: overlay; background-image: radial-gradient(rgba(255,255,255,.5) 1px, transparent 1px); background-size: 3px 3px; }
+  .yt-premium.cine .card .edge { position: absolute; inset: 0; border-radius: 34px; box-shadow: inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.35); }
+  .yt-premium.cine .card .lg { position: absolute; left: 56px; top: 50px; height: 50px; filter: brightness(0) invert(1) drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
+  .yt-premium.cine .card .chip { left: 56px; top: 158px; width: 94px; height: 72px; border-radius: 13px; background: linear-gradient(135deg, #fff4c4 0%, #d9b45a 30%, #8c6a1f 52%, #f1d98a 70%, #b38a2e 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+  .yt-premium.cine .card .chip::after { inset: 12px 10px; border: none; border-radius: 7px; background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(70,50,10,.45) 18px 20px), repeating-linear-gradient(0deg, transparent 0 15px, rgba(70,50,10,.45) 15px 17px); }
+  .yt-premium.cine .card .nfc { position: absolute; left: 170px; top: 168px; }
+  .yt-premium.cine .card .num { left: 56px; top: 266px; bottom: auto; font: 600 36px "Mont"; letter-spacing: .16em; opacity: 1; color: #f6f6f6; text-shadow: 0 1px 0 rgba(255,255,255,.55), 0 -1px 0 rgba(0,0,0,.45); }
+  .yt-premium.cine .card .mir { position: absolute; right: 46px; bottom: 36px; font: 800 42px "Mont"; color: #fff; }
+  .yt-premium.cine .card .big { bottom: 96px; }
+  .yt-premium.cine .card.refl { -webkit-box-reflect: below 14px linear-gradient(transparent 58%, rgba(255,255,255,.2)); }
+  .yt-premium.cine .q .w { background: linear-gradient(180deg, #ffffff 0%, #f1f3f7 52%, #b9bec8 100%); -webkit-background-clip: text; background-clip: text; }
+  .yt-premium.cine .q em .w, .yt-premium.cine .q em { -webkit-text-fill-color: transparent; background: linear-gradient(180deg, #fffbe9 0%, #ffe9a3 24%, #f5c242 48%, #b88214 56%, #ffd65c 72%, #fff1b8 100%); -webkit-background-clip: text; background-clip: text; }
+  .yt-premium.cine .q.red .w, .yt-premium.cine .q.red em .w { -webkit-text-fill-color: transparent; background: linear-gradient(180deg, #ffd3d8 0%, #ff6b7a 45%, #e0193a 100%); -webkit-background-clip: text; background-clip: text; }
+  .yt-premium.cine .q { filter: drop-shadow(0 10px 30px rgba(0,0,0,.6)); }
+  .yt-premium.cine .q.red { filter: drop-shadow(0 0 40px rgba(255,40,70,.45)); }
+  .yt-premium.cine .callout { background: linear-gradient(160deg, rgba(255,255,255,.075), rgba(255,255,255,.015)); border: 1px solid rgba(255,255,255,.12); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 60px 120px rgba(0,0,0,.55), 0 0 90px var(--accg, rgba(0,0,0,0)); }
+  .yt-premium.cine .callout .cg { opacity: .3; }
+  .yt-premium.cine .callout .cv { right: auto; padding-right: 8px; }
+  .yt-premium.cine .callout .cv { font-weight: 900; background: linear-gradient(180deg, #ffffff, #dfe3ea 55%, #9aa1ad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .yt-premium.cine .callout .cv.green { background-image: linear-gradient(180deg, #ffffff 0%, #d9ffe9 45%, #57f0a2 100%); color: transparent; }
+  .yt-premium.cine .callout .cv.red { background-image: linear-gradient(180deg, #ffe1e4 0%, #ff6b7a 50%, #e0193a 100%); color: transparent; }
+  .yt-premium.cine .callout .cv.gold { background-image: linear-gradient(180deg, #fffbe9 0%, #ffe9a3 25%, #f5c242 50%, #c99328 100%); color: transparent; }
+  .yt-premium.cine .rows .rt { background: linear-gradient(180deg, #fff, #d4d7de 60%, #9aa0aa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .yt-premium.cine .row.green span { color: #57f0a2; text-shadow: 0 0 18px rgba(87,240,162,.35); }
+  .yt-premium.cine .row.gold span { color: #ffd65c; text-shadow: 0 0 18px rgba(255,200,90,.3); }
+  .yt-premium.cine .row.red span, .yt-premium.cine .row.red b { color: #ff6b7a; }
+  .yt-premium.cine .ph { background: linear-gradient(160deg, #2a2a30, #0b0b0e); box-shadow: 0 0 0 10px #1c1c22, 0 0 0 12px #3a3a44, 0 80px 140px rgba(0,0,0,.75); }
+  .yt-premium.cine .ph .scr { background: #0d0d11; color: #fff; }
+  .yt-premium.cine .ph .r { background: #1b1b22; color: #f2f2f5; box-shadow: none; }
+  .yt-premium.cine .ph .r.red { background: linear-gradient(180deg, #ff5a6e, #d4142f); color: #fff; box-shadow: 0 0 70px rgba(255,40,70,.6); }
+  .yt-premium.cine .ph .r.green { background: linear-gradient(180deg, #123b29, #0b241a); color: #57f0a2; box-shadow: 0 0 50px rgba(87,240,162,.22); }
+  .yt-premium.cine .ph .r.mute { background: #16161c; color: #8a8a94; }
+  .yt-premium.cine .pool { position: absolute; width: 640px; height: 220px; border-radius: 50%; filter: blur(26px); pointer-events: none; }
+  .yt-premium.cine .coin { background: radial-gradient(circle at 34% 28%, #fffbe0 0%, #ffe27a 28%, #e2a514 62%, #8f6006 100%); color: #8a5a05; }
+  .yt-premium.cine .pct { -webkit-text-stroke: 2px rgba(255,107,122,.55); }
+  .yt-premium.cine .orb { background: radial-gradient(circle, rgba(255,226,170,.55) 0%, rgba(255,226,170,0) 70%); opacity: .5; }
+  .yt-premium.cine .pod { background: linear-gradient(180deg, rgba(255,226,170,.16), rgba(255,255,255,.02)); border-top: 2px solid rgba(255,226,170,.55); }
+  .yt-premium.cine .tag { color: #ff6b7a; text-shadow: 0 0 30px rgba(255,40,70,.4); }
   `,
   // звуки сцены для sfx.js (времена от начала отрезка): сдержанно — свист на смену кадра, тик на строку, щелчок на экран телефона
   events(d, dur) {
@@ -114,7 +161,10 @@ YT.mode("premium", {
     return E;
   },
   build(root, d, ctx) {
-    const { U } = ctx, P = root._P = {};
+    const { U } = ctx, P = root._P = {}, cine = d.theme === "cine"; P.cine = cine;
+    if (cine) { root.classList.add("cine"); const tone = d.tone || (d.decor === "pct" ? "red" : d.decor === "coins" ? "green" : "gold");
+      const ST = { red: ["#3a0f16", "#14060a", "rgba(255,90,100,.17)", "rgba(255,60,90,.35)"], green: ["#0f3a28", "#07150f", "rgba(120,255,190,.15)", "rgba(87,240,162,.3)"], gold: ["#1b2738", "#0b1018", "rgba(255,226,160,.16)", "rgba(255,200,120,.25)"] }[tone];
+      root.style.setProperty("--st1", ST[0]); root.style.setProperty("--st2", ST[1]); root.style.setProperty("--accg", ST[3]); P.tone = tone; P.coneC = ST[2]; P.rimC = ST[3]; }
     U.el("div", "spot", null, root);
     // живой фон — вид из d.bg (build-скрипт чередует), цвет — акцент сцены
     const acc = d.accent || (d.hero && d.hero.card.c1) || "#7d8bff", acc2 = d.accent2 || (d.hero && (d.hero.card.c3 || d.hero.card.c2)) || "#c86bff";
@@ -125,6 +175,9 @@ YT.mode("premium", {
     if (P.bgk === "rings") { P.rings = U.el("div", "ringsv", `<svg viewBox="0 0 1800 1800" width="1800" height="1800">${[260, 420, 580, 740, 880].map((r, i) =>
       `<circle cx="900" cy="900" r="${r}" fill="none" stroke="${i % 2 ? acc : "#ffffff"}" stroke-opacity="${.10 + .05 * (i % 2)}" stroke-width="${i % 2 ? 3 : 2}" stroke-dasharray="${[6, 18, 2, 40, 10][i]} ${[14, 22, 18, 30, 26][i]}"/>`).join("")}</svg>`, P.bg); P.ringEls = [...P.rings.querySelectorAll("circle")]; }
     const rnd = U.rnd(Math.round((d.seed || 1) * 977) + 3);
+    if (cine) { const n = (d.seed || 1) % 3 === 0 ? 2 : 1;
+      P.cones = Array.from({ length: n }, (_, i) => { const e = U.el("div", "cone", null, P.bg); e.style.background = `conic-gradient(from 180deg at 50% 0%, transparent 0deg, ${P.coneC} 14deg, transparent 30deg)`;
+        return { e, x: n === 1 ? 960 + (rnd() - .5) * 500 : (i ? 1350 : 570), ph: rnd() * 6 }; }); }
     P.dust = U.el("div", "dust", null, root); P.motes = Array.from({ length: 34 }, () => { const e = U.el("i", null, null, P.dust), z = .3 + rnd() * .9, r = 2 + rnd() * 4;
       Object.assign(e.style, { width: r + "px", height: r + "px", opacity: (.08 + rnd() * .3).toFixed(2) }); return { e, x: rnd() * 1920, y: rnd() * 1080, z, sp: 8 + rnd() * 26 }; });
     // летающие объекты по краям кадра (decor: coins | pct | orbs)
@@ -136,19 +189,26 @@ YT.mode("premium", {
     P.glow = U.el("div", "glow", null, root);
     U.el("div", "floor", null, root);
     P.cam = U.el("div", "cam", null, root);
+    if (cine && d.ghost) P.ghost = U.el("div", "ghost", d.ghost, P.cam);
+    const nfcSvg = `<svg class="nfc" width="48" height="54" viewBox="0 0 40 44">${[9, 16, 23].map(r => `<path d="M${6 + r * .3} ${22 - r * .62} A ${r} ${r} 0 0 1 ${6 + r * .3} ${22 + r * .62}" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3.4" stroke-linecap="round"/>`).join("")}</svg>`;
+    const cardCine = (c, parent) => {
+      const e = U.el("div", "card", `<div class="base"></div><div class="tex"></div><div class="sheen"></div>${c.logo ? `<img class="lg" src="${c.logo}" style="height:${c.logoH || 50}px">` : `<div class="bank">${c.bank || ""}</div><div class="nm">${c.name || ""}</div>`}
+        <div class="chip"></div>${nfcSvg}<div class="num">2200 •••• •••• 2026</div><div class="mir">МИР</div>${!c.logo && c.big ? `<div class="big">${c.small ? `<small>${c.small}</small>` : ""}${c.big}</div>` : ""}<div class="edge"></div>`, parent);
+      e.querySelector(".base").style.background = `radial-gradient(120% 140% at 15% 0%, ${c.c3 || c.c1} 0%, ${c.c1} 38%, ${c.c2} 100%)`; e.style.setProperty("--rim", P.rimC);
+      if (c.ink) e.style.color = c.ink; return e; };
     const card = (c, parent) => {
       const e = U.el("div", "card", `<div class="grain"></div><div class="sheen"></div><div class="bank">${c.bank || ""}</div><div class="nm">${c.name || ""}</div>
         <div class="chip"></div><div class="sys"><i style="left:0;background:${c.s1 || "#e0e2e8"};opacity:.9"></i><i style="left:34px;background:${c.s2 || "#9aa0ab"};opacity:.8"></i></div>
         <div class="num">•••• 2026</div>${c.big ? `<div class="big">${c.small ? `<small>${c.small}</small>` : ""}${c.big}</div>` : ""}`, parent);
       e.style.background = `linear-gradient(135deg, ${c.c1} 0%, ${c.c2} 58%, ${c.c3 || c.c1} 100%)`; if (c.ink) e.style.color = c.ink;
       return e; };
-    P.card = card;
+    const cardAny = (c, parent) => cine ? cardCine(c, parent) : card(c, parent); P.card = cardAny;
     if (d.place) P.place = U.el("div", "place", d.place, P.cam);
-    if (d.hero) { const hc = d.hero.card; P.hero = U.el("div", "c3", null, P.cam); const f = card(hc, P.hero);
+    if (d.hero) { const hc = d.hero.card; P.hero = U.el("div", "c3", null, P.cam); const f = cardAny(hc, P.hero);
       const bk = U.el("div", "card back", `<div class="grain"></div><div class="stripe"></div><div class="bl">${hc.small || "дней без %"}</div><div class="bv">${hc.big || ""}</div>`, P.hero);
       bk.style.background = `linear-gradient(135deg, ${hc.c2} 0%, ${hc.c1} 70%, ${hc.c3 || hc.c1} 100%)`; P.heroFace = f;
       P.glow.style.background = hc.glow || "rgba(200,205,220,.16)"; }
-    if (d.fan) P.fan = d.fan.cards.map(c => card(c, P.cam));
+    if (d.fan) P.fan = d.fan.cards.map(c => cardAny(c, P.cam));
     if (d.quote) { const q = d.quote; P.q = U.el("div", "q" + (q.red ? " red" : ""), q.text, P.cam); P.qw = U.words(P.q);
       if (q.sub) P.qsub = U.el("div", "qsub", q.sub, P.cam); }
     if (d.rows) { const r = d.rows; P.rows = U.el("div", "rows", r.title ? `<div class="rt silver">${r.title}</div>` : "", P.cam);
@@ -164,10 +224,11 @@ YT.mode("premium", {
         lb.style.transform = `translateX(${o.x < .15 ? -8 : o.x > .85 ? -92 : -50}%)`; return { e, lb }; });
       if (l.cap) P.cap = U.el("div", "cap", l.cap, P.cam); }
     if (d.phone) { P.ph = U.el("div", "ph", `<div class="scr"></div>`, P.cam); const s = P.ph.firstChild;
-      P.pr = d.phone.rows.map(r => U.el("div", "r" + (r.c ? " " + r.c : ""), r.html, s)); }
-    if (d.compare) { P.cmp = d.compare.cards.map(c => card(c, P.cam)); P.tags = (d.compare.tags || []).map(tg => U.el("div", "tag", tg.text, P.cam)); }
+      P.pr = d.phone.rows.map(r => U.el("div", "r" + (r.c ? " " + r.c : ""), r.html, s));
+      if (cine) { P.pool = U.el("div", "pool", null, P.cam); P.pool.style.background = `radial-gradient(ellipse, ${d.phone.rows.some(r => r.c === "red") ? "rgba(255,40,70,.5)" : P.rimC}, transparent 70%)`; } }
+    if (d.compare) { P.cmp = d.compare.cards.map(c => { const e = cardAny(c, P.cam); if (cine) e.classList.add("refl"); return e; }); P.tags = (d.compare.tags || []).map(tg => U.el("div", "tag", tg.text, P.cam)); }
     if (d.podium) { P.pods = [[290, 230], [750, 330], [1210, 170]].map(([x, h], i) => { const e = U.el("div", "pod", `<b>${[2, 1, 3][i]}</b>`, P.cam); Object.assign(e.style, { left: x + "px", height: h + "px", bottom: "150px" }); return e; });
-      P.pc = d.podium.cards.map(pc => card(pc.card, P.cam)); }
+      P.pc = d.podium.cards.map(pc => cardAny(pc.card, P.cam)); }
   },
   render(root, t, d, ctx) {
     const { U, dur } = ctx, P = root._P, k = (a, len = .5) => U.clamp((t - (a || 0)) / len);
@@ -180,6 +241,9 @@ YT.mode("premium", {
     // фон живёт всегда
     if (P.blobs) P.blobs.forEach((e, i) => { e.style.left = (960 + Math.sin(t * (.21 + i * .07) + i * 2) * 520) + "px"; e.style.top = (540 + Math.cos(t * (.17 + i * .05) + i) * 300) + "px"; });
     if (P.grid) { P.grid.style.transform = `perspective(700px) rotateX(74deg)`; P.grid.style.backgroundPosition = `${Math.sin(t * .2) * 60}px ${(t * 90) % 120}px`; P.hz.style.opacity = .7 + .3 * Math.sin(t * .8); }
+    if (P.cones) P.cones.forEach(o => { o.e.style.left = (o.x + Math.sin(t * .18 + o.ph) * 90) + "px"; o.e.style.opacity = (.75 + .25 * Math.sin(t * .5 + o.ph)).toFixed(3); });
+    if (P.ghost) { const kg = k(0, 1.2); P.ghost.style.opacity = U.out3(kg); P.ghost.style.transform = `translateX(${(-30 + t * 6).toFixed(1)}px) scale(${(1.06 - .06 * U.out5(kg)).toFixed(4)})`; }
+    if (P.cine && P.deco) P.deco.forEach(o => { o.e.style.filter = `blur(${(o.z < .8 ? (1 - o.z) * 9 : 0).toFixed(1)}px)`; });
     if (P.rays) P.rays.style.transform = `rotate(${t * 4}deg)`;
     if (P.ringEls) P.ringEls.forEach((c, i) => { c.setAttribute("transform", `rotate(${(i % 2 ? -1 : 1) * t * (6 + i * 3)} 900 900)`); });
     // камера-оператор: смена плана каждые 2–3 с (shots), плавные переходы, лёгкий дрейф между ними
@@ -253,7 +317,8 @@ YT.mode("premium", {
     if (P.ph) { const kp = k(d.phone.at, .8), x = P.rows ? 330 : 725;
       Object.assign(P.ph.style, { left: x + "px", top: "110px" }); P.ph.style.opacity = U.out3(kp * 1.3);
       P.ph.style.transform = `perspective(1800px) translateY(${(1 - U.out5(kp)) * 160}px) rotateY(${P.rows ? 10 : -6}deg) rotateZ(${P.rows ? -2 : 2}deg) scale(.9)`;
-      P.pr.forEach((e, i) => rise(e, k(d.phone.rows[i].at ?? (d.phone.at || 0) + .5 + i * .4, .45), 24)); }
+      P.pr.forEach((e, i) => rise(e, k(d.phone.rows[i].at ?? (d.phone.at || 0) + .5 + i * .4, .45), 24));
+      if (P.pool) { Object.assign(P.pool.style, { left: (x - 85) + "px", top: "900px" }); P.pool.style.opacity = U.out3(kp) * (.8 + .2 * Math.sin(t * 1.3)); } }
     if (P.cmp) { const n = P.cmp.length, sc = n > 4 ? .36 : .5, w = 640 * sc + 30, x0 = 960 - (n * w - 30) / 2;
       P.cmp.forEach((e, i) => { const kk = k((d.compare.at || 0) + i * .08, .6); Object.assign(e.style, { left: x0 + i * w + "px", top: "380px", transformOrigin: "0 0" });
         e.style.opacity = U.out3(kk * 1.3); e.style.transform = `translateY(${(1 - U.out5(kk)) * 80}px) scale(${sc})`; sheen(e, i * .17); });

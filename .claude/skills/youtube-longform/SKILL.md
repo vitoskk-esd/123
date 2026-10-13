@@ -261,6 +261,8 @@ Scene types, all from the references:
   graphics, free-licence stock, AI images. No film/TV/game clips and no
   copyrighted music — Content ID blocks monetization. Keep `assets/LICENSES.md`.
 
+**Theme «Кино-свет» (owner, 13.10, video #5: «давай монтаж сделаем ещё лучше… ещё современнее» → picked `05-credit-card-earn/style/out/cine_sheet.jpg`, «берём это»).** `modes/premium.js` with `data.theme = "cine"` (build5.py sets it for every segment): stage tinted by meaning (green — money, red — loss, gold — neutral; from `decor`/`tone`), sweeping spotlight cones, floor line, detailed product cards (real logo via `card.logo`, chip with contacts, NFC, embossed number, sheen, rim light, reflection on compare cards), gold/green/red gradient glowing numbers and quote accents, dark phone with glowing red/green buttons and a light pool, coins with depth-of-field, `ghost` outline text behind the hook. Rules learned: no single scene longer than ~10–12 s (split long lines/quotes into 2–3 scenes); callout values must not be clipped (`.cv {right:auto}`).
+
 ## 4b. Retention editing — mandatory
 
 Read `retention-editing` skill before building a timeline. Long-form: shot 3–8 s, something moves
