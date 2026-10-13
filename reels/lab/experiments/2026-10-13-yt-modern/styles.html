@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<title>Ролик №4 — 4 современных стиля</title>
+<style>
+@font-face { font-family: "Unb"; src: url("../../../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+@font-face { font-family: "Mont"; src: url("../../../../youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+@font-face { font-family: "Mono"; src: url("../../../../youtube/kit/fonts/GeistMono-Bold.ttf"); }
+@font-face { font-family: "Osw"; src: url("../../../../youtube/kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-04FF; }
+@font-face { font-family: "Osw"; src: url("../../../../youtube/kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+@font-face { font-family: "Int"; src: url("../../../../youtube/kit/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-04FF; }
+@font-face { font-family: "Int"; src: url("../../../../youtube/kit/fonts/inter-latin-500.woff2"); font-weight: 500; }
+@font-face { font-family: "Int"; src: url("../../../../youtube/kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-04FF; }
+@font-face { font-family: "Int"; src: url("../../../../youtube/kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; }
+body { font-family: "Int", "Mont"; color: #fff; background: #000; position: relative; }
+.abs { position: absolute; }
+.tag { position: absolute; left: 40px; bottom: 30px; font: 600 20px "Int"; letter-spacing: .08em; text-transform: uppercase; opacity: .55; z-index: 50; }
+.note { position: absolute; right: 48px; bottom: 34px; font: 500 18px "Int"; opacity: .5; z-index: 50; }
+
+/* ---------- карта (общая) ---------- */
+.card { position: absolute; width: 640px; height: 404px; border-radius: 34px; overflow: hidden;
+  box-shadow: 0 60px 120px rgba(0,0,0,.55), 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+.card .sheen { position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.28) 47%, rgba(255,255,255,.05) 55%, transparent 62%); }
+.card .grain { position: absolute; inset: 0; opacity: .25; mix-blend-mode: overlay;
+  background-image: radial-gradient(rgba(255,255,255,.5) 1px, transparent 1px); background-size: 3px 3px; }
+.card .chip { position: absolute; left: 54px; top: 128px; width: 84px; height: 64px; border-radius: 12px;
+  background: linear-gradient(135deg, #f3dfa2, #b8913e 55%, #e9cf86); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+.card .chip::after { content: ""; position: absolute; inset: 12px 20px; border: 2px solid rgba(80,55,10,.35); border-radius: 6px; }
+.card .nfc { position: absolute; left: 160px; top: 138px; width: 40px; height: 44px; border: 4px solid rgba(255,255,255,.55);
+  border-left: 0; border-top-color: transparent; border-bottom-color: transparent; border-radius: 0 50% 50% 0; }
+.card .name { position: absolute; left: 54px; top: 46px; font: 700 30px "Unb"; letter-spacing: .02em; }
+.card .num { position: absolute; left: 54px; bottom: 54px; font: 26px "Mono"; letter-spacing: .14em; opacity: .85; }
+.card .big { position: absolute; right: 50px; bottom: 44px; font: 800 64px "Unb"; letter-spacing: -.02em; }
+.card .sys { position: absolute; right: 50px; top: 44px; width: 86px; height: 52px; }
+.card .sys i { position: absolute; top: 0; width: 52px; height: 52px; border-radius: 50%; }
+</style>
+</head><body>
+<script>
+const Q = new URLSearchParams(location.search), STYLE = Q.get("style") || "premium", F = +(Q.get("f") || 1);
+const LABEL = { premium: "A · Премиум (Apple / Revolut)", bento: "B · Бенто-сетка", broadcast: "C · Спортивная трансляция", kinetic: "D · Кинетика на светлом" };
+const el = (h, parent = document.body) => { const t = document.createElement("template"); t.innerHTML = h.trim(); const n = t.content.firstElementChild; parent.append(...t.content.childNodes); return n; };
+const css = s => el(`<style>${s}</style>`, document.head);
+// карта: тема — фон, имя, крупная цифра
+const CARDS = {
+  a: { name: "КАРТА А", bg: "linear-gradient(135deg,#2b2d33 0%,#14151a 55%,#3a3d45 100%)", big: "120", sys: ["#e0e2e8", "#9aa0ab"] },
+  b: { name: "КАРТА Б", bg: "linear-gradient(135deg,#5b2bff 0%,#2a0f8f 60%,#8a5cff 100%)", big: "100", sys: ["#ffd84d", "#ff8a3d"] },
+  c: { name: "КАРТА В", bg: "linear-gradient(135deg,#ff5a5f 0%,#a3122a 60%,#ff9a6b 100%)", big: "60", sys: ["#fff", "#ffd2c2"] },
+  d: { name: "КАРТА Г", bg: "linear-gradient(140deg,#0fd29b 0%,#04745a 60%,#7cf2cf 100%)", big: "55", sys: ["#fff", "#c9ffe9"] },
+};
+function card(k, style, parent = document.body, big = true) {
+  const c = CARDS[k];
+  return el(`<div class="card" style="background:${c.bg};${style}"><div class="grain"></div><div class="sheen"></div>
+    <div class="name">${c.name}</div><div class="chip"></div><div class="nfc"></div>
+    <div class="sys"><i style="left:0;background:${c.sys[0]};opacity:.9"></i><i style="left:34px;background:${c.sys[1]};opacity:.8"></i></div>
+    <div class="num">•••• 2026</div>${big ? `<div class="big">${c.big}<span style="font-size:.4em;font-weight:600"> дн</span></div>` : ""}</div>`, parent);
+}
+el(`<div class="tag">${LABEL[STYLE]} — кадр ${F}/3</div>`);
+el(`<div class="note">цифры — пример</div>`);
+
+/* ================= A · ПРЕМИУМ ================= */
+if (STYLE === "premium") {
+  css(`body{background:radial-gradient(1200px 700px at 50% 38%,#23252c 0%,#0a0b0e 55%,#000 100%)}
+  .eyebrow{font:600 26px "Int";letter-spacing:.18em;text-transform:uppercase;color:#8d929c}
+  .silver{background:linear-gradient(180deg,#fff 0%,#c9ccd3 60%,#8b9099 100%);-webkit-background-clip:text;color:transparent}
+  .floor{position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent)}
+  .row{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid rgba(255,255,255,.12);padding:26px 0}
+  .row b{font:700 30px "Int";color:#a3a8b2;font-weight:500}.row span{font:44px "Mono";color:#fff}
+  .glow{position:absolute;border-radius:50%;filter:blur(90px)}`);
+  if (F === 1) {
+    el(`<div class="glow" style="left:610px;top:180px;width:700px;height:420px;background:rgba(140,150,255,.18)"></div>`);
+    card("b", "left:420px;top:330px;transform:perspective(1600px) rotateY(28deg) rotateZ(-8deg) scale(.82);filter:brightness(.8)");
+    card("c", "left:860px;top:330px;transform:perspective(1600px) rotateY(-28deg) rotateZ(8deg) scale(.82);filter:brightness(.8)");
+    card("a", "left:640px;top:300px;transform:perspective(1600px) rotateX(10deg) scale(.95)");
+    el(`<div class="eyebrow abs" style="left:0;right:0;top:110px;text-align:center">Октябрь 2026 · 18–25 лет</div>`);
+    el(`<div class="silver abs" style="left:0;right:0;top:150px;text-align:center;font:800 96px 'Unb';letter-spacing:-.03em">Топ кредитных карт</div>`);
+    el(`<div class="abs" style="left:0;right:0;top:820px;text-align:center;font:500 34px 'Int';color:#a3a8b2">Какую взять — и как не заплатить банку ни рубля</div>`);
+  }
+  if (F === 2) {
+    el(`<div class="glow" style="left:150px;top:260px;width:760px;height:520px;background:rgba(200,205,220,.12)"></div>`);
+    card("a", "left:190px;top:330px;transform:perspective(1600px) rotateY(22deg) rotateX(6deg)");
+    el(`<div class="eyebrow abs" style="left:1040px;top:200px">Место № 1</div>`);
+    el(`<div class="silver abs" style="left:1040px;top:240px;font:800 92px 'Unb';letter-spacing:-.03em;line-height:1.02">120 дней<br>без процентов</div>`);
+    el(`<div class="abs" style="left:1040px;top:500px;width:720px">
+      <div class="row"><b>Льготный период</b><span>120 дн</span></div>
+      <div class="row"><b>Обслуживание</b><span>0 ₽</span></div>
+      <div class="row"><b>Кэшбэк</b><span>до 5 %</span></div>
+      <div class="row" style="border-bottom:1px solid rgba(255,255,255,.12)"><b>Наличные без %</b><span style="color:#ff6b6b">нет</span></div></div>`);
+  }
+  if (F === 3) {
+    css(`.pod{position:absolute;bottom:150px;width:420px;border-radius:24px 24px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02));border-top:2px solid rgba(255,255,255,.45)}
+    .pl{position:absolute;font:800 120px 'Unb';color:rgba(255,255,255,.22)}`);
+    el(`<div class="floor"></div>`);
+    el(`<div class="pod" style="left:290px;height:220px"></div><div class="pod" style="left:750px;height:320px"></div><div class="pod" style="left:1210px;height:160px"></div>`);
+    el(`<div class="pl" style="left:470px;bottom:180px">2</div><div class="pl" style="left:930px;bottom:280px">1</div><div class="pl" style="left:1390px;bottom:120px">3</div>`);
+    card("b", "left:180px;top:390px;transform:perspective(1600px) rotateY(16deg) scale(.66)");
+    card("a", "left:640px;top:250px;transform:perspective(1600px) rotateX(8deg) scale(.7)");
+    card("c", "left:1100px;top:450px;transform:perspective(1600px) rotateY(-16deg) scale(.66)");
+    el(`<div class="silver abs" style="left:0;right:0;top:80px;text-align:center;font:800 70px 'Unb';letter-spacing:-.03em">Итоговый рейтинг</div>`);
+  }
+}
+
+/* ================= B · БЕНТО ================= */
+if (STYLE === "bento") {
+  css(`body{background:#07070b}
+  .mesh{position:absolute;inset:-200px;filter:blur(120px);opacity:.75}
+  .mesh i{position:absolute;border-radius:50%}
+  .t{position:absolute;border-radius:36px;background:rgba(20,20,28,.62);border:1px solid rgba(255,255,255,.09);
+     box-shadow:inset 0 1px 0 rgba(255,255,255,.06);padding:40px;overflow:hidden;backdrop-filter:blur(30px)}
+  .k{font:600 24px 'Int';color:#9a9bb0;letter-spacing:.02em}
+  .v{font:800 120px 'Unb';letter-spacing:-.04em;line-height:1}
+  .s{font:500 28px 'Int';color:#c6c7d6}`);
+  el(`<div class="mesh"><i style="left:200px;top:100px;width:900px;height:700px;background:#6d3bff"></i>
+     <i style="left:1100px;top:500px;width:900px;height:700px;background:#ff6a3d"></i><i style="left:900px;top:-100px;width:600px;height:500px;background:#00c2a8"></i></div>`);
+  const ring = (pct, col, size = 260) => `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="position:absolute;right:40px;top:50%;transform:translateY(-50%) rotate(-90deg)">
+     <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+     <circle cx="50" cy="50" r="42" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${2.639 * pct} 264"/></svg>`;
+  if (F === 1) {
+    el(`<div class="t" style="left:60px;top:60px;width:1060px;height:560px"><div class="k">Октябрь 2026 · для 18–25</div>
+      <div style="font:800 118px 'Unb';letter-spacing:-.04em;line-height:1.02;margin-top:40px">Топ-7<br>кредитных<br>карт</div></div>`);
+    const t2 = el(`<div class="t" style="left:1150px;top:60px;width:710px;height:560px;background:rgba(255,255,255,.04)"></div>`);
+    card("b", "left:40px;top:80px;transform:rotate(-8deg) scale(.95)", t2); card("a", "left:60px;top:150px;transform:rotate(4deg) scale(.95)", t2);
+    el(`<div class="t" style="left:60px;top:650px;width:560px;height:370px"><div class="k">Дольше всего без %</div><div class="v" style="margin-top:40px">120<span class="s"> дней</span></div>${ring(33, "#7c5cff", 200)}</div>`);
+    el(`<div class="t" style="left:650px;top:650px;width:560px;height:370px"><div class="k">Обслуживание</div><div class="v" style="margin-top:40px;color:#25e2b0">0 ₽</div><div class="s">у 5 карт из 7</div></div>`);
+    el(`<div class="t" style="left:1240px;top:650px;width:620px;height:370px;background:rgba(255,80,80,.10);border-color:rgba(255,90,90,.35)"><div class="k" style="color:#ff8a8a">Главная ловушка</div>
+      <div style="font:800 54px 'Unb';margin-top:44px;line-height:1.1">наличные<br>и переводы</div></div>`);
+  }
+  if (F === 2) {
+    const t1 = el(`<div class="t" style="left:60px;top:60px;width:900px;height:620px;background:rgba(255,255,255,.03)"><div class="k">Место № 1 · Карта А</div></div>`);
+    card("a", "left:130px;top:150px;transform:perspective(1400px) rotateY(-12deg) rotateX(8deg) scale(1.05)", t1);
+    el(`<div class="t" style="left:990px;top:60px;width:870px;height:300px"><div class="k">Льготный период</div><div class="v" style="margin-top:40px">120<span class="s"> дней</span></div>${ring(33, "#7c5cff", 220)}</div>`);
+    el(`<div class="t" style="left:990px;top:380px;width:420px;height:300px"><div class="k">Обслуживание</div><div class="v" style="margin-top:40px;font-size:100px;color:#25e2b0">0 ₽</div></div>`);
+    el(`<div class="t" style="left:1440px;top:380px;width:420px;height:300px"><div class="k">Кэшбэк</div><div class="v" style="margin-top:40px;font-size:100px;color:#ffb547">5 %</div></div>`);
+    el(`<div class="t" style="left:60px;top:710px;width:1800px;height:310px"><div class="k">Сколько стоит ошибка · пример</div>
+      <div style="position:absolute;left:40px;right:40px;top:120px;height:56px;border-radius:28px;background:rgba(255,255,255,.06)">
+      <div style="width:66%;height:100%;border-radius:28px;background:linear-gradient(90deg,#7c5cff,#25e2b0)"></div></div>
+      <div class="s" style="position:absolute;left:40px;top:200px">день 80 из 120 — до конца без процентов 40 дней</div>
+      <div style="position:absolute;right:40px;top:196px;font:44px 'Mono';color:#ff8a8a">потом ≈ 50 % годовых</div></div>`);
+  }
+  if (F === 3) {
+    el(`<div class="abs" style="left:60px;top:60px;font:800 76px 'Unb';letter-spacing:-.03em">Сравнение в одном кадре</div>`);
+    const rows = [["a", 120, "0 ₽", "до 5 %"], ["b", 100, "0 ₽", "до 3 %"], ["c", 60, "99 ₽/мес", "до 10 %"]];
+    rows.forEach((r, i) => {
+      const x = 60 + i * 610, t = el(`<div class="t" style="left:${x}px;top:200px;width:580px;height:820px"></div>`);
+      card(r[0], "left:30px;top:30px;transform:scale(.8);transform-origin:left top", t, false);
+      el(`<div class="k" style="position:absolute;left:40px;top:400px">Без процентов</div>
+         <div style="position:absolute;left:40px;top:440px;font:800 86px 'Unb'">${r[1]}<span class="s"> дн</span></div>
+         <div style="position:absolute;left:40px;right:40px;top:560px;height:14px;border-radius:7px;background:rgba(255,255,255,.08)"><div style="width:${r[1] / 1.2}%;height:100%;border-radius:7px;background:#7c5cff"></div></div>
+         <div class="k" style="position:absolute;left:40px;top:620px">Обслуживание</div><div style="position:absolute;left:40px;top:656px;font:40px 'Mono'">${r[2]}</div>
+         <div class="k" style="position:absolute;left:40px;top:730px">Кэшбэк</div><div style="position:absolute;left:40px;top:766px;font:40px 'Mono'">${r[3]}</div>`, t);
+    });
+  }
+}
+
+/* ================= C · ТРАНСЛЯЦИЯ ================= */
+if (STYLE === "broadcast") {
+  css(`body{background:#0b0c10;font-family:'Osw'}
+  .stripes{position:absolute;inset:0;background:repeating-linear-gradient(-60deg,rgba(255,255,255,.025) 0 18px,transparent 18px 46px)}
+  .slab{position:absolute;transform:skewX(-14deg);background:#15171d;border-left:10px solid #ffd400}
+  .slab>*{transform:skewX(14deg)}
+  .up{font:700 40px 'Osw';text-transform:uppercase;letter-spacing:.02em}
+  .lb{position:absolute;left:80px;top:250px;width:900px}
+  .lr{display:flex;align-items:center;height:92px;margin-bottom:12px;transform:skewX(-14deg);background:#161920}
+  .lr>*{transform:skewX(14deg)}.pos{width:110px;text-align:center;font:700 54px 'Osw'}
+  .nm{flex:1;font:700 46px 'Osw';text-transform:uppercase}.gap{width:220px;text-align:right;padding-right:40px;font:40px 'Mono';color:#9aa0ab}`);
+  el(`<div class="stripes"></div>`);
+  if (F === 1) {
+    el(`<div class="slab" style="left:60px;top:70px;width:1200px;height:130px;background:#ffd400;border:0"><div class="up" style="color:#0b0c10;font-size:84px;padding:6px 50px">ТОП-7 КРЕДИТОК 2026</div></div>`);
+    el(`<div class="up abs" style="left:1300px;top:110px;color:#ffd400;font-size:44px">ЗАЕЗД: ЛЬГОТНЫЙ ПЕРИОД</div>`);
+    const lb = el(`<div class="lb"></div>`);
+    [["1", "Карта А", "120 дн", "#ffd400"], ["2", "Карта Б", "−20", "#c9ccd3"], ["3", "Карта В", "−60", "#cd7f32"], ["4", "Карта Г", "−65", "#fff"], ["5", "Карта Д", "−65", "#fff"]]
+      .forEach(r => el(`<div class="lr"><div class="pos" style="color:${r[3]}">${r[0]}</div><div class="nm">${r[1]}</div><div class="gap">${r[2]}</div></div>`, lb));
+    card("a", "left:1150px;top:430px;transform:perspective(1600px) rotateY(-24deg) rotateZ(4deg) scale(1.05)");
+    el(`<div class="abs" style="left:1150px;top:880px;width:700px;height:8px;background:linear-gradient(90deg,#ffd400,transparent)"></div>`);
+  }
+  if (F === 2) {
+    el(`<div class="abs" style="left:0;top:0;width:960px;height:1080px;background:linear-gradient(90deg,rgba(91,43,255,.35),transparent)"></div>
+        <div class="abs" style="right:0;top:0;width:960px;height:1080px;background:linear-gradient(270deg,rgba(255,90,95,.35),transparent)"></div>`);
+    card("b", "left:120px;top:110px;transform:perspective(1600px) rotateY(18deg) scale(.9)");
+    card("c", "left:1160px;top:110px;transform:perspective(1600px) rotateY(-18deg) scale(.9)");
+    el(`<div class="abs" style="left:880px;top:200px;width:160px;height:160px;border-radius:50%;background:#ffd400;color:#0b0c10;font:700 80px 'Osw';display:flex;align-items:center;justify-content:center;transform:rotate(-8deg)">VS</div>`);
+    const stats = [["БЕЗ ПРОЦЕНТОВ", 100, 60, "дн"], ["ОБСЛУЖИВАНИЕ", 0, 99, "₽"], ["КЭШБЭК", 3, 10, "%"]];
+    stats.forEach((s, i) => {
+      const y = 620 + i * 130, mx = Math.max(s[1], s[2]) || 1;
+      el(`<div class="up abs" style="left:0;right:0;top:${y - 6}px;text-align:center;font-size:34px;color:#9aa0ab">${s[0]}</div>
+        <div class="abs" style="right:1010px;top:${y + 44}px;height:40px;width:${600 * s[1] / mx + 6}px;background:#7c5cff;transform:skewX(-14deg)"></div>
+        <div class="abs" style="left:1010px;top:${y + 44}px;height:40px;width:${600 * s[2] / mx + 6}px;background:#ff5a5f;transform:skewX(-14deg)"></div>
+        <div class="abs" style="left:780px;top:${y + 34}px;width:130px;text-align:right;font:52px 'Mono';display:none">${s[1]}</div>
+        <div class="abs" style="right:${1010 + 600 * s[1] / mx + 30}px;top:${y + 34}px;font:52px 'Mono'">${s[1]}</div>
+        <div class="abs" style="left:${1010 + 600 * s[2] / mx + 30}px;top:${y + 34}px;font:52px 'Mono'">${s[2]}</div>`);
+    });
+  }
+  if (F === 3) {
+    css(`body{background:radial-gradient(900px 600px at 50% 40%,#22252e,#0b0c10)}`);
+    card("a", "left:640px;top:150px;transform:perspective(1600px) rotateX(12deg) scale(1.05)");
+    el(`<div class="abs" style="left:120px;top:760px;width:1680px;height:200px;display:flex">
+      <div style="width:200px;background:#ffd400;color:#0b0c10;font:700 120px 'Osw';display:flex;align-items:center;justify-content:center">P1</div>
+      <div style="flex:1;background:#14161c;padding:24px 50px;border-bottom:8px solid #ffd400">
+        <div class="up" style="font-size:66px">КАРТА А · ПОБЕДИТЕЛЬ ЗАЕЗДА</div>
+        <div style="display:flex;gap:70px;margin-top:10px;font:40px 'Mono';color:#c9ccd3"><span>120 ДН БЕЗ %</span><span>0 ₽ / МЕС</span><span>ДО 5 % КЭШБЭК</span></div></div></div>`);
+  }
+}
+
+/* ================= D · КИНЕТИКА НА СВЕТЛОМ ================= */
+if (STYLE === "kinetic") {
+  css(`body{background:#f4f2ee;color:#0d0d12}
+  .wave{position:absolute;inset:-300px;filter:blur(110px);opacity:.9}.wave i{position:absolute;border-radius:50%}
+  .h{font:800 150px 'Unb';letter-spacing:-.05em;line-height:.95}
+  .pill{display:inline-block;padding:14px 30px;border-radius:999px;background:#0d0d12;color:#fff;font:600 30px 'Int'}
+  .phone{position:absolute;width:430px;height:880px;border-radius:64px;background:#0d0d12;padding:16px;box-shadow:0 60px 120px rgba(20,20,40,.25)}
+  .scr{width:100%;height:100%;border-radius:50px;background:#fff;overflow:hidden;position:relative;color:#0d0d12}
+  .tag,.note{color:#0d0d12}`);
+  el(`<div class="wave"><i style="left:900px;top:-100px;width:1100px;height:800px;background:#ff8bd0"></i>
+     <i style="left:1300px;top:400px;width:900px;height:700px;background:#7a6bff"></i><i style="left:700px;top:600px;width:800px;height:600px;background:#ffc76b"></i></div>`);
+  if (F === 1) {
+    el(`<div class="abs" style="left:110px;top:150px"><div class="pill">Топ кредитных карт · 2026</div>
+       <div class="h" style="margin-top:60px">Кредитка —<br>это не долг.</div>
+       <div style="font:500 44px 'Int';margin-top:50px;max-width:900px;color:#3a3a46">Если знать одно правило. И выбрать правильную карту.</div></div>`);
+    card("b", "left:1240px;top:170px;transform:rotate(-14deg)");
+    card("c", "left:1220px;top:520px;transform:rotate(6deg)");
+  }
+  if (F === 2) {
+    const ph = el(`<div class="phone" style="left:1280px;top:100px;transform:rotate(4deg)"><div class="scr"></div></div>`), s = ph.firstChild;
+    el(`<div style="padding:70px 40px 0;font:600 26px 'Int';color:#7a7a88">Кредитная карта</div>
+        <div style="padding:6px 40px;font:800 64px 'Unb';letter-spacing:-.03em">0 ₽</div>
+        <div style="padding:0 40px;font:500 24px 'Int';color:#7a7a88">долг — погашен полностью</div>
+        <div style="margin:50px 40px 0;padding:30px;border-radius:30px;background:#f1f0f6">
+          <div style="font:600 24px 'Int'">До конца льготного периода</div>
+          <div style="font:800 76px 'Unb';margin-top:14px">37 <span style="font-size:.45em">дней</span></div>
+          <div style="height:16px;border-radius:8px;background:#e0dfea;margin-top:20px"><div style="width:69%;height:100%;border-radius:8px;background:linear-gradient(90deg,#7a6bff,#ff8bd0)"></div></div></div>
+        <div style="margin:30px 40px 0;padding:26px 30px;border-radius:30px;background:#e9fbf4;font:600 26px 'Int';color:#0a7a55">Кэшбэк за месяц · +412 ₽</div>`, s);
+    el(`<div class="abs" style="left:110px;top:200px"><div class="pill" style="background:#7a6bff">Правило № 1</div>
+       <div class="h" style="margin-top:50px;font-size:120px">Вернул всё<br>до срока —<br>0 ₽ процентов</div></div>`);
+  }
+  if (F === 3) {
+    el(`<div class="abs" style="left:100px;top:40px;font:800 520px 'Unb';letter-spacing:-.07em;line-height:1">120</div>`);
+    el(`<div class="abs" style="left:120px;top:600px;font:800 92px 'Unb';letter-spacing:-.04em">дней без %</div>`);
+    el(`<div class="abs" style="left:124px;top:740px;font:500 40px 'Int';color:#3a3a46;width:1050px">самый длинный льготный период в нашем топе · пример</div>`);
+    card("a", "left:1240px;top:560px;transform:rotate(-10deg) scale(.8)");
+  }
+}
+document.fonts.ready.then(() => setTimeout(() => (window.__ready = true), 150));
+</script>
+</body></html>
