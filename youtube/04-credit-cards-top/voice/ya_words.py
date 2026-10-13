@@ -26,5 +26,5 @@ for k, g in enumerate(G):
         out.append({"w": tok, "a": round(a + off, 3), "d": round(max(.08, min(.6, nxt - a)), 3)})
     gap = 0 if k == len(G) - 1 else (.9 if G[k + 1]["sec"] != g["sec"] else .4)
     off += dur(f) + gap
-json.dump(out, open(os.path.join(HERE, "words.json"), "w"), ensure_ascii=False)
+json.dump({"duration": round(off, 3), "words": out}, open(os.path.join(HERE, "words.json"), "w"), ensure_ascii=False)
 print(len(out), "слов,", round(off, 1), "с; голос:", round(dur(os.path.join(HERE, "out/voice.wav")), 1), "с")
