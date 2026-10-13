@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №5</title>
+<!-- НОВЫЕ ФОРМАТЫ (владелец 13.10: «хочу что-нибудь прогрессивное, новое, интересное, что будет цеплять»), только 2D:
+     v1 игра VS · v2 экран блокировки с пушами · v3 поиск с подсказками · v4 прогресс-бар льготного периода · v5 коллаж
+     · v6 два чека · v7 швейцарский постер «180» · v8 ретро-окна ошибок. Суммы — пример. Снимок: node kit/shot3d.js 04-credit-cards-top/thumb/fresh.html 04-credit-cards-top/thumb/f1.png 1280 720 v=1
+     Общая база (карты, шрифты) — из thumbs2d.html. Владелец 13.10: «убери 3д из превью, это не красиво и больше не используй никогда». Только 2D: формула выбранного превью ролика №3
+     (03-banks-pay-you/thumb/b2.png): яркий фон, огромное число, чёрная плашка Oswald, плоские карты в цветах банков (упрощённые знаки,
+     не копии логотипов), список с цифрами. Цифры — из сценария ролика №4 (агрегаторы на 13.10.2026), пример.
+     ?v=1…6. Снимок из youtube/: node kit/shot3d.js 04-credit-cards-top/thumb/thumbs2d.html 04-credit-cards-top/thumb/t1.png 1280 720 v=1 -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  #bg { position: absolute; inset: 0; }
+  #bg::after { content: ""; position: absolute; inset: 0; opacity: .08; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .big { position: absolute; font: 900 230px/1 "Unb"; letter-spacing: -.07em; white-space: nowrap; color: #fff; }
+  .pl { position: absolute; display: inline-block; font: 700 70px/1 "O"; text-transform: uppercase; padding: 6px 24px 14px; background: #111; color: #fff; white-space: nowrap; }
+  .card { position: absolute; width: 430px; height: 271px; border-radius: 22px; overflow: hidden; box-shadow: 0 26px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+  .card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(255,255,255,.18), transparent 38%, transparent 70%, rgba(255,255,255,.06)); }
+  .chip { position: absolute; left: 32px; top: 104px; width: 62px; height: 46px; border-radius: 9px; background: linear-gradient(135deg, #f3e2a6, #c9a44a 55%, #f0d48a); }
+  .n4 { position: absolute; left: 32px; bottom: 26px; font: 600 22px "I"; letter-spacing: .18em; opacity: .85; color: #fff; }
+  .ps { position: absolute; right: 28px; bottom: 22px; font: 700 26px "I"; color: #fff; }
+  .days { position: absolute; right: 26px; top: 22px; font: 900 44px/1 "Unb"; letter-spacing: -.04em; color: #fff; text-align: right; }
+  .days small { display: block; font: 700 15px "I"; letter-spacing: .04em; opacity: .85; margin-top: 4px; }
+  .row { display: flex; align-items: center; gap: 14px; width: 540px; margin-top: 10px; padding: 12px 18px; border-radius: 18px; background: rgba(255,255,255,.96); box-shadow: 0 10px 24px rgba(0,0,0,.18); }
+  .row i { width: 34px; height: 34px; border-radius: 9px; flex: none; display: flex; align-items: center; justify-content: center; font: 900 20px "Unb"; color: #fff; font-style: normal; }
+  .row span { font: 600 26px "I"; color: #111; } .row b { margin-left: auto; font: 700 30px "I"; color: #0f9d4f; white-space: nowrap; }
+  .note { font: 600 17px "I"; margin-top: 10px; }
+  .medal { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c8, #ffd84a 45%, #d99a0b); box-shadow: 0 14px 30px rgba(0,0,0,.35), inset 0 0 0 7px rgba(255,255,255,.35);
+    display: flex; align-items: center; justify-content: center; font: 900 46px "Unb"; color: #7a4f05; letter-spacing: -.04em; }
+  .arrow { position: absolute; }
+  @font-face { font-family: "GM"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "PF"; src: url("../../kit/fonts/playfair-cyrillic-600-italic.woff2"); font-weight: 600; font-style: italic; unicode-range: U+0400-045F; }
+  @font-face { font-family: "PF"; src: url("../../kit/fonts/playfair-latin-600-italic.woff2"); font-weight: 600; font-style: italic; }
+  .bp { display: inline-flex; align-items: center; gap: 12px; padding: 10px 20px; border-radius: 14px; background: #fff; font: 700 28px "I"; color: #111; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+  .bp i { width: 22px; height: 22px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="root"></div>
+<script>
+const v = +(new URLSearchParams(location.search).get("v") || 1);
+const nfc = `<svg style="position:absolute;left:106px;top:110px" width="34" height="34" viewBox="0 0 34 34">${[8, 14, 20].map(r => `<path d="M${6 + r * .35} ${17 - r * .55} A ${r} ${r} 0 0 1 ${6 + r * .35} ${17 + r * .55}" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3" stroke-linecap="round"/>`).join("")}</svg>`;
+// упрощённые знаки банков (не копии логотипов), фирменные цвета
+const C = {
+  ya: { bg: "linear-gradient(135deg,#1c1c20,#0a0a0c 60%,#2a1010)", mark: `<svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="#fc3f1d"/><text x="22" y="31" text-anchor="middle" font-family="I" font-weight="700" font-size="26" fill="#fff">Я</text></svg>`, name: "Яндекс Банк", d: 180 },
+  psb: { bg: "linear-gradient(135deg,#f26c1b,#e2541a 45%,#26357e)", mark: `<svg width="44" height="44" viewBox="0 0 44 44"><rect x="2" y="2" width="40" height="40" rx="10" fill="#fff"/><text x="22" y="30" text-anchor="middle" font-family="I" font-weight="700" font-size="17" fill="#26357e">ПСБ</text></svg>`, name: "ПСБ", d: 180 },
+  sber: { bg: "linear-gradient(135deg,#2cc24c,#13a538 50%,#0b7a2a)", mark: `<svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="#fff" stroke-width="4"/><path d="M13 22 L20 29 L33 15" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`, name: "Сбер", d: 120 },
+  ural: { bg: "linear-gradient(118deg,#f1ecff 0%,#d9cfff 18%,#c58df0 34%,#e2559e 50%,#7b3fd6 68%,#3a23a8 84%,#24187a 100%)", mark: `<svg width="36" height="36" viewBox="0 0 34 34"><path d="M17 4 C 11 10, 11 22, 17 30 M17 4 C 23 10, 23 22, 17 30 M9 9 C 5 15, 6 24, 11 29 M25 9 C 29 15, 28 24, 23 29" fill="none" stroke="#1d1a4a" stroke-width="2.6" stroke-linecap="round"/></svg>`, name: "Уралсиб", ink: "#1d1a4a", d: 120 },
+  alfa: { bg: "linear-gradient(135deg,#ff3b30,#ef3124 50%,#c41d14)", mark: `<div style="position:relative;width:40px;height:50px"><div style="font:700 50px/1 I;color:#fff;position:absolute;left:3px;top:-4px">А</div><div style="position:absolute;left:4px;bottom:0;width:32px;height:6px;background:#fff"></div></div>`, name: "Альфа-Банк", d: 60 },
+  t: { bg: "linear-gradient(135deg,#2b2c30,#141518 55%,#050506)", mark: `<svg width="44" height="50" viewBox="0 0 44 50"><path d="M2 2 H42 V26 C42 38 32 46 22 48 C12 46 2 38 2 26 Z" fill="#ffdd2d"/><path d="M12 12 H32 V18 H25 V36 H19 V18 H12 Z" fill="#111"/></svg>`, name: "Т-Банк", d: 55 },
+};
+const card = (k, x, y, r = 0, s = 1, days = true) => { const c = C[k];
+  return `<div class="card" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});background:${c.bg}">
+    <div style="position:absolute;left:30px;top:22px;display:flex;align-items:center;gap:12px">${c.mark}<div style="font:700 26px I;color:${c.ink || "#fff"}">${c.name}</div></div>
+    ${days ? `<div class="days" style="top:auto;bottom:62px;color:${c.ink && false ? c.ink : "#fff"}">${c.d}<small>ДНЕЙ БЕЗ %</small></div>` : ""}
+    <div class="chip"></div>${nfc}<div class="n4">•••• 2026</div><div class="ps">МИР</div></div>`; };
+const rows = (items, note, col = "rgba(0,0,0,.55)") => items.map(([ic, a, b, bc]) => `<div class="row"><i style="background:${ic}">${""}</i><span>${a}</span><b style="${bc ? "color:" + bc : ""}">${b}</b></div>`).join("") + (note ? `<div class="note" style="color:${col}">${note}</div>` : "");
+const bg = document.getElementById("bg"), R = document.getElementById("root");
+const shadow = (c) => `text-shadow: 0 4px 0 ${c}, 0 8px 0 ${c}, 0 12px 0 ${c}, 0 16px 0 ${c}, 0 30px 50px rgba(0,0,0,.35)`;
+const G = "font-family:GM";
+const P = (s) => R.insertAdjacentHTML("beforeend", s);
+const mag = (c = "#666", s = 34) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5" fill="none" stroke="${c}" stroke-width="2.6"/><path d="M15 15 L21 21" stroke="${c}" stroke-width="2.8" stroke-linecap="round"/></svg>`;
+const pill = (k) => `<div class="bp"><i style="background:${{ ya: "#fc3f1d", psb: "#f26c1b", sber: "#13a538", ural: "#7b3fd6", alfa: "#ef3124", t: "#ffdd2d" }[k]}"></i>${C[k].name}</div>`;
+
+// ===== Ролик №5 «Заработок на кредитке: проверил схему на цифрах (2026)» — только 2D. Снимок из youtube/:
+// node kit/shot3d.js 05-credit-card-earn/thumb/thumbs.html 05-credit-card-earn/thumb/k1.png 1280 720 v=1
+const zig = () => { let p = ["0 0", "100% 0"]; for (let i = 20; i >= 0; i--) p.push(`${i * 5}% ${i % 2 ? 97 : 100}%`); return `clip-path:polygon(${p.join(",")})`; };
+const stamp = (txt, c, x, y, r, fs = 54) => `<div style="position:absolute;left:${x}px;top:${y}px;transform:rotate(${r}deg);border:8px solid ${c};color:${c};border-radius:16px;padding:6px 20px;font:700 ${fs}px/1 O;text-transform:uppercase;background:rgba(255,255,255,.55);white-space:nowrap">${txt}</div>`;
+
+if (v === 1) {   // ДВА ЧЕКА: «обещают +15 000» НЕ ВЕРЮ vs «посчитал ???» ПРОВЕРЕНО
+  bg.style.background = "radial-gradient(900px 700px at 25% 20%, #ff6b6b, #d92b2b 60%, #8f1515)";
+  P(`<div style="position:absolute;right:0;top:0;bottom:0;width:50%;background:radial-gradient(800px 600px at 70% 20%, #3ee08f, #12a35a 60%, #0a6d3b)"></div>`);
+  const rc = (x, r, head, lines, total, tc, blur) => `<div style="position:absolute;left:${x}px;top:36px;width:480px;height:650px;transform:rotate(${r}deg);filter:drop-shadow(0 24px 30px rgba(0,0,0,.35))">
+     <div style="position:absolute;inset:0;background:#fbfaf6;${zig()};padding:34px 34px;font:700 26px/1.5 GM;color:#222">
+       <div style="text-align:center;font:700 32px GM;letter-spacing:.06em">${head}</div><div style="text-align:center;font:600 20px GM;color:#777;margin-bottom:16px">кредитка + накопительный · пример</div>
+       ${lines.map(([a, b]) => `<div style="display:flex;justify-content:space-between;border-bottom:2px dashed #ccc;padding:6px 0"><span>${a}</span><span>${b}</span></div>`).join("")}
+       <div style="margin-top:20px;font:700 28px GM;color:#555">ДОХОД В МЕСЯЦ</div><div style="font:900 96px/1 Unb;letter-spacing:-.06em;color:${tc};white-space:nowrap;${blur ? "filter:blur(14px)" : ""}">${total}</div></div></div>`;
+  P(rc(60, -5, "ОБЕЩАЮТ", [["Лимит", "1 000 000"], ["Схема", "«пассивно»"], ["Риски", "—"]], "+15 000", "#d92b2b", false)
+    + rc(740, 5, "ПОСЧИТАЛ", [["Траты", "30 000"], ["Ставка", "15,5 %"], ["Срок", "55–180 дн"]], "+888 ₽", "#12a35a", true));
+  P(stamp("не верю", "#d92b2b", 230, 470, -14) + stamp("проверено", "#12a35a", 880, 470, 10));
+  P(`<div style="position:absolute;left:600px;top:250px;width:80px;height:80px;border-radius:50%;background:#111;color:#fff;font:900 34px/80px Unb;text-align:center;box-shadow:0 10px 30px #0008">VS</div>`);
+}
+
+if (v === 2) {   // КАЛЬКУЛЯТОР: на табло «15 000?» зачёркнуто, рядом кредитка
+  bg.style.background = "radial-gradient(900px 600px at 70% 30%, #ffe45c, #ffc800 55%, #e9a600)";
+  P(card("alfa", 760, 380, 12, .95, false) + card("ya", 820, 120, -8, .85, false));
+  const key = (t, c = "#2a2b30", f = "#fff") => `<div style="height:84px;border-radius:18px;background:${c};color:${f};font:700 40px/84px I;text-align:center;box-shadow:inset 0 -6px 0 rgba(0,0,0,.35)">${t}</div>`;
+  P(`<div style="position:absolute;left:70px;top:40px;width:560px;height:640px;border-radius:44px;background:linear-gradient(160deg,#3a3b42,#16171b);box-shadow:0 30px 60px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.15);transform:rotate(-4deg);padding:34px">
+       <div style="height:170px;border-radius:22px;background:#c9e7c4;box-shadow:inset 0 6px 14px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:0 26px;position:relative">
+         <div style="font:700 26px GM;color:#4c6a49">доход в месяц?</div><div style="font:700 96px/1 GM;color:#17321a;letter-spacing:-.04em">15 000</div>
+         <div style="position:absolute;left:40px;right:20px;top:96px;height:12px;background:#e5383b;transform:rotate(-8deg);border-radius:6px"></div></div>
+       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px">${["7", "8", "9", "÷", "4", "5", "6", "×", "1", "2", "3", "−"].map(k => key(k, "÷×−".includes(k) ? "#ff9500" : "#2a2b30")).join("")}${key("0")}${key(",")}${key("%", "#ff9500")}${key("=", "#13b85a")}</div></div>`);
+  P(`<div class="pl" style="left:690px;top:60px;font-size:84px;transform:rotate(-2deg)">а реально?</div>`);
+}
+
+if (v === 3) {   // ПОИСК: «как заработать на кредитке» → «сколько реально» обведено
+  bg.style.background = "radial-gradient(900px 600px at 50% 0%, #ffffff, #eef1f6 70%, #dfe5ee)";
+  P(card("t", 900, 440, -10, .85, false) + card("psb", 1010, 380, 8, .78, false));
+  P(`<div style="position:absolute;left:50px;top:44px;width:1180px;height:130px;border-radius:65px;background:#fff;box-shadow:0 20px 50px rgba(30,50,90,.22),0 0 0 3px #d7dce6;display:flex;align-items:center;padding:0 40px;gap:26px">
+       ${mag("#7a8394", 56)}<div style="font:700 62px/1 I;color:#111;letter-spacing:-.02em;white-space:nowrap">заработок на кредитке</div><div style="width:6px;height:78px;background:#1a73e8;margin-left:-14px"></div></div>
+     <div style="position:absolute;left:50px;top:192px;width:820px;border-radius:30px;background:#fff;box-shadow:0 20px 50px rgba(30,50,90,.2);padding:16px 0">
+       ${[["сколько реально", 1], ["15 000 в месяц", 0], ["это развод?", 0], ["подводные камни", 0]].map(([q, h]) => `<div style="display:flex;align-items:center;gap:22px;padding:14px 36px;${h ? "background:#fff4a8" : ""}">${mag("#9aa2b1", 34)}<span style="font:600 40px/1 I;color:#555;white-space:nowrap">заработок… <b style="font:700 46px I;color:#111">${q}</b></span></div>`).join("")}</div>
+     <svg style="position:absolute;left:250px;top:196px" width="470" height="110" viewBox="0 0 470 110"><path d="M20 60 C 30 10, 420 0, 450 40 C 470 80, 220 110, 60 98 C 10 92, 5 70, 40 50" fill="none" stroke="#e5383b" stroke-width="8" stroke-linecap="round"/></svg>
+     <div class="pl" style="left:50px;top:590px;font-size:64px;background:#13a35a">честный расчёт</div>`);
+}
+
+if (v === 4) {   // VS: БЛОГЕРЫ против КАЛЬКУЛЯТОРА
+  bg.style.background = "#111";
+  P(`<div style="position:absolute;inset:0;background:linear-gradient(135deg,#ff3b4f,#b0122a 60%,#3a0610);clip-path:polygon(0 0,58% 0,42% 100%,0 100%)"></div>
+     <div style="position:absolute;inset:0;background:linear-gradient(135deg,#0a5a33,#0f9d58 50%,#3ee08f);clip-path:polygon(58% 0,100% 0,100% 100%,42% 100%)"></div>
+     <div style="position:absolute;inset:-200px;background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.08) 0 2deg,transparent 2deg 9deg)"></div>`);
+  P(`<div style="position:absolute;left:50px;top:60px;font:700 92px/1 O;color:#fff;text-transform:uppercase;text-shadow:0 6px 0 #000">Блогеры</div>
+     <div style="position:absolute;left:56px;top:170px;font:900 110px/1 Unb;color:#fff;letter-spacing:-.05em;text-shadow:0 8px 0 #5a0710">15 000 ₽</div>
+     <div style="position:absolute;left:60px;top:300px;font:700 34px I;color:#fffc">в месяц «пассивно»</div>
+     <div style="position:absolute;right:50px;top:470px;font:700 92px/1 O;color:#fff;text-transform:uppercase;text-shadow:0 6px 0 #000;text-align:right">Калькулятор</div>
+     <div style="position:absolute;right:56px;top:575px;font:900 110px/1 Unb;color:#fff;letter-spacing:-.05em;text-shadow:0 8px 0 #063d22">??? ₽</div>
+     <div style="position:absolute;left:0;right:0;top:230px;text-align:center;font:900 220px/1 Unb;letter-spacing:-.06em;font-style:italic;color:#ffe95c;transform:skewX(-10deg);-webkit-text-stroke:10px #111;paint-order:stroke fill;text-shadow:0 12px 0 #111">VS</div>`);
+}
+
+if (v === 5) {   // РЕТРО-ОКНО: «Доход 15 000 ₽ не найден» [ОК] [Пересчитать]
+  bg.style.background = "#0a8f8f";
+  P(`<div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.12) 2px,transparent 2px);background-size:26px 26px"></div>`);
+  const win = (x, y, w, title, body, btns, icon, fs = 34) => `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;background:#c3c3c3;border:4px solid;border-color:#fff #555 #555 #fff;box-shadow:10px 14px 0 rgba(0,0,0,.35)">
+     <div style="background:linear-gradient(90deg,#0a1f8f,#2b6fd6);color:#fff;font:700 24px/1 GM;padding:10px 12px;display:flex;justify-content:space-between;align-items:center">${title}<span style="background:#c3c3c3;color:#111;border:3px solid;border-color:#fff #555 #555 #fff;padding:0 8px;font:700 22px GM">×</span></div>
+     <div style="display:flex;gap:24px;padding:26px 28px 10px;align-items:center">${icon}<div style="font:700 ${fs}px/1.25 GM;color:#111">${body}</div></div>
+     <div style="display:flex;gap:22px;justify-content:center;padding:10px 0 24px">${btns.map(b => `<div style="min-width:150px;text-align:center;padding:10px 18px;border:4px solid;border-color:#fff #333 #333 #fff;font:700 30px GM;color:#111">${b}</div>`).join("")}</div></div>`;
+  const ix = `<svg width="90" height="90" viewBox="0 0 90 90" style="flex:none"><circle cx="45" cy="45" r="40" fill="#e01b1b" stroke="#7a0000" stroke-width="4"/><path d="M28 28 L62 62 M62 28 L28 62" stroke="#fff" stroke-width="11" stroke-linecap="round"/></svg>`;
+  P(card("ya", 860, 70, 10, .8, false));
+  P(win(90, 300, 900, "Кредитка.exe", "Доход «15 000 ₽ в месяц»<br>не найден.", ["ОК", "Пересчитать"], ix, 42));
+  P(`<div style="position:absolute;left:44px;top:50px;font:900 120px/1 Unb;letter-spacing:-.06em;color:#fff;-webkit-text-stroke:8px #111;paint-order:stroke fill;text-shadow:0 12px 0 #111">15 000 ₽?</div>
+     <div class="pl" style="left:50px;top:190px">в месяц на кредитке</div>`);
+}
+
+if (v === 6) {   // КОЛЛАЖ (формат-победитель №4): буквы «15 000?», карта на скотче, стикер «посчитал»
+  bg.style.background = "#efe6d6";
+  const tile = (ch, x, y, r, b, c, f) => `<div style="position:absolute;left:${x}px;top:${y}px;transform:rotate(${r}deg);background:${b};color:${c};font:${f};padding:6px 20px 14px;box-shadow:4px 8px 0 rgba(0,0,0,.18)">${ch}</div>`;
+  P(`<div style="position:absolute;left:-40px;top:430px;width:760px;height:340px;background:#3ee08f;transform:rotate(-4deg);clip-path:polygon(0 8%,12% 0,30% 6%,52% 1%,70% 7%,88% 0,100% 6%,100% 100%,0 100%)"></div>
+     <div style="position:absolute;left:760px;top:-60px;width:600px;height:360px;background:#ff5a5a;transform:rotate(7deg);clip-path:polygon(0 0,100% 0,100% 100%,84% 94%,66% 100%,44% 93%,22% 100%,0 92%)"></div>`);
+  P(tile("1", 40, 40, -6, "#111", "#fff", "900 180px/1 Unb") + tile("5", 175, 60, 5, "#e5383b", "#fff", "700 190px/1 O") + tile("000", 300, 30, -3, "#fff", "#111", "900 170px/1 Unb") + tile("?", 640, 30, 8, "#ffd23f", "#111", "900 190px/1 Unb"));
+  P(`<div style="position:absolute;left:60px;top:290px;font:600 italic 84px/1 PF;color:#111;transform:rotate(-3deg)">в месяц на кредитке</div>
+     <div style="position:absolute;left:66px;top:480px;font:700 64px/1.05 O;color:#111;text-transform:uppercase;transform:rotate(-4deg)">честный<br>расчёт</div>`);
+  const cut = (k, x, y, r, s) => card(k, x, y, r, s, false).replace('class="card" style="', 'class="card" style="box-shadow:0 0 0 10px #fff,8px 16px 0 rgba(0,0,0,.2);');
+  P(cut("alfa", 830, 170, 9, .8) + cut("t", 800, 400, -7, .86));
+  const tape = (x, y, r) => `<div style="position:absolute;left:${x}px;top:${y}px;width:150px;height:44px;background:rgba(255,240,170,.75);transform:rotate(${r}deg)"></div>`;
+  P(tape(830, 150, -30) + tape(1150, 190, 35) + tape(780, 390, 25));
+  P(`<div style="position:absolute;left:1030px;top:470px;width:210px;height:210px;border-radius:50%;background:#13a35a;color:#fff;transform:rotate(12deg);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 0 8px #fff,6px 12px 0 rgba(0,0,0,.2);text-align:center">
+       <div style="font:700 34px/1 O;text-transform:uppercase">реально</div><div style="font:900 64px/1 Unb;letter-spacing:-.05em">???</div></div>`);
+}
+document.fonts.ready.then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
