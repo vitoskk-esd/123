@@ -157,6 +157,76 @@ if (v === 6) {   // КОЛЛАЖ (формат-победитель №4): бу�
   P(`<div style="position:absolute;left:1030px;top:470px;width:210px;height:210px;border-radius:50%;background:#13a35a;color:#fff;transform:rotate(12deg);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 0 8px #fff,6px 12px 0 rgba(0,0,0,.2);text-align:center">
        <div style="font:700 34px/1 O;text-transform:uppercase">реально</div><div style="font:900 64px/1 Unb;letter-spacing:-.05em">???</div></div>`);
 }
+
+if (v === 7) {   // ЭКРАН БЛОКИРОВКИ: пуши «начислены проценты +??? ₽», «погасите кредитку»
+  bg.style.background = "radial-gradient(700px 520px at 18% 80%, #13c26b 0%, transparent 70%), radial-gradient(800px 600px at 85% 10%, #5b2cff 0%, transparent 65%), radial-gradient(600px 500px at 60% 110%, #00b3ff 0%, transparent 70%), #0b0b1a";
+  P(`<div style="position:absolute;left:60px;top:70px;font:600 40px/1 I;color:#fff9">каждый месяц</div>
+     <div style="position:absolute;left:46px;top:120px;font:900 150px/1 Unb;color:#fff;letter-spacing:-.06em">+???&nbsp;₽</div>
+     <div style="position:absolute;left:52px;top:290px;font:700 64px/1.05 O;color:#fff;text-transform:uppercase">за деньги банка</div>
+     <div style="position:absolute;left:60px;top:620px;font:600 22px I;color:#fff9">пример · кредитка + накопительный счёт</div>`);
+  const n = (y, ago, app, ic, title, big, col) => `<div style="position:absolute;left:690px;top:${y}px;width:560px;padding:20px 24px;border-radius:30px;background:rgba(255,255,255,.82);box-shadow:0 18px 40px rgba(0,0,0,.35)">
+      <div style="display:flex;align-items:center;gap:12px;font:600 21px I;color:#555"><div style="width:40px;height:40px;border-radius:10px;background:${ic};color:#fff;display:flex;align-items:center;justify-content:center;font:900 24px Unb">₽</div>${app}<span style="margin-left:auto">${ago}</span></div>
+      <div style="font:700 30px/1.15 I;color:#111;margin-top:12px">${title}</div>
+      ${big ? `<div style="font:900 40px Unb;color:${col};letter-spacing:-.03em;margin-top:6px">${big}</div>` : ""}</div>`;
+  P(n(60, "сейчас", "НАКОПИТЕЛЬНЫЙ СЧЁТ", "#13a35a", "Начислены проценты", "+??? ₽", "#13a35a") + n(270, "1 мин", "КРЕДИТКА", "#e5383b", "Погасите 30 000 ₽ до 25.11", "", "") + n(430, "2 мин", "КРЕДИТКА", "#e5383b", "Льготный период: осталось 3 дня", "", ""));
+}
+
+if (v === 8) {   // ОЖИДАНИЕ / РЕАЛЬНОСТЬ
+  bg.style.background = "#111";
+  P(`<div style="position:absolute;left:0;top:0;width:50%;height:100%;background:linear-gradient(160deg,#ffd84a,#ff9f1a)"></div>
+     <div style="position:absolute;right:0;top:0;width:50%;height:100%;background:linear-gradient(160deg,#2a2d35,#121318)"></div>
+     <div style="position:absolute;left:0;width:640px;top:40px;text-align:center;font:700 64px/1 O;color:#111;text-transform:uppercase">Ожидание</div>
+     <div style="position:absolute;left:640px;width:640px;top:40px;text-align:center;font:700 64px/1 O;color:#fff;text-transform:uppercase">Реальность</div>
+     <div style="position:absolute;left:0;width:640px;top:150px;text-align:center;font:900 120px/1 Unb;color:#111;letter-spacing:-.06em">15 000</div>
+     <div style="position:absolute;left:0;width:640px;top:280px;text-align:center;font:700 38px I;color:#111">₽ в месяц «пассивно»</div>
+     <div style="position:absolute;left:640px;width:640px;top:150px;text-align:center;font:900 120px/1 Unb;color:#3ee08f;letter-spacing:-.06em;filter:blur(12px)">888</div>
+     <div style="position:absolute;left:640px;width:640px;top:280px;text-align:center;font:700 38px I;color:#fffb">₽ в месяц — посчитал</div>`);
+  P(card("alfa", 120, 380, -8, .85, false) + card("t", 760, 380, 8, .85, false));
+  P(`<div style="position:absolute;left:150px;top:420px;z-index:2">${stamp("мечта", "#111", 0, 0, -12, 60).replace("position:absolute;left:0px;top:0px;", "")}</div>`);
+}
+
+if (v === 9) {   // ПЕРЕПИСКА: «бро, на кредитке 15к в месяц пассивно» — «посчитал. не 15»
+  bg.style.background = "linear-gradient(160deg,#cfe7ff,#a9cdf5)";
+  P(`<div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.4) 2px,transparent 2px);background-size:30px 30px"></div>`);
+  const b = (x, y, w, txt, me, time, fs = 44) => `<div style="position:absolute;left:${x}px;top:${y}px;max-width:${w}px;padding:22px 30px;border-radius:34px ${me ? "34px 8px 34px" : "34px 34px 8px"};background:${me ? "#dcf8c6" : "#fff"};box-shadow:0 10px 24px rgba(30,60,100,.18);font:700 ${fs}px/1.2 I;color:#111">${txt}<span style="display:block;text-align:right;font:600 20px I;color:#7a8a99;margin-top:6px">${time}${me ? " ✓✓" : ""}</span></div>`;
+  P(b(50, 50, 820, "Бро, на кредитке можно 15 000 ₽ в месяц. Пассивно", false, "21:14") + b(470, 270, 760, "Посчитал. Не 15 000", true, "21:16", 54) + b(50, 470, 560, "А сколько тогда?", false, "21:16"));
+  P(card("ya", 820, 460, -8, .8, false));
+}
+
+if (v === 10) {  // КРАСНАЯ КНОПКА «ПЕРЕВЕСТИ» = −3 100 ₽
+  bg.style.background = "radial-gradient(800px 600px at 70% 50%, #3a0a10, #12070a 70%)";
+  P(`<div style="position:absolute;left:46px;top:60px;font:900 120px/1 Unb;color:#fff;letter-spacing:-.06em">ОДНА</div>
+     <div style="position:absolute;left:46px;top:180px;font:900 120px/1 Unb;color:#fff;letter-spacing:-.06em">КНОПКА</div>
+     <div style="position:absolute;left:52px;top:330px;font:900 130px/1 Unb;color:#ff3b3b;letter-spacing:-.06em;text-shadow:0 0 50px #ff1a1a">−3 100 ₽</div>
+     <div class="pl" style="left:52px;top:500px;font-size:56px">на кредитке</div>`);
+  P(`<div style="position:absolute;left:760px;top:80px;width:420px;height:560px;border-radius:56px;background:#0d0d10;box-shadow:0 0 0 10px #2a2a30,0 40px 80px #000;padding:40px 30px">
+       <div style="font:700 28px I;color:#fff9">Кредитная карта</div><div style="font:900 56px Unb;color:#fff;letter-spacing:-.04em;margin:14px 0 40px">50 000 ₽</div>
+       <div style="height:120px;border-radius:30px;background:linear-gradient(#ff4b4b,#c4161c);box-shadow:0 0 60px rgba(255,40,40,.8),inset 0 -8px 0 rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font:700 44px I;color:#fff">Перевести</div>
+       <div style="margin-top:26px;height:100px;border-radius:30px;background:#1f1f25;display:flex;align-items:center;justify-content:center;font:700 34px I;color:#fff8">Снять наличные</div></div>
+     <svg style="position:absolute;left:1000px;top:330px" width="160" height="200" viewBox="0 0 160 200"><path d="M40 190 L40 70 Q40 50 58 50 Q76 50 76 70 L76 110 L120 118 Q140 122 138 145 L130 190 Z" fill="#ffd9b8" stroke="#111" stroke-width="6" stroke-linejoin="round"/></svg>`);
+}
+
+if (v === 11) {  // ЛУПА НА МЕЛКОМ ШРИФТЕ: «до 15 000 ₽*» → «*при 1 200 000 ₽ на счёте»
+  bg.style.background = "radial-gradient(1000px 700px at 30% 30%, #ffffff, #eef0f3 60%, #d9dde4)";
+  P(`<div style="position:absolute;left:50px;top:50px;font:900 150px/1 Unb;color:#111;letter-spacing:-.07em">до 15 000 ₽<span style="color:#e5383b">*</span></div>
+     <div style="position:absolute;left:56px;top:220px;font:700 52px/1 O;text-transform:uppercase;color:#111">в месяц на кредитке</div>
+     <div style="position:absolute;left:60px;top:670px;font:600 18px I;color:#999;width:440px">* при условии, что на счёте постоянно лежит 1 200 000 ₽ денег банка, а ставка не падает…</div>`);
+  P(card("psb", 120, 330, -6, .7, false));
+  P(`<div style="position:absolute;left:520px;top:300px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.95),rgba(235,245,255,.9));box-shadow:0 0 0 22px #1b1c22,0 30px 60px rgba(0,0,0,.4),inset 0 0 40px rgba(120,160,220,.35);display:flex;align-items:center;justify-content:center;text-align:center;padding:40px">
+       <div style="font:800 46px/1.15 I;color:#111;white-space:nowrap"><span style="color:#e5383b">*</span>при<br>1 200 000 ₽<br>на счёте</div></div>
+     <div style="position:absolute;left:840px;top:640px;width:300px;height:60px;border-radius:30px;background:#1b1c22;transform:rotate(40deg);transform-origin:left center"></div>`);
+}
+
+if (v === 12) {  // ПОСТЕР: огромное «15 000» зачёркнуто красным маркером
+  bg.style.background = "#f1ede4";
+  P(`<div style="position:absolute;left:44px;top:40px;right:44px;height:4px;background:#111"></div>
+     <div style="position:absolute;left:44px;top:58px;font:700 50px/1 O;text-transform:uppercase;color:#111">₽ в месяц на кредитке</div>
+     <div style="position:absolute;right:44px;top:58px;font:700 50px/1 O;color:#13a35a">проверено</div>
+     <div style="position:absolute;left:-10px;top:180px;font:900 290px/.85 Unb;letter-spacing:-.08em;color:#111;white-space:nowrap">15 000</div>
+     <svg style="position:absolute;left:20px;top:200px" width="1240" height="300" viewBox="0 0 1240 300"><path d="M20 240 C 300 200, 700 120, 1220 40" fill="none" stroke="#e5383b" stroke-width="34" stroke-linecap="round" opacity=".92"/></svg>
+     <div style="position:absolute;left:44px;top:600px;font:700 30px I;color:#111">сколько на самом деле — посчитал на ставках октября</div>
+     <div style="position:absolute;right:44px;top:590px;padding:8px 22px;background:#13a35a;color:#fff;font:700 44px/1 O;text-transform:uppercase">реально: ???</div>`);
+}
 document.fonts.ready.then(() => { window.__ready = true; });
 </script>
 </body>
