@@ -227,6 +227,83 @@ if (v === 12) {  // ПОСТЕР: огромное «15 000» зачёркнут
      <div style="position:absolute;left:44px;top:600px;font:700 30px I;color:#111">сколько на самом деле — посчитал на ставках октября</div>
      <div style="position:absolute;right:44px;top:590px;padding:8px 22px;background:#13a35a;color:#fff;font:700 44px/1 O;text-transform:uppercase">реально: ???</div>`);
 }
+
+if (v === 13) {  // ВЫПИСКА: среди трат зелёная строка «Проценты +??? ₽»
+  bg.style.background = "radial-gradient(900px 600px at 80% 20%, #3ee08f, #12a35a 55%, #0a6d3b)";
+  const row = (ic, a, b, c, hl) => `<div style="display:flex;align-items:center;gap:18px;padding:16px 26px;${hl ? "background:#eafff2;box-shadow:inset 0 0 0 4px #13b85a;border-radius:20px;" : "border-bottom:2px solid #eee;"}">
+      <div style="width:56px;height:56px;border-radius:16px;background:${ic};flex:none"></div><div style="font:600 32px I;color:#111">${a}</div><div style="margin-left:auto;font:800 ${hl ? 44 : 32}px I;color:${c};white-space:nowrap">${b}</div></div>`;
+  P(`<div style="position:absolute;left:640px;top:40px;width:580px;border-radius:36px;background:#fff;box-shadow:0 30px 60px rgba(0,0,0,.35);padding:22px 10px;transform:rotate(3deg)">
+       <div style="font:700 26px I;color:#888;padding:6px 26px 10px">Накопительный счёт · октябрь</div>
+       ${row("#ffb000", "Продукты", "кредиткой", "#999")}${row("#7b3fd6", "Проезд", "кредиткой", "#999")}${row("#13b85a", "Проценты", "+??? ₽", "#0f9d4f", true)}${row("#e5383b", "Погашение кредитки", "−30 000 ₽", "#111")}${row("#2b6fd6", "Стипендия", "+30 000 ₽", "#111")}</div>`);
+  P(`<div style="position:absolute;left:46px;top:70px;font:900 96px/1 Unb;color:#fff;letter-spacing:-.06em;text-shadow:0 8px 0 #0a6d3b">ЭТА</div>
+     <div style="position:absolute;left:46px;top:175px;font:900 96px/1 Unb;color:#fff;letter-spacing:-.06em;text-shadow:0 8px 0 #0a6d3b">СТРОКА</div>
+     <div class="pl" style="left:50px;top:310px;font-size:60px">за деньги банка</div>
+     <div style="position:absolute;left:52px;top:640px;font:600 22px I;color:#fffc">пример · сколько на самом деле — в ролике</div>`);
+}
+
+if (v === 14) {  // ВЕСЫ: «долг по кредитке» = «деньги на счёте», сверху капают проценты
+  bg.style.background = "radial-gradient(900px 600px at 50% 30%, #2b2f6b, #121433 70%)";
+  P(`<div style="position:absolute;left:630px;top:180px;width:20px;height:440px;background:linear-gradient(#e9e3c8,#b8ad7c);border-radius:10px"></div>
+     <div style="position:absolute;left:540px;top:610px;width:200px;height:40px;border-radius:20px;background:#b8ad7c"></div>
+     <div style="position:absolute;left:180px;top:200px;width:920px;height:16px;background:#e9e3c8;border-radius:8px;transform:rotate(-4deg)"></div>
+     <div style="position:absolute;left:240px;top:230px;width:2px;height:120px;background:#e9e3c8"></div><div style="position:absolute;left:1040px;top:190px;width:2px;height:120px;background:#e9e3c8"></div>`);
+  P(`<div style="position:absolute;left:90px;top:350px;width:300px;height:30px;border-radius:0 0 150px 150px;background:#e9e3c8"></div>
+     <div style="position:absolute;left:890px;top:310px;width:300px;height:30px;border-radius:0 0 150px 150px;background:#e9e3c8"></div>`);
+  P(card("alfa", 30, 190, -4, .5, false).replace('class="card" style="', 'class="card" style="transform-origin:left top;'));
+  P(`<div style="position:absolute;left:100px;top:395px;width:300px;text-align:center;font:800 40px I;color:#ff7a7a">−50 000 ₽</div><div style="position:absolute;left:100px;top:445px;width:300px;text-align:center;font:600 24px I;color:#fffa">долг по кредитке</div>
+     <div style="position:absolute;left:900px;top:220px;width:300px;text-align:center;font:900 64px Unb;color:#3ee08f;letter-spacing:-.04em">50 000</div>
+     <div style="position:absolute;left:900px;top:355px;width:300px;text-align:center;font:600 24px I;color:#fffa">на накопительном</div>
+     <div style="position:absolute;left:930px;top:60px;font:900 70px Unb;color:#ffe95c;letter-spacing:-.04em;text-shadow:0 0 40px #ffb000">+ % ?</div>`);
+  P(`<div style="position:absolute;left:0;right:0;top:500px;text-align:center"><span class="pl" style="position:static;font-size:72px">разница — твоя</span></div>`);
+}
+
+if (v === 15) {  // СХЕМА ПОТОКОВ: зарплата → счёт 15,5 % → гасит кредитку; покупки → кредитка; выход «+??? ₽»
+  bg.style.background = "radial-gradient(1000px 700px at 50% 40%, #1d2433, #0b0e15 75%)";
+  const box = (x, y, w, h, t, sub, c) => `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:30px;background:${c};box-shadow:0 20px 40px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+     <div style="font:900 38px/1 Unb;color:#fff;letter-spacing:-.04em">${t}</div><div style="font:700 26px I;color:#fffc;margin-top:10px">${sub}</div></div>`;
+  P(box(40, 70, 330, 170, "Стипендия", "на счёт", "#2b6fd6") + box(470, 70, 360, 170, "Счёт 15,5 %", "лежит и растёт", "#13a35a") + box(470, 470, 360, 170, "Кредитка", "все покупки", "#e5383b") + box(930, 470, 310, 170, "Покупки", "продукты, проезд", "#555b6b"));
+  const arr = (x1, y1, x2, y2, lbl) => `<svg style="position:absolute;left:0;top:0" width="1280" height="720"><defs><marker id="m${x1}${y1}" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#fff"/></marker></defs><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="8" marker-end="url(#m${x1}${y1})"/></svg>${lbl || ""}`;
+  P(arr(375, 155, 455, 155) + arr(650, 250, 650, 455, `<div style="position:absolute;left:670px;top:330px;font:700 28px I;color:#fff">гасит в конце срока</div>`) + arr(925, 555, 845, 555));
+  P(`<div style="position:absolute;left:900px;top:60px;width:340px;height:200px;border-radius:30px;background:#ffd84a;box-shadow:0 0 60px rgba(255,200,0,.6);display:flex;flex-direction:column;align-items:center;justify-content:center">
+       <div style="font:700 30px I;color:#5a4300">тебе остаётся</div><div style="font:900 72px/1 Unb;color:#111;letter-spacing:-.05em">+??? ₽</div></div>`
+    + arr(835, 155, 890, 155) + `<div style="position:absolute;left:40px;top:300px;font:900 60px/1.05 Unb;color:#fff;letter-spacing:-.05em">СХЕМА<br>НА ОДНОЙ<br>КАРТИНКЕ</div>`);
+}
+
+if (v === 16) {  // ГРАФИК: столбик «обещают 15 000» до потолка, реальный — крошечный
+  bg.style.background = "#f6f4ef";
+  P(`<div style="position:absolute;left:60px;top:44px;font:700 46px/1 O;color:#111;text-transform:uppercase">доход в месяц, ₽</div>
+     <div style="position:absolute;left:60px;top:110px;right:60px;bottom:110px;border-left:4px solid #111;border-bottom:4px solid #111"></div>
+     ${[1, 2, 3].map(i => `<div style="position:absolute;left:64px;right:60px;top:${110 + i * 125}px;border-top:2px dashed #ccc"></div>`).join("")}
+     <div style="position:absolute;left:160px;top:130px;width:300px;bottom:114px;background:linear-gradient(#ff6b6b,#d92b2b);border-radius:20px 20px 0 0"></div>
+     <div style="position:absolute;left:160px;width:300px;top:150px;text-align:center;font:900 70px Unb;color:#fff;letter-spacing:-.05em">15 000</div>
+     <div style="position:absolute;left:160px;width:300px;top:620px;text-align:center;font:700 30px I;color:#111">обещают</div>
+     <div style="position:absolute;left:560px;top:540px;width:300px;bottom:114px;background:linear-gradient(#3ee08f,#12a35a);border-radius:20px 20px 0 0"></div>
+     <div style="position:absolute;left:560px;width:300px;top:450px;text-align:center;font:900 70px Unb;color:#12a35a;letter-spacing:-.05em">???</div>
+     <div style="position:absolute;left:560px;width:300px;top:620px;text-align:center;font:700 30px I;color:#111">посчитал</div>`);
+  P(card("t", 900, 160, 10, .7, false) + `<div class="pl" style="left:900px;top:430px;font-size:56px;background:#e5383b">разница</div>`);
+}
+
+if (v === 17) {  // УРАВНЕНИЕ: «50 000 ₽ × 15,5 % × 60 дн = ???»
+  bg.style.background = "radial-gradient(1000px 700px at 30% 30%, #7b3fd6, #3a1d7a 60%, #1b0e3d)";
+  P(`<div style="position:absolute;left:60px;top:60px;font:700 56px/1 O;color:#fffb;text-transform:uppercase">деньги банка</div>
+     <div style="position:absolute;left:52px;top:140px;font:900 120px/1 Unb;color:#fff;letter-spacing:-.06em">50 000 ₽</div>
+     <div style="position:absolute;left:52px;top:280px;font:900 120px/1 Unb;color:#ffe95c;letter-spacing:-.06em">× 15,5 %</div>
+     <div style="position:absolute;left:52px;top:420px;font:900 120px/1 Unb;color:#fff;letter-spacing:-.06em">× 60 дн</div>
+     <div style="position:absolute;left:60px;top:560px;width:720px;height:10px;background:#fff;border-radius:5px"></div>
+     <div style="position:absolute;left:52px;top:590px;font:900 100px/1 Unb;color:#3ee08f;letter-spacing:-.06em">= ???</div>`);
+  P(card("alfa", 820, 120, 10, .9, false) + card("ya", 860, 360, -8, .85, false));
+}
+
+if (v === 18) {  // МАРКЕРНАЯ ДОСКА: расчёт «маркером», обведённый ответ, «15 000?» зачёркнуто
+  bg.style.background = "linear-gradient(#cfc6b8,#b9ae9c)";
+  P(`<div style="position:absolute;left:40px;top:30px;width:1200px;height:660px;border-radius:14px;background:linear-gradient(160deg,#ffffff,#eef1f3);box-shadow:0 0 0 18px #9aa3ad,0 30px 60px rgba(0,0,0,.35)"></div>
+     <div style="position:absolute;left:90px;top:70px;font:700 56px/1.35 GM;color:#1b3fa8;transform:rotate(-1.5deg)">кредитка → покупки<br>свои деньги → счёт 15,5%<br>30 000 × 15,5% ÷ 12 =</div>
+     <div style="position:absolute;left:900px;top:300px;font:900 96px/1 Unb;color:#d01f1f;transform:rotate(-4deg)">???</div>
+     <svg style="position:absolute;left:850px;top:260px" width="330" height="190" viewBox="0 0 330 190"><ellipse cx="165" cy="95" rx="150" ry="78" fill="none" stroke="#d01f1f" stroke-width="9" transform="rotate(-6 165 95)"/></svg>
+     <div style="position:absolute;left:90px;top:440px;font:700 120px/1 GM;color:#111">15 000?</div>
+     <svg style="position:absolute;left:70px;top:440px" width="560" height="140" viewBox="0 0 560 140"><path d="M10 110 L540 20" stroke="#d01f1f" stroke-width="14" stroke-linecap="round"/></svg>
+     <div class="pl" style="left:700px;top:520px;font-size:60px;background:#13a35a">честный расчёт</div>`);
+}
 document.fonts.ready.then(() => { window.__ready = true; });
 </script>
 </body>
