@@ -304,6 +304,72 @@ if (v === 18) {  // МАРКЕРНАЯ ДОСКА: расчёт «маркеро
      <svg style="position:absolute;left:70px;top:440px" width="560" height="140" viewBox="0 0 560 140"><path d="M10 110 L540 20" stroke="#d01f1f" stroke-width="14" stroke-linecap="round"/></svg>
      <div class="pl" style="left:700px;top:520px;font-size:60px;background:#13a35a">честный расчёт</div>`);
 }
+
+const note = (x, y, r, s = 1) => `<div style="position:absolute;left:${x}px;top:${y}px;width:300px;height:140px;transform:rotate(${r}deg) scale(${s});border-radius:10px;background:linear-gradient(135deg,#f6b28a,#e9824f 45%,#d3612e);box-shadow:0 14px 26px rgba(0,0,0,.3),inset 0 0 0 6px rgba(255,255,255,.35)">
+   <div style="position:absolute;left:18px;top:14px;font:900 40px/1 Unb;color:#7a2a0a;letter-spacing:-.04em">5000</div><div style="position:absolute;right:20px;bottom:12px;font:900 54px/1 Unb;color:rgba(122,42,10,.55)">₽</div>
+   <div style="position:absolute;left:150px;top:20px;width:110px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 70%)"></div></div>`;
+const coin = (x, y, sz = 90) => `<div style="position:absolute;left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c8,#ffd84a 45%,#d99a0b);box-shadow:0 10px 20px rgba(0,0,0,.3),inset 0 0 0 6px rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font:900 ${sz * .5}px Unb;color:#7a4f05">₽</div>`;
+
+if (v === 19) {  // как b2 №3: «+6 800 ₽ за год», плашка, список, лесенка карт
+  bg.style.background = "radial-gradient(1000px 700px at 30% 30%, #2ee07a, #11a653 55%, #0a7a3c)";
+  R.innerHTML = `<div class="big" style="left:36px;top:46px;font-size:200px;${shadow("#0a7a3c")}">+6 800 ₽</div><div class="pl" style="left:44px;top:320px">за год на деньгах банка</div>
+    <div style="position:absolute;left:46px;top:430px">${rows([["#e5383b", "Покупки — кредиткой", "30 000 ₽"], ["#13b85a", "Свои — на счёт", "15,5 %"], ["#ffb000", "Срок без %", "120–180 дн"]], "пример · условия на 13.10.2026, у каждого банка свои")}</div>
+    ${card("psb", 930, 280, -6, .78, false)}${card("ya", 880, 365, -6, .82, false)}${card("alfa", 830, 450, -6, .86, false)}`;
+}
+
+if (v === 20) {  // как v8 №1: «было 0 % → стало 15,5 %» на картах, тёмный фон
+  bg.style.background = "radial-gradient(800px 500px at 75% 40%, rgba(46,224,122,.35), transparent 70%), #08090c";
+  P(`<div style="position:absolute;left:50px;top:150px;width:480px;height:300px;border-radius:26px;background:linear-gradient(135deg,#2b2c30,#141518);transform:rotate(-6deg);box-shadow:0 30px 60px #000;opacity:.85">
+       <div style="position:absolute;left:34px;top:40px;width:70px;height:52px;border-radius:10px;background:#bdb39a"></div>
+       <div style="position:absolute;left:34px;top:120px;font:700 30px I;color:#fff8;letter-spacing:.2em">БЫЛО</div><div style="position:absolute;left:30px;top:160px;font:900 110px/1 Unb;color:#c77;letter-spacing:-.05em">0 %</div>
+       <div style="position:absolute;right:30px;top:40px;font:600 22px I;color:#fff6">деньги лежат на карте</div></div>
+     <div style="position:absolute;left:560px;top:250px;font:900 90px/1 Unb;color:#fff;text-shadow:0 0 30px #fff8">→</div>
+     <div style="position:absolute;left:700px;top:90px;width:540px;height:340px;border-radius:30px;background:linear-gradient(135deg,#6ff0b0,#21c77a 50%,#0d8f50);transform:rotate(4deg);box-shadow:0 0 80px rgba(46,224,122,.6),0 30px 60px #000">
+       <div style="position:absolute;left:38px;top:40px;width:76px;height:56px;border-radius:10px;background:linear-gradient(135deg,#f3e2a6,#c9a44a)"></div>
+       <div style="position:absolute;left:38px;top:130px;font:700 32px I;color:#06341c;letter-spacing:.2em">СТАЛО</div><div style="position:absolute;left:32px;top:175px;font:900 120px/1 Unb;color:#fff;letter-spacing:-.05em;text-shadow:0 6px 0 #0a6d3b">15,5 %</div>
+       <div style="position:absolute;right:34px;top:44px;font:700 24px I;color:#06341c">пока платишь кредиткой</div></div>
+     <div style="position:absolute;left:60px;top:560px;padding:16px 34px;border-radius:20px;background:linear-gradient(#fff,#e6e8ec);font:900 58px/1 Unb;color:#111;letter-spacing:-.04em">ДЕНЬГИ БАНКА</div>`);
+  P(`<div style="position:absolute;left:700px;top:572px;display:flex;gap:12px;white-space:nowrap">${["ya", "psb"].map(pill).join("")}</div>`);
+}
+
+if (v === 21) {  // КУПЮРЫ И МОНЕТЫ: «+775 ₽ каждый месяц» — веер купюр из кредитки
+  bg.style.background = "radial-gradient(1000px 700px at 70% 40%, #ffe45c, #ffc800 55%, #e9a600)";
+  P(note(700, 120, -18) + note(760, 180, -6) + note(820, 240, 8) + card("t", 760, 330, -4, .95, false) + coin(1150, 90) + coin(690, 560, 80) + coin(1180, 560, 70));
+  P(`<div style="position:absolute;left:40px;top:60px;font:900 180px/1 Unb;color:#111;letter-spacing:-.07em">+775 ₽</div>
+     <div class="pl" style="left:48px;top:270px">каждый месяц</div>
+     <div style="position:absolute;left:50px;top:390px;font:700 50px/1.1 O;color:#111;text-transform:uppercase">на деньгах банка.<br>честный расчёт</div>
+     <div style="position:absolute;left:52px;top:640px;font:600 22px I;color:#5a4300">пример: траты 30 000 ₽ · карта 120–180 дней · счёт 15,5 %</div>`);
+}
+
+if (v === 22) {  // ДО / ПОСЛЕ ДВУМЯ СТОЛБЦАМИ: «обычно 0 ₽» серым — «со схемой +6 800 ₽» зелёным
+  bg.style.background = "#111";
+  P(`<div style="position:absolute;left:0;top:0;width:42%;height:100%;background:linear-gradient(160deg,#5b5f69,#2c2f36)"></div>
+     <div style="position:absolute;right:0;top:0;width:58%;height:100%;background:radial-gradient(900px 600px at 70% 30%,#2ee07a,#11a653 55%,#0a7a3c)"></div>
+     <div style="position:absolute;left:0;width:42%;top:70px;text-align:center;font:700 56px/1 O;color:#fffc;text-transform:uppercase">обычно</div>
+     <div style="position:absolute;left:0;width:42%;top:160px;text-align:center;font:900 170px/1 Unb;color:#fff;letter-spacing:-.07em;opacity:.8">0 ₽</div>
+     <div style="position:absolute;left:42%;right:0;top:70px;text-align:center;font:700 56px/1 O;color:#fff;text-transform:uppercase">с кредиткой</div>
+     <div style="position:absolute;left:42%;right:0;top:175px;text-align:center;font:900 132px/1 Unb;color:#fff;letter-spacing:-.07em;${shadow("#0a7a3c")}">+6 800 ₽</div>
+     <div style="position:absolute;left:42%;right:0;top:350px;text-align:center"><span class="pl" style="position:static;font-size:56px">в год, просто картой</span></div>`);
+  P(card("ya", 70, 400, -8, .8, false) + card("psb", 760, 450, 6, .78, false));
+}
+
+if (v === 23) {  // ОГРОМНЫЙ ПРОЦЕНТ: «15,5 %» на деньгах банка, неоновый
+  bg.style.background = "radial-gradient(900px 600px at 30% 40%, #3b1d8f, #12082e 70%)";
+  P(`<div style="position:absolute;left:30px;top:70px;font:900 300px/1 Unb;color:#fff;letter-spacing:-.08em;text-shadow:0 0 40px #9d6bff,0 0 90px #7b3fd6">15,5%</div>
+     <div class="pl" style="left:50px;top:420px;font-size:66px;background:#ffe95c;color:#111">на деньгах банка</div>
+     <div style="position:absolute;left:52px;top:540px;font:700 40px/1.2 I;color:#fffc">сколько это в рублях — посчитал</div>`);
+  P(card("alfa", 860, 330, -10, .85, false) + coin(1150, 300, 100));
+}
+
+if (v === 24) {  // МОНЕТЫ РАСТУТ: столбики монет по месяцам, итог «+6 800 ₽ за год»
+  bg.style.background = "radial-gradient(1000px 700px at 50% 30%, #1d7a4a, #0b3d24 75%)";
+  const stack = (x, n) => Array.from({ length: n }, (_, i) => `<div style="position:absolute;left:${x}px;bottom:${70 + i * 22}px;width:90px;height:26px;border-radius:50%;background:linear-gradient(#ffe27a,#d99a0b);box-shadow:0 3px 0 #9a6a05"></div>`).join("");
+  P([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m, i) => stack(560 + i * 58 - (i > 5 ? 0 : 0), Math.round(2 + i * 1.6))).join("").replace(/left:(\d+)px;bottom/g, (_, x) => `left:${x}px;bottom`));
+  P(`<div style="position:absolute;left:40px;top:50px;font:900 150px/1 Unb;color:#fff;letter-spacing:-.07em;${shadow("#06331d")}">+6 800 ₽</div>
+     <div class="pl" style="left:48px;top:230px">за год</div>
+     <div style="position:absolute;left:50px;top:350px;font:700 52px/1.1 O;color:#fff;text-transform:uppercase">просто платишь<br>другой картой</div>
+     <div style="position:absolute;left:52px;top:640px;font:600 22px I;color:#fffb">пример · траты 30 000 ₽/мес · условия на 13.10.2026</div>`);
+}
 document.fonts.ready.then(() => { window.__ready = true; });
 </script>
 </body>
