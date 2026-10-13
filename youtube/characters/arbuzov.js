@@ -1,11 +1,11 @@
-/* Арбузов — персонаж-ведущий проекта «Владик Арбузит» (владелец 13.10: «выбираю арбузика, его будут звать Арбузов»).
+/* Арбузов — персонаж-ведущий канала «Арбузов» (владелец 13.10: «выбираю арбузика, его будут звать Арбузов»).
    Один SVG из частей — основа для анимации (рот под голос, моргание, руки, эмоции).
    Arbuzov.svg({ mood, arm, look, theme, view, blink, mouth })
      mood:  talk | happy | shock | wink | smirk
      arm:   point | phone | up | down
      theme: pop (контур тёмный) | neon (светящийся контур на тёмном) | doodle (дрожащая «маркерная» линия)
      view:  full (весь рост) | head (для аватарки) | bust (по пояс)
-     mouth: null | "A" | "O" | "E" | "M" — фонема (перекрывает рот эмоции, для синхрона с голосом)
+     mouth: null | "A" | "O" | "E" | "S" | "M" — фонема (S — приоткрыт, согласные) (перекрывает рот эмоции, для синхрона с голосом)
 */
 (function () {
   let uid = 0;
@@ -32,6 +32,7 @@
       : mood === "talk" || mood === "wink" ? `<path d="M${cx - g - 20} ${cy} L ${cx - g + 20} ${cy - 8}" ${st(7)}/><path d="M${cx + g - 20} ${cy - 8} L ${cx + g + 20} ${cy}" ${st(7)}/>` : "";
     const mouth = (cx, cy, w) => {
       const v = o.mouth;
+      if (v === "S") return `<path d="M${cx - w * .5} ${cy + 4} Q ${cx} ${cy + w * .42} ${cx + w * .5} ${cy + 4} Q ${cx} ${cy + w * .12} ${cx - w * .5} ${cy + 4} Z" fill="#7a1f2b" ${st(6)}/>`;
       if (v === "M") return `<path d="M${cx - w * .5} ${cy + 6} Q ${cx} ${cy + 14} ${cx + w * .5} ${cy + 6}" fill="none" ${st(7)}/>`;
       if (v === "O") return `<ellipse cx="${cx}" cy="${cy + w * .3}" rx="${w * .38}" ry="${w * .5}" fill="#7a1f2b" ${st(6)}/>`;
       if (v === "E") return `<path d="M${cx - w * .8} ${cy} Q ${cx} ${cy + w * .5} ${cx + w * .8} ${cy} Q ${cx} ${cy + w * .15} ${cx - w * .8} ${cy} Z" fill="#7a1f2b" ${st(6)}/>`;
