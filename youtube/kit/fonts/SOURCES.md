@@ -1,0 +1,1 @@
+- Caveat 700 (cyrillic, latin) — Google Fonts, OFL; для стиля «Тетрадь» (персонаж Арбузов, 13.10)

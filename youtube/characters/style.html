@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Стиль проекта с Арбузовым</title>
+<!-- Владелец 13.10: «выбираю арбузика, его будут звать Арбузов. Теперь нужно для канала и в целом для проекта придумать
+     стилистику». Три направления, на каждом: аватарка, шапка канала, превью, кадр ролика, рилс, палитра, шрифты, правила.
+     ?s=1 Сочный поп · ?s=2 Арбуз-неон · ?s=3 Тетрадь. Снимок: characters/out/style1..3.png (1920×1080). -->
+<style>
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "Unb"; src: url("../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Cav"; src: url("../kit/fonts/caveat-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "Cav"; src: url("../kit/fonts/caveat-latin-700.woff2"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  .a { position: absolute; }
+  .box { position: absolute; overflow: hidden; }
+  .lab { position: absolute; font: 700 22px I; letter-spacing: .02em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div id="R"></div>
+<script src="arbuzov.js"></script>
+<script>
+const S = +(new URLSearchParams(location.search).get("s") || 1);
+const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h);
+const A = (o) => Arbuzov.svg(o);
+const INK = "#1d1b2c";
+const OUT = [[-3,-3],[3,-3],[-3,3],[3,3],[0,-4],[0,4],[-4,0],[4,0]].map(([x, y]) => `${x}px ${y}px 0 ${INK}`).join(",");
+const seedsBg = (c, op = .14) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><g fill='${c}' opacity='${op}'><ellipse cx='20' cy='24' rx='5' ry='9' transform='rotate(-20 20 24)'/><ellipse cx='84' cy='60' rx='5' ry='9' transform='rotate(25 84 60)'/><ellipse cx='40' cy='98' rx='5' ry='9' transform='rotate(-5 40 98)'/></g></svg>`)}")`;
+const circle = (w, h, col, sw = 8, rot = -4) => `<svg class="a" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="left:0;top:0;transform:rotate(${rot}deg)"><path d="M${w * .52} ${h * .06} C ${w * .95} ${h * .02} ${w * 1.0} ${h * .9} ${w * .5} ${h * .94} C ${w * .04} ${h * .97} ${w * .0} ${h * .12} ${w * .46} ${h * .08} L ${w * .62} ${h * .12}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/></svg>`;
+const arrow = (w, h, col, sw = 7) => `<svg class="a" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="left:0;top:0"><path d="M6 ${h * .2} Q ${w * .55} ${h * .05} ${w - 14} ${h - 14}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${w - 44} ${h - 20} L ${w - 12} ${h - 12} L ${w - 16} ${h - 46}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const card = (w, col, txt = "#fff") => `<div style="width:${w}px;height:${w * .63}px;border-radius:${w * .07}px;background:${col};position:relative;border:5px solid ${INK}">
+  <div class="a" style="left:${w * .09}px;top:${w * .2}px;width:${w * .15}px;height:${w * .11}px;border-radius:6px;background:#ffd23f;border:3px solid ${INK}"></div>
+  <div class="a" style="left:${w * .09}px;bottom:${w * .09}px;font:800 ${w * .065}px Unb;color:${txt};letter-spacing:.06em">2200 •••• 2026</div></div>`;
+
+const DIR = {
+  1: { name: "Сочный поп", sub: "Яркий комикс: кремовый фон, арбузные цвета, жирный контур, жёсткая тень, наклейки.", theme: "pop",
+       pal: [["#ff3b4f", "мякоть"], ["#1fa34a", "корка"], ["#fff4dc", "фон"], ["#ffd23f", "акцент-цифра"], ["#1d1b2c", "контур"]],
+       fonts: [["Unb", 900, "ЗАГОЛОВОК"], ["I", 700, "Текст и подписи"]],
+       rules: "Контур 6 px и тень 10 px у всего. Цифры — жёлтые наклейки. Фон — крем с косточками. Арбузов в каждой сцене." },
+  2: { name: "Арбуз-неон", sub: "Ночной премиум: тёмная корка, неоновая мякоть, свечение, как вывеска.", theme: "neon",
+       pal: [["#0c1410", "фон-ночь"], ["#2fd36a", "неон-корка"], ["#ff2d55", "неон-мякоть"], ["#f4fff6", "текст"], ["#ffd23f", "цифры"]],
+       fonts: [["Unb", 900, "ЗАГОЛОВОК"], ["I", 700, "Текст и подписи"]],
+       rules: "Фон всегда тёмный. Главная цифра светится. Мало элементов, много воздуха. Продолжает «Кино-свет» ролика №5." },
+  3: { name: "Тетрадь", sub: "Как конспект умного студента: клетка, маркер, обводки, стрелки, скотч.", theme: "doodle",
+       pal: [["#fbfbf4", "бумага"], ["#d6e4f5", "клетка"], ["#e8333f", "маркер"], ["#2e9e4f", "зелёная ручка"], ["#ffe45c", "выделитель"]],
+       fonts: [["Unb", 900, "ЗАГОЛОВОК"], ["Cav", 700, "Пометки от руки"]],
+       rules: "Расчёты пишем «от руки». Важное обводим красным, стрелки ведут к Арбузову. Карточки на скотче, лёгкий наклон." }};
+const D = DIR[S], dark = S === 2, ink = dark ? "#f4fff6" : INK;
+
+/* ---------- фон страницы ---------- */
+if (S === 1) P(`<div class="a" style="inset:0;background:#fff4dc ${seedsBg(INK, .08)}"></div>`);
+if (S === 2) P(`<div class="a" style="inset:0;background:radial-gradient(900px 600px at 20% 10%,#16331f,transparent 70%),radial-gradient(800px 600px at 90% 90%,#3a0f1c,transparent 70%),#0c1410"></div>
+  <div class="a" style="inset:0;background-image:linear-gradient(rgba(47,211,106,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(47,211,106,.06) 1px,transparent 1px);background-size:48px 48px"></div>`);
+if (S === 3) P(`<div class="a" style="inset:0;background:#fbfbf4;background-image:linear-gradient(#d6e4f5 2px,transparent 2px),linear-gradient(90deg,#d6e4f5 2px,transparent 2px);background-size:36px 36px"></div>
+  <div class="a" style="left:22px;top:0;bottom:0;width:3px;background:#f08a92"></div>`);
+
+/* ---------- заголовок ---------- */
+const glow = (c) => `0 0 12px ${c},0 0 34px ${c}`;
+P(`<div class="a" style="left:40px;top:34px;font:900 58px/1 Unb;letter-spacing:-.03em;color:${ink};${dark ? `text-shadow:${glow("rgba(47,211,106,.6)")}` : ""}">Стиль ${S} · ${D.name}</div>
+   <div class="a" style="left:42px;top:108px;font:600 28px I;color:${dark ? "#a9c7b2" : "#55536a"}">${D.sub}</div>`);
+
+/* ---------- аватарка ---------- */
+const avBg = S === 1 ? "#ff3b4f" : S === 2 ? "radial-gradient(circle at 50% 40%,#1f5a33,#0c1410 70%)" : "#ffe45c";
+P(`<div class="box" style="left:40px;top:180px;width:220px;height:220px;border-radius:50%;background:${avBg};border:${dark ? "3px solid #2fd36a" : `6px solid ${INK}`};${dark ? "box-shadow:0 0 30px rgba(47,211,106,.55)" : S === 1 ? `box-shadow:8px 8px 0 ${INK}` : ""}">
+     <div class="a" style="left:6px;top:14px">${A({ view: "head", w: 200, h: 200, mood: "happy", theme: D.theme })}</div></div>
+   <div class="lab" style="left:40px;top:412px;width:220px;text-align:center;color:${ink}">аватарка</div>`);
+
+/* ---------- палитра и шрифты ---------- */
+P(`<div class="a" style="left:40px;top:470px;width:230px">${D.pal.map(([c, n]) => `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+    <div style="width:46px;height:46px;border-radius:12px;background:${c};border:3px solid ${dark ? "#2a3a30" : INK}"></div>
+    <div style="font:700 18px/1.15 I;color:${ink}">${n}<br><span style="font-weight:600;opacity:.6">${c}</span></div></div>`).join("")}
+  <div style="margin-top:18px">${D.fonts.map(([f, w, t]) => `<div style="font:${w} ${f === "Cav" ? 38 : 24}px/1.2 ${f};color:${ink};margin-bottom:8px">${t}</div>`).join("")}</div></div>`);
+
+/* ---------- шапка канала (2560×423 → 1570×260) ---------- */
+let ban;
+if (S === 1) ban = `<div class="box" style="left:310px;top:180px;width:1570px;height:260px;border-radius:28px;background:#ff3b4f ${seedsBg("#1d1b2c", .22)};border:6px solid ${INK};box-shadow:10px 10px 0 ${INK}">
+   <div class="a" style="left:0;right:0;bottom:0;height:34px;background:#1fa34a;border-top:6px solid ${INK}"></div><div class="a" style="left:0;right:0;bottom:34px;height:16px;background:#c8f0a0"></div>
+   <div class="a" style="left:330px;top:40px;font:900 76px/1 Unb;letter-spacing:-.04em;color:#fff;white-space:nowrap;text-shadow:${OUT},7px 7px 0 ${INK}">ВЛАДИК АРБУЗИТ</div>
+   <div class="a" style="left:336px;top:150px;padding:10px 24px;background:#fff;border:5px solid ${INK};border-radius:999px;font:800 28px I;color:${INK};box-shadow:5px 5px 0 ${INK}">Считаю бонусы банков — чтобы ты не попался</div>
+   <div class="a" style="left:1220px;top:-30px;transform:rotate(6deg)">${A({ view: "bust", w: 340, h: 280, mood: "talk", arm: "point", theme: "pop" })}</div>
+   <div class="a" style="left:40px;top:58px;transform:rotate(-8deg);padding:14px 20px;background:#ffd23f;border:5px solid ${INK};border-radius:18px;font:900 34px/1 Unb;color:${INK};box-shadow:6px 6px 0 ${INK}">+15 000 ₽</div></div>`;
+if (S === 2) ban = `<div class="box" style="left:310px;top:180px;width:1570px;height:260px;border-radius:24px;background:linear-gradient(100deg,#0f1f16,#0a100d 60%,#2a0b16);border:2px solid rgba(47,211,106,.5);box-shadow:0 0 40px rgba(47,211,106,.18)">
+   <div class="a" style="left:290px;top:52px;white-space:nowrap;font:900 80px/1 Unb;letter-spacing:-.03em;color:#ffe0e6;text-shadow:${glow("#ff2d55")},0 0 70px #ff2d55">ВЛАДИК АРБУЗИТ</div>
+   <div class="a" style="left:306px;top:166px;font:700 30px I;color:#bff5d0;letter-spacing:.04em;text-shadow:0 0 14px rgba(47,211,106,.8)">считаю бонусы банков — чтобы ты не попался</div>
+   <div class="a" style="left:1230px;top:-20px">${A({ view: "bust", w: 330, h: 272, mood: "smirk", arm: "point", theme: "neon" })}</div>
+   <div class="a" style="left:40px;top:36px;width:200px;height:190px;border:3px solid #2fd36a;border-radius:20px;box-shadow:0 0 22px rgba(47,211,106,.7),inset 0 0 22px rgba(47,211,106,.4);display:flex;align-items:center;justify-content:center;font:900 40px/1.1 Unb;color:#fff;text-align:center;text-shadow:${glow("#2fd36a")}">0%<br><span style="font-size:22px">до 100 дней</span></div></div>`;
+if (S === 3) ban = `<div class="box" style="left:310px;top:180px;width:1570px;height:260px;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.12);transform:rotate(-.6deg);background-image:linear-gradient(#d6e4f5 2px,transparent 2px),linear-gradient(90deg,#d6e4f5 2px,transparent 2px);background-size:30px 30px">
+   <div class="a" style="left:300px;top:50px;white-space:nowrap;font:900 80px/1 Unb;letter-spacing:-.04em;color:${INK}">ВЛАДИК <span style="position:relative">АРБУЗИТ</span></div>
+   <div class="a" style="left:690px;top:24px;width:520px;height:130px">${circle(520, 130, "#e8333f", 9, -3)}</div>
+   <div class="a" style="left:304px;top:156px;font:700 50px/1 Cav;color:#2e9e4f">считаю бонусы банков — чтобы ты не попался</div>
+   <div class="a" style="left:1300px;top:-10px;transform:rotate(-4deg)">${A({ view: "bust", w: 320, h: 264, mood: "wink", arm: "point", theme: "doodle" })}</div>
+   <div class="a" style="left:40px;top:40px;font:700 64px/1 Cav;color:#e8333f;transform:rotate(-6deg)">+15 000 ₽<br><span style="font-size:40px;color:${INK}">— пример!</span></div>
+   <div class="a" style="left:1180px;top:110px;width:140px;height:90px">${arrow(140, 90, "#e8333f")}</div></div>
+   <div class="a" style="left:330px;top:166px;width:120px;height:34px;background:rgba(255,228,92,.75);transform:rotate(-8deg)"></div><div class="a" style="left:1760px;top:170px;width:120px;height:34px;background:rgba(255,228,92,.75);transform:rotate(7deg)"></div>`;
+P(ban + `<div class="lab" style="left:310px;top:452px;color:${ink}">шапка канала</div>`);
+
+/* ---------- превью 16:9 ---------- */
+let th;
+if (S === 1) th = `<div class="box" style="left:310px;top:500px;width:620px;height:349px;border-radius:22px;background:#1fa34a;border:6px solid ${INK};box-shadow:10px 10px 0 ${INK}">
+   <div class="a" style="inset:0;background:repeating-conic-gradient(from 0deg at 28% 60%,rgba(255,255,255,.12) 0 10deg,transparent 10deg 20deg)"></div>
+   <div class="a" style="left:-30px;top:30px">${A({ w: 300, h: 344, mood: "shock", arm: "up", theme: "pop" })}</div>
+   <div class="a" style="left:290px;top:52px;transform:rotate(-5deg);padding:14px 22px;background:#ffd23f;border:6px solid ${INK};border-radius:20px;white-space:nowrap;font:900 52px/1 Unb;color:${INK};box-shadow:8px 8px 0 ${INK}">15 000 ₽</div>
+   <div class="a" style="left:300px;top:190px;width:300px;font:900 46px/1.02 Unb;color:#fff;text-shadow:${OUT},5px 5px 0 ${INK}">БАНК<br>ПЛАТИТ?</div></div>`;
+if (S === 2) th = `<div class="box" style="left:310px;top:500px;width:620px;height:349px;border-radius:20px;background:radial-gradient(400px 300px at 25% 60%,#1d4a2b,#0a0f0c 70%);border:2px solid rgba(47,211,106,.5)">
+   <div class="a" style="left:-20px;top:40px">${A({ w: 290, h: 332, mood: "shock", arm: "phone", theme: "neon" })}</div>
+   <div class="a" style="left:276px;top:70px;white-space:nowrap;font:900 62px/1 Unb;letter-spacing:-.03em;color:#eaffef;text-shadow:${glow("#2fd36a")},0 0 60px #2fd36a">15 000 ₽</div>
+   <div class="a" style="left:280px;top:160px;font:900 38px/1.05 Unb;color:#ffe0e6;text-shadow:${glow("#ff2d55")}">ЗА КРЕДИТКУ?</div>
+   <div class="a" style="left:284px;top:262px;font:700 24px I;color:#9fbfa9">проверил на цифрах</div></div>`;
+if (S === 3) th = `<div class="box" style="left:310px;top:500px;width:620px;height:349px;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.14);transform:rotate(.8deg);background-image:linear-gradient(#d6e4f5 2px,transparent 2px),linear-gradient(90deg,#d6e4f5 2px,transparent 2px);background-size:28px 28px">
+   <div class="a" style="left:-10px;top:40px">${A({ w: 280, h: 320, mood: "shock", arm: "phone", theme: "doodle" })}</div>
+   <div class="a" style="left:300px;top:50px;white-space:nowrap;font:900 48px/1 Unb;color:${INK}">15 000 ₽</div>
+   <div class="a" style="left:270px;top:18px;width:330px;height:110px">${circle(330, 110, "#e8333f", 9, 3)}</div>
+   <div class="a" style="left:310px;top:160px;font:700 70px/1 Cav;color:#e8333f;transform:rotate(-4deg)">КАК?!</div>
+   <div class="a" style="left:220px;top:230px;width:130px;height:80px;transform:scaleX(-1)">${arrow(130, 80, "#2e9e4f")}</div>
+   <div class="a" style="left:380px;top:250px;padding:4px 10px;background:#ffe45c;font:900 24px Unb;white-space:nowrap;color:${INK};transform:rotate(-2deg)">НА КРЕДИТКЕ</div></div>`;
+P(th + `<div class="lab" style="left:310px;top:866px;color:${ink}">превью ролика</div>`);
+
+/* ---------- кадр ролика 16:9 ---------- */
+let fr;
+if (S === 1) fr = `<div class="box" style="left:960px;top:500px;width:620px;height:349px;border-radius:22px;background:#fff4dc ${seedsBg(INK, .07)};border:6px solid ${INK};box-shadow:10px 10px 0 ${INK}">
+   <div class="a" style="left:20px;top:18px;padding:8px 16px;background:#ff3b4f;border:4px solid ${INK};border-radius:999px;font:800 18px I;color:#fff">ГЛАВА 2 · ЛЬГОТНЫЙ ПЕРИОД</div>
+   <div class="a" style="left:300px;top:80px;transform:rotate(-6deg)">${card(260, "#ff3b4f")}</div>
+   <div class="a" style="left:430px;top:210px;transform:rotate(6deg);padding:10px 16px;background:#ffd23f;border:5px solid ${INK};border-radius:14px;font:900 30px/1 Unb;color:${INK};box-shadow:5px 5px 0 ${INK}">до 100 дней</div>
+   <div class="a" style="left:-10px;top:80px">${A({ w: 260, h: 298, mood: "talk", arm: "point", theme: "pop" })}</div></div>`;
+if (S === 2) fr = `<div class="box" style="left:960px;top:500px;width:620px;height:349px;border-radius:20px;background:#0a0f0c;border:2px solid rgba(47,211,106,.5)">
+   <div class="a" style="left:24px;top:22px;font:700 18px I;letter-spacing:.2em;color:#2fd36a;text-shadow:0 0 10px #2fd36a">ГЛАВА 2 · ЛЬГОТНЫЙ ПЕРИОД</div>
+   <div class="a" style="left:24px;top:60px;width:350px;height:250px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12)">
+     <div class="a" style="left:22px;top:20px;font:600 18px I;color:#9fbfa9">накопительный счёт, пример</div>
+     <div class="a" style="left:22px;top:52px;font:900 50px/1 Unb;color:#eaffef;text-shadow:${glow("#2fd36a")}">+1 247 ₽</div>
+     <svg class="a" style="left:16px;top:120px" width="320" height="110"><path d="M0 100 C 60 96 90 80 140 64 S 230 30 318 8" fill="none" stroke="#2fd36a" stroke-width="5" style="filter:drop-shadow(0 0 6px #2fd36a)"/><path d="M0 100 C 60 96 90 80 140 64 S 230 30 318 8 L 318 110 L 0 110 Z" fill="rgba(47,211,106,.12)"/></svg></div>
+   <div class="a" style="left:360px;top:70px">${A({ w: 260, h: 298, mood: "talk", arm: "point", theme: "neon" })}</div></div>`;
+if (S === 3) fr = `<div class="box" style="left:960px;top:500px;width:620px;height:349px;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.14);transform:rotate(-.8deg);background-image:linear-gradient(#d6e4f5 2px,transparent 2px),linear-gradient(90deg,#d6e4f5 2px,transparent 2px);background-size:28px 28px">
+   <div class="a" style="left:24px;top:14px;font:900 26px Unb;color:${INK}">Глава 2. <span style="background:linear-gradient(transparent 55%,#ffe45c 55%)">Льготный период</span></div>
+   <div class="a" style="left:30px;top:70px;font:700 40px/1.25 Cav;color:#1f3d8a">100 000 ₽ на счёте<br>× 16% годовых : 12<br>= <span style="color:#e8333f">≈ 1 333 ₽</span><br>в месяц</div>
+   <div class="a" style="left:56px;top:162px;width:190px;height:62px">${circle(190, 62, "#e8333f", 6, -2)}</div>
+   <div class="a" style="left:34px;top:290px;font:700 28px Cav;color:#7a7890">пример, ставки меняются</div>
+   <div class="a" style="left:400px;top:90px">${A({ w: 220, h: 252, mood: "smirk", arm: "point", theme: "doodle" })}</div></div>`;
+P(fr + `<div class="lab" style="left:960px;top:866px;color:${ink}">кадр ролика</div>`);
+
+/* ---------- рилс 9:16 ---------- */
+let rl;
+if (S === 1) rl = `<div class="box" style="left:1610px;top:500px;width:270px;height:480px;border-radius:26px;background:#ff3b4f ${seedsBg(INK, .2)};border:6px solid ${INK};box-shadow:10px 10px 0 ${INK}">
+   <div class="a" style="left:14px;top:40px;width:230px;padding:12px;background:#fff;border:5px solid ${INK};border-radius:18px;font:900 22px/1.15 Unb;color:${INK};text-align:center;box-shadow:5px 5px 0 ${INK}">БАНК ПЛАТИТ <br><span style="background:#ffd23f;padding:0 6px;white-space:nowrap">15 000 ₽</span>?</div>
+   <div class="a" style="left:-6px;top:170px">${A({ w: 270, h: 310, mood: "happy", arm: "up", theme: "pop" })}</div></div>`;
+if (S === 2) rl = `<div class="box" style="left:1610px;top:500px;width:270px;height:480px;border-radius:24px;background:radial-gradient(300px 300px at 50% 70%,#1d4a2b,#0a0f0c 70%);border:2px solid rgba(47,211,106,.5)">
+   <div class="a" style="left:16px;top:44px;width:236px;text-align:center;font:900 30px/1.1 Unb;color:#ffe0e6;text-shadow:${glow("#ff2d55")}">БАНК ПЛАТИТ<br><span style="color:#eaffef;text-shadow:${glow("#2fd36a")}">15 000 ₽</span>?</div>
+   <div class="a" style="left:-6px;top:170px">${A({ w: 270, h: 310, mood: "happy", arm: "up", theme: "neon" })}</div></div>`;
+if (S === 3) rl = `<div class="box" style="left:1610px;top:500px;width:270px;height:480px;background:#fbfbf4;box-shadow:0 10px 24px rgba(0,0,0,.14);background-image:linear-gradient(#d6e4f5 2px,transparent 2px),linear-gradient(90deg,#d6e4f5 2px,transparent 2px);background-size:24px 24px">
+   <div class="a" style="left:22px;top:40px;width:226px;padding:14px;background:#ffe45c;transform:rotate(-3deg);box-shadow:0 6px 12px rgba(0,0,0,.15);font:700 36px/1.05 Cav;color:${INK};text-align:center">банк платит<br><b style="color:#e8333f;font-size:44px">15 000 ₽</b> ?</div>
+   <div class="a" style="left:-6px;top:170px">${A({ w: 270, h: 310, mood: "happy", arm: "up", theme: "doodle" })}</div></div>`;
+P(rl + `<div class="lab" style="left:1610px;top:992px;color:${ink}">рилс / шортс</div>`);
+
+/* ---------- правила ---------- */
+P(`<div class="a" style="left:310px;top:920px;width:1270px;font:700 26px/1.35 I;color:${ink}"><span style="color:${S === 2 ? "#2fd36a" : "#e8333f"}">Правила:</span> ${D.rules}</div>`);
+
+document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 400))));
+</script>
+</body>
+</html>
