@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Слова голоса ролика №3 (Yandex LiveTTS) по кускам — устойчиво к перезапускам контейнера (12.10: контейнер перезапускался каждые
+"""Слова голоса ролика №4 (по тексту сценария) (Yandex LiveTTS) по кускам — устойчиво к перезапускам контейнера (12.10: контейнер перезапускался каждые
 30–45 мин, а Whisper medium по всей 14-минутной дорожке не успевал). Каждый кусок voice/ya_live/gNNN.wav распознаётся отдельно
 и кэшируется в gNNN.words.json; сдвиг куска = сумма длительностей предыдущих + паузы склейки (0,4 с внутри раздела, 0,9 с между
 разделами — как в ya_live.py). Итог — voice/words.json в формате build3.py words.
@@ -9,6 +9,7 @@ import json, os, subprocess, sys
 sys.path.insert(0, "/home/user/123/reels/zero-card-07")
 import voice as V
 HERE = os.path.dirname(os.path.abspath(__file__)); D = os.path.join(HERE, "ya_live")
+PH = [l.strip() for l in open(os.path.join(HERE, "phrases.txt")) if l.strip()]
 meta = json.load(open(os.path.join(D, "meta.json"))); G = [meta[str(k)] for k in range(len(meta))]
 dur = lambda f: float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f], capture_output=True, text=True).stdout)
 out, off = [], 0.0
@@ -17,7 +18,12 @@ for k, g in enumerate(G):
     if not os.path.exists(cj):
         f16 = f[:-4] + ".w16.wav"; subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f, "-ar", "16000", "-ac", "1", f16], check=True)
         json.dump(V.transcribe(f16, "medium"), open(cj, "w"), ensure_ascii=False); print(k, "распознан", flush=True)
-    for w in json.load(open(cj)): out.append({**w, "a": round(w["a"] + off, 3)})
+    # ролик №4: слова — из текста сценария (числа словами, как в привязках build4.py), времена — по Whisper через выравнивание
+    got = json.load(open(cj)); text = " ".join(PH[i] for i in g["ids"]); toks = [t for t in text.split() if V.norm(t)]
+    at = V.align(" ".join(toks), got); gd = dur(f)
+    for i, (tok, a) in enumerate(zip(toks, at)):
+        nxt = at[i + 1] if i + 1 < len(at) else gd
+        out.append({"w": tok, "a": round(a + off, 3), "d": round(max(.08, min(.6, nxt - a)), 3)})
     gap = 0 if k == len(G) - 1 else (.9 if G[k + 1]["sec"] != g["sec"] else .4)
     off += dur(f) + gap
 json.dump(out, open(os.path.join(HERE, "words.json"), "w"), ensure_ascii=False)
