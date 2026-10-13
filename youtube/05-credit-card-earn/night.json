@@ -1,1 +1,8 @@
-{"stage": "script — ждёт владельца (название, превью)", "updated": "2026-10-13", "voice": "Yandex LiveTTS vasily/sales", "style": "premium v2", "notes": "2 270 слов ≈ 12 мин"}
+{
+ "stage": "done — 720p отправлен, ждём утверждения; 1080p частями после",
+ "updated": "2026-10-13",
+ "voice": "Yandex LiveTTS vasily/sales",
+ "style": "premium v2",
+ "notes": "2 270 слов ≈ 12 мин",
+ "duration": "13:20"
+}
