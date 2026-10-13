@@ -20,6 +20,16 @@ Layout: `youtube/<NN-slug>/` per video (e.g. `youtube/01-bonus-tierlist/`),
 with `script.md`, `rec/` (gitignored), `sections/<NN>/` builds, `out/`
 (gitignored), `thumb/`, `publish.md` (title, description, chapters, tags).
 
+## Channel identity (owner, 2026-10-13) — read first
+- Channel name: **«Арбузов»** (not «Владик Арбузит» — old name; do not use it in new videos, thumbnails, banners, phone mock-ups).
+- Presenter/avatar: **Арбузов** — the watermelon in a red backwards cap (`youtube/characters/arbuzov.js`, `Arbuzov.svg({mood, arm, theme, view, mouth, blink})`).
+  Flat illustration, dark outline. Scenes are character-driven (owner liked reference rows 5 «Коротко и внятно» and 8 «David Explains Money»).
+- Voice of Арбузов: **variant 7 «Живой сочный»** — Yandex LiveTTS `sergey` → Chatterbox VC to the timbre `characters/voice/out/v1_sochny.wav`
+  (denis +2 st). Recipe: `characters/voice/base.py`, `make_voices.sh`, `vc_voices.py`. VC can blur words («Орбузов», «Поднали») —
+  check every phrase with Whisper after VC and re-take. Audio sting «хрум + маримба»: `characters/voice/sting.py`.
+- Project style: not chosen yet. Rejected 13.10: «Сочный поп», «Арбуз-неон», «Тетрадь» (characters/style.html).
+  Second round: characters/channel.html ?s=1..6 (зин-стикеры, Y2K-хром, финтех-минимал, газета, пиксель-игра, мем-карточка).
+
 ## Visual format from video #3 (owner, 2026-10-10)
 
 Video #3 and later are built on the **YouTube engine «режимы»** (`youtube/kit/yt/`, README there): a timeline of segments, each
