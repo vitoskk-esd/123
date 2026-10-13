@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ролик №5 — стили v3</title>
+<!-- Владелец 13.10 после ролика №5: «давай монтаж сделаем ещё лучше, изменим немного стилистику, я хочу ещё современнее».
+     Три развития «Премиума» (бенто, трансляция и кинетика на светлом уже показывались 13.10 — не повторяем), по 3 одинаковые сцены:
+     f=1 хук «15 000 ₽ в месяц на кредитке?», f=2 расчёт «30 000 × 15,5 % ÷ 12 ≈ 388 ₽», f=3 ловушка «Перевести → −3 100 ₽».
+     style=glass «Жидкое стекло» · style=cine «Кино-свет» · style=dash «Живые графики». Только 2D (CSS/SVG), без 3D.
+     Снимок из youtube/: node kit/shot3d.js 05-credit-card-earn/style/styles.html 05-credit-card-earn/style/out/glass_1.png 1920 1080 "style=glass&f=1" -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "GM"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); font-weight: 100 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; font-family: "I"; -webkit-font-smoothing: antialiased; color: #fff; }
+  .a { position: absolute; }
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: .12; mix-blend-mode: overlay; z-index: 90;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .vig { position: absolute; inset: 0; pointer-events: none; z-index: 89; background: radial-gradient(130% 110% at 50% 45%, transparent 55%, rgba(0,0,0,.7) 100%); }
+  .tag { position: absolute; left: 60px; bottom: 44px; z-index: 95; font: 600 22px "I"; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+
+  /* ЖИДКОЕ СТЕКЛО */
+  .glass { position: absolute; border-radius: 48px; background: linear-gradient(160deg, rgba(255,255,255,.26), rgba(255,255,255,.07) 55%, rgba(255,255,255,.12));
+    backdrop-filter: blur(34px) saturate(185%); -webkit-backdrop-filter: blur(34px) saturate(185%);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.75), inset 0 -1px 0 rgba(255,255,255,.2), inset 0 0 0 1.5px rgba(255,255,255,.28), 0 40px 90px rgba(10,0,40,.38); overflow: hidden; }
+  .glass::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(120% 60% at 10% 0%, rgba(255,255,255,.35), transparent 45%), radial-gradient(80% 50% at 100% 100%, rgba(255,255,255,.14), transparent 60%); }
+  .gl-k { font: 600 26px "I"; color: rgba(255,255,255,.78); letter-spacing: .01em; }
+  .gl-v { font: 700 92px/1 "I"; letter-spacing: -.045em; }
+  .pill { position: absolute; padding: 14px 28px; border-radius: 999px; font: 700 28px "I"; }
+
+  /* КИНО-СВЕТ: карта */
+  .card { position: absolute; width: 640px; height: 404px; border-radius: 34px; overflow: hidden; }
+  .card .base { position: absolute; inset: 0; }
+  .card .tex { position: absolute; inset: 0; opacity: .22; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .card .sheen { position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.34) 46%, rgba(255,255,255,.06) 52%, transparent 60%); }
+  .card .edge { position: absolute; inset: 0; border-radius: 34px; box-shadow: inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.35); }
+  .chip { position: absolute; left: 56px; top: 158px; width: 94px; height: 72px; border-radius: 13px;
+    background: linear-gradient(135deg, #fff4c4 0%, #d9b45a 30%, #8c6a1f 52%, #f1d98a 70%, #b38a2e 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+  .chip::before { content: ""; position: absolute; inset: 12px 10px; border-radius: 7px;
+    background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(70,50,10,.45) 18px 20px), repeating-linear-gradient(0deg, transparent 0 15px, rgba(70,50,10,.45) 15px 17px); }
+  .num { position: absolute; left: 56px; top: 266px; font: 600 36px "I"; letter-spacing: .16em; color: #f6f6f6; text-shadow: 0 1px 0 rgba(255,255,255,.55), 0 -1px 0 rgba(0,0,0,.45); }
+  .mir { position: absolute; right: 46px; bottom: 36px; font: 700 42px "I"; color: #fff; }
+  .goldtxt { background: linear-gradient(180deg, #fffbe9 0%, #ffe9a3 22%, #f5c242 44%, #a8740f 52%, #ffd65c 66%, #fff3c4 84%, #c99328 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ЖИВЫЕ ГРАФИКИ */
+  .panel { position: absolute; border-radius: 28px; background: linear-gradient(180deg, rgba(22,28,44,.92), rgba(12,16,28,.92)); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(120,150,220,.12), 0 30px 60px rgba(0,0,0,.45); }
+  .p-t { position: absolute; left: 34px; top: 28px; font: 600 24px "I"; color: #8a96b4; letter-spacing: .02em; }
+  .kpi { font: 700 76px/1 "I"; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+  .mono { font-family: "GM"; }
+</style>
+</head>
+<body>
+<div id="R"></div><div class="vig"></div><div class="grain"></div>
+<script>
+const q = new URLSearchParams(location.search), ST = q.get("style") || "glass", F = +(q.get("f") || 1);
+const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h);
+const LOGO = { alfa: "../../assets/logos/alfa.svg", t: "../../assets/logos/tbank.svg" };
+const nfc = (x, y) => `<svg class="a" style="left:${x}px;top:${y}px" width="48" height="54" viewBox="0 0 40 44">${[9, 16, 23].map(r => `<path d="M${6 + r * .3} ${22 - r * .62} A ${r} ${r} 0 0 1 ${6 + r * .3} ${22 + r * .62}" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3.4" stroke-linecap="round"/>`).join("")}</svg>`;
+const ALFA = "radial-gradient(120% 140% at 15% 0%, #ff6a5c 0%, #ef3124 38%, #b8160d 75%, #7d0b05 100%)";
+const TB = "radial-gradient(120% 140% at 15% 0%, #3a3b40 0%, #1c1d21 45%, #0b0b0d 100%)";
+const card = ({ bg = ALFA, logo = "alfa", x, y, r = 0, s = 1, rim = "rgba(255,255,255,0)", z = 5, reflect = false }) => `
+  <div class="card" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});z-index:${z};box-shadow:0 60px 90px rgba(0,0,0,.6),0 0 0 1.5px ${rim},0 0 70px ${rim};${reflect ? "-webkit-box-reflect:below 14px linear-gradient(transparent 55%, rgba(255,255,255,.22));" : ""}">
+    <div class="base" style="background:${bg}"></div><div class="tex"></div><div class="sheen"></div>
+    <img src="${LOGO[logo]}" style="position:absolute;left:56px;top:50px;height:${logo === "alfa" ? 50 : 56}px;filter:brightness(0) invert(1)">
+    <div class="chip"></div>${nfc(170, 168)}<div class="num">2200 •••• •••• 2026</div><div class="mir">МИР</div><div class="edge"></div></div>`;
+const tag = (t) => P(`<div class="tag">${t}</div>`);
+
+/* ================= ЖИДКОЕ СТЕКЛО ================= */
+if (ST === "glass") {
+  const blobs = (set) => set.map(([x, y, d, c, o = 1]) => `<div class="a" style="left:${x - d / 2}px;top:${y - d / 2}px;width:${d}px;height:${d}px;border-radius:50%;background:radial-gradient(circle,${c} 0%,transparent 66%);opacity:${o};filter:blur(20px)"></div>`).join("");
+  P(`<div class="a" style="inset:0;background:#120a2a"></div>`);
+  if (F === 1) {
+    P(blobs([[300, 250, 1100, "#7b3fff"], [1600, 300, 1000, "#ff4d8d"], [1100, 950, 1100, "#ff9a3c"], [500, 1000, 800, "#21d4a0", .8]]));
+    P(`<div class="glass" style="left:330px;top:250px;width:1260px;height:520px"></div>
+       <div class="a" style="left:330px;top:300px;width:1260px;text-align:center;font:700 240px/1 I;letter-spacing:-.06em;color:#fff;text-shadow:0 10px 40px rgba(60,0,80,.25)">15 000 ₽</div>
+       <div class="a" style="left:330px;top:570px;width:1260px;text-align:center;font:600 64px/1 I;letter-spacing:-.02em;color:rgba(255,255,255,.92)">в месяц на кредитке?</div>
+       <div class="pill" style="left:810px;top:690px;background:rgba(255,255,255,.92);color:#2a1460">проверим на цифрах</div>`);
+    P(`<div class="glass" style="left:1440px;top:640px;width:420px;height:266px;border-radius:30px;transform:rotate(-12deg)"><div class="a" style="left:34px;top:30px;font:700 30px I">Кредитка</div><div class="a" style="left:34px;top:110px;width:62px;height:48px;border-radius:9px;background:linear-gradient(135deg,#fff4c4,#d9b45a 40%,#a8822e)"></div><div class="a" style="right:30px;bottom:24px;font:700 34px I">МИР</div></div>`);
+  }
+  if (F === 2) {
+    P(blobs([[200, 900, 1000, "#21d4a0"], [1700, 200, 1000, "#3d7bff"], [1000, 300, 900, "#a64dff", .8], [1500, 1000, 800, "#c6ff3d", .55]]));
+    const tile = (x, k, v, sub, hi) => `<div class="glass" style="left:${x}px;top:250px;width:520px;height:360px;${hi ? "background:linear-gradient(160deg,rgba(198,255,61,.55),rgba(198,255,61,.18));" : ""}">
+        <div class="a gl-k" style="left:44px;top:44px;${hi ? "color:#1d2a00" : ""}">${k}</div><div class="a gl-v" style="left:40px;top:150px;${hi ? "color:#152000" : ""}">${v}</div>
+        <div class="a" style="left:44px;top:276px;font:600 26px I;color:${hi ? "#2c3d00" : "rgba(255,255,255,.7)"}">${sub}</div></div>`;
+    P(`<div class="a" style="left:120px;top:110px;font:700 64px I;letter-spacing:-.03em">Расчёт №1 <span style="color:rgba(255,255,255,.6)">· карта 55–60 дней</span></div>`);
+    P(tile(120, "Тратишь картой", "30 000 ₽", "в месяц") + tile(700, "Ставка счёта", "15,5 %", "приветственная, 2–3 мес") + tile(1280, "Доход в месяц", "≈ 388 ₽", "30 000 × 15,5 % ÷ 12", true));
+    P(`<div class="a" style="left:640px;top:405px;font:700 70px I;color:rgba(255,255,255,.85)">×</div><div class="a" style="left:1216px;top:405px;font:700 70px I;color:rgba(255,255,255,.85)">=</div>`);
+    P(`<div class="glass" style="left:120px;top:680px;width:1680px;height:200px;border-radius:40px">
+         <div class="a gl-k" style="left:48px;top:40px">За год</div><div class="a" style="left:44px;top:92px;font:700 72px I;letter-spacing:-.04em">≈ 3 400 ₽</div>
+         <div class="a" style="left:520px;top:58px;width:2px;height:90px;background:rgba(255,255,255,.35)"></div>
+         <div class="a gl-k" style="left:580px;top:40px">Карта на 120–180 дней</div><div class="a" style="left:576px;top:92px;font:700 72px I;letter-spacing:-.04em;color:#e9ffb0">≈ 6 800 ₽ / год</div>
+         <div class="a" style="right:48px;top:80px;font:600 26px I;color:rgba(255,255,255,.65)">пример · условия на 13.10.2026</div></div>`);
+  }
+  if (F === 3) {
+    P(blobs([[400, 300, 1100, "#ff3b5c"], [1600, 800, 1100, "#7b3fff"], [1300, 150, 800, "#ff9a3c", .7], [300, 1000, 700, "#3d7bff", .7]]));
+    P(`<div class="glass" style="left:1180px;top:110px;width:520px;height:860px;border-radius:72px">
+         <div class="a" style="left:190px;top:22px;width:140px;height:36px;border-radius:20px;background:rgba(0,0,0,.55)"></div>
+         <div class="a gl-k" style="left:50px;top:110px">Кредитная карта</div><div class="a" style="left:46px;top:156px;font:700 84px I;letter-spacing:-.04em">50 000 ₽</div>
+         <div class="a" style="left:46px;top:330px;width:428px;height:128px;border-radius:36px;background:linear-gradient(180deg,#ff5a6e,#e0193a);box-shadow:0 0 80px rgba(255,40,80,.75),inset 0 2px 0 rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font:700 44px I">Перевести</div>
+         <div class="a" style="left:46px;top:490px;width:428px;height:110px;border-radius:36px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font:700 38px I;color:rgba(255,255,255,.85)">Снять наличные</div></div>`);
+    P(`<div class="glass" style="left:160px;top:330px;width:900px;height:300px;border-radius:44px">
+         <div class="a gl-k" style="left:48px;top:44px">Комиссия 5,9 % + 150 ₽</div>
+         <div class="a" style="left:44px;top:110px;font:700 150px/1 I;letter-spacing:-.05em;color:#fff;text-shadow:0 0 50px rgba(255,60,90,.65)">−3 100 ₽</div></div>
+       <div class="pill" style="left:160px;top:670px;background:rgba(255,255,255,.92);color:#8a0a24">= доход схемы за 5 месяцев</div>`);
+  }
+  tag("Стиль · Жидкое стекло");
+}
+
+/* ================= КИНО-СВЕТ ================= */
+if (ST === "cine") {
+  const stage = (c1 = "#1b2738", c2 = "#0b1018") => P(`<div class="a" style="inset:0;background:radial-gradient(1400px 900px at 50% 20%, ${c1} 0%, ${c2} 50%, #030406 100%)"></div>
+     <div class="a" style="left:0;right:0;top:740px;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,0) 40%);border-top:1px solid rgba(255,255,255,.08)"></div>`);
+  const cone = (x, c = "rgba(255,226,160,.16)", w = 900) => P(`<div class="a" style="left:${x - w / 2}px;top:-300px;width:${w}px;height:1300px;background:conic-gradient(from 180deg at 50% 0%, transparent 0deg, ${c} 14deg, transparent 30deg);filter:blur(12px)"></div>`);
+  if (F === 1) {
+    stage(); cone(960);
+    P(`<div class="a" style="left:0;right:0;top:150px;text-align:center;font:900 330px/1 Unb;letter-spacing:-.08em;color:transparent;-webkit-text-stroke:3px rgba(255,214,120,.35)">15 000 ₽</div>`);
+    P(card({ x: 640, y: 300, r: -6, s: 1, rim: "rgba(255,200,140,.35)", reflect: true, z: 6 }));
+    P(`<div class="a" style="left:0;right:0;top:800px;text-align:center;font:700 92px/1 O;text-transform:uppercase;letter-spacing:.02em;color:#fff;text-shadow:0 8px 24px rgba(0,0,0,.7);z-index:8">в месяц на кредитке<span style="color:#ffcf4a">?</span></div>`);
+    P(`<div class="a" style="left:-200px;top:520px;width:2400px;height:6px;background:linear-gradient(90deg,transparent,rgba(255,236,190,.0) 30%,rgba(255,236,190,.65) 50%,transparent 70%);transform:rotate(-8deg);filter:blur(2px);z-index:7"></div>`);
+  }
+  if (F === 2) {
+    stage("#0f3a28", "#07150f"); cone(560, "rgba(120,255,190,.14)");
+    P(card({ x: 200, y: 330, r: -10, s: .92, rim: "rgba(120,255,190,.35)", reflect: true }));
+    const coin = (x, y, d, bl = 0) => `<div class="a" style="left:${x}px;top:${y}px;width:${d}px;height:${d}px;border-radius:50%;filter:blur(${bl}px) drop-shadow(0 12px 16px rgba(0,0,0,.5));background:radial-gradient(circle at 34% 28%,#fffbe0 0%,#ffe27a 28%,#e2a514 62%,#8f6006 100%);display:flex;align-items:center;justify-content:center;font:900 ${d * .5}px Unb;color:#8a5a05">₽</div>`;
+    P(coin(780, 160, 110, 0) + coin(140, 180, 70, 4) + coin(860, 760, 60, 6) + coin(1780, 860, 90, 8));
+    P(`<div class="a mono" style="left:1000px;top:250px;font-size:44px;color:rgba(255,255,255,.62)">30 000 ₽ × 15,5 % ÷ 12</div>
+       <div class="a" style="left:990px;top:320px;font:900 260px/1 Unb;letter-spacing:-.08em;background:linear-gradient(180deg,#fff,#d9ffe9 45%,#57f0a2);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 40px rgba(87,240,162,.45))">388 ₽</div>
+       <div class="a" style="left:1000px;top:600px;font:700 64px/1 O;text-transform:uppercase">в месяц · ≈ 3 400 ₽ в год</div>
+       <div class="a" style="left:1000px;top:690px;padding:12px 24px;border-radius:14px;background:#ffd34d;color:#111;font:700 40px/1 O;text-transform:uppercase">карта на 120–180 дней → 6 800 ₽</div>`);
+  }
+  if (F === 3) {
+    stage("#3a0f16", "#14060a"); cone(1300, "rgba(255,90,100,.16)");
+    P(`<div class="a" style="left:1080px;top:120px;width:470px;height:880px;border-radius:70px;background:linear-gradient(160deg,#2a2a30,#0b0b0e);box-shadow:0 0 0 10px #1c1c22,0 0 0 12px #3a3a44,0 60px 120px #000;-webkit-box-reflect:below 20px linear-gradient(transparent 70%, rgba(255,255,255,.15))">
+         <div class="a" style="left:165px;top:22px;width:140px;height:38px;border-radius:20px;background:#000"></div>
+         <div class="a" style="left:44px;top:120px;font:600 28px I;color:#fff9">Кредитная карта</div><div class="a" style="left:40px;top:162px;font:700 80px I;letter-spacing:-.04em">50 000 ₽</div>
+         <div class="a" style="left:40px;top:330px;width:390px;height:124px;border-radius:34px;background:linear-gradient(180deg,#ff5a6e,#d4142f);box-shadow:0 0 120px rgba(255,40,70,.9);display:flex;align-items:center;justify-content:center;font:700 44px I">Перевести</div>
+         <div class="a" style="left:40px;top:486px;width:390px;height:106px;border-radius:34px;background:#1f1f25;display:flex;align-items:center;justify-content:center;font:700 36px I;color:#fff8">Снять наличные</div></div>
+       <div class="a" style="left:1050px;top:780px;width:540px;height:200px;border-radius:50%;background:radial-gradient(ellipse,rgba(255,40,70,.45),transparent 70%);filter:blur(20px)"></div>`);
+    P(`<div class="a" style="left:120px;top:260px;font:700 64px/1 O;text-transform:uppercase;color:#fffb">одна кнопка</div>
+       <div class="a" style="left:110px;top:350px;font:900 196px/1 Unb;letter-spacing:-.08em;color:#ff4b5c;text-shadow:0 0 60px rgba(255,40,70,.7)">−3 100 ₽</div>
+       <div class="a mono" style="left:124px;top:620px;font-size:40px;color:#fffa">5,9 % + 150 ₽ · без льготного</div>`);
+  }
+  tag("Стиль · Кино-свет");
+}
+
+/* ================= ЖИВЫЕ ГРАФИКИ ================= */
+if (ST === "dash") {
+  P(`<div class="a" style="inset:0;background:radial-gradient(1400px 900px at 70% 0%, #14203a 0%, #0a0f1c 55%, #05070d 100%)"></div>
+     <div class="a" style="inset:0;background-image:linear-gradient(rgba(120,150,220,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(120,150,220,.06) 1px,transparent 1px);background-size:80px 80px"></div>`);
+  const tick = () => P(`<div class="a mono" style="left:0;right:0;bottom:0;height:56px;background:rgba(10,14,26,.95);border-top:1px solid rgba(120,150,220,.18);display:flex;align-items:center;gap:60px;padding-left:60px;font-size:24px;color:#8a96b4;white-space:nowrap;z-index:80">
+       <span>КЛЮЧЕВАЯ <b style="color:#fff">14,00 %</b></span><span>СОВКОМБАНК <b style="color:#3ee08f">15,5 %</b></span><span>МТС <b style="color:#3ee08f">15,5 %</b></span><span>ОЗОН <b style="color:#3ee08f">15,1 %</b></span><span>ЯНДЕКС <b style="color:#3ee08f">15 %</b></span><span>АЛЬФА <b style="color:#3ee08f">14 %</b></span><span>АТБ <b style="color:#3ee08f">14 %</b></span></div>`);
+  if (F === 1) {
+    P(`<div class="a" style="left:120px;top:90px;font:700 72px I;letter-spacing:-.03em">Доход на кредитке, ₽ в месяц</div>
+       <div class="a" style="left:124px;top:180px;font:600 30px I;color:#8a96b4">обещают vs посчитаем · пример</div>`);
+    P(`<div class="panel" style="left:120px;top:260px;width:1680px;height:680px">
+         ${[0, 1, 2, 3].map(i => `<div class="a" style="left:120px;right:40px;top:${80 + i * 140}px;border-top:1px dashed rgba(138,150,180,.25)"></div><div class="a mono" style="left:30px;top:${66 + i * 140}px;font-size:22px;color:#5d6a88">${[15, 10, 5, 0][i] === 0 ? "0" : [15, 10, 5][i] + " 000"}</div>`).join("")}
+         <div class="a" style="left:260px;top:80px;width:360px;height:420px;border-radius:22px 22px 0 0;background:linear-gradient(180deg,#ff6b7a,#d9233c);box-shadow:0 0 60px rgba(255,60,90,.35)"></div>
+         <div class="a" style="left:260px;width:360px;top:20px;text-align:center;font:700 52px I">15 000</div>
+         <div class="a" style="left:260px;width:360px;top:520px;text-align:center;font:600 30px I;color:#c9d2ea">обещают блогеры</div>
+         <div class="a" style="left:820px;top:430px;width:360px;height:70px;border-radius:22px 22px 0 0;background:repeating-linear-gradient(135deg,rgba(62,224,143,.35) 0 14px,rgba(62,224,143,.15) 14px 28px);border:2px dashed #3ee08f;border-bottom:none"></div>
+         <div class="a" style="left:820px;width:360px;top:360px;text-align:center;font:700 64px I;color:#3ee08f">?</div>
+         <div class="a" style="left:820px;width:360px;top:520px;text-align:center;font:600 30px I;color:#c9d2ea">посчитаем</div>
+         <div class="a" style="left:1300px;top:120px;width:330px">
+           <div style="font:600 24px I;color:#8a96b4">Чтобы 15 000 ₽/мес при 15 %</div><div class="kpi" style="margin-top:12px;color:#ff6b7a">1,2 млн</div><div style="font:600 24px I;color:#8a96b4;margin-top:10px">должно лежать на счёте</div></div></div>`);
+    tick();
+  }
+  if (F === 2) {
+    P(`<div class="a" style="left:120px;top:80px;font:700 64px I;letter-spacing:-.03em">Запас на счёте · месяц по схеме</div>`);
+    // площадной график: счёт растёт 1-го, держится, падает в конце (погашение); проценты капают
+    const W = 1100, H = 440, pts = [[0, 380], [30, 120], [800, 108], [880, 380], [1100, 380]];
+    P(`<div class="panel" style="left:120px;top:190px;width:1180px;height:720px"><div class="p-t">Накопительный счёт, ₽</div>
+         <svg class="a" style="left:40px;top:110px" width="${W}" height="${H + 60}" viewBox="0 0 ${W} ${H + 60}">
+           <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ee08f" stop-opacity=".55"/><stop offset="1" stop-color="#3ee08f" stop-opacity="0"/></linearGradient></defs>
+           ${[0, 1, 2, 3].map(i => `<line x1="0" x2="${W}" y1="${40 + i * 110}" y2="${40 + i * 110}" stroke="rgba(138,150,180,.18)" stroke-dasharray="6 8"/>`).join("")}
+           <path d="M0 380 L30 120 C 300 116, 600 110, 800 108 L880 380 L1100 380 L1100 440 L0 440 Z" fill="url(#g)"/>
+           <path d="M0 380 L30 120 C 300 116, 600 110, 800 108 L880 380 L1100 380" fill="none" stroke="#3ee08f" stroke-width="6" stroke-linejoin="round"/>
+           <circle cx="30" cy="120" r="12" fill="#3ee08f"/><circle cx="800" cy="108" r="12" fill="#ffd34d"/><circle cx="880" cy="380" r="12" fill="#ff6b7a"/>
+           <text x="44" y="98" fill="#fff" font-family="I" font-weight="700" font-size="30">1-е · +30 000 ₽</text>
+           <text x="600" y="80" fill="#ffd34d" font-family="I" font-weight="700" font-size="30">проценты капают</text>
+           <text x="840" y="430" fill="#ff6b7a" font-family="I" font-weight="700" font-size="30">погасил кредитку</text>
+           <text x="0" y="490" fill="#5d6a88" font-family="GM" font-size="22">1 окт</text><text x="1020" y="490" fill="#5d6a88" font-family="GM" font-size="22">31 окт</text></svg></div>`);
+    const k = (y, t, v, c, sub) => `<div class="panel" style="left:1340px;top:${y}px;width:460px;height:226px"><div class="p-t">${t}</div><div class="a kpi" style="left:34px;top:80px;color:${c};font-size:62px">${v}</div><div class="a" style="left:36px;top:172px;font:600 22px I;color:#5d6a88">${sub}</div>
+         <svg class="a" style="right:30px;top:24px" width="140" height="60" viewBox="0 0 140 60"><path d="M0 50 L30 40 L60 44 L90 24 L120 18 L140 8" fill="none" stroke="${c}" stroke-width="4"/></svg></div>`;
+    P(k(190, "Траты картой / мес", "30 000 ₽", "#fff", "пример") + k(436, "Ставка счёта", "15,5 %", "#ffd34d", "приветственная 2–3 мес") + k(682, "Доход / мес", "≈ 388 ₽", "#3ee08f", "≈ 3 400 ₽ за год"));
+    tick();
+  }
+  if (F === 3) {
+    P(`<div class="a" style="left:120px;top:80px;font:700 64px I;letter-spacing:-.03em">Операции по кредитке</div>`);
+    const row = (ic, a, b, v, c, hl) => `<div style="display:flex;align-items:center;gap:26px;padding:26px 34px;border-bottom:1px solid rgba(120,150,220,.12);${hl ? "background:linear-gradient(90deg,rgba(255,60,90,.22),rgba(255,60,90,.05));box-shadow:inset 4px 0 0 #ff4b5c;" : ""}">
+       <div style="width:64px;height:64px;border-radius:18px;background:${ic};flex:none"></div><div><div style="font:700 34px I">${a}</div><div style="font:600 24px I;color:#8a96b4;margin-top:6px">${b}</div></div>
+       <div class="mono" style="margin-left:auto;font-size:40px;color:${c}">${v}</div></div>`;
+    P(`<div class="panel" style="left:120px;top:190px;width:1100px;height:740px;overflow:hidden;padding-top:20px">
+         ${row("#2b6fd6", "Продукты", "покупка · в льготный период", "−2 340 ₽", "#fff")}${row("#7b3fd6", "Проезд", "покупка · в льготный период", "−780 ₽", "#fff")}
+         ${row("#ff4b5c", "Перевод по номеру телефона", "квази-кэш · льготный не действует", "−50 000 ₽", "#ff6b7a", true)}${row("#ff4b5c", "Комиссия за перевод", "5,9 % + 150 ₽", "−3 100 ₽", "#ff4b5c", true)}
+         ${row("#3ee08f", "Снятие наличных", "до 50 000 ₽ / мес · без комиссии", "0 ₽", "#3ee08f")}</div>`);
+    P(`<div class="panel" style="left:1260px;top:190px;width:540px;height:740px;background:linear-gradient(180deg,rgba(80,10,20,.92),rgba(30,6,10,.92));box-shadow:inset 0 0 0 1px rgba(255,90,110,.35),0 0 80px rgba(255,40,70,.25),0 30px 60px rgba(0,0,0,.5)">
+         <div class="p-t" style="color:#ff9aa6">Потеряно одним нажатием</div><div class="a kpi" style="left:34px;top:110px;font-size:100px;color:#ff4b5c">−3 100 ₽</div>
+         <div class="a" style="left:36px;top:280px;font:600 30px/1.4 I;color:#ffd0d6;width:470px">= доход схемы<br>за 5 месяцев</div>
+         <svg class="a" style="left:34px;top:470px" width="470" height="200" viewBox="0 0 470 200"><path d="M0 30 L80 40 L160 36 L240 50 L300 44 L320 180 L470 190" fill="none" stroke="#ff4b5c" stroke-width="6"/><circle cx="320" cy="180" r="10" fill="#ff4b5c"/></svg></div>`);
+    tick();
+  }
+  tag("Стиль · Живые графики");
+}
+Promise.all([document.fonts.ready, ...[...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))]).then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
