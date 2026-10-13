@@ -291,6 +291,8 @@ History: v1 (one static scene per 4.5 s) — «скучно»; v2/v3 (reel stimu
   - Every open loop closed; every number has a source line in `script.md`.
   - You cannot watch or listen: say what was checked and how.
 
+**Delivery order (owner, 13.10):** «сначала присылай полностью ролик в 720, потом после утверждения по частям в 1080р». Send ONE full 720p file (two-pass, ≤ 29 MiB) first; send the lossless 1080p parts (`ffmpeg -f segment -c copy`, each ≤ 29 MiB) only after the owner approves the 720p.
+
 ## 7. Packaging (`publish.md`)
 
 - Title (chosen at gate 1), description: first 2 lines = promise + Telegram link;
