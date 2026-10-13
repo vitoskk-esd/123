@@ -138,7 +138,7 @@ YT.mode("premium", {
     if (P.q) { const q = d.quote, pos = q.pos || (P.hero || P.fan || P.ph || P.ln || P.cmp || P.pods ? "top" : "center");
       P.q.style.top = pos === "top" ? "90px" : pos === "bottom" ? "800px" : "380px"; if (pos !== "center") P.q.style.fontSize = "70px";
       const n = P.qw.length, kq = k(q.at, Math.max(.45, n * .12)); P.qw.forEach((w, i) => { const kw = U.clamp(kq * n - i); w.style.opacity = U.out3(kw); w.style.transform = `translateY(${(1 - U.out5(kw)) * 30}px)`; });
-      if (P.qsub) { P.qsub.style.top = (pos === "center" ? 560 : pos === "top" ? 200 : 940) + "px"; rise(P.qsub, k((q.at || 0) + .4, .5), 16); } }
+      if (P.qsub) { P.qsub.style.top = (P.q.offsetTop + P.q.offsetHeight + (pos === "center" ? 50 : 26)) + "px"; rise(P.qsub, k((q.at || 0) + .4, .5), 16); } }
     if (P.rows) { const r = d.rows; Object.assign(P.rows.style, { left: (P.hero || P.ph ? 1020 : 580) + "px", top: (P.q ? 300 : r.title ? 190 : 330) + "px" });
       const rt = P.rows.querySelector(".rt"); if (rt) rise(rt, k(r.at, .5), 30);
       P.rowEls.forEach((e, i) => rise(e, k(r.items[i].at ?? (r.at || 0) + .3 + i * .35, .45), 26));
