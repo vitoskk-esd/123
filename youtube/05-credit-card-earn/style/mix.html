@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ролик №5 — микс миров</title>
+<!-- Владелец 13.10 на «Кино-свет»: «ты просто добавил чуть-чуть красок, нужно заменить структуру, покидай ещё вариантов».
+     Не палитра, а грамматика кадра. Один и тот же фрагмент голоса («тратишь 30 000 → платишь кредиткой, деньги на счёте → под 15,5 % →
+     ≈ 388 ₽ в месяц») в 5 структурах, по 4 кадра-раскадровки с подписью движения:
+       s=1 «Предметная съёмка» — каждая фраза = один предмет крупным планом, почти без текста
+       s=2 «Бесконечный холст» — схема-карта, камера летает по стрелкам между узлами
+       s=3 «Кинетическая типографика» — голос превращается в огромные слова и цифры на весь кадр
+       s=4 «Жизнь в экране» — всё происходит в приложениях телефона: пуши, переводы, счета
+       s=5 «Сплит-экран» — два мира рядом: «без схемы» и «со схемой», меняются синхронно
+     Снимок из youtube/: node kit/shot3d.js 05-credit-card-earn/style/structures.html 05-credit-card-earn/style/out/s1_1.png 1920 1080 "s=1&f=1" -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "GM"; src: url("../../kit/fonts/GeistMono-Bold.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "PF"; src: url("../../kit/fonts/playfair-cyrillic-600-italic.woff2"); font-weight: 600; font-style: italic; unicode-range: U+0400-045F; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; font-family: "I"; -webkit-font-smoothing: antialiased; color: #fff; }
+  .a { position: absolute; }
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: .1; mix-blend-mode: overlay; z-index: 90;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .sb { position: absolute; left: 0; right: 0; bottom: 0; z-index: 99; padding: 22px 44px; background: linear-gradient(0deg, rgba(0,0,0,.92), rgba(0,0,0,.7)); display: flex; gap: 26px; align-items: baseline; }
+  .sb b { font: 700 30px "I"; color: #ffd34d; white-space: nowrap; } .sb span { font: 600 28px/1.3 "I"; color: #e8e8ee; }
+  .vo { position: absolute; top: 28px; left: 44px; z-index: 98; font: 600 24px "I"; color: rgba(255,255,255,.55); letter-spacing: .02em; }
+  .card { position: absolute; width: 640px; height: 404px; border-radius: 34px; overflow: hidden; box-shadow: 0 60px 110px rgba(0,0,0,.6); }
+  .chip { position: absolute; width: 94px; height: 72px; border-radius: 13px; background: linear-gradient(135deg, #fff4c4 0%, #d9b45a 30%, #8c6a1f 52%, #f1d98a 70%, #b38a2e 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+  .chip::before { content: ""; position: absolute; inset: 12px 10px; border-radius: 7px; background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(70,50,10,.45) 18px 20px), repeating-linear-gradient(0deg, transparent 0 15px, rgba(70,50,10,.45) 15px 17px); }
+  .sheen { position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.34) 46%, rgba(255,255,255,.06) 52%, transparent 60%); }
+</style>
+</head>
+<body>
+<div id="R"></div><div class="grain"></div>
+<script>
+const q = new URLSearchParams(location.search), S = +(q.get("s") || 1), F = +(q.get("f") || 1);
+const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h);
+const VO = ["«Допустим, ты тратишь тридцать тысяч в месяц…»", "«…платишь кредиткой, а свои деньги лежат на счёте…»", "«…под пятнадцать с половиной процентов…»", "«…это примерно триста девяносто рублей в месяц»"];
+const sb = (n, t) => P(`<div class="vo">голос: ${VO[F - 1]}</div><div class="sb"><b>${n} · кадр ${F}/4</b><span>${t}</span></div>`);
+const ALFA = "radial-gradient(120% 140% at 15% 0%, #ff6a5c 0%, #ef3124 38%, #b8160d 75%, #7d0b05 100%)";
+const card = (x, y, r = 0, s = 1, extra = "") => `<div class="card" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});${extra}"><div class="a" style="inset:0;background:${ALFA}"></div><div class="sheen"></div>
+   <img src="../../assets/logos/alfa.svg" style="position:absolute;left:56px;top:50px;height:50px;filter:brightness(0) invert(1)"><div class="chip" style="left:56px;top:158px"></div>
+   <div class="a" style="left:56px;top:266px;font:600 36px I;letter-spacing:.16em">2200 •••• •••• 2026</div><div class="a" style="right:46px;bottom:36px;font:700 42px I">МИР</div></div>`;
+const coin = (x, y, d, bl = 0, r = 0) => `<div class="a" style="left:${x}px;top:${y}px;width:${d}px;height:${d}px;border-radius:50%;transform:rotate(${r}deg);filter:blur(${bl}px) drop-shadow(0 14px 18px rgba(0,0,0,.5));background:radial-gradient(circle at 34% 28%,#fffbe0 0%,#ffe27a 28%,#e2a514 62%,#8f6006 100%);display:flex;align-items:center;justify-content:center;font:900 ${d * .5}px Unb;color:#8a5a05;box-shadow:inset 0 0 0 ${d * .07}px rgba(255,240,180,.45)">₽</div>`;
+const note = (x, y, r, s = 1, bl = 0) => `<div class="a" style="left:${x}px;top:${y}px;width:520px;height:236px;transform:rotate(${r}deg) scale(${s});filter:blur(${bl}px) drop-shadow(0 26px 30px rgba(0,0,0,.55));border-radius:10px;overflow:hidden;background:linear-gradient(120deg,#f8c39c 0%,#ef9563 35%,#d96c37 70%,#f3b086 100%)">
+   <div class="a" style="inset:14px;border:3px solid rgba(110,40,10,.35);border-radius:6px"></div><div class="a" style="left:30px;top:22px;font:900 64px/1 Unb;color:#6e2a0a;letter-spacing:-.04em">5000</div>
+   <div class="a" style="right:30px;bottom:16px;font:900 90px/1 Unb;color:rgba(110,40,10,.4)">₽</div><div class="a" style="left:230px;top:40px;width:190px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.45),transparent 68%)"></div></div>`;
+
+// ===== МИКС МИРОВ (владелец 13.10: «ролик на ютуб должен состоять не из одного фона, как в рилсах в инсте»).
+// Первые ~30 с ролика №5, 8 кадров подряд — у каждого свой мир (видеокадр Pexels, кинетика, лента, стол сверху, телефон, доска, предметка).
+// f=1..8; фон-видео в ролике — живые клипы youtube/assets/broll (лицензия Pexels), здесь — их кадры.
+const SH = [
+  ["0:00–0:03", "«Можно ли зарабатывать на кредитке?»", "Живое видео: оплата картой на терминале, тёмная грейд-подложка, вопрос крупно."],
+  ["0:03–0:04", "«Можно.»", "Жёсткая склейка на зелёный: одно слово на весь кадр, удар в звуке."],
+  ["0:04–0:08", "«В роликах обещают от трёх до пятнадцати тысяч…»", "Лента соцсетей: пост блогера «15 000 ₽ пассивно», лайки набегают."],
+  ["0:08–0:11", "«Я взял калькулятор и проверил…»", "Стол сверху: калькулятор, чек, карта — камера опускается к калькулятору."],
+  ["0:11–0:14", "«Спойлер: деньги правда есть.»", "Живое видео: пересчёт купюр, зелёная плашка «деньги есть»."],
+  ["0:14–0:19", "«…одна кнопка — и минус три тысячи»", "Телефон крупно: палец над красной кнопкой «Перевести», вспышка −3 100 ₽."],
+  ["0:19–0:26", "«Разберу, посчитаю, покажу, дам план»", "Маркерная доска: план ролика рисуется пунктами в такт голосу."],
+  ["0:26–0:30", "«Без ссылок и без рекламы. Поехали.»", "Предметка: карта под прожектором, титр главы «Как работает схема»."]];
+const [tc, vo, how] = SH[F - 1];
+P(`<div class="vo" style="z-index:98">${tc} · голос: ${vo}</div><div class="sb"><b>Кадр ${F}/8 · ${tc}</b><span>${how}</span></div>`);
+const photo = (src, pos = "50% 50%", grade = "rgba(0,0,0,.45)", size = "cover") => P(`<div class="a" style="inset:0;background:url(bg/${src}) ${pos}/${size}"></div><div class="a" style="inset:0;background:linear-gradient(180deg,${grade},rgba(0,0,0,.15) 40%,${grade})"></div>`);
+if (F === 1) { photo("pay_terminal.jpg", "50% 50%", "rgba(5,8,20,.7)");
+  P(`<div class="a" style="left:120px;top:300px;font:900 120px/1.05 Unb;letter-spacing:-.05em;text-shadow:0 10px 40px rgba(0,0,0,.6)">Можно ли<br>зарабатывать<br>на <span style="color:#ffd34d">кредитке?</span></div>`); }
+if (F === 2) { P(`<div class="a" style="inset:0;background:#57f0a2"></div><div class="a" style="left:0;right:0;top:300px;text-align:center;font:900 300px/1 Unb;letter-spacing:-.08em;color:#0b0b0d">МОЖНО.</div>`); }
+if (F === 3) { P(`<div class="a" style="inset:0;background:#0d0f14"></div>
+   <div class="a" style="left:510px;top:150px;width:900px;padding:40px 46px;border-radius:36px;background:#171a22;box-shadow:0 40px 80px rgba(0,0,0,.5)">
+     <div style="display:flex;align-items:center;gap:18px"><div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#ff5a6e,#ffb03a)"></div><div><div style="font:700 34px I">финансовый_гуру</div><div style="font:600 24px I;color:#7d8495">2 ч · реклама курса</div></div></div>
+     <div style="font:700 56px/1.25 I;margin-top:28px">Зарабатываю <span style="color:#ffd34d">от 3 000 до 15 000 ₽</span> в месяц на кредитке. Пассивно.</div>
+     <div style="font:600 30px I;color:#7d8495;margin-top:26px">♥ 12 400 · 830 комментариев · ↗ 2 100</div></div>`); }
+if (F === 4) { P(`<div class="a" style="inset:0;background:#d6c3a3;background-image:linear-gradient(90deg,rgba(0,0,0,.04) 0 2px,transparent 2px 120px);background-size:120px 100%"></div>
+   <div class="a" style="left:640px;top:110px;width:560px;height:820px;border-radius:50px;background:#2a2d35;transform:rotate(-5deg);box-shadow:0 40px 60px rgba(0,0,0,.35)">
+     <div class="a" style="left:40px;top:40px;right:40px;height:180px;border-radius:20px;background:#c9e7c4;font:700 110px/180px GM;color:#17321a;text-align:right;padding-right:30px">15000?</div>
+     ${Array.from({ length: 16 }, (_, i) => `<div class="a" style="left:${40 + (i % 4) * 122}px;top:${270 + Math.floor(i / 4) * 130}px;width:104px;height:110px;border-radius:22px;background:${i % 4 === 3 ? "#ff9500" : "#444"};box-shadow:inset 0 -6px 0 rgba(0,0,0,.3)"></div>`).join("")}</div>
+   ${card(120, 620, 14, .7)}<div class="a" style="left:1300px;top:160px;width:420px;height:560px;background:#fffdf5;transform:rotate(6deg);box-shadow:0 20px 30px rgba(0,0,0,.25);padding:34px;font:700 34px/1.6 GM;color:#333">ПРОВЕРКА<br>ставка ... ?<br>лимит .... ?<br>срок ..... ?<br>доход .... ?</div>`); }
+if (F === 5) { photo("cash.jpg", "45% 78%", "rgba(0,20,10,.55)", "135% auto");
+  P(`<div class="a" style="left:120px;top:760px;padding:22px 40px;border-radius:24px;background:#57f0a2;color:#06341c;font:900 84px/1 Unb;letter-spacing:-.04em">деньги есть</div><div class="a" style="left:126px;top:900px;font:700 40px I;color:#fff">но цифра — другая</div>`); }
+if (F === 6) { P(`<div class="a" style="inset:0;background:radial-gradient(1200px 800px at 60% 50%, #3a0f16, #0b0306 70%)"></div>
+   <div class="a" style="left:1060px;top:60px;width:520px;height:1040px;border-radius:80px;background:#0d0d11;box-shadow:0 0 0 12px #1c1c22,0 0 0 14px #3a3a44,0 60px 120px #000">
+     <div class="a" style="left:46px;top:140px;font:600 30px I;color:#fff9">Кредитная карта</div><div class="a" style="left:42px;top:186px;font:800 96px I;letter-spacing:-.04em">50 000 ₽</div>
+     <div class="a" style="left:42px;top:380px;width:436px;height:140px;border-radius:40px;background:linear-gradient(180deg,#ff5a6e,#d4142f);box-shadow:0 0 120px rgba(255,40,70,.9);display:flex;align-items:center;justify-content:center;font:700 50px I">Перевести</div></div>
+   <div class="a" style="left:120px;top:330px;font:700 64px/1 O;text-transform:uppercase;color:#fffb">одна кнопка</div><div class="a" style="left:110px;top:410px;font:900 200px/1 Unb;letter-spacing:-.08em;color:#ff4b5c;text-shadow:0 0 60px rgba(255,40,70,.7)">−3 100 ₽</div>`); }
+if (F === 7) { P(`<div class="a" style="inset:0;background:#f7f7f2"></div>
+   <svg class="a" style="left:0;top:0" width="1920" height="1080" font-family="GM" font-weight="700"><text x="160" y="190" font-size="76" fill="#111">План ролика</text><path d="M160 215 C 400 228, 640 222, 760 210" fill="none" stroke="#d01f1f" stroke-width="8" stroke-linecap="round"/>
+     ${[["1. как работает схема", "#1b3fa8"], ["2. два расчёта на живых ставках", "#0a8f4f"], ["3. откуда у блогеров 15 000", "#d01f1f"], ["4. план из 5 шагов", "#1b3fa8"]].map(([t, c], i) => `<text x="180" y="${340 + i * 130}" font-size="60" fill="${c}">${t}</text>`).join("")}
+     <path d="M1160 470 C 1240 440, 1300 520, 1260 580" fill="none" stroke="#0a8f4f" stroke-width="7"/></svg>
+   <div class="a" style="left:1300px;top:520px;width:40px;height:220px;border-radius:12px;background:linear-gradient(90deg,#222,#444);transform:rotate(30deg)"><div style="height:44px;border-radius:12px 12px 4px 4px;background:#1b3fa8"></div></div>`); }
+if (F === 8) { P(`<div class="a" style="inset:0;background:radial-gradient(1500px 950px at 50% 16%, #1b2738 0%, #0b1018 52%, #030406 100%)"></div>
+   <div class="a" style="left:460px;top:-320px;width:1000px;height:1500px;background:conic-gradient(from 180deg at 50% 0%, transparent 0deg, rgba(255,226,160,.16) 14deg, transparent 30deg);filter:blur(14px)"></div>
+   ${card(640, 220, -6, 1, "box-shadow:0 0 0 1.5px rgba(255,200,140,.35),0 0 70px rgba(255,200,140,.35),0 60px 110px rgba(0,0,0,.65)")}
+   <div class="a" style="left:0;right:0;top:760px;text-align:center;font:700 40px I;color:#ffd34d;letter-spacing:.2em">ГЛАВА 1</div><div class="a" style="left:0;right:0;top:820px;text-align:center;font:900 90px/1 Unb;letter-spacing:-.04em">Как работает схема</div>`); }
+Promise.all([document.fonts.ready, ...[...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))]).then(() => { window.__ready = true; });
+</script>
+</body>
+</html>
