@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Персонаж канала — эскизы</title>
+<!-- Владелец 13.10: «ряд 5, 8 прикольно. Давай создадим своего персонажа, который будет вещать людям в рилсах и ролике на ютуб».
+     Референсы: youtube/research/refs_2026-10-13 (ряды 5 «Коротко и внятно», 8 «David Explains Money»).
+     Плоская иллюстрация, тёмный контур, яркие цвета; персонаж собран из SVG-частей, чтобы его можно было анимировать
+     (рот — фонемы под голос, моргание, руки, эмоции). c=1 Арбузик · c=2 Влад · c=3 Лис Финик · c=4 Карточка Кэш.
+     Снимок из youtube/: node kit/shot3d.js characters/sheet.html characters/out/c1.png 1920 1080 c=1 -->
+<style>
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "Unb"; src: url("../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  .a { position: absolute; }
+</style>
+</head>
+<body>
+<div id="R"></div>
+<script>
+const C = +(new URLSearchParams(location.search).get("c") || 1);
+const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h);
+const OL = "#1d1b2c";            // общий контур
+const st = (w = 7) => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+
+// глаза и рот: эмоции talk | happy | shock
+const eyes = (cx, cy, gap, r, mood, look = 0) => {
+  const one = (x) => mood === "happy"
+    ? `<path d="M${x - r} ${cy + 4} Q ${x} ${cy - r - 4} ${x + r} ${cy + 4}" fill="none" ${st(7)}/>`
+    : `<ellipse cx="${x}" cy="${cy}" rx="${r}" ry="${r * (mood === "shock" ? 1.25 : 1.12)}" fill="#fff" ${st(6)}/>
+       <circle cx="${x + look}" cy="${cy + 2}" r="${r * (mood === "shock" ? .38 : .52)}" fill="${OL}"/><circle cx="${x + look + r * .2}" cy="${cy - r * .2}" r="${r * .16}" fill="#fff"/>`;
+  return one(cx - gap) + one(cx + gap);
+};
+const brows = (cx, cy, gap, mood) => mood === "shock"
+  ? `<path d="M${cx - gap - 22} ${cy - 10} Q ${cx - gap} ${cy - 30} ${cx - gap + 22} ${cy - 14}" fill="none" ${st(7)}/><path d="M${cx + gap - 22} ${cy - 14} Q ${cx + gap} ${cy - 30} ${cx + gap + 22} ${cy - 10}" fill="none" ${st(7)}/>`
+  : mood === "talk" ? `<path d="M${cx - gap - 20} ${cy} L ${cx - gap + 20} ${cy - 8}" ${st(7)}/><path d="M${cx + gap - 20} ${cy - 8} L ${cx + gap + 20} ${cy}" ${st(7)}/>` : "";
+const mouth = (cx, cy, w, mood) => mood === "happy"
+  ? `<path d="M${cx - w} ${cy} Q ${cx} ${cy + w * 1.1} ${cx + w} ${cy} Z" fill="#7a1f2b" ${st(6)}/><path d="M${cx - w * .55} ${cy + w * .55} Q ${cx} ${cy + w * .3} ${cx + w * .55} ${cy + w * .55} Q ${cx} ${cy + w * .95} ${cx - w * .55} ${cy + w * .55}" fill="#ff8a9a"/>`
+  : mood === "shock" ? `<ellipse cx="${cx}" cy="${cy + w * .3}" rx="${w * .45}" ry="${w * .6}" fill="#7a1f2b" ${st(6)}/>`
+  : `<path d="M${cx - w * .8} ${cy} Q ${cx} ${cy + w * .9} ${cx + w * .8} ${cy} Q ${cx} ${cy + w * .25} ${cx - w * .8} ${cy} Z" fill="#7a1f2b" ${st(6)}/><path d="M${cx - w * .35} ${cy + w * .45} Q ${cx} ${cy + w * .3} ${cx + w * .35} ${cy + w * .45}" fill="none" stroke="#ff8a9a" stroke-width="8" stroke-linecap="round"/>`;
+const phone = (x, y, r = 0) => `<g transform="translate(${x} ${y}) rotate(${r})"><rect x="-38" y="-70" width="76" height="140" rx="16" fill="#2b2b3a" ${st(6)}/><rect x="-28" y="-56" width="56" height="104" rx="8" fill="#57f0a2"/><text x="0" y="6" text-anchor="middle" font-family="Unb" font-weight="900" font-size="22" fill="#0b2a1a">₽</text></g>`;
+const bubble = (x, y, w, t, tail = "left") => `<div class="a" style="left:${x}px;top:${y}px;width:${w}px;padding:26px 34px;background:#fff;border:6px solid ${OL};border-radius:46px;font:800 40px/1.2 I;color:${OL};box-shadow:10px 10px 0 ${OL}">${t}</div>`;
+
+/* ---------- 1. АРБУЗИК ---------- */
+const arbuz = (mood = "talk", arm = "point") => `<svg viewBox="-40 -20 680 780" width="680" height="780">
+  <ellipse cx="300" cy="730" rx="180" ry="22" fill="rgba(0,0,0,.15)"/>
+  <!-- ноги и кеды -->
+  <path d="M235 600 L225 690" ${st(16)}/><path d="M365 600 L375 690" ${st(16)}/>
+  <path d="M180 700 Q 185 668 228 670 L 262 676 Q 272 700 250 712 L 190 712 Q 176 710 180 700 Z" fill="#fff" ${st(6)}/><path d="M420 700 Q 415 668 372 670 L 338 676 Q 328 700 350 712 L 410 712 Q 424 710 420 700 Z" fill="#fff" ${st(6)}/>
+  <!-- тело-арбуз -->
+  <ellipse cx="300" cy="400" rx="230" ry="240" fill="#2fa84f" ${st(8)}/>
+  ${[-150, -85, -25, 35, 95, 155].map(dx => `<path d="M${300 + dx * .2} 165 Q ${300 + dx * 1.35} 400 ${300 + dx * .2} 636" fill="none" stroke="#17702f" stroke-width="22" stroke-linecap="round" opacity=".9"/>`).join("")}
+  <ellipse cx="230" cy="290" rx="60" ry="34" fill="rgba(255,255,255,.18)" transform="rotate(-25 230 290)"/>
+  <!-- кепка задом наперёд -->
+  <path d="M150 230 Q 170 120 300 112 Q 430 120 450 230 Q 300 200 150 230 Z" fill="#ff3b4f" ${st(7)}/><path d="M400 200 Q 480 190 520 220 Q 480 240 430 232" fill="#d81f36" ${st(7)}/>
+  <circle cx="300" cy="116" r="12" fill="#d81f36" ${st(5)}/>
+  <!-- лицо -->
+  <ellipse cx="300" cy="400" rx="150" ry="120" fill="#ff6b78" ${st(7)}/>
+  ${[[-70, -40], [-20, -70], [40, -55], [85, -20], [-90, 30], [80, 40]].map(([x, y]) => `<ellipse cx="${300 + x}" cy="${400 + y}" rx="6" ry="10" fill="#2b1d1d" opacity=".55" transform="rotate(${x / 3} ${300 + x} ${400 + y})"/>`).join("")}
+  ${eyes(300, 380, 52, 30, mood, mood === "talk" ? 6 : 0)}${brows(300, 335, 52, mood)}${mouth(300, 440, 46, mood)}
+  <!-- руки -->
+  ${arm === "point" ? `<path d="M90 420 Q 40 470 70 540" fill="none" ${st(16)}/><path d="M510 400 Q 580 330 600 270" fill="none" ${st(16)}/><circle cx="600" cy="262" r="18" fill="#fff" ${st(6)}/>`
+    : arm === "phone" ? `<path d="M90 420 Q 40 470 70 540" fill="none" ${st(16)}/><path d="M510 420 Q 570 410 560 330" fill="none" ${st(16)}/>${phone(560, 300, 12)}`
+    : `<path d="M90 420 Q 20 360 40 290" fill="none" ${st(16)}/><path d="M510 420 Q 580 360 560 290" fill="none" ${st(16)}/><circle cx="40" cy="282" r="18" fill="#fff" ${st(6)}/><circle cx="560" cy="282" r="18" fill="#fff" ${st(6)}/>`}
+</svg>`;
+
+/* ---------- 2. ВЛАД (человек) ---------- */
+const vlad = (mood = "talk", arm = "point") => `<svg viewBox="-40 -20 680 780" width="680" height="780">
+  <ellipse cx="300" cy="735" rx="170" ry="20" fill="rgba(0,0,0,.15)"/>
+  <path d="M245 560 L235 700" stroke="#2d3a6b" stroke-width="58" stroke-linecap="round"/><path d="M355 560 L365 700" stroke="#2d3a6b" stroke-width="58" stroke-linecap="round"/>
+  <path d="M245 560 L235 700" fill="none" ${st(6)} opacity="0"/>
+  <path d="M190 712 Q 195 680 238 684 L 270 690 Q 278 712 258 722 L 196 722 Z" fill="#fff" ${st(6)}/><path d="M410 712 Q 405 680 362 684 L 330 690 Q 322 712 342 722 L 404 722 Z" fill="#fff" ${st(6)}/>
+  <!-- худи -->
+  <path d="M170 600 Q 160 400 220 350 Q 300 320 380 350 Q 440 400 430 600 Z" fill="#2fa84f" ${st(8)}/>
+  <path d="M250 352 Q 300 410 350 352" fill="none" ${st(6)}/><path d="M285 380 L 280 450" ${st(5)}/><path d="M315 380 L 320 450" ${st(5)}/>
+  <g transform="translate(300 500)"><circle r="40" fill="#ff6b78" ${st(5)}/><path d="M-40 0 A 40 40 0 0 0 40 0" fill="#2fa84f" ${st(5)}/><circle cx="-12" cy="-10" r="4" fill="#2b1d1d"/><circle cx="12" cy="-12" r="4" fill="#2b1d1d"/></g>
+  <!-- голова -->
+  <rect x="268" y="300" width="64" height="50" fill="#f2c7a5" ${st(6)}/>
+  <ellipse cx="300" cy="220" rx="118" ry="128" fill="#f2c7a5" ${st(8)}/>
+  <ellipse cx="184" cy="230" rx="18" ry="28" fill="#f2c7a5" ${st(6)}/><ellipse cx="416" cy="230" rx="18" ry="28" fill="#f2c7a5" ${st(6)}/>
+  <path d="M178 190 Q 170 80 300 78 Q 440 80 424 200 Q 400 140 330 150 Q 260 120 200 170 Z" fill="#3a2516" ${st(7)}/>
+  <path d="M300 82 Q 360 40 410 70" fill="none" stroke="#3a2516" stroke-width="22" stroke-linecap="round"/>
+  ${eyes(300, 215, 46, 22, mood, mood === "talk" ? 5 : 0)}${brows(300, 178, 46, mood)}
+  <path d="M296 230 Q 290 255 302 258" fill="none" stroke="#c48a66" stroke-width="5" stroke-linecap="round"/>${mouth(300, 280, 36, mood)}
+  ${arm === "point" ? `<path d="M205 440 Q 165 520 190 590" fill="none" stroke="#1d1b2c" stroke-width="52" stroke-linecap="round"/><path d="M205 440 Q 165 520 190 590" fill="none" stroke="#2fa84f" stroke-width="40" stroke-linecap="round"/><circle cx="192" cy="604" r="22" fill="#f2c7a5" stroke="#1d1b2c" stroke-width="6"/><path d="M420 420 Q 500 360 520 290" fill="none" stroke="#1d1b2c" stroke-width="54" stroke-linecap="round"/><path d="M420 420 Q 500 360 520 290" fill="none" stroke="#2fa84f" stroke-width="42" stroke-linecap="round"/><circle cx="522" cy="275" r="26" fill="#f2c7a5" ${st(6)}/>`
+    : arm === "phone" ? `<path d="M205 440 Q 165 520 190 590" fill="none" stroke="#1d1b2c" stroke-width="52" stroke-linecap="round"/><path d="M205 440 Q 165 520 190 590" fill="none" stroke="#2fa84f" stroke-width="40" stroke-linecap="round"/><circle cx="192" cy="604" r="22" fill="#f2c7a5" stroke="#1d1b2c" stroke-width="6"/><path d="M420 420 Q 480 470 470 380" fill="none" stroke="#1d1b2c" stroke-width="54" stroke-linecap="round"/><path d="M420 420 Q 480 470 470 380" fill="none" stroke="#2fa84f" stroke-width="42" stroke-linecap="round"/>${phone(470, 340, 10)}`
+    : `<path d="M180 420 Q 100 360 110 270" fill="none" stroke="#1d1b2c" stroke-width="54" stroke-linecap="round"/><path d="M180 420 Q 100 360 110 270" fill="none" stroke="#2fa84f" stroke-width="42" stroke-linecap="round"/><path d="M420 420 Q 500 360 490 270" fill="none" stroke="#1d1b2c" stroke-width="54" stroke-linecap="round"/><path d="M420 420 Q 500 360 490 270" fill="none" stroke="#2fa84f" stroke-width="42" stroke-linecap="round"/><circle cx="110" cy="258" r="26" fill="#f2c7a5" ${st(6)}/><circle cx="490" cy="258" r="26" fill="#f2c7a5" ${st(6)}/>`}
+</svg>`;
+
+/* ---------- 3. ЛИС ФИНИК ---------- */
+const fox = (mood = "talk", arm = "point") => `<svg viewBox="-40 -20 680 780" width="680" height="780">
+  <ellipse cx="300" cy="735" rx="170" ry="20" fill="rgba(0,0,0,.15)"/>
+  <path d="M430 560 Q 560 520 540 400 Q 520 330 470 360 Q 500 450 420 500" fill="#ff8a2a" ${st(7)}/><path d="M540 400 Q 520 330 470 360 Q 490 390 500 420 Q 520 410 540 400 Z" fill="#fff"/>
+  <path d="M250 570 L245 700" ${st(18)}/><path d="M350 570 L355 700" ${st(18)}/>
+  <ellipse cx="235" cy="712" rx="42" ry="18" fill="#3a2516" ${st(6)}/><ellipse cx="365" cy="712" rx="42" ry="18" fill="#3a2516" ${st(6)}/>
+  <path d="M180 600 Q 170 420 230 370 Q 300 340 370 370 Q 430 420 420 600 Z" fill="#3d5bd9" ${st(8)}/>
+  <path d="M255 372 L 300 470 L 345 372" fill="#fff" ${st(6)}/><path d="M300 400 L 286 440 L 300 470 L 314 440 Z" fill="#ff3b4f" ${st(5)}/>
+  <!-- голова -->
+  <path d="M170 110 L 210 230 L 150 230 Z" fill="#ff8a2a" ${st(7)}/><path d="M430 110 L 390 230 L 450 230 Z" fill="#ff8a2a" ${st(7)}/>
+  <path d="M300 120 Q 440 130 450 250 Q 430 360 300 380 Q 170 360 150 250 Q 160 130 300 120 Z" fill="#ff8a2a" ${st(8)}/>
+  <path d="M300 250 Q 380 260 410 300 Q 360 372 300 378 Q 240 372 190 300 Q 220 260 300 250 Z" fill="#fff"/>
+  <ellipse cx="300" cy="292" rx="22" ry="16" fill="${OL}"/>
+  ${eyes(300, 225, 58, 24, mood, mood === "talk" ? 5 : 0)}${brows(300, 186, 58, mood)}${mouth(300, 320, 30, mood)}
+  <!-- очки -->
+  <circle cx="242" cy="225" r="38" fill="none" stroke="${OL}" stroke-width="7"/><circle cx="358" cy="225" r="38" fill="none" stroke="${OL}" stroke-width="7"/><path d="M280 222 L 320 222" ${st(7)}/>
+  ${arm === "point" ? `<path d="M210 450 Q 170 525 195 590" fill="none" stroke="#1d1b2c" stroke-width="50" stroke-linecap="round"/><path d="M210 450 Q 170 525 195 590" fill="none" stroke="#3d5bd9" stroke-width="38" stroke-linecap="round"/><circle cx="197" cy="603" r="20" fill="#ff8a2a" stroke="#1d1b2c" stroke-width="6"/><path d="M410 430 Q 490 370 510 300" fill="none" stroke="#1d1b2c" stroke-width="50" stroke-linecap="round"/><path d="M410 430 Q 490 370 510 300" fill="none" stroke="#3d5bd9" stroke-width="38" stroke-linecap="round"/><circle cx="512" cy="286" r="24" fill="#ff8a2a" ${st(6)}/>`
+    : arm === "phone" ? `<path d="M210 450 Q 170 525 195 590" fill="none" stroke="#1d1b2c" stroke-width="50" stroke-linecap="round"/><path d="M210 450 Q 170 525 195 590" fill="none" stroke="#3d5bd9" stroke-width="38" stroke-linecap="round"/><circle cx="197" cy="603" r="20" fill="#ff8a2a" stroke="#1d1b2c" stroke-width="6"/><path d="M410 430 Q 470 480 470 390" fill="none" stroke="#1d1b2c" stroke-width="50" stroke-linecap="round"/><path d="M410 430 Q 470 480 470 390" fill="none" stroke="#3d5bd9" stroke-width="38" stroke-linecap="round"/>${phone(470, 350, 10)}`
+    : `<path d="M190 430 Q 110 370 120 280" fill="none" stroke="#1d1b2c" stroke-width="50" stroke-linecap="round"/><path d="M190 430 Q 110 370 120 280" fill="none" stroke="#3d5bd9" stroke-width="38" stroke-linecap="round"/><path d="M410 430 Q 490 370 480 280" fill="none" stroke="#1d1b2c" stroke-width="50" stroke-linecap="round"/><path d="M410 430 Q 490 370 480 280" fill="none" stroke="#3d5bd9" stroke-width="38" stroke-linecap="round"/><circle cx="120" cy="268" r="24" fill="#ff8a2a" ${st(6)}/><circle cx="480" cy="268" r="24" fill="#ff8a2a" ${st(6)}/>`}
+</svg>`;
+
+/* ---------- 4. КАРТОЧКА КЭШ ---------- */
+const cardy = (mood = "talk", arm = "point") => `<svg viewBox="-40 -20 680 780" width="680" height="780">
+  <ellipse cx="300" cy="735" rx="170" ry="20" fill="rgba(0,0,0,.15)"/>
+  <path d="M250 600 L240 700" ${st(16)}/><path d="M350 600 L360 700" ${st(16)}/>
+  <path d="M190 712 Q 195 680 238 684 L 268 690 Q 276 712 256 722 L 196 722 Z" fill="#ffd34d" ${st(6)}/><path d="M410 712 Q 405 680 362 684 L 332 690 Q 324 712 344 722 L 404 722 Z" fill="#ffd34d" ${st(6)}/>
+  <rect x="110" y="170" width="380" height="440" rx="44" fill="#7b3fd6" ${st(8)}/>
+  <rect x="110" y="170" width="380" height="440" rx="44" fill="url(#cg)"/>
+  <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a97bff"/><stop offset="1" stop-color="#4a1fa8"/></linearGradient></defs>
+  <rect x="110" y="170" width="380" height="440" rx="44" fill="none" ${st(8)}/>
+  <rect x="150" y="210" width="80" height="62" rx="12" fill="#ffd34d" ${st(5)}/><path d="M150 241 L 230 241 M190 210 L 190 272" stroke="${OL}" stroke-width="4"/>
+  <text x="440" y="580" text-anchor="end" font-family="I" font-weight="700" font-size="40" fill="#fff">МИР</text>
+  <ellipse cx="300" cy="400" rx="140" ry="110" fill="#fff" opacity=".12"/>
+  ${eyes(300, 370, 55, 30, mood, mood === "talk" ? 6 : 0)}${brows(300, 324, 55, mood)}${mouth(300, 445, 44, mood)}
+  ${arm === "point" ? `<path d="M110 420 Q 50 480 80 560" fill="none" ${st(16)}/><path d="M490 400 Q 560 330 580 270" fill="none" ${st(16)}/><circle cx="582" cy="262" r="18" fill="#fff" ${st(6)}/>`
+    : arm === "phone" ? `<path d="M110 420 Q 50 480 80 560" fill="none" ${st(16)}/><path d="M490 420 Q 550 410 540 330" fill="none" ${st(16)}/>${phone(540, 300, 12)}`
+    : `<path d="M110 420 Q 40 360 60 290" fill="none" ${st(16)}/><path d="M490 420 Q 560 360 540 290" fill="none" ${st(16)}/><circle cx="60" cy="282" r="18" fill="#fff" ${st(6)}/><circle cx="540" cy="282" r="18" fill="#fff" ${st(6)}/>`}
+</svg>`;
+
+const CH = {
+  1: [arbuz, "Арбузик", "Талисман канала «Владик Арбузит»: живой арбуз в кепке. Узнаётся с первого кадра, сразу связан с названием канала, весело смотрится в любой сцене.", "#ffe9a8", "Привет! Я Арбузик —<br>считаю деньги банков"],
+  2: [vlad, "Влад", "Нарисованный «ты» из 18–25: худи с арбузом на груди, телефон в руке. Зрителю легко узнать себя — герой сам попадает в ловушки банков.", "#dfe9ff", "Я Влад. Проверяю<br>схемы на своих деньгах"],
+  3: [fox, "Лис Финик", "Хитрый лис-финансист в очках и пиджаке поверх рубашки. Образ «знает, где подвох» — разоблачает обещания блогеров и банков.", "#ffe3d0", "Финик на связи.<br>Ищем подвох?"],
+  4: [cardy, "Кэш", "Банковская карта с лицом, руками и ногами. Сам продукт, о котором ролик: может «показывать» на себе чип, лимит, кэшбэк.", "#efe3ff", "Я — Кэш, твоя карта.<br>Не дай мне тебя обмануть"]};
+const [draw, name, desc, bg, line] = CH[C];
+P(`<div class="a" style="inset:0;background:${bg}"></div><div class="a" style="inset:0;background-image:radial-gradient(rgba(0,0,0,.06) 2px,transparent 2px);background-size:26px 26px"></div>`);
+P(`<div class="a" style="left:40px;top:150px">${draw("talk", "point")}</div>`);
+P(bubble(560, 120, 600, line));
+P(`<div class="a" style="left:1230px;top:90px;width:300px;transform:scale(.48);transform-origin:0 0">${draw("happy", "up")}</div><div class="a" style="left:1560px;top:90px;width:300px;transform:scale(.48);transform-origin:0 0">${draw("shock", "phone")}</div>
+   <div class="a" style="left:1250px;top:470px;font:700 26px I;color:${OL}">радость</div><div class="a" style="left:1580px;top:470px;font:700 26px I;color:${OL}">шок / с телефоном</div>`);
+P(`<div class="a" style="left:700px;top:560px;width:1140px">
+     <div style="font:900 92px/1 Unb;letter-spacing:-.04em;color:${OL}">${C}. ${name}</div>
+     <div style="font:600 34px/1.4 I;color:#3a3850;margin-top:24px">${desc}</div>
+     <div style="display:flex;gap:14px;margin-top:30px">${["говорит в такт голосу", "моргает и двигает руками", "эмоции: радость · шок · подмигивание"].map(t => `<div style="padding:12px 22px;border-radius:999px;background:#fff;border:4px solid ${OL};font:700 24px I;color:${OL}">${t}</div>`).join("")}</div></div>`);
+document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 400))));
+</script>
+</body>
+</html>
