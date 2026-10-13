@@ -5,7 +5,8 @@
 <title>Канал «Арбузов» — стили</title>
 <!-- Владелец 13.10: «Стиль не нашел подходящий. Канал будет называться — Арбузов, а не Владик Арбузит».
      Шесть новых направлений, каждое — макет страницы канала: шапка, аватарка, название, три превью реальных тем.
-     ?s=1 Зин-стикеры · 2 Y2K-хром · 3 Финтех-минимал · 4 Газета · 5 Пиксель-игра · 6 Мем-карточка. -->
+     ?s=1 Зин-стикеры · 2 Y2K-хром · 3 Финтех-минимал · 4 Газета · 5 Пиксель-игра · 6 Мем-карточка.
+     Владелец: «давай ещё варианты стилей» → 7 Кислотный стрит · 8 Манга · 9 Пастель · 10 Коллаж · 11 Конструктивизм · 12 Чат. -->
 <style>
   @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
   @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
@@ -33,7 +34,7 @@ const S = +(new URLSearchParams(location.search).get("s") || 1);
 const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h);
 const A = (o) => Arbuzov.svg(o), INK = "#1d1b2c";
 const waits = [];
-const NAMES = { 1: "Зин-стикеры", 2: "Y2K-хром", 3: "Финтех-минимал", 4: "Газета-разоблачение", 5: "Пиксель-игра", 6: "Мем-карточка" };
+const NAMES = { 1: "Зин-стикеры", 2: "Y2K-хром", 3: "Финтех-минимал", 4: "Газета-разоблачение", 5: "Пиксель-игра", 6: "Мем-карточка", 7: "Кислотный стрит", 8: "Манга-комикс", 9: "Пастель", 10: "Коллаж-вырезки", 11: "Конструктивизм", 12: "Чат-переписка" };
 const TH = [
   { big: "15 000 ₽", small: "ЗА КРЕДИТКУ?", mood: "shock", arm: "phone", title: "Заработок на кредитке: проверил схему на цифрах (2026)", meta: "ролик №5" },
   { big: "ТОП-5", small: "КРЕДИТОК 2026", mood: "smirk", arm: "point", title: "Топ кредитных карт 2026: где дольше всего без процентов", meta: "ролик №4" },
@@ -42,6 +43,21 @@ const TAG = "Бонусы банков — без воды и подвохов";
 
 /* ---------- общие приёмы ---------- */
 const sticker = (svg, k = 5) => `<div style="filter:drop-shadow(${k}px 0 0 #fff) drop-shadow(-${k}px 0 0 #fff) drop-shadow(0 ${k}px 0 #fff) drop-shadow(0 -${k}px 0 #fff) drop-shadow(8px 10px 0 rgba(0,0,0,.22))">${svg}</div>`;
+const stickerC = (svg, k, c) => `<div style="filter:drop-shadow(${k}px 0 0 ${c}) drop-shadow(-${k}px 0 0 ${c}) drop-shadow(0 ${k}px 0 ${c}) drop-shadow(0 -${k}px 0 ${c})">${svg}</div>`;
+const tape = "repeating-linear-gradient(-45deg,#c6ff00 0 22px,#0a0a0a 22px 44px)", tapeK = "repeating-linear-gradient(-45deg,#0a0a0a 0 22px,#c6ff00 22px 44px)";
+const speed = (at) => `repeating-conic-gradient(from 0deg at ${at},rgba(0,0,0,.85) 0deg .6deg,transparent .6deg 6deg)`;
+const burst = (x, y, w, txt, c, h) => { h = h || w * .62; const n = 14, pts = Array.from({ length: n * 2 }, (_, k) => { const a = k / (n * 2) * Math.PI * 2, r = k % 2 ? .78 : 1; return `${50 + 50 * r * Math.cos(a)}% ${50 + 50 * r * Math.sin(a)}%`; }).join(",");
+  return `<div class="a" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;filter:drop-shadow(5px 6px 0 #111)"><div style="width:100%;height:100%;background:#111;clip-path:polygon(${pts})"></div><div class="a" style="inset:7px;background:${c};clip-path:polygon(${pts})"></div>
+    <div class="a nw" style="left:0;right:0;top:50%;transform:translateY(-50%) rotate(-6deg);text-align:center;font:900 ${Math.round(Math.min(w / 5.2, w * .82 / (txt.length * .78)))}px/1 Unb;letter-spacing:-.04em;color:#111">${txt}</div></div>`; };
+const bubbleM = (x, y, w, t) => `<div class="a" style="left:${x}px;top:${y}px;width:${w}px;padding:14px 16px;background:#fff;border:5px solid #111;border-radius:50%/40%;font:800 22px/1.15 I;color:#111;text-align:center">${t}</div>`;
+const blob = (x, y, s, c) => `<div class="a" style="left:${x}px;top:${y}px;width:${s}px;height:${s * .86}px;background:${c};border-radius:58% 42% 61% 39%/45% 58% 42% 55%"></div>`;
+const torn = "polygon(0 4%,6% 0,13% 3%,21% 0,30% 4%,38% 1%,47% 3%,55% 0,64% 4%,72% 1%,81% 3%,89% 0,100% 3%,98% 14%,100% 27%,97% 41%,100% 56%,98% 70%,100% 84%,97% 100%,88% 96%,79% 100%,70% 97%,61% 100%,52% 96%,43% 100%,34% 97%,25% 100%,16% 96%,7% 100%,0 96%,2% 82%,0 68%,3% 54%,0 40%,2% 26%,0 12%)";
+const ransom = (txt, s, seed = 1) => { const F = ["Unb", "O", "PF", "GM", "I", "Unb"], B = ["#fff", "#111", "#ff3b4f", "#ffd23f", "#2fa84f", "#f5efe2", "#7fd1ff"], C = { "#111": "#fff", "#ff3b4f": "#fff", "#2fa84f": "#fff" };
+  return [...txt].map((ch, k) => { if (ch === " ") return `<span style="display:inline-block;width:${s * .3}px"></span>`; const r = (seed * 7 + k * 13) % 97, b = B[r % B.length], f = F[(r >> 1) % F.length];
+    return `<span style="display:inline-block;margin:0 2px;padding:2px ${s * .08}px;background:${b};color:${C[b] || "#111"};font:${f === "PF" ? "italic 600" : f === "I" ? 700 : f === "GM" ? 700 : 900} ${s * (f === "O" ? 1.05 : .82)}px/1.1 ${f};transform:rotate(${(r % 11) - 5}deg) translateY(${(r % 7) - 3}px);box-shadow:2px 3px 0 rgba(0,0,0,.25)">${ch}</span>`; }).join(""); };
+const msg = (x, y, who, t, me, fs = 26) => `<div class="a" style="left:${x}px;top:${y}px;max-width:560px;padding:12px 18px 14px;border-radius:${me ? "22px 22px 6px 22px" : "22px 22px 22px 6px"};background:${me ? "#2b5278" : "#182533"};box-shadow:0 2px 0 rgba(0,0,0,.3)">
+  <div style="font:700 18px I;color:${me ? "#7fe39a" : "#ff8a7a"};margin-bottom:4px">${who}</div><div class="nw" style="font:700 ${fs}px/1.15 I;color:#fff">${t}</div></div>`;
+const seedsBg = (c, op = .14) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><g fill='${c}' opacity='${op}'><ellipse cx='20' cy='24' rx='5' ry='9' transform='rotate(-20 20 24)'/><ellipse cx='84' cy='60' rx='5' ry='9' transform='rotate(25 84 60)'/><ellipse cx='40' cy='98' rx='5' ry='9' transform='rotate(-5 40 98)'/></g></svg>`)}")`;
 const noise = (op = .35) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${op} 0'/></filter><rect width='300' height='300' filter='url(#n)'/></svg>`)}")`;
 const halftone = (c, s = 10) => `radial-gradient(${c} 28%, transparent 30%) 0 0/${s}px ${s}px`;
 const star = (x, y, r, c = "#fff") => `<svg class="a" style="left:${x - r}px;top:${y - r}px" width="${2 * r}" height="${2 * r}" viewBox="-10 -10 20 20"><path d="M0 -10 Q 1 -1 10 0 Q 1 1 0 10 Q -1 1 -10 0 Q -1 -1 0 -10 Z" fill="${c}"/></svg>`;
@@ -152,7 +168,95 @@ const ST = {
       <div class="a nw" style="left:14px;right:14px;top:78px;text-align:center;font:900 38px/1 Unb;letter-spacing:-.03em;color:${i === 1 ? "#ff3b4f" : "#111"}">${t.small}</div>
       <div class="a" style="left:146px;top:130px;width:300px;height:192px;background:#fff;border-radius:16px;padding:9px">
         <div style="width:100%;height:100%;border-radius:10px;background:${["#ffe9a8", "#dff3ff", "#e3f6d8"][i]};overflow:hidden;display:flex;justify-content:center;align-items:flex-end">${A({ view: "bust", w: 250, h: 206, mood: t.mood, arm: t.arm })}</div></div>`,
-  }};
+  },
+  7: { // Кислотный стрит: чёрный + кислотный лайм, лента «осторожно», жирный гротеск
+    banner: () => `<div class="a" style="inset:0;background:#0a0a0a"></div>
+      <div class="a" style="left:-20px;right:-20px;top:0;height:30px;background:${tape}"></div><div class="a" style="left:-20px;right:-20px;bottom:0;height:30px;background:${tape}"></div>
+      <div class="a nw" style="left:80px;top:58px;font:900 150px/1 Unb;letter-spacing:-.05em;color:#c6ff00">АРБУЗОВ</div>
+      <div class="a nw" style="left:86px;top:220px;padding:4px 12px;background:#c6ff00;color:#0a0a0a;font:700 24px GM">⚠ ОСТОРОЖНО: БАНКИ И МЕЛКИЙ ШРИФТ</div>
+      <div class="a nw" style="left:1060px;top:70px;transform:rotate(-6deg);padding:12px 18px;border:4px solid #c6ff00;color:#c6ff00;font:700 34px/1.1 GM">+15 000 ₽<br><span style="font-size:20px">ИЛИ МИНУС?</span></div>
+      <div class="a" style="left:1450px;top:10px">${stickerC(A({ view: "bust", w: 340, h: 280, mood: "smirk", arm: "point" }), 5, "#c6ff00")}</div>`,
+    av: `background:#c6ff00`,
+    thumb: (t, i) => `<div class="a" style="inset:0;background:${i === 1 ? "#c6ff00" : "#0a0a0a"}"></div>
+      <div class="a" style="left:-20px;right:-20px;bottom:0;height:26px;background:${i === 1 ? tapeK : tape}"></div>
+      <div class="a" style="left:-10px;top:24px">${stickerC(A({ w: 270, h: 310, mood: t.mood, arm: t.arm }), 5, i === 1 ? "#0a0a0a" : "#c6ff00")}</div>
+      <div class="a nw" style="left:276px;top:48px;font:900 80px/1 Unb;letter-spacing:-.05em;color:${i === 1 ? "#0a0a0a" : "#c6ff00"}">${t.big}</div>
+      <div class="a nw" style="left:280px;top:150px;padding:6px 12px;background:${i === 1 ? "#0a0a0a" : "#c6ff00"};color:${i === 1 ? "#c6ff00" : "#0a0a0a"};font:700 28px GM">${t.small}</div>`,
+  },
+  8: { // Манга-комикс: чёрно-белые панели, линии скорости, растр, взрыв-надпись; цветной только Арбузов
+    banner: () => `<div class="a" style="inset:0;background:#fff"></div>
+      ${[[0, 560], [580, 520], [1120, 720]].map(([x, w], k) => `<div class="a" style="left:${x + 14}px;top:14px;width:${w - 14}px;height:276px;border:6px solid #111;overflow:hidden;background:#fff">
+        <div class="a" style="inset:0;background:${k === 1 ? speed("50% 55%") : halftone("rgba(0,0,0,.16)", 9)}"></div>
+        ${k === 0 ? `<div class="a" style="left:10px;top:30px">${A({ view: "bust", w: 290, h: 240, mood: "talk", arm: "phone" })}</div>${bubbleM(290, 40, 230, "Банк дал бонус 15 000 ₽!")}` : ""}
+        ${k === 1 ? `<div class="a" style="left:120px;top:40px">${A({ view: "bust", w: 290, h: 240, mood: "shock", arm: "up" })}</div>${burst(330, 20, 170, "ЧТО?!", "#ff3b4f")}` : ""}
+        ${k === 2 ? `<div class="a nw" style="left:40px;top:50px;font:900 100px/1 Unb;letter-spacing:-.05em;color:#111;transform:skewX(-8deg)">АРБУЗОВ</div><div class="a nw" style="left:48px;top:192px;padding:6px 14px;background:#111;color:#fff;font:700 26px I">разбираю бонусы банков по кадрам</div>` : ""}</div>`).join("")}`,
+    av: `background:#fff;border:5px solid #f1f1f1`,
+    thumb: (t, i) => `<div class="a" style="inset:0;background:#fff"></div><div class="a" style="inset:0;background:${speed("26% 62%")}"></div>
+      <div class="a" style="inset:8px;border:6px solid #111"></div>
+      <div class="a" style="left:0;top:30px">${A({ w: 270, h: 310, mood: t.mood, arm: t.arm })}</div>
+      ${burst(250, 18, 330, t.big, ["#ffd23f", "#ff3b4f", "#ffd23f"][i], 230)}
+      <div class="a nw" style="left:290px;top:250px;padding:6px 14px;background:#111;color:#fff;font:900 30px/1 Unb;transform:rotate(-3deg)">${t.small}</div>`,
+  },
+  9: { // Пастель: мягкие градиенты, капли-формы, скруглённые карточки, дружелюбный шрифт
+    banner: () => `<div class="a" style="inset:0;background:linear-gradient(110deg,#ffd9c7,#ffe9d6 40%,#c9f2df)"></div>
+      ${blob(780, -60, 360, "#ffc2d1")}${blob(1180, 150, 260, "#bfe8ff")}${blob(-80, 160, 300, "#d8f7c2")}
+      <div class="a nw" style="left:90px;top:66px;font:800 140px/1 Unb;letter-spacing:-.04em;color:#2b2540">арбузов</div>
+      <div class="a nw" style="left:96px;top:226px;padding:10px 22px;background:rgba(255,255,255,.75);border-radius:999px;font:700 26px I;color:#2b2540">${TAG}</div>
+      <div class="a" style="left:1000px;top:56px;padding:18px 24px;background:#fff;border-radius:28px;box-shadow:0 14px 30px rgba(43,37,64,.12);font:800 34px/1.1 Unb;color:#2b2540">+15 000 ₽<div style="font:600 18px I;color:#8a84a3;margin-top:6px">пример расчёта</div></div>
+      <div class="a" style="left:1470px;top:6px">${A({ view: "bust", w: 340, h: 280, mood: "happy", arm: "point" })}</div>`,
+    av: `background:linear-gradient(135deg,#ffd9c7,#c9f2df)`,
+    thumb: (t, i) => `<div class="a" style="inset:0;background:${["linear-gradient(135deg,#ffd9c7,#ffc2d1)", "linear-gradient(135deg,#c9f2df,#bfe8ff)", "linear-gradient(135deg,#fff0b8,#ffd9c7)"][i]}"></div>
+      ${blob(380, 180, 260, "rgba(255,255,255,.5)")}
+      <div class="a" style="left:0;top:36px">${A({ w: 270, h: 310, mood: t.mood, arm: t.arm })}</div>
+      <div class="a" style="left:270px;top:56px;width:300px;padding:18px 20px;background:#fff;border-radius:28px;box-shadow:0 14px 30px rgba(43,37,64,.14)">
+        <div class="nw" style="font:800 ${t.big.length > 6 ? 44 : 56}px/1 Unb;letter-spacing:-.04em;color:#2b2540">${t.big}</div>
+        <div class="nw" style="font:700 24px/1.2 I;color:#ff5c7a;margin-top:10px">${t.small.toLowerCase()}</div></div>`,
+  },
+  10: { // Коллаж-вырезки: крафт-бумага, буквы «из журналов», рваные полосы, скотч
+    banner: () => `<div class="a" style="inset:0;background:#c9a87c"></div><div class="a" style="inset:0;background:${noise(.3)}"></div>
+      <div class="a" style="left:40px;top:40px;width:1000px;height:230px;background:#f5efe2;clip-path:${torn};transform:rotate(-1deg)"></div>
+      <div class="a nw" style="left:80px;top:70px">${ransom("АРБУЗОВ", 118, 7)}</div>
+      <div class="a nw" style="left:90px;top:220px;font:700 30px/1 Cav;color:#2b2520">${TAG}</div>
+      <div class="a" style="left:1100px;top:60px;width:240px;padding:14px;background:#fff;transform:rotate(5deg);box-shadow:0 8px 16px rgba(0,0,0,.25)"><div style="height:150px;background:#ffe9a8;display:flex;justify-content:center;overflow:hidden">${A({ view: "head", w: 150, h: 150, mood: "wink" })}</div><div style="font:700 26px Cav;color:#2b2520;text-align:center;margin-top:6px">это я, Арбузов</div></div>
+      <div class="a" style="left:1160px;top:46px;width:120px;height:32px;background:rgba(255,255,230,.7);transform:rotate(-4deg)"></div>
+      <div class="a" style="left:1460px;top:6px">${sticker(A({ view: "bust", w: 340, h: 280, mood: "talk", arm: "point" }), 6)}</div>`,
+    av: `background:#c9a87c`,
+    thumb: (t, i) => `<div class="a" style="inset:0;background:${["#c9a87c", "#2b2520", "#d9c7a5"][i]}"></div><div class="a" style="inset:0;background:${noise(.3)}"></div>
+      <div class="a" style="left:240px;top:30px;width:340px;height:270px;background:#f5efe2;clip-path:${torn};transform:rotate(2deg)"></div>
+      <div class="a" style="left:-10px;top:30px">${sticker(A({ w: 270, h: 310, mood: t.mood, arm: t.arm }), 6)}</div>
+      <div class="a nw" style="left:262px;top:56px">${ransom(t.big, t.big.length > 6 ? 42 : 62, i * 3 + 1)}</div>
+      <div class="a nw" style="left:270px;top:176px;font:700 44px/1 Cav;color:#c8102e;transform:rotate(-3deg)">${t.small.toLowerCase()}</div>
+      <div class="a" style="left:470px;top:22px;width:110px;height:30px;background:rgba(255,255,230,.7);transform:rotate(8deg)"></div>`,
+  },
+  11: { // Конструктивизм: крем, красный, чёрный; диагонали, круги, наклонный крупный шрифт
+    banner: () => `<div class="a" style="inset:0;background:#efe4cc"></div><div class="a" style="inset:0;background:${noise(.2)}"></div>
+      <div class="a" style="left:1100px;top:-40px;width:900px;height:420px;background:#d42a1f;clip-path:polygon(18% 0,100% 0,100% 100%,0 100%)"></div>
+      <div class="a" style="left:1480px;top:20px;width:290px;height:290px;border-radius:50%;background:#111"></div>
+      <div class="a" style="left:-40px;top:246px;width:1200px;height:40px;background:#111;transform:rotate(-4deg)"></div>
+      <div class="a nw" style="left:80px;top:20px;font:700 160px/1 O;letter-spacing:.02em;color:#d42a1f;transform:rotate(-4deg)">АРБУЗОВ</div>
+      <div class="a nw" style="left:100px;top:252px;font:700 28px O;letter-spacing:.2em;color:#efe4cc;transform:rotate(-4deg)">БОНУСЫ БАНКОВ — ПОД КОНТРОЛЬ</div>
+      <div class="a" style="left:1470px;top:0">${A({ view: "bust", w: 340, h: 280, mood: "talk", arm: "point" })}</div>`,
+    av: `background:#d42a1f`,
+    thumb: (t, i) => `<div class="a" style="inset:0;background:#efe4cc"></div><div class="a" style="inset:0;background:${noise(.2)}"></div>
+      <div class="a" style="left:-60px;top:-40px;width:400px;height:420px;background:${i === 1 ? "#111" : "#d42a1f"};clip-path:polygon(0 0,100% 0,70% 100%,0 100%)"></div>
+      <div class="a" style="left:20px;top:60px;width:230px;height:230px;border-radius:50%;background:${i === 1 ? "#d42a1f" : "#111"}"></div>
+      <div class="a" style="left:-6px;top:30px">${A({ w: 270, h: 310, mood: t.mood, arm: t.arm })}</div>
+      <div class="a nw" style="left:300px;top:50px;font:700 96px/1 O;color:${i === 1 ? "#d42a1f" : "#111"};transform:rotate(-6deg)">${t.big}</div>
+      <div class="a nw" style="left:296px;top:182px;padding:6px 14px;background:#111;color:#efe4cc;font:700 32px/1 O;letter-spacing:.06em;transform:rotate(-6deg)">${t.small}</div>`,
+  },
+  12: { // Чат-переписка: тёмные «обои» мессенджера, пузыри сообщений, Арбузов отвечает банку
+    banner: () => `<div class="a" style="inset:0;background:#17212b"></div><div class="a" style="inset:0;background:${seedsBg("#2fa84f", .12)}"></div>
+      <div class="a nw" style="left:80px;top:60px;font:900 130px/1 Unb;letter-spacing:-.05em;color:#fff">АРБУЗОВ</div>
+      <div class="a nw" style="left:86px;top:206px;font:600 26px I;color:#8fa6ba">в сети · ${TAG.toLowerCase()}</div>
+      ${msg(960, 40, "Банк", "Вам одобрен бонус 15 000 ₽", false)}${msg(1110, 130, "Арбузов", "А где подвох? Покажите условия", true)}${msg(960, 214, "Банк", "печатает…", false)}
+      <div class="a" style="left:1540px;top:20px">${A({ view: "bust", w: 300, h: 248, mood: "smirk", arm: "phone" })}</div>`,
+    av: `background:#2fa84f`,
+    thumb: (t, i) => `<div class="a" style="inset:0;background:#17212b"></div><div class="a" style="inset:0;background:${seedsBg("#2fa84f", .12)}"></div>
+      ${msg(24, 26, "Банк", t.big, false, 46)}
+      ${msg(70, 150, "Арбузов", t.small.toLowerCase(), true, 28)}
+      <div class="a" style="left:372px;top:96px">${A({ w: 230, h: 264, mood: t.mood, arm: t.arm })}</div>`,
+  }
+};
 const D = ST[S];
 
 /* ---------- макет страницы канала ---------- */

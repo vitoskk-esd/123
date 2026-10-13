@@ -28,7 +28,8 @@ with `script.md`, `rec/` (gitignored), `sections/<NN>/` builds, `out/`
   (denis +2 st). Recipe: `characters/voice/base.py`, `make_voices.sh`, `vc_voices.py`. VC can blur words («Орбузов», «Поднали») —
   check every phrase with Whisper after VC and re-take. Audio sting «хрум + маримба»: `characters/voice/sting.py`.
 - Project style: not chosen yet. Rejected 13.10: «Сочный поп», «Арбуз-неон», «Тетрадь» (characters/style.html).
-  Second round: characters/channel.html ?s=1..6 (зин-стикеры, Y2K-хром, финтех-минимал, газета, пиксель-игра, мем-карточка).
+  Second round: characters/channel.html ?s=1..6 (зин-стикеры, Y2K-хром, финтех-минимал, газета, пиксель-игра, мем-карточка);
+  third round ?s=7..12 (кислотный стрит, манга, пастель, коллаж-вырезки, конструктивизм, чат-переписка).
 
 ## Visual format from video #3 (owner, 2026-10-10)
 
