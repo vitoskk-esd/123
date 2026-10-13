@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Превью ролика №4 — 6 идей 3D</title>
+<!-- 6 вариантов превью (владелец 13.10: «превью ни одно не нравится, нужны ещё варианты»). Настоящее 3D (three.js, PBR, отражения, тени, bloom),
+     текст — HTML поверх, ≤ 6 слов, без эмодзи. ?v=1 наклейка «0 %», под ней «60 %» · 2 песочные часы · 3 семь карт и медаль · 4 мышеловка ·
+     5 одна карта — зелёная и красная половины · 6 календарь «180». Снимок из youtube/:
+     node kit/shot3d.js 04-credit-cards-top/thumb/ideas3d.html 04-credit-cards-top/thumb/idea1.png 1280 720 v=1 -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #030304; }
+  canvas { position: absolute; inset: 0; width: 1280px !important; height: 720px !important; }
+  .t { position: absolute; left: 56px; top: 80px; z-index: 5; font: 900 104px/.95 "Unb"; text-transform: uppercase; letter-spacing: -.05em; }
+  .t div { white-space: nowrap; }
+  .w { color: #f3f6f9; text-shadow: 0 8px 0 rgba(0,0,0,.45), 0 0 34px rgba(0,0,0,.8); }
+  .g { background: linear-gradient(180deg, #d9ffe9 0%, #4ee39a 45%, #0fae63 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 8px 0 rgba(0,0,0,.45)); }
+  .r { background: linear-gradient(180deg, #ffd0d0 0%, #ff5a5a 45%, #c41c1c 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 8px 0 rgba(0,0,0,.45)); }
+  .y { background: linear-gradient(180deg, #fff6c8 0%, #ffd84a 38%, #e3a10e 62%, #fff0a0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 8px 0 rgba(0,0,0,.45)) drop-shadow(0 0 26px rgba(255,200,40,.4)); }
+  .plate { position: absolute; left: 60px; top: 500px; z-index: 5; padding: 12px 28px 16px; border-radius: 18px; transform: rotate(-2.5deg);
+    font: 900 46px "Unb"; text-transform: uppercase; letter-spacing: -.02em; box-shadow: 0 14px 30px rgba(0,0,0,.55), inset 0 2px 0 rgba(255,255,255,.4); }
+  .pg { background: linear-gradient(180deg, #5cf0a0, #2bc272); color: #04140b; } .pr { background: linear-gradient(180deg, #ff6b6b, #d92b2b); color: #fff; } .pw { background: linear-gradient(180deg, #fff, #d6d9df); color: #0b0c10; }
+  .shade { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.42) 40%, transparent 60%); }
+  .vig { position: absolute; inset: 0; z-index: 4; pointer-events: none; background: radial-gradient(ellipse at 68% 50%, transparent 46%, rgba(0,0,0,.75)); }
+</style>
+<script type="importmap">{ "imports": { "three": "../../kit/vendor/three/three.module.min.js", "three/addons/": "../../kit/vendor/three/addons/" } }</script>
+</head>
+<body>
+<div class="shade"></div><div class="vig"></div>
+<div id="txt"></div>
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+await document.fonts.load("900 100px Unb"); await document.fonts.load("800 70px Unb");
+const V = +(new URLSearchParams(location.search).get("v") || 1);
+const TXT = {
+  1: `<div class="t"><div class="g">0 %</div><div class="w">или</div><div class="r">60 %?</div></div><div class="plate pw">топ кредиток</div>`,
+  2: `<div class="t"><div class="w">180 дней</div><div class="y">без %</div></div><div class="plate pr">и что потом</div>`,
+  3: `<div class="t"><div class="w">Топ-7</div><div class="y">кредиток</div></div><div class="plate pg">№1 — неожиданно</div>`,
+  4: `<div class="t"><div class="w">Кредитка</div><div class="w">без</div><div class="r">ловушки</div></div><div class="plate pg">как выбрать</div>`,
+  5: `<div class="t"><div class="w">Одна карта</div><div class="g">0 ₽</div><div class="r">или 60 %</div></div>`,
+  6: `<div class="t"><div class="w">Какую</div><div class="w">кредитку</div><div class="y">брать?</div></div><div class="plate pr">7 банков</div>`,
+}[V];
+document.getElementById("txt").innerHTML = TXT;
+
+const W = 1280, H = 720;
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setPixelRatio(2); r.setSize(W, H); r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = .95;
+r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; document.body.prepend(r.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x030304);
+scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), .04).texture; scene.environmentIntensity = .5;
+const cam = new THREE.PerspectiveCamera(30, W / H, .1, 100); cam.position.set(-.6, 1.9, 11.8); cam.lookAt(2.6, .45, 0);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshPhysicalMaterial({ color: 0x060608, metalness: .3, roughness: .6 }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -.83; floor.receiveShadow = true; scene.add(floor);
+const spot = new THREE.SpotLight(0xffffff, 260, 30, .45, .6, 1.4); spot.position.set(4.6, 8.5, 3.6); spot.target.position.set(4.1, .4, 0);
+spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); scene.add(spot, spot.target);
+const rim = new THREE.PointLight(0x9fb4ff, 40, 12, 1.6); rim.position.set(2.2, 2.6, -2.4); scene.add(rim);
+
+// карта: canvas-текстура (цвета, чип, надпись) + металл и лак
+const cardTex = (o, relief) => { const c = document.createElement("canvas"); c.width = 1712; c.height = 1080; const g = c.getContext("2d");
+  const gr = g.createLinearGradient(0, 0, 1712, 1080); (o.stops || [[0, "#4a4d55"], [.55, "#15161a"], [1, "#5a5e68"]]).forEach(([p, col]) => gr.addColorStop(p, relief ? "#666" : col));
+  g.fillStyle = gr; g.fillRect(0, 0, 1712, 1080);
+  if (o.split && !relief) { const L = g.createLinearGradient(0, 0, 1712, 0); L.addColorStop(0, "#0b8a52"); L.addColorStop(.49, "#13d98a"); L.addColorStop(.51, "#ff4a4a"); L.addColorStop(1, "#8e0e0e"); g.fillStyle = L; g.fillRect(0, 0, 1712, 1080); }
+  if (!relief) for (let i = 0; i < 1200; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * .03})`; g.fillRect(0, Math.random() * 1080, 1712, 1); }
+  g.fillStyle = relief ? "#fff" : "#e9c46a"; g.beginPath(); g.roundRect(150, 360, 230, 175, 30); g.fill();
+  g.fillStyle = relief ? "#fff" : (o.ink || "#e8ebf0"); g.textAlign = "right";
+  if (o.big) { g.font = "900 280px Unb"; g.fillText(o.big, 1590, 930); } if (o.small) { g.font = "800 70px Unb"; g.fillText(o.small, 1590, 640); }
+  if (o.bank) { g.textAlign = "left"; g.font = "800 90px Unb"; g.fillText(o.bank, 150, 200); }
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 8; if (!relief) t.colorSpace = THREE.SRGBColorSpace; return t; };
+const cw = 1.712, ch = 1.08, ct = .03, rr = .1, shp = new THREE.Shape();
+{ const x = -cw / 2, y = -ch / 2; shp.moveTo(x + rr, y); shp.lineTo(x + cw - rr, y); shp.quadraticCurveTo(x + cw, y, x + cw, y + rr); shp.lineTo(x + cw, y + ch - rr);
+  shp.quadraticCurveTo(x + cw, y + ch, x + cw - rr, y + ch); shp.lineTo(x + rr, y + ch); shp.quadraticCurveTo(x, y + ch, x, y + ch - rr); shp.lineTo(x, y + rr); shp.quadraticCurveTo(x, y, x + rr, y); }
+const cgeo = new THREE.ExtrudeGeometry(shp, { depth: ct, bevelEnabled: true, bevelThickness: .006, bevelSize: .006, bevelSegments: 3, curveSegments: 24 });
+{ const p = cgeo.attributes.position, uv = cgeo.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, (p.getX(i) + cw / 2) / cw, (p.getY(i) + ch / 2) / ch); }
+const mkCard = (o) => { const face = new THREE.MeshPhysicalMaterial({ map: cardTex(o, false), bumpMap: cardTex(o, true), bumpScale: 2, metalness: o.metal ?? .85, roughness: .3, clearcoat: .5, clearcoatRoughness: .2 });
+  const m = new THREE.Mesh(cgeo, [face, new THREE.MeshPhysicalMaterial({ color: o.edge || 0x9aa0aa, metalness: 1, roughness: .25 })]); m.castShadow = true; return m; };
+const pt = (c, i, x, y, z) => { const l = new THREE.PointLight(c, i * .55, 9, 1.5); l.position.set(x, y + 1.6, z); scene.add(l); return l; };
+
+if (V === 1) {   // наклейка «0 %», уголок отклеен, под ней «60 %»
+  const card = mkCard({ stops: [[0, "#2a2c33"], [.6, "#0f1013"], [1, "#3c4049"]], big: "60%", ink: "#ff4a4a" }); card.scale.setScalar(2.3); card.position.set(4.2, .95, 0); card.rotation.set(-.05, -.42, 0); scene.add(card);
+  const sc = document.createElement("canvas"); sc.width = 1024; sc.height = 640; const g = sc.getContext("2d"); g.fillStyle = "#19d38a"; g.beginPath(); g.roundRect(0, 0, 1024, 640, 60); g.fill();
+  g.fillStyle = "#03170c"; g.font = "900 330px Unb"; g.textAlign = "center"; g.fillText("0 %", 512, 450); const st = new THREE.CanvasTexture(sc); st.colorSpace = THREE.SRGBColorSpace;
+  const sg = new THREE.PlaneGeometry(1.0, .62, 40, 24), p = sg.attributes.position;   // отгибаем правый нижний угол
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), d = Math.max(0, (x - .1) - (y + .05)); if (d > 0) { p.setZ(i, d * d * 1.6); p.setX(i, x - d * d * .5); p.setY(i, y + d * d * .5); } }
+  sg.computeVertexNormals();
+  const stk = new THREE.Mesh(sg, new THREE.MeshPhysicalMaterial({ map: st, roughness: .45, clearcoat: .6, side: THREE.DoubleSide })); stk.position.set(.3, -.12, .05); card.add(stk);
+  pt(0x4ee39a, 14, 2.6, .8, 2.2); pt(0xff4a4a, 16, 6.2, .3, 1.8);
+}
+if (V === 2) {   // песочные часы: стекло, золотой песок, рядом карта
+  const prof = []; for (let i = 0; i <= 40; i++) { const y = -1.3 + i * 2.6 / 40, w = .12 + .78 * Math.pow(Math.abs(y) / 1.3, .7); prof.push(new THREE.Vector2(w, y)); }
+  const glass = new THREE.Mesh(new THREE.LatheGeometry(prof, 64), new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: .05, transmission: 1, thickness: .2, ior: 1.45, transparent: true, opacity: .35, clearcoat: 1 }));
+  glass.position.set(4.6, .65, 0); scene.add(glass);
+  const sand = new THREE.MeshPhysicalMaterial({ color: 0xffc94a, roughness: .7, metalness: .2, emissive: 0x6a3e00, emissiveIntensity: .25 });
+  const bottom = new THREE.Mesh(new THREE.ConeGeometry(.78, .7, 48), sand); bottom.position.set(4.6, -.4, 0); scene.add(bottom);
+  const top = new THREE.Mesh(new THREE.ConeGeometry(.42, .45, 48), sand); top.rotation.x = Math.PI; top.position.set(4.6, .55, 0); scene.add(top);
+  const stream = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .95, 8), sand); stream.position.set(4.6, .1, 0); scene.add(stream);
+  const wood = new THREE.MeshPhysicalMaterial({ color: 0x2a1a10, roughness: .5, clearcoat: .4 });
+  [-0.73 + .65, 2.03].forEach(y => { const c = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, .14, 64), wood); c.position.set(4.6, y - 1.35 + .65 - .65 + (y > 1 ? .0 : 0), 0); });
+  const cap1 = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, .16, 64), wood); cap1.position.set(4.6, -.72, 0); cap1.castShadow = true; scene.add(cap1);
+  const cap2 = cap1.clone(); cap2.position.y = 2.02; scene.add(cap2);
+  const card = mkCard({ stops: [[0, "#f6d77a"], [.55, "#b88a22"], [1, "#ffe9a3"]], big: "180", small: "ДНЕЙ БЕЗ %", ink: "#2a1d05", edge: 0xd9a93a }); card.scale.setScalar(1.6);
+  card.position.set(2.75, .05, .8); card.rotation.set(-.15, .35, .18); scene.add(card); pt(0xffc46b, 22, 5.8, 1.2, 2.2);
+}
+if (V === 3) {   // семь карт в ряд, первая — с медалью
+  const cols = [["#3a3a40", "#101012"], ["#7a4bd0", "#2b1260"], ["#ef3124", "#7d0b0b"], ["#2a55c8", "#0b1f52"], ["#21a038", "#0a4d1a"], ["#f26c1b", "#1b2a6b"], ["#ffcc00", "#ff3b30"]];
+  cols.forEach(([a, b], i) => { const c = mkCard({ stops: [[0, a], [.6, b], [1, a]], big: String(7 - i) }); const s = i === 6 ? 1.55 : 1.0; c.scale.setScalar(s);
+    c.scale.multiplyScalar(1.35); c.position.set(1.5 + i * .82, (i === 6 ? .75 : .15), -1.6 + i * .3); c.rotation.set(-.08, -.55, 0); scene.add(c); });
+  const gold = new THREE.MeshPhysicalMaterial({ color: 0xffc94a, metalness: 1, roughness: .2 });
+  const medal = new THREE.Mesh(new THREE.CylinderGeometry(.36, .36, .06, 48), gold); medal.rotation.set(Math.PI / 2, 0, 0); medal.position.set(6.3, -.2, .9); scene.add(medal);
+  const rib = new THREE.Mesh(new THREE.BoxGeometry(.22, .8, .02), new THREE.MeshPhysicalMaterial({ color: 0xd62828, roughness: .5 })); rib.position.set(6.3, .3, .86); scene.add(rib);
+  pt(0xffd36b, 20, 6.4, 1.5, 2.4);
+}
+if (V === 4) {   // мышеловка: деревянное основание, пружинная дуга, карта как приманка
+  const wood = new THREE.MeshPhysicalMaterial({ color: 0xb98a55, roughness: .6, clearcoat: .2 });
+  const base = new THREE.Mesh(new THREE.BoxGeometry(4.6, .22, 2.4), wood); base.position.set(4.4, -.7, .4); base.castShadow = base.receiveShadow = true; scene.add(base);
+  const steel = new THREE.MeshPhysicalMaterial({ color: 0xcfd4dc, metalness: 1, roughness: .2 });
+  const path = new THREE.CatmullRomCurve3([new THREE.Vector3(-1.5, 0, -.8), new THREE.Vector3(-1.5, .9, -.8), new THREE.Vector3(-1.5, .9, .8), new THREE.Vector3(-1.5, 0, .8)]);
+  const bar = new THREE.Mesh(new THREE.TubeGeometry(path, 40, .05, 12), steel); bar.scale.setScalar(1.3); bar.position.set(4.6, -.58, .4); bar.rotation.z = -.35; scene.add(bar);
+  const spring = new THREE.Mesh(new THREE.TorusGeometry(.18, .04, 12, 32), steel); spring.position.set(3.0, -.5, .4); spring.scale.setScalar(1.4); spring.rotation.y = Math.PI / 2; scene.add(spring);
+  const card = mkCard({ stops: [[0, "#4a4d55"], [.55, "#15161a"], [1, "#5a5e68"]], big: "0%", ink: "#4ee39a" }); card.scale.setScalar(1.6); card.position.set(5.2, -.3, .6); card.rotation.set(-1.15, 0, .25); scene.add(card);
+  pt(0xff6b6b, 14, 6.4, .6, 2.2);
+}
+if (V === 5) {   // одна карта, зелёная и красная половины, двойной свет
+  const card = mkCard({ split: true, big: "", metal: .5 }); card.scale.setScalar(2.4); card.position.set(4.3, .95, 0); card.rotation.set(-.04, -.38, 0); scene.add(card);
+  pt(0x2bff9a, 12, 1.6, 1.2, 3.2); pt(0xff3b3b, 12, 7.2, 1.2, 2.8);
+}
+if (V === 6) {   // календарь «180» и карта
+  const cc = document.createElement("canvas"); cc.width = 1024; cc.height = 1024; const g = cc.getContext("2d"); g.fillStyle = "#f4f2ee"; g.fillRect(0, 0, 1024, 1024);
+  g.fillStyle = "#e5484d"; g.fillRect(0, 0, 1024, 230); g.fillStyle = "#fff"; g.font = "800 110px Unb"; g.textAlign = "center"; g.fillText("ДНЕЙ БЕЗ %", 512, 160);
+  g.fillStyle = "#0d0d12"; g.font = "900 420px Unb"; g.fillText("180", 512, 720); g.strokeStyle = "#e5484d"; g.lineWidth = 22; g.beginPath(); g.ellipse(512, 590, 450, 260, -.08, 0, 7); g.stroke();
+  const ct2 = new THREE.CanvasTexture(cc); ct2.colorSpace = THREE.SRGBColorSpace;
+  const blk = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.4, .5), [0, 1, 2, 3].map(() => new THREE.MeshPhysicalMaterial({ color: 0xe9e6e0, roughness: .8 })).concat([new THREE.MeshPhysicalMaterial({ map: ct2, roughness: .7 }), new THREE.MeshPhysicalMaterial({ color: 0xe9e6e0 })]));
+  blk.position.set(4.9, .55, -.3); blk.rotation.y = -.35; blk.castShadow = true; scene.add(blk);
+  const card = mkCard({ stops: [[0, "#2a55c8"], [.6, "#0b1f52"], [1, "#6b95f0"]], big: "?", ink: "#fff" }); card.scale.setScalar(1.2); card.position.set(3.0, -.25, 1.0); card.rotation.set(-.2, .35, .2); scene.add(card);
+  pt(0xffe0b0, 6, 6.8, 1.6, 2.6);
+}
+const comp = new EffectComposer(r); comp.setPixelRatio(2); comp.setSize(W, H);
+comp.addPass(new RenderPass(scene, cam)); comp.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), .28, .4, .92)); comp.addPass(new OutputPass());
+document.fonts.load("900 100px Unb").then(() => { scene.traverse(o => { if (o.material && !Array.isArray(o.material) && o.material.map && o.material.map.image) o.material.map.needsUpdate = true; });
+  // текстуры карт нарисованы до загрузки шрифта — перерисовываем
+  comp.render(); requestAnimationFrame(() => { comp.render(); window.__ready = true; }); });
+</script>
+</body></html>

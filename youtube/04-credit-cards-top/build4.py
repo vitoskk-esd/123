@@ -38,7 +38,20 @@ C = {  # карты: цвета — по фирменной гамме банк�
 }
 SEVEN = [C[k] for k in ("t", "ren", "alfa", "ural", "sber", "psb", "ya")]
 FLASH = {"type": "flash", "dur": .7, "color": "radial-gradient(1400px 900px at 50% 40%, rgba(255,255,255,1), rgba(210,215,230,.75) 50%, rgba(255,255,255,0) 85%)"}
-def S(ph, data, tin=None): return B.seg("premium", ph, data, tin=tin)
+BGS = ["aurora", "grid", "rays", "rings", "aurora", "spot", "grid", "rays"]
+TINS = [lambda c: {"type": "zoom", "dur": .7, "at": [960, 520]}, lambda c: {"type": "wipe", "dur": .8, "color": f"linear-gradient(100deg, {c} 0%, #0b0c10 9%, #0b0c10 91%, {c} 100%)"},
+        lambda c: {"type": "iris", "dur": .8, "at": [960, 540], "color": "#0b0c10"}, lambda c: {"type": "flash", "dur": .55, "color": "radial-gradient(1400px 900px at 50% 45%, rgba(235,240,255,.95), rgba(150,165,230,.45) 50%, rgba(0,0,0,0) 85%)"}]
+_n = [0]; _acc = ["#7d8bff"]
+def S(ph, data, tin=None):
+    i = _n[0]; _n[0] += 1
+    if "hero" in data: _acc[0] = data["hero"]["card"]["c1"]
+    data.setdefault("bg", BGS[i % len(BGS)]); data.setdefault("seed", i + 1); data.setdefault("accent", _acc[0])
+    red = any(it.get("c") == "red" for it in data.get("rows", {}).get("items", [])) or data.get("quote", {}).get("red")
+    green = any(it.get("c") in ("green", "gold") for it in data.get("rows", {}).get("items", []))
+    data.setdefault("decor", "pct" if red else "coins" if green else "orbs")
+    if i and not tin: tin = TINS[i % len(TINS)](_acc[0])
+    elif tin: tin = TINS[(i + 1) % len(TINS)](_acc[0]) if tin.get("type") == "flash" else tin
+    return B.seg("premium", ph, data, tin=tin)
 def rows(title, items, at=0, src=None):
     r = {"title": title, "at": at, "items": [dict(k=i[0], v=i[1], **({"c": i[2]} if len(i) > 2 and i[2] else {}), **({"at": i[3]} if len(i) > 3 else {})) for i in items]}
     if src: r["src"] = src
