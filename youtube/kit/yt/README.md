@@ -19,6 +19,7 @@
 | `build.py` | сборщик по словам голоса: `Build(words.json)`, `seg(mode, "фраза", data)`, в data `"@фраза"` → время; `stop`, `write(page=…)`, проверка ритма и «мёртвых зон»; `python3 build.py draft script.md words.json` — черновые слова до голоса |
 | `y7/build_ch1.py` | пример: глава «Способ 1» ролика №2 по настоящему голосу |
 | `render.js` | `node render.js demo.html --query label=1 --stills 4.5,22.2` (кадры) / `--out out/demo.mp4` (видео) |
+| `render_pieces.sh` | `bash render_pieces.sh <page_bake.html> <data_full.js> <outdir> 192 4 <page.html>` — длинный ролик кусками по ~3,4 с, переживает перезапуски контейнера (метки `.pN`), куски с 3D-картой — со страницы без запекания; итог `<outdir>/video_full.mp4` |
 
 Отрезок: `{mode, t0, t1, data, tin: {type, dur, at, key}, marks: {ключ: селектор}}`. Все времена в `data` — от начала отрезка.
 Переходы (`tin` входящего отрезка): `flash` — засветка (по центру границы), `zoom` — пролёт сквозь точку `at` (экран
