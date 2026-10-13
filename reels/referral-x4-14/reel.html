@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Рилс 14 — За друга с кредиткой</title>
+<!-- Рилс #14 «За друга с кредиткой — до 4 раз больше», стиль D «Кинетика на светлом» (владелец 13.10: «давай сегодня создадим рилс
+     в стиле номер 4»; голос — «как в ютуб ролике номер 3»). Кадр в момент t: window.renderAt(t); время — timeline.js (build.py).
+     Всё детерминировано от t. Рендер: node youtube/kit/yt/render.js reels/referral-x4-14/reel.html --out reels/referral-x4-14/out/reel_video.mp4 -->
+<style>
+  @font-face { font-family: "Unb"; src: url("/youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "Mont"; src: url("/youtube/kit/fonts/Montserrat.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Mono"; src: url("/youtube/kit/fonts/GeistMono-Bold.ttf"); }
+  @font-face { font-family: "Int"; src: url("/youtube/kit/fonts/inter-cyrillic-500.woff2"); font-weight: 500; unicode-range: U+0400-04FF; }
+  @font-face { font-family: "Int"; src: url("/youtube/kit/fonts/inter-latin-500.woff2"); font-weight: 500; }
+  @font-face { font-family: "Int"; src: url("/youtube/kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-04FF; }
+  @font-face { font-family: "Int"; src: url("/youtube/kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f2ee; color: #0d0d12; font-family: "Int"; }
+  #bg, #stage { position: absolute; inset: 0; }
+  .a { position: absolute; }
+  .h { font-family: "Unb"; font-weight: 800; letter-spacing: -.05em; word-spacing: .1em; line-height: .95; }
+  .pill { display: inline-block; padding: 14px 30px; border-radius: 999px; background: #0d0d12; color: #fff; font: 700 32px "Int"; white-space: nowrap; }
+  .grad { background: linear-gradient(100deg, #7a6bff 0%, #d45cff 45%, #ff7aa8 100%); -webkit-background-clip: text; color: transparent; }
+  .card { position: absolute; width: 640px; height: 404px; border-radius: 34px; overflow: hidden; color: #fff;
+    box-shadow: 0 50px 100px rgba(40,30,80,.28), 0 10px 26px rgba(40,30,80,.18), inset 0 1px 0 rgba(255,255,255,.3); }
+  .card .sheen { position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.3) 47%, rgba(255,255,255,.05) 55%, transparent 62%); }
+  .card .chip { position: absolute; left: 54px; top: 128px; width: 84px; height: 64px; border-radius: 12px; background: linear-gradient(135deg, #f3dfa2, #b8913e 55%, #e9cf86); }
+  .card .nm { position: absolute; left: 54px; top: 46px; font: 700 32px "Unb"; }
+  .card .num { position: absolute; left: 54px; bottom: 54px; font: 26px "Mono"; letter-spacing: .14em; opacity: .85; }
+  .card .lab { position: absolute; right: 50px; bottom: 50px; font: 800 40px "Unb"; }
+  .phone { position: absolute; width: 520px; height: 1000px; border-radius: 76px; background: #0d0d12; padding: 18px; box-shadow: 0 60px 120px rgba(40,30,80,.25); }
+  .scr { width: 100%; height: 100%; border-radius: 60px; background: #fff; overflow: hidden; position: relative; }
+  .bar { height: 22px; border-radius: 11px; background: #e6e4ef; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 11px; }
+  #cap { position: absolute; left: 60px; right: 150px; top: 1300px; display: flex; justify-content: center; align-items: baseline; gap: 22px;
+    font-family: Unb; font-weight: 900; letter-spacing: -.03em; color: #0d0d12; white-space: nowrap; }
+  #cap span { display: inline-block; }
+  #foot { position: absolute; left: 0; right: 0; top: 1858px; text-align: center; font: 600 23px "Int"; color: rgba(13,13,18,.45); }
+</style>
+<script src="timeline.js"></script>
+</head><body>
+<div id="bg"></div><div id="stage"></div><div id="cap"></div>
+<div id="foot">Познавательный ролик · не реклама банка · суммы — пример</div>
+<script>
+(function () {
+const TL = window.TL, $ = (id) => document.getElementById(id);
+const VIO = "#7a6bff", GRN = "#0b9b6c", RED = "#e5484d", COL = { k: VIO, g: GRN, r: RED };
+const cl = (x) => Math.max(0, Math.min(1, x)), out3 = (x) => 1 - Math.pow(1 - cl(x), 3), out5 = (x) => 1 - Math.pow(1 - cl(x), 5);
+const back = (x) => { x = cl(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const bell = (x) => Math.sin(Math.PI * cl(x));
+const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+// появление снизу с прозрачностью / «пружина» по масштабу; k — 0..1
+const up = (k, html, dy = 70) => k <= 0 ? "" : `<div class="a" style="inset:0;transform:translateY(${((1 - out5(k)) * dy).toFixed(1)}px);opacity:${out3(k * 1.4).toFixed(3)}">${html}</div>`;
+const sp = (k, html, ox = "50%", oy = "50%") => k <= 0 ? "" : `<div class="a" style="inset:0;transform-origin:${ox} ${oy};transform:scale(${back(k).toFixed(3)});opacity:${cl(k * 3).toFixed(3)}">${html}</div>`;
+const CARDS = { deb: ["ОБЫЧНАЯ", "linear-gradient(135deg,#5b2bff 0%,#2a0f8f 60%,#8a5cff 100%)", "дебет"], cred: ["КРЕДИТКА", "linear-gradient(135deg,#ff5a5f 0%,#a3122a 60%,#ff9a6b 100%)", "кредит"] };
+const card = (k, x, y, rot, sc = 1, t = 0) => { const c = CARDS[k], sh = ((t * .35) % 1.6) * 100 - 60;
+  return `<div class="card" style="left:${x}px;top:${y}px;background:${c[1]};transform:rotate(${rot}deg) scale(${sc})"><div class="sheen" style="transform:translateX(${sh.toFixed(1)}%)"></div>
+    <div class="nm">${c[0]}</div><div class="chip"></div><div class="num">•••• 2026</div></div>`; };
+const tap = (t, t0, x, y) => { const k = (t - t0) / .5; if (k < -.4 || k > 1.2) return "";
+  return `<div class="a" style="left:${x - 46}px;top:${y - 46}px;width:92px;height:92px;border-radius:50%;background:rgba(13,13,18,.25);opacity:${k < 0 ? cl(1 + k * 2.5) : 1 - cl(k)}"></div>
+    ${k > 0 ? `<div class="a" style="left:${x - 46 - 80 * out3(k)}px;top:${y - 46 - 80 * out3(k)}px;width:${92 + 160 * out3(k)}px;height:${92 + 160 * out3(k)}px;border-radius:50%;border:6px solid rgba(13,13,18,.35);opacity:${1 - cl(k)}"></div>` : ""}`; };
+const count = (t, t0, a, b, dur = .7) => a + (b - a) * out3((t - t0) / dur);
+
+const SCENES = {
+  // хук — в кадре с 0-го кадра: «1 000 ₽ или 4 000 ₽?»
+  s_hook: (t, e, s) => { const k1 = (t - e.one + .3) / .4, k4 = (t - e.four) / .45, kc = (t - e.card) / .5, p4 = bell((t - e.four) / .6);
+    return `<div class="a" style="left:80px;top:150px"><span class="pill">За одного друга</span></div>
+      <div class="a h" style="left:76px;top:250px;white-space:nowrap;font-size:${178 + 14 * bell(k1)}px">1 000 ₽</div>
+      <div class="a" style="left:80px;top:520px"><span class="pill" style="background:${VIO}">За другого</span></div>
+      <div class="a h grad" style="left:70px;top:620px;white-space:nowrap;font-size:${166 + 16 * p4}px;opacity:${(.18 + .82 * out3(k4)).toFixed(3)}">4 000 ₽</div>
+      ${up(kc, `<div class="a h" style="left:80px;top:920px;font-size:66px">разница —<br>в одной карте</div>${card("cred", 560, 900, -10 + 4 * (1 - out5(kc)), .62, t)}`, 90)}`; },
+  s_debit: (t, e, s) => { const kc = (t - s.t0) / .45, kl = (t - e.link) / .4, n = count(t, e.sum, 0, 1);
+    return `${up(kc, card("deb", 220, 150, -6 + Math.sin(t * .9) * 1.5, 1, t), 140)}
+      ${sp(kl, `<div class="a" style="left:0;right:0;top:620px;text-align:center"><span class="pill">по твоей ссылке</span></div>`)}
+      ${t >= e.sum - .1 ? `<div class="a" style="left:0;right:0;top:720px;text-align:center;font:500 40px 'Int';color:#55556a">тебе за друга · пример</div>
+        <div class="a h" style="left:0;right:0;top:790px;text-align:center;white-space:nowrap;font-size:104px">${fmt(1000 * n)}–${fmt(1800 * n)} ₽</div>` : ""}`; },
+  s_credit: (t, e, s) => { const kc = (t - e.card + .3) / .45, kb = (t - e.sum) / .7, n = count(t, e.sum, 0, 1), k4 = (t - e.four) / .4;
+    return `${card("deb", 120, 140, -8, .7, t)}${up(kc, card("cred", 380, 210, 6 - 6 * (1 - out5(kc)), .82, t), 160)}
+      <div class="a" style="left:110px;right:110px;top:700px">
+        <div style="display:flex;justify-content:space-between;font:700 36px 'Int'"><span>обычная карта</span><span style="font-family:Mono">1 800 ₽</span></div>
+        <div class="bar" style="margin:16px 0 40px"><i style="width:${45 * out3((t - s.t0) / .6)}%;background:#8a5cff"></i></div>
+        <div style="display:flex;justify-content:space-between;font:700 36px 'Int'"><span>кредитка</span><span style="font-family:Mono;color:${RED}">${fmt(2500 + 1500 * out3(k4))} ₽</span></div>
+        <div class="bar" style="margin-top:16px"><i style="width:${(62.5 * out3(kb) + 37.5 * out3(k4))}%;background:linear-gradient(90deg,#ff7aa8,${RED})"></i></div></div>
+      ${sp(k4, `<div class="a h grad" style="right:110px;top:980px;font-size:150px">×2</div>`, "80%", "55%")}`; },
+  s_why: (t, e, s) => { const kp = (t - s.t0) / .5, kb = (t - e.best) / .4, kl = (t - e.late) / .4, kpct = (t - e.pct) / .4, days = Math.max(0, Math.floor((t - e.pct) * 6));
+    return `${up(kp, `<div class="a h" style="left:80px;top:130px;font-size:84px">Почему банк<br><span class="grad">такой щедрый?</span></div>`)}
+      ${up(kb, `<div class="phone" style="left:280px;top:480px;transform:rotate(3deg) scale(.82);transform-origin:50% 0"><div class="scr">
+        <div style="padding:80px 50px 0;font:700 30px 'Int';color:#7a7a88">Кредитная карта · пример</div>
+        <div style="padding:10px 50px;font:800 76px 'Unb';letter-spacing:-.04em">5 000 ₽</div>
+        <div style="padding:0 50px;font:500 30px 'Int';color:#7a7a88">долг</div>
+        <div style="margin:50px 40px 0;padding:34px;border-radius:34px;background:${kl > 0 ? "#fdecec" : "#f1f0f6"}">
+          <div style="font:700 30px 'Int'">${kl > 0 ? "Льготный период закончился" : "Льготный период"}</div>
+          <div class="bar" style="margin-top:22px"><i style="width:${kl > 0 ? 100 : 70}%;background:${kl > 0 ? RED : VIO}"></i></div></div>
+        ${kpct > 0 ? `<div style="margin:30px 40px 0;padding:30px 34px;border-radius:34px;background:#fdecec;color:${RED};font:800 44px 'Unb';letter-spacing:-.03em">
+          +${(6.85 * (days + 1)).toFixed(2).replace(".", ",")} ₽<div style="font:600 26px 'Int';margin-top:8px">проценты · день ${days + 1}</div></div>` : ""}
+        </div></div>`, 120)}
+      ${sp(kb, `<div class="a" style="left:80px;top:370px"><span class="pill" style="background:${GRN}">самый выгодный клиент</span></div>`, "20%", "20%")}`; },
+  s_psk: (t, e, s) => { const k = (t - e.num) / .55, n = count(t, e.num, 0, 50, .9);
+    return `${up((t - s.t0) / .4, `<div class="a h" style="left:80px;top:200px;font-size:70px">Средняя полная<br>стоимость по кредиткам</div>`)}
+      ${t > e.num - .1 ? `<div class="a h" style="left:0;right:0;top:500px;text-align:center;white-space:nowrap;font-size:${300 + 24 * bell(k)}px;letter-spacing:-.07em;color:${RED}">~${Math.round(n)}%</div>
+        <div class="a h" style="left:84px;top:880px;font-size:80px">годовых</div>` : ""}
+      <div class="a" style="left:84px;top:1010px;font:500 30px 'Int';color:#55556a">ПСК по кредитным картам — 48 % и выше · ОКБ, 2026</div>`; },
+  s_rule: (t, e, s) => { const kp = (t - s.t0) / .45, left = Math.max(0, 12 - Math.floor(cl((t - e.pay) / 1.6) * 12)), kz = (t - e.zero) / .45, kf = (t - e.friend) / .4, kn = (t - e.no) / .35;
+    return `${up(kp, `<div class="a" style="left:80px;top:130px"><span class="pill" style="background:${VIO}">Правило одно</span></div>
+        <div class="a h" style="left:80px;top:230px;font-size:96px">Гаси всё<br>до срока</div>`)}
+      ${up(kp - .2, `<div class="phone" style="left:330px;top:520px;transform:rotate(-3deg) scale(.7);transform-origin:50% 0"><div class="scr">
+        <div style="padding:80px 50px 0;font:700 30px 'Int';color:#7a7a88">До конца льготного периода</div>
+        <div style="padding:10px 50px;font:800 110px 'Unb';letter-spacing:-.04em">${left} <span style="font-size:.4em">дней</span></div>
+        <div style="margin:10px 50px 0" class="bar"><i style="width:${100 - left / 12 * 100}%;background:linear-gradient(90deg,#7a6bff,#ff8bd0)"></i></div>
+        ${kz > 0 ? `<div style="margin:60px 40px 0;padding:40px 34px;border-radius:34px;background:#e9fbf4;color:${GRN};transform:scale(${back(kz).toFixed(3)})">
+          <div style="font:800 96px 'Unb';letter-spacing:-.04em">0 ₽</div><div style="font:700 32px 'Int'">проценты</div></div>` : ""}</div></div>`, 120)}
+      ${sp(kf, `<div class="a" style="left:60px;top:1050px;transform:rotate(-4deg)"><span class="pill" style="background:#fff;color:#0d0d12;box-shadow:0 16px 40px rgba(40,30,80,.18)">друг не уверен?</span></div>`, "20%", "57%")}
+      ${sp(kn, `<div class="a" style="right:150px;top:1120px;transform:rotate(3deg)"><span class="pill" style="background:${RED};font-size:40px">не уговаривай</span></div>`, "75%", "60%")}`; },
+  s_cta: (t, e, s) => { const k = (t - s.t0) / .5, ky = (t - e.yt) / .4, ks = (t - e.sub) / .4;
+    return `${up(k, `<div class="a h" style="left:80px;top:180px;font-size:110px">Топ<br><span class="grad">кредиток</span><br>2026</div>`)}
+      ${card("cred", 520, 330, 10 + Math.sin(t * .8) * 2, .62, t)}${card("deb", 470, 520, -4 + Math.sin(t * .7 + 1) * 2, .62, t)}
+      ${sp(ky, `<div class="a" style="left:80px;top:860px;display:flex;align-items:center;gap:22px"><div style="width:120px;height:84px;border-radius:24px;background:#ff2d2d;position:relative">
+          <div style="position:absolute;left:46px;top:24px;border-left:36px solid #fff;border-top:18px solid transparent;border-bottom:18px solid transparent"></div></div>
+          <span style="font:800 54px 'Unb';letter-spacing:-.03em">скоро на YouTube</span></div>`, "20%", "47%")}
+      ${sp(ks, `<div class="a" style="left:80px;top:1040px"><span class="pill" style="font-size:44px;padding:22px 48px;transform:scale(${(1 - .06 * bell((t - e.sub - .2) / .3)).toFixed(3)});display:inline-block">Подписаться</span></div>`, "20%", "56%")}
+      ${tap(t, e.sub + .2, 330, 1088)}`; },
+};
+
+const capEl = $("cap"); let lastChunk = -1;
+window.renderAt = (t) => {
+  const sc = TL.scenes.find(s => t >= s.t0 && t < s.t1) || TL.scenes[TL.scenes.length - 1];
+  const kIn = (t - sc.t0) / .3, push = 1 + .025 * Math.min(1, (t - sc.t0) / 5);
+  // фон: мягкий перелив (радиальные градиенты без blur-фильтра — дёшево в рендере), медленно плывёт
+  const x1 = 70 + 12 * Math.sin(t * .23), y1 = 8 + 8 * Math.cos(t * .19), x2 = 95 + 10 * Math.cos(t * .17), y2 = 55 + 10 * Math.sin(t * .21), x3 = 20 + 14 * Math.sin(t * .13 + 2), y3 = 70 + 8 * Math.cos(t * .29);
+  $("bg").style.background = `radial-gradient(900px 760px at ${x1}% ${y1}%, rgba(255,139,208,.55), transparent 70%),
+    radial-gradient(820px 700px at ${x2}% ${y2}%, rgba(122,107,255,.45), transparent 70%), radial-gradient(800px 640px at ${x3}% ${y3}%, rgba(255,199,107,.5), transparent 70%), #f4f2ee`;
+  const body = `<div class="a" style="inset:0;transform:scale(${push.toFixed(4)});transform-origin:50% 40%">${SCENES[sc.id](t, sc.ev, sc)}</div>`;
+  $("stage").innerHTML = sc === TL.scenes[0] ? body : `<div class="a" style="inset:0;transform:translateY(${((1 - out5(kIn)) * 110).toFixed(1)}px);opacity:${cl(kIn * 2).toFixed(3)}">${body}</div>`;
+  // субтитры v2: кусок 2–3 слова; слово появляется, когда его говорят; ключевое — ×1.28 и цветом
+  const ci = TL.chunks.findIndex(c => t >= c.t0 && t < c.t1), c = TL.chunks[ci < 0 ? TL.chunks.length - 1 : ci];
+  if (ci !== lastChunk) { const ws = TL.words.slice(c.i0, c.i1 + 1);
+    capEl.innerHTML = ws.map(w => `<span style="font-size:${w.c ? 112 : 88}px;color:${COL[w.c] || "#0d0d12"}">${w.w}</span>`).join("");
+    let k = 1; const sps = capEl.querySelectorAll("span");
+    while (capEl.scrollWidth > capEl.clientWidth + 1 && k > .45) { k -= .04; sps.forEach((el, i) => el.style.fontSize = (ws[i].c ? 112 : 88) * k + "px"); }
+    lastChunk = ci; }
+  capEl.querySelectorAll("span").forEach((el, i) => { const w = TL.words[c.i0 + i], kk = w.a < .1 ? 1 : (t - w.a + .06) / .22;
+    el.style.opacity = out3(kk).toFixed(3); el.style.transform = `translateY(${((1 - out5(kk)) * 26).toFixed(1)}px) scale(${(.92 + .08 * out5(kk)).toFixed(3)})`; });
+};
+document.fonts.ready.then(() => { window.renderAt(0); window.__ready = true; });
+})();
+</script>
+</body></html>
