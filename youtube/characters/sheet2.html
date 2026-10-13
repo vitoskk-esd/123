@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Персонаж канала — эскизы 2</title>
+<!-- Владелец 13.10: «ряд 5, 8 прикольно. Давай создадим своего персонажа, который будет вещать людям в рилсах и ролике на ютуб».
+     Референсы: youtube/research/refs_2026-10-13 (ряды 5 «Коротко и внятно», 8 «David Explains Money»).
+     Плоская иллюстрация, тёмный контур, яркие цвета; персонаж собран из SVG-частей, чтобы его можно было анимировать
+     (рот — фонемы под голос, моргание, руки, эмоции). c=1 Арбузик · c=2 Влад · c=3 Лис Финик · c=4 Карточка Кэш.
+     Снимок из youtube/: node kit/shot3d.js characters/sheet.html characters/out/c1.png 1920 1080 c=1 -->
+<style>
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F, U+2116; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "Unb"; src: url("../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; font-family: "I"; -webkit-font-smoothing: antialiased; }
+  .a { position: absolute; }
+</style>
+</head>
+<body>
+<div id="R"></div>
+<script>
+const C = +(new URLSearchParams(location.search).get("c") || 0);
+const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h);
+const OL = "#1d1b2c";            // общий контур
+const st = (w = 7) => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+
+// глаза и рот: эмоции talk | happy | shock
+const eyes = (cx, cy, gap, r, mood, look = 0) => {
+  const one = (x) => mood === "happy"
+    ? `<path d="M${x - r} ${cy + 4} Q ${x} ${cy - r - 4} ${x + r} ${cy + 4}" fill="none" ${st(7)}/>`
+    : `<ellipse cx="${x}" cy="${cy}" rx="${r}" ry="${r * (mood === "shock" ? 1.25 : 1.12)}" fill="#fff" ${st(6)}/>
+       <circle cx="${x + look}" cy="${cy + 2}" r="${r * (mood === "shock" ? .38 : .52)}" fill="${OL}"/><circle cx="${x + look + r * .2}" cy="${cy - r * .2}" r="${r * .16}" fill="#fff"/>`;
+  return one(cx - gap) + one(cx + gap);
+};
+const brows = (cx, cy, gap, mood) => mood === "shock"
+  ? `<path d="M${cx - gap - 22} ${cy - 10} Q ${cx - gap} ${cy - 30} ${cx - gap + 22} ${cy - 14}" fill="none" ${st(7)}/><path d="M${cx + gap - 22} ${cy - 14} Q ${cx + gap} ${cy - 30} ${cx + gap + 22} ${cy - 10}" fill="none" ${st(7)}/>`
+  : mood === "talk" ? `<path d="M${cx - gap - 20} ${cy} L ${cx - gap + 20} ${cy - 8}" ${st(7)}/><path d="M${cx + gap - 20} ${cy - 8} L ${cx + gap + 20} ${cy}" ${st(7)}/>` : "";
+const mouth = (cx, cy, w, mood) => mood === "happy"
+  ? `<path d="M${cx - w} ${cy} Q ${cx} ${cy + w * 1.1} ${cx + w} ${cy} Z" fill="#7a1f2b" ${st(6)}/><path d="M${cx - w * .55} ${cy + w * .55} Q ${cx} ${cy + w * .3} ${cx + w * .55} ${cy + w * .55} Q ${cx} ${cy + w * .95} ${cx - w * .55} ${cy + w * .55}" fill="#ff8a9a"/>`
+  : mood === "shock" ? `<ellipse cx="${cx}" cy="${cy + w * .3}" rx="${w * .45}" ry="${w * .6}" fill="#7a1f2b" ${st(6)}/>`
+  : `<path d="M${cx - w * .8} ${cy} Q ${cx} ${cy + w * .9} ${cx + w * .8} ${cy} Q ${cx} ${cy + w * .25} ${cx - w * .8} ${cy} Z" fill="#7a1f2b" ${st(6)}/><path d="M${cx - w * .35} ${cy + w * .45} Q ${cx} ${cy + w * .3} ${cx + w * .35} ${cy + w * .45}" fill="none" stroke="#ff8a9a" stroke-width="8" stroke-linecap="round"/>`;
+const phone = (x, y, r = 0) => `<g transform="translate(${x} ${y}) rotate(${r})"><rect x="-38" y="-70" width="76" height="140" rx="16" fill="#2b2b3a" ${st(6)}/><rect x="-28" y="-56" width="56" height="104" rx="8" fill="#57f0a2"/><text x="0" y="6" text-anchor="middle" font-family="Unb" font-weight="900" font-size="22" fill="#0b2a1a">₽</text></g>`;
+const bubble = (x, y, w, t, tail = "left") => `<div class="a" style="left:${x}px;top:${y}px;width:${w}px;padding:26px 34px;background:#fff;border:6px solid ${OL};border-radius:46px;font:800 40px/1.2 I;color:${OL};box-shadow:10px 10px 0 ${OL}">${t}</div>`;
+
+/* ===== Эскизы 2: персонажи, которые запоминаются (владелец 13.10: «еще персонажей, которые будут выделяться,
+   чтобы запоминались — это будет аватар моего проекта»). Правило: уникальный силуэт + одна фишка + фраза.
+   c=0 — общий состав, c=5..10 — лист персонажа. ===== */
+let uid = 0;
+const SVG = (inner) => `<svg viewBox="-40 -20 680 780" width="680" height="780">${inner}</svg>`;
+const limb = (d, col, w) => col
+  ? `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w + 12}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`
+  : `<path d="${d}" fill="none" ${st(16)}/>`;
+const hand = (x, y, c, r = 20) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" ${st(6)}/>`;
+// руки: point (левая вниз, правая вверх) · phone · up (обе вверх)
+const arms = ([lx, ly], [rx, ry], col, w, hc, arm, hr = 20, k = 1) => {
+  const down = limb(`M${lx} ${ly} Q ${lx - 50} ${ly + 70} ${lx - 30} ${ly + 150}`, col, w) + hand(lx - 30, ly + 162, hc, hr);
+  if (arm === "point") return down + limb(`M${rx} ${ry} Q ${rx + 90 * k} ${ry - 40} ${rx + 110 * k} ${ry - 130}`, col, w) + hand(rx + 110 * k + 2, ry - 144, hc, hr);
+  if (arm === "phone") return down + limb(`M${rx} ${ry} Q ${rx + 75} ${ry + 60} ${rx + 70} ${ry - 30}`, col, w) + phone(rx + 72, ry - 78, 10) + hand(rx + 62, ry - 34, hc, hr);
+  return limb(`M${lx} ${ly} Q ${lx - 90 * k} ${ly - 40} ${lx - 100 * k} ${ly - 130}`, col, w) + hand(lx - 100 * k - 2, ly - 144, hc, hr)
+       + limb(`M${rx} ${ry} Q ${rx + 90 * k} ${ry - 40} ${rx + 100 * k} ${ry - 130}`, col, w) + hand(rx + 100 * k + 2, ry - 144, hc, hr);
+};
+const legs = (y0, y1, col, w, shoe, gap = 60) => [300 - gap, 300 + gap].map((x, i) => {
+  const s = i ? 1 : -1, fx = x + s * 4, cx = fx + s * 14, y = y1 + 8;
+  return limb(`M${x} ${y0} L ${fx} ${y1}`, col, w)
+    + `<path d="M${cx - 42} ${y + 18} L ${cx - 42} ${y + 2} Q ${cx - 40} ${y - 20} ${cx - 8} ${y - 20} L ${cx + 8} ${y - 20} Q ${cx + 40} ${y - 20} ${cx + 42} ${y + 2} L ${cx + 42} ${y + 18} Z" fill="${shoe}" ${st(6)}/><path d="M${cx - 40} ${y + 8} L ${cx + 40} ${y + 8}" stroke="${OL}" stroke-width="4" opacity=".35"/>`;
+}).join("");
+const shadow = `<ellipse cx="300" cy="736" rx="190" ry="20" fill="rgba(0,0,0,.14)"/>`;
+const eye1 = (x, y, r, mood) => mood === "happy"
+  ? `<path d="M${x - r} ${y + 4} Q ${x} ${y - r - 6} ${x + r} ${y + 4}" fill="none" ${st(7)}/>`
+  : `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * (mood === "shock" ? 1.25 : 1.1)}" fill="#fff" ${st(6)}/><circle cx="${x}" cy="${y + 2}" r="${r * (mood === "shock" ? .36 : .5)}" fill="${OL}"/><circle cx="${x + r * .2}" cy="${y - r * .22}" r="${r * .16}" fill="#fff"/>`;
+const seed = (x, y, a = 0) => `<ellipse cx="${x}" cy="${y}" rx="7" ry="12" fill="#2a1414" transform="rotate(${a} ${x} ${y})"/>`;
+
+/* ---------- 5. ДОЛЬКА ---------- */
+const dolka = (mood = "talk", arm = "point") => {
+  const id = "d" + (++uid);
+  const body = "M300 40 Q 318 40 330 62 L 406 217 Q 378 228 384 252 Q 372 278 400 288 Q 420 302 440 286 L 530 470 Q 542 502 510 516 Q 300 604 90 516 Q 58 502 70 470 L 270 62 Q 282 40 300 40 Z";
+  const gy = mood === "shock" ? 52 : 0;
+  return SVG(`${shadow}${legs(548, 700, null, 0, "#ff3b4f")}
+  ${arms([150, 330], [450, 330], null, 0, "#fff", arm)}
+  <clipPath id="${id}"><path d="${body}"/></clipPath>
+  <path d="${body}" fill="#ff4d5e"/>
+  <g clip-path="url(#${id})"><path d="M40 470 Q 300 600 560 470" fill="none" stroke="#c8f0a0" stroke-width="40"/><path d="M40 500 Q 300 640 560 500" fill="none" stroke="#2fa84f" stroke-width="54"/>
+    <path d="M40 520 Q 300 655 560 520" fill="none" stroke="#1f7d3a" stroke-width="14" stroke-dasharray="30 26"/>
+    <ellipse cx="250" cy="150" rx="26" ry="70" fill="#fff" opacity=".18" transform="rotate(24 250 150)"/></g>
+  <path d="${body}" fill="none" ${st(8)}/>
+  ${seed(300, 160, 0)}${seed(250, 235, -20)}${seed(342, 240, 20)}${seed(165, 440, -30)}${seed(440, 420, 25)}${seed(225, 475, -10)}${seed(380, 470, 15)}
+  ${mood === "shock" ? eye1(250, 300, 22, "shock") + eye1(350, 300, 22, "shock") : ""}
+  <g transform="translate(0 ${gy})">
+    <path d="M150 316 L 190 312" ${st(7)}/><path d="M410 312 L 450 316" ${st(7)}/>
+    <path d="M190 308 L 290 308 Q 292 362 252 370 L 226 370 Q 190 362 190 308 Z" fill="${OL}" ${st(6)}/>
+    <path d="M310 308 L 410 308 Q 408 362 374 370 L 348 370 Q 308 362 310 308 Z" fill="${OL}" ${st(6)}/>
+    <path d="M290 318 Q 300 310 310 318" fill="none" ${st(7)}/>
+    <path d="M206 322 L 236 322 M 326 322 L 356 322" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".55"/>
+  </g>
+  ${mouth(300, mood === "shock" ? 448 : 412, 34, mood)}`);
+};
+
+/* ---------- 6. ЕНОТ БОНУС ---------- */
+const enot = (mood = "talk", arm = "point") => {
+  const tail = "M380 560 Q 560 560 560 390 Q 560 300 500 270";
+  return SVG(`${shadow}
+  <path d="${tail}" fill="none" stroke="${OL}" stroke-width="88" stroke-linecap="round"/><path d="${tail}" fill="none" stroke="#a3a9bd" stroke-width="74" stroke-linecap="round"/>
+  <path d="${tail}" fill="none" stroke="#2a2a36" stroke-width="74" stroke-dasharray="28 30" stroke-dashoffset="10"/>
+  ${legs(590, 700, "#3a3f55", 40, "#fff")}
+  <path d="M172 615 Q 160 420 232 382 Q 300 358 368 382 Q 440 420 428 615 Z" fill="#ff7a1a" ${st(8)}/>
+  <path d="M228 520 L 372 520 L 388 595 L 212 595 Z" fill="#e8630a" ${st(6)}/><path d="M275 392 L 270 470 M 325 392 L 330 470" ${st(5)}/>
+  ${arms([218, 412], [382, 412], "#ff7a1a", 40, "#a3a9bd", arm, 22)}
+  <path d="M168 170 L 150 52 Q 215 70 258 118 Z" fill="#a3a9bd" ${st(7)}/><path d="M178 150 L 168 82 Q 205 95 230 122 Z" fill="#2a2a36"/>
+  <path d="M432 170 L 450 52 Q 385 70 342 118 Z" fill="#a3a9bd" ${st(7)}/><path d="M422 150 L 432 82 Q 395 95 370 122 Z" fill="#2a2a36"/>
+  <ellipse cx="300" cy="235" rx="162" ry="136" fill="#a3a9bd" ${st(8)}/>
+  <path d="M146 262 Q 200 330 300 336 Q 400 330 454 262 Q 440 330 380 362 Q 300 384 220 362 Q 160 330 146 262 Z" fill="#fff"/>
+  <path d="M300 104 L 286 170 L 314 170 Z" fill="#2a2a36"/>
+  <path d="M142 205 Q 172 168 240 186 Q 300 206 360 186 Q 428 168 458 205 Q 452 266 390 268 Q 338 268 300 250 Q 262 268 210 268 Q 148 266 142 205 Z" fill="#2a2a36"/>
+  ${mood === "shock" ? `<path d="M198 160 Q 222 140 250 156 M 350 156 Q 378 140 402 160" fill="none" ${st(7)}/>` : mood === "talk" ? `<path d="M196 168 L 250 160 M 350 160 L 404 168" ${st(7)}/>` : ""}
+  ${eye1(238, 224, 26, mood).replaceAll(`fill="none" ${st(7)}`, `fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"`)}${eye1(362, 224, 26, mood).replaceAll(`fill="none" ${st(7)}`, `fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"`)}
+  <ellipse cx="300" cy="292" rx="24" ry="16" fill="${OL}"/><ellipse cx="292" cy="287" rx="7" ry="4" fill="#fff" opacity=".6"/>
+  ${mouth(300, 322, 26, mood)}`);
+};
+
+/* ---------- 7. КАПИБАРА КАПИ ---------- */
+const capy = (mood = "talk", arm = "point") => {
+  const id = "c" + (++uid);
+  const cEye = (x) => mood === "talk"
+    ? `<circle cx="${x}" cy="200" r="14" fill="${OL}"/><circle cx="${x + 4}" cy="196" r="4" fill="#fff"/><path d="M${x - 22} 194 Q ${x} 182 ${x + 22} 194" fill="#b07a4a" ${st(6)}/>`
+    : eye1(x, 200, mood === "shock" ? 22 : 18, mood);
+  return SVG(`${shadow}
+  ${legs(630, 700, "#9a6a3e", 46, "#5a3a22", 70)}
+  <path d="M148 625 Q 128 420 222 380 L 378 380 Q 472 420 452 625 Q 300 668 148 625 Z" fill="#b07a4a" ${st(8)}/>
+  <ellipse cx="300" cy="530" rx="102" ry="92" fill="#c99566"/>
+  ${arms([196, 432], [404, 432], "#b07a4a", 44, "#9a6a3e", arm, 24)}
+  <ellipse cx="190" cy="122" rx="28" ry="22" fill="#8a5a32" ${st(7)}/><ellipse cx="410" cy="122" rx="28" ry="22" fill="#8a5a32" ${st(7)}/>
+  <path d="M168 175 Q 168 98 300 98 Q 432 98 432 175 L 442 300 Q 442 386 300 390 Q 158 386 158 300 Z" fill="#b07a4a" ${st(8)}/>
+  <path d="M190 268 Q 300 238 410 268 Q 424 372 300 376 Q 176 372 190 268 Z" fill="#9a6a3e"/>
+  <rect x="232" y="274" width="136" height="50" rx="25" fill="#5a3a22" ${st(6)}/><ellipse cx="272" cy="299" rx="12" ry="8" fill="${OL}"/><ellipse cx="328" cy="299" rx="12" ry="8" fill="${OL}"/>
+  ${cEye(222)}${cEye(378)}
+  ${mood === "happy" ? `<ellipse cx="200" cy="250" rx="22" ry="12" fill="#ff8a7a" opacity=".55"/><ellipse cx="400" cy="250" rx="22" ry="12" fill="#ff8a7a" opacity=".55"/>` : ""}
+  ${mood === "shock" ? `<ellipse cx="300" cy="352" rx="14" ry="18" fill="#7a1f2b" ${st(5)}/>` : mood === "happy" ? `<path d="M276 342 Q 300 366 324 342" fill="#7a1f2b" ${st(5)}/>` : `<path d="M280 344 Q 300 356 320 344" fill="none" ${st(6)}/>`}
+  <g transform="rotate(-8 300 80)">
+    <clipPath id="${id}"><path d="M300 22 Q 306 22 310 30 L 352 96 Q 300 116 248 96 L 290 30 Q 294 22 300 22 Z"/></clipPath>
+    <path d="M300 22 Q 306 22 310 30 L 352 96 Q 300 116 248 96 L 290 30 Q 294 22 300 22 Z" fill="#ff4d5e"/>
+    <g clip-path="url(#${id})"><path d="M230 92 Q 300 118 370 92" fill="none" stroke="#c8f0a0" stroke-width="14"/><path d="M230 104 Q 300 130 370 104" fill="none" stroke="#2fa84f" stroke-width="18"/></g>
+    <path d="M300 22 Q 306 22 310 30 L 352 96 Q 300 116 248 96 L 290 30 Q 294 22 300 22 Z" fill="none" ${st(6)}/>
+    <ellipse cx="300" cy="62" rx="4" ry="7" fill="#2a1414"/><ellipse cx="282" cy="80" rx="4" ry="7" fill="#2a1414"/><ellipse cx="318" cy="80" rx="4" ry="7" fill="#2a1414"/>
+  </g>`);
+};
+
+/* ---------- 8. ХРЮН ---------- */
+const hryun = (mood = "talk", arm = "point") => {
+  const id = "h" + (++uid);
+  return SVG(`${shadow}
+  ${legs(560, 700, "#ff8fb1", 46, "#fff", 72)}
+  <path d="M155 248 L 150 140 Q 205 160 245 212 Z" fill="#ff8fb1" ${st(7)}/><path d="M165 225 L 163 170 Q 192 182 214 210 Z" fill="#ff6f9a"/>
+  <path d="M445 248 L 450 140 Q 395 160 355 212 Z" fill="#ff8fb1" ${st(7)}/><path d="M435 225 L 437 170 Q 408 182 386 210 Z" fill="#ff6f9a"/>
+  <path d="M512 430 q 46 -6 42 -40 q -4 -26 -26 -16 q -16 14 8 30 q 26 12 44 -12" fill="none" ${st(8)}/>
+  <ellipse cx="300" cy="385" rx="222" ry="196" fill="#ff8fb1" ${st(8)}/>
+  <ellipse cx="205" cy="290" rx="54" ry="28" fill="#fff" opacity=".35" transform="rotate(-30 205 290)"/>
+  <clipPath id="${id}"><rect x="200" y="100" width="200" height="104"/></clipPath>
+  <g clip-path="url(#${id})"><circle cx="300" cy="184" r="40" fill="#ffcc33" ${st(7)}/><text x="300" y="186" text-anchor="middle" font-family="Unb" font-weight="900" font-size="34" fill="#a86d00">₽</text></g>
+  <rect x="236" y="196" width="128" height="20" rx="10" fill="#7a2f4b" ${st(6)}/>
+  ${arms([108, 400], [492, 400], "#ff8fb1", 40, "#7a2f4b", arm, 20)}
+  ${eye1(232, 318, 24, mood)}${eye1(368, 318, 24, mood)}${brows(300, 282, 68, mood)}
+  <ellipse cx="190" cy="408" rx="26" ry="14" fill="#ff5a8a" opacity=".5"/><ellipse cx="410" cy="408" rx="26" ry="14" fill="#ff5a8a" opacity=".5"/>
+  <ellipse cx="300" cy="402" rx="72" ry="50" fill="#ff6f9a" ${st(7)}/><ellipse cx="274" cy="402" rx="11" ry="18" fill="#7a2f4b"/><ellipse cx="326" cy="402" rx="11" ry="18" fill="#7a2f4b"/>
+  ${mouth(300, 478, 34, mood)}`);
+};
+
+/* ---------- 9. БИП ---------- */
+const bip = (mood = "talk", arm = "point") => {
+  const scr = "#b9f5a3", px = "#1b3a1a";
+  const face = mood === "happy"
+    ? `<path d="M210 205 L 236 180 L 262 205 M 338 205 L 364 180 L 390 205" fill="none" stroke="${px}" stroke-width="14" stroke-linejoin="miter"/><path d="M256 238 L 344 238 L 330 262 L 270 262 Z" fill="${px}"/>`
+    : mood === "shock"
+    ? `<rect x="206" y="166" width="48" height="52" fill="${px}"/><rect x="346" y="166" width="48" height="52" fill="${px}"/><rect x="216" y="176" width="14" height="14" fill="${scr}"/><rect x="356" y="176" width="14" height="14" fill="${scr}"/><rect x="282" y="236" width="36" height="36" fill="${px}"/>`
+    : `<rect x="214" y="170" width="30" height="44" fill="${px}"/><rect x="356" y="170" width="30" height="44" fill="${px}"/><rect x="222" y="176" width="10" height="10" fill="${scr}"/><rect x="364" y="176" width="10" height="10" fill="${scr}"/><rect x="262" y="240" width="76" height="22" fill="${px}"/>`;
+  const keys = [["7", "8", "9", "÷"], ["4", "5", "6", "×"], ["1", "2", "3", "−"], ["C", "0", "%", "+"]];
+  const kb = keys.map((row, j) => row.map((k, i) => {
+    const x = 170 + i * 68, y = 330 + j * 56, hot = i === 3 ? "#ff8a3d" : k === "C" ? "#ff4d5e" : "#4a5068";
+    return `<rect x="${x}" y="${y}" width="56" height="44" rx="12" fill="${hot}" ${st(5)}/><text x="${x + 28}" y="${y + 31}" text-anchor="middle" font-family="Unb" font-weight="800" font-size="22" fill="#fff">${k}</text>`;
+  }).join("")).join("");
+  return SVG(`${shadow}${legs(560, 700, null, 0, "#ff8a3d")}
+  ${arms([146, 330], [454, 330], null, 0, "#fff", arm)}
+  <path d="M300 92 L 300 44" ${st(8)}/><circle cx="300" cy="30" r="24" fill="#ffcc33" ${st(7)}/><text x="300" y="40" text-anchor="middle" font-family="Unb" font-weight="900" font-size="26" fill="${OL}">%</text>
+  <rect x="140" y="90" width="320" height="476" rx="52" fill="#2d3142" ${st(8)}/>
+  <rect x="152" y="102" width="296" height="40" rx="20" fill="#fff" opacity=".07"/>
+  <rect x="172" y="128" width="256" height="170" rx="22" fill="${scr}" ${st(7)}/>
+  <g opacity=".12">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(i => `<rect x="178" y="${136 + i * 11}" width="244" height="4" fill="${px}"/>`).join("")}</g>
+  ${face}<text x="414" y="152" text-anchor="end" font-family="Unb" font-weight="900" font-size="16" fill="${px}" opacity=".7">₽</text>
+  ${kb}`);
+};
+
+/* ---------- 10. ГЛЮК ---------- */
+const gluk = (mood = "talk", arm = "point") => SVG(`${shadow}
+  ${legs(560, 690, "#8be04e", 22, "#c9d3e6", 48)}
+  <path d="M232 70 L 196 6" ${st(8)}/><circle cx="192" cy="0" r="18" fill="#ff4d8a" ${st(6)}/><path d="M368 70 L 404 6" ${st(8)}/><circle cx="408" cy="0" r="18" fill="#ff4d8a" ${st(6)}/>
+  <path d="M222 568 Q 210 430 252 398 L 348 398 Q 390 430 378 568 Z" fill="#c9d3e6" ${st(8)}/>
+  <path d="M252 398 L 300 452 L 348 398" fill="none" ${st(6)}/><path d="M300 452 L 300 566" ${st(5)}/>
+  <circle cx="338" cy="486" r="16" fill="#ff4d5e" ${st(5)}/><path d="M322 486 A 16 16 0 0 0 354 486" fill="#2fa84f" ${st(4)}/>
+  ${arms([238, 426], [362, 426], "#8be04e", 20, "#8be04e", arm, 18, 1.8)}
+  <rect x="282" y="360" width="36" height="48" fill="#8be04e" ${st(6)}/>
+  <path d="M300 44 Q 474 44 484 200 Q 488 330 300 382 Q 112 330 116 200 Q 126 44 300 44 Z" fill="#8be04e" ${st(8)}/>
+  <ellipse cx="226" cy="110" rx="40" ry="22" fill="#fff" opacity=".28" transform="rotate(-25 226 110)"/>
+  ${eye1(300, 160, 38, mood)}${eye1(198, 222, 27, mood)}${eye1(402, 222, 27, mood)}
+  ${mouth(300, 300, 36, mood)}`);
+
+const CH = {
+  5: [dolka, "Долька", "Долька арбуза с откусом и в тёмных очках. Силуэт-треугольник не спутать ни с кем. Когда банк хитрит, очки съезжают на нос.", "#fff1c9", "Откусим у банка<br>бонус — законно", ["силуэт-треугольник", "очки съезжают на шоке", "откус = «забрал бонус»"]],
+  6: [enot, "Енот Бонус", "Енот в оранжевом худи: маска «бандита» и полосатый хвост. Хитрец, который утаскивает бонусы у банков — но строго по правилам.", "#dff3ff", "Бонусы? Заберу.<br>Легально.", ["маска + полосатый хвост", "оранжевое худи", "образ «хитреца»"]],
+  7: [capy, "Капибара Капи", "Самый спокойный зверь интернета с долькой арбуза на голове. Любимый мем 18–25: объясняет деньги без паники.", "#e3f6d8", "Спокойно.<br>Сейчас всё посчитаем.", ["мем-зверь", "арбуз на голове", "сонный взгляд"]],
+  8: [hryun, "Хрюн", "Свинья-копилка с монетой в прорези. Монета торчит, когда он «заработал». Сразу про главное — копить.", "#ffe4ee", "Кидай бонус —<br>я коплю!", ["монета в прорези", "хвост-пружинка", "розовый — виден в ленте"]],
+  9: [bip, "Бип", "Робот-калькулятор: его лицо — экран. На нём он показывает эмоции, цифры и проценты. Готовый инструмент для расчётов в ролике.", "#e6e8f2", "Бип! Считаю:<br>+15 000 ₽", ["лицо-экран", "кнопки на груди", "антенна-процент"]],
+  10: [gluk, "Глюк", "Пришелец с тремя глазами изучает земные банки. Задаёт вопросы, которые зритель стесняется задать, — повод объяснять с нуля.", "#efe6ff", "Объясните, зачем<br>землянам кредитка?", ["три глаза", "лайм + серебро", "«глупые» вопросы"]]};
+
+if (C === 0) {
+  // общий состав: шесть новых в ряд
+  P(`<div class="a" style="inset:0;background:#fbf6ea"></div><div class="a" style="inset:0;background-image:radial-gradient(rgba(0,0,0,.06) 2px,transparent 2px);background-size:26px 26px"></div>
+     <div class="a" style="left:60px;top:46px;font:900 64px/1 Unb;letter-spacing:-.03em;color:${OL}">Аватар канала — новые персонажи</div>
+     <div class="a" style="left:62px;top:128px;font:600 30px I;color:#55536a">Каждый: свой силуэт, одна фишка и фраза. Номера — чтобы выбрать.</div>`);
+  [5, 6, 7, 8, 9, 10].forEach((n, i) => {
+    const [draw, name, , bg, line] = CH[n], x = 30 + i * 312;
+    P(`<div class="a" style="left:${x}px;top:200px;width:296px;height:840px;border-radius:40px;background:${bg};border:5px solid ${OL};overflow:hidden">
+         <div class="a" style="left:-24px;top:70px;transform:scale(.5);transform-origin:0 0">${draw(n % 2 ? "talk" : "happy", n === 7 ? "up" : "point")}</div></div>
+       <div class="a" style="left:${x + 20}px;top:220px;width:62px;height:62px;border-radius:50%;background:${OL};color:#fff;font:900 30px/62px Unb;text-align:center">${n}</div>
+       <div class="a" style="left:${x}px;top:${name.length > 9 ? 700 : 720}px;width:296px;text-align:center;font:900 ${name.length > 9 ? 34 : 42}px/1.05 Unb;letter-spacing:-.02em;color:${OL}">${name}</div>
+       <div class="a" style="left:${x + 18}px;top:830px;width:260px;padding:18px 18px;background:#fff;border:4px solid ${OL};border-radius:26px;box-shadow:6px 6px 0 ${OL};font:800 24px/1.25 I;color:${OL};text-align:center">${line}</div>`);
+  });
+} else {
+  const [draw, name, desc, bg, line, pills] = CH[C];
+  P(`<div class="a" style="inset:0;background:${bg}"></div><div class="a" style="inset:0;background-image:radial-gradient(rgba(0,0,0,.06) 2px,transparent 2px);background-size:26px 26px"></div>`);
+  P(`<div class="a" style="left:10px;top:200px">${draw("talk", "point")}</div>`);
+  P(bubble(600, 96, 620, line));
+  [["happy", "up", "радость", ""], ["shock", "phone", "шок", ""], ["talk", "point", "силуэт", "filter:brightness(0) opacity(.85)"]].forEach(([m, a, lab, f], i) => {
+    const x = 1240 + i * 218;
+    P(`<div class="a" style="left:${x}px;top:70px;transform:scale(.32);transform-origin:0 0;${f}">${draw(m, a)}</div>
+       <div class="a" style="left:${x}px;top:340px;width:218px;text-align:center;font:700 26px I;color:${OL}">${lab}</div>`);
+  });
+  P(`<div class="a" style="left:700px;top:470px;width:1160px">
+     <div style="font:900 92px/1 Unb;letter-spacing:-.04em;color:${OL}">${C}. ${name}</div>
+     <div style="font:600 34px/1.4 I;color:#3a3850;margin-top:26px">${desc}</div>
+     <div style="display:flex;gap:14px;margin-top:32px;flex-wrap:wrap">${pills.map(t => `<div style="padding:12px 24px;border-radius:999px;background:#fff;border:4px solid ${OL};font:700 26px I;color:${OL}">${t}</div>`).join("")}</div></div>`);
+}
+document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 400))));
+</script>
+</body>
+</html>
