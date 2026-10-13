@@ -1,0 +1,4 @@
+voice/ya_live/
+voice/out/
+out/
+voice/*.words.json
