@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from anchors import Words, norm
 
 NAMES = {"office": "Ночной офис", "editorial": "Журнальная инфографика", "phone": "Телефон крупно", "board": "Маркерная доска",
-         "search": "Поиск", "scrap": "Коллаж-скрапбук", "swipe": "Свайп-карточки", "voice": "Голосовое сообщение", "ai": "ИИ-ассистент"}
+         "search": "Поиск", "scrap": "Коллаж-скрапбук", "swipe": "Свайп-карточки", "voice": "Голосовое сообщение", "ai": "ИИ-ассистент", "premium": "Премиум"}
 
 
 class Build:
@@ -111,7 +111,7 @@ class Build:
             for x in v: yield from self._times(x)
         elif isinstance(v, dict):
             for k, x in v.items():
-                if k in ("t", "tq", "ta", "tAns", "tSug", "tIn", "tTr", "hl", "circle", "draw", "strike", "beats", "t0", "t1", "rowsT") or isinstance(x, (dict, list)):
+                if k in ("t", "tq", "ta", "tAns", "tSug", "tIn", "tTr", "hl", "circle", "draw", "strike", "beats", "t0", "t1", "rowsT", "at", "capAt", "pulses") or isinstance(x, (dict, list)):
                     yield from self._times(x)
 
     def write(self, path, page=None, kit_rel=None):

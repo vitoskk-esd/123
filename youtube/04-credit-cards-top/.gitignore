@@ -2,3 +2,4 @@ voice/ya_live/
 voice/out/
 out/
 voice/*.words.json
+voice/ya_live_log.txt
