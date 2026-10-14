@@ -5,10 +5,11 @@
 #   bash render_pieces.sh <page.html> <data.js> <outdir> [pieces=192] [jobs=4] [gl_page.html]
 # page.html  — страница для рендера (с запеканием: …_bake.html, см. modes/illu_bake.js);
 # data.js    — файл с window.SEGS той же страницы: из него берутся длительность и отрезки с 3D-картой;
+# RQUERY=w=1280 — параметры страницы (например, рендер 720p).
 # gl_page    — страница без запекания для кусков с картой (swiftshader + запекание упирались в таймаут скриншота).
 # Скорость на 4 ядрах (ролик №3): кусок 3,4 с с запеканием — 2–5 мин, с картой через swiftshader — ~20 мин.
 set -u
-PAGE=$(realpath "$1"); DATA=$(realpath "$2"); OUT=$(realpath -m "$3"); NP=${4:-192}; JOBS=${5:-4}; GLPAGE=${6:+$(realpath "$6")}
+RQUERY=${RQUERY:-}; PAGE=$(realpath "$1"); DATA=$(realpath "$2"); OUT=$(realpath -m "$3"); NP=${4:-192}; JOBS=${5:-4}; GLPAGE=${6:+$(realpath "$6")}
 cd "$(dirname "$0")"; mkdir -p "$OUT"
 # длительность и номера кусков с картой — один раз, в файл
 python3 - "$DATA" "$NP" "$OUT" <<'EOF' || exit 1
@@ -22,12 +23,12 @@ open(out + "/map_pieces.txt", "w").write(" ".join(map(str, maps)))
 print(f"{dur} с, {n} кусков по {dur / n:.2f} с; с картой: {maps or 'нет'}")
 EOF
 DUR=$(cat "$OUT/dur.txt"); MAPS=" $(cat "$OUT/map_pieces.txt") "
-export PAGE GLPAGE OUT DUR NP MAPS
+export PAGE GLPAGE OUT DUR NP MAPS RQUERY
 seq 0 $((NP - 1)) | xargs -P "$JOBS" -I{} bash -c '
   j={}; [ -f "$OUT/.p$j" ] && exit 0
   A=$(python3 -c "print(round($DUR*$j/$NP, 3))"); B=$(python3 -c "print(round($DUR*($j+1)/$NP, 3))")
   PG=$PAGE; [ -n "$GLPAGE" ] && [[ "$MAPS" == *" $j "* ]] && PG=$GLPAGE
-  node render.js "$PG" --from $A --to $B --out "$OUT/p$j.mp4" > "$OUT/p${j}_log.txt" 2>&1 && touch "$OUT/.p$j"'
+  node render.js "$PG" ${RQUERY:+--query "$RQUERY"} --from $A --to $B --out "$OUT/p$j.mp4" > "$OUT/p${j}_log.txt" 2>&1 && touch "$OUT/.p$j"'
 for j in $(seq 0 $((NP - 1))); do [ -f "$OUT/.p$j" ] || { echo "кусок $j не отрендерился (лог $OUT/p${j}_log.txt) — запусти снова"; exit 1; }; done
 : > "$OUT/pieces.txt"; for j in $(seq 0 $((NP - 1))); do echo "file 'p$j.mp4'" >> "$OUT/pieces.txt"; done
 ffmpeg -y -v error -f concat -safe 0 -i "$OUT/pieces.txt" -c copy "$OUT/video_full.mp4" && echo "$(date +%H:%M:%S) готово: $OUT/video_full.mp4"

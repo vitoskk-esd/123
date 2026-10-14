@@ -119,8 +119,8 @@ const S = {
     P(hero(220, 190, 600, "happy", 20, "#fff2a8", "point"));
     P(phone(900, 170, 6, `<div class="a" style="left:0;right:0;top:0;height:120px;background:#2aa3e0"></div><div class="a" style="left:20px;top:56px;width:60px;height:60px;border-radius:50%;background:#ff3b3b;border:4px solid #fff;overflow:hidden">${ArbuzHD.svg({ mood: "smirk", w: 60, h: 64 })}</div>
       <div class="a nw" style="left:94px;top:62px;font:900 22px Unb;color:#fff">Арбузов</div><div class="a nw" style="left:94px;top:92px;font:700 15px I;color:#d9f0ff">канал · акции банков</div>
-      <div class="a" style="left:16px;right:16px;top:150px;padding:14px;border-radius:16px;background:#fff;font:700 19px/1.3 I;color:${OL}">Свежие бонусы этой недели: <b>5 акций</b>, сроки и условия — в одном посте</div>
-      <div class="a" style="left:16px;right:16px;top:290px;padding:14px;border-radius:16px;background:#fff;font:700 19px/1.3 I;color:${OL}">Ставки накопительных счетов на октябрь 📈</div>`, 1));
+      <div class="a" style="left:16px;right:16px;top:150px;padding:14px;border-radius:16px;background:#fff;font:700 18px/1.28 I;color:${OL}">Свежие бонусы этой недели: <b>5 акций</b>, сроки и условия — в одном посте</div>
+      <div class="a" style="left:16px;right:16px;top:300px;padding:14px;border-radius:16px;background:#fff;font:700 18px/1.28 I;color:${OL}">Ставки накопительных счетов на октябрь 📈</div>`, 1));
     P(`<div class="a" style="left:1360px;top:330px;width:300px;height:300px;padding:18px;border-radius:24px;background:#fff;border:6px solid ${OL};box-shadow:0 20px 40px rgba(0,0,0,.35)"><div style="width:100%;height:100%;background:repeating-conic-gradient(${OL} 0 25%,#fff 0 50%) 0 0/36px 36px;opacity:.9"></div></div>
        <div class="a" style="left:1330px;top:660px;width:360px;text-align:center;font:700 44px/1.1 O;color:#fff;text-shadow:0 4px 0 ${OL}">ТЕЛЕГРАМ<br>ССЫЛКА В ОПИСАНИИ</div>`);
     P(label(6, "Реклама своего Telegram посередине ролика (как у амоБлога): телефон с каналом + QR-код, 15–20 с.", "6:20–6:40"));

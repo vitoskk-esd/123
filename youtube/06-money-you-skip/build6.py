@@ -73,5 +73,15 @@ for i, p in enumerate(P):
 out = dict(duration=dur, off=OFF, words=[dict(w=x["w"], s=x["s"], e=x["e"]) for x in words], acts=acts,
            segs=[dict(scene=s["scene"], t0=s["t0"], t1=s["t1"], shots=s["shots"]) for s in segs])
 open(f"{HERE}/timeline6.js", "w").write("const TL6 = " + json.dumps(out, ensure_ascii=False) + ";\n")
+# музыка и звуки (kit/audio.js): пэд под хук, бит с первой главы, «стоп» на рекламе канала, финал — outro;
+# свист на смену сцены, «поп» на появление предметов, монетка на сценах с деньгами
+first_main = next(s["t0"] for s in segs if s["scene"] != 1)
+music = [dict(t=0, part="intro"), dict(t=first_main, part="main")]
+for s in segs:
+    if s["scene"] == 6: music += [dict(t=s["t0"], part="break"), dict(t=s["t1"], part="main")]
+music.append(dict(t=segs[-1]["t0"], part="outro"))
+sfx = dict(whoosh=[s["t0"] for s in segs[1:]], pop=[round(s["t0"] + .3 + k * .18, 2) for s in segs for k in range(3)],
+           coin=[round(s["t0"] + .9, 2) for s in segs if s["scene"] in (7, 9, 11)])
+open(f"{HERE}/timeline_audio6.js", "w").write("window.TL = " + json.dumps(dict(duration=dur, bpm=92, music=music, sfx=sfx, sfxGain=.8)) + ";\n")
 print("длительность", dur, "с; сегментов", len(segs))
 for s in segs: print(f"  сцена {s['scene']:>2}  {s['t0']:7.1f}–{s['t1']:7.1f}  планов {len(s['shots'])}  фразы {s['p0']}–{s['p1']}")
