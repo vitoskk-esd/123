@@ -1,0 +1,28 @@
+{
+  "about": "Библиотека фонов для гибридных роликов «Арбузова» (владелец 14.10: «давай попробуем гибрид»). Нейросеть рисует только места без людей; Арбузов — наш риг поверх (рот под голос, моргание, жесты). Один стиль на все фоны — переиспользуются во всех роликах. Генерация: python3 tools/gemini_image.py --batch youtube/characters/hybrid/library.json (≈50 в день, пропускает готовые).",
+  "aspect": "16:9",
+  "style": "Style: cinematic graphic-novel illustration, rich hand-painted digital art, detailed and textured, adult and slightly gritty mood, muted palette with deep teal shadows and warm amber practical lights, soft volumetric light, film grain. Contemporary Russia (2020s), realistic everyday details. Absolutely no people, no animals, no characters, no readable text, no logos or brand names. Eye-level camera, wide shot, clear empty floor area in the lower middle third where a character will stand, 16:9.",
+  "refs": [],
+  "items": [
+    {"id": "kitchen_night", "out": "bg/kitchen_night.png", "prompt": "A small kitchen in a Soviet-era panel apartment at night: oilcloth on the table, old fridge with magnets, kettle, window with lights of panel buildings outside, a single warm lamp."},
+    {"id": "dorm_room", "out": "bg/dorm_room.png", "prompt": "A cramped student dormitory room: two narrow beds, desk with laptop and instant noodles, posters, string lights, cluttered shelves, evening."},
+    {"id": "bank_branch", "out": "bg/bank_branch.png", "prompt": "Interior of a generic modern bank branch: service desks, queue ticket machine, glass partitions, cold fluorescent light, plants, waiting chairs; no logos."},
+    {"id": "atm_night", "out": "bg/atm_night.png", "prompt": "A street ATM niche in the wall of a building at night in the rain, glowing screen, puddles reflecting the light, empty sidewalk."},
+    {"id": "metro_car", "out": "bg/metro_car.png", "prompt": "Inside a Moscow-style metro car, rush hour emptiness, handrails, ads frames blank, motion blur lights in the tunnel windows."},
+    {"id": "checkout", "out": "bg/checkout.png", "prompt": "Supermarket checkout counter with a card payment terminal in focus, conveyor belt with groceries, price tags, bright shelves in the background."},
+    {"id": "coffee_counter", "out": "bg/coffee_counter.png", "prompt": "Small street coffee kiosk counter with a payment terminal and menu boards without text, morning light, paper cups."},
+    {"id": "open_space", "out": "bg/open_space.png", "prompt": "Open-space office in the evening, rows of desks with monitors, one desk lamp on, city view through panoramic windows."},
+    {"id": "courier_street", "out": "bg/courier_street.png", "prompt": "City street in autumn rain, bike lane, delivery backpacks near a shop entrance, wet asphalt reflections, dusk."},
+    {"id": "bedroom_phone", "out": "bg/bedroom_phone.png", "prompt": "A young man's bedroom at 2 AM, unmade bed, phone screen glow on the pillow, blue light, dark room, gaming chair."},
+    {"id": "mfc_office", "out": "bg/mfc_office.png", "prompt": "Government services center hall (like Russian MFC): numbered windows, queue screen, rows of seats, neutral daylight; no readable text."},
+    {"id": "parents_living_room", "out": "bg/parents_living_room.png", "prompt": "A Russian parents' living room: carpet on the wall, cabinet with dishes, sofa with a blanket, TV, warm evening light."},
+    {"id": "park_autumn", "out": "bg/park_autumn.png", "prompt": "City park in golden autumn, bench, fallen leaves, lamp posts, panel buildings behind the trees, late afternoon light."},
+    {"id": "rooftop_dusk", "out": "bg/rooftop_dusk.png", "prompt": "Flat roof of a high-rise at dusk, view of a big city skyline with lights turning on, antennas, dramatic sky."},
+    {"id": "pickup_point", "out": "bg/pickup_point.png", "prompt": "Marketplace parcel pickup point: shelves full of packages, fitting booth curtain, counter with a scanner, purple-ish neutral light; no logos."},
+    {"id": "car_night", "out": "bg/car_night.png", "prompt": "Interior of an old car at night, dashboard glow, rain on the windshield, city lights bokeh outside."},
+    {"id": "university_hall", "out": "bg/university_hall.png", "prompt": "University lecture hall, wooden tiered desks, chalkboard, large windows, dust in sunlight."},
+    {"id": "gym", "out": "bg/gym.png", "prompt": "Small neighborhood gym, racks of dumbbells, bench press, mirrors, fluorescent light."},
+    {"id": "stairwell", "out": "bg/stairwell.png", "prompt": "Stairwell of a Soviet panel building, green painted walls, mailboxes, window on the landing, dim light."},
+    {"id": "vault", "out": "bg/vault.png", "prompt": "A dramatic stylized bank vault interior: huge round open steel door, shelves with stacks of money and gold coins, cinematic light beams; metaphorical scene."}
+  ]
+}

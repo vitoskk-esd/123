@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Гибрид: нарисованный фон + живой Арбузов</title>
+<!-- Гибрид (владелец 14.10: «давай попробуем гибрид»): фон — картинка (нейросеть, library.json; пока заглушка
+     из нашей кухни), Арбузов — риг в объёмной теме hd (рот под голос №7, моргание, жесты), свет и цвет подогнаны под фон:
+     контактная тень, контровой свет, общая цветокоррекция, медленный наезд камеры, зерно.
+     ?bg=bg/kitchen_night.png — свой фон. Рендер: node ../../kit/yt/render.js scene.html --out out/hybrid_silent.mp4 -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+  .a { position: absolute; }
+  #cam { inset: 0; transform-origin: 50% 60%; }
+  #bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #hero { left: 560px; bottom: -40px; width: 800px; height: 659px; transform-origin: 50% 100%;
+          filter: drop-shadow(0 26px 30px rgba(0,0,0,.45)) saturate(.92) brightness(.96); }
+  #shadow { left: 610px; bottom: 0; width: 700px; height: 90px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent); }
+  #grade { inset: 0; background: linear-gradient(180deg, rgba(255,190,120,.10), rgba(20,40,60,.18)); mix-blend-mode: soft-light; }
+  #vig { inset: 0; background: radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(0,0,0,.6)); }
+  .card { right: 110px; width: 640px; padding: 26px 32px; border-radius: 22px; background: rgba(10,14,20,.72); backdrop-filter: blur(8px);
+          border: 1px solid rgba(255,255,255,.12); color: #f2f4f6; opacity: 0; box-shadow: 0 20px 50px rgba(0,0,0,.4); }
+  .card .k { font: 600 22px I; letter-spacing: .18em; color: #9fb3c4; text-transform: uppercase; }
+  .card .v { font: 700 66px/1.02 O; letter-spacing: .02em; margin-top: 8px; text-transform: uppercase; }
+  .card .v b { color: #ff4f62; }
+  .grain { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: .5; }
+</style>
+</head>
+<body>
+<div class="a" id="cam"><img id="bg" alt=""><div class="a" id="shadow"></div><div class="a" id="hero"></div></div>
+<div class="a" id="grade"></div>
+<div class="a card" id="c1" style="top:120px"><div class="k">Банки любят</div><div class="v">мелкий <b>шрифт</b></div></div>
+<div class="a card" id="c2" style="top:330px"><div class="k">Сегодня проверим</div><div class="v">заработок на <b>кредитке</b></div></div>
+<div class="a card" id="c3" style="top:560px;background:rgba(200,30,50,.85)"><div class="k" style="color:#ffd6dc">Спойлер</div><div class="v">есть ловушка</div></div>
+<div class="a" id="vig"></div>
+<svg class="grain" viewBox="0 0 1920 1080" width="1920" height="1080"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0"/></filter><rect width="1920" height="1080" filter="url(#g)"/></svg>
+<script src="../arbuzov.js"></script>
+<script src="../rig/rig.js"></script>
+<script>
+const Q = new URLSearchParams(location.search), OFF = 1.0, DUR = 12.3;
+const ACTS = [{ t: 0, mood: "happy", arm: "down" }, { t: 1.0, mood: "happy", arm: "up" }, { t: 2.6, mood: "smirk", arm: "point" },
+              { t: 5.6, mood: "talk", arm: "phone" }, { t: 8.6, mood: "wink", arm: "point" }, { t: 10.15, mood: "shock", arm: "up" }];
+const CARDS = [["c1", 3.1], ["c2", 7.2], ["c3", 10.15]];
+let WORDS = [];
+const hero = document.getElementById("hero"), cam = document.getElementById("cam");
+const ease = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+window.renderAt = (t) => {
+  const k = t / DUR;
+  cam.style.transform = `scale(${1.02 + .05 * k}) translateX(${-12 * k}px)`;              // медленный наезд
+  const s = ArbuzovRig.state(t, { words: WORDS, acts: ACTS, offset: OFF });
+  hero.innerHTML = Arbuzov.svg({ ...s.opts, theme: "hd", rim: "#ffd29a", view: "bust", w: 800, h: 659 });
+  const intro = ease((t - .1) / .5);
+  hero.style.transform = `${s.transform} translateY(${(1 - intro) * 120}px)`;
+  hero.style.opacity = Math.min(1, intro * 1.5);
+  for (const [id, t0] of CARDS) {
+    const el = document.getElementById(id), q = (t - t0) / .45;
+    el.style.opacity = q <= 0 ? 0 : Math.min(1, q * 2);
+    el.style.transform = `translateY(${(1 - ease(q)) * 30}px)`;
+  }
+};
+window.TL = { duration: DUR, fps: 30, size: [1920, 1080] };
+const bg = document.getElementById("bg");
+bg.src = Q.get("bg") || "bg/_placeholder_kitchen.png";
+Promise.all([new Promise(r => { bg.onload = r; bg.onerror = r; }), fetch("../rig/voice/words.json").then(r => r.json()).then(w => WORDS = w), document.fonts.ready])
+  .then(() => { renderAt(0); window.__ready = true; });
+</script>
+</body>
+</html>

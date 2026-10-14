@@ -20,7 +20,7 @@
 <body>
 <div id="R"></div>
 <script>
-const V = new URLSearchParams(location.search).get("v") || "scene";
+const V = new URLSearchParams(location.search).get("v") || "scene", NOCHAR = !!new URLSearchParams(location.search).get("nochar");
 const OL = "#1e1717";
 const st = (w = 6) => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
 let rnd = 7; const R = () => (rnd = (rnd * 16807) % 2147483647) / 2147483647;
@@ -115,7 +115,7 @@ if (V === "scene") {
     <!-- лампа-свет -->
     <rect width="1920" height="1080" fill="url(#lamp)"/>
     <!-- Арбузов за столом -->
-    <g transform="translate(600 150)">${arbuzHD({ mood: "smirk", w: 700, h: 747, look: 16 })}</g>
+    ${NOCHAR ? "" : `<g transform="translate(600 150)">${arbuzHD({ mood: "smirk", w: 700, h: 747, look: 16 })}</g>`}
     <!-- стол с клеёнкой -->
     <path d="M0 830 L 1920 790 L 1920 1080 L 0 1080 Z" fill="url(#oil)"/>
     <path d="M0 830 L 1920 790" stroke="#2b1f1a" stroke-width="10"/>
@@ -126,7 +126,7 @@ if (V === "scene") {
     <path d="M1540 800 Q 1592 806 1586 846 Q 1580 878 1534 868" fill="none" ${st(10)}/><text x="1452" y="852" font-family="O" font-weight="700" font-size="30" fill="#c23b2f">ЛЮБИМЫЙ</text>
     <path d="M1460 740 Q 1440 700 1470 670 Q 1500 640 1480 600" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".35" filter="url(#blur)"/>
     <ellipse cx="300" cy="930" rx="190" ry="44" fill="#e9e4d6" ${st(6)}/><ellipse cx="300" cy="926" rx="130" ry="26" fill="#d9d2c0"/><path d="M240 920 l18 -6 M300 930 l16 4 M340 918 l10 -6" stroke="#b58a4a" stroke-width="7" stroke-linecap="round"/>
-    <!-- руки и телефон -->
+    ${NOCHAR ? "" : `    <!-- руки и телефон -->
     <g transform="translate(1250 700) rotate(10)">
       <circle cx="0" cy="0" r="170" fill="url(#phoneGlow)"/>
       <rect x="-80" y="-140" width="160" height="290" rx="26" fill="#1c1c22" ${st(7)}/>
@@ -137,6 +137,7 @@ if (V === "scene") {
       <circle cx="-86" cy="40" r="30" fill="#fff" ${st(6)}/><circle cx="86" cy="20" r="30" fill="#fff" ${st(6)}/>
     </g>
     <path d="M1110 640 Q 1150 700 1166 740" fill="none" ${st(16)}/><path d="M1150 560 Q 1260 560 1336 720" fill="none" ${st(16)}/>
+`}
     <rect width="1920" height="1080" fill="url(#vig)"/>
   </svg>
   <div style="position:absolute;inset:0;background:${noiseBg(.22)};mix-blend-mode:multiply"></div>`;

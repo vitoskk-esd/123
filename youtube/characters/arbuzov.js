@@ -3,7 +3,7 @@
    Arbuzov.svg({ mood, arm, look, theme, view, blink, mouth })
      mood:  talk | happy | shock | wink | smirk
      arm:   point | phone | up | down
-     theme: pop (контур тёмный) | neon (светящийся контур на тёмном) | doodle (дрожащая «маркерная» линия)
+     theme: pop (контур тёмный) | hd (объём: градиенты, контровой свет o.rim, тень снизу — для гибрида с нарисованными фонами) | neon | doodle
      view:  full (весь рост) | head (для аватарки) | bust (по пояс)
      mouth: null | "A" | "O" | "E" | "S" | "M" — фонема (S — приоткрыт, согласные) (перекрывает рот эмоции, для синхрона с голосом)
 */
@@ -15,7 +15,13 @@
     doodle: { ol: "#232031", skin: "#3bb15a", stripe: "#1b7a37", face: "#ff7884", cap: "#ff4053", cap2: "#d92a40", seed: "#2b1d1d", shoe: "#fff", hand: "#fff", sh: "rgba(0,0,0,.12)" },
   };
   function svg(o = {}) {
-    const mood = o.mood || "talk", arm = o.arm || "point", th = o.theme || "pop", c = T[th], id = "az" + (++uid);
+    const mood = o.mood || "talk", arm = o.arm || "point", th = o.theme || "pop", id = "az" + (++uid);
+    const hd = th === "hd", rim = o.rim || "#9fd7ff";
+    const c = hd ? { ...T.pop, ol: "#1b1416", skin: `url(#${id}r)`, stripe: "#0e4d24", face: `url(#${id}f)`, cap: `url(#${id}c)`, cap2: "#8f1222", sh: "rgba(0,0,0,.35)" } : T[th];
+    const hdDefs = hd ? `<radialGradient id="${id}r" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#6fe08a"/><stop offset=".45" stop-color="#2a9a46"/><stop offset="1" stop-color="#0c3f1c"/></radialGradient>
+      <radialGradient id="${id}f" cx="40%" cy="32%" r="78%"><stop offset="0" stop-color="#ffa0a9"/><stop offset=".6" stop-color="#ee5d6d"/><stop offset="1" stop-color="#b8344a"/></radialGradient>
+      <linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff626a"/><stop offset="1" stop-color="#a8162a"/></linearGradient>
+      <clipPath id="${id}b"><ellipse cx="300" cy="400" rx="230" ry="240"/></clipPath><filter id="${id}s"><feGaussianBlur stdDeviation="8"/></filter>` : "";
     const OL = c.ol, st = (w = 7) => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
     const look = o.look ?? (mood === "talk" ? 6 : 0), blink = o.blink || 0;
     const eye = (x, y, r, side) => {
@@ -50,7 +56,7 @@
     const vb = o.view === "head" ? "80 92 440 440" : o.view === "bust" ? "-40 60 680 560" : "-40 -20 680 780";
     const filt = th === "doodle" ? `<filter id="${id}f"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="${o.seed || 3}"/><feDisplacementMap in="SourceGraphic" scale="7"/></filter>`
       : th === "neon" ? `<filter id="${id}f" x="-20%" y="-20%" width="140%" height="140%"><feMorphology in="SourceAlpha" operator="dilate" radius="5" result="d"/><feFlood flood-color="#7dffb0"/><feComposite in2="d" operator="in" result="rim"/><feGaussianBlur in="rim" stdDeviation="14" result="glow"/><feMerge><feMergeNode in="glow"/><feMergeNode in="rim"/><feMergeNode in="SourceGraphic"/></feMerge></filter>` : "";
-    return `<svg viewBox="${vb}" ${o.w ? `width="${o.w}"` : ""} ${o.h ? `height="${o.h}"` : ""} xmlns="http://www.w3.org/2000/svg"><defs>${filt}</defs>
+    return `<svg viewBox="${vb}" ${o.w ? `width="${o.w}"` : ""} ${o.h ? `height="${o.h}"` : ""} xmlns="http://www.w3.org/2000/svg"><defs>${filt}${hdDefs}</defs>
   ${o.view === "head" ? "" : `<ellipse cx="300" cy="730" rx="180" ry="22" fill="${c.sh}"/>`}
   <g ${filt ? `filter="url(#${id}f)"` : ""}>
   <path d="M235 600 L225 690" ${st(16)}/><path d="M365 600 L375 690" ${st(16)}/>
@@ -58,6 +64,7 @@
   <ellipse cx="300" cy="400" rx="230" ry="240" fill="${c.skin}" ${st(8)}/>
   ${[-150, -85, -25, 35, 95, 155].map(dx => `<path d="M${300 + dx * .2} 165 Q ${300 + dx * 1.35} 400 ${300 + dx * .2} 636" fill="none" stroke="${c.stripe}" stroke-width="22" stroke-linecap="round" opacity=".9"/>`).join("")}
   <ellipse cx="230" cy="290" rx="60" ry="34" fill="rgba(255,255,255,.18)" transform="rotate(-25 230 290)"/>
+  ${hd ? `<g clip-path="url(#${id}b)"><path d="M500 260 Q 560 400 500 560" fill="none" stroke="${rim}" stroke-width="30" opacity=".5" filter="url(#${id}s)"/><ellipse cx="300" cy="650" rx="280" ry="120" fill="#03200d" opacity=".45" filter="url(#${id}s)"/></g>` : ""}
   <path d="M150 230 Q 170 120 300 112 Q 430 120 450 230 Q 300 200 150 230 Z" fill="${c.cap}" ${st(7)}/><path d="M400 200 Q 480 190 520 220 Q 480 240 430 232" fill="${c.cap2}" ${st(7)}/>
   <circle cx="300" cy="116" r="12" fill="${c.cap2}" ${st(5)}/>
   <ellipse cx="300" cy="400" rx="150" ry="120" fill="${c.face}" ${st(7)}/>
