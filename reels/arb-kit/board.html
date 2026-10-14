@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилсы с Арбузовым — раскадровка</title>
+<!-- Владелец 14.10: «Давай 5 тем, потом для каждой темы карусель из фото и после моего одобрения собирай».
+     ?r=<папка рилса>&f=<номер кадра>; кадр 1080×1920, внизу подпись для владельца (что звучит в этот момент). ?clean=1 — без подписи. -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../../youtube/kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../../youtube/kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  .a { position: absolute; } .nw { white-space: nowrap; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<div id="R" style="position:relative;width:1080px;height:1920px;overflow:hidden"></div>
+<script src="../../youtube/characters/hd/arbuzhd.js"></script>
+<script src="arb9.js"></script>
+<script>
+const Q = new URLSearchParams(location.search), REEL = Q.get("r"), FN = +(Q.get("f") || 1);
+const s = document.createElement("script"); s.src = `../${REEL}/story.js`;
+s.onload = () => {
+  const fr = STORY.frames[FN - 1]; A9.reseed(FN);
+  const R = document.getElementById("R");
+  R.innerHTML = fr.build(A9) + (fr.cap ? A9.caption(fr.cap, fr.capY) : "") + A9.vign(.45) + A9.grain +
+    (Q.get("clean") ? "" : `<div class="a" style="left:0;right:0;bottom:0;padding:26px 40px 34px;background:rgba(10,8,12,.9);font:700 30px/1.35 I;color:#fff">
+      <div style="display:flex;gap:18px;align-items:center;margin-bottom:12px"><span style="padding:6px 16px;border-radius:8px;background:#ff3b3b;font:700 32px O">КАДР ${FN}/${STORY.frames.length}</span><span style="font:700 32px O;opacity:.75">${fr.time || ""}</span></div>
+      <div style="opacity:.95">🎙 ${fr.voice}</div>${fr.note ? `<div style="margin-top:10px;color:#ffe066">${fr.note}</div>` : ""}</div>`);
+  document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 300))));
+};
+document.head.appendChild(s);
+</script>
+</body>
+</html>
