@@ -27,6 +27,7 @@ with `script.md`, `rec/` (gitignored), `sections/<NN>/` builds, `out/`
 - Voice of Арбузов: **variant 7 «Живой сочный»** — Yandex LiveTTS `sergey` → Chatterbox VC to the timbre `characters/voice/out/v1_sochny.wav`
   (denis +2 st). Recipe: `characters/voice/base.py`, `make_voices.sh`, `vc_voices.py`. VC can blur words («Орбузов», «Поднали») —
   check every phrase with Whisper after VC and re-take. Audio sting «хрум + маримба»: `characters/voice/sting.py`.
+- 14.10: Gemini API key added, but «в gemini нет бесплатных генераций, делаем все на коде» — **everything is drawn in code** (backgrounds, banner, scenes). tools/gemini_image.py + hybrid/library.json stay for later, not used now. Banner direction the owner accepted as «построже»: noir v3 (characters/banner/banner3.html) — no childish look.
 - Drawing approach (owner 14.10, «вариант 3»): **code-drawn illustration** (SVG/HTML, own engine) for now — no AI image generation or illustrator yet; improve later if needed. Reference for ambition: амоБлог (youtube/research/amo_blog/README.md) — rich everyday scenes, light, texture, big emotions; never copy their art.
 - Channel banner idea (owner 14.10): bank-card «thugs» in brand colours (no logos/names) with bat/knuckles/chain/pipe chase Арбузов running with a sack «БОНУСЫ». First sketch rejected as «слишком просто, нужно лучше и современнее».
 - Project style: not chosen yet. Rejected 13.10: «Сочный поп», «Арбуз-неон», «Тетрадь» (characters/style.html).

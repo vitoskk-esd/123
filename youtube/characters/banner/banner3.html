@@ -64,15 +64,8 @@ function arbuz(x, y, s, flip = 1) {
   return `<g transform="translate(${x} ${y}) scale(${s * flip} ${s})">
     <path d="M-40 190 L -70 330" ${st(20)}/><path d="M50 190 L 90 326" ${st(20)}/>
     <path d="M-116 338 Q -112 312 -70 312 Q -28 312 -24 338 Z" fill="#e9ecef" ${st(6)}/><path d="M48 334 Q 52 308 94 308 Q 136 308 140 334 Z" fill="#e9ecef" ${st(6)}/>
-    <!-- мешок на плече -->
-    <g transform="translate(150 -170) rotate(14)">
-      <path d="M-120 40 Q -150 220 0 240 Q 150 220 120 40 Q 60 -10 0 -6 Q -60 -10 -120 40 Z" fill="url(#sack)" ${st(8)}/>
-      <path d="M-40 -6 Q 0 -40 40 -6" fill="none" ${st(16)}/><path d="M-52 4 Q 0 24 52 4" fill="none" stroke="#4a3418" stroke-width="12"/>
-      <g ${tf}><text x="0" y="150" text-anchor="middle" font-family="O" font-weight="700" font-size="64" letter-spacing="4" fill="#1d2a12">БОНУСЫ</text>
-      <text x="0" y="92" text-anchor="middle" font-family="O" font-weight="700" font-size="64" fill="#1d2a12">₽</text></g>
-    </g>
-    <path d="M120 -40 Q 170 -110 150 -160" fill="none" ${st(18)}/><circle cx="148" cy="-160" r="24" fill="#e9ecef" ${st(6)}/>
-    <path d="M-150 40 Q -190 120 -170 180" fill="none" ${st(18)}/><circle cx="-168" cy="186" r="24" fill="#e9ecef" ${st(6)}/>
+    <path d="M-150 -30 Q -210 -110 -190 -170" fill="none" ${st(18)}/><circle cx="-188" cy="-176" r="24" fill="#e9ecef" ${st(6)}/>
+    <path d="M160 40 Q 210 120 190 180" fill="none" ${st(18)}/><circle cx="192" cy="186" r="24" fill="#e9ecef" ${st(6)}/>
     <!-- тело -->
     <ellipse cx="0" cy="0" rx="210" ry="210" fill="url(#rind)" ${st(10)}/>
     <clipPath id="bc"><ellipse cx="0" cy="0" rx="210" ry="210"/></clipPath>
@@ -87,12 +80,19 @@ function arbuz(x, y, s, flip = 1) {
     <path d="M130 -158 Q 246 -180 290 -128 Q 246 -106 172 -118" fill="#7d0f1e" ${st(8)}/>
     <path d="M60 -250 Q 120 -236 150 -180" fill="none" stroke="#9fd7ff" stroke-width="8" opacity=".5" stroke-linecap="round"/>
     <circle cx="0" cy="-264" r="13" fill="#7d0f1e" ${st(5)}/>
+    <!-- мешок на плече, поверх тела — чтобы читалась надпись -->
+    <g transform="translate(-250 -80) rotate(-14) scale(1.05)">
+      <path d="M-120 40 Q -150 220 0 240 Q 150 220 120 40 Q 60 -10 0 -6 Q -60 -10 -120 40 Z" fill="url(#sack)" ${st(8)}/>
+      <path d="M-40 -6 Q 0 -40 40 -6" fill="none" ${st(16)}/><path d="M-52 4 Q 0 24 52 4" fill="none" stroke="#4a3418" stroke-width="12"/>
+      <g ${tf}><text x="0" y="160" text-anchor="middle" font-family="O" font-weight="700" font-size="50" letter-spacing="2" fill="#1d2a12">БОНУСЫ</text>
+      <text x="0" y="104" text-anchor="middle" font-family="O" font-weight="700" font-size="60" fill="#1d2a12">₽</text></g>
+    </g>
     <!-- лицо -->
-    <ellipse cx="0" cy="12" rx="146" ry="118" fill="url(#face)" ${st(8)}/>
+    <ellipse cx="0" cy="12" rx="146" ry="118" fill="url(#faceU)" ${st(8)}/>
     ${[[-80, -40], [-26, -80], [50, -72], [104, -24], [-108, 32], [98, 50]].map(([a, b]) => `<ellipse cx="${a}" cy="${12 + b}" rx="6" ry="10" fill="#2a0c10" opacity=".55"/>`).join("")}
     <!-- полуприкрытые уверенные глаза -->
     ${[-50, 50].map(ex => `<ellipse cx="${ex}" cy="-6" rx="36" ry="38" fill="#eef1f4" ${st(6)}/><circle cx="${ex + 10}" cy="2" r="15" fill="${OL}"/><circle cx="${ex + 15}" cy="-4" r="5" fill="#fff"/>
-      <path d="M${ex - 40} -12 Q ${ex} -28 ${ex + 40} -12 L ${ex + 40} -48 L ${ex - 40} -48 Z" fill="url(#face)"/><path d="M${ex - 38} -12 Q ${ex} -26 ${ex + 38} -12" fill="none" ${st(8)}/>`).join("")}
+      <path d="M${ex - 40} -12 Q ${ex} -28 ${ex + 40} -12 L ${ex + 40} -48 L ${ex - 40} -48 Z" fill="url(#faceU)"/><path d="M${ex - 38} -12 Q ${ex} -26 ${ex + 38} -12" fill="none" ${st(8)}/>`).join("")}
     <path d="M-90 -66 L -14 -58 M 18 -70 Q 54 -84 92 -64" fill="none" ${st(9)}/>
     <path d="M-44 64 Q 14 96 80 50" fill="none" ${st(9)}/>
   </g>`;
@@ -105,6 +105,7 @@ const grads = `
   <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fb4c9" stop-opacity="0"/><stop offset=".6" stop-color="#8fb4c9" stop-opacity=".22"/><stop offset="1" stop-color="#8fb4c9" stop-opacity="0"/></linearGradient>
   <linearGradient id="cardSheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <radialGradient id="rind" cx="35%" cy="25%" r="85%"><stop offset="0" stop-color="#3fae5c"/><stop offset=".5" stop-color="#1d6b33"/><stop offset="1" stop-color="#082a14"/></radialGradient>
+  <radialGradient id="faceU" gradientUnits="userSpaceOnUse" cx="-29" cy="-35" r="200"><stop offset="0" stop-color="#ff8c97"/><stop offset=".6" stop-color="#d94a5c"/><stop offset="1" stop-color="#8f2234"/></radialGradient>
   <radialGradient id="face" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#ff8c97"/><stop offset=".6" stop-color="#d94a5c"/><stop offset="1" stop-color="#8f2234"/></radialGradient>
   <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0283c"/><stop offset="1" stop-color="#6e0c19"/></linearGradient>
   <radialGradient id="sack" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#cdb27a"/><stop offset="1" stop-color="#6e5428"/></radialGradient>
@@ -127,11 +128,30 @@ const scene = (mirror) => `
   <rect x="1500" y="560" width="600" height="380" fill="url(#fog)"/>
   ${arbuz(1555, 762, .48, -1)}`;
 
+if (new URLSearchParams(location.search).get("avatar")) {
+  document.body.style.width = document.body.style.height = document.documentElement.style.width = document.documentElement.style.height = "800px";
+  document.getElementById("R").innerHTML = `<svg viewBox="0 0 800 800" width="800" height="800"><defs>${grads}</defs>
+    <rect width="800" height="800" fill="#05080d"/>
+    <radialGradient id="av" cx="62%" cy="40%" r="70%"><stop offset="0" stop-color="#3a6e93" stop-opacity=".9"/><stop offset=".55" stop-color="#0d1a26" stop-opacity=".6"/><stop offset="1" stop-color="#05080d" stop-opacity="0"/></radialGradient>
+    <rect width="800" height="800" fill="url(#av)"/>
+    <g filter="url(#blur2)"><text x="590" y="250" font-family="O" font-weight="700" font-size="150" fill="none" stroke="#ff3b6b" stroke-width="6" opacity=".7">₽</text></g>
+    ${Array.from({ length: 60 }, () => { const x = R() * 800, y = R() * 800, l = 14 + R() * 26; return `<path d="M${x} ${y} l -4 ${l}" stroke="#bcd6e6" stroke-width="2" opacity="${.1 + R() * .2}"/>`; }).join("")}
+    ${arbuz(330, 400, 1.02, -1)}
+    <radialGradient id="avv" cx="50%" cy="50%" r="55%"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>
+    <rect width="800" height="800" fill="url(#avv)"/></svg>`;
+} else
 document.getElementById("R").innerHTML = `<svg viewBox="0 0 2560 1440" width="2560" height="1440"><defs>${grads}</defs>
   <rect width="2560" height="1440" fill="url(#sky)"/>
   ${city}
   <rect width="2560" height="1440" fill="url(#backlight)"/>
+
+  <!-- неон на зданиях (видно на ТВ) и фонарь за «вышибалами» -->
+  <g filter="url(#blur2)" opacity=".9"><text x="760" y="420" font-family="O" font-weight="700" font-size="120" fill="none" stroke="#ff3b6b" stroke-width="6">₽</text><text x="2210" y="470" font-family="O" font-weight="700" font-size="110" fill="none" stroke="#3be8ff" stroke-width="6">%</text></g>
+  <text x="760" y="420" font-family="O" font-weight="700" font-size="120" fill="none" stroke="#ffd0dc" stroke-width="2">₽</text><text x="2210" y="470" font-family="O" font-weight="700" font-size="110" fill="none" stroke="#d9fbff" stroke-width="2">%</text>
+  <path d="M2085 935 V 520 Q 2085 490 2050 490 H 1990" fill="none" stroke="#0b1016" stroke-width="12"/><rect x="1960" y="482" width="40" height="16" rx="6" fill="#ffe2a8"/>
+  <path d="M1980 498 L 1840 935 L 2140 935 Z" fill="#ffe2a8" opacity=".08"/>
   <rect y="935" width="2560" height="505" fill="url(#wet)"/>
+  <ellipse cx="1620" cy="1010" rx="420" ry="34" fill="#9fd7ff" opacity=".07"/><ellipse cx="900" cy="1080" rx="300" ry="26" fill="#ff3b6b" opacity=".06"/>
   <!-- отражения на мокром асфальте -->
   <g transform="translate(0 1870) scale(1 -1)" opacity=".28" filter="url(#blur6)">${scene(true)}</g>
   <path d="M0 935 H 2560" stroke="#9fd7ff" stroke-width="3" opacity=".35"/>
