@@ -1,0 +1,102 @@
+/* Общие стили для картинок объявления «Тестировщик удалённо».
+   Холст 1200×900 (4:3 — родной формат галереи Авито), экспорт в 2x. */
+:root {
+  --bg: #0e0f2c;
+  --bg-2: #1b1652;
+  --card: #171a44;
+  --line: rgba(255, 255, 255, 0.13);
+  --text: #ffffff;
+  --muted: #a8abd8;
+  --lime: #c6ff3d;
+  --lime-ink: #10122e;
+  --violet: #8b7cff;
+  --coral: #ff5c6c;
+  --amber: #ffc34d;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 1200px;
+  height: 900px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+body {
+  font-family: "Manrope", "Inter", sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+ul { list-style: none; }
+svg { display: block; flex: none; }
+
+.canvas {
+  position: relative;
+  width: 1200px;
+  height: 900px;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 600px at 50% -10%, var(--bg-2) 0%, transparent 70%),
+    var(--bg);
+}
+
+/* Сетка «тестового стенда» */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 30%, transparent 100%);
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+}
+.glow-a { width: 420px; height: 420px; left: -120px; bottom: -140px; background: var(--violet); }
+.glow-b { width: 360px; height: 360px; right: -100px; top: 260px; background: #2fd38a; opacity: 0.28; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(198, 255, 61, 0.45);
+  background: rgba(198, 255, 61, 0.08);
+  color: var(--lime);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.pill .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 0 5px rgba(198, 255, 61, 0.2);
+}
+
+.mono { font-family: "JetBrains Mono", monospace; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+  font-size: 20px;
+  white-space: nowrap;
+}
+.chip svg { color: var(--lime); }

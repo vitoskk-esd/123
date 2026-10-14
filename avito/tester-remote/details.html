@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Тестировщик удалённо — подробности</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .head { position: absolute; top: 60px; left: 72px; right: 72px; }
+  .head h2 {
+    margin-top: 22px;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 54px;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+  .head h2 mark { background: none; color: var(--lime); }
+
+  .tasks {
+    position: absolute;
+    top: 240px;
+    left: 72px;
+    width: 560px;
+    display: grid;
+    gap: 34px;
+  }
+  .tasks li { display: flex; gap: 20px; }
+  .num {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: rgba(198, 255, 61, 0.12);
+    border: 1.5px solid rgba(198, 255, 61, 0.4);
+    color: var(--lime);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 20px;
+    flex: none;
+  }
+  .tasks div > b { display: block; font-weight: 800; font-size: 25px; line-height: 1.2; }
+  .tasks div > span { display: block; margin-top: 6px; color: var(--muted); font-weight: 600; font-size: 18px; line-height: 1.35; }
+
+  .side {
+    position: absolute;
+    top: 240px;
+    left: 676px;
+    width: 452px;
+    display: grid;
+    gap: 20px;
+  }
+  .card {
+    padding: 24px 26px 26px;
+    border-radius: 22px;
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  }
+  .card h3 {
+    color: var(--muted);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .tools { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .tools li {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid var(--line);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .format { display: grid; gap: 14px; margin-top: 16px; }
+  .format li { display: flex; align-items: center; gap: 14px; font-weight: 700; font-size: 21px; }
+  .format svg { color: var(--lime); }
+
+  .cta {
+    position: absolute;
+    left: 72px;
+    right: 72px;
+    bottom: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    height: 76px;
+    border-radius: 20px;
+    background: var(--lime);
+    color: var(--lime-ink);
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+  }
+</style>
+</head>
+<body>
+<main class="canvas">
+  <div class="bg-grid"></div>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <header class="head">
+    <span class="pill"><span class="dot"></span>Тестировщик · удалённо</span>
+    <h2>Что входит <mark>в работу</mark></h2>
+  </header>
+
+  <ol class="tasks">
+    <li>
+      <span class="num">01</span>
+      <div><b>Тестирование сайтов и приложений</b><span>Веб, Android и iOS: функции, интерфейс, вёрстка</span></div>
+    </li>
+    <li>
+      <span class="num">02</span>
+      <div><b>Поиск и описание багов</b><span>Понятные баг-репорты с шагами и скриншотами</span></div>
+    </li>
+    <li>
+      <span class="num">03</span>
+      <div><b>Тест-кейсы и чек-листы</b><span>Документация, по которой легко проверить продукт</span></div>
+    </li>
+    <li>
+      <span class="num">04</span>
+      <div><b>Регресс перед релизом</b><span>Проверка, что новое не сломало старое</span></div>
+    </li>
+  </ol>
+
+  <aside class="side">
+    <div class="card">
+      <h3>Инструменты</h3>
+      <ul class="tools">
+        <li>Jira</li><li>Postman</li><li>DevTools</li><li>Charles</li>
+        <li>SQL</li><li>Git</li><li>TestRail</li><li>Figma</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Формат</h3>
+      <ul class="format">
+        <li>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Удалённо, из дома
+        </li>
+        <li>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Гибкий график
+        </li>
+        <li>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+          Из любого города
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="cta">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    Пишите в сообщения на Авито
+  </div>
+</main>
+</body>
+</html>

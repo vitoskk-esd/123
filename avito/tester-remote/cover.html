@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Тестировщик удалённо — обложка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Главный текст держим в центральных 900px, чтобы он не обрезался,
+     если Авито покажет превью квадратом. */
+  .hero {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+  .title {
+    margin-top: 26px;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 100px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .remote {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+    padding: 8px 30px 12px 24px;
+    border-radius: 20px;
+    background: var(--lime);
+    color: var(--lime-ink);
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 58px;
+    line-height: 1.1;
+    transform: rotate(-2deg);
+    box-shadow: 0 18px 50px rgba(198, 255, 61, 0.25);
+  }
+
+  .window {
+    position: absolute;
+    top: 432px;
+    left: 230px;
+    width: 740px;
+    border-radius: 22px;
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+  }
+  .window-bar {
+    position: relative;
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    height: 46px;
+    padding: 0 20px;
+    border-bottom: 1.5px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .window-bar i { width: 13px; height: 13px; border-radius: 50%; }
+  .window-bar i:nth-child(1) { background: var(--coral); }
+  .window-bar i:nth-child(2) { background: var(--amber); }
+  .window-bar i:nth-child(3) { background: var(--lime); }
+  .window-bar .url {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .window-body { padding: 20px 26px 24px; }
+  .run-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-weight: 800;
+    font-size: 20px;
+  }
+  .run-head .mono { color: var(--muted); font-size: 17px; }
+  .run-head .mono b { color: var(--lime); }
+  .bar {
+    height: 8px;
+    margin: 12px 0 16px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+  .bar span { display: block; width: 95%; height: 100%; background: linear-gradient(90deg, #7be35a, var(--lime)); }
+
+  .cases { display: grid; gap: 8px; }
+  .cases li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 50px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .cases .ico {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+  }
+  .cases .ok .ico { background: rgba(198, 255, 61, 0.16); color: var(--lime); }
+  .cases .fail { background: rgba(255, 92, 108, 0.12); border: 1.5px solid rgba(255, 92, 108, 0.55); }
+  .cases .fail .ico { background: var(--coral); color: #fff; }
+  .cases em {
+    margin-left: auto;
+    padding: 4px 10px;
+    border-radius: 7px;
+    font-style: normal;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+  .cases .ok em { color: var(--lime); background: rgba(198, 255, 61, 0.1); }
+  .cases .fail em { color: #fff; background: var(--coral); }
+
+  .toast {
+    position: absolute;
+    top: 384px;
+    left: 842px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    width: 300px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: #fff;
+    color: var(--lime-ink);
+    transform: rotate(4deg);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+  .toast-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--coral);
+    color: #fff;
+    flex: none;
+  }
+  .toast b { display: block; font-weight: 800; font-size: 20px; }
+  .toast span { display: block; margin-top: 2px; color: #5a5d80; font-weight: 600; font-size: 15px; line-height: 1.3; }
+
+  .lens { position: absolute; left: 34px; top: 506px; color: var(--muted); }
+
+  .chips {
+    position: absolute;
+    bottom: 52px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+</style>
+</head>
+<body>
+<main class="canvas">
+  <div class="bg-grid"></div>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <header class="hero">
+    <span class="pill"><span class="dot"></span>QA · тестирование ПО</span>
+    <h1 class="title">Тестировщик</h1>
+    <div class="remote">
+      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      удалённо
+    </div>
+  </header>
+
+  <!-- Декоративная лупа с багом слева -->
+  <svg class="lens" width="200" height="220" viewBox="0 0 200 220" fill="none">
+    <circle cx="88" cy="88" r="70" fill="rgba(139,124,255,0.14)" stroke="#8b7cff" stroke-width="10"/>
+    <path d="M140 140 L188 196" stroke="#8b7cff" stroke-width="18" stroke-linecap="round"/>
+    <g transform="translate(52 52) scale(3)" stroke="#ff5c6c" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/>
+    </g>
+  </svg>
+
+  <section class="window">
+    <div class="window-bar">
+      <i></i><i></i><i></i>
+      <span class="url mono">test-run / регресс v2.4</span>
+    </div>
+    <div class="window-body">
+      <div class="run-head">
+        <span>Прогон тестов</span>
+        <span class="mono"><b>19</b> / 20 пройдено</span>
+      </div>
+      <div class="bar"><span></span></div>
+      <ul class="cases">
+        <li class="ok">
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          Регистрация и вход <em>PASSED</em>
+        </li>
+        <li class="ok">
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          Корзина и заказ <em>PASSED</em>
+        </li>
+        <li class="fail">
+          <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
+          Оплата картой <em>BUG-142</em>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <aside class="toast">
+    <span class="toast-icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>
+    </span>
+    <div>
+      <b>Баг найден!</b>
+      <span>Оплата не проходит на iOS</span>
+    </div>
+  </aside>
+
+  <ul class="chips">
+    <li class="chip">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+      Сайты и приложения
+    </li>
+    <li class="chip">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Гибкий график
+    </li>
+    <li class="chip">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+      Из любого города
+    </li>
+  </ul>
+</main>
+</body>
+</html>

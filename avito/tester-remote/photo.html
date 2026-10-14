@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Тестировщик удалённо — фото</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* Затемнение снизу, чтобы подпись читалась на любом фото */
+  .shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(14, 15, 44, 0.94) 0%, rgba(14, 15, 44, 0.78) 24%, rgba(14, 15, 44, 0) 54%);
+  }
+  .caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 60px;
+    text-align: center;
+  }
+  .caption h1 {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 92px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-shadow: 0 6px 30px rgba(0, 0, 0, 0.35);
+  }
+  .caption .remote {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 6px 28px 10px;
+    border-radius: 18px;
+    background: var(--lime);
+    color: var(--lime-ink);
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 52px;
+    line-height: 1.1;
+    transform: rotate(-2deg);
+  }
+</style>
+</head>
+<body>
+<main class="canvas">
+  <!-- Фото и кадрирование задаются параметрами: photo.html?img=photos/man.jpg&pos=50%25 -->
+  <img class="photo" id="photo" src="photos/man.jpg" alt="">
+  <div class="shade"></div>
+  <div class="caption">
+    <h1>Тестировщик</h1>
+    <div class="remote">удалённо</div>
+  </div>
+</main>
+<script>
+  const q = new URLSearchParams(location.search);
+  const img = document.getElementById("photo");
+  if (q.get("img")) img.src = q.get("img");
+  img.style.objectPosition = (q.get("pos") || "50%") + " 30%";
+</script>
+</body>
+</html>
