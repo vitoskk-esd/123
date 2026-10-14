@@ -76,7 +76,7 @@ const A9 = (() => {
     `<div style="font:700 ${o.ts || 46}px/1.1 O;color:${OL};letter-spacing:.02em">${title}</div><div style="height:6px;background:${OL};margin:18px 0 26px;width:40%"></div>` +
     lines.map(([t, hl, strike]) => `<div style="position:relative;font:700 ${o.fs || 30}px/1.4 I;color:#3a3030;margin:6px 0">${hl ? `<span style="background:linear-gradient(transparent 38%,${hl === true ? "#ffe066" : hl} 38%,${hl === true ? "#ffe066" : hl} 92%,transparent 92%);padding:0 6px">${t}</span>` : t}${strike ? `<div class="a" style="left:-6px;right:-6px;top:50%;height:7px;background:#e2283f;border-radius:4px;transform:rotate(-2deg)"></div>` : ""}</div>`).join("") +
     (o.sign ? `<div style="margin-top:30px;font:italic 700 34px I;color:#2f5bea">${o.sign}</div>` : ""));
-  const receipt = (x, y, r, items, total, o = {}) => div(x, y, `width:${o.w || 520}px;transform:rotate(${r}deg);filter:drop-shadow(0 26px 30px rgba(0,0,0,.35))`,
+  const receipt = (x, y, r, items, total, o = {}) => div(x, y, `width:${o.w || 520}px;transform:rotate(${r}deg) scale(${o.s || 1});transform-origin:0 0;filter:drop-shadow(0 26px 30px rgba(0,0,0,.35))`,
     `<div style="background:#fff;padding:40px 38px 30px;font:700 28px/1.5 I;color:#2b2b2b;border:5px solid ${OL};border-bottom:none">
       <div style="text-align:center;font:700 34px O;letter-spacing:.08em">${o.title || "КАССОВЫЙ ЧЕК"}</div><div style="border-top:4px dashed #999;margin:16px 0"></div>
       ${items.map(([n, v, hl]) => `<div style="display:flex;justify-content:space-between;${hl ? `background:${hl};margin:0 -10px;padding:0 10px;border-radius:6px` : ""}"><span>${n}</span><span class="nw">${v}</span></div>`).join("")}

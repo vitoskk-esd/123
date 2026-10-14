@@ -15,7 +15,7 @@ var STORY = { title: "Вычет за 3 прошлых года", frames: [
   { time: "0:08", voice: "В этом году — за расходы двадцать третьего, двадцать четвёртого и двадцать пятого годов.", cap: "*2023*, *2024* и *2025*",
     note: "Крупно: шкала времени 2023 → 2024 → 2025 → «2026: подаёшь сейчас».",
     build: (K) => K.BG.desk() + [["2023", "#c23b2f"], ["2024", "#c46a3c"], ["2025", "#3f6fb0"], ["2026", "#2fa84f"]].map(([y, c], k) =>
-      K.div(120, 260 + k * 230, `width:840px;display:flex;align-items:center;gap:30px`, `<div style="flex:none;width:250px;padding:18px;border-radius:18px;background:${c};border:6px solid ${K.OL};font:700 72px O;color:#fff;text-align:center;box-shadow:0 14px 24px rgba(0,0,0,.35)">${y}</div><div style="font:700 50px O;color:#fff;text-shadow:0 4px 0 ${K.OL}">${k < 3 ? "расходы ✓" : "← подаёшь сейчас"}</div>`)).join("") },
+      K.div(120, 260 + k * 230, `width:840px;display:flex;align-items:center;gap:30px`, `<div style="flex:none;width:250px;padding:18px;border-radius:18px;background:${c};border:6px solid ${K.OL};font:700 72px O;color:#fff;text-align:center;box-shadow:0 14px 24px rgba(0,0,0,.35)">${y}</div><div style="font:700 70px O;color:${k < 3 ? "#ffe066" : "#9be26b"};text-shadow:0 5px 0 ${K.OL}">${k < 3 ? "РАСХОДЫ ✓" : "← ПОДАЁШЬ"}</div>`)).join("") },
   { time: "0:15", voice: "Автошкола, курсы, лечение, спорт — по каждому году отдельно.", cap: "по *каждому году* отдельно",
     note: "Крупно: чек-лист по годам: автошкола 2023, курсы 2024, зубы 2025.",
     build: (K) => K.BG.burst("#ffd27a", "#f08a3c", "#fff") + K.checklist(110, 280, 860, [["Автошкола · 2023", true], ["Курсы · 2024", true], ["Лечение зубов · 2025", true], ["Спортзал · 2025", true]]) +
@@ -33,5 +33,5 @@ var STORY = { title: "Вычет за 3 прошлых года", frames: [
   { time: "0:36", voice: "Найди договоры и чеки, пока они не потерялись, и подпишись на Арбузова.", cap: "найди *договоры и чеки*",
     note: "Финал: стол с договором и чеком, Арбузов машет, кнопка «Подписаться».",
     build: (K) => K.BG.desk("#8a5a36") + K.paper(90, 240, 560, -8, "ДОГОВОР", [["об оказании", 0], ["образовательных услуг", 0], ["Оплачено ✓", true]], { fs: 30, ts: 54 }) +
-      K.receipt(600, 330, 8, [["Обучение", "45 000 ₽"]], "45 000 ₽", { w: 400, title: "ЧЕК" }) + K.hero(250, 800, 560, { mood: "smirk", arm: "wave" }) + K.pill(560, 1130, "+ ПОДПИСАТЬСЯ", "#fff", "#e2283f", 48, -6) },
+      K.receipt(560, 300, 8, [["Обучение", "45 000 ₽"]], "45 000 ₽", { w: 400, title: "ЧЕК", s: 1.15 }) + K.hero(250, 800, 560, { mood: "smirk", arm: "wave" }) + K.pill(560, 1130, "+ ПОДПИСАТЬСЯ", "#fff", "#e2283f", 48, -6) },
 ] };

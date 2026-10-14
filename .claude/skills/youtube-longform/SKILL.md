@@ -350,3 +350,7 @@ them after delivery. Before VC, always run `youtube/02-bank-earns/recheck_cuts.p
 - alignment against read.txt, flagging repeated n-grams within 20 s, insertions and cut-off words;
 - the flag list is read by hand. "…" at a window boundary is a false alarm, and so is a repeat that the script itself
   contains. Every real flag is cut via CUTS/POST_CUTS.
+
+**Owner feedback on video #6 (14.10):** title — not «6 денег…» (непонятно), а по смыслу «6 способов вернуть свои деньги у банков» или похоже;
+no shot may stay on screen longer than ~30 s — when Арбузов talks about something, show that thing in detail (close-up of the document,
+push, receipt, calendar, number), cutting every few seconds, as in the Arbuzov reels (`reels/arb-kit/arb9.js`).
