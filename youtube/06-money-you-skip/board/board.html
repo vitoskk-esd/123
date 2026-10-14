@@ -85,8 +85,9 @@ const grain = `<div class="a" style="inset:0;background:${noise(.22)};mix-blend-
 const S = {
   1: () => {   // хук: та же кухня, что понравилась
     P(`<img class="a" src="../../characters/hybrid/bg/_placeholder_kitchen.png" style="left:0;top:0;width:1920px;height:1080px">`);
-    P(phone(1240, 400, 10, push("Налоговая", "+19 500 ₽", "возврат за учёбу"), .62));
     P(hero(600, 150, 700, "smirk", 16, "#ffd27a", "phone", false));
+    P(phone(1225, 360, 8, push("Налоговая", "+19 500 ₽", "возврат за учёбу"), .62));   // телефон поверх руки — рука за телефоном (владелец 14.10)
+    P(`<div class="a" style="left:1196px;top:540px;width:36px;height:56px;border-radius:18px;background:#fff;border:6px solid ${OL};transform:rotate(14deg)"></div>`);
     P(bubble(120, 380, "Тебе уже должны деньги. Ты просто их не забираешь.", 520));
     P(label(1, "Хук: Арбузов на кухне, пуш «+19 500 ₽». Фраза: «Пока ты ищешь подработку, у тебя под носом лежат деньги…»", "0:00–0:30"));
   },
