@@ -20,7 +20,7 @@ for i, text in enumerate(P):
     ws = [w for w in W if w["p"] == i]
     s0, s1 = ws[0]["s"] + OFF, ws[-1]["e"] + OFF
     ph.append((s0, s1))
-    if META[str(i)]["sim"] >= .97: words += [dict(w=w["w"], s=round(w["s"] + OFF, 3), e=round(w["e"] + OFF, 3), p=i) for w in ws]
+    if META[str(i)]["sim"] >= .8: words += [dict(w=w["w"], s=round(w["s"] + OFF, 3), e=round(w["e"] + OFF, 3), p=i) for w in ws]
     else:
         toks = text.split(); L = sum(len(t) + 1 for t in toks); t = s0
         for tok in toks:
