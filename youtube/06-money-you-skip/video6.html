@@ -50,6 +50,30 @@ for (const id of [...new Set(TL6.segs.map(s => s.scene))]) {
   SCN[id] = { el, heroes, items, slots: [...el.querySelectorAll(".heroSlot")] };
 }
 window.HERO_HOOK = null;
+// рамка, которую камера обязана держать в кадре: все предметы сцены, кроме фона, крупных слоёв и карточки главы
+const isBig = (r) => r.width > .45 * 1920 || r.height > .6 * 1080;
+const isChapter = (d) => /left:60px;top:54px;display:flex/.test(d.innerHTML.slice(0, 200));
+for (const sc of Object.values(SCN)) {
+  sc.el.style.display = "block"; sc.el.style.transform = "none";
+  let b = null;
+  sc.items.forEach((d, i) => {
+    if (i === 0 || d.querySelector(".heroSlot") || isChapter(d)) return;
+    for (const ch of d.children) {
+      const q = ch.getBoundingClientRect(), r = { x0: q.left / K, y0: q.top / K, x1: q.right / K, y1: q.bottom / K, width: q.width / K, height: q.height / K };
+      if (!r.width || isBig(r)) continue;
+      b = b ? { x0: Math.min(b.x0, r.x0), y0: Math.min(b.y0, r.y0), x1: Math.max(b.x1, r.x1), y1: Math.max(b.y1, r.y1) } : r;
+    }
+  });
+  sc.box = b; sc.el.style.display = "none";
+}
+// план камеры с поправкой: не крупнее, чем позволяет рамка предметов, и центр сдвинут так, чтобы они не срезались
+const fit = (sc, c) => {
+  const b = sc.box, M = 40; if (!b) return c;
+  let z = Math.max(1, Math.min(c.z, 1920 / (b.x1 - b.x0 + 2 * M), 1080 / (b.y1 - b.y0 + 2 * M)));
+  const hx = 960 / z, hy = 540 / z, cl = (v, a, z2) => Math.min(Math.max(v, a), z2);
+  let x = cl(c.x, b.x1 + M - hx, b.x0 - M + hx), y = cl(c.y, b.y1 + M - hy, b.y0 - M + hy);
+  return { z, x: cl(x, hx, 1920 - hx), y: cl(y, hy, 1080 - hy) };
+};
 document.getElementById("fx").innerHTML = `${svg(vign)}${grain}`;
 
 /* ---------- кадр ---------- */
@@ -69,12 +93,22 @@ window.renderAt = (t) => {
   // камера: план внутри сегмента + плавный переход между планами + медленный дрейф; «удар» при смене сцены
   const shot = seg.shots.find(s => t >= s.t0 && t < s.t1) || seg.shots[seg.shots.length - 1];
   const prev = seg.shots[seg.shots.indexOf(shot) - 1];
-  const camOf = (s, tt) => { const d = (tt - s.t0) / Math.max(1, s.t1 - s.t0); return { z: s.z * (1 + .035 * d), x: s.x, y: s.y }; };
+  const camOf = (s, tt) => { const d = (tt - s.t0) / Math.max(1, s.t1 - s.t0); return fit(sc, { z: s.z * (1 + .035 * d), x: s.x, y: s.y }); };
   let c = camOf(shot, t);
   if (prev) { const k = ease((t - shot.t0) / .55), p = camOf(prev, t); c = { z: p.z + (c.z - p.z) * k, x: p.x + (c.x - p.x) * k, y: p.y + (c.y - p.y) * k }; }
   const punch = lt < .4 ? 1 + (1 - ease(lt / .4)) * .05 : 1;
   const z = c.z * punch;
   sc.el.style.transform = `translate(${960 - c.x * z}px,${540 - c.y * z}px) scale(${z})`;
+  // предмет, который камера срезала (видно меньше ~9/10) (облачко, плашка на краю крупного плана), плавно убираем
+  const VW = innerWidth, VH = innerHeight;
+  sc.items.forEach((d, i) => {
+    if (i === 0 || d.querySelector(".heroSlot") || !d.children.length) return;
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const ch of d.children) { const r = ch.getBoundingClientRect(); if (!r.width) continue; x0 = Math.min(x0, r.left); y0 = Math.min(y0, r.top); x1 = Math.max(x1, r.right); y1 = Math.max(y1, r.bottom); }
+    if (x1 <= x0 || x1 - x0 > .45 * 1920 * K * z || y1 - y0 > .6 * 1080 * K * z) return;   // крупные слои сцены не трогаем
+    const vis = Math.max(0, Math.min(x1, VW) - Math.max(x0, 0)) * Math.max(0, Math.min(y1, VH) - Math.max(y0, 0)) / ((x1 - x0) * (y1 - y0));
+    d.style.opacity = (+d.style.opacity) * Math.min(1, Math.max(0, (vis - .88) / .07));
+  });
   // Арбузов: рот по словам, моргание, позы по фразам, дыхание
   const st = ArbuzovRig.state(t, { words: TL6.words, acts: TL6.acts });
   sc.slots.forEach((slot) => {
