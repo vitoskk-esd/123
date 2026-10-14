@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Тайминг рилса с Арбузовым: голос (out/voice/words.json, phrases.json от arbuzov_voice.py) + раскадровка (story.js) → timeline.js.
 Владелец 14.10: «сделай ролики так, чтобы не было застоев в кадрах несколько секунд, кадры должны часто меняться».
-Поэтому кадр раскадровки (= фраза) режется на планы по ~1,8 с на границах слов: общий → крупно предмет → реакция Арбузова → крупно другой предмет.
+Поэтому кадр раскадровки (= фраза) режется на планы по ~1,3 с на границах слов: общий → крупно предмет → реакция Арбузова → крупно другой предмет;
+про-версия (владелец 14.10: «вяло… хочу более профессиональный»): переход на каждой склейке, цифры — отдельным крупным кадром со счётчиком.
   python3 arb-kit/build_arb.py <папка рилса>
 """
 import difflib, json, os, re, sys
@@ -31,13 +32,13 @@ bounds = [0.0] + [round((ph[i][1] + ph[i + 1][0]) / 2, 3) for i in range(len(P) 
 PAT = [["wide", "detail", "react", "detail2"], ["wide", "react", "detail", "detail2"], ["wide", "detail", "detail2", "react"]]
 shots = []
 for i in range(len(P)):
-    a, b = bounds[i], bounds[i + 1]; D = b - a; n = max(1, round(D / 1.8))
-    starts = [w["s"] for w in words if w["p"] == i and a + .6 < w["s"] < b - .6]
+    a, b = bounds[i], bounds[i + 1]; D = b - a; n = max(1, round(D / 1.35))
+    starts = [w["s"] for w in words if w["p"] == i and a + .5 < w["s"] < b - .5]
     cuts = [a]
     for k in range(1, n):
         tgt = a + D * k / n
         c = min(starts, key=lambda s: abs(s - tgt)) if starts else tgt
-        if c - cuts[-1] > .7 and b - c > .7: cuts.append(round(c - .04, 3))
+        if c - cuts[-1] > .55 and b - c > .55: cuts.append(round(c - .04, 3))
     pat = ["wide", "react", "detail", "detail2"] if i == 0 else (["wide", "react", "wide2"] if i == len(P) - 1 else PAT[i % 3])
     for k, c in enumerate(cuts):
         shots.append(dict(t0=round(c, 3), t1=round(cuts[k + 1] if k + 1 < len(cuts) else b, 3), frame=i, kind=pat[k % len(pat)], first=k == 0))
@@ -54,6 +55,18 @@ for i in range(len(P)):
             chunks.append(dict(t0=cur[0]["s"] - .05, p=i, w=[dict(t=x["w"], c="k" if re.search(r"\d|₽|%", x["w"]) or (norm(x["w"])[:5] and any(norm(x["w"])[:5] == k[:5] for k in keys)) else ("r" if NEG.match(x["w"]) else "")) for x in cur])); cur = []
 for k, c in enumerate(chunks): c["t1"] = round(min(chunks[k + 1]["t0"] if k + 1 < len(chunks) else END, (bounds[c["p"] + 1])), 3); c["t0"] = round(c["t0"], 3)
 
+# цифра крупно: план, на котором звучит кусок с числом, становится кадром «word» (не первый план фразы — там общий вид)
+# в story.js у кадра можно задать big: "..." — что показать крупно (иначе — кусок субтитров с цифрой)
+BIG = [(re.search(r'big: "([^"]*)"', f) or [None, None])[1] for f in story.split("{ time:")[1:]]
+for i in range(len(P)):
+    num = [c for c in chunks if c["p"] == i and any(re.search(r"\d", w["t"]) for w in c["w"])]
+    sh = [s for s in shots if s["frame"] == i and not s["first"]]
+    if (num or BIG[i]) and sh:
+        tgt = min(sh, key=lambda s: abs(s["t0"] - num[0]["t0"])) if num else sh[0]
+        tgt["kind"] = "word"; tgt["text"] = BIG[i] or " ".join(w["t"] for w in num[0]["w"]).strip(",.:—")
+TR = ["whip", "zoom", "slam", "whipL"]
+for k, s in enumerate(shots): s["tr"] = "none" if k == 0 else TR[k % 4]
+
 # эмоции для реакций и рта
 acts = []
 for i, text in enumerate(P):
@@ -62,10 +75,10 @@ for i, text in enumerate(P):
     if re.search(r"не засчит|без |сгор|исчез|отказ|бросен", low): mood, arm = "shock", "shrug"
     acts.append(dict(t=round(bounds[i], 3), mood=mood, arm=arm))
 
-sfx = {"whoosh": [round(x - .05, 3) for x in bounds[1:-1]], "pop": [s["t0"] for s in shots if not s["first"]],
-       "coin": [c["t0"] for c in chunks if any("₽" in w["t"] or re.search(r"\d", w["t"]) for w in c["w"])][:6]}
+sfx = {"whoosh": [round(s["t0"] - .04, 3) for s in shots[1:]], "pop": [round(s["t0"] + .3, 3) for s in shots if s["first"]],
+       "coin": [round(s["t0"] + .15, 3) for s in shots if s["kind"] == "word"], "impact": [round(s["t0"] + .02, 3) for s in shots if s["tr"] == "slam"]}
 tl = dict(size=[1080, 1920], fps=30, duration=END, off=OFF, words=[dict(w=w["w"], s=w["s"], e=w["e"]) for w in words], acts=acts, shots=shots, chunks=chunks,
-          music=[dict(t=0, part="main"), dict(t=bounds[-2], part="outro")], sfx=sfx, bpm=112, hats=.5)
+          music=[dict(t=0, part="main"), dict(t=bounds[-2], part="outro")], sfx=sfx, bpm=120, hats=.6)
 open(f"{REEL}/timeline.js", "w").write("window.TL = " + json.dumps(tl, ensure_ascii=False) + ";\n")
 os.makedirs(f"{REEL}/out", exist_ok=True)
 open(f"{REEL}/out/segs.js", "w").write("window.SEGS = " + json.dumps([dict(mode="arb", t0=s["t0"], t1=s["t1"]) for s in shots]) + ";\n")

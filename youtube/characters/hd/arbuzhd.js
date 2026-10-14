@@ -28,7 +28,9 @@ function arbuzHD(o = {}) {
     : `<path d="M262 470 Q 306 494 346 458" fill="none" ${st(8)}/>`;
   const mouthF = V && VM[V] ? VM[V] : mouth;
   // руки и ноги (владелец 14.10: «давай ему сделаем руки и ноги»): o.limbs = true, o.arm = down | point | up | phone | wave | shrug
-  const L = !!o.limbs, arm = o.arm || "down", lim = (d, w = 24) => `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const L = !!o.limbs, arm = o.arm || "down", lim = (d, w = 24) => o.tube   // o.tube (рилсы «про», владелец 14.10: «не очень чётко отрисовано»): руки-ноги трубками с контуром, а не палочками
+    ? `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w * 1.75}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#2e8b43" stroke-width="${w * 1.75 - 14}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#5cc46e" stroke-width="${w * .35}" stroke-linecap="round" stroke-linejoin="round" opacity=".7" transform="translate(-4 -4)"/>`
+    : `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const glove = (x, y, r = 34) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" ${st(7)}/><path d="M${x - r * .45} ${y - r * .25} Q ${x} ${y - r * .55} ${x + r * .45} ${y - r * .25}" fill="none" stroke="#c9ccd8" stroke-width="5"/>`;
   const shoe = (x, y, f) => `<path d="M${x - 58 * f} ${y + 26} Q ${x - 62 * f} ${y - 18} ${x - 6 * f} ${y - 20} Q ${x + 52 * f} ${y - 20} ${x + 66 * f} ${y + 26} Z" fill="#f6f6f6" ${st(7)}/><path d="M${x - 54 * f} ${y + 10} H ${x + 62 * f}" stroke="#ff3b4f" stroke-width="8"/>`;
   const ARMS = {
