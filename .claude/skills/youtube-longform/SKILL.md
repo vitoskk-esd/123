@@ -27,6 +27,8 @@ with `script.md`, `rec/` (gitignored), `sections/<NN>/` builds, `out/`
 - Voice of Арбузов: **variant 7 «Живой сочный»** — Yandex LiveTTS `sergey` → Chatterbox VC to the timbre `characters/voice/out/v1_sochny.wav`
   (denis +2 st). Recipe: `characters/voice/base.py`, `make_voices.sh`, `vc_voices.py`. VC can blur words («Орбузов», «Поднали») —
   check every phrase with Whisper after VC and re-take. Audio sting «хрум + маримба»: `characters/voice/sting.py`.
+- Drawing approach (owner 14.10, «вариант 3»): **code-drawn illustration** (SVG/HTML, own engine) for now — no AI image generation or illustrator yet; improve later if needed. Reference for ambition: амоБлог (youtube/research/amo_blog/README.md) — rich everyday scenes, light, texture, big emotions; never copy their art.
+- Channel banner idea (owner 14.10): bank-card «thugs» in brand colours (no logos/names) with bat/knuckles/chain/pipe chase Арбузов running with a sack «БОНУСЫ». First sketch rejected as «слишком просто, нужно лучше и современнее».
 - Project style: not chosen yet. Rejected 13.10: «Сочный поп», «Арбуз-неон», «Тетрадь» (characters/style.html).
   Second round: characters/channel.html ?s=1..6 (зин-стикеры, Y2K-хром, финтех-минимал, газета, пиксель-игра, мем-карточка);
   third round ?s=7..12 (кислотный стрит, манга, пастель, коллаж-вырезки, конструктивизм, чат-переписка).

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Шапка «Арбузов» v3 — нуар</title>
+<!-- Владелец 14.10: «прикольный вариант, но это выглядит как детское, нужно что-то построже».
+     v3: ночная улица после дождя, туман и контровой свет, мокрый асфальт с отражениями; банки — высокие силуэты в костюмах
+     с картой вместо головы, узнаются только по цветным галстукам и краям карт (без логотипов и названий), биты опущены.
+     Арбузов спокойно уходит с мешком «БОНУСЫ», уверенная ухмылка. Узкая строгая типографика, плёночное зерно.
+     2560×1440, безопасная зона 1546×423 (x 507–2053, y 508–931). -->
+<style>
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 2560px; height: 1440px; overflow: hidden; background: #000; }
+  svg { display: block; position: absolute; left: 0; top: 0; }
+  .grain { mix-blend-mode: overlay; opacity: .6; }
+</style>
+</head>
+<body>
+<div id="R"></div>
+<script>
+const OL = "#07090c";
+const st = (w = 7) => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+let seed = 3; const R = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+/* «вышибала»: силуэт в костюме, голова — банковская карта с цветным краем; галстук фирменного цвета; бита вниз */
+function enforcer(x, y, s, col, opt = {}) {
+  const lean = opt.lean || 0;
+  return `<g transform="translate(${x} ${y}) scale(${s}) rotate(${lean})">
+    <!-- ноги -->
+    <path d="M-70 380 L -60 660 L -10 660 L 0 420 L 10 660 L 60 660 L 70 380 Z" fill="#1a2330"/>
+    <path d="M-90 664 h 90 v 16 h -100 z M 10 664 h 92 v 16 h -100 z" fill="#05070a"/>
+    <!-- корпус-пиджак -->
+    <path d="M-150 60 Q -170 260 -110 400 L 110 400 Q 170 260 150 60 Q 80 20 0 20 Q -80 20 -150 60 Z" fill="#1c2633"/>
+    <path d="M-30 30 L 0 140 L 30 30 Z" fill="#cfd6df" opacity=".85"/>
+    <path d="M-14 50 L 14 50 L 22 240 L 0 270 L -22 240 Z" fill="${col}"/>
+    <path d="M-150 60 Q -170 260 -110 400" fill="none" stroke="${col}" stroke-width="8" opacity=".8"/><path d="M150 60 Q 170 260 110 400" fill="none" stroke="#9fd7ff" stroke-width="8" opacity=".6"/>
+    <!-- руки -->
+    <path d="M-150 70 Q -200 220 -170 360" fill="none" stroke="#1c2633" stroke-width="64" stroke-linecap="round"/>
+    <path d="M150 70 Q 200 220 176 350" fill="none" stroke="#1c2633" stroke-width="64" stroke-linecap="round"/>
+    ${opt.weapon === "bat" ? `<g transform="translate(176 360) rotate(-12)"><path d="M-10 0 L -14 260 Q 0 290 14 260 L 10 0 Z" fill="#3a2a1e"/><path d="M-4 20 L -6 250" stroke="#8a6a4a" stroke-width="4" opacity=".6"/></g>`
+      : opt.weapon === "pipe" ? `<g transform="translate(-170 370) rotate(10)"><rect x="-10" y="0" width="20" height="270" rx="6" fill="#4a5260"/><rect x="-6" y="10" width="4" height="240" fill="#9aa3b0" opacity=".6"/></g>`
+      : opt.weapon === "chain" ? `<path d="M176 360 q 30 60 -6 120 q -36 60 10 120" fill="none" stroke="#7a8494" stroke-width="10" stroke-dasharray="12 8"/>`
+      : `<g transform="translate(176 360)"><rect x="-30" y="-14" width="60" height="26" rx="10" fill="#9aa3b0"/></g>`}
+    <!-- голова-карта -->
+    <g transform="translate(0 -110) rotate(${opt.tilt || 0})">
+      <rect x="-82" y="-118" width="164" height="236" rx="20" fill="#141c26"/>
+      <rect x="-82" y="-118" width="164" height="236" rx="20" fill="none" stroke="${col}" stroke-width="7"/>
+      <rect x="-82" y="-118" width="164" height="236" rx="20" fill="url(#cardSheen)"/>
+      <rect x="-56" y="40" width="40" height="30" rx="6" fill="#b89a4a" opacity=".7"/>
+      <path d="M-50 -24 L -12 -14 M 50 -24 L 12 -14" stroke="${col}" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="-30" cy="-2" r="7" fill="${col}"/><circle cx="30" cy="-2" r="7" fill="${col}"/>
+      <circle cx="-30" cy="-2" r="22" fill="${col}" opacity=".2"/><circle cx="30" cy="-2" r="22" fill="${col}" opacity=".2"/>
+    </g>
+  </g>`;
+}
+
+/* Арбузов: идёт спокойно, мешок «БОНУСЫ» на плече, уверенная ухмылка, контровой свет */
+function arbuz(x, y, s, flip = 1) {
+  const tf = flip < 0 ? `transform="scale(-1 1)"` : "";
+  return `<g transform="translate(${x} ${y}) scale(${s * flip} ${s})">
+    <path d="M-40 190 L -70 330" ${st(20)}/><path d="M50 190 L 90 326" ${st(20)}/>
+    <path d="M-116 338 Q -112 312 -70 312 Q -28 312 -24 338 Z" fill="#e9ecef" ${st(6)}/><path d="M48 334 Q 52 308 94 308 Q 136 308 140 334 Z" fill="#e9ecef" ${st(6)}/>
+    <!-- мешок на плече -->
+    <g transform="translate(150 -170) rotate(14)">
+      <path d="M-120 40 Q -150 220 0 240 Q 150 220 120 40 Q 60 -10 0 -6 Q -60 -10 -120 40 Z" fill="url(#sack)" ${st(8)}/>
+      <path d="M-40 -6 Q 0 -40 40 -6" fill="none" ${st(16)}/><path d="M-52 4 Q 0 24 52 4" fill="none" stroke="#4a3418" stroke-width="12"/>
+      <g ${tf}><text x="0" y="150" text-anchor="middle" font-family="O" font-weight="700" font-size="64" letter-spacing="4" fill="#1d2a12">БОНУСЫ</text>
+      <text x="0" y="92" text-anchor="middle" font-family="O" font-weight="700" font-size="64" fill="#1d2a12">₽</text></g>
+    </g>
+    <path d="M120 -40 Q 170 -110 150 -160" fill="none" ${st(18)}/><circle cx="148" cy="-160" r="24" fill="#e9ecef" ${st(6)}/>
+    <path d="M-150 40 Q -190 120 -170 180" fill="none" ${st(18)}/><circle cx="-168" cy="186" r="24" fill="#e9ecef" ${st(6)}/>
+    <!-- тело -->
+    <ellipse cx="0" cy="0" rx="210" ry="210" fill="url(#rind)" ${st(10)}/>
+    <clipPath id="bc"><ellipse cx="0" cy="0" rx="210" ry="210"/></clipPath>
+    <g clip-path="url(#bc)">
+      ${[-150, -86, -26, 34, 94, 154].map(dx => `<path d="M${dx * .25} -210 C ${dx * 1.3} -84 ${dx * 1.35} 84 ${dx * .25} 210" fill="none" stroke="#0a3a1b" stroke-width="${30 - Math.abs(dx) * .06}" stroke-linecap="round"/>`).join("")}
+      <path d="M190 -120 Q 230 0 180 140" fill="none" stroke="#9fd7ff" stroke-width="22" opacity=".55"/>
+      <path d="M-190 -100 Q -226 0 -186 120" fill="none" stroke="#ff4f6d" stroke-width="16" opacity=".35"/>
+      <ellipse cx="0" cy="210" rx="260" ry="110" fill="#000" opacity=".5"/>
+    </g>
+    <!-- кепка -->
+    <path d="M-160 -126 Q -140 -262 0 -268 Q 140 -262 160 -126 Q 0 -158 -160 -126 Z" fill="url(#cap)" ${st(8)}/>
+    <path d="M130 -158 Q 246 -180 290 -128 Q 246 -106 172 -118" fill="#7d0f1e" ${st(8)}/>
+    <path d="M60 -250 Q 120 -236 150 -180" fill="none" stroke="#9fd7ff" stroke-width="8" opacity=".5" stroke-linecap="round"/>
+    <circle cx="0" cy="-264" r="13" fill="#7d0f1e" ${st(5)}/>
+    <!-- лицо -->
+    <ellipse cx="0" cy="12" rx="146" ry="118" fill="url(#face)" ${st(8)}/>
+    ${[[-80, -40], [-26, -80], [50, -72], [104, -24], [-108, 32], [98, 50]].map(([a, b]) => `<ellipse cx="${a}" cy="${12 + b}" rx="6" ry="10" fill="#2a0c10" opacity=".55"/>`).join("")}
+    <!-- полуприкрытые уверенные глаза -->
+    ${[-50, 50].map(ex => `<ellipse cx="${ex}" cy="-6" rx="36" ry="38" fill="#eef1f4" ${st(6)}/><circle cx="${ex + 10}" cy="2" r="15" fill="${OL}"/><circle cx="${ex + 15}" cy="-4" r="5" fill="#fff"/>
+      <path d="M${ex - 40} -12 Q ${ex} -28 ${ex + 40} -12 L ${ex + 40} -48 L ${ex - 40} -48 Z" fill="url(#face)"/><path d="M${ex - 38} -12 Q ${ex} -26 ${ex + 38} -12" fill="none" ${st(8)}/>`).join("")}
+    <path d="M-90 -66 L -14 -58 M 18 -70 Q 54 -84 92 -64" fill="none" ${st(9)}/>
+    <path d="M-44 64 Q 14 96 80 50" fill="none" ${st(9)}/>
+  </g>`;
+}
+
+const grads = `
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#04060a"/><stop offset=".6" stop-color="#0c1724"/><stop offset="1" stop-color="#1a2c3c"/></linearGradient>
+  <radialGradient id="backlight" cx="72%" cy="55%" r="40%"><stop offset="0" stop-color="#9fd7ff" stop-opacity=".55"/><stop offset=".5" stop-color="#3a6e93" stop-opacity=".2"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <linearGradient id="wet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#162330"/><stop offset="1" stop-color="#05080c"/></linearGradient>
+  <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fb4c9" stop-opacity="0"/><stop offset=".6" stop-color="#8fb4c9" stop-opacity=".22"/><stop offset="1" stop-color="#8fb4c9" stop-opacity="0"/></linearGradient>
+  <linearGradient id="cardSheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="rind" cx="35%" cy="25%" r="85%"><stop offset="0" stop-color="#3fae5c"/><stop offset=".5" stop-color="#1d6b33"/><stop offset="1" stop-color="#082a14"/></radialGradient>
+  <radialGradient id="face" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#ff8c97"/><stop offset=".6" stop-color="#d94a5c"/><stop offset="1" stop-color="#8f2234"/></radialGradient>
+  <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0283c"/><stop offset="1" stop-color="#6e0c19"/></linearGradient>
+  <radialGradient id="sack" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#cdb27a"/><stop offset="1" stop-color="#6e5428"/></radialGradient>
+  <radialGradient id="vig" cx="50%" cy="52%" r="70%"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient>
+  <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter><filter id="blur2"><feGaussianBlur stdDeviation="2.2"/></filter>`;
+
+// город: тёмные силуэты, редкие окна
+let city = "", xx = -40;
+while (xx < 2600) { const w = 120 + R() * 200, h = 240 + R() * 520, y = 935 - h; city += `<rect x="${xx}" y="${y}" width="${w}" height="${h}" fill="#070b11"/>`;
+  for (let r = y + 26; r < 910; r += 38) for (let c = xx + 16; c < xx + w - 20; c += 30) if (R() < .12) city += `<rect x="${c}" y="${r}" width="12" height="18" fill="${R() < .6 ? "#e8c27a" : "#9fd7ff"}" opacity=".55"/>`;
+  xx += w + 8; }
+const rain = Array.from({ length: 260 }, () => { const x = R() * 2560, y = R() * 1440, l = 20 + R() * 40; return `<path d="M${x} ${y} l -6 ${l}" stroke="#bcd6e6" stroke-width="2" opacity="${.12 + R() * .2}"/>`; }).join("");
+
+const scene = (mirror) => `
+  <ellipse cx="1840" cy="760" rx="300" ry="230" fill="#9fd7ff" opacity=".16" filter="url(#blur6)"/>
+  ${enforcer(1700, 642, .4, "#f2c400", { weapon: "bat", tilt: -4 })}
+  ${enforcer(1800, 636, .41, "#e5261b", { weapon: "knux", tilt: 3 })}
+  ${enforcer(1900, 642, .4, "#7fd13a", { weapon: "chain", tilt: -2 })}
+  ${enforcer(1995, 638, .41, "#2f5bea", { weapon: "pipe", tilt: 4 })}
+  <rect x="1500" y="560" width="600" height="380" fill="url(#fog)"/>
+  ${arbuz(1555, 762, .48, -1)}`;
+
+document.getElementById("R").innerHTML = `<svg viewBox="0 0 2560 1440" width="2560" height="1440"><defs>${grads}</defs>
+  <rect width="2560" height="1440" fill="url(#sky)"/>
+  ${city}
+  <rect width="2560" height="1440" fill="url(#backlight)"/>
+  <rect y="935" width="2560" height="505" fill="url(#wet)"/>
+  <!-- отражения на мокром асфальте -->
+  <g transform="translate(0 1870) scale(1 -1)" opacity=".28" filter="url(#blur6)">${scene(true)}</g>
+  <path d="M0 935 H 2560" stroke="#9fd7ff" stroke-width="3" opacity=".35"/>
+  ${[1700, 1800, 1900, 1995].map((cx, k) => `<rect x="${cx - 6}" y="940" width="12" height="${120 + k * 10}" fill="${["#f2c400", "#e5261b", "#7fd13a", "#2f5bea"][k]}" opacity=".18" filter="url(#blur6)"/>`).join("")}
+  ${scene(false)}
+  ${rain}
+  <!-- типографика -->
+  <text x="540" y="770" font-family="O" font-weight="700" font-size="170" letter-spacing="10" fill="#f2f4f6">АРБУЗОВ</text>
+  <rect x="546" y="800" width="70" height="6" fill="#e0283c"/>
+  <text x="632" y="811" font-family="I" font-weight="600" font-size="26" letter-spacing="5" fill="#c9d3dc">БОНУСЫ БАНКОВ. БЕЗ ВОДЫ И ПОДВОХОВ</text>
+  <rect width="2560" height="1440" fill="url(#vig)"/>
+  ${new URLSearchParams(location.search).get("guide") ? `<rect x="507" y="508" width="1546" height="423" fill="none" stroke="#0ff" stroke-width="6" stroke-dasharray="20 14"/>` : ""}
+</svg>
+<svg class="grain" viewBox="0 0 2560 1440" width="2560" height="1440"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0"/></filter><rect width="2560" height="1440" filter="url(#g)"/></svg>`;
+document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 400))));
+</script>
+</body>
+</html>

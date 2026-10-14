@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Шапка «Арбузов» v2 — погоня</title>
+<!-- Владелец 14.10: первый набросок «слишком просто, нужно лучше и современнее»; рисуем кодом («вариант 3»).
+     v2: закат-ретровейв с полосами, город в 3 слоях глубины, дорога в перспективе, персонажи в беге (шаг, наклон),
+     дуги взмахов, пыль, шлейф монет, объём и контровой свет, крупный наклонный заголовок с цветной тенью, стикер-плашка, зерно.
+     Банки — карты в фирменных цветах без логотипов и названий; мешок «БОНУСЫ». 2560×1440, безопасная зона 1546×423 (x 507–2053, y 508–931). -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 2560px; height: 1440px; overflow: hidden; background: #000; }
+  svg { display: block; position: absolute; left: 0; top: 0; }
+  .grain { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: .55; }
+</style>
+</head>
+<body>
+<div id="R"></div>
+<script>
+const OL = "#1a1220";
+const st = (w = 7) => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+const limb = (d, c, w) => `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w + 14}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const shoe = (x, y, rot, c = "#f6f6f6") => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M-40 16 Q -44 -14 -4 -16 Q 40 -16 52 16 Z" fill="${c}" ${st(6)}/><path d="M-38 6 H 50" stroke="#ff3b4f" stroke-width="6"/></g>`;
+let seed = 9; const R = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+/* дуга взмаха — светлый «свуш» за оружием */
+const swoosh = (cx, cy, r, a0, a1) => {
+  const p = (a) => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
+  const [x0, y0] = p(a0), [x1, y1] = p(a1);
+  return `<path d="M${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" opacity=".55"/><path d="M${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/>`;
+};
+const dust = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})" opacity=".85">${[[0, 0, 34], [40, -14, 28], [76, 4, 22], [-30, 8, 24], [20, 16, 26]].map(([a, b, r]) => `<circle cx="${a}" cy="${b}" r="${r}" fill="#f2d6c0"/>`).join("")}<path d="M-50 20 H 110" stroke="#d7b49c" stroke-width="6" opacity=".6"/></g>`;
+
+/* банк-«бандит» в беге */
+function bankGuy(o) {
+  const { x, y, s = 1, id, arm, weapon, face = "angry", acc = "", ink = "#fff", phase = 0 } = o;
+  const k = phase ? -1 : 1;
+  const eyes = face === "shades"
+    ? `<path d="M-80 -30 H 80 L 72 6 Q 42 18 12 4 L 0 -8 L -12 4 Q -42 18 -72 6 Z" fill="#0d0d12" ${st(5)}/><path d="M-62 -20 L -32 -20 M 22 -20 L 52 -20" stroke="#fff" stroke-width="6" opacity=".55" stroke-linecap="round"/>`
+    : `<ellipse cx="-36" cy="-12" rx="25" ry="21" fill="#fff" ${st(5)}/><ellipse cx="40" cy="-12" rx="25" ry="21" fill="#fff" ${st(5)}/>
+       <circle cx="-24" cy="-8" r="10" fill="${OL}"/><circle cx="52" cy="-8" r="10" fill="${OL}"/><circle cx="-21" cy="-12" r="3.5" fill="#fff"/><circle cx="55" cy="-12" r="3.5" fill="#fff"/>
+       <path d="M-70 -48 L -12 -28 M 74 -48 L 18 -28" ${st(11)}/>`;
+  const mouth = face === "grin"
+    ? `<path d="M-48 34 Q 4 76 52 34 Z" fill="#fff" ${st(6)}/><path d="M-30 38 V 54 M -10 42 V 62 M 12 42 V 62 M 32 38 V 54" stroke="${OL}" stroke-width="4"/>`
+    : `<path d="M-44 36 H 48 Q 52 66 2 66 Q -48 66 -44 36 Z" fill="#fff" ${st(6)}/><path d="M-20 36 V 64 M 2 36 V 66 M 24 36 V 64 M -44 50 H 48" stroke="${OL}" stroke-width="4"/>`;
+  const W = {
+    bat: `${swoosh(120, -60, 230, -150, -80)}<g transform="translate(150 -190) rotate(${-30})"><path d="M-12 150 L -18 10 Q -26 -140 0 -170 Q 26 -140 18 10 L 12 150 Z" fill="url(#wood)" ${st(6)}/><path d="M-8 -120 Q -10 -40 -6 80" stroke="#fff" stroke-width="5" opacity=".35"/><rect x="-14" y="118" width="28" height="34" rx="6" fill="#222" ${st(4)}/></g>`,
+    knux: `<g transform="translate(150 -160)"><rect x="-46" y="-30" width="92" height="42" rx="16" fill="url(#steel)" ${st(6)}/>${[-32, -11, 11, 32].map(cx => `<circle cx="${cx}" cy="-32" r="13" fill="none" stroke="${OL}" stroke-width="13"/><circle cx="${cx}" cy="-32" r="13" fill="none" stroke="#e8ebf1" stroke-width="5"/>`).join("")}<path d="M-50 -70 l -20 -20 M 0 -84 V -112 M 50 -70 l 20 -20" stroke="#fff" stroke-width="8" stroke-linecap="round"/></g>`,
+    chain: `${swoosh(170, -150, 150, -170, -20)}<path d="M150 -170 Q 250 -290 320 -180 Q 350 -110 290 -70" fill="none" stroke="${OL}" stroke-width="24" stroke-linecap="round"/><path d="M150 -170 Q 250 -290 320 -180 Q 350 -110 290 -70" fill="none" stroke="#e3e6ec" stroke-width="13" stroke-dasharray="18 10" stroke-linecap="round"/>`,
+    pipe: `${swoosh(110, -40, 250, -140, -70)}<g transform="translate(160 -240) rotate(24)"><rect x="-15" y="-150" width="30" height="300" rx="10" fill="url(#steel)" ${st(6)}/><rect x="-24" y="-152" width="48" height="32" rx="6" fill="#9aa1ad" ${st(5)}/></g>`,
+  }[weapon];
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <ellipse cx="10" cy="340" rx="190" ry="26" fill="#120818" opacity=".45"/>
+    ${dust(-210, 300, .9)}
+    <g transform="rotate(9)">
+      <!-- ноги в беге -->
+      ${limb(`M-50 170 Q ${-120 * k} 240 ${-150 * k} 290`, "#2a2633", 34)}${shoe(-150 * k - 10, 300, -20 * k)}
+      ${limb(`M50 170 Q ${70 * k} 250 ${120 * k} 300`, "#2a2633", 34)}${shoe(130 * k, 306, 10 * k)}
+      <!-- дальняя рука назад -->
+      ${limb("M-110 0 Q -190 40 -220 110", arm, 34)}<circle cx="-222" cy="118" r="30" fill="${arm}" ${st(6)}/>
+      <!-- тело-карта -->
+      <rect x="-130" y="-190" width="260" height="380" rx="36" fill="url(#${id})" ${st(9)}/>
+      <rect x="-130" y="-190" width="260" height="380" rx="36" fill="url(#gloss)"/>
+      <path d="M108 -170 Q 132 0 108 170" fill="none" stroke="#ffb36b" stroke-width="12" opacity=".7" stroke-linecap="round"/>
+      <rect x="-96" y="96" width="64" height="48" rx="10" fill="url(#gold)" ${st(5)}/><path d="M-96 120 H -32 M -64 96 V 144" stroke="${OL}" stroke-width="3" opacity=".45"/>
+      <text x="100" y="164" text-anchor="end" font-family="I" font-weight="700" font-size="22" fill="${ink}" opacity=".85">•••• 0000</text>
+      ${acc}
+      <g transform="translate(0 -70)">${eyes}${mouth}</g>
+      ${W}
+      ${limb("M110 -20 Q 196 -60 150 -170", arm, 34)}<circle cx="150" cy="-170" r="32" fill="${arm}" ${st(6)}/>
+    </g>
+  </g>`;
+}
+
+/* Арбузов: бежит вправо, косится назад, мешок «БОНУСЫ» за спиной */
+function arbuz(x, y, s) {
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <ellipse cx="0" cy="340" rx="230" ry="28" fill="#120818" opacity=".45"/>
+    ${dust(-300, 300, 1.2)}
+    <g transform="rotate(-8)">
+      ${limb("M-60 170 Q -150 230 -230 190", OL, 6)}${shoe(-250, 196, -30)}
+      ${limb("M60 180 Q 120 250 110 316", OL, 6)}${shoe(126, 326, 6)}
+      <!-- мешок -->
+      <g transform="translate(-250 -110) rotate(-16)">
+        <path d="M-130 40 Q -165 240 0 262 Q 165 240 130 40 Q 64 -12 0 -8 Q -64 -12 -130 40 Z" fill="url(#sack)" ${st(9)}/>
+        <path d="M-90 80 Q -110 200 -20 230" fill="none" stroke="#fff" stroke-width="10" opacity=".3" stroke-linecap="round"/>
+        <path d="M-44 -8 Q 0 -46 44 -8" fill="none" ${st(18)}/><path d="M-56 4 Q 0 26 56 4" fill="none" stroke="#7a5a2a" stroke-width="12"/>
+        <text x="0" y="104" text-anchor="middle" font-family="Unb" font-weight="900" font-size="74" fill="#2b5a1a">₽</text>
+        <text x="0" y="170" text-anchor="middle" font-family="Unb" font-weight="900" font-size="54" fill="#2b5a1a" transform="rotate(-4)">БОНУСЫ</text>
+      </g>
+      <path d="M-100 -50 Q -180 -110 -210 -150" fill="none" ${st(18)}/><circle cx="-208" cy="-150" r="26" fill="#fff" ${st(6)}/>
+      <!-- тело -->
+      <ellipse cx="0" cy="0" rx="210" ry="210" fill="url(#rind)" ${st(10)}/>
+      <clipPath id="bc"><ellipse cx="0" cy="0" rx="210" ry="210"/></clipPath>
+      <g clip-path="url(#bc)">
+        ${[-150, -86, -26, 34, 94, 154].map(dx => `<path d="M${dx * .25} -210 C ${dx * 1.3} -84 ${dx * 1.35} 84 ${dx * .25} 210" fill="none" stroke="#0f5226" stroke-width="${30 - Math.abs(dx) * .06}" stroke-linecap="round" opacity=".92"/><path d="M${dx * .25 + 12} -210 C ${dx * 1.3 + 12} -84 ${dx * 1.35 + 12} 84 ${dx * .25 + 12} 210" fill="none" stroke="#8de59c" stroke-width="5" opacity=".25"/>`).join("")}
+        <path d="M-200 -60 Q -230 40 -170 150" fill="none" stroke="#ffb36b" stroke-width="26" opacity=".55"/>
+        <ellipse cx="-80" cy="-120" rx="80" ry="40" fill="#fff" opacity=".22" transform="rotate(-30 -80 -120)"/>
+        <ellipse cx="0" cy="200" rx="240" ry="90" fill="#062a12" opacity=".4"/>
+      </g>
+      <!-- кепка -->
+      <path d="M-160 -126 Q -140 -262 0 -268 Q 140 -262 160 -126 Q 0 -158 -160 -126 Z" fill="url(#cap)" ${st(8)}/>
+      <path d="M-130 -158 Q -246 -180 -290 -128 Q -246 -106 -172 -118" fill="#a31424" ${st(8)}/>
+      <path d="M-100 -200 Q -60 -244 0 -250" fill="none" stroke="#fff" stroke-width="10" opacity=".35" stroke-linecap="round"/>
+      <circle cx="0" cy="-264" r="13" fill="#a31424" ${st(5)}/>
+      <!-- лицо -->
+      <ellipse cx="22" cy="10" rx="146" ry="118" fill="url(#face)" ${st(8)}/>
+      ${[[-76, -40], [-24, -80], [52, -70], [106, -22], [-104, 32], [100, 50]].map(([a, b]) => `<ellipse cx="${22 + a}" cy="${10 + b}" rx="6" ry="10" fill="#3a1414" opacity=".55"/>`).join("")}
+      <ellipse cx="-62" cy="54" rx="22" ry="12" fill="#ff3d5a" opacity=".45"/><ellipse cx="116" cy="54" rx="22" ry="12" fill="#ff3d5a" opacity=".45"/>
+      <ellipse cx="-20" cy="-12" rx="36" ry="42" fill="#fff" ${st(6)}/><ellipse cx="72" cy="-12" rx="36" ry="42" fill="#fff" ${st(6)}/>
+      <circle cx="-38" cy="-8" r="15" fill="${OL}"/><circle cx="54" cy="-8" r="15" fill="${OL}"/><circle cx="-33" cy="-15" r="5.5" fill="#fff"/><circle cx="59" cy="-15" r="5.5" fill="#fff"/>
+      <path d="M-62 -68 Q -26 -90 8 -70 M 40 -74 Q 76 -92 108 -66" fill="none" ${st(9)}/>
+      <path d="M-34 50 Q 34 120 104 42 Z" fill="#5c1420" ${st(7)}/><path d="M-14 56 L 86 48" stroke="#fff" stroke-width="13" stroke-linecap="round"/><path d="M10 92 Q 40 80 66 88" stroke="#e46b80" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <path d="M176 -70 q 18 24 0 40 q -18 -16 0 -40" fill="#a8ecff" ${st(4)}/><path d="M196 -14 q 13 17 0 28 q -13 -11 0 -28" fill="#a8ecff" ${st(4)}/>
+      <path d="M160 20 Q 240 60 290 -4" fill="none" ${st(18)}/><circle cx="296" cy="-10" r="26" fill="#fff" ${st(6)}/>
+    </g>
+  </g>`;
+}
+
+const grads = `
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#140b2e"/><stop offset=".38" stop-color="#4b1f63"/><stop offset=".62" stop-color="#d2456a"/><stop offset=".8" stop-color="#ff8a5b"/><stop offset="1" stop-color="#ffc27a"/></linearGradient>
+  <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".55" stop-color="#ffb347"/><stop offset="1" stop-color="#ff4f6d"/></linearGradient>
+  <linearGradient id="road" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1e36"/><stop offset="1" stop-color="#0e0a14"/></linearGradient>
+  <linearGradient id="wood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a4a20"/><stop offset=".5" stop-color="#e2aa6c"/><stop offset="1" stop-color="#6a3c18"/></linearGradient>
+  <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7f8fb"/><stop offset=".5" stop-color="#8d95a3"/><stop offset="1" stop-color="#e3e6ec"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".5" stop-color="#e5b232"/><stop offset="1" stop-color="#fff3b0"/></linearGradient>
+  <linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".3" stop-color="#fff" stop-opacity="0"/><stop offset=".75" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+  <linearGradient id="bY" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff06e"/><stop offset="1" stop-color="#f0b800"/></linearGradient>
+  <linearGradient id="bR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6656"/><stop offset="1" stop-color="#c8140b"/></linearGradient>
+  <linearGradient id="bG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4f55a"/><stop offset="1" stop-color="#4f9c16"/></linearGradient>
+  <linearGradient id="bB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a72f2"/><stop offset="1" stop-color="#08207e"/></linearGradient>
+  <radialGradient id="rind" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#6fe08a"/><stop offset=".45" stop-color="#2a9a46"/><stop offset="1" stop-color="#0c3f1c"/></radialGradient>
+  <radialGradient id="face" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#ffa3ab"/><stop offset=".6" stop-color="#f2606f"/><stop offset="1" stop-color="#c3364a"/></radialGradient>
+  <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff626a"/><stop offset="1" stop-color="#b3152a"/></linearGradient>
+  <radialGradient id="sack" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#f6e2aa"/><stop offset="1" stop-color="#b3863f"/></radialGradient>
+  <linearGradient id="title" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ffe2a8"/></linearGradient>
+  <radialGradient id="vig" cx="50%" cy="50%" r="72%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient>
+  <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="3.2" fill="#fff"/></pattern>
+  <linearGradient id="fadeDots" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <mask id="dotMask"><rect width="2560" height="1440" fill="url(#fadeDots)"/></mask>
+  <clipPath id="sunClip"><circle cx="1290" cy="860" r="300"/></clipPath>`;
+
+// город в три слоя глубины
+const layer = (n, yb, hmin, hmax, wmin, wmax, col, winOp) => {
+  let s = "", xx = -60;
+  while (xx < 2620) {
+    const w = wmin + R() * (wmax - wmin), h = hmin + R() * (hmax - hmin), y = yb - h;
+    s += `<rect x="${xx}" y="${y}" width="${w}" height="${h}" fill="${col}"/>`;
+    if (R() < .3) s += `<rect x="${xx + w * .4}" y="${y - 40}" width="6" height="40" fill="${col}"/>`;
+    if (winOp) for (let r = y + 22; r < yb - 20; r += 34) for (let c = xx + 14; c < xx + w - 18; c += 26) if (R() < .28) s += `<rect x="${c}" y="${r}" width="12" height="16" fill="${R() < .5 ? "#ffcf6b" : "#ff9e6b"}" opacity="${winOp}"/>`;
+    xx += w + 6 + R() * 20;
+  }
+  return s;
+};
+const sunBands = [0, 1, 2, 3, 4, 5].map(k => `<rect x="980" y="${860 + k * 34}" width="620" height="${6 + k * 3}" fill="#d2456a"/>`).join("");
+const coinTrail = [[1760, 640, 18, 1], [1800, 600, -12, .9], [1730, 590, 30, .8], [1700, 650, 8, .7], [1670, 610, -20, .6]].map(([cx, cy, r, sc]) =>
+  `<g transform="translate(${cx} ${cy}) rotate(${r}) scale(${sc})"><path d="M-60 0 H -26" stroke="#ffe08a" stroke-width="10" stroke-linecap="round" opacity=".6"/><ellipse rx="26" ry="26" fill="url(#gold)" ${st(5)}/><text y="10" text-anchor="middle" font-family="Unb" font-weight="900" font-size="28" fill="#8a5a00">₽</text></g>`).join("");
+const speed = [600, 650, 705, 760, 815].map((yy, k) => `<path d="M${2110 + (k % 2) * 30} ${yy} H ${2330 - k * 24}" stroke="#fff" stroke-width="${10 - k}" stroke-linecap="round" opacity=".6"/>`).join("");
+
+document.getElementById("R").innerHTML = `<svg viewBox="0 0 2560 1440" width="2560" height="1440"><defs>${grads}</defs>
+  <rect width="2560" height="1440" fill="url(#sky)"/>
+  <rect width="2560" height="900" fill="url(#dots)" mask="url(#dotMask)"/>
+  <circle cx="1290" cy="860" r="420" fill="#ffb347" opacity=".18"/>
+  <circle cx="1290" cy="860" r="300" fill="url(#sun)"/>
+  <g clip-path="url(#sunClip)">${sunBands}</g>
+  ${[[300, 380, 1.2], [2050, 330, 1], [880, 300, .8]].map(([cx, cy, sc]) => `<g transform="translate(${cx} ${cy}) scale(${sc})" opacity=".55"><ellipse rx="160" ry="34" fill="#ffb3a0"/><ellipse cx="70" cy="-20" rx="90" ry="34" fill="#ffc6b3"/></g>`).join("")}
+  <g opacity=".55">${layer(0, 905, 140, 320, 90, 180, "#7a3e7e", 0)}</g>
+  <g>${layer(1, 910, 200, 470, 110, 200, "#3d1d52", .55)}</g>
+  <g>${layer(2, 935, 260, 600, 140, 240, "#21102f", .9)}</g>
+  <rect y="930" width="2560" height="510" fill="url(#road)"/>
+  ${Array.from({ length: 14 }, (_, k) => { const t = k / 13, yy = 960 + t * t * 480; return `<rect x="${1290 - 30 - t * 300}" y="${yy}" width="${60 + t * 600}" height="${6 + t * 22}" fill="#f4d35e" opacity="${.35 + t * .5}"/>`; }).join("")}
+  <path d="M0 930 H 2560" stroke="#ff8a5b" stroke-width="4" opacity=".7"/>
+  <!-- заголовок -->
+  <g transform="translate(530 700) skewX(-9)">
+    <text x="10" y="12" font-family="Unb" font-weight="900" font-size="132" letter-spacing="-6" fill="#ff3b4f">АРБУЗОВ</text>
+    <text x="0" y="0" font-family="Unb" font-weight="900" font-size="132" letter-spacing="-6" fill="url(#title)" stroke="${OL}" stroke-width="12" paint-order="stroke">АРБУЗОВ</text>
+  </g>
+  <g transform="translate(540 724) rotate(-2)"><rect width="610" height="66" rx="33" fill="#ffd23f" ${st(6)}/><text x="305" y="44" text-anchor="middle" font-family="I" font-weight="700" font-size="30" fill="${OL}">забираю бонусы банков — законно</text></g>
+  <!-- погоня -->
+  ${bankGuy({ x: 1235, y: 700, s: .45, id: "bY", arm: "#f0b800", weapon: "bat", face: "shades", ink: OL, acc: `<path d="M-64 186 Q 0 236 64 186" fill="none" stroke="url(#gold)" stroke-width="13"/>` })}
+  ${bankGuy({ x: 1372, y: 714, s: .42, id: "bR", arm: "#c8140b", weapon: "knux", face: "angry", phase: 1 })}
+  ${bankGuy({ x: 1505, y: 706, s: .42, id: "bG", arm: "#4f9c16", weapon: "chain", face: "grin", ink: OL })}
+  ${bankGuy({ x: 1640, y: 700, s: .44, id: "bB", arm: "#08207e", weapon: "pipe", face: "angry", phase: 1, acc: `<rect x="-74" y="-210" width="148" height="36" rx="10" fill="#0d0d12" ${st(5)}/>` })}
+  ${coinTrail}${speed}
+  ${arbuz(1945, 700, .46)}
+  <rect width="2560" height="1440" fill="url(#vig)"/>
+  ${new URLSearchParams(location.search).get("guide") ? `<rect x="507" y="508" width="1546" height="423" fill="none" stroke="#0ff" stroke-width="6" stroke-dasharray="20 14"/>` : ""}
+</svg>
+<svg class="grain" viewBox="0 0 2560 1440" width="2560" height="1440"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0"/></filter><rect width="2560" height="1440" filter="url(#g)"/></svg>`;
+document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 400))));
+</script>
+</body>
+</html>
