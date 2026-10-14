@@ -2,7 +2,7 @@
 """Голос Арбузова — вариант 7 «Живой сочный» (владелец 13.10: «Голос номер 7»).
 Цепочка на каждую фразу: Yandex LiveTTS «sergey» (живая интонация) → Chatterbox VC в тембр out/v1_sochny.wav
 (denis +2 полутона, make_voices.sh) → проверка Whisper по словам. VC иногда смазывает слова («Орбузов», «Поднали») —
-тогда новый дубль TTS с другой скоростью (1.0 → 0.95 → 1.05 → 0.9), лучший по совпадению. Склейка с паузами, −16 LUFS,
+тогда новый дубль TTS с другим темпом (1.0 → 0.95 → 1.05 → 0.9, atempo — LiveTTS не принимает speed), лучший по совпадению. Склейка с паузами, −16 LUFS,
 слова с временами — words.json (для рта персонажа и монтажа).
   <python venv с chatterbox и faster-whisper> arbuzov_voice.py phrases.txt out_dir
 """
@@ -39,7 +39,8 @@ def main(src, out):
         best = None
         for k, sp in enumerate(SPEEDS):
             raw, wav = f"{out}/p{i:03d}_{k}_tts.wav", f"{out}/p{i:03d}_{k}.wav"
-            Y.synth(fix(text), raw, voice="sergey", speed=sp, stressed=True)
+            Y.synth(fix(text), raw, voice="sergey", stressed=True)   # LiveTTS не принимает speed — темп меняем после синтеза
+            if sp: subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", f"atempo={sp}", raw + ".t.wav"], check=True); os.replace(raw + ".t.wav", raw)
             torchaudio.save(wav, vc.generate(audio=raw), vc.sr)
             segs, _ = asr.transcribe(wav, language="ru", beam_size=5, word_timestamps=True)
             words = [dict(w=w.word.strip(), s=round(w.start, 3), e=round(w.end, 3)) for s in segs for w in s.words]
