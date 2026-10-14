@@ -1,9 +1,10 @@
 {
   "video": "06-money-you-skip",
   "title": "Деньги, которые тебе положены, а ты их не забираешь (2026)",
-  "stage": "720p собран 14.10 (out/final_720p.mp4, 12:36, −14 LUFS), отправлен владельцу на утверждение (сжатая копия out/video6_720p.mp4)",
+  "stage": "720p собран 14.10 и отправлен; владелец 14.10: название переформулировать («6 способов вернуть свои деньги…»), без кадров дольше ~30 с — «пока учти и оставь». План — REWORK.md, пересборка по команде владельца",
   "voice": "characters/voice/arbuzov_voice.py (sergey LiveTTS → VC в тембр v1_sochny, проверка Whisper)",
   "next": "после утверждения: bash ya_build6.sh w=1920 → out/final_1080p.mp4, отправка частями; вставить ссылку Telegram в описание и QR в сцену 6",
   "thumbnail": "thumbnail.jpg — «ТЕБЕ ДОЛЖНЫ» (characters/hd/pack.html ?v=t1), выбрано владельцем 14.10",
-  "style": "стиль amo_test (characters/hd/arbuzhd.js): яркая бытовая сцена по теме + Арбузов в объёме; шапка/аватарка — characters/hd/out"
+  "style": "стиль amo_test (characters/hd/arbuzhd.js): яркая бытовая сцена по теме + Арбузов в объёме; шапка/аватарка — characters/hd/out",
+  "title_next": "6 способов вернуть свои деньги у банков и налоговой (2026)"
 }
