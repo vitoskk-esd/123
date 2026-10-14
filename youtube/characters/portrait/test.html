@@ -1,0 +1,7 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Арбузов — портрет, эмоции</title>
+<style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:linear-gradient(135deg,#ffcf3f,#ff7a3d 50%,#ff3d6b)} .p{position:absolute;top:120px}</style></head>
+<body><div id="R"></div><script src="portrait.js"></script><script>
+const m=["smirk","shock","grin","sly","angry"];let h="";
+m.forEach((x,i)=>{h+=`<div class="p" style="left:${i*380-10}px;top:${i%2?260:160}px">${ArbuzovP.svg({mood:x,w:400,h:400})}</div>`});
+h+=`<div class="p" style="left:1220px;top:520px">${ArbuzovP.svg({mood:"smirk",w:700,h:700})}</div>`;
+document.getElementById("R").innerHTML=h;window.__ready=true;</script></body></html>

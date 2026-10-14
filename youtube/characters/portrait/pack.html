@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Арбузов — портретный формат</title>
+<!-- Владелец 14.10: «Это всё не то. Полностью меняй формат» → весь визуал канала, направление «портрет как у амоБлога»:
+     крупный Арбузов на весь кадр с яркой эмоцией + огромный заголовок + предметы вокруг (ценники, карты, купюры, телефон),
+     яркие сочные фоны, объём и фактура. Без копирования рисунков амоБлога — свой персонаж и своя графика.
+     ?v=banner (2560×1440) · thumb1 · thumb2 · thumb3 (1280×720) · frame (1920×1080). -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow: hidden; background: #000; }
+  .a { position: absolute; }
+  .nw { white-space: nowrap; }
+  .grain { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: .45; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="R" style="position:relative"></div>
+<script src="portrait.js"></script>
+<script>
+const V = new URLSearchParams(location.search).get("v") || "thumb1";
+const SZ = { banner: [2560, 1440], frame: [1920, 1080] }[V] || [1280, 720];
+document.documentElement.style.width = document.body.style.width = SZ[0] + "px";
+document.documentElement.style.height = document.body.style.height = SZ[1] + "px";
+const R = document.getElementById("R"); R.style.width = SZ[0] + "px"; R.style.height = SZ[1] + "px";
+const P = (h) => R.insertAdjacentHTML("beforeend", h);
+const A = (o) => ArbuzovP.svg(o);
+const INK = "#16090c";
+const grain = `<svg class="grain" viewBox="0 0 ${SZ[0]} ${SZ[1]}" width="${SZ[0]}" height="${SZ[1]}"><filter id="gn"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0"/></filter><rect width="100%" height="100%" filter="url(#gn)"/></svg>`;
+
+/* предметы: ценник, карта, купюра, телефон с пушем, монета */
+const tag = (x, y, r, k, v, bg = "#ffe14d", s = 1) => `<div class="a" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0">
+  <div style="position:relative;padding:16px 26px 18px 46px;background:${bg};border-radius:10px;box-shadow:0 18px 30px rgba(0,0,0,.35);clip-path:polygon(28px 0,100% 0,100% 100%,28px 100%,0 50%)">
+    <div style="position:absolute;left:16px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:rgba(0,0,0,.35)"></div>
+    <div class="nw" style="font:700 22px/1 O;letter-spacing:.08em;color:${INK};opacity:.75">${k}</div>
+    <div class="nw" style="font:900 56px/1 Unb;letter-spacing:-.04em;color:${INK};margin-top:6px">${v}</div></div></div>`;
+const card = (x, y, r, c1, c2, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;width:340px;height:214px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0;border-radius:22px;
+  background:linear-gradient(135deg,${c1},${c2});box-shadow:0 24px 40px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.4);overflow:hidden">
+  <div class="a" style="inset:0;background:linear-gradient(115deg,rgba(255,255,255,.35),transparent 40%)"></div>
+  <div class="a" style="left:30px;top:66px;width:58px;height:44px;border-radius:9px;background:linear-gradient(135deg,#fff3b0,#d9a632)"></div>
+  <div class="a nw" style="left:30px;bottom:30px;font:700 22px I;letter-spacing:.14em;color:rgba(255,255,255,.9)">2200 •••• 2026</div></div>`;
+const bill = (x, y, r, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;width:300px;height:140px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0;border-radius:8px;
+  background:linear-gradient(135deg,#f6c49a,#e48a5a);box-shadow:0 16px 28px rgba(0,0,0,.35);border:3px solid rgba(120,40,10,.25)">
+  <div class="a" style="left:14px;top:14px;right:14px;bottom:14px;border:2px solid rgba(120,40,10,.35);border-radius:6px"></div>
+  <div class="a nw" style="right:26px;top:24px;font:900 54px/1 Unb;color:rgba(110,30,10,.75)">5000</div>
+  <div class="a" style="left:30px;top:30px;width:70px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(110,30,10,.35),transparent 70%)"></div></div>`;
+const coin = (x, y, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;width:${90 * s}px;height:${90 * s}px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c0,#f0b72f 55%,#a86d00);box-shadow:0 12px 20px rgba(0,0,0,.35),inset 0 0 0 ${6 * s}px rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font:900 ${46 * s}px Unb;color:#8a5200">₽</div>`;
+const phone = (x, y, r, title, sub, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;width:260px;height:520px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0;border-radius:44px;background:#111;box-shadow:0 30px 50px rgba(0,0,0,.45);padding:14px">
+  <div style="width:100%;height:100%;border-radius:32px;background:linear-gradient(180deg,#1b1f2b,#0d0f16);position:relative;overflow:hidden">
+    <div class="a" style="left:16px;right:16px;top:60px;padding:16px;border-radius:20px;background:rgba(255,255,255,.95)">
+      <div class="nw" style="font:700 16px I;color:#2fa84f">● Банк · сейчас</div>
+      <div style="font:900 30px/1.05 Unb;letter-spacing:-.03em;color:${INK};margin-top:8px">${title}</div>
+      <div style="font:700 16px/1.2 I;color:#6b7280;margin-top:6px">${sub}</div></div></div></div>`;
+const bigTitle = (x, y, lines, size, col = "#fff", shadow = INK, rot = -3) => `<div class="a" style="left:${x}px;top:${y}px;transform:rotate(${rot}deg);transform-origin:0 0">${lines.map(([t, c]) =>
+  `<div class="nw" style="font:700 ${size}px/.92 O;letter-spacing:.005em;color:${c || col};text-shadow:0 ${size * .06}px 0 ${shadow},0 ${size * .12}px ${size * .2}px rgba(0,0,0,.35);-webkit-text-stroke:${size * .02}px ${shadow}">${t}</div>`).join("")}</div>`;
+const rays = (cx, cy, c, n = 24, op = .16) => `<div class="a" style="inset:0;background:repeating-conic-gradient(from 0deg at ${cx} ${cy},${c} 0 ${360 / n / 2}deg,transparent ${360 / n / 2}deg ${360 / n}deg);opacity:${op}"></div>`;
+
+if (V === "banner") {
+  P(`<div class="a" style="inset:0;background:radial-gradient(1200px 800px at 64% 55%,#ff8a3d,#ff3d6b 45%,#7a1fa2 85%)"></div>
+     ${rays("64%", "55%", "#ffe14d", 36, .18)}
+     <div class="a" style="left:0;right:0;top:0;height:507px;background:linear-gradient(#2a0b3d,transparent)"></div>
+     ${card(1960, 540, 14, "#2b2b35", "#0d0d12", .8)}${card(1200, 760, -12, "#ff5a4a", "#c8140b", .62)}
+     ${tag(1950, 770, 10, "КЭШБЭК", "5%")}
+     ${coin(1960, 470, .8)}${coin(1235, 690, .7)}${coin(1900, 900, .6)}
+     <div class="a" style="left:1280px;top:470px">${A({ mood: "sly", look: -.4, w: 640, h: 640, rim: "#ffe14d", rim2: "#3be8ff" })}</div>
+     ${bigTitle(520, 570, [["АРБУЗОВ"]], 170, "#fff8e6", INK, -3)}
+     <div class="a nw" style="left:540px;top:775px;transform:rotate(-3deg);padding:12px 22px;background:${INK};color:#ffe14d;font:700 30px I;letter-spacing:.06em">ЗАБИРАЮ БОНУСЫ БАНКОВ. ЗАКОННО</div>
+     ${grain}`);
+} else if (V === "thumb1") {
+  P(`<div class="a" style="inset:0;background:radial-gradient(700px 520px at 70% 60%,#ffd84d,#ff8a2a 50%,#e2283f 100%)"></div>${rays("70%", "60%", "#fff", 28, .14)}
+     ${bill(-40, 470, -18, .9)}${bill(80, 540, 12, .8)}${card(900, 40, 18, "#2b2b35", "#0d0d12", .85)}
+     <div class="a" style="left:520px;top:120px">${A({ mood: "shock", look: 0, w: 760, h: 760, rim: "#fff2a8", rim2: "#3be8ff" })}</div>
+     ${bigTitle(36, 40, [["15 000 ₽"], ["ЗА КРЕДИТКУ?", "#ffe14d"]], 118, "#fff", INK, -4)}
+     ${tag(60, 360, -8, "СХЕМА", "работает?", "#fff", .9)}${grain}`);
+} else if (V === "thumb2") {
+  P(`<div class="a" style="inset:0;background:radial-gradient(700px 520px at 30% 60%,#3be8ff,#2f5bea 50%,#1a0f5a 100%)"></div>${rays("30%", "60%", "#fff", 28, .12)}
+     ${card(820, 70, -12, "#ffe14d", "#f0b800", .9)}${card(900, 260, 8, "#ff5a4a", "#c8140b", .9)}${card(840, 450, -6, "#7fd13a", "#3e8f12", .9)}
+     <div class="a" style="left:-60px;top:110px">${A({ mood: "sly", look: .6, w: 760, h: 760, rim: "#ffe14d", rim2: "#ff3d8b" })}</div>
+     ${bigTitle(560, 40, [["ТОП-5"], ["КРЕДИТОК", "#ffe14d"]], 128, "#fff", INK, 3)}${grain}`);
+} else if (V === "thumb3") {
+  P(`<div class="a" style="inset:0;background:radial-gradient(700px 520px at 65% 60%,#b6ff3a,#2fa84f 50%,#0b3d1a 100%)"></div>${rays("65%", "60%", "#fff", 28, .12)}
+     ${phone(40, 260, -10, "Бонус 2&nbsp;000&nbsp;₽", "ожидает начисления…", .85)}
+     <div class="a" style="left:500px;top:110px">${A({ mood: "angry", look: -.6, w: 760, h: 760, rim: "#ffe14d", rim2: "#ff3d8b" })}</div>
+     ${bigTitle(30, 30, [["БОНУС"], ["НЕ ПРИШЁЛ?!", "#ffe14d"]], 116, "#fff", INK, -4)}${grain}`);
+} else {
+  // кадр ролика: крупный план + предмет + подпись главы
+  P(`<div class="a" style="inset:0;background:radial-gradient(900px 700px at 30% 60%,#ff8a3d,#ff3d6b 50%,#5b0f6b 100%)"></div>${rays("30%", "60%", "#ffe14d", 32, .12)}
+     <div class="a" style="left:-40px;top:200px">${A({ mood: "grin", look: .7, w: 900, h: 900, rim: "#ffe14d", rim2: "#3be8ff" })}</div>
+     ${phone(1080, 190, 6, "+1&nbsp;000&nbsp;₽", "бонус новому клиенту", 1.2)}${coin(1500, 220)}${coin(1560, 330, .7)}${coin(1450, 760, .8)}
+     <div class="a nw" style="left:60px;top:60px;padding:12px 22px;background:${INK};color:#ffe14d;font:700 30px O;letter-spacing:.12em">ГЛАВА 1 · БАНК ПЛАТИТ ЗА ЗНАКОМСТВО</div>
+     ${tag(1240, 840, -6, "УСЛОВИЕ", "покупка от 100 ₽")}${grain}`);
+}
+document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 300))));
+</script>
+</body>
+</html>
