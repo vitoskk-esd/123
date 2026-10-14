@@ -233,3 +233,11 @@ engines — full list in `youtube/references/agent-skills.md`. For vertical 1080
   (`node -e "require('./timeline.js')"`) — a doubled `};` broke it once.
 - Anchors in `reel.html` must use words that exist in `SCRIPT`
   (`W()` throws otherwise); render stills right after editing the HTML.
+
+**Arbuzov reels (owner, 14.10).** Engine `reels/arb-kit/` (story.js storyboard → `build_arb.py` → `reel.html` → `make_reel.sh`), voice №7.
+Owner's path: «вяло» (slow push-ins only) → «слишком часто переходы» (a transition on every 1.4 s cut) → «используй этот скил» = the installed
+`motion-graphics` / `hyperframes-animation` skills. Load `hyperframes-animation` → `transitions/overview.md` before touching reel motion:
+one primary scene transition (push slide 0.35 s, outgoing and incoming move together) + 1–2 accents (zoom-through at the open and before the CTA);
+inside a phrase no cuts — multi-phase camera stations (wide → object → Arbuzov's face → object, 1.6–2.4 s, 0.55 s eased moves + drift);
+spring-pop entrances, stamps slam with shake, numbers as kinetic beat slam over the scene (coins only for ₽). Crisp flat look: bright
+gradients, hard offset shadows, tube limbs (`ArbuzHD tube:true`), no grain.
