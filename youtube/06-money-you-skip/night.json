@@ -1,9 +1,9 @@
 {
   "video": "06-money-you-skip",
   "title": "Деньги, которые тебе положены, а ты их не забираешь (2026)",
-  "stage": "script готов; превью выбрано; следующий шаг — голос Арбузова №7 и сцены в выбранном стиле, 720p на утверждение",
+  "stage": "720p собран 14.10 (out/final_720p.mp4, 12:36, −14 LUFS), отправлен владельцу на утверждение (сжатая копия out/video6_720p.mp4)",
   "voice": "characters/voice/arbuzov_voice.py (sergey LiveTTS → VC в тембр v1_sochny, проверка Whisper)",
-  "next": "владелец утверждает тему/текст → голос по фразам → сцены с Арбузовым в выбранном стиле → рендер 720p на утверждение",
+  "next": "после утверждения: bash ya_build6.sh w=1920 → out/final_1080p.mp4, отправка частями; вставить ссылку Telegram в описание и QR в сцену 6",
   "thumbnail": "thumbnail.jpg — «ТЕБЕ ДОЛЖНЫ» (characters/hd/pack.html ?v=t1), выбрано владельцем 14.10",
   "style": "стиль amo_test (characters/hd/arbuzhd.js): яркая бытовая сцена по теме + Арбузов в объёме; шапка/аватарка — characters/hd/out"
 }
