@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Арбузов — шапка, аватарка, превью</title>
+<!-- Владелец 14.10: стиль роликов — как amo_test (кухня с Арбузовым и превью «ТЕБЕ ДОЛЖНЫ»); «осталось придумать превью
+     для первого ролика, шапку и аватарку». Первый ролик канала «Арбузов» — №6 «Деньги, которые тебе положены».
+     ?v=banner (2560×1440) · avatar (800) · t1 · t2 · t3 (1280×720). -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow: hidden; background: #000; }
+  .a { position: absolute; } .nw { white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="R" style="position:relative;overflow:hidden"></div>
+<script src="arbuzhd.js"></script>
+<script>
+const V = new URLSearchParams(location.search).get("v") || "t1";
+const SZ = { banner: [2560, 1440], avatar: [800, 800] }[V] || [1280, 720];
+for (const el of [document.documentElement, document.body, document.getElementById("R")]) { el.style.width = SZ[0] + "px"; el.style.height = SZ[1] + "px"; }
+const R = document.getElementById("R"), P = (h) => R.insertAdjacentHTML("beforeend", h), A = (o) => ArbuzHD.svg(o);
+const INK = "#1e1717";
+const noise = (op) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${op} 0'/></filter><rect width='300' height='300' filter='url(#n)'/></svg>`)}")`;
+// ценник как в понравившемся превью: белый или жёлтый, наклон, тень
+const tag = (x, y, r, k, v, bg = "#fff", s = 1) => `<div class="a" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0;padding:14px 26px 16px;background:${bg === "#fff" ? "linear-gradient(135deg,#fff,#e9e9ee)" : "linear-gradient(135deg,#ffe066,#f2c230)"};border-radius:10px;box-shadow:0 16px 30px rgba(0,0,0,.4)">
+  <div class="nw" style="font:700 30px/1 O;color:${INK}">${k}</div><div class="nw" style="font:900 64px/1.05 Unb;letter-spacing:-.04em;color:${INK}">${v}</div></div>`;
+const title = (x, y, t, size, col = "#ff3b3b", sh = "#7a0f12", align = "left") => `<div class="a nw" style="left:${x}px;top:${y}px;${align === "center" ? "transform:translateX(-50%);" : ""}font:700 ${size}px/.95 O;color:${col};text-shadow:0 ${size * .045}px 0 ${sh},0 ${size * .1}px ${size * .18}px rgba(0,0,0,.5)">${t}</div>`;
+const vign = (s = .6) => `<div class="a" style="inset:0;background:radial-gradient(circle at 50% 55%,transparent 52%,rgba(0,0,0,${s}))"></div>`;
+const phone = (x, y, r, app, big, sub, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;width:300px;height:600px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0;border-radius:46px;background:#16161c;border:6px solid ${INK};box-shadow:0 30px 60px rgba(0,0,0,.5);padding:14px">
+  <div style="width:100%;height:100%;border-radius:32px;background:linear-gradient(180deg,#eaf3ff,#cfe0f5);position:relative;overflow:hidden">
+    <div class="a" style="left:14px;right:14px;top:70px;padding:18px;border-radius:22px;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.12)">
+      <div class="nw" style="font:700 18px I;color:#2fa84f">● ${app} · сейчас</div>
+      <div class="nw" style="font:900 40px/1.1 Unb;letter-spacing:-.03em;color:${INK};margin-top:10px">${big}</div>
+      <div style="font:700 18px/1.25 I;color:#6b7280;margin-top:6px">${sub}</div></div></div></div>`;
+const envelope = (x, y, r, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0">
+  <svg width="340" height="260" viewBox="0 0 340 260">
+    ${[0, 1, 2].map(k => `<rect x="${60 + k * 30}" y="${10 - k * 6}" width="200" height="110" rx="8" fill="${k % 2 ? "#e9a46a" : "#f2c49a"}" stroke="${INK}" stroke-width="5" transform="rotate(${-8 + k * 8} 160 60)"/><text x="${150 + k * 30}" y="${74 - k * 6}" text-anchor="middle" font-family="Unb" font-weight="900" font-size="40" fill="#8a3a14" transform="rotate(${-8 + k * 8} 160 60)">5000</text>`).join("")}
+    <path d="M10 90 H 330 V 250 H 10 Z" fill="#f4ead6" stroke="${INK}" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M10 90 L 170 190 L 330 90" fill="#e8dcc0" stroke="${INK}" stroke-width="7" stroke-linejoin="round"/>
+    <text x="170" y="236" text-anchor="middle" font-family="O" font-weight="700" font-size="30" fill="#c23b2f">ТЕБЕ</text></svg></div>`;
+
+if (V === "t1") {   // доработанное «ТЕБЕ ДОЛЖНЫ» (понравилось владельцу)
+  P(`<div class="a" style="inset:0;background:radial-gradient(760px 560px at 50% 70%,#3f7a2e,#1a3410 70%,#0e1d09)"></div><div class="a" style="inset:0;background:${noise(.32)}"></div>
+     ${title(640, 18, "ТЕБЕ ДОЛЖНЫ", 168, "#ff3b3b", "#7a0f12", "center")}
+     ${tag(40, 250, -12, "ВЫЧЕТ", "19 500 ₽", "#ffe066")}${tag(60, 480, 8, "БОНУС", "+1 000 ₽")}
+     ${tag(900, 230, 9, "КЭШБЭК", "5 %", "#ffe066")}${tag(930, 470, -8, "НА СЧЁТ", "15 %")}
+     <div class="a" style="left:340px;top:205px">${A({ mood: "shock", w: 600, h: 640, look: 0, rim: "#ffd27a" })}</div>${vign(.55)}`);
+} else if (V === "t2") {   // сцена на кухне: пуш «возврат налога»
+  P(`<img class="a" src="../hybrid/bg/_placeholder_kitchen.png" style="left:0;top:0;width:1280px;height:720px;object-fit:cover;filter:saturate(1.15) brightness(1.05)">
+     <div class="a" style="inset:0;background:linear-gradient(90deg,rgba(0,0,0,.65),rgba(0,0,0,.1) 55%,transparent)"></div>
+     <div class="a" style="left:390px;top:160px">${A({ mood: "shock", w: 560, h: 597, look: 18, rim: "#ffd27a" })}</div>
+     ${phone(900, 150, 10, "Налоговая", "+19 500 ₽", "возврат за учёбу", .85)}
+     ${title(40, 40, "ЗАБЕРИ", 150, "#fff", "#1e1717")}${title(40, 180, "СВОЁ", 150, "#ff3b3b", "#7a0f12")}
+     ${tag(40, 380, -6, "ДЕНЬГИ, О КОТОРЫХ", "ты не знал", "#ffe066", .8)}${vign(.45)}`);
+} else if (V === "t3") {   // конверт с деньгами + Арбузов с ухмылкой
+  P(`<div class="a" style="inset:0;background:radial-gradient(760px 560px at 62% 62%,#ff9a3d,#e2283f 60%,#6e0c19)"></div><div class="a" style="inset:0;background:${noise(.3)}"></div>
+     <div class="a" style="left:560px;top:150px">${A({ mood: "smirk", w: 620, h: 661, look: -14, rim: "#ffe066" })}</div>
+     ${envelope(930, 470, 10, .95)}
+     ${title(36, 40, "6 ДЕНЕГ,", 128, "#fff", "#1e1717")}${title(36, 160, "КОТОРЫЕ", 128, "#ffe066", "#1e1717")}${title(36, 280, "ТЫ НЕ", 128, "#fff", "#1e1717")}${title(36, 400, "ЗАБИРАЕШЬ", 128, "#fff", "#1e1717")}${vign(.45)}`);
+} else if (V === "avatar") {
+  P(`<div class="a" style="inset:0;background:radial-gradient(circle at 50% 45%,#ff6a4a,#e2283f 55%,#7a0f1e)"></div><div class="a" style="inset:0;background:${noise(.28)}"></div>
+     <div class="a" style="left:55px;top:40px">${A({ mood: "smirk", w: 690, h: 736, look: 12, rim: "#ffe066" })}</div>`);
+} else {   // шапка: та самая кухня (понравилась владельцу), Арбузов за столом с телефоном, название на стене
+  const oil = `repeating-conic-gradient(#d9493f 0 25%,#f3e9d8 0 50%) 0 0/60px 60px`;
+  P(`<img class="a" src="../hybrid/bg/_placeholder_kitchen.png" style="left:0;top:-230px;width:2560px;height:1440px;filter:saturate(1.15) brightness(1.08)">
+     <div class="a" style="left:0;top:0;width:1500px;height:1440px;background:linear-gradient(90deg,rgba(20,10,8,.7),rgba(20,10,8,.35) 70%,transparent)"></div>
+     <div class="a" style="left:1300px;top:470px">${A({ mood: "smirk", w: 520, h: 555, look: 16, rim: "#ffd27a" })}</div>
+     ${phone(1720, 600, 12, "Банк", "+1 000 ₽", "бонус новому клиенту", .62)}
+     <div class="a" style="left:0;right:0;top:905px;bottom:0;background:${oil};box-shadow:0 -10px 0 #2b1f1a"></div>
+     <div class="a" style="left:0;right:0;top:905px;bottom:0;background:linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.05) 120px,rgba(0,0,0,.55))"></div>
+     ${title(540, 560, "АРБУЗОВ", 190, "#ff3b3b", "#7a0f12")}
+     <div class="a nw" style="left:546px;top:770px;font:700 40px O;letter-spacing:.06em;color:#fff;text-shadow:0 4px 12px rgba(0,0,0,.7)">ЗАБИРАЮ БОНУСЫ БАНКОВ — ЗАКОННО</div>
+     ${tag(1040, 300, -8, "ВЫЧЕТ", "19 500 ₽", "#ffe066", .8)}${vign(.45)}`);
+}
+document.fonts.ready.then(() => Promise.all([...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))))
+  .then(() => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { window.__ready = true; }, 300))));
+</script>
+</body>
+</html>
