@@ -72,7 +72,9 @@ const envelope = (x, y, r, label, glow, s = 1) => `<div class="a" style="left:${
 const card = (x, y, r, c1, c2, s = 1) => `<div class="a" style="left:${x}px;top:${y}px;width:330px;height:208px;transform:rotate(${r}deg) scale(${s});transform-origin:0 0;border-radius:22px;border:5px solid ${OL};background:linear-gradient(135deg,${c1},${c2});box-shadow:0 20px 34px rgba(0,0,0,.4);overflow:hidden">
   <div class="a" style="inset:0;background:linear-gradient(115deg,rgba(255,255,255,.35),transparent 40%)"></div><div class="a" style="left:28px;top:64px;width:56px;height:42px;border-radius:9px;background:linear-gradient(135deg,#fff3b0,#d9a632);border:3px solid ${OL}"></div>
   <div class="a nw" style="left:28px;bottom:26px;font:700 22px I;letter-spacing:.14em;color:rgba(255,255,255,.95)">2200 •••• 2026</div></div>`;
-const hero = (x, y, w, mood, look = 0, rim = "#ffd27a") => `<div class="a" style="left:${x}px;top:${y}px;filter:drop-shadow(0 30px 30px rgba(0,0,0,.35))">${ArbuzHD.svg({ mood, look, rim, w, h: w * 640 / 600 })}</div>`;
+// x, y, w — рамка головы (как раньше, 600×640); руки и ноги дорисовываются вокруг (владелец 14.10: «сделаем руки и ноги»)
+const hero = (x, y, w, mood, look = 0, rim = "#ffd27a", arm = "down", legs = true) => { const k = w / 600;
+  return `<div class="a" style="left:${x - 130 * k}px;top:${y + 50 * k - (legs ? 55 : 0)}px;filter:drop-shadow(0 30px 30px rgba(0,0,0,.35))">${ArbuzHD.svg({ mood, look, rim, limbs: true, arm, w: 860 * k, h: 820 * k }).replace(legs ? "@@" : /<path d="M232 618[\s\S]*?stroke="#ff3b4f" stroke-width="8"\/>[\s\S]*?stroke="#ff3b4f" stroke-width="8"\/>/, "")}</div>`; };
 const hand = (x, y) => `<div class="a" style="left:${x - 30}px;top:${y - 30}px;width:60px;height:60px;border-radius:50%;background:#fff;border:6px solid ${OL}"></div>`;
 const arm = (d, w = 18) => `<svg class="a" style="left:0;top:0" width="1920" height="1080"><path d="${d}" fill="none" ${st(w)}/></svg>`;
 const label = (n, t, time) => `<div class="a" style="left:0;right:0;bottom:0;padding:16px 40px;background:rgba(10,8,12,.86);display:flex;gap:24px;align-items:center;font:700 26px I;color:#fff">
@@ -83,8 +85,8 @@ const grain = `<div class="a" style="inset:0;background:${noise(.22)};mix-blend-
 const S = {
   1: () => {   // хук: та же кухня, что понравилась
     P(`<img class="a" src="../../characters/hybrid/bg/_placeholder_kitchen.png" style="left:0;top:0;width:1920px;height:1080px">`);
-    P(hero(600, 150, 700, "smirk", 16) + arm("M1110 640 Q 1150 700 1166 740") + arm("M1150 560 Q 1260 560 1336 720"));
-    P(phone(1250, 690, 10, push("Налоговая", "+19 500 ₽", "возврат за учёбу"), .62) + hand(1336, 730));
+    P(phone(1240, 400, 10, push("Налоговая", "+19 500 ₽", "возврат за учёбу"), .62));
+    P(hero(600, 150, 700, "smirk", 16, "#ffd27a", "phone", false));
     P(bubble(120, 380, "Тебе уже должны деньги. Ты просто их не забираешь.", 520));
     P(label(1, "Хук: Арбузов на кухне, пуш «+19 500 ₽». Фраза: «Пока ты ищешь подработку, у тебя под носом лежат деньги…»", "0:00–0:30"));
   },
@@ -94,7 +96,7 @@ const S = {
       <rect x="80" y="520" width="1060" height="260" rx="14" fill="#f4f1ea" ${st(7)}/><rect x="80" y="500" width="1060" height="40" rx="10" fill="#d7d2c6" ${st(6)}/>
       <rect x="140" y="230" width="140" height="260" rx="12" fill="#2a3a48" ${st(6)}/><rect x="160" y="260" width="100" height="70" rx="6" fill="#7fd6ff"/><text x="210" y="306" text-anchor="middle" font-family="O" font-weight="700" font-size="30" fill="#0b2a3a">А012</text><rect x="175" y="360" width="70" height="14" rx="4" fill="#ffe9a8"/>
       ${floor(780, "#8a7a6a")}${lampLight}`));
-    P(hero(560, 210, 560, "happy", 0));
+    P(hero(560, 210, 560, "happy", 0, "#ffd27a", "wave"));
     P(card(1000, 380, -10, "#ffcf3f", "#e9a400", .8) + card(1150, 470, 8, "#ff5a4a", "#c8140b", .8));
     P(tag(980, 230, -8, "БОНУС НОВИЧКУ", "+1 000 ₽", true, .8) + tag(1300, 330, 7, "БОНУС НОВИЧКУ", "+2 000 ₽", false, .8));
     P(chapter(1, "БАНК ПЛАТИТ ЗА ЗНАКОМСТВО"));
@@ -105,7 +107,7 @@ const S = {
       ${floor(820)}${lampLight}
       <g transform="translate(330 300)"><path d="M0 0 H 260 V 30 Q 260 160 150 230 Q 260 300 260 430 V 460 H 0 V 430 Q 0 300 110 230 Q 0 160 0 30 Z" fill="#e8f4ff" fill-opacity=".7" ${st(9)}/><path d="M40 60 H 220 Q 210 150 130 200 Q 50 150 40 60 Z" fill="#e9b45a"/><path d="M60 420 Q 130 330 200 420 Z" fill="#e9b45a"/><rect x="-20" y="-24" width="300" height="30" rx="8" fill="#8a5a2b" ${st(6)}/><rect x="-20" y="454" width="300" height="30" rx="8" fill="#8a5a2b" ${st(6)}/></g>
       <text x="460" y="880" text-anchor="middle" font-family="Unb" font-weight="900" font-size="64" fill="${OL}">180 ДНЕЙ</text>`));
-    P(hero(800, 230, 560, "shock", -10));
+    P(hero(800, 230, 560, "shock", -10, "#ffd27a", "shrug"));
     P(bubble(1180, 640, "Я для вас новый клиент?", 470, "left"));
     P(label(3, "Глава 1: ловушка «новый клиент» — песочные часы 180 дней и брошенная анкета. Совет: спроси поддержку до оформления.", "1:10–1:50"));
   },
@@ -114,7 +116,7 @@ const S = {
       <rect x="60" y="220" width="420" height="300" rx="10" fill="#2b2050" ${st(6)}/>${[0, 1, 2].map(k => `<rect x="${90 + k * 130}" y="250" width="110" height="160" fill="${["#ff6b78", "#7fd6ff", "#ffe066"][k]}" opacity=".85"/>`).join("")}
       <path d="M0 760 Q 960 700 1920 760 V 1080 H 0 Z" fill="#4a3a6e"/><rect x="0" y="800" width="900" height="280" rx="30" fill="#ff8a5b" ${st(7)}/><rect x="20" y="760" width="860" height="80" rx="30" fill="#ffa57a" ${st(6)}/>
       ${lampLight}`));
-    P(hero(260, 260, 560, "smirk", 18));
+    P(hero(260, 220, 560, "smirk", 18, "#ffd27a", "phone"));
     P(phone(860, 220, -6, `<div class="a" style="left:16px;right:16px;top:60px;font:700 20px I;color:#6b7280">Чат «Общага 4 этаж»</div>
       <div class="a" style="left:16px;right:60px;top:110px;padding:14px;border-radius:18px;background:#fff;font:700 22px/1.25 I;color:${OL}">Кто хотел карту? Вот ссылка 👇 <span style="color:#2f5bea">bank.ru/ref/arbuz</span></div>
       <div class="a" style="left:60px;right:16px;top:270px;padding:14px;border-radius:18px;background:#d9f7c8;font:700 22px/1.25 I;color:${OL}">О, как раз собирался!</div>`, .95));
@@ -129,14 +131,14 @@ const S = {
       <rect y="900" width="1920" height="180" fill="#0d0b12"/>
       <!-- тень в капюшоне -->
       <g transform="translate(1340 320)"><path d="M0 560 Q -30 240 120 160 Q 270 240 240 560 Z" fill="#0a0910" ${st(6)}/><path d="M40 170 Q 120 40 200 170 Q 200 260 120 270 Q 40 260 40 170 Z" fill="#0a0910" ${st(6)}/><circle cx="96" cy="210" r="8" fill="#ff3b3b"/><circle cx="144" cy="210" r="8" fill="#ff3b3b"/></g>`));
-    P(hero(260, 270, 600, "smirk", 30, "#ff6b6b"));
+    P(hero(260, 200, 600, "smirk", 30, "#ff6b6b", "shrug"));
     P(bubble(1160, 170, "Дай карту на недельку — 5 000 ₽", 470, "right"));
     P(`<div class="a nw" style="left:820px;top:640px;transform:rotate(-10deg);padding:10px 26px;border:10px solid #ff3b3b;color:#ff3b3b;font:700 72px O;letter-spacing:.06em">ДО 3 ЛЕТ</div>`);
     P(label(5, "Глава 2: анти-дроп — «дай карту за процент» = статья (передача карты за вознаграждение — до 3 лет). Арбузов отказывается.", "4:00–4:30"));
   },
   6: () => {   // реклама своего Telegram посередине (как у амоБлога)
     P(svg(`${wall("#7fd6ff", "#2f8fd8")}${Array.from({ length: 30 }, (_, k) => `<path d="M${960 + Math.cos(k / 30 * 6.28) * 2000} ${540 + Math.sin(k / 30 * 6.28) * 2000} L 960 540 L ${960 + Math.cos((k + .5) / 30 * 6.28) * 2000} ${540 + Math.sin((k + .5) / 30 * 6.28) * 2000} Z" fill="#fff" opacity=".1"/>`).join("")}`));
-    P(hero(220, 260, 600, "happy", 20, "#fff2a8"));
+    P(hero(220, 190, 600, "happy", 20, "#fff2a8", "point"));
     P(phone(900, 170, 6, `<div class="a" style="left:0;right:0;top:0;height:120px;background:#2aa3e0"></div><div class="a" style="left:20px;top:56px;width:60px;height:60px;border-radius:50%;background:#ff3b3b;border:4px solid #fff;overflow:hidden">${ArbuzHD.svg({ mood: "smirk", w: 60, h: 64 })}</div>
       <div class="a nw" style="left:94px;top:62px;font:900 22px Unb;color:#fff">Арбузов</div><div class="a nw" style="left:94px;top:92px;font:700 15px I;color:#d9f0ff">канал · акции банков</div>
       <div class="a" style="left:16px;right:16px;top:150px;padding:14px;border-radius:16px;background:#fff;font:700 19px/1.3 I;color:${OL}">Свежие бонусы этой недели: <b>5 акций</b>, сроки и условия — в одном посте</div>
@@ -152,7 +154,7 @@ const S = {
     P(card(240, 600, -4, "#2b2b35", "#0d0d12", 1.1));
     P(`<div class="a" style="left:300px;top:520px;font:900 70px Unb;color:#fff;text-shadow:0 4px 0 ${OL}">z z Z</div>`);
     [[260, 560, -8], [400, 580, 10]].forEach(([x, y, r]) => P(`<div class="a" style="left:${x}px;top:${y}px;width:200px;height:96px;transform:rotate(${r}deg);border-radius:10px;background:linear-gradient(135deg,#f6c49a,#e48a5a);border:5px solid ${OL};display:flex;align-items:center;justify-content:center;font:900 40px Unb;color:#8a3a14">5000</div>`));
-    P(hero(820, 260, 520, "smirk", -16));
+    P(hero(820, 260, 520, "smirk", -16, "#ffd27a", "point"));
     P(`<div class="a" style="left:1320px;top:560px;width:300px;height:300px;border-radius:40px 40px 60px 60px;background:linear-gradient(180deg,rgba(200,240,255,.6),rgba(120,200,255,.5));border:7px solid ${OL}"><div class="a" style="left:20px;right:20px;bottom:20px;height:150px;border-radius:30px;background:repeating-linear-gradient(0deg,#f0b72f 0 18px,#ffd84d 18px 36px);border:4px solid ${OL}"></div></div>`);
     P(tag(1250, 380, -8, "НАКОПИТЕЛЬНЫЙ", "≈15 %", true, .85) + tag(1560, 870, 6, "ЗА 3 МЕС · ПРИМЕР", "+1 162 ₽", false, .7));
     P(chapter(3, "ТВОИ ДЕНЬГИ СПЯТ"));
@@ -162,7 +164,7 @@ const S = {
     P(svg(`${wall("#ffe6a8", "#ffc46b")}${[0, 1, 2, 3].map(r => `<rect x="80" y="${150 + r * 140}" width="1760" height="16" fill="#8a5a2b"/>${Array.from({ length: 22 }, (_, k) => `<rect x="${100 + k * 78}" y="${70 + r * 140}" width="56" height="80" rx="6" fill="${["#ff6b78", "#7fd6ff", "#9be26b", "#ffd84d", "#c79bff"][(k + r) % 5]}" ${st(3)}/>`).join("")}`).join("")}
       <rect x="0" y="700" width="1920" height="380" fill="#3a3f4a"/><rect x="0" y="690" width="1920" height="30" fill="#2b2f38"/>${table(800, "tiles")}
       <rect x="1220" y="560" width="200" height="240" rx="20" fill="#2b2b35" ${st(6)}/><rect x="1240" y="580" width="160" height="90" rx="8" fill="#9be26b"/><text x="1320" y="640" text-anchor="middle" font-family="O" font-weight="700" font-size="40" fill="#0b2a0b">QR</text>${lampLight}`));
-    P(hero(440, 250, 560, "shock", 20));
+    P(hero(440, 230, 560, "shock", 20, "#ffd27a", "shrug"));
     [[1000, 360, "годен до 31.10"], [1120, 470, "сгорит"], [1500, 330, "12 мес"]].forEach(([x, y, t]) => P(`<div class="a" style="left:${x}px;top:${y}px">${coin(0, 0, 1.2).replace('class="a"', 'class="a" ').replace(/left:0px;top:0px;/, "position:relative;")}<div class="nw" style="margin-top:6px;padding:4px 10px;background:#ff3b3b;color:#fff;font:700 22px O;border-radius:6px;transform:rotate(-4deg)">${t}</div></div>`));
     P(`<div class="a nw" style="left:1180px;top:840px;transform:rotate(-6deg);padding:8px 20px;border:8px solid #ff3b3b;color:#ff3b3b;font:700 52px O;background:rgba(255,255,255,.85)">QR — БЕЗ КЭШБЭКА</div>`);
     P(chapter(4, "КЭШБЭК С ДАТОЙ ПОРЧИ"));
@@ -171,7 +173,7 @@ const S = {
   9: () => {   // глава 5: налоговая — три двери
     P(svg(`${wall("#d9e6d0", "#a9c49a")}${[0, 1, 2].map(k => { const x = 260 + k * 520; return `<rect x="${x}" y="200" width="300" height="600" rx="10" fill="${["#c46a3c", "#3f6fb0", "#5aa86a"][k]}" ${st(7)}/><circle cx="${x + 250}" cy="520" r="16" fill="#ffd84d" ${st(4)}/><rect x="${x + 40}" y="150" width="220" height="60" rx="8" fill="#fff" ${st(5)}/><text x="${x + 150}" y="194" text-anchor="middle" font-family="O" font-weight="700" font-size="40" fill="${OL}">${["УЧЁБА", "СПОРТ", "ВРАЧ"][k]}</text>`; }).join("")}
       ${floor(800, "#b9a98a")}${lampLight}`));
-    P(hero(700, 360, 520, "happy", 0));
+    P(hero(700, 280, 520, "happy", 0, "#ffd27a", "point"));
     P(`<div class="a" style="left:1360px;top:250px;width:440px;padding:24px;border-radius:26px;background:#2b2f38;border:6px solid ${OL};box-shadow:0 24px 40px rgba(0,0,0,.4)">
       <div style="padding:16px;border-radius:12px;background:#b9f5a3;font:900 46px/1.1 Unb;color:#0b2a0b;text-align:right">19 500 ₽</div>
       <div style="margin-top:14px;font:700 28px I;color:#fff">150 000 × 13 % = 19 500</div></div>`);
@@ -183,21 +185,21 @@ const S = {
     P(svg(`<rect width="1920" height="1080" fill="#2a1450"/>${Array.from({ length: 24 }, (_, k) => `<circle cx="960" cy="540" r="${60 + k * 60}" fill="none" stroke="${k % 2 ? "#7a3cff" : "#ff5ab4"}" stroke-width="20" opacity="${.5 - k * .018}"/>`).join("")}`));
     [[160, 160, -14, "2023"], [1440, 150, 12, "2024"], [1500, 640, -8, "2025"]].forEach(([x, y, r, yr]) => P(`<div class="a" style="left:${x}px;top:${y}px;width:260px;transform:rotate(${r}deg);border:6px solid ${OL};border-radius:10px;overflow:hidden;box-shadow:0 20px 30px rgba(0,0,0,.4)"><div style="background:#c23b2f;padding:10px;font:700 48px O;color:#fff;text-align:center">${yr}</div><div style="background:#efe7d3;height:150px;background-image:linear-gradient(#bfb6a0 2px,transparent 2px),linear-gradient(90deg,#bfb6a0 2px,transparent 2px);background-size:40px 40px"></div></div>`));
     P(`<div class="a" style="left:560px;top:250px;width:800px;height:640px;border-radius:50%;background:radial-gradient(circle,#e9eef5,#9aa6b8);border:10px solid ${OL};box-shadow:0 0 80px #ff5ab4"></div><div class="a" style="left:690px;top:330px;width:540px;height:480px;border-radius:50%;background:radial-gradient(circle,#2a1450,#7a3cff);border:8px solid ${OL}"></div>`);
-    P(hero(720, 330, 480, "shock", 0, "#ff5ab4"));
+    P(hero(720, 330, 480, "shock", 0, "#ff5ab4", "up"));
     P(envelope(140, 560, -10, "ВЫЧЕТ 2023", true, .9) + envelope(300, 760, 8, "ВЫЧЕТ 2024", true, .8));
     P(chapter(6, "ДЕНЬГИ ИЗ ПРОШЛОГО"));
     P(label(10, "Глава 6: Арбузов в «машине времени» из барабана стиральной машины, календари 2023–2025 и конверты — вычет за 3 прошлых года.", "11:00–12:30"));
   },
   11: () => {  // итог: конверты на столе
     P(`<img class="a" src="../../characters/hybrid/bg/_placeholder_kitchen.png" style="left:0;top:0;width:1920px;height:1080px;filter:brightness(.8)">`);
-    P(hero(650, 120, 620, "happy", 0));
+    P(hero(650, 120, 620, "happy", 0, "#ffd27a", "up", false));
     P(envelope(120, 760, -8, "БОНУСЫ", true, .9) + envelope(420, 790, 4, "НАКОПИТЕЛЬНЫЙ", true, .9) + envelope(1180, 780, -4, "ВЫЧЕТ", true, .9) + envelope(1480, 760, 9, "КЭШБЭК", false, .9));
     P(`<div class="a" style="left:60px;top:60px;padding:16px 28px;background:#fff;border:6px solid ${OL};border-radius:20px;font:700 40px/1.3 O;color:${OL};transform:rotate(-2deg)">1. НОВИЧКУ ПЛАТЯТ<br>2. ДЕНЬГИ НЕ ДОЛЖНЫ СПАТЬ<br>3. НАЛОГОВАЯ ВЕРНЁТ</div>`);
     P(label(11, "Итог: 3 пункта, конверты на столе загораются по очереди. «Сохрани ролик и отправь другу».", "12:30–13:10"));
   },
   12: () => {  // финал
     P(svg(`${wall("#ff8a5b", "#e2283f")}${Array.from({ length: 30 }, (_, k) => `<path d="M${960 + Math.cos(k / 30 * 6.28) * 2000} ${540 + Math.sin(k / 30 * 6.28) * 2000} L 960 600 L ${960 + Math.cos((k + .5) / 30 * 6.28) * 2000} ${540 + Math.sin((k + .5) / 30 * 6.28) * 2000} Z" fill="#ffe066" opacity=".12"/>`).join("")}`));
-    P(hero(650, 240, 620, "smirk", 0, "#ffe066"));
+    P(hero(650, 170, 620, "smirk", 0, "#ffe066", "wave"));
     P(`<div class="a nw" style="left:960px;top:60px;transform:translateX(-50%);font:700 150px/1 O;color:#fff;text-shadow:0 8px 0 #7a0f12,0 16px 30px rgba(0,0,0,.4)">ЗАБИРАЙ СВОЁ</div>`);
     P(coin(380, 420, 1.4) + coin(1420, 380, 1.2) + coin(1500, 640, .9) + coin(300, 700, 1));
     P(label(12, "Финал: «Я Арбузов. Забирай своё». Ссылка на Telegram в описании, концовка 5 с под рекомендации.", "13:10–13:30"));

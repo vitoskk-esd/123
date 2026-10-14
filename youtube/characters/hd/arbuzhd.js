@@ -1,5 +1,6 @@
 /* Арбузов в выбранном стиле роликов (владелец 14.10: «рисовка которую ты кидал, она мне очень понравилась. Такую будем использовать в роликах» — amo_test: кухня и превью «ТЕБЕ ДОЛЖНЫ»).
-   ArbuzHD.svg({ mood: smirk|shock|happy, look, rim, w, h }) — голова с объёмом, полосами корки, контровым светом. */
+   ArbuzHD.svg({ mood: smirk|shock|happy, look, rim, w, h, limbs, arm }) — с объёмом, полосами корки, контровым светом;
+   limbs: true — руки (белые перчатки) и ноги (кеды), arm: down|point|up|phone|wave|shrug. */
 (function () {
 const OL = "#1e1717";
 const st = (w = 6) => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
@@ -18,7 +19,23 @@ function arbuzHD(o = {}) {
   const mouth = mood === "shock" ? `<ellipse cx="300" cy="478" rx="22" ry="30" fill="#5c1420" ${st(6)}/><ellipse cx="300" cy="490" rx="12" ry="9" fill="#d9536a"/>`
     : mood === "happy" ? `<path d="M250 456 Q 300 520 350 456 Z" fill="#5c1420" ${st(6)}/><path d="M270 482 Q 300 470 330 482 Q 300 506 270 482" fill="#e46b80"/>`
     : `<path d="M262 470 Q 306 494 346 458" fill="none" ${st(8)}/>`;
-  return `<svg viewBox="0 0 600 640" width="${o.w || 600}" height="${o.h || 640}">
+  // руки и ноги (владелец 14.10: «давай ему сделаем руки и ноги»): o.limbs = true, o.arm = down | point | up | phone | wave | shrug
+  const L = !!o.limbs, arm = o.arm || "down", lim = (d, w = 24) => `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const glove = (x, y, r = 34) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" ${st(7)}/><path d="M${x - r * .45} ${y - r * .25} Q ${x} ${y - r * .55} ${x + r * .45} ${y - r * .25}" fill="none" stroke="#c9ccd8" stroke-width="5"/>`;
+  const shoe = (x, y, f) => `<path d="M${x - 58 * f} ${y + 26} Q ${x - 62 * f} ${y - 18} ${x - 6 * f} ${y - 20} Q ${x + 52 * f} ${y - 20} ${x + 66 * f} ${y + 26} Z" fill="#f6f6f6" ${st(7)}/><path d="M${x - 54 * f} ${y + 10} H ${x + 62 * f}" stroke="#ff3b4f" stroke-width="8"/>`;
+  const ARMS = {
+    down:  [lim("M58 430 Q -20 520 6 618") + glove(6, 628), lim("M542 430 Q 620 520 594 618") + glove(594, 628)],
+    point: [lim("M58 430 Q -20 520 6 618") + glove(6, 628), lim("M542 420 Q 650 340 668 228") + glove(670, 216)],
+    up:    [lim("M58 420 Q -50 330 -40 206") + glove(-42, 194), lim("M542 420 Q 650 330 640 206") + glove(642, 194)],
+    phone: [lim("M58 430 Q -20 520 6 618") + glove(6, 628), lim("M542 440 Q 650 470 600 340") + glove(600, 328)],
+    wave:  [lim("M58 430 Q -20 520 6 618") + glove(6, 628), lim("M542 420 Q 660 360 690 250") + glove(694, 236)],
+    shrug: [lim("M58 430 Q -40 430 -70 330") + glove(-74, 318), lim("M542 430 Q 640 430 670 330") + glove(674, 318)],
+  }[arm];
+  const legs = L ? lim("M232 618 Q 222 700 214 788", 26) + lim("M368 618 Q 378 700 386 788", 26) + shoe(206, 806, -1) + shoe(394, 806, 1) : "";
+  const shadow = L ? `<ellipse cx="300" cy="836" rx="240" ry="26" fill="#000" opacity=".22"/>` : "";
+  const VB = L ? [-130, 50, 860, 820] : [0, 0, 600, 640];
+  const W = o.w || VB[2], H = o.h || Math.round(W * VB[3] / VB[2]);
+  return `<svg viewBox="${VB.join(" ")}" width="${W}" height="${H}">${shadow}${legs}
   <defs>
     <radialGradient id="rind${u}" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#5fd77a"/><stop offset=".45" stop-color="#2a9a46"/><stop offset="1" stop-color="#0f4a22"/></radialGradient>
     <radialGradient id="face${u}" gradientUnits="userSpaceOnUse" cx="268" cy="362" r="215"><stop offset="0" stop-color="#ff9aa3"/><stop offset=".6" stop-color="#f2606f"/><stop offset="1" stop-color="#c8394b"/></radialGradient>
@@ -43,8 +60,9 @@ function arbuzHD(o = {}) {
   ${[[-95, -50], [-30, -95], [55, -80], [110, -30], [-118, 30], [105, 50], [-60, 80]].map(([x, y]) => `<ellipse cx="${300 + x}" cy="${410 + y}" rx="7" ry="12" fill="#3a1414" opacity=".6" transform="rotate(${x / 3} ${300 + x} ${410 + y})"/>`).join("")}
   <ellipse cx="190" cy="452" rx="26" ry="14" fill="#ff3d5a" opacity=".45" filter="url(#soft${u})"/><ellipse cx="410" cy="452" rx="26" ry="14" fill="#ff3d5a" opacity=".45" filter="url(#soft${u})"/>
   ${eye(248)}${eye(352)}${brows}${mouth}
+  ${L ? ARMS[0] + ARMS[1] : ""}
   </svg>`;
 }
 
-(typeof window !== "undefined" ? window : globalThis).ArbuzHD = { svg: arbuzHD };
+(typeof window !== "undefined" ? window : globalThis).ArbuzHD = { svg: arbuzHD, ratioFull: 820 / 860 };
 })();
