@@ -50,7 +50,7 @@ const A9 = (() => {
 
   /* ---------- Арбузов ---------- */
   // x, y — левый верхний угол рамки с руками и ногами; w — её ширина (высота = w × 820/860)
-  const hero = (x, y, w, o = {}) => div(x, y, `width:${w}px;height:${w * 820 / 860}px;filter:drop-shadow(0 30px 30px rgba(0,0,0,.35))`,
+  const hero = (x, y, w, o = {}) => window.HERO9 ? window.HERO9(x, y, w, o) : div(x, y, `width:${w}px;height:${w * 820 / 860}px;filter:drop-shadow(0 30px 30px rgba(0,0,0,.35))`,
     ArbuzHD.svg({ mood: o.mood || "smirk", look: o.look || 0, rim: o.rim || "#ffd27a", limbs: true, arm: o.arm || "down", w, h: w * 820 / 860, mouth: o.mouth, blink: o.blink }));
   const shadow = (cx, cy, rx = 220) => svg(`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${rx * .14}" fill="#000" opacity=".28"/>`);
   const glove = (x, y, r = 0, s = 1) => div(x, y, `width:${70 * s}px;height:${70 * s}px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#e6e6ee);border:${6 * s}px solid ${OL};transform:rotate(${r}deg);box-shadow:0 8px 14px rgba(0,0,0,.25)`);

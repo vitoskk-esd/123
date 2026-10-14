@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс с Арбузовым</title>
+<!-- Рилс 9:16 по утверждённой раскадровке (story.js) и таймингу (timeline.js, build_arb.py). ?r=<папка рилса>.
+     Владелец 14.10: «не было застоев в кадрах несколько секунд, кадры должны часто меняться» — план меняется каждые ~1,8 с
+     (общий → крупно предмет → крупно Арбузов → другой предмет), внутри плана камера всё время едет, предметы появляются по очереди
+     и чуть покачиваются, у Арбузова рот под голос и моргание (characters/rig/rig.js). -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../../youtube/kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../../youtube/kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  .a { position: absolute; } .nw { white-space: nowrap; }
+  svg { display: block; }
+  .layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; display: none; transform-origin: 0 0; }
+  .it { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 960px; }
+  .heroSlot { transform-origin: 50% 90%; }
+</style>
+</head>
+<body>
+<div id="stage" class="a" style="inset:0;overflow:hidden"><div id="layers"></div><div id="cap" class="a" style="inset:0"></div><div id="fx" class="a" style="inset:0;pointer-events:none"></div></div>
+<script src="../../youtube/characters/hd/arbuzhd.js"></script>
+<script src="../../youtube/characters/rig/rig.js"></script>
+<script src="arb9.js"></script>
+<script>
+const REEL = new URLSearchParams(location.search).get("r");
+const load = (src) => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+const ease = (x) => { x = Math.min(1, Math.max(0, x)); return 1 - Math.pow(1 - x, 3); };
+const back = (x) => { x = Math.min(1, Math.max(0, x)); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const OL = A9.OL;
+// фоны для крупных планов Арбузова (по кругу, яркие)
+const REACT_BG = [["#ffd27a", "#f08a3c"], ["#9be26b", "#2f8a3c"], ["#7fd6ff", "#2f8fd8"], ["#ff8a8a", "#c8142b"], ["#c79bff", "#7a3cff"]];
+
+Promise.all([load(`../${REEL}/story.js`), load(`../${REEL}/timeline.js`)]).then(() => {
+  const L = document.getElementById("layers"), FR = [];
+  STORY.frames.forEach((fr, i) => {
+    A9.reseed(i + 1);
+    const heroes = [];
+    window.HERO9 = (x, y, w, o) => { heroes.push({ x, y, w, o }); return `<div class="a heroSlot" data-h="${heroes.length - 1}" style="left:${x}px;top:${y}px;width:${w}px;height:${w * 820 / 860}px;filter:drop-shadow(0 30px 30px rgba(0,0,0,.35))"></div>`; };
+    const el = document.createElement("div"); el.className = "layer"; L.appendChild(el);
+    const tmp = document.createElement("div"); tmp.innerHTML = fr.build(A9);
+    const items = [...tmp.children].map((c, k) => { const d = document.createElement("div"); d.className = "it"; d.appendChild(c); el.appendChild(d); return { d, bg: k === 0, hero: !!c.classList.contains("heroSlot") }; });
+    // крупный план реакции: тот же Арбузов на ярком фоне, лицо на весь кадр
+    const re = document.createElement("div"); re.className = "layer"; L.appendChild(re);
+    const [c1, c2] = REACT_BG[i % REACT_BG.length];
+    window.HERO9 = null; re.innerHTML = A9.BG.burst(c1, c2, "#fff", 900);
+    const rslot = document.createElement("div"); rslot.className = "a heroSlot"; rslot.style.cssText = "left:-330px;top:330px;width:1740px;height:1660px;filter:drop-shadow(0 40px 40px rgba(0,0,0,.35))"; re.appendChild(rslot);
+    FR.push({ el, items, heroes, slots: [...el.querySelectorAll(".heroSlot")], re, rslot, look: heroes[0] ? heroes[0].o.look || 0 : 0 });
+  });
+  window.HERO9 = null;
+  document.getElementById("fx").innerHTML = A9.vign(.4) + A9.grain;
+  // рамки предметов для крупных планов (в координатах кадра): самый крупный предмет и второй по размеру
+  FR.forEach((f) => {
+    f.el.style.display = "block";
+    const boxes = f.items.filter(x => !x.bg && !x.hero).map(x => { const r = x.d.firstElementChild.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, a: r.width * r.height }; })
+      .filter(b => b.w > 80 && b.h > 80 && b.w < 1060 && b.h < 1880).sort((a, b) => b.a - a.a);
+    const h = f.heroes[0], face = h ? { x: h.x + h.w * .28, y: h.y + h.w * .2, w: h.w * .44, h: h.w * .5 } : null;
+    f.focus = [boxes[0] || face || { x: 240, y: 400, w: 600, h: 600 }, boxes[1] || face || boxes[0] || { x: 240, y: 700, w: 600, h: 600 }];
+    f.el.style.display = "none";
+  });
+  const cam = (b, zmax = 1.8) => { const z = Math.max(1.15, Math.min(zmax, 780 / b.w, 1150 / b.h)); const cx = Math.min(Math.max(b.x + b.w / 2, 540 / z), 1080 - 540 / z), cy = Math.min(Math.max(b.y + b.h / 2 + 120 / z, 960 / z), 1920 - 960 / z); return { z, x: cx, y: cy }; };
+
+  let cur = null;
+  window.renderAt = (t) => {
+    const sh = TL.shots.find(s => t >= s.t0 && t < s.t1) || TL.shots[TL.shots.length - 1];
+    const f = FR[sh.frame], lt = t - sh.t0, d = sh.t1 - sh.t0, pr = lt / d;
+    const frameStart = TL.shots.find(s => s.frame === sh.frame).t0, ft = t - frameStart;
+    const react = sh.kind === "react", lay = react ? f.re : f.el;
+    if (cur !== lay) { if (cur) cur.style.display = "none"; lay.style.display = "block"; cur = lay; }
+    const st = ArbuzovRig.state(t, { words: TL.words, acts: TL.acts });
+    const punch = 1 + (1 - ease(lt / .22)) * .06;                        // «удар» на каждой склейке
+    const whip = sh.first && sh.frame > 0 ? 1 - ease(lt / .16) : 0;       // смена фразы — рывок снизу с размытием
+    let z, x, y;
+    if (react) {
+      z = (1 + .08 * pr) * punch; x = 540 + Math.sin(t * .7) * 14; y = 960;
+      f.rslot.innerHTML = ArbuzHD.svg({ mood: st.opts.mood === "talk" ? "smirk" : st.opts.mood, look: Math.sin(t * .9) * 12, rim: "#fff2a8", limbs: true, arm: st.opts.arm, w: 1740, h: 1660, mouth: st.opts.mouth === "M" ? null : st.opts.mouth, blink: st.opts.blink });
+      f.rslot.style.transform = st.transform;
+    } else {
+      let c = { z: 1, x: 540, y: 960 };
+      if (sh.kind === "detail") c = cam(f.focus[0]); else if (sh.kind === "detail2") c = cam(f.focus[1], 1.6); else if (sh.kind === "wide2") c = { z: 1.12, x: 540, y: 900 };
+      const dir = sh.frame % 2 ? 1 : -1;
+      z = c.z * (1 + .07 * pr) * punch; x = c.x + dir * 30 * pr / c.z; y = c.y - 20 * pr / c.z;
+      x = Math.min(Math.max(x, 540 / z), 1080 - 540 / z); y = Math.min(Math.max(y, 960 / z), 1920 - 960 / z);
+      // предметы: появление по очереди на первом плане фразы + постоянное лёгкое покачивание
+      f.items.forEach((it, k) => {
+        if (it.bg) { it.d.style.transform = `scale(${1.04 + .025 * Math.sin(t * .4)})`; return; }
+        const kk = sh.frame === 0 ? 1 : (ft - .05 - (k - 1) * .07) / .32, sway = Math.sin(t * 1.7 + k * 1.3), rot = Math.sin(t * 1.1 + k) * .6;
+        const s = .75 + .25 * back(kk);
+        it.d.style.opacity = Math.min(1, Math.max(0, kk * 2.5));
+        it.d.style.transform = it.hero ? "" : `translateY(${sway * 6 + (1 - ease(kk)) * 60}px) rotate(${rot}deg) scale(${s})`;
+      });
+      f.slots.forEach((slot) => {
+        const h = f.heroes[+slot.dataset.h];
+        slot.innerHTML = ArbuzHD.svg({ mood: h.o.mood || "smirk", look: (h.o.look || 0) + Math.sin(t * .8) * 6, rim: h.o.rim || "#ffd27a", limbs: true, arm: h.o.arm || "down", w: h.w, h: h.w * 820 / 860, mouth: st.opts.mouth === "M" ? null : st.opts.mouth, blink: st.opts.blink });
+        slot.style.transform = st.transform;
+      });
+    }
+    z *= 1 + whip * .22;
+    lay.style.transform = `translate(${540 - x * z}px,${960 - y * z}px) scale(${z})`;
+    lay.style.filter = whip > .05 ? `blur(${whip * 10}px)` : "";
+    // субтитры: 2–3 слова, ключевые — жёлтые и крупнее, «не/без/сгорит» — красные; кусок «выпрыгивает»
+    const ch = TL.chunks.find(c => t >= c.t0 && t < c.t1);
+    const capEl = document.getElementById("cap");
+    if (!ch) capEl.innerHTML = "";
+    else {
+      const k = ease((t - ch.t0) / .14), s = 1.18 - .18 * k;
+      capEl.innerHTML = `<div class="a" style="left:0;top:1250px;width:1080px;text-align:center;padding:0 70px;font:900 68px/1.15 Unb;transform:scale(${s});transform-origin:540px 60px;opacity:${Math.min(1, k * 2)}">` +
+        ch.w.map(w => `<span style="font:900 ${w.c ? 84 : 68}px/1.15 Unb;letter-spacing:-.02em;color:${w.c === "k" ? "#ffe066" : w.c === "r" ? "#ff5a5a" : "#fff"};-webkit-text-stroke:3px ${OL};paint-order:stroke fill;text-shadow:0 6px 0 ${OL},0 10px 24px rgba(0,0,0,.5)">${w.t.replace(/[,.:]$/, "")}</span>`).join(" ") + `</div>`;
+    }
+  };
+  window.TL.size = [1080, 1920];
+  Promise.all(["700 20px O", "700 20px I", "900 20px Unb", "200 20px Unb"].map(f => document.fonts.load(f, "АБВГДЁЖ abc 0123 ₽"))).then(() => document.fonts.ready)
+    .then(() => { renderAt(0); window.__ready = true; });
+});
+</script>
+</body>
+</html>
