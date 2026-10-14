@@ -6,7 +6,7 @@
 слова с временами — words.json (для рта персонажа и монтажа).
   <python venv с chatterbox и faster-whisper> arbuzov_voice.py phrases.txt out_dir
 """
-import difflib, json, os, re, subprocess, sys
+import difflib, json, os, re, subprocess, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, "/home/user/123/tools"); import tts_yandex as Y
 TARGET = os.path.join(HERE, "out/v1_sochny.wav")
@@ -39,7 +39,11 @@ def main(src, out):
         best = None
         for k, sp in enumerate(SPEEDS):
             raw, wav = f"{out}/p{i:03d}_{k}_tts.wav", f"{out}/p{i:03d}_{k}.wav"
-            Y.synth(fix(text), raw, voice="sergey", stressed=True)   # LiveTTS не принимает speed — темп меняем после синтеза
+            for att in range(6):   # сервис синтеза иногда отвечает 502 — повторяем с паузой
+                try: Y.synth(fix(text), raw, voice="sergey", stressed=True); break   # LiveTTS не принимает speed — темп меняем после синтеза
+                except Exception as e:
+                    if att == 5: raise
+                    print(f"{i}: синтез — {e}, повтор через {5 * (att + 1)} с", flush=True); time.sleep(5 * (att + 1))
             if sp: subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", f"atempo={sp}", raw + ".t.wav"], check=True); os.replace(raw + ".t.wav", raw)
             torchaudio.save(wav, vc.generate(audio=raw), vc.sr)
             segs, _ = asr.transcribe(wav, language="ru", beam_size=5, word_timestamps=True)
