@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ролик №6 — «Деньги, которые тебе положены»</title>
+<!-- Сборка ролика №6 по утверждённой раскадровке (board/, владелец 14.10: «собирай»). Сцены — board/scenes6.js;
+     Арбузов — characters/hd/arbuzhd.js (руки, ноги, рот под голос, моргание) + ритм тела из characters/rig/rig.js;
+     тайминг — timeline6.js (build6.py по словам голоса). Камера: внутри сцены планы сменяются каждые ~8–12 с
+     (общий / крупно Арбузов / другая сторона), предметы сцены появляются по очереди. ?w=1280 — рендер 720p. -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow: hidden; background: #000; }
+  .a { position: absolute; } .nw { white-space: nowrap; }
+  #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; }
+  .scene { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: none; transform-origin: 0 0; }
+  .pi { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  .heroSlot { transform-origin: 50% 90%; }
+  #fx { position: absolute; inset: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="scenes"></div><div id="fx"></div></div>
+<script src="../characters/hd/arbuzhd.js"></script>
+<script src="../characters/rig/rig.js"></script>
+<script>window.KITCHEN = "../characters/hybrid/bg/kitchen.jpg";</script>
+<script src="board/scenes6.js"></script>
+<script src="timeline6.js"></script>
+<script>
+const Q = new URLSearchParams(location.search), OUTW = +(Q.get("w") || 1920), K = OUTW / 1920;
+const stage = document.getElementById("stage"), SC = document.getElementById("scenes");
+if (K !== 1) stage.style.transform = `scale(${K})`;
+const ease = (x) => { x = Math.min(1, Math.max(0, x)); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x) => { x = Math.min(1, Math.max(0, x)); const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+
+/* ---------- сцены: строим один раз, предметы — отдельными слоями ---------- */
+const SCN = {};
+for (const id of [...new Set(TL6.segs.map(s => s.scene))]) {
+  const el = document.createElement("div"); el.className = "scene"; SC.appendChild(el);
+  const heroes = [], items = [];
+  window.HERO_HOOK = (h) => { heroes.push(h); const k = h.w / 600; return `<div class="a heroSlot" data-h="${heroes.length - 1}" style="left:${h.x - 130 * k}px;top:${h.y + 50 * k - (h.legs ? 55 : 0)}px;width:${860 * k}px;height:${820 * k}px;filter:drop-shadow(0 30px 30px rgba(0,0,0,.35))"></div>`; };
+  F = id; reseed(id);
+  P = (h) => { const d = document.createElement("div"); d.className = "pi"; d.innerHTML = h; el.appendChild(d); items.push(d); };
+  S[id]();
+  // фон-SVG и картинки — первый слой; остальное — «предметы» с появлением
+  SCN[id] = { el, heroes, items, slots: [...el.querySelectorAll(".heroSlot")] };
+}
+window.HERO_HOOK = null;
+document.getElementById("fx").innerHTML = `${svg(vign)}${grain}`;
+
+/* ---------- кадр ---------- */
+let curScene = null;
+window.renderAt = (t) => {
+  const seg = TL6.segs.find(s => t >= s.t0 && t < s.t1) || TL6.segs[TL6.segs.length - 1];
+  const sc = SCN[seg.scene];
+  if (curScene !== sc) { if (curScene) curScene.el.style.display = "none"; sc.el.style.display = "block"; curScene = sc; }
+  const lt = t - seg.t0;
+  // появление предметов: первый слой (фон) сразу, остальные по очереди с отскоком
+  sc.items.forEach((d, i) => {
+    if (i === 0 || d.querySelector(".heroSlot")) { d.style.opacity = 1; d.style.transform = ""; return; }
+    const k = (lt - .25 - (i - 1) * .18) / .45;
+    d.style.opacity = Math.min(1, Math.max(0, k * 2));
+    d.style.transform = `translateY(${(1 - back(k)) * 40}px)`;
+  });
+  // камера: план внутри сегмента + плавный переход между планами + медленный дрейф; «удар» при смене сцены
+  const shot = seg.shots.find(s => t >= s.t0 && t < s.t1) || seg.shots[seg.shots.length - 1];
+  const prev = seg.shots[seg.shots.indexOf(shot) - 1];
+  const camOf = (s, tt) => { const d = (tt - s.t0) / Math.max(1, s.t1 - s.t0); return { z: s.z * (1 + .035 * d), x: s.x, y: s.y }; };
+  let c = camOf(shot, t);
+  if (prev) { const k = ease((t - shot.t0) / .55), p = camOf(prev, t); c = { z: p.z + (c.z - p.z) * k, x: p.x + (c.x - p.x) * k, y: p.y + (c.y - p.y) * k }; }
+  const punch = lt < .4 ? 1 + (1 - ease(lt / .4)) * .05 : 1;
+  const z = c.z * punch;
+  sc.el.style.transform = `translate(${960 - c.x * z}px,${540 - c.y * z}px) scale(${z})`;
+  // Арбузов: рот по словам, моргание, позы по фразам, дыхание
+  const st = ArbuzovRig.state(t, { words: TL6.words, acts: TL6.acts });
+  sc.slots.forEach((slot) => {
+    const h = sc.heroes[+slot.dataset.h], k = h.w / 600;
+    const mood = st.opts.mood, arm = h.armLock || st.opts.arm;
+    let html = ArbuzHD.svg({ mood, look: h.look, rim: h.rim, limbs: true, arm, w: 860 * k, h: 820 * k, mouth: st.opts.mouth === "M" ? null : st.opts.mouth, blink: st.opts.blink });
+    if (!h.legs) html = html.replace(/<path d="M232 618[\s\S]*?stroke="#ff3b4f" stroke-width="8"\/>[\s\S]*?stroke="#ff3b4f" stroke-width="8"\/>/, "");
+    slot.innerHTML = html;
+    slot.style.transform = st.transform;
+  });
+};
+window.TL = { duration: TL6.duration, fps: 30, size: [OUTW, Math.round(1080 * K)] };
+window.SEGS = [];
+Promise.all(["700 20px O", "700 20px I", "900 20px Unb", "200 20px Unb"].map(f => document.fonts.load(f, "АБВГДЁЖ abc 0123 ₽"))).then(() => document.fonts.ready).then(() => Promise.all([...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))))
+  .then(() => { renderAt(0); window.__ready = true; });
+</script>
+</body>
+</html>

@@ -11,9 +11,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, "/home/user/123/tools"); import tts_yandex as Y
 TARGET = os.path.join(HERE, "out/v1_sochny.wav")
 SPEEDS = (None, .95, 1.05, .9)
+# ударения там, где синтезатор ошибается (как в роликах №4–5, ya_live.py)
+FIX = {"кэшбэк": "кэшб+эк", "кэшбэка": "кэшб+эка", "кэшбэком": "кэшб+эком", "кэшбэке": "кэшб+эке", "Арбузов": "Арб+узов", "Арбузова": "Арб+узова",
+       "договор": "догов+ор", "договора": "догов+ора", "начал": "н+ачал", "звонит": "звон+ит", "вычет": "в+ычет", "вычета": "в+ычета"}
+def fix(t): return re.sub(r"[А-Яа-яЁё]+", lambda m: FIX.get(m.group(), m.group()), t)
 
 
-def norm(s): return [w for w in re.sub(r"[^а-я0-9 ]", " ", s.lower().replace("ё", "е")).split() if w]
+NUMW = ("ноль", "один", "одна", "одну", "два", "двух", "две", "три", "трех", "четыр", "пять", "пяти", "шест", "семь", "семи", "восем", "девят", "десят",
+        "двадц", "тридц", "сорок", "пятьд", "шестьд", "сто", "двест", "тысяч", "милли", "полто", "полов", "проце")
+def norm(s):   # слова по основе (5 букв); числа выкидываем с обеих сторон — Whisper пишет их цифрами
+    ws = [w[:5] for w in re.sub(r"[^а-я0-9 ]", " ", s.lower().replace("ё", "е")).split() if w]
+    return [w for w in ws if not (w.isdigit() or any(w.startswith(n[:5]) for n in NUMW))]
 
 
 def main(src, out):
@@ -31,14 +39,14 @@ def main(src, out):
         best = None
         for k, sp in enumerate(SPEEDS):
             raw, wav = f"{out}/p{i:03d}_{k}_tts.wav", f"{out}/p{i:03d}_{k}.wav"
-            Y.synth(text.replace("Арбузов", "Арб+узов"), raw, voice="sergey", speed=sp, stressed=True)
+            Y.synth(fix(text), raw, voice="sergey", speed=sp, stressed=True)
             torchaudio.save(wav, vc.generate(audio=raw), vc.sr)
             segs, _ = asr.transcribe(wav, language="ru", beam_size=5, word_timestamps=True)
             words = [dict(w=w.word.strip(), s=round(w.start, 3), e=round(w.end, 3)) for s in segs for w in s.words]
             sim = difflib.SequenceMatcher(None, norm(text), norm(" ".join(x["w"] for x in words))).ratio()
             print(f"{i} дубль {k} ({sp or 1.0}): {sim:.2f} | {' '.join(x['w'] for x in words)}", flush=True)
             if not best or sim > best["sim"]: best = dict(text=text, wav=wav, sim=round(sim, 3), words=words)
-            if sim >= .99: break
+            if sim >= .97: break
         meta[str(i)] = best; json.dump(meta, open(meta_f, "w"), ensure_ascii=False, indent=1)
     # склейка: 0,35 с между фразами; слова — со сдвигом на начало фразы
     ins, flt, allw, t = [], [], [], 0.0

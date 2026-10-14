@@ -8,7 +8,7 @@ let U = 0;
 function arbuzHD(o = {}) {
   const u = ++U;
   const mood = o.mood || "smirk", rim = o.rim || "#7fd6ff";
-  const eye = (x) => mood === "happy"
+  const eye = (x) => (mood === "happy" || (o.blink || 0) >= .5)
     ? `<path d="M${x - 34} 392 Q ${x} 350 ${x + 34} 392" fill="none" ${st(9)}/>`
     : `<ellipse cx="${x}" cy="380" rx="40" ry="${mood === "shock" ? 52 : 46}" fill="url(#eyeW${u})" ${st(6)}/>
        <circle cx="${x + (o.look ?? 8)}" cy="${mood === "shock" ? 384 : 388}" r="${mood === "shock" ? 13 : 20}" fill="#1a1414"/>
@@ -16,9 +16,17 @@ function arbuzHD(o = {}) {
        ${mood === "smirk" ? `<path d="M${x - 44} ${352} Q ${x} ${340} ${x + 44} ${356} L ${x + 44} 334 L ${x - 44} 330 Z" fill="url(#face${u})" /><path d="M${x - 42} 354 Q ${x} 344 ${x + 42} 358" fill="none" ${st(7)}/>` : ""}`;
   const brows = mood === "shock" ? `<path d="M206 300 Q 248 272 286 296" fill="none" ${st(9)}/><path d="M314 296 Q 352 272 394 300" fill="none" ${st(9)}/>`
     : mood === "smirk" ? `<path d="M206 318 L 288 312" ${st(9)}/><path d="M312 304 Q 352 288 396 300" fill="none" ${st(9)}/>` : `<path d="M210 312 L 286 304" ${st(9)}/><path d="M314 304 L 390 312" ${st(9)}/>`;
+  // рот под голос: o.mouth = A | O | E | S | M (фонема) — перекрывает рот эмоции; o.blink 0…1 — моргание
+  const V = o.mouth, VM = {
+    A: `<path d="M252 454 Q 300 528 348 454 Q 300 470 252 454 Z" fill="#5c1420" ${st(6)}/><path d="M272 486 Q 300 474 328 486 Q 300 510 272 486" fill="#e46b80"/>`,
+    O: `<ellipse cx="300" cy="476" rx="26" ry="34" fill="#5c1420" ${st(6)}/><ellipse cx="300" cy="492" rx="14" ry="9" fill="#d9536a"/>`,
+    E: `<path d="M248 460 Q 300 500 352 460 Q 300 474 248 460 Z" fill="#5c1420" ${st(6)}/>`,
+    S: `<path d="M262 464 Q 300 492 340 464 Q 300 474 262 464 Z" fill="#5c1420" ${st(6)}/>`,
+    M: `<path d="M264 470 Q 304 486 342 466" fill="none" ${st(8)}/>` };
   const mouth = mood === "shock" ? `<ellipse cx="300" cy="478" rx="22" ry="30" fill="#5c1420" ${st(6)}/><ellipse cx="300" cy="490" rx="12" ry="9" fill="#d9536a"/>`
     : mood === "happy" ? `<path d="M250 456 Q 300 520 350 456 Z" fill="#5c1420" ${st(6)}/><path d="M270 482 Q 300 470 330 482 Q 300 506 270 482" fill="#e46b80"/>`
     : `<path d="M262 470 Q 306 494 346 458" fill="none" ${st(8)}/>`;
+  const mouthF = V && VM[V] ? VM[V] : mouth;
   // руки и ноги (владелец 14.10: «давай ему сделаем руки и ноги»): o.limbs = true, o.arm = down | point | up | phone | wave | shrug
   const L = !!o.limbs, arm = o.arm || "down", lim = (d, w = 24) => `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const glove = (x, y, r = 34) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" ${st(7)}/><path d="M${x - r * .45} ${y - r * .25} Q ${x} ${y - r * .55} ${x + r * .45} ${y - r * .25}" fill="none" stroke="#c9ccd8" stroke-width="5"/>`;
@@ -59,7 +67,7 @@ function arbuzHD(o = {}) {
   <ellipse cx="300" cy="410" rx="170" ry="138" fill="url(#face${u})" ${st(8)}/>
   ${[[-95, -50], [-30, -95], [55, -80], [110, -30], [-118, 30], [105, 50], [-60, 80]].map(([x, y]) => `<ellipse cx="${300 + x}" cy="${410 + y}" rx="7" ry="12" fill="#3a1414" opacity=".6" transform="rotate(${x / 3} ${300 + x} ${410 + y})"/>`).join("")}
   <ellipse cx="190" cy="452" rx="26" ry="14" fill="#ff3d5a" opacity=".45" filter="url(#soft${u})"/><ellipse cx="410" cy="452" rx="26" ry="14" fill="#ff3d5a" opacity=".45" filter="url(#soft${u})"/>
-  ${eye(248)}${eye(352)}${brows}${mouth}
+  ${eye(248)}${eye(352)}${brows}${mouthF}
   ${L ? ARMS[0] + ARMS[1] : ""}
   </svg>`;
 }
