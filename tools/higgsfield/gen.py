@@ -4,7 +4,7 @@
   <python с higgsfield-client> tools/higgsfield/gen.py reels/arb-story-20                 # план, бесплатно
   <python с higgsfield-client> tools/higgsfield/gen.py reels/arb-story-20 --go f01,f03    # ПЛАТНО: только эти задания
 Кадры — xai/grok-imagine-image-2.0 (картинки Арбузова и фона как образцы), вставки — bytedance/seedance-2.5/image-to-video
-из готового кадра. Результат: <рилс>/hf/<id>.png|.mp4 и hf/log.json (id запросов, без ключа). Готовые файлы повторно не генерируются.
+или модель из "clip_app" (Kling 2.5 Turbo Pro: 5 с ≈ $0,30 против ≈ $1,85 за 4 с у Seedance 720p — по /estimate 15.10) из готового кадра. Результат: <рилс>/hf/<id>.png|.mp4 и hf/log.json (id запросов, без ключа). Готовые файлы повторно не генерируются.
 Ключ — HF_KEY (key-id:key-secret) из окружения или .env.local; скрипт его не печатает.
 """
 import json, os, sys, time
@@ -67,7 +67,9 @@ def main():
         else:
             src = out / (j["from"] + ".png")
             if not src.exists(): print(f"{j['id']}: нет кадра {src.name}, пропуск"); continue
-            app, args = VID, dict(prompt=j["prompt"], image_url=upload(str(src.relative_to(ROOT))), duration=j["duration"], resolution="720p", generate_audio=False)
+            app = J.get("clip_app", VID); url = upload(str(src.relative_to(ROOT)))
+            args = (dict(prompt=j["prompt"], image_url=url, duration=j["duration"], resolution="720p", generate_audio=False) if app == VID
+                    else dict(prompt=j["prompt"], image_url=url, duration=j["duration"], negative_prompt="text, letters, watermark, deformed face, extra limbs"))
         t0 = time.time(); print(f"{j['id']}: отправляю в {app}")
         try:
             res = higgsfield_client.subscribe(app, arguments=args, on_enqueue=lambda rid, i=j["id"]: log.setdefault(i, {}).update(request_id=rid))
