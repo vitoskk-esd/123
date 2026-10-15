@@ -66,8 +66,48 @@ def avatar(d):
     c = Image.new("RGBA", (800, 800), (0, 0, 0, 0)); c.paste(im, (0, 0), m); c.save(f"{OUT}/{d}_avatar_circle.png")
 
 
+def banner_clean(name, top=.12, span=.80, feather=150):
+    """Шапка без текста (владелец 15.10: «текст отстой, можно просто без текста»): картинка целиком по центру, герои (по высоте
+    top … top+span кадра) — в полосе 423 px, которую видно на телефоне и компьютере; по краям — размытое продолжение того же фона."""
+    src = Image.open(f"{SRC}/{name}.png").convert("RGB")
+    bg = cover(src, 2560, 1440).filter(ImageFilter.GaussianBlur(45))
+    bg = Image.blend(bg, Image.new("RGB", bg.size, (24, 18, 16)), .25).convert("RGBA")
+    h = round(423 / span); w = round(src.width * h / src.height)
+    pic = src.resize((w, h), Image.LANCZOS).convert("RGBA")
+    m = Image.new("L", (w, h), 255); md = ImageDraw.Draw(m)
+    for i in range(feather): md.line([(i, 0), (i, h)], fill=int(255 * (i / feather) ** 1.5)); md.line([(w - 1 - i, 0), (w - 1 - i, h)], fill=int(255 * (i / feather) ** 1.5))
+    pic.putalpha(m)
+    bg.alpha_composite(pic, ((2560 - w) // 2, 508 - round(top * h)))
+    im = bg.convert("RGB"); im.save(f"{OUT}/{name}_banner.jpg", quality=92)
+    im.crop((0, 508, 2560, 931)).resize((1280, 212)).save(f"{OUT}/{name}_banner_desktop.jpg", quality=88)
+    im.crop((507, 508, 2053, 931)).save(f"{OUT}/{name}_banner_mobile.jpg", quality=88)
+
+
+def feathered(im, f):
+    im = im.convert("RGBA")
+    if f:
+        m = Image.new("L", im.size, 255); md = ImageDraw.Draw(m)
+        for i in range(f): md.rectangle((i, i, im.width - 1 - i, im.height - 1 - i), outline=int(255 * i / f))
+        im.putalpha(m)
+    return im
+
+
+def banner_wide(name, cy):
+    """Шапка без текста из «отдалённой» картинки (герои мелкие, по центру высоты кадра ≈ cy): картинка на всю ширину 2560,
+    сдвинута так, чтобы герои стояли в полосе 423 px; пустые края сверху/снизу (видно только на ТВ) — размытый фон."""
+    src = Image.open(f"{SRC}/{name}.png").convert("RGB")
+    w = round(2560 * float(os.environ.get("SC", ".94"))); h = round(src.height * w / src.width)
+    bg = cover(src, 2560, 1440).filter(ImageFilter.GaussianBlur(45)).convert("RGBA")
+    bg.alpha_composite(feathered(src.resize((w, h), Image.LANCZOS), 0 if w >= 2560 else 60), ((2560 - w) // 2, round(719.5 - cy * h)))
+    im = bg.convert("RGB"); im.save(f"{OUT}/{name}_banner.jpg", quality=92)
+    im.crop((0, 508, 2560, 931)).resize((1280, 212)).save(f"{OUT}/{name}_banner_desktop.jpg", quality=88)
+    im.crop((507, 508, 2053, 931)).save(f"{OUT}/{name}_banner_mobile.jpg", quality=88)
+
+
 if __name__ == "__main__":
     for d in sys.argv[1:]:
+        if d.startswith("w_"): banner_wide(d, float(os.environ.get("CY", ".535"))); print(d, "ok"); continue
+        if d.startswith("g_"): banner_clean(d); print(d, "ok"); continue
         if os.path.exists(f"{SRC}/b_{d}.png"): banner(d)
         if os.path.exists(f"{SRC}/a_{d}.png"): avatar(d)
         print(d, "ok")

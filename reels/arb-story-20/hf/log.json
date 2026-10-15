@@ -3,7 +3,9 @@
   "youtube/characters/gpt/src/phone.webp": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/7e0ee435-a078-48ab-a330-bf51ce3db66b.webp",
   "reels/arb-story-20/hf/d01.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/a3ef3224-defd-463b-9cda-9e5a1d31ff0f.png",
   "reels/arb-story-20/hf/d02.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/dfd5ad76-9946-492b-ab46-f01bf4b2cf75.png",
-  "reels/arb-story-20/hf/d03.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/9a211e72-6d1d-40cc-bea4-1e2cc300214f.png"
+  "reels/arb-story-20/hf/d03.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/9a211e72-6d1d-40cc-bea4-1e2cc300214f.png",
+  "reels/arb-story-20/hf/g_1.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/53a4c301-848a-41e2-97cb-c86bff066713.png",
+  "reels/arb-story-20/hf/g_2.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/886abdbc-3005-4403-bbb6-86dc5dfac895.png"
  },
  "d01": {
   "request_id": "8c9827f7-f6cc-4140-a266-0bb21e1972ae",
@@ -58,5 +60,29 @@
   "status": "completed",
   "app": "xai/grok-imagine-image-2.0",
   "sec": 46
+ },
+ "g_1": {
+  "request_id": "2d1d64fe-0d73-4a5f-ad02-effcf3204645",
+  "status": "completed",
+  "app": "xai/grok-imagine-image-2.0",
+  "sec": 32
+ },
+ "g_2": {
+  "request_id": "81d9a7f7-e751-4fe6-9a95-0a02356a58bf",
+  "status": "completed",
+  "app": "xai/grok-imagine-image-2.0",
+  "sec": 34
+ },
+ "w_1": {
+  "request_id": "7e8635d4-bc9e-4fe6-99c1-67b4471fc687",
+  "status": "completed",
+  "app": "xai/grok-imagine-image-2.0",
+  "sec": 43
+ },
+ "w_2": {
+  "request_id": "027a8ae5-20a4-48b0-8458-77066f4a38c2",
+  "status": "completed",
+  "app": "xai/grok-imagine-image-2.0",
+  "sec": 35
  }
 }
