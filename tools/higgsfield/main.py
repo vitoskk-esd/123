@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Пример Higgsfield API: Seedance 2.5 text-to-video через официальный SDK (higgsfield-client), метод subscribe.
 Ключ — HF_KEY в формате key-id:key-secret: из .env.local в корне репозитория (файл в .gitignore) или из переменной окружения.
-Значение ключа скрипт не печатает и не логирует. Запрос платный (Seedance 2.5, 5 с, 720p).
-  <python с higgsfield-client и python-dotenv> tools/higgsfield/main.py
+Значение ключа скрипт не печатает и не логирует.
+  <python с higgsfield-client и python-dotenv> tools/higgsfield/main.py --check   # БЕСПЛАТНО: только проверка ключа, без генерации
+  <python с higgsfield-client и python-dotenv> tools/higgsfield/main.py           # ПЛАТНО: Seedance 2.5, 5 с, 720p, 16:9
+Проверка (владелец 15.10: «не хочу запускать пример, чтобы сразу списали кредиты»): запрос ссылки для загрузки файла
+(POST /files/generate-upload-url) требует ключ, но ничего не генерирует и не списывает.
 """
 import os, sys
 from pathlib import Path
@@ -29,10 +32,25 @@ def find_url(result):
     return None
 
 
+def check():
+    """Бесплатная проверка ключа: просим ссылку для загрузки файла (ничего не генерируется и не списывается)."""
+    import httpx
+    try:
+        r = httpx.post("https://api.higgsfield.ai/files/generate-upload-url", json={"content_type": "image/jpeg"},
+                       headers={"Authorization": f"Key {os.environ['HF_KEY']}"}, timeout=30)
+    except httpx.HTTPError as e:
+        print(f"Сеть: не удалось достучаться до api.higgsfield.ai ({type(e).__name__})", file=sys.stderr); return 1
+    if r.status_code == 200 and "upload_url" in r.text:
+        print("Ключ принят: api.higgsfield.ai отвечает 200, генерации не было, деньги не списаны."); return 0
+    print(f"Ключ не принят: HTTP {r.status_code} — {r.text[:200]}", file=sys.stderr); return 1
+
+
 def main():
     if not os.getenv("HF_KEY"):
         print("Нет ключа: задайте HF_KEY (key-id:key-secret) в .env.local или в переменных окружения.", file=sys.stderr)
         return 2
+    if "--check" in sys.argv[1:]:
+        return check()
     try:
         result = higgsfield_client.subscribe(
             MODEL, arguments=ARGS,
