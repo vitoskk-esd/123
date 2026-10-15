@@ -6,6 +6,7 @@
 // часть "stop" — музыка замолкает (выделить момент), "intro" — только пэд.
 // Y5 (11.10, звуки предметов «Ночного офиса»): paper — шелест листа, slide — лист/стикер скользит по столу, pen: [[t, dur]] — ручка
 // (обводка, зачёркивание, пометка), keys: [[a, b]] — клавиатура, hum: [[a, b]] — тихий гул монитора. TL.sfxGain — общая громкость SFX.
+// Рилс-история v2 (15.10): rain/room/murmur: [[a, b]] — фоны сцен, beep: [t] — терминал.
 const fs = require("fs");
 const path = require("path");
 const tlPath = path.resolve(process.argv[2] || "timeline.js");
@@ -151,6 +152,26 @@ function hum(a, b) {  // гул монитора: очень тихо, 100 + 200
   const s = Math.floor(a * SR), n = Math.floor((b - a) * SR);
   for (let i = 0; i < n; i++) { const t = i / SR, f = Math.min(1, t / .6, (b - a - t) / .6); add(s + i, (Math.sin(2 * Math.PI * 100 * t) * .6 + Math.sin(2 * Math.PI * 200 * t) * .25 + noise() * .05) * .012 * f); }
 }
+// Рилс-история v2 (15.10, «всё живое»): фоны сцен и звуки предметов
+function rain(a, b) {  // дождь: широкий шум + редкие капли, вход/выход 0,4 с
+  const s = Math.floor(a * SR), n = Math.floor((b - a) * SR); let lp = 0;
+  for (let i = 0; i < n; i++) { const t = i / SR, f = Math.min(1, t / .4, (b - a - t) / .4), x = noise(); lp += (x - lp) * .35;
+    const drop = (i * 2654435761 >>> 0) % 9973 < 3 ? 1 : 0; add(s + i, ((x - lp) * .05 + lp * .03) * f, noise() * .3); if (drop) for (let k = 0; k < 300; k++) add(s + i + k, Math.sin(k * .9) * Math.exp(-k / 60) * .05 * f, .3); }
+}
+function room(a, b) {  // «воздух» комнаты ночью: низкий гул холодильника + тихий шум
+  const s = Math.floor(a * SR), n = Math.floor((b - a) * SR); let lp = 0;
+  for (let i = 0; i < n; i++) { const t = i / SR, f = Math.min(1, t / .4, (b - a - t) / .4), x = noise(); lp += (x - lp) * .02;
+    add(s + i, (Math.sin(2 * Math.PI * 50 * t) * .5 + Math.sin(2 * Math.PI * 150 * t) * .15 + lp * 2) * .011 * f); }
+}
+function murmur(a, b) {  // гул магазина: полосовой шум «голосов» + далёкий писк касс
+  const s = Math.floor(a * SR), n = Math.floor((b - a) * SR); let l1 = 0, l2 = 0;
+  for (let i = 0; i < n; i++) { const t = i / SR, f = Math.min(1, t / .4, (b - a - t) / .4), x = noise(); l1 += (x - l1) * .08; l2 += (l1 - l2) * .08;
+    add(s + i, (l1 - l2) * (.6 + .4 * Math.sin(t * 7.3) * Math.sin(t * 2.1)) * .09 * f, .1); }
+  for (let t = a + .7; t < b - .3; t += 1.9) beep(t, .25);
+}
+function beep(t0, g = 1) {  // терминал / касса
+  const s = Math.floor(t0 * SR); for (let i = 0; i < SR * .16; i++) { const t = i / SR; add(s + i, Math.sign(Math.sin(2 * Math.PI * 2093 * t)) * Math.min(1, t * 400, (.16 - t) * 200) * .03 * g, -.15); }
+}
 tonal();
 for (let t = 0; t < DUR - .5; t += BEAT / 2) {
   if (!drumsOn(t)) continue;
@@ -165,6 +186,7 @@ const S = TL.sfx || {};
 (S.riser || []).forEach(([a, b]) => riser(a, b)); (S.glitch || []).forEach(glitch); (S.swish || []).forEach(swish);
 (S.ui || []).forEach(ui); (S.pan || []).forEach(pan); (S.notif || []).forEach(notif); (S.mark || []).forEach(mark); (S.click || []).forEach(click);
 (S.thud || []).forEach(thud); (S.chip || []).forEach(chip); (S.sting || []).forEach(sting); (S.ticks || []).forEach(([a, b]) => ticks(a, b));
+(S.rain || []).forEach(([a, b]) => rain(a, b)); (S.room || []).forEach(([a, b]) => room(a, b)); (S.murmur || []).forEach(([a, b]) => murmur(a, b)); (S.beep || []).forEach(t => beep(t));
 (S.paper || []).forEach(paper); (S.slide || []).forEach(slide); (S.pen || []).forEach(([a, d]) => pen(a, d)); (S.keys || []).forEach(([a, b]) => keys(a, b)); (S.hum || []).forEach(([a, b]) => hum(a, b));
 
 let peak = 0;

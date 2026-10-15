@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс-история: живой монтаж</title>
+<!-- Версия 2 рилса-истории (владелец 15.10: «без этих субтитров… не шаблонные ролики»; понравилось «на доске написал вопросы»).
+     Только живые планы (кадры клипов Kling, out/clips/<id>/NNN.jpg, 30 к/с), жёсткие склейки по голосу, «удар» камеры на ключевых словах,
+     текст — только рукописные пометки маркером, которые рисуются штрихом (marks в timeline2.js, cut2.py). Никаких плашек, карточек, субтитров.
+     ?r=<папка рилса>. -->
+<style>
+  @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  .a { position: absolute; }
+  #v { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 900px; }
+  .mk { position: absolute; left: 0; top: 0; font: 700 96px/1 H; white-space: nowrap; paint-order: stroke fill; -webkit-text-stroke: 10px #1e1717; filter: drop-shadow(0 6px 0 rgba(0,0,0,.45)); }
+</style>
+</head>
+<body>
+<div id="stage" class="a" style="inset:0;overflow:hidden">
+  <img id="v">
+  <div id="look" class="a" style="inset:0;pointer-events:none"></div>
+  <svg id="sv" class="a" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>
+  <div id="tx" class="a" style="inset:0"></div>
+  <div id="fx" class="a" style="inset:0;pointer-events:none"></div>
+</div>
+<script>
+const REEL = new URLSearchParams(location.search).get("r");
+const cl = (x) => Math.min(1, Math.max(0, x)), out4 = (x) => 1 - Math.pow(1 - cl(x), 4), io2 = (x) => { x = cl(x); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; };
+const hashf = (k) => { const x = Math.sin(k * 127.1) * 43758.5453; return x - Math.floor(x); };
+const NCLIP = 151;
+const s = document.createElement("script"); s.src = `../${REEL}/timeline2.js`; document.head.appendChild(s);
+s.onload = () => {
+  const V = document.getElementById("v"), SV = document.getElementById("sv"), TX = document.getElementById("tx"), LOOK = document.getElementById("look");
+  // пометки: заранее строим элементы; каждая живёт до конца своего плана
+  const shotAt = (t) => { let k = TL.shots.findIndex(x => t >= x.t0 && t < x.t1); return k < 0 ? TL.shots.length - 1 : k; };
+  const ellipse = (m) => { const pts = []; for (let a = -.3; a <= Math.PI * 2 + .5; a += .08) { const wob = 1 + .04 * Math.sin(a * 3 + m.cx); pts.push([m.cx + Math.cos(a - Math.PI / 2) * m.rx * wob * (1 + a * .012), m.cy + Math.sin(a - Math.PI / 2) * m.ry * wob]); }
+    return "M" + pts.map(p => p.map(v => v.toFixed(1)).join(" ")).join(" L "); };
+  const MK = TL.marks.map((m) => {
+    const end = TL.shots[shotAt(m.t)].t1;
+    if (m.kind === "text" || m.kind === "board") {
+      const d = document.createElement("div"); d.className = "a"; TX.appendChild(d);
+      const lines = m.kind === "board" ? m.lines : [[m.t, m.text]];
+      d.style.cssText = `left:${m.x}px;top:${m.y}px;transform:rotate(${m.r || 0}deg);transform-origin:0 50%`;
+      d.innerHTML = lines.map(([, txt], j) => `<div class="mk" style="position:relative;display:table;font-size:${m.size || 100}px;color:${m.c};${m.kind === "board" ? "-webkit-text-stroke:0;filter:none;transform:rotate(-2deg);margin-bottom:12px" : ""}">${txt}</div>`).join("");
+      return { m, end, d, parts: [...d.children], lines };
+    }
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g"); SV.appendChild(g);
+    let path = m.d;
+    if (m.kind === "circle") path = ellipse(m);
+    if (m.kind === "arrow") { const p = m.d.match(/-?\d+(\.\d+)?/g).map(Number), [x2, y2, x1, y1] = [p[p.length - 2], p[p.length - 1], p[p.length - 4], p[p.length - 3]], a = Math.atan2(y2 - y1, x2 - x1);
+      path += ` M ${x2 - 60 * Math.cos(a - .5)} ${y2 - 60 * Math.sin(a - .5)} L ${x2} ${y2} L ${x2 - 60 * Math.cos(a + .5)} ${y2 - 60 * Math.sin(a + .5)}`; }
+    g.innerHTML = `<path d="${path}" pathLength="1" fill="none" stroke="#1e1717" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><path d="${path}" pathLength="1" fill="none" stroke="${m.c}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`;
+    return { m, end, g, paths: [...g.querySelectorAll("path")] };
+  });
+  document.getElementById("fx").innerHTML = `<div class="a" style="inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 62%,rgba(0,0,0,.32))"></div>`;
+  let pend = [];
+  window.renderAt = (t) => {
+    pend = [];
+    const k = shotAt(t), sh = TL.shots[k], lt = t - sh.t0;
+    // кадр клипа: с 0,15 с (первый кадр — неподвижная картинка), скорость sh.rate, после конца — последний кадр
+    const n = Math.min(NCLIP, Math.max(1, Math.floor((.15 + lt * sh.rate) * 30) + 1)), src = `../${REEL}/out/clips/${sh.clip}/${String(n).padStart(3, "0")}.jpg`;
+    if (!V.src.endsWith(src.slice(2))) { V.src = src; pend.push(V.decode().catch(() => 0)); }
+    // камера: лёгкий наезд за план + «удар» на ключевом слове (резко +9 %, остаётся до конца плана); после склейки — короткий «впрыг»
+    let z = 1.0 + .035 * cl(lt / Math.max(1, sh.t1 - sh.t0)) + .05 * (1 - out4(lt / .3));
+    sh.punch.forEach(p => { if (t >= p) z += .09 * out4((t - p) / .12); });
+    V.style.transform = `scale(${z})`;
+    // воспоминание: сепия, тёплая виньетка, вспышка на входе
+    const mem = sh.look === "memory";
+    V.style.filter = mem ? "sepia(.5) saturate(.75) contrast(1.06) brightness(1.05)" : "none";
+    LOOK.style.background = mem ? `radial-gradient(ellipse at 50% 45%,transparent 42%,rgba(70,40,10,.6)), rgba(255,250,235,${.9 * (1 - out4(lt / .25))})` : "none";
+    // пометки маркером
+    MK.forEach((o) => {
+      const on = t >= o.m.t && t < o.end, q = cl((t - o.m.t) / (o.m.kind === "circle" ? .45 : .35));
+      if (o.g) { o.g.style.display = on ? "" : "none"; o.paths.forEach(p => { p.setAttribute("stroke-dasharray", "1 1"); p.setAttribute("stroke-dashoffset", String(1 - q)); }); return; }
+      o.d.style.display = on ? "" : "none";
+      o.parts.forEach((el, j) => { const t0 = o.lines[j][0], len = o.lines[j][1].length, qq = cl((t - t0) / Math.max(.3, len * .045)); el.style.clipPath = `inset(-30% ${100 - qq * 102}% -30% -5%)`; });
+    });
+    return Promise.all(pend);
+  };
+  document.fonts.load("700 40px H", "Арбузов abc ₽ ✓").then(() => document.fonts.ready).then(() => renderAt(0)).then(() => { window.__ready = true; });
+};
+</script>
+</body>
+</html>

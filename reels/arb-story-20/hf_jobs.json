@@ -89,6 +89,42 @@
     "@design"
    ],
    "prompt": "Use the watermelon character from the first reference image, keep his design identical. Medium close-up in the kitchen: he waves at the viewer with a cheeky smile, looking straight into the camera, warm light."
+  },
+  {
+   "id": "n02",
+   "phrase": 0,
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/f01.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Over-the-shoulder close shot at night in the same dark kitchen as the second reference image: his green hand holds a smartphone close to the camera, a bright notification card glows on the lock screen (the card is a plain glowing white rectangle with a green icon, no readable text), cold blue light, his cap and cheek visible at the edge of the frame."
+  },
+  {
+   "id": "n03",
+   "phrase": 0,
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/f01.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Extreme close-up of his face at night, lit only by the blue phone screen from below: big eyes wide open, the glowing phone screen reflected in his pupils, a slowly forming greedy grin. Dark kitchen softly blurred behind."
+  },
+  {
+   "id": "n07",
+   "phrase": 2,
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/f01.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Daytime in the same panel-apartment kitchen: he stands in front of a big paper wall calendar hanging next to the fridge and lifts its pages back with one hand, counting months with a puzzled face. The calendar shows only a grid of days with no readable words or numbers."
+  },
+  {
+   "id": "n09",
+   "phrase": 3,
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/f05.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Evening, over-the-shoulder shot from behind his shoulder at the desk with the lamp: we see his smartphone screen in his hand showing a messenger chat with two blank speech bubbles (one blue on the right, one white on the left, no readable text), a mug of tea and instant noodles on the desk."
   }
  ],
  "clips": [
@@ -115,6 +151,72 @@
    "from": "f09",
    "duration": 5,
    "prompt": "He jumps with joy, coins bounce and sparkle around him, he lands and raises the phone. Camera follows the jump. Cartoon animation, keep the character design."
+  },
+  {
+   "id": "k02",
+   "from": "n02",
+   "duration": 5,
+   "prompt": "The notification lights up brighter, his thumb slides in and taps it, the screen glow pulses on his cheek. Slow push-in. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k03",
+   "from": "n03",
+   "duration": 5,
+   "prompt": "His eyes slowly open wider and wider, the reflected screen glows in the pupils, a greedy grin spreads across his face. Very slow push-in. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k04",
+   "from": "f02",
+   "duration": 5,
+   "prompt": "He frantically taps the phone with both thumbs, tongue out, legs kicking on the sofa with excitement. Slight handheld camera. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k06",
+   "from": "f04",
+   "duration": 5,
+   "prompt": "He lazily swipes the form away on his phone, puts the phone in his pocket, stands up from the bench and walks towards the ice-cream cart. Petals fall. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k07",
+   "from": "n07",
+   "duration": 5,
+   "prompt": "He flips the calendar pages back one by one, counting on his fingers, frowning more with each page. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k08",
+   "from": "f05",
+   "duration": 5,
+   "prompt": "He puts the noodles aside, cracks his knuckles with a determined smirk and grabs the phone to type. Slow push-in. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k09",
+   "from": "n09",
+   "duration": 5,
+   "prompt": "A blue message bubble pops up on the phone screen, then after a moment a white answer bubble pops up, his thumb hovers, he nods. Camera stays over his shoulder. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k11",
+   "from": "f07",
+   "duration": 5,
+   "prompt": "Rain starts falling harder, he looks at the phone, his shoulders drop and he sighs heavily, puddles ripple. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k12",
+   "from": "f08",
+   "duration": 5,
+   "prompt": "He taps the yellow card on the terminal, the terminal light turns green, he winks at the camera, the cashier barely looks up. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k14",
+   "from": "f10",
+   "duration": 5,
+   "prompt": "He turns to the whiteboard and writes on it with the marker in quick confident strokes, then points at it and looks at the camera. The board stays blank (the text will be added later). Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k15",
+   "from": "f11",
+   "duration": 5,
+   "prompt": "He waves at the camera with a cheeky smile, then reaches to the wall switch next to him and clicks it, the kitchen light goes off into darkness. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
   }
  ],
  "design": "reels/arb-story-20/hf/d01.png",
