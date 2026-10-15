@@ -241,3 +241,11 @@ one primary scene transition (push slide 0.35 s, outgoing and incoming move toge
 inside a phrase no cuts — multi-phase camera stations (wide → object → Arbuzov's face → object, 1.6–2.4 s, 0.55 s eased moves + drift);
 spring-pop entrances, stamps slam with shake, numbers as kinetic beat slam over the scene (coins only for ₽). Crisp flat look: bright
 gradients, hard offset shadows, tube limbs (`ArbuzHD tube:true`), no grain.
+
+## Рилсы-истории с Арбузовым (новый формат, владелец 15.10)
+- Формат: Арбузов — парень (образ d01, `reels/arb-story-20/hf/d01.png`), проходит схемы с банками; рассказ от 3-го лица, голос №2 denis
+  с интонацией (`arb-kit/narrator_voice.py`). Рисунки и живые вставки — Higgsfield (`tools/higgsfield/gen.py`, цены — бесплатный `/estimate`).
+- Отзыв на первый монтаж (story.html: камера по рисункам + пуши/плашки/цифры/субтитры поверх): «нужно всё намного лучше,
+  **без этих субтитров**… мне нужны **не шаблонные** ролики». Понравилось одно: **надпись от руки на доске** — «прикольный нюанс».
+  Значит: никаких субтитров, UI-карточек, плашек и «цифр-слэмов» поверх кадра; текст — только внутри мира (маркер на доске,
+  экран телефона в рисунке, записка), рукописные пометки — фирменный приём.
