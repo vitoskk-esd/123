@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Обложка: закрыть кредитку (tech)</title>
+<!-- Владелец 15.10: «текст такой не нужно… нужен прикольный, технологический текст, который будет красиво смотреться, беру фото номер 2».
+     Рисунок img/tg2.jpg, три варианта заголовка: ?v=1 «терминал», ?v=2 «HUD + глитч», ?v=3 «неон + стекло». -->
+<style>
+  @font-face { font-family: "Mono"; src: url("img/GeistMono-Bold.ttf"); }
+  @font-face { font-family: "Tek"; src: url("img/Tektur-Medium.ttf"); }
+  @font-face { font-family: "Unb"; src: url("img/Unbounded.ttf"); font-weight: 200 900; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 1280px; overflow: hidden; background: #0b0d10; }
+  .a { position: absolute; } .nw { white-space: nowrap; }
+</style></head><body>
+<img id="bg" class="a" src="img/tg2.jpg" style="inset:0;width:1280px;height:1280px">
+<div id="o" class="a" style="inset:0"></div>
+<script>
+const v = new URLSearchParams(location.search).get("v") || "1", O = document.getElementById("o");
+const fade = (h, a) => `<div class="a" style="left:0;right:0;top:0;height:${h}px;background:linear-gradient(rgba(6,8,12,${a}),rgba(6,8,12,${a * .55}) 55%,transparent)"></div>`;
+if (v === "1") O.innerHTML = fade(460, .8) + `
+  <div class="a" style="left:56px;top:40px;width:1060px;border-radius:24px;background:rgba(8,12,16,.84);border:2px solid rgba(80,255,160,.45);box-shadow:0 0 40px rgba(60,255,150,.25),0 24px 50px rgba(0,0,0,.5);overflow:hidden">
+    <div style="display:flex;gap:10px;align-items:center;padding:14px 22px;border-bottom:1px solid rgba(80,255,160,.25)"><i style="width:16px;height:16px;border-radius:50%;background:#ff5f57"></i><i style="width:16px;height:16px;border-radius:50%;background:#febc2e"></i><i style="width:16px;height:16px;border-radius:50%;background:#28c840"></i><span style="margin-left:14px;font:22px Mono;color:#7f8c99">arbuzov@bank:~</span></div>
+    <div style="padding:18px 30px 24px;font:34px/1.3 Mono;color:#c9ffe0">
+      <div><span style="color:#5cff9d">$</span> close --credit-card --no-interest</div>
+      <div class="nw" style="margin-top:8px;font:900 62px/1.05 Unb;letter-spacing:-.03em;color:#fff;text-shadow:0 0 24px rgba(90,255,160,.55)">КАК ЗАКРЫТЬ <span style="color:#5cff9d">КРЕДИТКУ</span></div>
+      <div style="margin-top:10px;font:30px Mono;color:#5cff9d">[ OK ] долг 0,00 ₽ · проценты 0,00 ₽<span style="display:inline-block;width:18px;height:32px;background:#5cff9d;margin-left:10px;vertical-align:-5px"></span></div>
+    </div></div>`;
+if (v === "2") O.innerHTML = fade(470, .78) + `
+  <svg class="a" width="1280" height="1280" style="left:0;top:0"><g fill="none" stroke="#ffe066" stroke-width="7"><path d="M60 120 V60 H120"/><path d="M1160 60 H1220 V120"/><path d="M60 290 V350 H120"/><path d="M1160 350 H1220 V290"/></g></svg>
+  <div class="a nw" style="left:92px;top:84px;font:30px Mono;letter-spacing:.3em;color:#ffe066">// ИНСТРУКЦИЯ · 7 ШАГОВ · 4 БАНКА</div>
+  <div class="a" style="left:86px;top:140px">
+    <div class="nw" style="position:relative;font:110px/1 Tek;letter-spacing:.02em;color:#fff">
+      <span class="a" style="left:-6px;top:0;color:#ff2d55;opacity:.85;mix-blend-mode:screen">ЗАКРЫТЬ КРЕДИТКУ</span><span class="a" style="left:6px;top:0;color:#00e5ff;opacity:.85;mix-blend-mode:screen">ЗАКРЫТЬ КРЕДИТКУ</span><span style="position:relative">ЗАКРЫТЬ КРЕДИТКУ</span></div>
+    <div class="nw" style="margin-top:30px;display:inline-flex;align-items:center;gap:22px;padding:14px 30px;background:#ffe066;color:#111;font:56px/1 Tek;clip-path:polygon(0 0,96% 0,100% 30%,100% 100%,4% 100%,0 70%)">БЕЗ ПРОЦЕНТОВ <span style="font:40px Mono">0,00 ₽</span></div>
+  </div>`;
+if (v === "3") O.innerHTML = fade(460, .72) + `
+  <div class="a" style="left:56px;top:46px;width:1110px;padding:28px 40px 30px;border-radius:40px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04));border:2px solid rgba(255,255,255,.35);backdrop-filter:blur(14px);box-shadow:0 30px 60px rgba(0,0,0,.45)">
+    <div class="nw" style="font:24px Mono;letter-spacing:.25em;color:#9fe8ff">КРЕДИТКА.EXE → ЗАКРЫТЬ</div>
+    <div class="nw" style="margin-top:12px;font:900 82px/1 Unb;letter-spacing:-.04em;color:#fff;text-shadow:0 0 18px rgba(0,229,255,.9),0 0 46px rgba(0,229,255,.55)">ЗАКРЫТЬ <span style="color:transparent;-webkit-text-stroke:3px #00e5ff">КРЕДИТКУ</span></div>
+    <div style="margin-top:20px;display:flex;align-items:center;gap:18px"><div style="flex:1;height:12px;border-radius:6px;background:rgba(255,255,255,.18);overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,#00e5ff,#7cff6b)"></div></div><span class="nw" style="font:30px Mono;color:#7cff6b">100% · 0 ₽ процентов</span></div>
+  </div>`;
+Promise.all([document.fonts.load("40px Mono", "0 ₽"), document.fonts.load("40px Tek", "ЗАКРЫТЬ"), document.fonts.load("900 40px Unb", "ЗАКРЫТЬ"), new Promise(r => { const i = document.getElementById("bg"); i.complete ? r() : (i.onload = r); })]).then(() => { window.__ready = true; });
+</script></body></html>
