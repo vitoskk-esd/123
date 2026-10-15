@@ -286,7 +286,7 @@
    "prompt": "He laughs and leans back on the throne, coins keep raining, confetti falls, the crown wobbles. Slow push-in. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
   },
   {
-   "id": "k07",
+   "id": "k17",
    "from": "p07",
    "duration": 5,
    "prompt": "The clerk slowly shakes his head, then pulls down a blind behind the glass window. Static camera. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
@@ -296,6 +296,12 @@
    "from": "f05",
    "duration": 5,
    "prompt": "He reads the phone, his eyes light up and he pumps his fist in the air with joy: yes! Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k07",
+   "from": "n07",
+   "duration": 5,
+   "prompt": "He flips the calendar pages back one by one, counting on his fingers, frowning more with each page. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
   }
  ],
  "design": "reels/arb-story-20/hf/d01.png",
