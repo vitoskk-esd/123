@@ -60,11 +60,13 @@ s.onload = () => {
     pend = [];
     const k = shotAt(t), sh = TL.shots[k], lt = t - sh.t0;
     // кадр клипа: с 0,15 с (первый кадр — неподвижная картинка), скорость sh.rate, после конца — последний кадр
-    const n = Math.min(NCLIP, Math.max(1, Math.floor((.15 + lt * sh.rate) * 30) + 1)), src = `../${REEL}/out/clips/${sh.clip}/${String(n).padStart(3, "0")}.jpg`;
+    const n = Math.min(NCLIP, Math.max(1, Math.floor((.15 + lt * sh.rate) * 30) + 1));
+    const src = sh.img ? `../${REEL}/out/img/${sh.img}.jpg` : `../${REEL}/out/clips/${sh.clip}/${String(n).padStart(3, "0")}.jpg`;   // img — видео ещё нет
     if (!V.src.endsWith(src.slice(2))) { V.src = src; pend.push(V.decode().catch(() => 0)); }
     // камера: лёгкий наезд за план + «удар» на ключевом слове (резко +9 %, остаётся до конца плана); после склейки — короткий «впрыг»
-    let z = 1.0 + .035 * cl(lt / Math.max(1, sh.t1 - sh.t0)) + .05 * (1 - out4(lt / .3));
+    let z = 1.0 + (sh.img ? .12 : .035) * cl(lt / Math.max(1, sh.t1 - sh.t0)) + .05 * (1 - out4(lt / .3));   // у рисунка наезд сильнее
     sh.punch.forEach(p => { if (t >= p) z += .09 * out4((t - p) / .12); });
+    if (sh.lock) z = 1;   // план с надписью на доске: камера стоит, иначе рукописный текст «съезжает» с доски
     V.style.transform = `scale(${z})`;
     // воспоминание: сепия, тёплая виньетка, вспышка на входе
     const mem = sh.look === "memory";
