@@ -140,5 +140,56 @@
    ],
    "prompt": "Character design, full body. Arbuzov: a round watermelon body with short arms and legs, painted realistically with rind texture and stripes, wearing an unzipped black zip-hoodie with the hood down and a thin silver chain, red baseball cap worn backwards, big expressive white eyes, cocky grin, holding a smartphone. Standing in a panel-apartment kitchen at night, lit by a ceiling lamp."
   }
- ]
+ ],
+ "brand": [
+  {
+   "id": "a_d01",
+   "ar": "1:1",
+   "refs": [
+    "reels/arb-story-20/hf/d01.png"
+   ],
+   "prompt": "YouTube channel avatar, square. Head-and-shoulders close-up portrait of the character from the reference image, keep his design identical, looking straight at the viewer with a cheeky confident grin, one eyebrow raised. Plain bold warm red-orange background with a soft painted glow behind him, strong rim light, big readable silhouette that works at a tiny size. No text."
+  },
+  {
+   "id": "b_d01",
+   "ar": "16:9",
+   "refs": [
+    "reels/arb-story-20/hf/d01.png"
+   ],
+   "prompt": "Wide YouTube channel banner. Evening street in a Russian city with panel buildings, warm sunset, puddles reflecting lights. The character from the reference image (keep his design identical) runs to the right with a cheeky grin, carrying a burlap sack full of money, gold coins flying out, dust and speed lines. Behind him four angry anthropomorphic bank cards with arms and legs (yellow, red, lime green and blue, no logos) chase him, one in dark sunglasses with a gold chain, raising a rolled-up contract, a stamp and a calculator. Keep all characters inside a centered horizontal band (middle 60% of the width, middle 30% of the height); leave calm empty sky on the left third for a title. No text, no letters."
+  },
+  {
+   "id": "a_d02",
+   "ar": "1:1",
+   "refs": [
+    "reels/arb-story-20/hf/d02.png"
+   ],
+   "prompt": "YouTube channel avatar, square. Head-and-shoulders close-up portrait of the character from the reference image, keep his design identical, looking straight at the viewer with a cheeky confident grin, one eyebrow raised. Plain bold warm red-orange background with a soft painted glow behind him, strong rim light, big readable silhouette that works at a tiny size. No text."
+  },
+  {
+   "id": "b_d02",
+   "ar": "16:9",
+   "refs": [
+    "reels/arb-story-20/hf/d02.png"
+   ],
+   "prompt": "Wide YouTube channel banner. Evening street in a Russian city with panel buildings, warm sunset, puddles reflecting lights. The character from the reference image (keep his design identical) runs to the right with a cheeky grin, carrying a burlap sack full of money, gold coins flying out, dust and speed lines. Behind him four angry anthropomorphic bank cards with arms and legs (yellow, red, lime green and blue, no logos) chase him, one in dark sunglasses with a gold chain, raising a rolled-up contract, a stamp and a calculator. Keep all characters inside a centered horizontal band (middle 60% of the width, middle 30% of the height); leave calm empty sky on the left third for a title. No text, no letters."
+  },
+  {
+   "id": "a_d03",
+   "ar": "1:1",
+   "refs": [
+    "reels/arb-story-20/hf/d03.png"
+   ],
+   "prompt": "YouTube channel avatar, square. Head-and-shoulders close-up portrait of the character from the reference image, keep his design identical, looking straight at the viewer with a cheeky confident grin, one eyebrow raised. Plain bold warm red-orange background with a soft painted glow behind him, strong rim light, big readable silhouette that works at a tiny size. No text."
+  },
+  {
+   "id": "b_d03",
+   "ar": "16:9",
+   "refs": [
+    "reels/arb-story-20/hf/d03.png"
+   ],
+   "prompt": "Wide YouTube channel banner. Evening street in a Russian city with panel buildings, warm sunset, puddles reflecting lights. The character from the reference image (keep his design identical) runs to the right with a cheeky grin, carrying a burlap sack full of money, gold coins flying out, dust and speed lines. Behind him four angry anthropomorphic bank cards with arms and legs (yellow, red, lime green and blue, no logos) chase him, one in dark sunglasses with a gold chain, raising a rolled-up contract, a stamp and a calculator. Keep all characters inside a centered horizontal band (middle 60% of the width, middle 30% of the height); leave calm empty sky on the left third for a title. No text, no letters."
+  }
+ ],
+ "style_vertical": "vertical 9:16, main character in the lower-middle part of the frame with free space at the top. "
 }

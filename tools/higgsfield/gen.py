@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Кадры и живые вставки рилса через Higgsfield по заданиям <рилс>/hf_jobs.json (designs → images → clips).
+"""Кадры и живые вставки рилса через Higgsfield по заданиям <рилс>/hf_jobs.json (designs → brand: аватарка и шапка → images → clips).
 Без --go ничего не отправляет и ничего не списывает: печатает, что будет сгенерировано.
   <python с higgsfield-client> tools/higgsfield/gen.py reels/arb-story-20                 # план, бесплатно
   <python с higgsfield-client> tools/higgsfield/gen.py reels/arb-story-20 --go f01,f03    # ПЛАТНО: только эти задания
@@ -40,7 +40,7 @@ def main():
     reel = (ROOT / sys.argv[1]).resolve(); go = sys.argv[sys.argv.index("--go") + 1].split(",") if "--go" in sys.argv else []
     J = json.load(open(reel / "hf_jobs.json", encoding="utf-8")); out = reel / "hf"; out.mkdir(exist_ok=True)
     logf = out / "log.json"; log = json.load(open(logf)) if logf.exists() else {}
-    jobs = [("img", j) for j in J.get("designs", []) + J["images"]] + [("vid", j) for j in J["clips"]]
+    jobs = [("img", j) for j in J.get("designs", []) + J.get("brand", []) + J["images"]] + [("vid", j) for j in J["clips"]]
     for kind, j in jobs:
         dst = out / (j["id"] + (".png" if kind == "img" else ".mp4"))
         what = "кадр" if kind == "img" else "видео %d с" % j["duration"]
@@ -62,7 +62,8 @@ def main():
         dst = out / (j["id"] + (".png" if kind == "img" else ".mp4"))
         if j["id"] not in go or dst.exists(): continue
         if kind == "img":
-            app, args = IMG, dict(prompt=J["style"] + " " + j["prompt"], image_urls=[upload(r) for r in j["refs"]], aspect_ratio="9:16", resolution="2k", quality="medium")
+            style = J["style"] if j.get("ar", "9:16") == "9:16" else J["style"].replace(J.get("style_vertical", ""), "")   # для аватарки и шапки — без «вертикально, персонаж внизу»
+            app, args = IMG, dict(prompt=style + " " + j["prompt"], image_urls=[upload(r) for r in j["refs"]], aspect_ratio=j.get("ar", "9:16"), resolution="2k", quality="medium")
         else:
             src = out / (j["from"] + ".png")
             if not src.exists(): print(f"{j['id']}: нет кадра {src.name}, пропуск"); continue
