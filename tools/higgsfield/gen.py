@@ -36,6 +36,25 @@ def first_url(x):
     return None
 
 
+def save(log, f):
+    json.dump(log, open(f, "w"), ensure_ascii=False, indent=1)
+
+
+def retry(fn, *a):
+    """Сеть через прокси иногда рвёт соединение (15.10 так потеряли номер оплаченного запроса c09) — повторяем, а не падаем."""
+    for k in range(8):
+        try: return fn(*a)
+        except (httpx.TransportError, httpx.HTTPStatusError) as e:
+            if k == 7: raise
+            print(f"  сеть: {type(e).__name__}, повтор через {5 * (k + 1)} с", flush=True); time.sleep(5 * (k + 1))
+
+
+def wait(rid):
+    """Ждём готовности запроса по его номеру; ответ — как у subscribe (dict со status и ссылками)."""
+    while not isinstance(retry(higgsfield_client.status, rid), higgsfield_client.DONE_STATUSES): time.sleep(4)
+    return retry(higgsfield_client.result, rid)
+
+
 def main():
     reel = (ROOT / sys.argv[1]).resolve(); go = sys.argv[sys.argv.index("--go") + 1].split(",") if "--go" in sys.argv else []
     J = json.load(open(reel / "hf_jobs.json", encoding="utf-8")); out = reel / "hf"; out.mkdir(exist_ok=True)
@@ -70,16 +89,22 @@ def main():
             app = J.get("clip_app", VID); url = upload(str(src.relative_to(ROOT)))
             args = (dict(prompt=j["prompt"], image_url=url, duration=j["duration"], resolution="720p", generate_audio=False) if app == VID
                     else dict(prompt=j["prompt"], image_url=url, duration=j["duration"], negative_prompt="text, letters, watermark, deformed face, extra limbs"))
-        t0 = time.time(); print(f"{j['id']}: отправляю в {app}")
+        t0 = time.time(); rec = log.setdefault(j["id"], {})
         try:
-            res = higgsfield_client.subscribe(app, arguments=args, on_enqueue=lambda rid, i=j["id"]: log.setdefault(i, {}).update(request_id=rid))
+            if rec.get("request_id") and rec.get("status") not in ("completed", "failed", "nsfw", "canceled"):
+                rid = rec["request_id"]; print(f"{j['id']}: продолжаю ждать запрос {rid} (уже оплачен, повторно не отправляю)")
+            else:
+                print(f"{j['id']}: отправляю в {app}")
+                rid = higgsfield_client.submit(app, arguments=args).request_id
+                rec.update(request_id=rid, app=app, status="queued"); save(log, logf)   # номер запроса — на диск сразу
+            res = wait(rid)
         except HiggsfieldClientError as e:
-            print(f"{j['id']}: ошибка API — {type(e).__name__}: {e}"); break
+            print(f"{j['id']}: ошибка API — {type(e).__name__}: {e}"); save(log, logf); break
         st = res.get("status") if isinstance(res, dict) else None
         url = first_url(res)
         if st not in (None, "completed") or not url:
             print(f"{j['id']}: не получилось (статус {st}); за неудачные и NSFW деньги не списываются"); log.setdefault(j["id"], {})["status"] = st; continue
-        dst.write_bytes(httpx.get(url, timeout=300, follow_redirects=True).content)
+        dst.write_bytes(retry(lambda: httpx.get(url, timeout=300, follow_redirects=True).raise_for_status().content))
         log.setdefault(j["id"], {}).update(status="completed", app=app, sec=round(time.time() - t0))
         print(f"{j['id']}: готово за {time.time() - t0:.0f} с → {dst.relative_to(ROOT)}")
         json.dump(log, open(logf, "w"), ensure_ascii=False, indent=1)
