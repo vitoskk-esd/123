@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Кадры и живые вставки рилса через Higgsfield по заданиям <рилс>/hf_jobs.json.
+"""Кадры и живые вставки рилса через Higgsfield по заданиям <рилс>/hf_jobs.json (designs → images → clips).
 Без --go ничего не отправляет и ничего не списывает: печатает, что будет сгенерировано.
   <python с higgsfield-client> tools/higgsfield/gen.py reels/arb-story-20                 # план, бесплатно
   <python с higgsfield-client> tools/higgsfield/gen.py reels/arb-story-20 --go f01,f03    # ПЛАТНО: только эти задания
@@ -40,7 +40,7 @@ def main():
     reel = (ROOT / sys.argv[1]).resolve(); go = sys.argv[sys.argv.index("--go") + 1].split(",") if "--go" in sys.argv else []
     J = json.load(open(reel / "hf_jobs.json", encoding="utf-8")); out = reel / "hf"; out.mkdir(exist_ok=True)
     logf = out / "log.json"; log = json.load(open(logf)) if logf.exists() else {}
-    jobs = [("img", j) for j in J["images"]] + [("vid", j) for j in J["clips"]]
+    jobs = [("img", j) for j in J.get("designs", []) + J["images"]] + [("vid", j) for j in J["clips"]]
     for kind, j in jobs:
         dst = out / (j["id"] + (".png" if kind == "img" else ".mp4"))
         what = "кадр" if kind == "img" else "видео %d с" % j["duration"]
@@ -52,6 +52,9 @@ def main():
     ups = log.setdefault("_uploads", {})
 
     def upload(rel):
+        if rel == "@design":   # образец персонажа — дизайн, который выбрал владелец (поле "design" в hf_jobs.json)
+            if not J.get("design"): raise SystemExit("Дизайн Арбузова не выбран: впишите путь в \"design\" в hf_jobs.json")
+            rel = J["design"]
         if rel not in ups: ups[rel] = higgsfield_client.upload_file(ROOT / rel); print(f"  загружен образец {rel}")
         return ups[rel]
 

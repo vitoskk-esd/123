@@ -1,34 +1,144 @@
 {
-  "_": "Задания Higgsfield для рилса 20. Кадры: xai/grok-imagine-image-2.0 (до 10 картинок-образцов), 9:16, 2k. Живые вставки: bytedance/seedance-2.5/image-to-video из готового кадра, 720p, без звука (звук — наш). Текст и цифры на картинках не рисуем: русские надписи, пуши и чат кладём кодом поверх.",
-  "style": "Same cartoon character as in the reference image: a watermelon boy with a pink face, big expressive eyes, red baseball cap exactly as in the reference, white cartoon gloves, short green legs, white sneakers. Keep his design identical to the reference. Bright cozy 2D cartoon illustration, thick dark outlines, rich detailed background, warm cinematic lighting, depth of field, vertical 9:16 composition with the character in the lower-middle part of the frame and free space at the top. No text, no letters, no numbers, no logos, no watermarks.",
-  "images": [
-    {"id": "f01", "phrase": 0, "refs": ["youtube/characters/gpt/src/phone.webp", "youtube/characters/gpt/bg/kitchen.jpg"],
-     "prompt": "Night in this kitchen. He sits at the table in the dark, only his phone screen lights his face with a cold blue glow, he stares at the screen with wide surprised eyes. City lights in the window."},
-    {"id": "f02", "phrase": 1, "refs": ["youtube/characters/gpt/src/phone.webp", "youtube/characters/gpt/bg/room.jpg"],
-     "prompt": "In this room he lies on the sofa, excitedly tapping the phone with both thumbs, tongue out from concentration, legs kicking in the air."},
-    {"id": "f03", "phrase": 1, "refs": ["youtube/characters/gpt/src/shrug.webp", "youtube/characters/gpt/bg/room.jpg"],
-     "prompt": "In this room he stands frozen in shock, the phone in his hand glows red, a sweat drop on his head, mouth open, dramatic red rim light."},
-    {"id": "f04", "phrase": 2, "refs": ["youtube/characters/gpt/src/phone.webp"],
-     "prompt": "Flashback in spring: a park bench under blossoming cherry trees, sunny day. He sits on the bench, bored, lazily swiping a half-filled form away on his phone, then looks away at a passing ice-cream cart. Soft warm nostalgic film look."},
-    {"id": "f05", "phrase": 3, "refs": ["youtube/characters/gpt/src/phone.webp", "youtube/characters/gpt/bg/room.jpg"],
-     "prompt": "Evening in this room. He sits at a desk with a determined, cunning smile, typing a message on the phone, a desk lamp lights him, a mug of tea next to him."},
-    {"id": "f06", "phrase": 4, "refs": ["youtube/characters/gpt/src/phone.webp", "youtube/characters/gpt/bg/store.jpg"],
-     "prompt": "At the checkout of this store. He holds his phone up to a payment terminal with a square code on its screen, a friendly cashier behind the counter, shopping bag with groceries."},
-    {"id": "f07", "phrase": 4, "refs": ["youtube/characters/gpt/src/shrug.webp", "youtube/characters/gpt/bg/store.jpg"],
-     "prompt": "Outside this store at the door, he looks at his phone disappointed, shoulders down, a grey cloud above his head, groceries in the other hand."},
-    {"id": "f08", "phrase": 5, "refs": ["youtube/characters/gpt/src/point.webp", "youtube/characters/gpt/bg/store.jpg"],
-     "prompt": "At the checkout of this store. He confidently taps a bright yellow plastic bank card on the payment terminal, winking, the terminal shows a green light."},
-    {"id": "f09", "phrase": 5, "refs": ["youtube/characters/gpt/src/wave.webp", "youtube/characters/gpt/bg/kitchen.jpg"],
-     "prompt": "Morning in this kitchen, sunlight through the window. He jumps high with joy holding the phone up, golden coins flying around him, huge happy smile."},
-    {"id": "f10", "phrase": 6, "refs": ["youtube/characters/gpt/src/point.webp", "youtube/characters/gpt/bg/room.jpg"],
-     "prompt": "In this room he stands next to a big empty whiteboard and points at it with a smart confident face, a marker in the other hand. The whiteboard is completely blank."},
-    {"id": "f11", "phrase": 7, "refs": ["youtube/characters/gpt/src/wave.webp", "youtube/characters/gpt/bg/kitchen.jpg"],
-     "prompt": "Close-up medium shot in this kitchen: he waves at the viewer with a cheeky smile, looking straight into the camera, warm light."}
-  ],
-  "clips": [
-    {"id": "c01", "from": "f01", "duration": 4, "prompt": "The phone light flickers on his face, his eyes slowly go wide and he leans closer to the screen. Slow camera push-in. Cartoon animation, keep the character design."},
-    {"id": "c03", "from": "f03", "duration": 4, "prompt": "He freezes, then his jaw drops and he slowly lowers the phone, the sweat drop slides down. Slight camera shake. Cartoon animation, keep the character design."},
-    {"id": "c06", "from": "f06", "duration": 4, "prompt": "He brings the phone to the terminal, it beeps, he smiles at the cashier. Handheld camera. Cartoon animation, keep the character design."},
-    {"id": "c09", "from": "f09", "duration": 4, "prompt": "He jumps with joy, coins bounce and sparkle around him, he lands and raises the phone. Camera follows the jump. Cartoon animation, keep the character design."}
-  ]
+ "_": "Задания Higgsfield для рилса 20. Владелец 15.10: «хочу как у амоБлога, нужна крутая рисовка». Стиль описан словами (чужие кадры образцом не даём, персонажа и приёмы амоБлога не копируем). Шаг 1 — дизайн Арбузова в новом стиле (d01–d03), владелец выбирает → путь в \"design\". Шаг 2 — сцены f01–f11 с образцом @design. Шаг 3 — живые вставки c01–c09 (Seedance 2.5 image-to-video, 720p, без звука). Текст и цифры на картинках не рисуем — пуши, чат, ценники кладём кодом поверх.",
+ "style": "Satirical hand-painted digital illustration for an adult YouTube channel about money: confident ink linework, painterly shading with visible brush texture, volumetric light, soft shadows, realistic muted palette with warm accents, highly detailed lived-in everyday Russian interiors and streets (Soviet-era panel apartments, old fridge with magnets, patterned carpet on the wall, oilcloth on the table, tiled kitchen, cheap supermarket), expressive slightly grotesque faces, cinematic composition, vertical 9:16, main character in the lower-middle part of the frame with free space at the top. Not a kids cartoon, not glossy 3D, not flat vector. No text, no letters, no numbers, no logos, no watermarks.",
+ "images": [
+  {
+   "id": "f01",
+   "phrase": 0,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. Night in a small panel-apartment kitchen. He sits at the table covered with oilcloth in the dark, only his phone screen lights his face with a cold blue glow, eyes wide in surprise. Window with panel buildings and lit windows."
+  },
+  {
+   "id": "f02",
+   "phrase": 1,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. In a small rented room with a patterned carpet on the wall he lies on an old sofa, excitedly tapping the phone with both thumbs, tongue out from concentration."
+  },
+  {
+   "id": "f03",
+   "phrase": 1,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. In the same room he stands frozen in shock, the phone in his hand glows red on his face, a sweat drop, mouth open, dramatic red rim light."
+  },
+  {
+   "id": "f04",
+   "phrase": 2,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. Flashback in spring: a bench in a courtyard of panel buildings, blossoming trees, sunny day. He sits on the bench, bored, lazily swiping away a half-filled form on his phone while looking at a passing ice-cream cart. Warm faded nostalgic look."
+  },
+  {
+   "id": "f05",
+   "phrase": 3,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. Evening at a cluttered desk in his room. He types a message on the phone with a cunning determined smile, desk lamp light, a mug of tea, instant noodles."
+  },
+  {
+   "id": "f06",
+   "phrase": 4,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. At the checkout of a cheap Russian supermarket with bright price tags. He holds his phone up to a payment terminal with a square code on its screen, a tired cashier behind the counter."
+  },
+  {
+   "id": "f07",
+   "phrase": 4,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. Outside the supermarket entrance in grey autumn weather, he looks at his phone disappointed, shoulders down, a plastic grocery bag in the other hand."
+  },
+  {
+   "id": "f08",
+   "phrase": 5,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. At the supermarket checkout. He confidently taps a bright yellow plastic bank card on the payment terminal, winking at the viewer, the terminal shows a green light."
+  },
+  {
+   "id": "f09",
+   "phrase": 5,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. Morning in the panel-apartment kitchen, sunlight through the window. He jumps high with joy holding the phone up, golden coins flying around him, huge happy grin."
+  },
+  {
+   "id": "f10",
+   "phrase": 6,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. In his room he stands next to a big empty whiteboard and points at it with a smart confident face, a marker in the other hand. The whiteboard is completely blank."
+  },
+  {
+   "id": "f11",
+   "phrase": 7,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical. Medium close-up in the kitchen: he waves at the viewer with a cheeky smile, looking straight into the camera, warm light."
+  }
+ ],
+ "clips": [
+  {
+   "id": "c01",
+   "from": "f01",
+   "duration": 4,
+   "prompt": "The phone light flickers on his face, his eyes slowly go wide and he leans closer to the screen. Slow camera push-in. Cartoon animation, keep the character design."
+  },
+  {
+   "id": "c03",
+   "from": "f03",
+   "duration": 4,
+   "prompt": "He freezes, then his jaw drops and he slowly lowers the phone, the sweat drop slides down. Slight camera shake. Cartoon animation, keep the character design."
+  },
+  {
+   "id": "c06",
+   "from": "f06",
+   "duration": 4,
+   "prompt": "He brings the phone to the terminal, it beeps, he smiles at the cashier. Handheld camera. Cartoon animation, keep the character design."
+  },
+  {
+   "id": "c09",
+   "from": "f09",
+   "duration": 4,
+   "prompt": "He jumps with joy, coins bounce and sparkle around him, he lands and raises the phone. Camera follows the jump. Cartoon animation, keep the character design."
+  }
+ ],
+ "design": "",
+ "designs": [
+  {
+   "id": "d01",
+   "refs": [
+    "youtube/characters/gpt/src/phone.webp"
+   ],
+   "prompt": "Character design, full body. Arbuzov, a 19-year-old guy whose head is a real striped watermelon with an expressive carved face: half-lidded ironic eyes, smirk. Human body in an oversized grey hoodie, sweatpants and worn white sneakers, red baseball cap worn backwards, holding a smartphone. Standing in a panel-apartment kitchen at night, lit by a ceiling lamp."
+  },
+  {
+   "id": "d02",
+   "refs": [
+    "youtube/characters/gpt/src/phone.webp"
+   ],
+   "prompt": "Character design, full body. Arbuzov: the whole character is a round watermelon with short arms and legs like in the reference, but painted realistically: real watermelon rind texture with dark stripes and subtle gloss, big white bulging eyes with tiny pupils, tired ironic smirk, red baseball cap worn backwards, worn white sneakers, holding a smartphone. Standing in a panel-apartment kitchen at night, lit by a ceiling lamp."
+  },
+  {
+   "id": "d03",
+   "refs": [
+    "youtube/characters/gpt/src/phone.webp"
+   ],
+   "prompt": "Character design, full body. Arbuzov: a round watermelon body with short arms and legs, painted realistically with rind texture and stripes, wearing an unzipped black zip-hoodie with the hood down and a thin silver chain, red baseball cap worn backwards, big expressive white eyes, cocky grin, holding a smartphone. Standing in a panel-apartment kitchen at night, lit by a ceiling lamp."
+  }
+ ]
 }
