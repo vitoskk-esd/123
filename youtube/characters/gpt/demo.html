@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Арбузов — гибрид ChatGPT + движок</title>
+<!-- Владелец 15.10: рисовку делаем в ChatGPT (фоны и позы Арбузова), оживляем кодом. Проба 9 с, 16:9:
+     фон из ChatGPT + камера (наезд, дрейф), Арбузов — вырезанная поза (tools/sprite_cut.py), рот рисуем под голос (виземы rig.js),
+     моргание — веки поверх глаз, дыхание и «пружина» на словах; смена сцены — push slide (скилл hyperframes-animation);
+     пуш в телефоне — spring-pop; субтитры по слову. Голос и слова — из рилса 15 (первые две фразы). -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+  .a { position: absolute; }
+  .scene { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  .cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+</style>
+</head>
+<body>
+<div id="S1" class="scene"><div class="cam"><img class="a" src="bg/kitchen.jpg" style="left:0;top:0;width:1920px;height:1081px"><div class="a hero" data-pose="phone" style="left:300px;top:270px"></div>
+  <div class="a push" style="left:1080px;top:250px;width:540px;padding:28px 30px;border-radius:34px;background:rgba(255,255,255,.97);box-shadow:0 16px 0 rgba(0,0,0,.18);border:5px solid #1e1717">
+    <div style="font:700 26px I;color:#6b7280"><span style="display:inline-block;width:40px;height:40px;border-radius:11px;background:#2fa84f;color:#fff;font:900 24px/40px Unb;text-align:center;margin-right:12px">₽</span>Банк · сейчас</div>
+    <div style="font:900 70px/1.1 Unb;letter-spacing:-.03em;color:#1e1717;margin-top:12px">+1 000 ₽</div><div style="font:700 28px I;color:#4b5563;margin-top:6px">бонус новому клиенту</div></div></div></div>
+<div id="S2" class="scene" style="display:none"><div class="cam"><img class="a" src="bg/bank.jpg" style="left:0;top:0;width:1920px;height:1081px"><div class="a hero" data-pose="point" style="left:180px;top:250px"></div>
+  <div class="a push" style="left:1000px;top:330px;padding:22px 40px 26px;border-radius:18px;background:linear-gradient(135deg,#ffe066,#f2c230);box-shadow:0 16px 0 rgba(0,0,0,.2);transform-origin:0 0;border:5px solid #1e1717">
+    <div style="font:700 34px I;color:#1e1717">ОБЫЧНО</div><div style="font:900 96px/1.05 Unb;letter-spacing:-.04em;color:#1e1717">1–2 тыс. ₽</div></div></div></div>
+<div id="cap" class="a" style="left:0;right:0;top:910px;text-align:center;z-index:5"></div>
+<script src="../rig/rig.js"></script>
+<script src="../../../reels/arb-newbie-15/timeline.js"></script>
+<script>
+const SRC = window.TL, OL = "#1e1717";
+const cl = (x) => Math.min(1, Math.max(0, x)), ease = (x) => 1 - Math.pow(1 - cl(x), 3), io = (x) => { x = cl(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x) => { x = cl(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const B1 = SRC.scenes[1].t0, END = SRC.scenes[2].t0 - .05;   // две первые фразы рилса 15
+window.TL = { duration: END, fps: 30, size: [1920, 1080] };
+const SCALE = .82;                                            // масштаб позы в сцене
+fetch("sprites/sprites.json").then(r => r.json()).then(M => {
+  // Арбузов: картинка позы + наш рот + веки
+  document.querySelectorAll(".hero").forEach(h => {
+    const m = M[h.dataset.pose], k = SCALE, fc = m.face.color;
+    h.style.width = m.w * k + "px"; h.style.height = m.h * k + "px"; h.style.transformOrigin = "50% 96%";
+    h.innerHTML = `<img src="sprites/${h.dataset.pose}.png" style="width:100%;height:100%;display:block">` +
+      m.eyes.map(e => `<div class="a lid" style="left:${(e.x0 - 4) * k}px;top:${(e.y0 - 4) * k}px;width:${(e.x1 - e.x0 + 8) * k}px;height:${(e.y1 - e.y0 + 8) * k}px;overflow:hidden;border-radius:50%"><div style="width:100%;height:100%;background:${fc};border-bottom:${6 * k}px solid ${OL};transform-origin:50% 0"></div></div>`).join("") +
+      `<svg class="a mouth" style="left:${(m.mouth.cx - 90) * k}px;top:${(m.mouth.cy - 70) * k}px" width="${180 * k}" height="${140 * k}" viewBox="0 0 180 140"></svg>`;
+    h._m = m;
+  });
+  // рот по виземе (в координатах 180×140, центр 90,70), ширина под нарисованный рот позы
+  const mouthSvg = (v, w) => {
+    const s = w / 110, g = (d, fill = "#6b1414") => `<g transform="translate(90 70) scale(${s})">${d.replace(/FILL/g, fill)}</g>`;
+    const T = `<path d="M-22 18 Q 0 4 22 18 Q 0 30 -22 18 Z" fill="#f07a86"/>`;
+    if (!v) return g(`<path d="M-38 -6 Q 0 26 38 -6" fill="none" stroke="${OL}" stroke-width="9" stroke-linecap="round"/>`);
+    if (v === "M") return g(`<path d="M-34 0 Q 0 14 34 0" fill="none" stroke="${OL}" stroke-width="9" stroke-linecap="round"/>`);
+    const P = { A: "M-42 -16 Q 0 -22 42 -16 Q 40 40 0 44 Q -40 40 -42 -16 Z", O: "M-24 -18 Q 0 -26 24 -18 Q 30 14 0 36 Q -30 14 -24 -18 Z",
+      E: "M-46 -10 Q 0 -16 46 -10 Q 40 20 0 24 Q -40 20 -46 -10 Z", S: "M-34 -8 Q 0 -12 34 -8 Q 30 12 0 16 Q -30 12 -34 -8 Z" }[v] || "";
+    return g(`<clipPath id="mc${v}"><path d="${P}"/></clipPath><path d="${P}" fill="FILL"/><g clip-path="url(#mc${v})">${T}</g><path d="${P}" fill="none" stroke="${OL}" stroke-width="8" stroke-linejoin="round"/>`);
+  };
+  const pulse = (t) => { for (const w of SRC.words) { if (t < w.s) return 0; if (t < w.s + .18) return Math.sin((t - w.s) / .18 * Math.PI); } return 0; };
+  window.renderAt = (t) => {
+    const st = ArbuzovRig.state(t, { words: SRC.words, acts: SRC.acts }), p = pulse(t);
+    const scenes = [["S1", 0, B1], ["S2", B1, END + 1]];
+    const tr = cl((t - B1) / .4), e = io(tr), inTr = t >= B1 && t < B1 + .4;
+    scenes.forEach(([id, a, b], i) => {
+      const el = document.getElementById(id), on = (t >= a && t < b) || (inTr && i === 0);
+      el.style.display = on ? "block" : "none"; if (!on) return;
+      el.style.transform = inTr ? `translateX(${i === 0 ? -1920 * e : 1920 * (1 - e)}px)` : "";
+      const lt = t - a, d = b - a;
+      // камера: медленный наезд + дрейф (multi-phase camera, одна фаза на фразу)
+      const z = 1.04 + .07 * io(lt / Math.min(d, 6)), dx = Math.sin(t * 1.4) * 8, dy = Math.sin(t * 1.9 + 1) * 6;
+      const fx = i === 0 ? 860 : 900, fy = 600;
+      el.querySelector(".cam").style.transform = `translate(${960 - fx * z + dx}px,${540 - fy * z + dy}px) scale(${z})`;
+      // Арбузов: появление прыжком, дыхание, пружина на словах, рот и моргание
+      const h = el.querySelector(".hero"), pop = i === 0 ? 1 : back((lt - .15) / .45);
+      h.style.transform = `translateY(${(1 - pop) * 120}px) rotate(${Math.sin(t * 1.3) * 1.2}deg) scale(${(1 + p * .025) * (.85 + .15 * pop)},${(1 - p * .035 + Math.sin(t * 2.2) * .008) * (.85 + .15 * pop)})`;
+      h.querySelector(".mouth").innerHTML = mouthSvg(st.opts.mouth, h._m.mouth.w);
+      h.querySelectorAll(".lid > div").forEach(l => { l.style.transform = `scaleY(${st.opts.blink})`; });
+      // всплывающая плашка: spring-pop через 1 с после начала фразы
+      const pu = el.querySelector(".push"), k = (lt - (i === 0 ? 1.2 : .9)) / .45;
+      pu.style.opacity = cl(k * 3); pu.style.transform = `scale(${k >= 1 ? 1 : .5 + .5 * back(k)}) rotate(${i ? -3 : 2}deg)`;
+    });
+    // субтитры по слову
+    const ch = SRC.chunks.find(q => t >= q.t0 && t < q.t1), cap = document.getElementById("cap");
+    if (!ch) { cap.innerHTML = ""; return; }
+    const ws = SRC.words.filter(w => w.s >= ch.t0 - .1 && w.s < ch.t1);
+    cap.innerHTML = ch.w.map((w, j) => { const s0 = ws[j] ? ws[j].s : ch.t0, on = t >= s0 - .03, now = on && (!ws[j + 1] || t < ws[j + 1].s), kk = back((t - s0 + .03) / .16);
+      return `<span style="display:inline-block;margin:0 10px;opacity:${on ? 1 : 0};transform:scale(${on ? .7 + .3 * kk : .7});font:900 ${w.c ? 70 : 62}px/1.2 Unb;letter-spacing:-.02em;${now ? `background:#ffe066;color:${OL};border:5px solid ${OL};border-radius:16px;padding:0 14px;box-shadow:0 7px 0 ${OL}` : `color:${w.c === "k" ? "#ffe066" : "#fff"};-webkit-text-stroke:4px ${OL};paint-order:stroke fill;text-shadow:0 6px 0 ${OL}`}">${w.t.replace(/[,.:]$/, "")}</span>`; }).join("");
+  };
+  Promise.all(["900 20px Unb", "700 20px I"].map(f => document.fonts.load(f, "АБВ ₽"))).then(() => Promise.all([...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))))
+    .then(() => { renderAt(0); window.__ready = true; });
+});
+</script>
+</body>
+</html>
