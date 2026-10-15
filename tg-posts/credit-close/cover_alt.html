@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><title>Обложка: закрыть кредитку (форматы)</title>
 <!-- Владелец 15.10: «ещё варианты, нужен совсем другой формат текста» (после «терминала / HUD / неона»). Рисунок №2 (img/tg2.jpg).
-     ?v=1 «штамп ЗАКРЫТО», ?v=2 «чек из кассы», ?v=3 «стикеры», ?v=4 «экстренный выпуск новостей». Лица не закрываем. -->
+     ?v=1 «штамп ЗАКРЫТО», ?v=5 «штамп РАЗМИНИРОВАНО» на рисунке №3 (бомба; владелец 15.10), ?v=2 «чек из кассы», ?v=3 «стикеры», ?v=4 «экстренный выпуск новостей». Лица не закрываем. -->
 <style>
   @font-face { font-family: "Mono"; src: url("img/GeistMono-Bold.ttf"); }
   @font-face { font-family: "Unb"; src: url("img/Unbounded.ttf"); font-weight: 200 900; }
@@ -22,6 +22,10 @@ if (v === "1") O.innerHTML = shade(420, .55) + `
   <div class="a" style="left:70px;top:60px;transform:rotate(-7deg);filter:url(#grunge)">
     <div class="nw" style="padding:6px 44px 14px;border:16px solid #e11d2e;border-radius:28px;font:700 220px/1 Osw;letter-spacing:.06em;color:#e11d2e;background:rgba(255,245,235,.22)">ЗАКРЫТО</div>
     <div class="nw" style="display:inline-block;margin:18px 0 0 18px;padding:8px 18px;background:#e11d2e;font:700 50px/1 Osw;letter-spacing:.1em;color:#fff">КРЕДИТКА · ПРОЦЕНТЫ 0 ₽</div></div>`;
+if (v === "5") { document.getElementById("bg").src = "img/tg3.jpg"; O.innerHTML = shade(400, .5) + `
+  <div class="a" style="left:52px;top:62px;transform:rotate(-5deg);filter:url(#grunge)">
+    <div class="nw" style="padding:4px 34px 12px;border:13px solid #e11d2e;border-radius:24px;font:700 128px/1 Osw;letter-spacing:.04em;color:#e11d2e;background:rgba(255,245,235,.22)">РАЗМИНИРОВАНО</div>
+    <div class="nw" style="display:inline-block;margin:18px 0 0 18px;padding:8px 18px;background:#e11d2e;font:700 50px/1 Osw;letter-spacing:.1em;color:#fff">ПРОЦЕНТЫ 0 РУБЛЕЙ</div></div>`; }
 if (v === "2") O.innerHTML = `
   <div class="a" style="left:-6px;top:-40px;width:470px;transform:rotate(-4deg) scale(.74);transform-origin:0 0;filter:drop-shadow(0 22px 26px rgba(0,0,0,.55))">
     <div style="background:#fbf8f0;padding:70px 34px 30px;font:30px/1.5 Mono;color:#2a2622;-webkit-mask:linear-gradient(#000,#000) top/100% calc(100% - 18px) no-repeat,radial-gradient(circle at 12px 0,transparent 11px,#000 12px) bottom/24px 18px repeat-x">
