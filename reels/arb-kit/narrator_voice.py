@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Голос рассказчика рилсов от 3-го лица — №2 «denis» (Yandex LiveTTS), владелец 15.10: «голос номер 2, но доделай, чтобы был с интонацией».
 Интонация: phrases_marked.txt — те же фразы с разметкой Яндекса (**ударное слово**, sil<[мс]> паузы, «!»), ударения «+».
-На каждую фразу 3 дубля (LiveTTS каждый раз читает по-разному); из дублей, где Whisper услышал текст точно (≥ .9), берём
+На каждую фразу 3 дубля (LiveTTS каждый раз читает по-разному); из дублей, где Whisper услышал текст точно (≥ .97, иначе проскакивает «плати карты»), берём
 самый живой — с наибольшим диапазоном тона (pyin, 5–95 %, в полутонах). Выход как у arbuzov_voice.py: out/voice/voice.wav, words.json, phrases.json.
   <python с faster-whisper и librosa> arb-kit/narrator_voice.py <папка рилса>
 """
@@ -41,7 +41,7 @@ def main(reel):
             st = 12 * np.log2(f0 / np.median(f0)); rng = float(np.percentile(st, 95) - np.percentile(st, 5))
             print(f"{i} дубль {k}: точность {sim:.2f}, тон {rng:.1f} пт | {' '.join(x['w'] for x in words)}", flush=True)
             takes.append(dict(text=text, marked=marked, wav=wav, sim=round(sim, 3), range=round(rng, 1), words=words))
-        good = [t for t in takes if t["sim"] >= .9] or sorted(takes, key=lambda t: -t["sim"])[:1]
+        good = [t for t in takes if t["sim"] >= .97] or sorted(takes, key=lambda t: -t["sim"])[:1]
         meta[str(i)] = max(good, key=lambda t: t["range"]); json.dump(meta, open(meta_f, "w"), ensure_ascii=False, indent=1)
     ins, flt, allw, t = [], [], [], 0.0
     for i in range(len(P)):
