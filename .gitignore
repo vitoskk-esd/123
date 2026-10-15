@@ -21,3 +21,6 @@ data/screenshots/
 data/covers/
 data/logs/
 *.tmp
+
+# Higgsfield и прочие локальные ключи
+.env.local
