@@ -60,13 +60,16 @@ for k, c in enumerate(chunks): c["t1"] = round(min(chunks[k + 1]["t0"] if k + 1 
 
 # цифры «впечатываются» поверх сцены (kinetic beat slam), не отдельная склейка; в story.js можно задать big: "..."
 BIG = [(re.search(r'big: "([^"]*)"', f) or [None, None])[1] for f in story.split("{ time:")[1:]]
+# bigAt: "слово" — цифра бьёт на этом слове фразы (рилс 20: «…пришёл пуш: плюс тысяча» — цифрами Whisper её не пишет)
+BIGAT = [(re.search(r'bigAt: "([^"]*)"', f) or [None, None])[1] for f in story.split("{ time:")[1:]]
 slams = []
 for i in range(len(P)):
     num = [c for c in chunks if c["p"] == i and any(re.search(r"\d", w["t"]) for w in c["w"])]
-    if not (num or BIG[i]) or i == 0 and not num: continue
-    t0 = num[0]["t0"] if num else bounds[i] + min(1.6, (bounds[i + 1] - bounds[i]) * .45)
+    if not (num or BIG[i]) or i == 0 and not num and not BIGAT[i]: continue
+    at = [w["s"] for w in words if w["p"] == i and BIGAT[i] and norm(w["w"]).startswith(norm(BIGAT[i])[:5])]
+    t0 = at[0] - .05 if at else num[0]["t0"] if num else bounds[i] + min(1.6, (bounds[i + 1] - bounds[i]) * .45)
     t0 = max(t0, bounds[i] + .5)
-    slams.append(dict(t0=round(t0, 3), t1=round(min(t0 + 1.15, bounds[i + 1] - .15), 3), frame=i, text=BIG[i] or " ".join(w["t"] for w in num[0]["w"]).strip(",.:—")))
+    slams.append(dict(t0=round(t0, 3), t1=round(min(t0 + 1.15, max(bounds[i + 1] - .15, t0 + .95)), 3), frame=i, text=BIG[i] or " ".join(w["t"] for w in num[0]["w"]).strip(",.:—")))
 
 # эмоции для реакций и рта
 acts = []

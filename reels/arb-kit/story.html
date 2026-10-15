@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс-история с Арбузовым</title>
+<!-- Новый формат (владелец 15.10): Арбузов — парень, который проходит схемы с банками, рассказ от 3-го лица, монтаж «как у амоБлога».
+     Кадры — рисунки Higgsfield (out/img), живые вставки — кадры видео Kling (out/clips/<id>/NNN.jpg, 30 к/с), тайминг — timeline.js (build_arb.py),
+     раскадровка — story.js (pics, cam, ov). ?r=<папка рилса>. Движение — по скиллу hyperframes-animation, как у одобренных рилсов v3:
+     между фразами ОДИН основной переход push 0,35 с (+ zoom-акценты), внутри фразы — камера по станциям рисунка и жёсткая склейка между рисунками;
+     наложения (пуш, штамп, чат, плашки) — spring-pop / удар со встряской; цифры — kinetic slam; субтитры по слову. -->
+<style>
+  @font-face { font-family: "Unb"; src: url("../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  @font-face { font-family: "O"; src: url("../../youtube/kit/fonts/oswald-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "O"; src: url("../../youtube/kit/fonts/oswald-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #111; }
+  .a { position: absolute; } .nw { white-space: nowrap; }
+  .layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; display: none; overflow: hidden; transform-origin: 540px 960px; background: #111; }
+  .pic { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; display: none; }
+  .pic img.base { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+</style>
+</head>
+<body>
+<div id="stage" class="a" style="inset:0;overflow:hidden"><div id="layers"></div><div id="cap" class="a" style="inset:0;z-index:6"></div><div id="fx" class="a" style="inset:0;pointer-events:none;z-index:7"></div></div>
+<script>
+const REEL = new URLSearchParams(location.search).get("r");
+const load = (src) => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+const cl = (x) => Math.min(1, Math.max(0, x));
+const ease = (x) => 1 - Math.pow(1 - cl(x), 3), io2 = (x) => { x = cl(x); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }, io3 = (x) => { x = cl(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const out4 = (x) => 1 - Math.pow(1 - cl(x), 4);
+const back = (x) => { x = cl(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const OL = "#1e1717", hashf = (k) => { const x = Math.sin(k * 127.1) * 43758.5453; return x - Math.floor(x); };
+const norm = (s) => s.toLowerCase().replace(/ё/g, "е").replace(/[^а-яa-z0-9]/g, "");
+const FPS_CLIP = 30, NCLIP = 151;
+
+// наложения: разметка (координаты экрана 1080×1920 или рисунка)
+const OV = {
+  notif: (o) => `<div style="width:820px;padding:30px 34px;border-radius:40px;background:rgba(250,250,252,.97);border:6px solid ${OL};box-shadow:0 18px 0 rgba(0,0,0,.35)">
+      <div style="display:flex;align-items:center;gap:16px"><div style="width:62px;height:62px;border-radius:16px;background:${o.c || "#2fa84f"};color:#fff;font:900 36px/62px Unb;text-align:center">${o.icon || "₽"}</div>
+      <div class="nw" style="font:700 32px I;color:#6b7280">${o.app} · сейчас</div></div>
+      <div class="nw" style="font:900 92px/1.1 Unb;letter-spacing:-.04em;color:${o.c === "#e2283f" ? "#e2283f" : OL};margin-top:14px">${o.num}</div>
+      <div style="font:700 38px/1.3 I;color:#374151;margin-top:6px">${o.sub}</div></div>`,
+  pill: (o) => `<div class="nw" style="transform:rotate(${o.r || -3}deg);padding:18px 34px;border-radius:999px;background:${o.bg};color:${o.c};font:700 58px/1 O;letter-spacing:.04em;border:6px solid ${OL};box-shadow:0 10px 0 rgba(0,0,0,.35)">${o.text}</div>`,
+  stamp: (o) => `<div class="nw" style="transform:rotate(${o.r || -8}deg);padding:14px 34px;border:12px solid #e2283f;border-radius:18px;color:#e2283f;font:700 96px/1 O;letter-spacing:.05em;background:rgba(255,255,255,.82)">${o.text}</div>`,
+  chat: (o) => `<div style="width:${o.w}px;border-radius:40px;overflow:hidden;border:6px solid ${OL};box-shadow:0 18px 0 rgba(0,0,0,.35);background:#eef1f6">
+      <div style="padding:22px 30px;background:#2f5bea;color:#fff;font:900 36px Unb">Чат банка<div style="font:700 24px I;opacity:.85;margin-top:4px">поддержка · онлайн</div></div>
+      <div style="padding:22px 22px 26px;display:flex;flex-direction:column;gap:18px">${o.msgs.map((m, k) => `<div class="msg" data-k="${k}" style="align-self:${m.me ? "flex-end" : "flex-start"};max-width:88%;padding:20px 26px;border-radius:28px;${m.me ? "border-bottom-right-radius:8px;background:#2f5bea;color:#fff" : "border-bottom-left-radius:8px;background:#fff;color:" + OL};font:700 34px/1.3 I;box-shadow:0 6px 0 rgba(0,0,0,.18);transform-origin:${m.me ? "100%" : "0"} 100%">${m.t}</div>`).join("")}</div></div>`,
+  board: (o) => `<div style="width:${o.w}px">${o.lines.map((l, k) => `<div class="bl nw" data-k="${k}" style="display:table;font:700 64px/1.35 H;color:#1d3c8f;transform:rotate(-2deg)">${l.t}</div>`).join("")}</div>`,
+};
+
+Promise.all([load(`../${REEL}/story.js`), load(`../${REEL}/timeline.js`)]).then(() => {
+  const L = document.getElementById("layers"), FR = [];
+  const sceneWords = (i) => TL.words.filter(w => w.s >= TL.scenes[i].t0 - .05 && w.s < TL.scenes[i].t1);
+  const wordAt = (i, key) => { const k = norm(key), w = sceneWords(i).find(x => { const n = norm(x.w); return k.length <= 3 ? n === k : n.startsWith(k.slice(0, 5)); }); return w ? w.s : null; };
+  const atTime = (i, at) => typeof at === "number" ? TL.scenes[i].t0 + at : (wordAt(i, at) ?? TL.scenes[i].t0 + .5);
+  STORY.frames.forEach((fr, i) => {
+    const el = document.createElement("div"); el.className = "layer"; L.appendChild(el);
+    const pics = fr.pics.map((p, k) => {
+      const d = document.createElement("div"); d.className = "pic"; el.appendChild(d);
+      d.innerHTML = `<div class="a cam" style="left:0;top:0;width:1080px;height:1920px;transform-origin:0 0"><img class="base" src="../${REEL}/out/img/${p.src}.jpg" style="${p.look === "memory" ? "filter:sepia(.45) saturate(.8) contrast(1.05) brightness(1.04)" : ""}"><div class="imgov a" style="inset:0"></div></div>` +
+        (p.look === "memory" ? `<div class="a" style="inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(60,35,10,.55));pointer-events:none"></div>` : "");
+      const t0 = k === 0 ? TL.scenes[i].t0 : (wordAt(i, p.from) ?? TL.scenes[i].t0 + (TL.scenes[i].t1 - TL.scenes[i].t0) * k / fr.pics.length) - .12;
+      return { ...p, d, camEl: d.querySelector(".cam"), img: d.querySelector("img.base"), imgov: d.querySelector(".imgov"), t0 };
+    });
+    pics.forEach((p, k) => { p.t1 = k + 1 < pics.length ? pics[k + 1].t0 : TL.scenes[i].t1 + .5; });
+    const scr = document.createElement("div"); scr.className = "a"; scr.style.cssText = "inset:0;z-index:3"; el.appendChild(scr);
+    const ovs = (fr.ov || []).map((o) => {
+      const d = document.createElement("div"); d.className = "a"; d.style.cssText = `left:${o.x ?? 130}px;top:${o.y ?? 150}px;transform-origin:50% 0`;
+      d.innerHTML = OV[o.kind](o);
+      const t = atTime(i, o.at), host = o.space === "img" ? pics.find(p => t >= p.t0 - .01 && t < p.t1) || pics[0] : null;
+      (host ? host.imgov : scr).appendChild(d);
+      return { ...o, d, t, inner: d.firstElementChild, msgT: (o.msgs || []).map(m => atTime(i, m.at)), lineT: (o.lines || []).map(l => atTime(i, l.at)) };
+    });
+    FR.push({ el, pics, ovs });
+  });
+  // цифра поверх сцены (kinetic slam) — как в reel.html
+  const SL = document.createElement("div"); SL.className = "a"; SL.style.cssText = "inset:0;display:none;z-index:5"; document.getElementById("stage").insertBefore(SL, document.getElementById("cap"));
+  SL.innerHTML = `<div class="a sback" style="inset:0;background:rgba(20,14,12,.62)"></div>` + Array.from({ length: 10 }, (_, k) => `<div class="a scoin" data-k="${k}" style="left:485px;top:765px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c0,#f0b72f 55%,#a86d00);border:6px solid ${OL};display:flex;align-items:center;justify-content:center;font:700 60px O;color:#7a4a00">₽</div>`).join("") + `<div class="a stext" style="left:0;width:1080px;text-align:center"></div>`;
+  // лёгкая плёнка и виньетка поверх всего — рисунки «живописные», без неё склейки с видео заметнее
+  document.getElementById("fx").innerHTML = `<div class="a" style="inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 60%,rgba(0,0,0,.28))"></div><div class="a grain" style="inset:-40px;opacity:.07;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%22.9%22 numOctaves=%222%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/></svg>')"></div>`;
+  const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  const pending = [];
+
+  function drawScene(i, t) {
+    const f = FR[i], sc = TL.scenes[i];
+    let k = f.pics.findIndex(p => t >= p.t0 && t < p.t1); if (k < 0) k = t < f.pics[0].t0 ? 0 : f.pics.length - 1;
+    f.pics.forEach((p, j) => { p.d.style.display = j === k ? "block" : "none"; });
+    const p = f.pics[k], lt = t - p.t0, D = Math.max(.5, p.t1 - p.t0);
+    // живое видео: кадр клипа по времени от начала плана, после конца — последний кадр
+    if (p.clip) {
+      const n = Math.min(NCLIP, Math.max(1, Math.floor(lt * FPS_CLIP) + 1)), src = `../${REEL}/out/clips/${p.clip}/${String(n).padStart(3, "0")}.jpg`;
+      if (!p.img.src.endsWith(src.slice(2))) { p.img.src = src; pending.push(p.img.decode().catch(() => 0)); }
+    }
+    // камера по станциям: переезд 0,6 с, между переездами — медленный наезд и дрейф (камера не стоит)
+    const S = p.cam, n = S.length, seg = D / n, si = Math.min(n - 1, Math.floor(Math.max(0, lt) / seg));
+    const a = S[Math.max(0, si - 1)], b = S[si], m = si ? io2((lt - si * seg) / .6) : 1;
+    let z = a[2] + (b[2] - a[2]) * m, x = a[0] + (b[0] - a[0]) * m, y = a[1] + (b[1] - a[1]) * m;
+    z *= 1 + .04 * cl(lt / D) + (k > 0 ? .06 * (1 - out4(lt / .35)) : 0);          // склейка внутри фразы — с лёгким «впрыгиванием»
+    x += Math.sin(t * 1.45) * 9 / z; y += Math.sin(t * 1.9 + 1) * 7 / z;
+    x = Math.min(Math.max(x, 540 / z), 1080 - 540 / z); y = Math.min(Math.max(y, 960 / z), 1920 - 960 / z);
+    let shake = 0;
+    // наложения
+    f.ovs.forEach((o) => {
+      const dt = t - o.t, el = o.d;
+      if (dt < 0) { el.style.opacity = 0; return; }
+      if (o.kind === "stamp") {
+        el.style.opacity = cl(dt * 20); el.style.transform = `scale(${dt < .2 ? 2.4 - 1.4 * out4(dt / .2) : 1})`;
+        if (dt > .2 && dt < .48) shake = Math.max(shake, (1 - (dt - .2) / .28) * 22);
+      } else if (o.kind === "notif") {
+        el.style.opacity = cl(dt * 6); el.style.transform = `translateY(${(1 - back(dt / .45)) * -260}px) scale(${.92 + .08 * back(dt / .45)})`;
+      } else if (o.kind === "board") {
+        el.style.opacity = 1; el.style.transform = "";
+        el.querySelectorAll(".bl").forEach((l, j) => { const q = cl((t - o.lineT[j]) / .55); l.style.clipPath = `inset(-20% ${100 - q * 100}% -20% 0)`; });
+      } else {
+        el.style.opacity = cl(dt * 5); el.style.transform = `scale(${.4 + .6 * back(dt / .4)})`;
+        if (o.kind === "chat") el.querySelectorAll(".msg").forEach((mm, j) => { const q = (t - o.msgT[j]) / .35; mm.style.opacity = cl(q * 3); mm.style.transform = `scale(${q >= 1 ? 1 : .3 + .7 * back(q)})`; });
+      }
+    });
+    const fr60 = Math.floor(t * 60), sx = shake ? (hashf(fr60) - .5) * shake : 0, sy = shake ? (hashf(fr60 + 7) - .5) * shake : 0;
+    p.camEl.style.transform = `translate(${540 - x * z + sx}px,${960 - y * z + sy}px) scale(${z})`;
+  }
+
+  window.renderAt = (t) => {
+    pending.length = 0;
+    let si = TL.scenes.findIndex(s => t >= s.t0 && t < s.t1); if (si < 0) si = TL.scenes.length - 1;
+    const sc = TL.scenes[si], lt = t - sc.t0;
+    const TD = sc.tr === "zoom" ? .4 : .35, inTr = si > 0 && sc.tr !== "none" && lt < TD, e = io3(lt / TD);
+    FR.forEach((f, i) => { f.el.style.display = (i === si || (inTr && i === si - 1)) ? "block" : "none"; });
+    drawScene(si, t);
+    const inc = FR[si].el; inc.style.opacity = 1; inc.style.transform = ""; inc.style.zIndex = 2;
+    if (inTr) {
+      drawScene(si - 1, t);
+      const outEl = FR[si - 1].el; outEl.style.zIndex = 1;
+      if (sc.tr === "push") { outEl.style.transform = `translateX(${-1080 * e}px)`; outEl.style.opacity = 1; inc.style.transform = `translateX(${1080 * (1 - e)}px)`; }
+      else { outEl.style.transform = `scale(${1 + .5 * e})`; outEl.style.opacity = 1 - e; inc.style.transform = `scale(${.85 + .15 * e})`; inc.style.opacity = e; }
+    }
+    document.querySelector("#fx .grain").style.transform = `translate(${(hashf(Math.floor(t * 12)) - .5) * 40}px,${(hashf(Math.floor(t * 12) + 5) - .5) * 40}px)`;
+    // цифра поверх сцены
+    const sl = TL.slams.find(q => t >= q.t0 && t < q.t1);
+    if (sl) {
+      SL.style.display = "block"; const lt2 = t - sl.t0, D = sl.t1 - sl.t0, outK = cl((lt2 - (D - .16)) / .16);
+      SL.querySelector(".sback").style.opacity = cl(lt2 / .12) * (1 - outK);
+      const txt = sl.text, mm = /[–-]/.test(txt) ? null : txt.match(/\d[\d  ]*\d|\d/), num = mm ? +mm[0].replace(/\D/g, "") : null;
+      const shown = num ? txt.replace(mm[0], fmt(Math.round(num * io3(lt2 / .5)))) : txt;
+      const lines = shown.length > 9 && shown.includes(" ") && !/^\+?[\d  ]+ ₽$/.test(shown) ? [shown.slice(0, shown.lastIndexOf(" ", Math.ceil(shown.length / 2) + 2)), shown.slice(shown.lastIndexOf(" ", Math.ceil(shown.length / 2) + 2) + 1)] : [shown];
+      const size = Math.min(170, 960 / (Math.max(...lines.map(l => l.length)) * .98));
+      const tEl = SL.querySelector(".stext"); tEl.style.top = `${800 - lines.length * size * .55}px`;
+      tEl.innerHTML = `<div style="display:inline-block;transform:scale(${(1.8 - .8 * out4(lt2 / .18)) * (1 - .1 * outK)}) rotate(-3deg);opacity:${cl(lt2 / .06) * (1 - outK)};font:900 ${size}px/1.08 Unb;letter-spacing:-.04em;color:#ffe066;-webkit-text-stroke:10px ${OL};paint-order:stroke fill;text-shadow:0 16px 0 ${OL}">${lines.map(l => `<div class="nw">${l}</div>`).join("")}</div>`;
+      const money = /₽/.test(txt);
+      SL.querySelectorAll(".scoin").forEach(cn => { const j = +cn.dataset.k, a = -Math.PI * (.15 + .7 * j / 9), sp = 1300 + hashf(j + si) * 500, tt = Math.max(0, Math.min(lt2 - .15, 1.2));
+        cn.style.opacity = money && lt2 > .15 ? 1 - outK : 0;
+        cn.style.transform = `translate(${Math.cos(a) * sp * tt}px,${450 + Math.sin(a) * sp * tt + 1800 * tt * tt}px) rotate(${tt * 480 * (j % 2 ? 1 : -1)}deg)`; });
+    } else SL.style.display = "none";
+    // субтитры по слову (во время цифры скрыты)
+    const ch = sl ? null : TL.chunks.find(q => t >= q.t0 && t < q.t1), capEl = document.getElementById("cap");
+    if (!ch) capEl.innerHTML = "";
+    else {
+      const wsT = TL.words.filter(w => w.s >= ch.t0 - .1 && w.s < ch.t1);
+      capEl.innerHTML = `<div class="a" style="left:40px;right:40px;top:1300px;text-align:center;font:900 68px/1.3 Unb">` + ch.w.map((w, j) => {
+        const ws = wsT[j] ? wsT[j].s : ch.t0 + j * .25, on = t >= ws - .03, nowW = on && (j === ch.w.length - 1 || !wsT[j + 1] || t < wsT[j + 1].s), k = back((t - ws + .03) / .16);
+        const col = w.c === "k" ? "#ffe066" : w.c === "r" ? "#ff5a5a" : "#fff";
+        return `<span style="display:inline-block;margin:6px 8px;opacity:${on ? 1 : 0};transform:scale(${on ? .7 + .3 * k : .7});${nowW ? `background:${w.c === "r" ? "#ff3b3b" : "#ffe066"};border-radius:18px;padding:0 16px;box-shadow:0 8px 0 ${OL};border:5px solid ${OL};` : ""}letter-spacing:-.02em;color:${nowW ? OL : col};${nowW ? "" : `-webkit-text-stroke:4px ${OL};paint-order:stroke fill;text-shadow:0 7px 0 ${OL};`}font-size:${w.c ? 78 : 68}px">${w.t.replace(/[,.:]$/, "")}</span>`;
+      }).join("") + `</div>`;
+    }
+    return Promise.all(pending);
+  };
+  const imgs = [...document.images];
+  Promise.all(["700 20px O", "700 20px I", "900 20px Unb", "700 20px H"].map(f => document.fonts.load(f, "АБВГДЁЖ abc 0123 ₽"))).then(() => document.fonts.ready)
+    .then(() => Promise.all(imgs.map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))))
+    .then(() => renderAt(0)).then(() => { window.__ready = true; });
+});
+</script>
+</body>
+</html>
