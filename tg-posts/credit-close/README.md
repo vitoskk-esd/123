@@ -17,3 +17,9 @@
 - ВТБ: ФПА (26.01.2026) — кредитку закрывают только в офисе, 30–45 дней — https://fpa.ru/info/kak-zakryt-kartu-vtb-v-2026-vse-sposoby-i-instrukcii/
 - Общий порядок (полное погашение, следующая выписка, блокировка ≠ закрытие, справка 3 года, проверка КИ) —
   https://journal.sovcombank.ru/krediti/kak-zakrit-kreditnuyu-kartu , https://www.sravni.ru/text/kak-zakryt-bankovskuyu-kartu/
+
+## Обложки (15.10, владелец: «обложку в новом стиле Арбузова, 3 варианта, разных»)
+Рисунки Higgsfield (Grok Image 2.0, 1:1, по образцу d01; `reels/arb-story-20/hf/tg1–3.png`, 3 × $0,09) + заголовок маркером от руки:
+`cover_v1.png` — режет кредитку ножницами, из неё сыплются монеты (кадр обрезан: в углу был чек с «каракулями» нейросети);
+`cover_v2.png` — клерк ставит печать на справку, Арбузов доволен; `cover_v3.png` — сапёр обезвреживает «кредитку-бомбу».
+Сборка: `cover.html?v=1|2|3`, `NODE_PATH=$(npm root -g) node tg-posts/credit-close/shot.js`.

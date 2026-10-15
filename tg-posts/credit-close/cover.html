@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Обложка: закрыть кредитку</title>
+<!-- Обложки поста «Как закрыть кредитку и не заплатить ни рубля процентов» (15.10): рисунок Higgsfield в новом стиле Арбузова (img/tgN.jpg)
+     + заголовок маркером от руки (фирменный приём рилсов: владельцу понравилась надпись на доске). ?v=1|2|3 -->
+<style>
+  @font-face { font-family: "H"; src: url("img/caveat-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "H"; src: url("img/caveat-latin-700.woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 1280px; overflow: hidden; background: #111; }
+  .a { position: absolute; }
+  .mk { font: 700 150px/0.95 H; color: #ffe066; paint-order: stroke fill; -webkit-text-stroke: 14px #1e1717; filter: drop-shadow(0 8px 0 rgba(0,0,0,.5)); white-space: nowrap; }
+  .sub { font: 700 82px/1 H; color: #fff; paint-order: stroke fill; -webkit-text-stroke: 10px #1e1717; filter: drop-shadow(0 6px 0 rgba(0,0,0,.5)); white-space: nowrap; }
+</style></head><body>
+<img id="bg" class="a" style="inset:0;width:1280px;height:1280px">
+<div class="a" style="left:0;right:0;top:0;height:560px;background:linear-gradient(rgba(10,8,6,.78),rgba(10,8,6,.35) 60%,transparent)"></div>
+<div id="t" class="a" style="left:60px;top:50px"></div>
+<svg class="a" width="1280" height="1280" style="left:0;top:0"><path id="u" fill="none" stroke="#ff4d4d" stroke-width="16" stroke-linecap="round"/></svg>
+<script>
+const v = new URLSearchParams(location.search).get("v") || "1";
+const L = { "1": { img: "tg1", rot: -4, y: 50, u: "M70 205 C 380 175, 700 190, 1010 165" },
+            "2": { img: "tg2", rot: -3, y: 40, u: "M70 200 C 380 172, 700 186, 1000 162" },
+            "3": { img: "tg3", rot: -5, y: 50, u: "M70 212 C 380 180, 700 196, 1020 164" } }[v];
+document.getElementById("bg").src = `img/${L.img}.jpg`;
+const t = document.getElementById("t"); t.style.top = L.y + "px"; t.style.transform = `rotate(${L.rot}deg)`; t.style.transformOrigin = "0 50%";
+t.innerHTML = `<div class="mk">Как закрыть кредитку</div><div class="sub" style="margin:52px 0 0 10px">и не заплатить ни рубля процентов</div>`;
+document.getElementById("u").setAttribute("d", L.u);
+Promise.all([document.fonts.load("700 40px H", "Как закрыть"), new Promise(r => { const i = document.getElementById("bg"); i.complete ? r() : (i.onload = r); })]).then(() => { window.__ready = true; });
+</script></body></html>

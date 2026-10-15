@@ -410,6 +410,31 @@
     "@design"
    ],
    "prompt": "Zoom out: the same scene as the first reference image, seen from much further away with a wider lens. Keep the same characters, poses, colors, garages and sunset, but make every character about half of the current size and keep them in one horizontal line exactly across the vertical middle of the image. Show many more garages continuing on the left and on the right, more sky above and more wet asphalt below. No text, no letters, no logos."
+  },
+  {
+   "id": "tg1",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). In his kitchen at the table with patterned oilcloth, he confidently cuts a bright yellow credit card in half with huge red scissors, golden coins spill out of the cut, a satisfied cheeky grin. On the table: a cup of tea, a phone showing a green checkmark, a paper receipt. Square composition, leave calm empty space in the top quarter for a title. Extremely detailed, every small object carefully drawn and recognizable, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "id": "tg2",
+   "ar": "1:1",
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/p07.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). At a bank teller window: the strict bank clerk from the second reference image, now reluctantly, slams a big red rubber stamp onto a paper certificate lying on the counter (the stamp mark is a plain red rectangle, no letters). He leans on the counter with a smug victorious smile and a thumbs-up. A cut yellow credit card lies next to the paper. Square composition, leave calm empty space in the top quarter for a title. Extremely detailed, every small object carefully drawn and recognizable, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "id": "tg3",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Comic bomb-defusal scene: a giant yellow credit card is strapped to a cartoon bomb with a red digital-style timer made only of glowing bars (no digits) and red and blue wires. He kneels in front of it in a sweat, carefully cutting the blue wire with small pliers, tongue out from concentration, a flashlight in his teeth. Dark room, dramatic light. Square composition, leave calm empty space in the top quarter for a title. Extremely detailed, every small object carefully drawn and recognizable, no garbled shapes, no text, no letters, no numbers, no logos."
   }
  ],
  "style_vertical": "vertical 9:16, main character in the lower-middle part of the frame with free space at the top. ",

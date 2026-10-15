@@ -342,5 +342,23 @@
   "app": "kling-video/v2.5-turbo/pro/image-to-video",
   "status": "completed",
   "sec": 229
+ },
+ "tg1": {
+  "request_id": "90605103-8452-42c0-8427-fa917afce1a8",
+  "app": "xai/grok-imagine-image-2.0",
+  "status": "completed",
+  "sec": 32
+ },
+ "tg2": {
+  "request_id": "c02ff3b8-bc14-4837-82a7-59fcc8c40504",
+  "app": "xai/grok-imagine-image-2.0",
+  "status": "completed",
+  "sec": 36
+ },
+ "tg3": {
+  "request_id": "86fa2674-855f-4c03-8a27-f42cfcedf59f",
+  "app": "xai/grok-imagine-image-2.0",
+  "status": "completed",
+  "sec": 32
  }
 }
