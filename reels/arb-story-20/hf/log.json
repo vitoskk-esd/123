@@ -300,6 +300,12 @@
  "k11": {
   "request_id": "d8145b70-6de1-40ad-977d-19a7701c2149",
   "app": "kling-video/v2.5-turbo/pro/image-to-video",
+  "status": "completed",
+  "sec": 187
+ },
+ "k12": {
+  "request_id": "a2ff0ae3-4d3b-4da5-972b-553c7cfed79f",
+  "app": "kling-video/v2.5-turbo/pro/image-to-video",
   "status": "queued"
  }
 }
