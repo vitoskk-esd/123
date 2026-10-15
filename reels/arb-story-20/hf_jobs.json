@@ -125,6 +125,73 @@
     "reels/arb-story-20/hf/f05.png"
    ],
    "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Evening, over-the-shoulder shot from behind his shoulder at the desk with the lamp: we see his smartphone screen in his hand showing a messenger chat with two blank speech bubbles (one blue on the right, one white on the left, no readable text), a mug of tea and instant noodles on the desk."
+  },
+  {
+   "phrase": 0,
+   "id": "p02",
+   "refs": [
+    "reels/arb-story-20/hf/f01.png"
+   ],
+   "prompt": "No characters. Night exterior of a Soviet nine-storey panel apartment building seen from the courtyard, wide establishing shot. Only one window on the fifth floor is lit with a cold blue phone glow, all other windows dark or warm. Details: satellite dishes, laundry on balconies, a bicycle on a balcony, old parked cars (Lada), a street lamp with moths, a bench with a sleeping cat, puddles reflecting the lamp, a playground. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "phrase": 0,
+   "id": "p05",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Fantasy dream scene: he sits proudly on a huge throne built from stacks of banknotes, wearing a golden crown on top of his red cap, holding his phone like a royal scepter, a red carpet, golden coins raining down, spotlights and confetti, a tiny bank-card servant bowing to him. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "phrase": 0,
+   "id": "p07",
+   "refs": [
+    "reels/arb-story-20/hf/f06.png"
+   ],
+   "prompt": "No watermelon character. A strict middle-aged bank clerk in a grey suit, tie and thin glasses, slicked hair, sitting behind a bank teller window with thick glass and a small document slot, arms crossed, slowly shaking his head with a smug face. Details: rubber stamps, a pile of forms, a pen on a chain, a cactus, a queue-ticket display behind him, a calendar, office lamp, potted plant. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "phrase": 0,
+   "id": "p10",
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/f04.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Over-the-shoulder close shot in a spring courtyard in daylight with blossoming trees: his green hand holds a smartphone towards the camera, the screen faces the camera almost flat and is a plain blank white glowing rectangle. Petals in the air, a bench and panel buildings softly blurred behind. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "phrase": 0,
+   "id": "p15",
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/f07.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). A city street with a row of four different bank branch entrances side by side, each facade a different color (yellow, green, blue, red) with glass doors, ATMs and blank signboards. He stands in the middle of the sidewalk seen from behind, scratching his head, choosing. Pigeons, puddles, a lamp post, a kiosk. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "phrase": 0,
+   "id": "p16",
+   "refs": [
+    "@design",
+    "reels/arb-story-20/hf/f05.png"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Evening close-up of his two green hands holding a smartphone in front of the camera, the screen faces the camera flat and is a plain blank white glowing rectangle filling the center of the frame. Desk lamp light, a mug of tea and a cup of instant noodles softly blurred behind. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "phrase": 0,
+   "id": "p19",
+   "refs": [
+    "reels/arb-story-20/hf/f01.png"
+   ],
+   "prompt": "No characters. Top-down view of a kitchen table covered with a patterned oilcloth: a brand-new bright yellow plastic bank card with a chip (no text, no logos) lies next to a cup of tea with a lemon slice, an opened paper envelope, house keys with a keychain, bread crumbs, a teaspoon and a smartphone face down. Morning light. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
+  },
+  {
+   "phrase": 0,
+   "id": "p21",
+   "refs": [
+    "reels/arb-story-20/hf/f08.png"
+   ],
+   "prompt": "No watermelon character. Close-up of a tired supermarket cashier woman about fifty years old behind the register, raising one eyebrow and talking with a skeptical face, hair in a bun, uniform apron, blank name tag, reading glasses on a cord. Behind her: cigarette shelf, chewing gum rack, a payment terminal with a square code on its screen. Extremely detailed, every small object carefully drawn and recognizable, clean readable shapes, no garbled shapes, no text, no letters, no numbers, no logos."
   }
  ],
  "clips": [
@@ -177,12 +244,6 @@
    "prompt": "He lazily swipes the form away on his phone, puts the phone in his pocket, stands up from the bench and walks towards the ice-cream cart. Petals fall. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
   },
   {
-   "id": "k07",
-   "from": "n07",
-   "duration": 5,
-   "prompt": "He flips the calendar pages back one by one, counting on his fingers, frowning more with each page. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
-  },
-  {
    "id": "k08",
    "from": "f05",
    "duration": 5,
@@ -217,6 +278,24 @@
    "from": "f11",
    "duration": 5,
    "prompt": "He waves at the camera with a cheeky smile, then reaches to the wall switch next to him and clicks it, the kitchen light goes off into darkness. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k05",
+   "from": "p05",
+   "duration": 5,
+   "prompt": "He laughs and leans back on the throne, coins keep raining, confetti falls, the crown wobbles. Slow push-in. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k07",
+   "from": "p07",
+   "duration": 5,
+   "prompt": "The clerk slowly shakes his head, then pulls down a blind behind the glass window. Static camera. Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
+  },
+  {
+   "id": "k18",
+   "from": "f05",
+   "duration": 5,
+   "prompt": "He reads the phone, his eyes light up and he pumps his fist in the air with joy: yes! Cartoon hand-painted animation, keep the character design and the painting style exactly, no text appears."
   }
  ],
  "design": "reels/arb-story-20/hf/d01.png",

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Рилс-история: монтаж v3</title>
+<!-- Версия 3 рилса-истории (владелец 15.10: «посмотри ещё раз амоБлог… нужно больше деталей… показать на телефоне, как Арбузов пишет
+     в поддержку и ему пришёл ответ… больше кадров»; «Бу появляется не в каждом кадре»). Разбор — reels/arb-story-20/AMO_DIFF_v3.md.
+     Типы планов (timeline3.js, cut3.py): clip — живое видео (кадры out/clips), img — рисунок с движением камеры,
+     phone — рисунок с телефоном + экран кодом, вписанный по 4 углам (lock/form/reject/swipe/chat/bonus),
+     board — «ТЕОРИЯ» маркером на доске, card — карточка главы, calflip — листки календаря слетают.
+     Поверх — только пометки маркером и реплики в «пузырях». Субтитров и плашек нет. ?r=<папка рилса>. -->
+<style>
+  @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-cyrillic-600.woff2"); font-weight: 600; unicode-range: U+0400-045F; }
+  @font-face { font-family: "I"; src: url("../../youtube/kit/fonts/inter-latin-600.woff2"); font-weight: 600; }
+  @font-face { font-family: "IB"; src: url("../../youtube/kit/fonts/inter-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
+  @font-face { font-family: "IB"; src: url("../../youtube/kit/fonts/inter-latin-700.woff2"); font-weight: 700; }
+  @font-face { font-family: "Unb"; src: url("../../youtube/kit/fonts/Unbounded.ttf"); font-weight: 200 900; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  .a { position: absolute; }
+  .mk { position: relative; display: table; font: 700 96px/1 H; white-space: nowrap; paint-order: stroke fill; -webkit-text-stroke: 10px #1e1717; filter: drop-shadow(0 6px 0 rgba(0,0,0,.45)); }
+  .ui { font-family: I; color: #111; }
+</style>
+</head>
+<body>
+<div id="stage" class="a" style="inset:0;overflow:hidden">
+  <div id="cam" class="a" style="left:0;top:0;width:1080px;height:1920px;transform-origin:0 0">
+    <img id="v" class="a" style="left:0;top:0;width:1080px;height:1920px">
+    <div id="scr" class="a" style="left:0;top:0;transform-origin:0 0"></div>
+    <img id="top" class="a" style="left:0;top:0;width:1080px;height:1920px;display:none">
+    <div id="lay" class="a" style="inset:0"></div>
+  </div>
+  <div id="look" class="a" style="inset:0;pointer-events:none"></div>
+  <svg id="sv" class="a" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>
+  <div id="tx" class="a" style="inset:0"></div>
+  <div id="fx" class="a" style="inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 62%,rgba(0,0,0,.3))"></div>
+</div>
+<script>
+const REEL = new URLSearchParams(location.search).get("r");
+const cl = (x) => Math.min(1, Math.max(0, x)), out4 = (x) => 1 - Math.pow(1 - cl(x), 4), io2 = (x) => { x = cl(x); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; };
+const back = (x) => { x = cl(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const hashf = (k) => { const x = Math.sin(k * 127.1) * 43758.5453; return x - Math.floor(x); };
+const NCLIP = 151, OL = "#1e1717";
+
+// гомография: прямоугольник w×h → четырёхугольник (TL, TR, BR, BL) — CSS matrix3d
+function quadMatrix(w, h, q) {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3, dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  const den = dx1 * dy2 - dx2 * dy1, g = (dx3 * dy2 - dx2 * dy3) / den, hh = (dx1 * dy3 - dx3 * dy1) / den;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + hh * x3, c = x0, d = y1 - y0 + g * y1, e = y3 - y0 + hh * y3, f = y0;
+  const m = [a / w, d / w, 0, g / w, b / h, e / h, 0, hh / h, 0, 0, 1, 0, c, f, 0, 1];
+  return `matrix3d(${m.join(",")})`;
+}
+
+// экраны телефона (логический экран W×H), lt — секунды от начала плана
+const typed = (s, lt, t0, cps = 16) => s.slice(0, Math.max(0, Math.floor((lt - t0) * cps)));
+const SCREENS = {
+  // пуш на карточке уведомления (вписывается в нарисованную белую карточку)
+  pushcard: (lt, o) => `<div style="width:520px;height:600px;padding:34px 34px;background:#f7f9fb;border-radius:40px" class="ui">
+     <div style="display:flex;align-items:center;gap:16px"><div style="width:70px;height:70px;border-radius:18px;background:#2fa84f;color:#fff;font:700 42px/70px IB;text-align:center">₽</div><div style="font:600 30px I;color:#6b7280">Банк · сейчас</div></div>
+     <div style="font:700 62px/1.08 IB;margin-top:30px;letter-spacing:-.02em">${o.title}</div><div style="font:600 34px/1.3 I;color:#374151;margin-top:20px">${o.body}</div></div>`,
+  form: (lt, o) => { const f = [["ФИО", "Арбузов Арсений"], ["Телефон", "+7 912 ••• 12 04"], ["Дата рождения", "07.06.2006"], ["Паспорт", "•••• ••••••"]];
+    let k = 0; const rows = f.map(([l, v], j) => { const t0 = .1 + j * .38; return `<div style="margin:14px 0 0;padding:16px 20px;border-radius:16px;background:#fff;border:2px solid ${lt > t0 && lt < t0 + .38 ? "#2f5bea" : "#e5e7eb"}"><div style="font:600 20px I;color:#6b7280">${l}</div><div style="font:600 28px I;min-height:34px">${typed(v, lt, t0, 40)}</div></div>`; }).join("");
+    const pr = lt > 1.75; return `<div style="width:600px;height:1220px;background:#eef1f6" class="ui"><div style="padding:70px 30px 26px;background:#2f5bea;color:#fff;font:700 36px IB">Оформление карты<div style="font:600 22px I;opacity:.85;margin-top:6px">шаг 1 из 2 · 2 минуты</div></div><div style="padding:6px 28px">${rows}
+      <div style="margin-top:30px;padding:24px;border-radius:20px;text-align:center;font:700 32px IB;color:#fff;background:${pr ? "#1e3fb0" : "#2f5bea"};transform:scale(${pr ? .96 : 1})">Оформить</div></div>
+      ${pr ? `<div class="a" style="left:${300 - 50}px;top:${1000 - 50}px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(${.6 + .6 * cl((lt - 1.75) / .25)});opacity:${1 - cl((lt - 1.9) / .3)}"></div>` : ""}</div>`; },
+  reject: (lt, o) => `<div style="width:600px;height:1220px;background:#fff" class="ui"><div style="padding:70px 30px 26px;background:#e2283f;color:#fff;font:700 36px IB">Заявка на карту</div>
+     <div style="margin:110px auto 0;width:180px;height:180px;border-radius:50%;background:#fde2e4;color:#e2283f;font:700 120px/180px IB;text-align:center;transform:scale(${back(lt / .4)})">✕</div>
+     <div style="text-align:center;font:700 46px/1.15 IB;margin:40px 30px 0">Вы не новый клиент</div><div style="text-align:center;font:600 28px/1.35 I;color:#4b5563;margin:22px 46px 0">Бонус за первую карту недоступен: у вас уже была заявка в нашем банке</div></div>`,
+  swipe: (lt, o) => { const up = io2((lt - 1.0) / .45); return `<div style="width:600px;height:1220px;background:#d9e3d2;overflow:hidden" class="ui">
+     <div style="position:absolute;left:40px;right:40px;top:${120 - up * 900}px;height:900px;border-radius:40px;background:#eef1f6;overflow:hidden;transform:scale(${1 - .15 * cl(lt / .5)});opacity:${1 - up}">
+       <div style="padding:40px 26px 20px;background:#2f5bea;color:#fff;font:700 30px IB">Оформление карты<div style="font:600 20px I;opacity:.85;margin-top:6px">шаг 2 из 5</div></div>
+       <div style="margin:22px 26px;height:16px;border-radius:9px;background:#d1d5db"><div style="width:40%;height:100%;border-radius:9px;background:#2f5bea"></div></div>
+       <div style="margin:0 26px;padding:16px;border-radius:14px;background:#fff;font:600 24px I">Арбузов Арсений</div><div style="margin:14px 26px;padding:16px;border-radius:14px;background:#fff;font:600 24px I;color:#9ca3af">Паспорт…</div></div>
+     <div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font:600 24px I;color:#4b5563;opacity:${cl((lt - 1.4) / .3)}">Нет открытых приложений</div></div>`; },
+  chat: (lt, o) => { const q = "Здравствуйте! Я для вас новый клиент?", tq = o.tq, ts = o.ts, tdots = o.tdots, ta = o.ta;
+    const inp = lt < ts ? typed(q, lt, tq, 14) : "", sent = lt >= ts, dots = lt >= tdots && lt < ta, ans = lt >= ta;
+    const bub = (me, html, k) => `<div style="align-self:${me ? "flex-end" : "flex-start"};max-width:78%;padding:18px 22px;border-radius:26px;${me ? "border-bottom-right-radius:8px;background:#2f5bea;color:#fff" : "border-bottom-left-radius:8px;background:#fff"};font:600 28px/1.32 I;box-shadow:0 2px 0 rgba(0,0,0,.08);transform:scale(${k});transform-origin:${me ? "100%" : "0"} 100%">${html}</div>`;
+    return `<div style="width:600px;height:1220px;background:#e9edf3;display:flex;flex-direction:column" class="ui">
+     <div style="padding:66px 26px 20px;background:#fff;border-bottom:2px solid #e5e7eb;display:flex;gap:16px;align-items:center"><div style="width:62px;height:62px;border-radius:50%;background:#2fa84f;color:#fff;font:700 30px/62px IB;text-align:center">Б</div><div><div style="font:700 28px IB">Поддержка банка</div><div style="font:600 20px I;color:#2fa84f">онлайн</div></div></div>
+     <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:20px 22px">
+       <div style="align-self:center;font:600 20px I;color:#6b7280">Сегодня</div>
+       ${sent ? bub(true, q + `<span style="font:600 18px I;opacity:.7;margin-left:10px">21:14 ✓✓</span>`, back((lt - ts) / .3)) : ""}
+       ${dots ? `<div style="align-self:flex-start;padding:18px 24px;border-radius:26px;background:#fff;font:600 24px I;color:#6b7280">Оператор печатает${".".repeat(1 + Math.floor(lt * 4) % 3)}</div>` : ""}
+       ${ans ? bub(false, "Здравствуйте! Да, у вас не было наших карт и заявок — бонус 1 000 ₽ за первую карту вам доступен", back((lt - ta) / .3)) : ""}
+     </div>
+     <div style="padding:16px 18px;background:#fff;display:flex;gap:14px;align-items:center"><div style="flex:1;min-height:60px;padding:14px 20px;border-radius:30px;background:#f1f3f6;font:600 26px/1.3 I;color:${inp ? "#111" : "#9ca3af"}">${inp || "Сообщение"}${inp && Math.floor(lt * 3) % 2 ? "|" : ""}</div><div style="width:60px;height:60px;border-radius:50%;background:${inp ? "#2f5bea" : "#c7d2fe"};color:#fff;font:700 30px/60px IB;text-align:center">➤</div></div>
+     ${lt < ts ? `<div style="height:330px;background:#d3d7de;display:grid;grid-template-columns:repeat(10,1fr);gap:10px;padding:16px 10px">${"йцукенгшщзфывапролджячсмитьбю".split("").map((ch, j) => `<div style="border-radius:8px;background:${((hashf(Math.floor(lt * 14)) * 30) | 0) === j ? "#9aa3b2" : "#fff"};font:600 26px/62px I;text-align:center">${ch}</div>`).join("")}</div>` : ""}</div>`; },
+  bonus: (lt, o) => `<div style="width:520px;height:600px;padding:34px;background:#f7f9fb;border-radius:40px" class="ui">
+     <div style="display:flex;align-items:center;gap:16px"><div style="width:70px;height:70px;border-radius:18px;background:#2fa84f;color:#fff;font:700 42px/70px IB;text-align:center">₽</div><div style="font:600 30px I;color:#6b7280">Банк · сейчас</div></div>
+     <div style="font:700 92px/1.05 IB;margin-top:28px;color:#1f9d47;letter-spacing:-.03em">+1 000 ₽</div><div style="font:600 34px/1.3 I;color:#374151;margin-top:16px">Бонус за первую карту зачислен</div></div>`,
+};
+
+// доска «ТЕОРИЯ»: штрихи маркером (SVG) и подписи от руки
+function boardSVG(o, t) {   // t — абсолютное время (моменты частей доски абсолютные)
+  const P = o.parts.map((p) => { const q = cl((t - p.t) / (p.dur || .5)); return p.text
+    ? `<clipPath id="bc${p.x}_${p.y}"><rect x="${p.x - 20}" y="${p.y - (p.size || 80)}" width="${q * (p.text.length * (p.size || 80) * .5 + 40)}" height="${(p.size || 80) * 1.4}"/></clipPath><text x="${p.x}" y="${p.y}" clip-path="url(#bc${p.x}_${p.y})" font-family="H" font-weight="700" font-size="${p.size || 80}" fill="${p.c || "#1d3c8f"}" transform="rotate(${p.r || 0} ${p.x} ${p.y})">${p.text}</text>`
+    : `<path d="${p.d}" pathLength="1" fill="none" stroke="${p.c || "#1d3c8f"}" stroke-width="${p.w || 9}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1" stroke-dashoffset="${1 - q}"/>`; }).join("");
+  return `<div class="a" style="inset:0;background:#f4f2ec"><div class="a" style="inset:0;opacity:.35;background:radial-gradient(ellipse at 30% 20%,#fff 0,transparent 60%),radial-gradient(ellipse at 80% 90%,#e6e2d6 0,transparent 55%)"></div>
+    <div class="a" style="left:0;right:0;top:0;height:40px;background:linear-gradient(#b8b4aa,#d9d5ca)"></div><div class="a" style="left:0;right:0;bottom:0;height:60px;background:linear-gradient(#d9d5ca,#a8a49a)"></div>
+    <svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0">${P}</svg></div>`;
+}
+
+const s = document.createElement("script"); s.src = `../${REEL}/timeline3.js`; document.head.appendChild(s);
+s.onload = () => {
+  const V = document.getElementById("v"), SCR = document.getElementById("scr"), LAY = document.getElementById("lay"), CAM = document.getElementById("cam");
+  const SV = document.getElementById("sv"), TX = document.getElementById("tx"), LOOK = document.getElementById("look");
+  const shotAt = (t) => { const k = TL.shots.findIndex(x => t >= x.t0 && t < x.t1); return k < 0 ? TL.shots.length - 1 : k; };
+  const ellipse = (m) => { const pts = []; for (let a = -.3; a <= Math.PI * 2 + .5; a += .08) { const wob = 1 + .04 * Math.sin(a * 3 + m.cx); pts.push([m.cx + Math.cos(a - Math.PI / 2) * m.rx * wob * (1 + a * .012), m.cy + Math.sin(a - Math.PI / 2) * m.ry * wob]); } return "M" + pts.map(p => p.map(v => v.toFixed(1)).join(" ")).join(" L "); };
+  // пометки маркером и «пузыри» — экранные, живут до конца своего плана
+  const MK = TL.marks.map((m) => {
+    const end = TL.shots[shotAt(m.t)].t1;
+    if (m.kind === "text" || m.kind === "bubble") {
+      const d = document.createElement("div"); d.className = "a"; TX.appendChild(d);
+      d.style.cssText = `left:${m.x}px;top:${m.y}px;transform:rotate(${m.r || 0}deg);transform-origin:0 50%`;
+      d.innerHTML = m.kind === "bubble"
+        ? `<div style="position:relative;width:${m.w || 640}px;padding:30px 38px;background:#fff;border:7px solid ${OL};border-radius:46px;font:700 ${m.size || 62}px/1.12 H;color:${OL};box-shadow:10px 12px 0 rgba(0,0,0,.35)">${m.text}<div class="a" style="${m.tail || "left:90px"};bottom:-40px;width:56px;height:56px;background:#fff;border-right:7px solid ${OL};border-bottom:7px solid ${OL};transform:rotate(45deg)"></div></div>`
+        : `<div class="mk" style="font-size:${m.size || 100}px;color:${m.c};${m.board ? "-webkit-text-stroke:0;filter:none;transform:rotate(-2deg)" : ""}">${m.text}</div>`;   // board — надпись маркером на доске в кадре
+      return { m, end, d };
+    }
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g"); SV.appendChild(g);
+    let path = m.kind === "circle" ? ellipse(m) : m.d;
+    if (m.kind === "arrow") { const p = m.d.match(/-?\d+(\.\d+)?/g).map(Number), [x2, y2, x1, y1] = [p[p.length - 2], p[p.length - 1], p[p.length - 4], p[p.length - 3]], a = Math.atan2(y2 - y1, x2 - x1);
+      path += ` M ${x2 - 60 * Math.cos(a - .5)} ${y2 - 60 * Math.sin(a - .5)} L ${x2} ${y2} L ${x2 - 60 * Math.cos(a + .5)} ${y2 - 60 * Math.sin(a + .5)}`; }
+    g.innerHTML = `<path d="${path}" pathLength="1" fill="none" stroke="${OL}" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><path d="${path}" pathLength="1" fill="none" stroke="${m.c}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`;
+    return { m, end, g, paths: [...g.querySelectorAll("path")] };
+  });
+  let pend = [];
+  const setImg = (src) => { if (!V.src.endsWith(src.slice(2))) { V.src = src; pend.push(V.decode().catch(() => 0)); } };
+  window.renderAt = (t) => {
+    pend = [];
+    const sh = TL.shots[shotAt(t)], lt = t - sh.t0, D = Math.max(.3, sh.t1 - sh.t0);
+    SCR.innerHTML = ""; LAY.innerHTML = ""; V.style.display = "";
+    if (sh.type === "clip") { const n = Math.min(NCLIP, Math.max(1, Math.floor(((sh.from || .15) + lt * (sh.rate || 1)) * 30) + 1)); setImg(`../${REEL}/out/clips/${sh.clip}/${String(n).padStart(3, "0")}.jpg`); }
+    else if (sh.type === "board" || sh.type === "card") { V.style.display = "none"; }
+    else setImg(`../${REEL}/out/img/${sh.img}.jpg`);
+    const TOP = document.getElementById("top"); TOP.style.display = "none";
+    if (sh.type === "phone" && sh.top) { const src = `../${REEL}/out/img/${sh.top}.png`; if (!TOP.src.endsWith(src.slice(2))) { TOP.src = src; pend.push(TOP.decode().catch(() => 0)); } TOP.style.display = ""; }   // пальцы и рамка — поверх экрана
+    if (sh.type === "phone") { SCR.style.transform = quadMatrix(sh.sw, sh.sh, sh.quad); SCR.style.width = sh.sw + "px"; SCR.style.height = sh.sh + "px"; SCR.style.overflow = "hidden"; SCR.style.borderRadius = (sh.rad || 0) + "px";
+      SCR.innerHTML = SCREENS[sh.screen](lt, sh) + `<div class="a" style="inset:0;background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 40%);pointer-events:none"></div>`; SCR.style.filter = sh.glow ? `drop-shadow(0 0 30px ${sh.glow})` : ""; }
+    if (sh.type === "board") LAY.innerHTML = boardSVG(sh, t);
+    if (sh.type === "card") LAY.innerHTML = `<div class="a" style="inset:0;background:#141210 url(../${REEL}/out/img/f10.jpg) center/cover;filter:blur(0)"><div class="a" style="inset:0;backdrop-filter:blur(14px) brightness(.35)"></div>
+       <div class="a" style="left:0;right:0;top:${sh.y || 760}px;text-align:center;transform:rotate(-3deg)"><div class="mk" style="margin:0 auto;font-size:150px;color:#ffe066;clip-path:inset(-30% ${100 - cl(lt / .7) * 102}% -30% -5%)">${sh.text}</div>
+       <svg width="900" height="60" style="display:block;margin:10px auto 0"><path d="M20 30 C 250 10, 600 50, 880 22" pathLength="1" fill="none" stroke="#ff4d4d" stroke-width="12" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="${1 - cl((lt - .6) / .35)}"/></svg></div></div>`;
+    if (sh.type === "calflip") { const [cx, cy, w, h] = sh.area; LAY.innerHTML = Array.from({ length: 7 }, (_, j) => { const t0 = j * .17, q = cl((lt - t0) / .55);
+        return q <= 0 ? "" : `<div class="a" style="left:${cx - w / 2}px;top:${cy - h / 2}px;width:${w}px;height:${h}px;background:#f3eee2;border:3px solid #6b6255;border-radius:6px;background-image:linear-gradient(#c9c0ae 2px,transparent 2px),linear-gradient(90deg,#c9c0ae 2px,transparent 2px);background-size:${w / 7}px ${h / 6}px;transform-origin:50% 0;transform:translate(${q * (j % 2 ? 260 : -200)}px,${q * q * 900}px) rotate(${q * (j % 2 ? 70 : -60)}deg) rotateX(${q * 60}deg);opacity:${1 - q * .7}"></div>`; }).join(""); }
+    // камера: от станции cam[0] к cam[1] за план; «впрыг» после склейки; удары на словах
+    const c0 = sh.cam[0], c1 = sh.cam[1] || sh.cam[0], m = io2(lt / D);
+    let z = c0[2] + (c1[2] - c0[2]) * m, x = c0[0] + (c1[0] - c0[0]) * m, y = c0[1] + (c1[1] - c0[1]) * m;
+    z *= 1 + .05 * (1 - out4(lt / .3)); (sh.punch || []).forEach(p => { if (t >= p) z *= 1 + .08 * out4((t - p) / .12); });
+    x = Math.min(Math.max(x, 540 / z), 1080 - 540 / z); y = Math.min(Math.max(y, 960 / z), 1920 - 960 / z);
+    CAM.style.transform = `translate(${540 - x * z}px,${960 - y * z}px) scale(${z})`;
+    const mem = sh.look === "memory";
+    CAM.style.filter = mem ? "sepia(.5) saturate(.75) contrast(1.06) brightness(1.05)" : "none";
+    LOOK.style.background = mem ? `radial-gradient(ellipse at 50% 45%,transparent 42%,rgba(70,40,10,.6)), rgba(255,250,235,${sh.flash ? .9 * (1 - out4(lt / .25)) : 0})` : "none";
+    MK.forEach((o) => {
+      const on = t >= o.m.t && t < o.end, q = cl((t - o.m.t) / (o.m.kind === "circle" ? .45 : .35));
+      if (o.g) { o.g.style.display = on ? "" : "none"; o.paths.forEach(p => { p.setAttribute("stroke-dasharray", "1 1"); p.setAttribute("stroke-dashoffset", String(1 - q)); }); return; }
+      o.d.style.display = on ? "" : "none";
+      if (o.m.kind === "bubble") { o.d.firstElementChild.style.transform = `scale(${.3 + .7 * back((t - o.m.t) / .35)})`; o.d.firstElementChild.style.transformOrigin = "15% 110%"; }
+      else o.d.firstElementChild.style.clipPath = `inset(-30% ${100 - cl((t - o.m.t) / Math.max(.3, o.m.text.length * .045)) * 102}% -30% -5%)`;
+    });
+    return Promise.all(pend);
+  };
+  Promise.all(["700 40px H", "600 20px I", "700 20px IB", "900 20px Unb"].map(f => document.fonts.load(f, "Арбузов abc ₽ ✓ ✕ ➤"))).then(() => document.fonts.ready).then(() => renderAt(0)).then(() => { window.__ready = true; });
+};
+</script>
+</body>
+</html>
