@@ -122,7 +122,7 @@ const SCREENS = {
         <div style="font:700 ${i.size || 34}px/1.12 IB;margin-top:12px;color:${i.c || "#111"};letter-spacing:-.01em">${i.title}</div>${i.body ? `<div style="font:600 24px/1.3 I;color:#374151;margin-top:8px">${i.body}</div>` : ""}</div>`; };
     const list = (o.lock ? its.slice().reverse() : its).map(card).join("");
     return `<div style="width:600px;height:${H}px;background:${o.wall || (o.lock ? "linear-gradient(170deg,#3a4a6b,#1c2233 60%,#141826)" : "#e9edf3")};display:flex;flex-direction:column;overflow:hidden" class="ui">
-      ${o.lock ? `<div style="padding-top:${Math.round(H * .07)}px;text-align:center;color:#fff"><div style="font:600 24px I;opacity:.85">${o.date || "вторник, 16:20"}</div><div style="font:700 ${Math.round((o.sw || 600) * .22)}px/1 IB;letter-spacing:-.04em">${o.time || "19:42"}</div></div>`
+      ${o.lock ? `<div style="padding-top:${Math.round(H * .07)}px;text-align:center;color:#fff"><div style="font:600 24px I;opacity:.85">${o.date || "вторник, 16:20"}</div><div style="font:700 ${Math.round((o.sw || 600) * .19)}px/1 IB;letter-spacing:-.04em">${o.time || "19:42"}</div></div>`
         : `<div style="padding:60px 24px 18px;background:#fff;border-bottom:2px solid #e5e7eb;display:flex;gap:14px;align-items:center"><div style="width:62px;height:62px;border-radius:50%;background:${o.head.c || "#ffd23f"};color:#1e1717;font:700 30px/62px IB;text-align:center">${o.head.a || "А"}</div><div><div style="font:700 28px IB;color:#111">${o.head.name}</div><div style="font:600 20px I;color:#6b7280">${o.head.sub || ""}</div></div></div>`}
       <div style="flex:1;display:flex;flex-direction:column;justify-content:${o.lock ? "flex-start" : "flex-end"};padding:${o.lock ? 36 : 20}px ${o.lock ? 20 : 36}px 26px">${list}</div></div>`; },
   invite: (lt, o) => { const sent = lt > (o.ts || .3), ans = lt > (o.ta || 1.6), dots = lt > (o.ta || 1.6) - .8 && !ans;
@@ -193,7 +193,7 @@ s.onload = () => {
     if (sh.type !== "clip" && sh.type !== "board" && sh.type !== "card") setImg(`../${REEL}/out/img/${cur.img}.jpg`);
     const TOP = document.getElementById("top"); TOP.style.display = "none";
     if (sh.type === "phone" && cur.top) { const src = `../${REEL}/out/img/${cur.top}.png`; if (!TOP.src.endsWith(src.slice(2))) { TOP.src = src; pend.push(TOP.decode().catch(() => 0)); } TOP.style.display = ""; }   // пальцы и рамка — поверх экрана
-    if (sh.type === "phone") SCR.innerHTML = (sh.scr || [sh]).map(e => { const o = Object.assign({}, cur, e);   // sh.scr — несколько телефонов в кадре
+    if (sh.type === "phone") SCR.innerHTML = (sh.scr || [cur]).map(e => { const o = Object.assign({}, cur, e);   // cur — с учётом позы: её углы экрана (рилс 22: телефон на новой позе стоит выше)   // sh.scr — несколько телефонов в кадре
       return `<div class="a" style="left:0;top:0;width:${o.sw}px;height:${o.sh}px;overflow:hidden;border-radius:${o.rad || 0}px;transform-origin:0 0;transform:${quadMatrix(o.sw, o.sh, o.quad)};${o.glow ? `filter:drop-shadow(0 0 30px ${o.glow})` : ""}">`
         + SCREENS[o.screen](lt, o) + `<div class="a" style="inset:0;background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 40%)"></div></div>`; }).join("");
     if (sh.type === "board") LAY.innerHTML = boardSVG(sh, t);
