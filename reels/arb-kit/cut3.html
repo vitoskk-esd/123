@@ -6,8 +6,10 @@
 <!-- Версия 3 рилса-истории (владелец 15.10: «посмотри ещё раз амоБлог… нужно больше деталей… показать на телефоне, как Арбузов пишет
      в поддержку и ему пришёл ответ… больше кадров»; «Бу появляется не в каждом кадре»). Разбор — reels/arb-story-20/AMO_DIFF_v3.md.
      Типы планов (timeline3.js, cut3.py): clip — живое видео (кадры out/clips), img — рисунок с движением камеры,
-     phone — рисунок с телефоном + экран кодом, вписанный по 4 углам (lock/form/reject/swipe/chat/bonus),
+     phone — рисунок с телефоном + экран кодом, вписанный по 4 углам (pushcard/form/reject/swipe/chat/bonus; с рилса 21 — lock/issued/invite;
+     scr — несколько телефонов в кадре; углы и прозрачный верхний слой — arb-kit/screens.py),
      board — «ТЕОРИЯ» маркером на доске, card — карточка главы, calflip — листки календаря слетают.
+     TL.grade / TL.grain — одна цветокоррекция и зерно на весь ролик (цельность, как у амоБлога).
      Поверх — только пометки маркером и реплики в «пузырях». Субтитров и плашек нет. ?r=<папка рилса>. -->
 <style>
   @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
@@ -28,13 +30,15 @@
 <div id="stage" class="a" style="inset:0;overflow:hidden">
   <div id="cam" class="a" style="left:0;top:0;width:1080px;height:1920px;transform-origin:0 0">
     <img id="v" class="a" style="left:0;top:0;width:1080px;height:1920px">
-    <div id="scr" class="a" style="left:0;top:0;transform-origin:0 0"></div>
+    <div id="scr" class="a" style="left:0;top:0"></div>
     <img id="top" class="a" style="left:0;top:0;width:1080px;height:1920px;display:none">
     <div id="lay" class="a" style="inset:0"></div>
+    <div id="wtx" class="a" style="inset:0"></div>   <!-- надписи «в мире» (board: маркер на доске/двери) — едут вместе с камерой -->
   </div>
   <div id="look" class="a" style="inset:0;pointer-events:none"></div>
   <svg id="sv" class="a" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>
   <div id="tx" class="a" style="inset:0"></div>
+  <div id="grain" class="a" style="inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:0"></div>
   <div id="fx" class="a" style="inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 62%,rgba(0,0,0,.3))"></div>
 </div>
 <script>
@@ -90,13 +94,40 @@ const SCREENS = {
      ${lt < ts ? `<div style="height:330px;background:#d3d7de;display:grid;grid-template-columns:repeat(10,1fr);gap:10px;padding:16px 10px">${"йцукенгшщзфывапролджячсмитьбю".split("").map((ch, j) => `<div style="border-radius:8px;background:${((hashf(Math.floor(lt * 14)) * 30) | 0) === j ? "#9aa3b2" : "#fff"};font:600 26px/62px I;text-align:center">${ch}</div>`).join("")}</div>` : ""}</div>`; },
   bonus: (lt, o) => `<div style="width:520px;height:600px;padding:34px;background:#f7f9fb;border-radius:40px" class="ui">
      <div style="display:flex;align-items:center;gap:16px"><div style="width:70px;height:70px;border-radius:18px;background:#2fa84f;color:#fff;font:700 42px/70px IB;text-align:center">₽</div><div style="font:600 30px I;color:#6b7280">Банк · сейчас</div></div>
-     <div style="font:700 92px/1.05 IB;margin-top:28px;color:#1f9d47;letter-spacing:-.03em">+1 000 ₽</div><div style="font:600 34px/1.3 I;color:#374151;margin-top:16px">Бонус за первую карту зачислен</div></div>`,
+     <div style="font:700 92px/1.05 IB;margin-top:28px;color:#1f9d47;letter-spacing:-.03em">${o.amount || "+1 000 ₽"}</div><div style="font:600 34px/1.3 I;color:#374151;margin-top:16px">${o.body || "Бонус за первую карту зачислен"}</div></div>`,
+  // рилс 21: экран блокировки с пушем (или пустой), оформление без ссылки, чат со ссылкой-приглашением
+  lock: (lt, o) => { const q = o.title ? back((lt - (o.tn || .3)) / .35) : 0, hh = o.time || "13:42";
+    const H = o.sh || 1266, c = H < 1000 ? .72 : 1;   // экран на рисунке бывает почти квадратным — вёрстка по его пропорциям
+    return `<div style="width:600px;height:${H}px;background:${o.wall || "linear-gradient(170deg,#3a4a6b,#1c2233 60%,#141826)"};color:#fff;text-align:center" class="ui">
+     <div style="padding-top:${Math.round(H * .09)}px;font:600 26px I;opacity:.85;color:#fff">${o.date || "среда, 16 октября"}</div><div style="font:700 ${Math.round(150 * c)}px/1 IB;letter-spacing:-.04em;color:#fff;margin-top:6px">${hh}</div>
+     ${o.title ? `<div style="margin:${Math.round(H * .05)}px 22px 0;padding:24px 24px 26px;border-radius:30px;background:rgba(246,248,251,.94);color:#111;text-align:left;transform:translateY(${(1 - cl(q)) * -60}px) scale(${.6 + .4 * q});opacity:${cl(q * 1.4)}">
+       <div style="display:flex;align-items:center;gap:14px"><div style="width:54px;height:54px;border-radius:14px;background:#2fa84f;color:#fff;font:700 32px/54px IB;text-align:center">₽</div><div style="font:600 24px I;color:#6b7280">Банк · сейчас</div></div>
+       <div style="font:700 ${o.tsize || 44}px/1.1 IB;margin-top:18px;letter-spacing:-.02em;color:${o.tcolor || "#111"}">${o.title}</div><div style="font:600 27px/1.3 I;color:#374151;margin-top:12px">${o.body || ""}</div></div>`
+     : `<div style="margin-top:${Math.round(H * .22)}px;font:600 30px I;opacity:${.75 * cl(lt / .5)};color:#fff">${o.empty || "Нет уведомлений"}</div>`}
+     <div class="a" style="left:230px;right:230px;bottom:26px;height:10px;border-radius:5px;background:rgba(255,255,255,.8)"></div></div>`; },
+  issued: (lt, o) => { const done = lt > (o.td || 1.1), q = back((lt - (o.td || 1.1)) / .4), H = o.sh || 1266, c = H < 1000;
+    return `<div style="width:600px;height:${H}px;background:#f2f4f7" class="ui"><div style="padding:70px 30px 22px;background:#fff;font:700 34px IB;border-bottom:2px solid #e5e7eb">Новая карта</div>
+     ${done ? `<div style="margin:${c ? 26 : 60}px auto 0;width:${c ? 130 : 170}px;height:${c ? 130 : 170}px;border-radius:50%;background:#dcf5e3;color:#1f9d47;font:700 ${c ? 84 : 110}px/${c ? 130 : 170}px IB;text-align:center;transform:scale(${q})">✓</div>
+       <div style="text-align:center;font:700 44px/1.15 IB;margin:${c ? 20 : 34}px 30px 0">Карта оформлена</div>
+       <div style="margin:${c ? 26 : 50}px 30px 0;padding:22px 24px;border-radius:20px;background:#fff;border:2px solid #e5e7eb;font:600 26px/1.4 I;color:#6b7280">Пригласивший друг<div style="font:700 30px IB;color:#9ca3af">не указан</div></div>`
+     : `<div style="margin:${Math.round(H * .25)}px auto 0;width:110px;height:110px;border-radius:50%;border:12px solid #d1d5db;border-top-color:#2f5bea;transform:rotate(${lt * 540}deg)"></div><div style="text-align:center;font:600 30px I;color:#6b7280;margin-top:30px">Оформляем карту…</div>`}</div>`; },
+  invite: (lt, o) => { const sent = lt > (o.ts || .3), ans = lt > (o.ta || 1.6), dots = lt > (o.ta || 1.6) - .8 && !ans;
+    const card = `<div style="align-self:flex-end;width:78%;border-radius:26px;border-bottom-right-radius:8px;background:#2f5bea;color:#fff;overflow:hidden;transform:scale(${back((lt - (o.ts || .3)) / .3)});transform-origin:100% 100%">
+       <div style="height:150px;background:linear-gradient(135deg,#ffd84d,#ff9f1c);display:flex;align-items:center;justify-content:center"><div style="width:190px;height:118px;border-radius:14px;background:#1c1c1e;box-shadow:0 8px 18px rgba(0,0,0,.3)"><div style="margin:30px 0 0 22px;width:40px;height:30px;border-radius:6px;background:#e9c46a"></div></div></div>
+       <div style="padding:16px 20px 8px;font:700 28px/1.25 IB">Приглашение от Арбузова</div><div style="padding:0 20px 18px;font:600 23px/1.3 I;opacity:.85">Оформи карту по ссылке — бонус получим оба</div></div>`;
+    return `<div style="width:600px;height:${o.sh || 1266}px;background:#e9edf3;display:flex;flex-direction:column" class="ui">
+     <div style="padding:66px 26px 20px;background:#fff;border-bottom:2px solid #e5e7eb;display:flex;gap:16px;align-items:center"><div style="width:62px;height:62px;border-radius:50%;background:#b7d97a;color:#2b3a12;font:700 30px/62px IB;text-align:center">К</div><div><div style="font:700 28px IB">Кабачков</div><div style="font:600 20px I;color:#6b7280">${dots ? "печатает…" : "в сети"}</div></div></div>
+     <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:20px 22px 30px">
+       <div style="align-self:center;font:600 20px I;color:#6b7280">Сегодня</div>${sent ? card : ""}
+       ${ans ? `<div style="align-self:flex-start;padding:18px 24px;border-radius:26px;border-bottom-left-radius:8px;background:#fff;font:600 30px I;transform:scale(${back((lt - (o.ta || 1.6)) / .3)});transform-origin:0 100%">ок, оформляю</div>` : ""}</div>
+     <div style="padding:16px 18px 40px;background:#fff;display:flex;gap:14px;align-items:center"><div style="flex:1;min-height:60px;padding:14px 20px;border-radius:30px;background:#f1f3f6;font:600 26px/1.3 I;color:#9ca3af">Сообщение</div></div></div>`; },
 };
 
 // доска «ТЕОРИЯ»: штрихи маркером (SVG) и подписи от руки
 function boardSVG(o, t) {   // t — абсолютное время (моменты частей доски абсолютные)
-  const P = o.parts.map((p) => { const q = cl((t - p.t) / (p.dur || .5)); return p.text
-    ? `<clipPath id="bc${p.x}_${p.y}"><rect x="${p.x - 20}" y="${p.y - (p.size || 80)}" width="${q * (p.text.length * (p.size || 80) * .5 + 40)}" height="${(p.size || 80) * 1.4}"/></clipPath><text x="${p.x}" y="${p.y}" clip-path="url(#bc${p.x}_${p.y})" font-family="H" font-weight="700" font-size="${p.size || 80}" fill="${p.c || "#1d3c8f"}" transform="rotate(${p.r || 0} ${p.x} ${p.y})">${p.text}</text>`
+  const P = o.parts.map((p) => { const q = cl((t - p.t) / (p.dur || .5)); if (q <= 0) return "";   // не начатый штрих — без точки от скруглённого конца
+    return p.text
+    ? `<clipPath id="bc${p.x}_${p.y}"><rect x="${p.x - 20}" y="${p.y - (p.size || 80)}" width="${q * (p.text.length * (p.size || 80) * .58 + 60)}" height="${(p.size || 80) * 1.4}"/></clipPath><text x="${p.x}" y="${p.y}" clip-path="url(#bc${p.x}_${p.y})" font-family="H" font-weight="700" font-size="${p.size || 80}" fill="${p.c || "#1d3c8f"}" transform="rotate(${p.r || 0} ${p.x} ${p.y})">${p.text}</text>`
     : `<path d="${p.d}" pathLength="1" fill="none" stroke="${p.c || "#1d3c8f"}" stroke-width="${p.w || 9}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1" stroke-dashoffset="${1 - q}"/>`; }).join("");
   return `<div class="a" style="inset:0;background:#f4f2ec"><div class="a" style="inset:0;opacity:.35;background:radial-gradient(ellipse at 30% 20%,#fff 0,transparent 60%),radial-gradient(ellipse at 80% 90%,#e6e2d6 0,transparent 55%)"></div>
     <div class="a" style="left:0;right:0;top:0;height:40px;background:linear-gradient(#b8b4aa,#d9d5ca)"></div><div class="a" style="left:0;right:0;bottom:0;height:60px;background:linear-gradient(#d9d5ca,#a8a49a)"></div>
@@ -106,14 +137,17 @@ function boardSVG(o, t) {   // t — абсолютное время (момен
 const s = document.createElement("script"); s.src = `../${REEL}/timeline3.js`; document.head.appendChild(s);
 s.onload = () => {
   const V = document.getElementById("v"), SCR = document.getElementById("scr"), LAY = document.getElementById("lay"), CAM = document.getElementById("cam");
-  const SV = document.getElementById("sv"), TX = document.getElementById("tx"), LOOK = document.getElementById("look");
+  const SV = document.getElementById("sv"), TX = document.getElementById("tx"), LOOK = document.getElementById("look"), GR = document.getElementById("grain");
+  if (TL.grain) { const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d"), d = g.createImageData(256, 256);
+    for (let j = 0; j < d.data.length; j += 4) { const v = (hashf(j * .37 + 1) * 255) | 0; d.data[j] = d.data[j + 1] = d.data[j + 2] = v; d.data[j + 3] = 255; }
+    g.putImageData(d, 0, 0); GR.style.backgroundImage = `url(${c.toDataURL()})`; GR.style.opacity = TL.grain; }
   const shotAt = (t) => { const k = TL.shots.findIndex(x => t >= x.t0 && t < x.t1); return k < 0 ? TL.shots.length - 1 : k; };
   const ellipse = (m) => { const pts = []; for (let a = -.3; a <= Math.PI * 2 + .5; a += .08) { const wob = 1 + .04 * Math.sin(a * 3 + m.cx); pts.push([m.cx + Math.cos(a - Math.PI / 2) * m.rx * wob * (1 + a * .012), m.cy + Math.sin(a - Math.PI / 2) * m.ry * wob]); } return "M" + pts.map(p => p.map(v => v.toFixed(1)).join(" ")).join(" L "); };
   // пометки маркером и «пузыри» — экранные, живут до конца своего плана
   const MK = TL.marks.map((m) => {
     const end = TL.shots[shotAt(m.t)].t1;
     if (m.kind === "text" || m.kind === "bubble") {
-      const d = document.createElement("div"); d.className = "a"; TX.appendChild(d);
+      const d = document.createElement("div"); d.className = "a"; (m.board ? document.getElementById("wtx") : TX).appendChild(d);
       d.style.cssText = `left:${m.x}px;top:${m.y}px;transform:rotate(${m.r || 0}deg);transform-origin:0 50%`;
       d.innerHTML = m.kind === "bubble"
         ? `<div style="position:relative;width:${m.w || 640}px;padding:30px 38px;background:#fff;border:7px solid ${OL};border-radius:46px;font:700 ${m.size || 62}px/1.12 H;color:${OL};box-shadow:10px 12px 0 rgba(0,0,0,.35)">${m.text}<div class="a" style="${m.tail || "left:90px"};bottom:-40px;width:56px;height:56px;background:#fff;border-right:7px solid ${OL};border-bottom:7px solid ${OL};transform:rotate(45deg)"></div></div>`
@@ -138,10 +172,11 @@ s.onload = () => {
     else setImg(`../${REEL}/out/img/${sh.img}.jpg`);
     const TOP = document.getElementById("top"); TOP.style.display = "none";
     if (sh.type === "phone" && sh.top) { const src = `../${REEL}/out/img/${sh.top}.png`; if (!TOP.src.endsWith(src.slice(2))) { TOP.src = src; pend.push(TOP.decode().catch(() => 0)); } TOP.style.display = ""; }   // пальцы и рамка — поверх экрана
-    if (sh.type === "phone") { SCR.style.transform = quadMatrix(sh.sw, sh.sh, sh.quad); SCR.style.width = sh.sw + "px"; SCR.style.height = sh.sh + "px"; SCR.style.overflow = "hidden"; SCR.style.borderRadius = (sh.rad || 0) + "px";
-      SCR.innerHTML = SCREENS[sh.screen](lt, sh) + `<div class="a" style="inset:0;background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 40%);pointer-events:none"></div>`; SCR.style.filter = sh.glow ? `drop-shadow(0 0 30px ${sh.glow})` : ""; }
+    if (sh.type === "phone") SCR.innerHTML = (sh.scr || [sh]).map(e => { const o = Object.assign({}, sh, e);   // sh.scr — несколько телефонов в кадре
+      return `<div class="a" style="left:0;top:0;width:${o.sw}px;height:${o.sh}px;overflow:hidden;border-radius:${o.rad || 0}px;transform-origin:0 0;transform:${quadMatrix(o.sw, o.sh, o.quad)};${o.glow ? `filter:drop-shadow(0 0 30px ${o.glow})` : ""}">`
+        + SCREENS[o.screen](lt, o) + `<div class="a" style="inset:0;background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 40%)"></div></div>`; }).join("");
     if (sh.type === "board") LAY.innerHTML = boardSVG(sh, t);
-    if (sh.type === "card") LAY.innerHTML = `<div class="a" style="inset:0;background:#141210 url(../${REEL}/out/img/f10.jpg) center/cover;filter:blur(0)"><div class="a" style="inset:0;backdrop-filter:blur(14px) brightness(.35)"></div>
+    if (sh.type === "card") LAY.innerHTML = `<div class="a" style="inset:0;background:#141210 url(../${REEL}/out/img/${sh.bg || "f10"}.jpg) center/cover;filter:blur(0)"><div class="a" style="inset:0;backdrop-filter:blur(14px) brightness(.35)"></div>
        <div class="a" style="left:0;right:0;top:${sh.y || 760}px;text-align:center;transform:rotate(-3deg)"><div class="mk" style="margin:0 auto;font-size:150px;color:#ffe066;clip-path:inset(-30% ${100 - cl(lt / .7) * 102}% -30% -5%)">${sh.text}</div>
        <svg width="900" height="60" style="display:block;margin:10px auto 0"><path d="M20 30 C 250 10, 600 50, 880 22" pathLength="1" fill="none" stroke="#ff4d4d" stroke-width="12" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="${1 - cl((lt - .6) / .35)}"/></svg></div></div>`;
     if (sh.type === "calflip") { const [cx, cy, w, h] = sh.area; LAY.innerHTML = Array.from({ length: 7 }, (_, j) => { const t0 = j * .17, q = cl((lt - t0) / .55);
@@ -152,8 +187,9 @@ s.onload = () => {
     z *= 1 + .05 * (1 - out4(lt / .3)); (sh.punch || []).forEach(p => { if (t >= p) z *= 1 + .08 * out4((t - p) / .12); });
     x = Math.min(Math.max(x, 540 / z), 1080 - 540 / z); y = Math.min(Math.max(y, 960 / z), 1920 - 960 / z);
     CAM.style.transform = `translate(${540 - x * z}px,${960 - y * z}px) scale(${z})`;
-    const mem = sh.look === "memory";
-    CAM.style.filter = mem ? "sepia(.5) saturate(.75) contrast(1.06) brightness(1.05)" : "none";
+    const mem = sh.look === "memory", gr = TL.grade || "none";
+    CAM.style.filter = mem ? "sepia(.5) saturate(.75) contrast(1.06) brightness(1.05)" : gr;
+    if (TL.grain) GR.style.backgroundPosition = `${(hashf(Math.floor(t * 12)) * 256) | 0}px ${(hashf(Math.floor(t * 12) + 7) * 256) | 0}px`;
     LOOK.style.background = mem ? `radial-gradient(ellipse at 50% 45%,transparent 42%,rgba(70,40,10,.6)), rgba(255,250,235,${sh.flash ? .9 * (1 - out4(lt / .25)) : 0})` : "none";
     MK.forEach((o) => {
       const on = t >= o.m.t && t < o.end, q = cl((t - o.m.t) / (o.m.kind === "circle" ? .45 : .35));

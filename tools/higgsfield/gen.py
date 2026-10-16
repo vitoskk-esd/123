@@ -20,6 +20,7 @@ import higgsfield_client
 from higgsfield_client.exceptions import HiggsfieldClientError
 
 IMG, VID = "xai/grok-imagine-image-2.0", "bytedance/seedance-2.5/image-to-video"
+QWEN = "alibaba/qwen-image-3/edit"   # вторая модель картинок (проба детализации 16.10); выбор — "app" у задания или "img_app" у рилса
 
 
 def first_url(x):
@@ -82,7 +83,13 @@ def main():
         if j["id"] not in go or dst.exists(): continue
         if kind == "img":
             style = J["style"] if j.get("ar", "9:16") == "9:16" else J["style"].replace(J.get("style_vertical", ""), "")   # для аватарки и шапки — без «вертикально, персонаж внизу»
-            app, args = IMG, dict(prompt=style + " " + j["prompt"], image_urls=[upload(r) for r in j["refs"]], aspect_ratio=j.get("ar", "9:16"), resolution="2k", quality="medium")
+            if j.get("raw"): style = ""   # точечная правка готового кадра («положи гречку в тарелку») — без длинного стилевого префикса
+            app = j.get("app", J.get("img_app", IMG)); refs = [upload(r) for r in j["refs"]]
+            if app == QWEN:   # Qwen Image 3 edit: до 3 образцов, без quality; ≈ $0,075 против $0,09 у Grok (по /estimate 16.10)
+                args = dict(prompt=style + " " + j["prompt"], image_urls=refs[:3], aspect_ratio=j.get("ar", "9:16"), resolution="2k",
+                            negative_prompt="text, letters, words, garbled writing, watermark, deformed hands, extra fingers, blurry")
+            else:
+                args = dict(prompt=style + " " + j["prompt"], image_urls=refs, aspect_ratio=j.get("ar", "9:16"), resolution="2k", quality="medium")
         else:
             src = out / (j["from"] + ".png")
             if not src.exists(): print(f"{j['id']}: нет кадра {src.name}, пропуск"); continue

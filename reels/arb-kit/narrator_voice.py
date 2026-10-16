@@ -7,8 +7,19 @@
 """
 import difflib, json, os, re, subprocess, sys, time
 sys.path.insert(0, "/home/user/123/tools"); import tts_yandex as Y
-sys.path.insert(0, "/home/user/123/youtube/characters/voice"); from arbuzov_voice import norm
+sys.path.insert(0, "/home/user/123/youtube/characters/voice"); from arbuzov_voice import norm, NUMW
 TAKES, VOICE = 3, "denis"
+
+
+def strict_sim(text, heard):
+    """Сверка целыми словами — с окончаниями (рилс 21: по основам прошли «другу около пятьсот» и «плюс 500 кабачков»).
+    Числа, которые Whisper записал цифрами, пропускаем с обеих сторон; числительные, записанные словами, сверяем."""
+    isnum = lambda w: any(w.startswith(n[:5]) or w.startswith(n[:4]) for n in NUMW) or w.startswith(("полтор", "тысяч", "сот"))
+    W = lambda x: re.sub(r"[^а-я0-9 ]", " ", x.lower().replace("ё", "е")).split()
+    tw, hw = W(text), [w for w in W(heard) if not w.isdigit()]
+    tw = [w for w in tw if not isnum(w) or any(isnum(x) and x[:3] == w[:3] for x in hw)]
+    hw = [w for w in hw if not isnum(w) or any(x[:3] == w[:3] for x in tw)]
+    return difflib.SequenceMatcher(None, tw, hw).ratio()
 
 
 def main(reel):
@@ -22,7 +33,7 @@ def main(reel):
     meta_f = f"{out}/phrases.json"; meta = json.load(open(meta_f)) if os.path.exists(meta_f) else {}
     for i, (text, marked) in enumerate(zip(P, M)):
         m = meta.get(str(i))
-        if m and m["text"] == text and m.get("marked") == marked and os.path.exists(m["wav"]): continue
+        if m and m["text"] == text and m.get("marked") == marked and "strict" in m and os.path.exists(m["wav"]): continue
         takes = []
         for k in range(TAKES):
             raw, wav = f"{out}/p{i:03d}_{k}_raw.wav", f"{out}/p{i:03d}_{k}.wav"
@@ -37,11 +48,12 @@ def main(reel):
             segs, _ = asr.transcribe(wav, language="ru", beam_size=5, word_timestamps=True)
             words = [dict(w=w.word.strip(), s=round(w.start, 3), e=round(w.end, 3)) for s in segs for w in s.words]
             sim = difflib.SequenceMatcher(None, norm(text), norm(" ".join(x["w"] for x in words))).ratio()
+            strict = strict_sim(text, " ".join(x["w"] for x in words))
             y, sr = librosa.load(wav, sr=16000); f0, v, _ = librosa.pyin(y, fmin=60, fmax=400, sr=sr); f0 = f0[v]
             st = 12 * np.log2(f0 / np.median(f0)); rng = float(np.percentile(st, 95) - np.percentile(st, 5))
-            print(f"{i} дубль {k}: точность {sim:.2f}, тон {rng:.1f} пт | {' '.join(x['w'] for x in words)}", flush=True)
-            takes.append(dict(text=text, marked=marked, wav=wav, sim=round(sim, 3), range=round(rng, 1), words=words))
-        good = [t for t in takes if t["sim"] >= .97] or sorted(takes, key=lambda t: -t["sim"])[:1]
+            print(f"{i} дубль {k}: точность {sim:.2f}/{strict:.2f}, тон {rng:.1f} пт | {' '.join(x['w'] for x in words)}", flush=True)
+            takes.append(dict(text=text, marked=marked, wav=wav, sim=round(sim, 3), strict=round(strict, 3), range=round(rng, 1), words=words))
+        good = [t for t in takes if t["sim"] >= .97 and t["strict"] >= .97] or sorted(takes, key=lambda t: (-t["strict"], -t["sim"]))[:1]
         meta[str(i)] = max(good, key=lambda t: t["range"]); json.dump(meta, open(meta_f, "w"), ensure_ascii=False, indent=1)
     ins, flt, allw, t = [], [], [], 0.0
     for i in range(len(P)):

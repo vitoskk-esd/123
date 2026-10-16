@@ -1,0 +1,295 @@
+{
+ "_": "Задания Higgsfield для рилса 21 «Арбузов привёл друга». Персонажи: Арбузов (design), Огурцов (c_ogur), Кабачков (c_kab). Проба 16.10: t_grok vs t_qwen — у Qwen богаче мир и мягче свет (ближе к амоБлогу), сцены — Qwen (img_app), образец столовой — t_qwen. Текст на картинках не рисуем — экраны и надписи кодом. *b — второй вариант ключевого кадра.",
+ "style": "Satirical hand-painted digital illustration for an adult YouTube channel about money, in one consistent art style for the whole series: confident ink linework, painterly shading with visible brush texture, volumetric light, soft shadows. ONE consistent color grade for every scene: warm tungsten evening light with muted teal shadows, slightly desaturated. Extremely detailed lived-in everyday Russian student life (university canteen, student dormitory, small shop near the dorm): many small, carefully drawn, recognizable objects and textures — worn surfaces, stickers, cables, dishes, posters with no readable text. Expressive slightly grotesque faces, cinematic composition, vertical 9:16. Food is always served properly: soup in bowls, buckwheat and cutlets on plates, bread on a saucer — nothing lies loose directly on a tray or table. Not a kids cartoon, not glossy 3D, not flat vector. No text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "design": "reels/arb-story-20/hf/d01.png",
+ "clip_app": "kling-video/v2.5-turbo/pro/image-to-video",
+ "designs": [
+  {
+   "id": "c_ogur",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Character design sheet pose, full body, in the same art style and world as the reference: Ogurtsov, Arbuzov's best friend, a young guy whose head is a real green cucumber with bumpy skin and tiny pimples, thick round glasses, absent-minded friendly smile, stretched faded t-shirt, cargo shorts, socks with slides, holding a smartphone. Standing in a student dormitory corridor."
+  },
+  {
+   "id": "c_kab",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Character design sheet pose, full body, in the same art style and world as the reference: Kabachkov, Arbuzov's calm dorm neighbor, a young guy whose head is a pale-green striped zucchini (courgette), sleepy calm eyes, wearing a fluffy terry bathrobe, home slippers, holding a mug of tea. Standing in the doorway of a dorm room."
+  }
+ ],
+ "brand": [],
+ "images": [
+  {
+   "id": "t_grok",
+   "phrase": 0,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Wide shot in a busy Russian university canteen at lunch: he sits at a long table with a plastic tray (borscht, buckwheat with cutlet, compote in a glass, bread slices), students in the queue behind, a cashier at the till, menu board on the wall, steam, chipped tiles, radiators, pigeons outside the window."
+  },
+  {
+   "id": "t_qwen",
+   "app": "alibaba/qwen-image-3/edit",
+   "phrase": 0,
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Use the watermelon character from the first reference image, keep his design identical (watermelon head, red cap backwards, grey hoodie, green hands). Wide shot in a busy Russian university canteen at lunch: he sits at a long table with a plastic tray (borscht, buckwheat with cutlet, compote in a glass, bread slices), students in the queue behind, a cashier at the till, menu board on the wall, steam, chipped tiles, radiators, pigeons outside the window."
+  },
+  {
+   "id": "t_fix",
+   "raw": true,
+   "refs": [
+    "reels/arb-friend-21/hf/t_qwen.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — characters, faces, poses, room, light, colors, composition. Only fix the food: on every tray the buckwheat and the cutlet must lie ON a round white ceramic plate (not loose on the tray), the borscht stays in its bowl, bread on a small saucer. No loose food on the trays."
+  },
+  {
+   "id": "s01f",
+   "raw": true,
+   "refs": [
+    "reels/arb-friend-21/hf/s01.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — characters, faces, poses, room, light, colors, composition. Only fix the food: on every tray the buckwheat and the cutlet must lie ON a round white ceramic plate (not loose on the tray), the borscht stays in its bowl, bread on a small saucer. No loose food on the trays."
+  },
+  {
+   "id": "s01bf",
+   "raw": true,
+   "refs": [
+    "reels/arb-friend-21/hf/s01b.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — characters, faces, poses, room, light, colors, composition. Only fix the food: on every tray the buckwheat and the cutlet must lie ON a round white ceramic plate (not loose on the tray), the borscht stays in its bowl, bread on a small saucer. No loose food on the trays."
+  },
+  {
+   "id": "s01",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "Medium-wide shot: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, and the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical, sit side by side at a canteen table with plastic trays (a bowl of borscht with sour cream, a white plate with buckwheat and a cutlet on it, compote in a faceted glass, bread slices, a crumpled napkin, a salt shaker). The cucumber guy happily slurps borscht, the watermelon guy looks at him with a sly scheming smile. Same university canteen as reference image 3 (pale green chipped tiles, radiators, window with pigeons, hanging lamps, worn wooden tables, steam from the serving counter). Students with backpacks in the queue behind, a cashier lady in a white cap."
+  },
+  {
+   "id": "s01b",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "Shot from across the table, slightly low angle: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, and the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical, eat lunch at a canteen table, trays with a bowl of borscht, a white plate of buckwheat with a cutlet, compote, bread, a cracked plate, a fork with buckwheat). The cucumber guy is pushing his glasses up and chewing, the watermelon guy leans on his fist and watches him with a cunning smile. Same university canteen as reference image 3 (pale green chipped tiles, radiators, window with pigeons, hanging lamps, worn wooden tables, steam from the serving counter)."
+  },
+  {
+   "id": "s02",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "Fantasy shot, over the shoulder of the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical: across the table the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical obliviously slurps borscht, and in the watermelon guy's imagination the cucumber guy glows with golden light, shiny gold coins rain down around him and splash into his soup, coins stacked on his plate next to the cutlet. Dreamy warm golden glow. Same university canteen as reference image 3 (pale green chipped tiles, radiators, window with pigeons, hanging lamps, worn wooden tables, steam from the serving counter)."
+  },
+  {
+   "id": "s03",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "Close-up first-person view: a green hand of the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical holds a smartphone above a canteen tray with a bowl of borscht and a plate of buckwheat with a cutlet, fork resting on the plate, compote glass, crumbs. The phone screen is completely blank and pure flat white, glowing, nothing on it, facing the camera, not tilted much. Canteen softly out of focus behind."
+  },
+  {
+   "id": "s03c",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "First-person point of view through the eyes of the watermelon guy from reference image 1: we see only his own green hand (grey hoodie sleeve) holding a smartphone toward us in the lower half of the frame, above his canteen tray with a bowl of borscht and a white plate of buckwheat with a cutlet, compote in a faceted glass, a fork, crumbs. The phone screen is completely blank and pure flat white, glowing, facing the camera. Across the table sits the cucumber guy from reference image 2 (bumpy cucumber head, round glasses, grey t-shirt), happily eating borscht, not noticing anything. The watermelon guy himself is NOT visible in the frame — only his hand. Same canteen as reference image 3, softly out of focus."
+  },
+  {
+   "id": "s04",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "Two-shot at the canteen table: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, holds his phone and stares at it with wide excited eyes and an open grin, then glances at the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical, who obliviously eats a cutlet with a fork. Lots of space above both heads. Same university canteen as reference image 3 (pale green chipped tiles, radiators, window with pigeons, hanging lamps, worn wooden tables, steam from the serving counter)."
+  },
+  {
+   "id": "s05",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, passionately explains something, gesturing with a fork so a few grains of buckwheat fly off it, half standing over the table; the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical nods absent-mindedly while already looking down at his smartphone. Trays with bowls of borscht and plates of buckwheat, compote, bread on saucers, crumbs. Same university canteen as reference image 3 (pale green chipped tiles, radiators, window with pigeons, hanging lamps, worn wooden tables, steam from the serving counter)."
+  },
+  {
+   "id": "s05b",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "Low angle across the canteen table: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, waves his hands and explains a big idea, a fork in one hand; the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical nods while tapping his smartphone, not really listening. Other students eat at neighbouring tables, steam, trays. Same university canteen as reference image 3 (pale green chipped tiles, radiators, window with pigeons, hanging lamps, worn wooden tables, steam from the serving counter)."
+  },
+  {
+   "id": "s06",
+   "refs": [
+    "reels/arb-friend-21/hf/c_ogur.png",
+    "reels/arb-friend-21/hf/t_fix.png"
+   ],
+   "prompt": "Close-up: the green bumpy hands of the cucumber guy from reference image 1 hold a smartphone above a canteen tray (half-eaten borscht, a bitten bread slice, a compote glass). The phone screen is completely blank and pure flat white, glowing, nothing on it, facing the camera, not tilted much. His glasses and chin are at the top edge of the frame. Canteen softly out of focus."
+  },
+  {
+   "id": "s07",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png"
+   ],
+   "prompt": "Night, Russian student dormitory: long dim corridor with brown linoleum, peeling paint, numbered doors without readable numbers, shoe racks, a drying rack with laundry, an old fire extinguisher, a broken bicycle, extension cords, a bucket and mop, warm bulb light. the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, and the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical sit on the dirty windowsill at the end of the corridor, both staring sadly at their phones, slumped shoulders; a tumbleweed of dust rolls along the linoleum toward the camera. Cold blue moonlight from the window mixed with warm bulb light."
+  },
+  {
+   "id": "s08",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png"
+   ],
+   "prompt": "Shared dormitory kitchen at night: old gas stove with a dented kettle, a pot of instant noodles, a greasy wall, a sink with dishes, a fridge with magnets. the cucumber guy from reference image 2 (bumpy green cucumber head, thick round glasses, stretched faded grey t-shirt, cargo shorts, white socks with slides) — keep his design identical guiltily chews noodles and looks sideways, the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, stands next to him with a facepalm. Lots of empty space on the wall above them."
+  },
+  {
+   "id": "s10",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Russian student dormitory: long dim corridor with brown linoleum, peeling paint, numbered doors without readable numbers, shoe racks, a drying rack with laundry, an old fire extinguisher, a broken bicycle, extension cords, a bucket and mop, warm bulb light. the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, knocks with his knuckles on a worn wooden dorm room door with a peeling sticker and a hook with a towel; he holds his phone in the other hand and smiles slyly. View down the long corridor."
+  },
+  {
+   "id": "s11",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_kab.png"
+   ],
+   "prompt": "A dorm room door is opened: in the doorway stands the zucchini guy from reference image 2 (pale-green striped zucchini head, sleepy calm eyes, white fluffy terry bathrobe, fluffy slippers) — keep his design identical, calmly holding a steaming mug of tea; behind him a cozy cluttered dorm room — bunk bed, rug on the wall, a desk with books, an electric kettle, a mini fridge, posters without text, a laptop. In the foreground, the back of the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical."
+  },
+  {
+   "id": "s11b",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_kab.png"
+   ],
+   "prompt": "Over-the-shoulder shot from the corridor: the zucchini guy from reference image 2 (pale-green striped zucchini head, sleepy calm eyes, white fluffy terry bathrobe, fluffy slippers) — keep his design identical opens the door of his dorm room and looks with sleepy calm, holding a mug of tea with steam; the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, in the foreground waves hello with his phone. Warm lamp light from the room, dim corridor."
+  },
+  {
+   "id": "s12",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Close-up: a green hand of the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical holds a smartphone in a dim dormitory corridor (linoleum, shoe rack and a door blurred behind). The phone screen is completely blank and pure flat white, glowing, nothing on it, facing the camera, not tilted much."
+  },
+  {
+   "id": "s13",
+   "refs": [
+    "reels/arb-friend-21/hf/c_kab.png"
+   ],
+   "prompt": "Night, a tiny grocery store near the dormitory: the zucchini guy from reference image 2 (pale-green striped zucchini head, sleepy calm eyes, white fluffy terry bathrobe, fluffy slippers) — keep his design identical, at the checkout taps a bank card on the card terminal. On the conveyor belt — groceries for a week: buckwheat packs, pasta, eggs in a carton, milk, apples, a loaf of bread, sausages, canned fish, tea. A tired cashier woman, shelves with colorful packaging without readable text, a fridge with drinks. Everything without letters."
+  },
+  {
+   "id": "s13b",
+   "refs": [
+    "reels/arb-friend-21/hf/c_kab.png"
+   ],
+   "prompt": "Night, small corner shop near the dorm: the zucchini guy from reference image 2 (pale-green striped zucchini head, sleepy calm eyes, white fluffy terry bathrobe, fluffy slippers) — keep his design identical, walks out of the shop carrying two heavy full grocery bags (a baguette, leeks, a milk carton, pasta sticking out), slippers on wet asphalt, warm light from the shop window, a street lamp, puddles."
+  },
+  {
+   "id": "s14",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Inside a dorm room: on a wall with a faded rug and old wallpaper hangs a tear-off day calendar with completely blank white pages, next to a hook with a backpack, a mirror and a shelf with instant noodles and a mug. The watermelon guy from reference image 1 lies on the bed below, waiting, staring at the ceiling."
+  },
+  {
+   "id": "s15",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_kab.png"
+   ],
+   "prompt": "Shared dorm kitchen: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, and the zucchini guy from reference image 2 (pale-green striped zucchini head, sleepy calm eyes, white fluffy terry bathrobe, fluffy slippers) — keep his design identical, stand side by side, both proudly hold up their smartphones toward the camera at chest height, two phones clearly visible, their screens blank pure flat white and glowing. Kettle, stove, fridge with magnets behind."
+  },
+  {
+   "id": "s16",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_kab.png"
+   ],
+   "prompt": "Shared dorm kitchen at night: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, and the zucchini guy from reference image 2 (pale-green striped zucchini head, sleepy calm eyes, white fluffy terry bathrobe, fluffy slippers) — keep his design identical, happily clink their tea mugs in celebration, steam rising, a box of cookies and a loaf on the table, warm lamp light, fridge with magnets, gas stove, window with night city."
+  },
+  {
+   "id": "s17",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Shared dorm kitchen: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, stands next to an old white fridge whose door is a big clean empty white surface; he holds a black marker and points at the empty fridge door. Magnets in the corners only, kettle and stove nearby. The fridge door takes up most of the frame."
+  },
+  {
+   "id": "s18",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Dorm room at night: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, lies on the lower bunk bed scrolling his phone and looks into the camera with a sly raised eyebrow; from the upper bunk a sleepy tomato-head guy peeks down, and a potato-head roommate sits at the desk in headphones. Rug on the wall, cluttered desk, laundry, lamp light."
+  },
+  {
+   "id": "s18b",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Close-up: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, lies on a dorm bed with a phone glowing on his face, looking straight into the camera with a cunning smile, one eyebrow raised; behind him a rug on the wall, a poster without text, a string of fairy lights, a shelf with instant noodles."
+  }
+ ],
+ "clips": [
+  {
+   "id": "v01",
+   "from": "s01bf",
+   "duration": 5,
+   "prompt": "The cucumber guy chews and pushes his glasses up with one finger, the watermelon guy leans on his fist and watches him with a sly smile, steam rises from the counter, students in the queue shift slightly. Keep the art style, characters and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v05",
+   "from": "s05",
+   "duration": 5,
+   "prompt": "The watermelon guy passionately explains, waving his fork, a few buckwheat grains fly off; the cucumber guy nods slowly while scrolling his phone with his thumb. Keep the art style, characters and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v07",
+   "from": "s07",
+   "duration": 5,
+   "prompt": "A small dust tumbleweed slowly rolls along the corridor floor toward the camera; the two guys on the windowsill sigh and stare at their phones, the wall lamp flickers slightly. Keep the art style, characters and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v10",
+   "from": "s10",
+   "duration": 5,
+   "prompt": "The watermelon guy knocks on the wooden door three times with his knuckles, then waits with a sly smile. Keep the art style, characters and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v11",
+   "from": "s11",
+   "duration": 5,
+   "prompt": "The zucchini guy in the bathrobe calmly takes a sip of tea from his mug and raises an eyebrow, steam rises from the mug. Keep the art style, characters and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v13",
+   "from": "s13",
+   "duration": 5,
+   "prompt": "The zucchini guy taps his bank card on the card terminal, the cashier woman nods tiredly and pushes the groceries along the counter. Keep the art style, characters and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v18",
+   "from": "s18",
+   "duration": 5,
+   "prompt": "The watermelon guy scrolls his phone, then looks into the camera and slowly raises one eyebrow with a cunning smile; the tomato on the upper bunk yawns. Keep the art style, characters and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  }
+ ],
+ "img_app": "alibaba/qwen-image-3/edit"
+}
