@@ -1,0 +1,161 @@
+{
+ "_": "Задания Higgsfield для рилса 22 «Почему ты откладываешь свою жизнь» — новый формат (AMO_DIFF_v4.md): сцены слоями, позы, предметы отдельно. Обстановка: съёмная однушка (спальня, угол, прихожая, дверь, кухня, балкон) и двор панельки утром. r01 — образец квартиры для остальных сцен. p_* — предметы на белом фоне, фон вырезается кодом. r01b/r04b/r06b — позы (точечная правка готового кадра).",
+ "style": "Satirical hand-painted digital illustration for an adult YouTube channel about money, in one consistent art style for the whole series: confident ink linework, painterly shading with visible brush texture, volumetric light, soft shadows. ONE consistent color grade for every scene: warm tungsten evening light with muted teal shadows, slightly desaturated. Extremely detailed lived-in everyday life of a young guy in a Russian city (small rented one-room apartment in a panel building: bedroom, hallway, kitchen, balcony; the courtyard of the block): many small, carefully drawn, recognizable objects and textures — worn surfaces, stickers, cables, dishes, posters with no readable text. Expressive slightly grotesque faces, cinematic composition, vertical 9:16. Food is always served properly: soup in bowls, buckwheat and cutlets on plates, bread on a saucer — nothing lies loose directly on a tray or table. Not a kids cartoon, not glossy 3D, not flat vector. No text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "design": "reels/arb-story-20/hf/d01.png",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "clip_app": "kling-video/v2.5-turbo/pro/image-to-video",
+ "designs": [],
+ "brand": [],
+ "images": [
+  {
+   "id": "r01",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Early Monday morning in a small cozy-messy rented one-room apartment in a Russian panel building: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, lies in bed under a checkered blanket, wide awake and determined, eyes open, staring at the ceiling. On the wall above the bed hangs a big paper wall calendar showing one month as an empty grid of squares — completely blank squares, no numbers, no words. An old twin-bell alarm clock on a stool, a phone on a charger, clothes thrown on a chair, a dusty dumbbell under the bed, a rug on the wall, curtains with cold dawn light, a lamp, a mug. Medium-wide shot, lots of small details."
+  },
+  {
+   "id": "r08",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Early morning in the courtyard of a Russian nine-storey panel apartment block, sunrise light, long shadows: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, wearing running sneakers, jogs out of the entrance door of the building toward the camera with a fresh determined smile; pigeons fly off, puddles, a bench with a babushka, a children's playground, parked old cars, autumn trees. Wide shot."
+  },
+  {
+   "id": "r08b",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Sunrise jogging path in a small city park next to Russian panel apartment blocks: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, in running sneakers runs along the path toward the camera, breathing steam in the cold air, happy and determined; autumn leaves, a dog walker, a bench, lamp posts, morning mist. Medium shot, dynamic."
+  },
+  {
+   "id": "p_dumb",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A single isolated object on a pure flat white background, centered, fully visible with some empty margin around it, no shadow, no floor, drawn in the same ink-and-paint illustration style, linework and colors as reference image 1. No text, no letters. The object: an old black iron dumbbell with a little dust on it.",
+   "raw": true,
+   "ar": "1:1"
+  },
+  {
+   "id": "p_book",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A single isolated object on a pure flat white background, centered, fully visible with some empty margin around it, no shadow, no floor, drawn in the same ink-and-paint illustration style, linework and colors as reference image 1. No text, no letters. The object: a thick closed textbook with a plain dark-blue cover and no writing at all, a bookmark sticking out.",
+   "raw": true,
+   "ar": "1:1"
+  },
+  {
+   "id": "p_piggy",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A single isolated object on a pure flat white background, centered, fully visible with some empty margin around it, no shadow, no floor, drawn in the same ink-and-paint illustration style, linework and colors as reference image 1. No text, no letters. The object: a pink ceramic piggy bank.",
+   "raw": true,
+   "ar": "1:1"
+  },
+  {
+   "id": "p_bag",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A single isolated object on a pure flat white background, centered, fully visible with some empty margin around it, no shadow, no floor, drawn in the same ink-and-paint illustration style, linework and colors as reference image 1. No text, no letters. The object: a dark-green sports duffel bag with a towel sticking out.",
+   "raw": true,
+   "ar": "1:1"
+  },
+  {
+   "id": "r02",
+   "refs": [
+    "@design",
+    "reels/arb-later-22/hf/r01.png"
+   ],
+   "prompt": "Evening, a corner of the apartment: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, crouches next to a big open empty cardboard box standing on the laminate floor (plain cardboard, no text on it), holding one flap of the box and smiling guiltily at the camera; a wardrobe, a floor lamp, a radiator, a stack of old magazines, slippers. The open box is in the lower half of the frame and its opening is clearly visible. Same apartment and the same art style, light and colors as reference image 2."
+  },
+  {
+   "id": "r04a",
+   "refs": [
+    "@design",
+    "reels/arb-later-22/hf/r01.png"
+   ],
+   "prompt": "Evening, the narrow hallway of the apartment: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, sits on a low shoe bench and lazily looks down at a pair of running sneakers lying on the floor in front of him, tired face; coats on wall hooks, a shoe rack, a door mat, a small mirror, an umbrella. Same apartment and the same art style, light and colors as reference image 2."
+  },
+  {
+   "id": "r05",
+   "refs": [
+    "@design",
+    "reels/arb-later-22/hf/r01.png"
+   ],
+   "prompt": "Close-up of the apartment front door from the inside: a blank square yellow sticky note stuck on the door at eye level (nothing written on it), keys on a hook, a round wall clock next to the door with its hands at seven o'clock, a pair of running sneakers placed neatly on the door mat right at the door; warm evening lamp light. Same apartment and the same art style, light and colors as reference image 2."
+  },
+  {
+   "id": "r06",
+   "refs": [
+    "@design",
+    "reels/arb-later-22/hf/r01.png"
+   ],
+   "prompt": "Evening in the small kitchen of the apartment: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, sits at a small table and holds up a smartphone toward the camera at chest height; the phone screen is completely blank, pure flat white, glowing. A mug of tea, a sandwich on a plate, a bank card lying on the table, a gas stove, a fridge with magnets, a window with night city lights. Same apartment and the same art style, light and colors as reference image 2."
+  },
+  {
+   "id": "r07",
+   "refs": [
+    "@design",
+    "reels/arb-later-22/hf/r01.png"
+   ],
+   "prompt": "Dusk on the glazed balcony of the apartment, city lights and panel blocks outside: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, leans on the windowsill and holds a smartphone toward the camera at chest height, the phone screen is completely blank, pure flat white, glowing; laundry drying on a line, pot plants, an old bicycle, jars on a shelf. Same apartment and the same art style, light and colors as reference image 2."
+  },
+  {
+   "id": "r01b",
+   "raw": true,
+   "refs": [
+    "reels/arb-later-22/hf/r01.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the room, objects, light, colors, framing and the character's design. Only change: the watermelon guy is now fast asleep, eyes closed, mouth open, snoring, curled under the blanket; the alarm clock on the stool is ringing and shaking."
+  },
+  {
+   "id": "r04f",
+   "raw": true,
+   "refs": [
+    "reels/arb-later-22/hf/r04a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the room, objects, light, colors, framing and the character's design. Only change: the watermelon guy's feet are in plain grey socks, he is NOT wearing any shoes; there is exactly ONE pair of white running sneakers lying on the floor in front of him (remove the second pair)."
+  },
+  {
+   "id": "r04b",
+   "raw": true,
+   "refs": [
+    "reels/arb-later-22/hf/r04f.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the room, objects, light, colors, framing and the character's design. Only change: the watermelon guy now has the sneakers on his feet and is tying the laces, with a satisfied confident smile."
+  },
+  {
+   "id": "r06b",
+   "raw": true,
+   "refs": [
+    "reels/arb-later-22/hf/r06.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the room, objects, light, colors, framing and the character's design. Only change: the watermelon guy raises his free hand in a joyful fist, big happy grin; he still holds the same phone in the same place, the phone screen stays blank white."
+  }
+ ],
+ "clips": [
+  {
+   "id": "v04",
+   "from": "r04b",
+   "duration": 5,
+   "prompt": "The watermelon guy ties the laces of the sneakers on his feet, pulls the laces tight, then looks up with a confident smile. Keep the art style, character and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v08",
+   "from": "r08",
+   "duration": 5,
+   "prompt": "The watermelon guy jogs toward the camera out of the building entrance, pigeons fly up, the old woman on the bench turns her head, morning sun flickers through the trees. Keep the art style, character and background exactly as in the image; subtle natural motion only, no new objects, no text. Static camera."
+  },
+  {
+   "id": "v08b",
+   "from": "r08b",
+   "duration": 5,
+   "prompt": "The watermelon guy jogs toward the camera along the park path; the camera moves backward at the same speed, keeping him centered and the same size in frame the whole time; breath steam in cold air, autumn leaves fall, the dog walker in the background. Keep the art style and character exactly as in the image; no text. He never leaves the frame."
+  }
+ ]
+}

@@ -12,8 +12,8 @@ done
 node "$ROOT/youtube/kit/audio.js" "$R/timeline3.js" music_sfx3.wav > /dev/null || exit 1
 OFF=$(python3 -c "import json;s=open('$R/timeline3.js').read();print(int(json.loads(s[s.index('=')+1:].strip().rstrip(';'))['off']*1000))")
 ffmpeg -v error -y -i "$R/out/voice/voice.wav" -af "adelay=$OFF:all=1" "$R/out/voice_off.wav"
-mkdir -p "$R/out/img"   # рисунки планов (img, phone, calflip, фон карточки) → jpg 1188×2112 (запас под движение камеры)
-for f in $(python3 -c "import json;s=open('$R/timeline3.js').read();print(' '.join(sorted({x.get(k) for x in json.loads(s[s.index('=')+1:].strip().rstrip(';'))['shots'] for k in ('img','bg')} - {None})))"); do
+mkdir -p "$R/out/img"   # рисунки планов (img, phone, calflip, фон карточки, позы) → jpg 1188×2112 (запас под движение камеры)
+for f in $(python3 -c "import json;s=open('$R/timeline3.js').read();T=json.loads(s[s.index('=')+1:].strip().rstrip(';'));print(' '.join(sorted(({x.get(k) for x in T['shots'] for k in ('img','bg')} | {p['img'] for x in T['shots'] for p in x.get('poses',[])}) - {None})))"); do
   [ -f "$R/out/img/$f.jpg" ] || ffmpeg -v error -y -i "$R/hf/$f.png" -vf scale=1188:2112 -q:v 2 "$R/out/img/$f.jpg"; done
 SUM=$(cat arb-kit/cut3.html "$R/timeline3.js" "$R"/out/img/*_top.png | md5sum | cut -c1-12)
 [ "$(cat "$R/out/pieces3/.sum" 2>/dev/null)" = "$SUM" ] || { rm -rf "$R/out/pieces3"; mkdir -p "$R/out/pieces3"; echo "$SUM" > "$R/out/pieces3/.sum"; }

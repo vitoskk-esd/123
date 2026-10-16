@@ -1,0 +1,126 @@
+{
+ "_uploads": {
+  "reels/arb-story-20/hf/d01.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/385fa051-3811-4bdd-87f4-332545e17a2c.png",
+  "reels/arb-later-22/hf/r01.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/c0e29f83-a29c-4a48-acce-86097055399d.png",
+  "reels/arb-later-22/hf/r04a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/5214cd2b-afea-4931-b839-cc3c2665f56a.png",
+  "reels/arb-later-22/hf/r04f.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/977cbd76-cd51-4505-a1fc-d3cca2ba8be7.png",
+  "reels/arb-later-22/hf/r06.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/1a2f1c58-52a9-456d-a8bd-d53b40175c6d.png",
+  "reels/arb-later-22/hf/r08.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/8e8d8728-1e56-453c-b8f0-3b6c0b6faa57.png",
+  "reels/arb-later-22/hf/r04b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/bfbf1fbc-6a02-4e1a-85a6-9d77e4401bef.png",
+  "reels/arb-later-22/hf/r08b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/afccc16e-be95-4236-8533-9b2a49097328.png"
+ },
+ "r01": {
+  "request_id": "eb53b7e0-8d8b-4d97-833f-ad4f29eec434",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "r08": {
+  "request_id": "5690e29a-60e9-437e-aff8-3c0d18e347ea",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 53
+ },
+ "r08b": {
+  "request_id": "aef6c015-666e-48b5-99a8-643c7e3fda29",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 45
+ },
+ "p_dumb": {
+  "request_id": "0201a772-7dcc-488c-9093-fea1956994e9",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 36
+ },
+ "p_book": {
+  "request_id": "3a9d03d1-4ea8-4f37-9300-ab66f0f262f5",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 48
+ },
+ "p_piggy": {
+  "request_id": "2119efac-14a3-4770-a2a7-160978565cf8",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 53
+ },
+ "p_bag": {
+  "request_id": "51149cc0-8ab7-4f80-ad9b-5c6df62262a5",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 40
+ },
+ "r02": {
+  "request_id": "fe5ae345-f13f-47bb-b85a-22f3d586e994",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 98
+ },
+ "r04a": {
+  "request_id": "47eb9e67-ab03-4c30-90b9-3f8b8795fda2",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 73
+ },
+ "r05": {
+  "request_id": "785c5340-a819-4821-929b-cf1d5751fbd2",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 82
+ },
+ "r06": {
+  "request_id": "6f0cef56-5b23-427a-8229-5f5dbff8d131",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 82
+ },
+ "r07": {
+  "request_id": "42e6bfba-7dac-4d32-82b5-24051fba4bc3",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 78
+ },
+ "r01b": {
+  "request_id": "6be22fb6-4320-411e-a9f0-0d683532e398",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "r04f": {
+  "request_id": "d269d1dc-9957-40a2-b30a-826d8b7c7cc8",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 65
+ },
+ "r04b": {
+  "request_id": "44c4f837-aa47-4052-8915-6a3f62c987f2",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 66
+ },
+ "r06b": {
+  "request_id": "ef77725d-8ce3-4150-a68a-87e43a339011",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "v08": {
+  "request_id": "21a089bb-b774-4a69-bf82-df7edc5d04ff",
+  "app": "kling-video/v2.5-turbo/pro/image-to-video",
+  "status": "completed",
+  "sec": 103
+ },
+ "v04": {
+  "request_id": "bde5a8b2-24d7-4166-9074-6b073e1d67e0",
+  "app": "kling-video/v2.5-turbo/pro/image-to-video",
+  "status": "completed",
+  "sec": 82
+ },
+ "v08b": {
+  "request_id": "7bd56af8-174b-4ecb-8e8b-56d5bbb3110e",
+  "app": "kling-video/v2.5-turbo/pro/image-to-video",
+  "status": "completed",
+  "sec": 62
+ }
+}

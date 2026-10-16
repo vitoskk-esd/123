@@ -10,6 +10,8 @@
      scr — несколько телефонов в кадре; углы и прозрачный верхний слой — arb-kit/screens.py),
      board — «ТЕОРИЯ» маркером на доске, card — карточка главы, calflip — листки календаря слетают.
      TL.grade / TL.grain — одна цветокоррекция и зерно на весь ролик (цельность, как у амоБлога).
+     С рилса 22 (новый формат, AMO_DIFF_v4.md): sh.layers — предметы-слои (drop/pop, clipY — «в коробку»), sh.poses — смена позы
+     на слове, TL.whip — смаз между сценами, TL.worldMarks — пометки в координатах рисунка, пометка timer, экран feed.
      Поверх — только пометки маркером и реплики в «пузырях». Субтитров и плашек нет. ?r=<папка рилса>. -->
 <style>
   @font-face { font-family: "H"; src: url("../../youtube/kit/fonts/caveat-cyrillic-700.woff2"); font-weight: 700; unicode-range: U+0400-045F; }
@@ -33,6 +35,7 @@
     <div id="scr" class="a" style="left:0;top:0"></div>
     <img id="top" class="a" style="left:0;top:0;width:1080px;height:1920px;display:none">
     <div id="lay" class="a" style="inset:0"></div>
+    <div id="lyr" class="a" style="inset:0"></div>   <!-- предметы-слои (sh.layers): падают/выпрыгивают по словам -->
     <div id="wtx" class="a" style="inset:0"></div>   <!-- надписи «в мире» (board: маркер на доске/двери) — едут вместе с камерой -->
   </div>
   <div id="look" class="a" style="inset:0;pointer-events:none"></div>
@@ -111,6 +114,17 @@ const SCREENS = {
        <div style="text-align:center;font:700 44px/1.15 IB;margin:${c ? 20 : 34}px 30px 0">Карта оформлена</div>
        <div style="margin:${c ? 26 : 50}px 30px 0;padding:22px 24px;border-radius:20px;background:#fff;border:2px solid #e5e7eb;font:600 26px/1.4 I;color:#6b7280">Пригласивший друг<div style="font:700 30px IB;color:#9ca3af">не указан</div></div>`
      : `<div style="margin:${Math.round(H * .25)}px auto 0;width:110px;height:110px;border-radius:50%;border:12px solid #d1d5db;border-top-color:#2f5bea;transform:rotate(${lt * 540}deg)"></div><div style="text-align:center;font:600 30px I;color:#6b7280;margin-top:30px">Оформляем карту…</div>`}</div>`; },
+  // рилс 22: лента карточек — уведомления (o.lock: часы сверху, новые сверху) или посты канала (o.head: шапка, новые снизу)
+  feed: (lt, o) => { const H = o.sh || 1266, its = (o.items || []).filter(i => lt >= i.t);
+    const card = (i) => { const q = back((lt - i.t) / .35);
+      return `<div style="margin:0 0 18px;padding:22px 24px;border-radius:26px;background:${i.bg || "rgba(246,248,251,.95)"};color:#111;transform:scale(${.6 + .4 * q});opacity:${cl(q * 1.5)};transform-origin:50% 0">
+        <div style="display:flex;align-items:center;gap:12px"><div style="width:48px;height:48px;border-radius:13px;background:${i.ic || "#2fa84f"};color:#fff;font:700 26px/48px IB;text-align:center">${i.icon || "₽"}</div><div style="font:600 22px I;color:#6b7280">${i.from || "Банк · сейчас"}</div></div>
+        <div style="font:700 ${i.size || 34}px/1.12 IB;margin-top:12px;color:${i.c || "#111"};letter-spacing:-.01em">${i.title}</div>${i.body ? `<div style="font:600 24px/1.3 I;color:#374151;margin-top:8px">${i.body}</div>` : ""}</div>`; };
+    const list = (o.lock ? its.slice().reverse() : its).map(card).join("");
+    return `<div style="width:600px;height:${H}px;background:${o.wall || (o.lock ? "linear-gradient(170deg,#3a4a6b,#1c2233 60%,#141826)" : "#e9edf3")};display:flex;flex-direction:column;overflow:hidden" class="ui">
+      ${o.lock ? `<div style="padding-top:${Math.round(H * .07)}px;text-align:center;color:#fff"><div style="font:600 24px I;opacity:.85">${o.date || "вторник, 16:20"}</div><div style="font:700 ${Math.round((o.sw || 600) * .22)}px/1 IB;letter-spacing:-.04em">${o.time || "19:42"}</div></div>`
+        : `<div style="padding:60px 24px 18px;background:#fff;border-bottom:2px solid #e5e7eb;display:flex;gap:14px;align-items:center"><div style="width:62px;height:62px;border-radius:50%;background:${o.head.c || "#ffd23f"};color:#1e1717;font:700 30px/62px IB;text-align:center">${o.head.a || "А"}</div><div><div style="font:700 28px IB;color:#111">${o.head.name}</div><div style="font:600 20px I;color:#6b7280">${o.head.sub || ""}</div></div></div>`}
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:${o.lock ? "flex-start" : "flex-end"};padding:${o.lock ? 36 : 20}px ${o.lock ? 20 : 36}px 26px">${list}</div></div>`; },
   invite: (lt, o) => { const sent = lt > (o.ts || .3), ans = lt > (o.ta || 1.6), dots = lt > (o.ta || 1.6) - .8 && !ans;
     const card = `<div style="align-self:flex-end;width:78%;border-radius:26px;border-bottom-right-radius:8px;background:#2f5bea;color:#fff;overflow:hidden;transform:scale(${back((lt - (o.ts || .3)) / .3)});transform-origin:100% 100%">
        <div style="height:150px;background:linear-gradient(135deg,#ffd84d,#ff9f1c);display:flex;align-items:center;justify-content:center"><div style="width:190px;height:118px;border-radius:14px;background:#1c1c1e;box-shadow:0 8px 18px rgba(0,0,0,.3)"><div style="margin:30px 0 0 22px;width:40px;height:30px;border-radius:6px;background:#e9c46a"></div></div></div>
@@ -141,12 +155,17 @@ s.onload = () => {
   if (TL.grain) { const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d"), d = g.createImageData(256, 256);
     for (let j = 0; j < d.data.length; j += 4) { const v = (hashf(j * .37 + 1) * 255) | 0; d.data[j] = d.data[j + 1] = d.data[j + 2] = v; d.data[j + 3] = 255; }
     g.putImageData(d, 0, 0); GR.style.backgroundImage = `url(${c.toDataURL()})`; GR.style.opacity = TL.grain; }
+  if (TL.worldMarks) { CAM.appendChild(SV); CAM.appendChild(TX); }   // рилс 22: все пометки в координатах рисунка — едут вместе с камерой
+  const LYR = document.getElementById("lyr");
+  const bounce = (x) => { x = cl(x); const n = 7.5625, d = 2.75; return x < 1 / d ? n * x * x : x < 2 / d ? n * (x -= 1.5 / d) * x + .75 : x < 2.5 / d ? n * (x -= 2.25 / d) * x + .9375 : n * (x -= 2.625 / d) * x + .984375; };
+  const mmss = (v) => `${Math.floor(v / 60)}:${String(Math.floor(v % 60)).padStart(2, "0")}`;
   const shotAt = (t) => { const k = TL.shots.findIndex(x => t >= x.t0 && t < x.t1); return k < 0 ? TL.shots.length - 1 : k; };
   const ellipse = (m) => { const pts = []; for (let a = -.3; a <= Math.PI * 2 + .5; a += .08) { const wob = 1 + .04 * Math.sin(a * 3 + m.cx); pts.push([m.cx + Math.cos(a - Math.PI / 2) * m.rx * wob * (1 + a * .012), m.cy + Math.sin(a - Math.PI / 2) * m.ry * wob]); } return "M" + pts.map(p => p.map(v => v.toFixed(1)).join(" ")).join(" L "); };
   // пометки маркером и «пузыри» — экранные, живут до конца своего плана
   const MK = TL.marks.map((m) => {
     const end = TL.shots[shotAt(m.t)].t1;
-    if (m.kind === "text" || m.kind === "bubble") {
+    if (m.kind === "timer") m.text = mmss(m.from);
+    if (m.kind === "text" || m.kind === "bubble" || m.kind === "timer") {
       const d = document.createElement("div"); d.className = "a"; (m.board ? document.getElementById("wtx") : TX).appendChild(d);
       d.style.cssText = `left:${m.x}px;top:${m.y}px;transform:rotate(${m.r || 0}deg);transform-origin:0 50%`;
       d.innerHTML = m.kind === "bubble"
@@ -169,26 +188,43 @@ s.onload = () => {
     SCR.innerHTML = ""; LAY.innerHTML = ""; V.style.display = "";
     if (sh.type === "clip") { const n = Math.min(NCLIP, Math.max(1, Math.floor(((sh.from || .15) + lt * (sh.rate || 1)) * 30) + 1)); setImg(`../${REEL}/out/clips/${sh.clip}/${String(n).padStart(3, "0")}.jpg`); }
     else if (sh.type === "board" || sh.type === "card") { V.style.display = "none"; }
-    else setImg(`../${REEL}/out/img/${sh.img}.jpg`);
+    let pz = null, cur = sh;   // смена позы: тот же кадр с другой эмоцией
+    (sh.poses || []).forEach(p => { if (t >= p.t) { cur = Object.assign({}, sh, p); pz = p; } });
+    if (sh.type !== "clip" && sh.type !== "board" && sh.type !== "card") setImg(`../${REEL}/out/img/${cur.img}.jpg`);
     const TOP = document.getElementById("top"); TOP.style.display = "none";
-    if (sh.type === "phone" && sh.top) { const src = `../${REEL}/out/img/${sh.top}.png`; if (!TOP.src.endsWith(src.slice(2))) { TOP.src = src; pend.push(TOP.decode().catch(() => 0)); } TOP.style.display = ""; }   // пальцы и рамка — поверх экрана
-    if (sh.type === "phone") SCR.innerHTML = (sh.scr || [sh]).map(e => { const o = Object.assign({}, sh, e);   // sh.scr — несколько телефонов в кадре
+    if (sh.type === "phone" && cur.top) { const src = `../${REEL}/out/img/${cur.top}.png`; if (!TOP.src.endsWith(src.slice(2))) { TOP.src = src; pend.push(TOP.decode().catch(() => 0)); } TOP.style.display = ""; }   // пальцы и рамка — поверх экрана
+    if (sh.type === "phone") SCR.innerHTML = (sh.scr || [sh]).map(e => { const o = Object.assign({}, cur, e);   // sh.scr — несколько телефонов в кадре
       return `<div class="a" style="left:0;top:0;width:${o.sw}px;height:${o.sh}px;overflow:hidden;border-radius:${o.rad || 0}px;transform-origin:0 0;transform:${quadMatrix(o.sw, o.sh, o.quad)};${o.glow ? `filter:drop-shadow(0 0 30px ${o.glow})` : ""}">`
         + SCREENS[o.screen](lt, o) + `<div class="a" style="inset:0;background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 40%)"></div></div>`; }).join("");
     if (sh.type === "board") LAY.innerHTML = boardSVG(sh, t);
+    LYR.innerHTML = (sh.layers || []).map(L => { if (t < L.t) return ""; const q = (t - L.t) / (L.dur || .5);
+      let dy = 0, sc = 1, sy = 1;
+      if (L.anim === "drop") { dy = -(L.from || 800) * (1 - bounce(q)); const hit = t - L.t - (L.dur || .5) * .36; if (hit > 0 && hit < .14) sy = 1 - .12 * Math.sin(hit / .14 * Math.PI); }
+      else if (L.anim === "pop") sc = .3 + .7 * back(q);
+      const top = L.y + dy, cut = L.clipY ? Math.max(0, top + L.h - L.clipY) : 0;   // clipY — ниже этой линии предмет скрыт (упал в коробку)
+      return `<img class="a" src="../${REEL}/out/img/${L.src}.png" style="left:${L.x}px;top:${top}px;width:${L.w}px;height:${L.h}px;transform-origin:50% 100%;transform:rotate(${L.r || 0}deg) scale(${sc},${sc * sy});clip-path:inset(0 0 ${cut}px 0);filter:drop-shadow(0 10px 8px rgba(0,0,0,.35))">`; }).join("");
     if (sh.type === "card") LAY.innerHTML = `<div class="a" style="inset:0;background:#141210 url(../${REEL}/out/img/${sh.bg || "f10"}.jpg) center/cover;filter:blur(0)"><div class="a" style="inset:0;backdrop-filter:blur(14px) brightness(.35)"></div>
        <div class="a" style="left:0;right:0;top:${sh.y || 760}px;text-align:center;transform:rotate(-3deg)"><div class="mk" style="margin:0 auto;font-size:150px;color:#ffe066;clip-path:inset(-30% ${100 - cl(lt / .7) * 102}% -30% -5%)">${sh.text}</div>
        <svg width="900" height="60" style="display:block;margin:10px auto 0"><path d="M20 30 C 250 10, 600 50, 880 22" pathLength="1" fill="none" stroke="#ff4d4d" stroke-width="12" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="${1 - cl((lt - .6) / .35)}"/></svg></div></div>`;
     if (sh.type === "calflip") { const [cx, cy, w, h] = sh.area; LAY.innerHTML = Array.from({ length: 7 }, (_, j) => { const t0 = j * .17, q = cl((lt - t0) / .55);
         return q <= 0 ? "" : `<div class="a" style="left:${cx - w / 2}px;top:${cy - h / 2}px;width:${w}px;height:${h}px;background:#f3eee2;border:3px solid #6b6255;border-radius:6px;background-image:linear-gradient(#c9c0ae 2px,transparent 2px),linear-gradient(90deg,#c9c0ae 2px,transparent 2px);background-size:${w / 7}px ${h / 6}px;transform-origin:50% 0;transform:translate(${q * (j % 2 ? 260 : -200)}px,${q * q * 900}px) rotate(${q * (j % 2 ? 70 : -60)}deg) rotateX(${q * 60}deg);opacity:${1 - q * .7}"></div>`; }).join(""); }
     // камера: от станции cam[0] к cam[1] за план; «впрыг» после склейки; удары на словах
-    const c0 = sh.cam[0], c1 = sh.cam[1] || sh.cam[0], m = io2(lt / D);
-    let z = c0[2] + (c1[2] - c0[2]) * m, x = c0[0] + (c1[0] - c0[0]) * m, y = c0[1] + (c1[1] - c0[1]) * m;
+    let x, y, z;
+    if (sh.camk) {   // рилс 22: маршрут камеры [[t от начала плана, x, y, z], …] — плавно от точки к точке
+      const K = sh.camk; let j = 0; while (j < K.length - 2 && lt >= K[j + 1][0]) j++;
+      const [ta, xa, ya, za] = K[j], [tb, xb, yb, zb] = K[Math.min(j + 1, K.length - 1)], mm = tb > ta ? io2((lt - ta) / (tb - ta)) : 1;
+      x = xa + (xb - xa) * mm; y = ya + (yb - ya) * mm; z = za + (zb - za) * mm;
+    } else { const c0 = sh.cam[0], c1 = sh.cam[1] || sh.cam[0], m = io2(lt / D);
+      z = c0[2] + (c1[2] - c0[2]) * m; x = c0[0] + (c1[0] - c0[0]) * m; y = c0[1] + (c1[1] - c0[1]) * m; }
     z *= 1 + .05 * (1 - out4(lt / .3)); (sh.punch || []).forEach(p => { if (t >= p) z *= 1 + .08 * out4((t - p) / .12); });
+    if (pz) z *= 1 + .035 * (1 - out4((t - pz.t) / .25));
     x = Math.min(Math.max(x, 540 / z), 1080 - 540 / z); y = Math.min(Math.max(y, 960 / z), 1920 - 960 / z);
-    CAM.style.transform = `translate(${540 - x * z}px,${960 - y * z}px) scale(${z})`;
+    let wy = 0, wb = 0; const k = TL.shots.indexOf(sh), tail = sh.t1 - t;
+    if (TL.whip && k > 0 && lt < .16) { const q = out4(lt / .16); wy = 320 * (1 - q); wb = 16 * (1 - q); }                       // въезжает снизу со смазом
+    if (TL.whip && k < TL.shots.length - 1 && tail < .12) { const q = 1 - tail / .12; wy = -320 * q * q; wb = 16 * q; }   // уезжает вверх
+    CAM.style.transform = `translate(${540 - x * z}px,${960 - y * z + wy}px) scale(${z})`;
     const mem = sh.look === "memory", gr = TL.grade || "none";
-    CAM.style.filter = mem ? "sepia(.5) saturate(.75) contrast(1.06) brightness(1.05)" : gr;
+    CAM.style.filter = (mem ? "sepia(.5) saturate(.75) contrast(1.06) brightness(1.05)" : gr) + (wb > .3 ? ` blur(${wb.toFixed(1)}px)` : "");
     if (TL.grain) GR.style.backgroundPosition = `${(hashf(Math.floor(t * 12)) * 256) | 0}px ${(hashf(Math.floor(t * 12) + 7) * 256) | 0}px`;
     LOOK.style.background = mem ? `radial-gradient(ellipse at 50% 45%,transparent 42%,rgba(70,40,10,.6)), rgba(255,250,235,${sh.flash ? .9 * (1 - out4(lt / .25)) : 0})` : "none";
     MK.forEach((o) => {
@@ -196,6 +232,8 @@ s.onload = () => {
       if (o.g) { o.g.style.display = on ? "" : "none"; o.paths.forEach(p => { p.setAttribute("stroke-dasharray", "1 1"); p.setAttribute("stroke-dashoffset", String(1 - q)); }); return; }
       o.d.style.display = on ? "" : "none";
       if (o.m.kind === "bubble") { o.d.firstElementChild.style.transform = `scale(${.3 + .7 * back((t - o.m.t) / .35)})`; o.d.firstElementChild.style.transformOrigin = "15% 110%"; }
+      else if (o.m.kind === "timer") { const el = o.d.firstElementChild; el.textContent = mmss(Math.max(0, o.m.from - Math.max(0, t - o.m.t - .3) * (o.m.speed || 1)));
+        el.style.transform = `scale(${.4 + .6 * back((t - o.m.t) / .35)})`; el.style.transformOrigin = "50% 50%"; }
       else o.d.firstElementChild.style.clipPath = `inset(-30% ${100 - cl((t - o.m.t) / Math.max(.3, o.m.text.length * .045)) * 102}% -30% -5%)`;
     });
     return Promise.all(pend);
