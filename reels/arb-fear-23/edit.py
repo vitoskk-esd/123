@@ -47,7 +47,7 @@ def edit(W):
         dict(clip="v06", t=23.9, src=.4, zoom=(1.0, 1.06), center=(.5, .55), trans="whip"),
         dict(clip="v07", t=27.05, src=1.3, zoom=(1.0, 1.08), center=(.5, .45), trans="whip"),
         dict(clip="v08", t=30.0, src=0, zoom=(1.0, 1.05), center=(.5, .45), trans="pixel"),
-        dict(clip="v08c", t=33.2, src=.8, zoom=(1.0, 1.06), center=(.55, .53),
+        dict(clip="v08c", t=33.2, src=0, speed=.9, zoom=(1.45, 1.6), center=(.56, .52),
              screens=[dict(ui="lock", t0=33.2, quad=quad), dict(ui="push", t0=T("покупку") - .1, quad=quad)]),
         dict(clip="v08", t=34.9, src=7.0, zoom=(1.04, 1.0), center=(.5, .4)),
         dict(clip="v09", t=36.9, src=0, speed=.85, zoom=(1.0, 1.06), center=(.5, .4)),
@@ -65,8 +65,8 @@ def edit(W):
             W_(text="ПОТЕРЯ", kind="bold", size=70, color=WHITE, x=.5, y=.11, t=T("потерю") - .03, anim="rise"),
             W_(text="×2", kind="hero", size=420, color=RED, x=.5, y=.24, t=T("вдвое") - .03, anim="slam", behind=True)]),
         dict(shot=11, out=END + 1, punch=T("начни"), words=[
-            W_(text="НАЧНИ", kind="hero", size=230, color=RED, x=.42, y=.2, t=T("начни") - .03, anim="slam", arc=.08),
-            W_(text="с одного шага", kind="bold", size=70, color=WHITE, x=.42, y=.3, t=T("одного") - .03, anim="rise")]),
+            W_(text="НАЧНИ", kind="hero", size=200, color=RED, x=.5, y=.2, t=T("начни") - .03, anim="slam", rot=6),
+            W_(text="с одного шага", kind="bold", size=70, color=WHITE, x=.5, y=.29, t=T("одного") - .03, anim="rise")]),
     ]
     sfx = dict(
         impact=[T("3"), T("вдвое"), T("начни")], pop=[T("год"), T("заработано"), T("потерю"), T("одного")], coin=[T("0")],
