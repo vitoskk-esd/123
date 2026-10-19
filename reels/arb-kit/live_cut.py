@@ -278,9 +278,17 @@ def mix(reel, E, video, off):
     subprocess.run(["node", f"{ROOT}/youtube/kit/audio.js", f"{reel}/out/live_tl.js", "live_music_sfx.wav"], check=True, capture_output=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{reel}/out/voice/voice.wav", "-af", f"adelay={int(off * 1000)}:all=1",
                     f"{reel}/out/voice_off.wav"], check=True)
-    subprocess.run(["bash", f"{ROOT}/youtube/02-bank-earns/mix.sh", video, f"{reel}/out/voice_off.wav", f"{reel}/out/live_music_sfx.wav",
-                    f"{reel}/reel.mp4"], check=True)
-    print(f"→ {reel}/reel.mp4")
+    os.replace(f"{reel}/out/out/live_music_sfx.wav", f"{reel}/out/live_music_sfx.wav")   # audio.js пишет в <папка TL>/out/
+    # мастер 60 к/с (crf 16, ~450 МБ) сразу ужимаем в две прохода до ~26 МБ (≈ 4,6 Мбит/с) — и для отправки, и чтобы не забить диск
+    small = f"{reel}/out/live_small.mp4"; log = f"{reel}/out/x264pass"
+    for p in (1, 2):
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", video, "-c:v", "libx264", "-b:v", "4600k", "-maxrate", "7000k", "-bufsize", "9000k",
+                        "-preset", "slow", "-pass", str(p), "-passlogfile", log, "-pix_fmt", "yuv420p", "-an"] +
+                       (["-f", "null", "/dev/null"] if p == 1 else [small]), check=True)
+    os.remove(video)
+    subprocess.run(["bash", f"{ROOT}/youtube/02-bank-earns/mix.sh", small, f"{reel}/out/voice_off.wav", f"{reel}/out/live_music_sfx.wav",
+                    f"{reel}/reel_1080p.mp4"], check=True)
+    print(f"→ {reel}/reel_1080p.mp4")
 
 
 if __name__ == "__main__":
