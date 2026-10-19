@@ -4,7 +4,8 @@
 строит кадр между двумя соседними рисунками по оптическому потоку. Длинные паузы (≥ 4 одинаковых кадров) не трогаем — это игра персонажа.
 ffmpeg minterpolate для этого не годится: на пробе v_box дал «призраки» рук (19.10).
 Веса (~20 МБ) один раз скачиваются с Hugging Face (hzwer/RIFE) в ~/.cache/arb-kit/rife, в репозиторий не кладутся.
-  <python с torch и huggingface_hub> arb-kit/smooth.py <клип.mp4> <выход.mp4> [--scale 0.5]
+  <python с torch и huggingface_hub> arb-kit/smooth.py <клип.mp4> <выход.mp4> [--fps 60] [--scale 0.5]
+--fps 60 — больше кадров в секунду (владелец 19.10: «нужно больше кадров в секунду»): все кадры между рисунками строит RIFE.
 --scale 0.5 — поток считается на половинном разрешении (для 1080×1920 на CPU ≈ 1–2 с на кадр), кадр собирается в полном.
 """
 import json, os, subprocess, sys, zipfile
@@ -112,33 +113,34 @@ def holds(G):
     return new
 
 
-def main(src, dst, scale=.5):
-    w, h, fps = probe(src)
+def main(src, dst, scale=.5, out_fps=None):
+    """Каждый кадр выхода (с частотой out_fps, по умолчанию как у исходника) строится между двумя соседними рисунками:
+    повторы «на двойках» не считаются рисунками, длинные паузы (≥ 4 одинаковых кадров) и замер в конце держатся как есть."""
+    w, h, fps = probe(src); out_fps = out_fps or fps
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", src, "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True).stdout
     V = np.frombuffer(raw, np.uint8).reshape(-1, h, w, 3)
     G = V[:, ::4, ::4].mean(3).astype(np.float32)
-    new = holds(G) + [len(V)]
+    new = holds(G); n_out = int(round(len(V) / fps * out_fps))
     net = load_net(); tmp = max(128, int(128 / scale)); ph, pw = ((h - 1) // tmp + 1) * tmp, ((w - 1) // tmp + 1) * tmp
     T = lambda a: F.pad(torch.from_numpy(a.copy()).permute(2, 0, 1)[None].float() / 255, (0, pw - w, 0, ph - h))
-    enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{w}x{h}", "-r", f"{fps}", "-i", "-",
+    enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{w}x{h}", "-r", f"{out_fps}", "-i", "-",
                             "-c:v", "libx264", "-crf", "14", "-preset", "slow", "-pix_fmt", "yuv420p", dst], stdin=subprocess.PIPE)
-    made = 0
-    for k in range(len(new) - 1):
-        a, b = new[k], new[k + 1]; enc.stdin.write(V[a].tobytes())
-        n = b - a   # рисунок a держится n кадров; следующий рисунок — b
-        if n == 1: continue
-        if n >= 4 or b >= len(V):   # пауза в игре персонажа или замер в конце — оставляем как есть
-            for i in range(a + 1, b): enc.stdin.write(V[i].tobytes())
-            continue
-        i0, i1 = T(V[a]), T(V[b])
-        for j in range(1, n):
-            out = net(i0, i1, j / n, scale)[0, :, :h, :w].clamp(0, 1).permute(1, 2, 0).numpy()
-            enc.stdin.write((out * 255 + .5).astype(np.uint8).tobytes()); made += 1
-        print(f"\r  кадр {b}/{len(V)}, дорисовано {made}", end="", flush=True)
+    made, cache = 0, {}
+    for n in range(n_out):
+        t = n / out_fps * fps   # время выходного кадра в кадрах исходника
+        k = max(i for i in range(len(new)) if new[i] <= t + 1e-6); a = new[k]
+        b = new[k + 1] if k + 1 < len(new) else None
+        if b is None or b - a >= 4 or t - a < 1e-3:   # последний рисунок, пауза в игре или точное попадание в рисунок
+            enc.stdin.write(V[min(len(V) - 1, int(round(t)))].tobytes()); continue
+        for i in (a, b):
+            if i not in cache: cache = {j: v for j, v in cache.items() if j >= a}; cache[i] = T(V[i])
+        out = net(cache[a], cache[b], (t - a) / (b - a), scale)[0, :, :h, :w].clamp(0, 1).permute(1, 2, 0).numpy()
+        enc.stdin.write((out * 255 + .5).astype(np.uint8).tobytes()); made += 1
+        if made % 10 == 0: print(f"\r  кадр {n}/{n_out}, дорисовано {made}", end="", flush=True)
     enc.stdin.close(); enc.wait()
-    print(f"\n{src}: рисунков {len(new) - 1} из {len(V)} кадров, дорисовано {made} → {dst}")
+    print(f"\n{src}: рисунков {len(new)} из {len(V)} кадров, выход {n_out} кадров при {out_fps:g} к/с, дорисовано {made} → {dst}")
 
 
 if __name__ == "__main__":
-    a = sys.argv[1:]; sc = float(a[a.index("--scale") + 1]) if "--scale" in a else .5
-    main(a[0], a[1], sc)
+    a = sys.argv[1:]; opt = lambda k, d: float(a[a.index(k) + 1]) if k in a else d
+    main(a[0], a[1], opt("--scale", .5), opt("--fps", None))
