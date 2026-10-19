@@ -8,7 +8,13 @@
   "reels/arb-fear-23/hf/k5a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/fd51441e-b3b6-48d5-91e3-8acbcac46090.png",
   "reels/arb-fear-23/hf/k6a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/8d6e9305-b8a7-417d-b1a0-ffd55b30057c.png",
   "reels/arb-fear-23/hf/k7a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/d9dccddb-780f-43f2-95a1-19d6de7c4fbb.png",
-  "reels/arb-fear-23/hf/k8a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/cf7caa33-9c82-4af8-83ad-5d9f141aa526.png"
+  "reels/arb-fear-23/hf/k8a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/cf7caa33-9c82-4af8-83ad-5d9f141aa526.png",
+  "reels/arb-fear-23/hf/k9a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/a7e2a803-6c87-44a5-a6af-9dcb102e6f9e.png",
+  "reels/arb-fear-23/hf/k10a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/bbe8cfdc-51b7-4fd0-855a-5d367034e634.png",
+  "reels/arb-fear-23/hf/k5b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/0ff1278f-f85b-4509-aa86-cc03708e7753.png",
+  "reels/arb-fear-23/hf/k6b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/2a172dc2-176b-472e-a0e4-9d7065e48045.png",
+  "reels/arb-fear-23/hf/k8d.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/ed26aa4f-dc7d-4791-bdef-9134998f6246.png",
+  "reels/arb-fear-23/hf/k8b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/41e7c2be-35c1-4cf8-85c8-e3d63283193c.png"
  },
  "k1a": {
   "request_id": "311f7755-f82a-4b0c-bce8-0a7a7280fd6f",
@@ -121,6 +127,65 @@
  "k9a": {
   "request_id": "54ddfc54-0d0f-4f05-9646-e8b2418bf1c1",
   "app": "alibaba/qwen-image-3/edit",
-  "status": "queued"
+  "status": "completed",
+  "sec": 61
+ },
+ "k9b": {
+  "request_id": "1b355378-b52a-43e4-a0de-c9276d236c78",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 52
+ },
+ "k10a": {
+  "request_id": "82a23d7e-204b-4cbc-8904-9197bb890deb",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 74
+ },
+ "k10b": {
+  "request_id": "784e90c1-e1b4-4310-80d3-731c86b85455",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 52
+ },
+ "k5c": {
+  "request_id": "05827cd2-faf9-4a14-a07c-bd3ca3712848",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 40
+ },
+ "k6c": {
+  "request_id": "7c06e652-b7f6-4da8-9173-c7b7e1bcf8cd",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 40
+ },
+ "k6d": {
+  "request_id": "5a06c81e-a525-4024-bc0e-ef9804eb4751",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 40
+ },
+ "k8d": {
+  "request_id": "be7f5d49-ba2a-4e89-93ef-641d5e882c51",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 45
+ },
+ "k8e": {
+  "request_id": "f02c3be6-4604-4ee0-bf50-eec8ca6c47da",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "failed"
+ },
+ "k8f": {
+  "request_id": "94825168-5bf6-4cf5-b7c8-a32a1da21b90",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "failed"
+ },
+ "k8g": {
+  "request_id": "28e21d33-0b14-4ce2-98f6-591e541d7615",
+  "app": "xai/grok-imagine-image-2.0",
+  "status": "completed",
+  "sec": 36
  }
 }

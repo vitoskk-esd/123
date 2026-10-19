@@ -179,6 +179,47 @@
    ],
    "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the notebook now lies on top of the stack; the watermelon guy wears the jacket over his hoodie and has opened the room door, warm light from the corridor, he looks back at the camera with a determined smile, one foot already stepping out.",
    "raw": true
+  },
+  {
+   "id": "k5c",
+   "raw": true,
+   "refs": [
+    "reels/arb-fear-23/hf/k5b.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: remove the second wooden step stool on the floor — there is only ONE small stool, the one the watermelon guy stands on; the floor where the second stool was is empty."
+  },
+  {
+   "id": "k6c",
+   "raw": true,
+   "refs": [
+    "reels/arb-fear-23/hf/k6a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: remove the apple logo from the back of the laptop lid — the lid is plain grey aluminium with no logo, no marks."
+  },
+  {
+   "id": "k6d",
+   "raw": true,
+   "refs": [
+    "reels/arb-fear-23/hf/k6b.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: remove the apple logo from the back of the laptop lid — the lid is plain grey aluminium with no logo, no marks."
+  },
+  {
+   "id": "k8d",
+   "raw": true,
+   "refs": [
+    "reels/arb-fear-23/hf/k8a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: add a black smartphone lying flat screen-down on the counter between the grocery bag and the payment terminal."
+  },
+  {
+   "id": "k8g",
+   "raw": true,
+   "app": "xai/grok-imagine-image-2.0",
+   "refs": [
+    "reels/arb-fear-23/hf/k8d.png"
+   ],
+   "prompt": "Edit this image. Keep the shop, the cashier, light, colors, framing, art style and the watermelon character's design exactly the same. Change only: the payment terminal shows a small green light; the counter top is empty except the payment terminal; the watermelon guy holds the grocery bag with bread, milk and noodles in his left hand and the black smartphone in his right hand, looking at the phone with a big happy surprised grin; the phone screen faces him, not the camera. No text."
   }
  ],
  "clips": []
