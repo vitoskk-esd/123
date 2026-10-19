@@ -125,9 +125,9 @@ def draw_moment(frame, m, t, subject=None):
             spr = pixel_out(spr, st["out"], i * 7 + 3)
             if spr is None: continue
         place(back if w.get("behind") else front, spr, w["x"], w["y"], st["scale"], st["alpha"], st["rot"], st["dx"], st["dy"])
-    frame = Image.alpha_composite(frame, back)
-    if subject is not None:   # голова/фигура Арбузова поверх слов «за ним»
-        fg = frame.copy(); fg.putalpha(Image.fromarray(subject)); frame = Image.alpha_composite(frame, fg)
+    orig = frame; frame = Image.alpha_composite(frame, back)
+    if subject is not None:   # голова/фигура Арбузова (из кадра без текста) поверх слов «за ним»
+        fg = orig.copy(); fg.putalpha(Image.fromarray(subject)); frame = Image.alpha_composite(frame, fg)
     return Image.alpha_composite(frame, front)
 
 
@@ -211,7 +211,10 @@ def load_edit(reel):
 
 def render(reel, t_from=None, t_to=None, png=False):
     E = load_edit(reel); S = E["shots"]; END = E["end"]; OFF = E.get("voice_off", .3)
-    clips = {s["clip"]: Clip(ensure_60(reel, s["clip"])) for s in S}
+    clips = {}   # открываем клип при первом обращении (проба куска не трогает остальные клипы)
+    def clip(c):
+        if c not in clips: clips[c] = Clip(ensure_60(reel, c))
+        return clips[c]
     for m in E["moments"]:
         for w in m["words"]: w["_spr"] = sprite(w["text"], w["kind"], w["size"], w["color"], w.get("stroke", 0), w.get("arc", 0))
     uis = {k: Image.open(f"{reel}/{v}").convert("RGBA") for k, v in E.get("screens_ui", {}).items()}
@@ -225,7 +228,7 @@ def render(reel, t_from=None, t_to=None, png=False):
         """Кадр плана si в момент t (до камеры): клип + экран + текст."""
         s = S[si]; src = s.get("src", 0) + (t - s["t"]) * s.get("speed", 1)
         if "src2" in s and t >= s["t2"]: src = s["src2"] + (t - s["t2"]) * s.get("speed", 1)
-        rgb = clips[s["clip"]].get(int(round(src * FPS))); img = Image.fromarray(rgb).convert("RGBA")
+        rgb = clip(s["clip"]).get(int(round(src * FPS))); img = Image.fromarray(rgb).convert("RGBA")
         for sc in s.get("screens", []):
             if sc["t0"] <= t: img = put_screen(img, uis[sc["ui"]], sc["quad"])
         for m in E["moments"]:
@@ -244,22 +247,21 @@ def render(reel, t_from=None, t_to=None, png=False):
                 elif .07 <= d < .25: z *= 1 + .1 * (1 - (d - .07) / .18) ** 2
         return z, cx, cy
 
+    DUR = {"pixel": .18, "whip": .2}
+
+    def full(si, t):
+        z, cx, cy = cam(si, t); return np.array(camera(shot_frame(si, t), z, cx, cy).convert("RGB"))
+
     for n in range(n0, n1):
         t = n / FPS; si = max(i for i, st in enumerate(starts) if st <= t)
-        z, cx, cy = cam(si, t); cur = np.array(camera(shot_frame(si, t), z, cx, cy).convert("RGB"))
-        s = S[si]; tr = s.get("trans", "cut"); D = {"pixel": .16, "whip": .2}.get(tr, 0)
-        if si > 0 and D and t - s["t"] < D / 2:   # вторая половина перехода: от прошлого плана держим последний кадр
-            prev = getattr(render, "_prev", cur); k = .5 + (t - s["t"]) / D
-            cur = pixel_trans(prev, cur, k, si) if tr == "pixel" else whip(prev, cur, k)
-        nxt = S[si + 1] if si + 1 < len(S) else None
-        if nxt and nxt.get("trans", "cut") != "cut":
-            D2 = {"pixel": .16, "whip": .2}[nxt["trans"]]
-            if nxt["t"] - t <= D2 / 2:   # первая половина: этот план уходит
-                k = .5 - (nxt["t"] - t) / D2; render._prev = cur
-                cur = pixel_trans(cur, cur, 0, si + 1) if nxt["trans"] == "pixel" and k < 0 else (
-                    pixel_trans(cur, np.zeros_like(cur) + 8, k * .6, si + 1) if nxt["trans"] == "pixel" else whip(cur, cur, k))
-        if not (nxt and nxt.get("trans", "cut") != "cut" and nxt["t"] - t <= {"pixel": .16, "whip": .2}.get(nxt.get("trans"), 0) / 2):
-            render._prev = cur
+        # окно перехода вокруг склейки Tb: план A держит последний кадр после Tb, план B — первый кадр до Tb
+        j = next((j for j in (si, si + 1) if 0 < j < len(S) and S[j].get("trans", "cut") in DUR
+                  and abs(t - S[j]["t"]) < DUR[S[j]["trans"]] / 2), None)
+        if j is None: cur = full(si, t)
+        else:
+            Tb, D = S[j]["t"], DUR[S[j]["trans"]]; k = (t - (Tb - D / 2)) / D
+            A = full(j - 1, min(t, Tb - 1 / FPS)); B = full(j, max(t, Tb))
+            cur = pixel_trans(A, B, k, j) if S[j]["trans"] == "pixel" else whip(A, B, k)
         frame = grade(cur, n)
         if png: Image.fromarray(frame).save(f"{reel}/out/still_{t:06.2f}.jpg", quality=90)
         else: enc.stdin.write(frame.tobytes())
