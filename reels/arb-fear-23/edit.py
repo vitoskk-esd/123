@@ -50,27 +50,33 @@ def edit(W):
         dict(clip="v08c", t=33.2, src=0, speed=.9, zoom=(1.45, 1.6), center=(.56, .52),
              screens=[dict(ui="lock", t0=33.2, quad=quad), dict(ui="push", t0=T("покупку") - .1, quad=quad)]),
         dict(clip="v08", t=34.9, src=7.0, zoom=(1.04, 1.0), center=(.5, .4)),
-        dict(clip="v09", t=36.9, src=0, speed=.85, zoom=(1.0, 1.06), center=(.5, .4)),
+        # «…собираю в своём телеграме»: Арбузов показывает экран → камера наезжает на телефон → влёт в экран: запись канала владельца
+        # (src/tg_channel.mp4, посты и число подписчиков размыты → out/tg_blur.mp4; название и закреп — читаются)
+        dict(clip="v09t", t=36.9, src=0, camk=[[0, 1.0, .45, .45], [.8, 1.04, .4, .43], [1.95, 2.8, .32, .4]],
+             screens=[dict(video="out/tg_blur.mp4", t0=36.9, vsrc=0)]),
+        dict(clip="tg", path="out/tg_blur.mp4", t=38.85, src=1.95, zoom=(1.0, 1.04), center=(.5, .3), trans="zoom"),
+        dict(clip="v09", t=40.25, src=2.1, speed=.85, zoom=(1.03, 1.0), center=(.5, .4), trans="whip"),
         dict(clip="v10", t=41.3, src=2.4, zoom=(1.0, 1.05), center=(.5, .45), trans="pixel"),
     ]
     W_ = lambda **k: {"stroke": 0, **k}
+    assert [s["t"] for s in shots] == sorted(s["t"] for s in shots)
     moments = [
         dict(shot=0, out=T("заработка", end=True) + .05, punch=T("3"), mask_box=(.25, .1, .8, .55), words=[
-            W_(text="ТРЕТИЙ", kind="hero", size=165, color=RED, x=.5, y=.125, t=T("3") - .03, anim="slam"),
+            W_(text="ТРЕТИЙ", kind="hero", size=165, stroke=5, color=RED, x=.5, y=.125, t=T("3") - .03, anim="slam"),
             W_(text="ГОД", kind="black", size=200, color=WHITE, x=.5, y=.235, t=T("год") - .03, anim="slam", behind=True)]),
         dict(shot=1, out=T("0", end=True) + .35, punch=T("0"), words=[
             W_(text="ЗАРАБОТАНО", kind="bold", size=64, color=WHITE, x=.5, y=.12, t=T("заработано") - .03, anim="rise"),
             W_(text="0 ₽", kind="black", size=260, color=TEAL, x=.5, y=.22, t=T("0") - .03, anim="slam", stroke=0)]),
         dict(shot=2, out=T("выигрыш", end=True) - .25, punch=T("вдвое"), mask_box=(.2, .08, .85, .5), words=[
             W_(text="ПОТЕРЯ", kind="bold", size=70, color=WHITE, x=.5, y=.11, t=T("потерю") - .03, anim="rise"),
-            W_(text="×2", kind="hero", size=420, color=RED, x=.5, y=.24, t=T("вдвое") - .03, anim="slam", behind=True)]),
-        dict(shot=11, out=END + 1, punch=T("начни"), words=[
+            W_(text="×2", kind="hero", size=420, color=RED, x=.5, y=.21, t=T("вдвое") - .03, anim="slam", behind=True, stroke=7)]),
+        dict(shot=13, out=END + 1, punch=T("начни"), words=[
             W_(text="НАЧНИ", kind="hero", size=200, color=RED, x=.5, y=.2, t=T("начни") - .03, anim="slam", rot=6),
             W_(text="с одного шага", kind="bold", size=70, color=WHITE, x=.5, y=.29, t=T("одного") - .03, anim="rise")]),
     ]
     sfx = dict(
         impact=[T("3"), T("вдвое"), T("начни")], pop=[T("год"), T("заработано"), T("потерю"), T("одного")], coin=[T("0")],
-        glitch=[s["t"] for s in shots if s.get("trans") == "pixel"], whoosh=[s["t"] - .08 for s in shots if s.get("trans") == "whip"],
+        glitch=[s["t"] for s in shots if s.get("trans") == "pixel"], whoosh=[s["t"] - .08 for s in shots if s.get("trans") in ("whip", "zoom")],
         pen=[[.9, 1.6], [25.3, .6]], paper=[3.6, 20.0], thud=[T("вдвое") + .05], notif=[T("покупку") - .1], beep=[31.3],
         room=[[0, 30.0], [36.9, END]], murmur=[[30.0, 36.9]])
     return dict(shots=shots, moments=moments, end=END, voice_off=OFF, bpm=92, sfx=sfx, sfxGain=.9,

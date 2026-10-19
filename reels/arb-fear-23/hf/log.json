@@ -27,7 +27,8 @@
   "reels/arb-fear-23/hf/k8g.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/a65f75de-c1c9-45f2-a105-7d6654f3e4cf.png",
   "reels/arb-fear-23/hf/k8c.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/276a23f6-2791-4249-85bb-ed4c09eb2b26.png",
   "reels/arb-fear-23/hf/k9b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/e0997a0b-b78c-41e6-b653-8219ccd1dca2.png",
-  "reels/arb-fear-23/hf/k10c.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/41817cfa-e639-4bd6-8dec-1404646e6b38.png"
+  "reels/arb-fear-23/hf/k10c.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/41817cfa-e639-4bd6-8dec-1404646e6b38.png",
+  "reels/arb-fear-23/hf/k9c.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/67a259ab-814c-40dc-8417-8f7cdc903e35.png"
  },
  "k1a": {
   "request_id": "311f7755-f82a-4b0c-bce8-0a7a7280fd6f",
@@ -272,5 +273,17 @@
   "app": "kling-video/v3.0/pro/image-to-video",
   "status": "completed",
   "sec": 153
+ },
+ "k9c": {
+  "request_id": "abc80446-4f13-48b0-acc3-e5f1791f118f",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 65
+ },
+ "v09t": {
+  "request_id": "5cd785ef-cbbb-4e06-a70b-9712b1d9214f",
+  "app": "kling-video/v3.0/pro/image-to-video",
+  "status": "completed",
+  "sec": 194
  }
 }

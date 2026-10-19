@@ -228,6 +228,14 @@
     "reels/arb-fear-23/hf/k10a.png"
    ],
    "prompt": "Edit this image. Keep everything exactly the same — the room, the window with the curtain and the city lights, the stack of notebooks, objects, light, colors, framing and the character's design. Only change: the notebook from his hand now lies on top of the stack; the white room door on the far right (the one with the coat hook) is now opened, warm yellow light from the dormitory corridor falls into the room through the doorway; the jacket is gone from the hook because the watermelon guy now wears it over his hoodie; he stands in that right doorway with one foot stepping out into the corridor and looks back at the camera with a determined smile. The window stays closed and unchanged."
+  },
+  {
+   "id": "k9c",
+   "refs": [
+    "@design",
+    "reels/arb-fear-23/hf/k9a.png"
+   ],
+   "prompt": "The same dormitory room by the window at night as in reference image 2, same light. Medium close-up: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, holds his smartphone up in one green hand at chest height and turns its screen straight toward the camera, showing it to the viewer with a proud smile; the phone is large in the center of the frame, upright, its screen faces the camera fully and is plain bright white, completely empty, no text, no icons. His other hand gives a thumbs up."
   }
  ],
  "clips": [
@@ -345,6 +353,15 @@
    "beats": [
     "the watermelon guy puts the thick notebook on top of the stack",
     "he takes the jacket from the hook, puts it on, opens the right door to the bright corridor and looks back at the camera with a determined smile"
+   ]
+  },
+  {
+   "id": "v09t",
+   "from": "k9c",
+   "duration": 5,
+   "prompt": "Dormitory room by the window at night, static camera. The watermelon guy holds his phone toward the camera with the screen facing the viewer; the phone stays upright and almost still in his hand, the screen stays plain bright white.",
+   "beats": [
+    "he holds the phone steady toward the camera and gives a slow confident nod with a smile"
    ]
   }
  ]

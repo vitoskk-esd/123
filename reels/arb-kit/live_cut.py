@@ -27,8 +27,9 @@ def font(kind, size):
 # ---------- клипы ----------
 class Clip:
     """Последовательное чтение кадров 1080×1920 из mp4 (60 к/с после smooth.py); назад — перезапуск."""
-    def __init__(self, path):
+    def __init__(self, path, vf=None, size=(None, None)):
         self.path, self.p, self.i, self.last = path, None, -1, None
+        self.w, self.h = size[0] or FW, size[1] or FH; self.vf = vf or f"scale={self.w}:{self.h}"
         self.n = int(subprocess.run(["ffprobe", "-v", "error", "-count_packets", "-select_streams", "v", "-show_entries",
                                      "stream=nb_read_packets", "-of", "csv=p=0", path], capture_output=True, text=True).stdout.strip())
 
@@ -36,12 +37,12 @@ class Clip:
         i = max(0, min(self.n - 1, i))
         if i < self.i or self.p is None:
             if self.p: self.p.kill()
-            self.p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", self.path, "-vf", f"scale={FW}:{FH}", "-f", "rawvideo",
+            self.p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", self.path, "-vf", self.vf, "-r", str(FPS), "-f", "rawvideo",
                                        "-pix_fmt", "rgb24", "-"], stdout=subprocess.PIPE); self.i = -1
         while self.i < i:
-            b = self.p.stdout.read(FW * FH * 3)
-            if len(b) < FW * FH * 3: break
-            self.last = np.frombuffer(b, np.uint8).reshape(FH, FW, 3); self.i += 1
+            b = self.p.stdout.read(self.w * self.h * 3)
+            if len(b) < self.w * self.h * 3: break
+            self.last = np.frombuffer(b, np.uint8).reshape(self.h, self.w, 3); self.i += 1
         return self.last
 
 
@@ -138,11 +139,15 @@ def head_mask(rgb, box):
     a = rgb[y0:y1, x0:x1].astype(np.float32) / 255; r, g, b = a[..., 0], a[..., 1], a[..., 2]
     mx, mn = a.max(2), a.min(2); s = (mx - mn) / (mx + 1e-6)
     green = (g >= r) & (g >= b * .95) & (s > .28) & (mx > .12)
-    red = (r > g * 1.6) & (r > b * 1.5) & (s > .45) & (mx > .25)
-    m = ndimage.binary_opening(green | red, iterations=2); lab, n = ndimage.label(m)
+    red = (r > g * 2.3) & (r > b * 2.0) & (s > .5) & (mx > .1)   # кепка целиком с тенью; коричневое дерево и стены (r ≈ 1,5 g) не берём
+    lab, n = ndimage.label(ndimage.binary_opening(green, iterations=2))
     if n == 0: return np.zeros((FH, FW), np.uint8)
-    sizes = ndimage.sum(m, lab, range(1, n + 1)); big = np.isin(lab, [i + 1 for i, v in enumerate(sizes) if v > .25 * sizes.max()])
-    big = ndimage.binary_fill_holes(ndimage.binary_closing(big, iterations=6))
+    head = lab == (np.argmax(ndimage.sum(lab > 0, lab, range(1, n + 1))) + 1)   # арбуз — самое большое зелёное пятно
+    ys, xs = np.nonzero(head); hw, hh = xs.max() - xs.min(), ys.max() - ys.min()
+    zone = np.zeros_like(head); zone[max(0, ys.min() - int(.6 * hh)):ys.max(), max(0, xs.min() - int(.3 * hw)):xs.max() + int(.45 * hw)] = True
+    rl, rn = ndimage.label(red & zone); near = ndimage.binary_dilation(head, iterations=6)   # кепка — только над/у головы (ковёр на стене не берём)
+    cap = np.isin(rl, [i for i in np.unique(rl[near & red & zone]) if i])
+    big = ndimage.binary_dilation(ndimage.binary_fill_holes(ndimage.binary_closing(head | cap, iterations=6)), iterations=2)
     out = np.zeros((FH, FW), np.uint8); out[y0:y1, x0:x1] = big * 255
     return np.array(Image.fromarray(out).filter(ImageFilter.GaussianBlur(1.5)))
 
@@ -163,6 +168,29 @@ def put_screen(frame, ui, quad):
     m = Image.new("L", (FW * 2, FH * 2)); ImageDraw.Draw(m).polygon([(x * 2, y * 2) for x, y in quad], fill=255)
     warped.putalpha(Image.fromarray(np.minimum(np.array(warped.getchannel("A")), np.array(m.resize((FW, FH), Image.LANCZOS)))))
     return Image.alpha_composite(frame, warped)
+
+
+def track_screen(rgb, prev=None):
+    """Белый экран телефона в кадре → четырёхугольник (TL, TR, BR, BL): самое большое почти белое пятно, повёрнутый
+    по главным осям прямоугольник (палец на краю экрана его не ломает); prev — сглаживание дрожи между кадрами."""
+    a = rgb.astype(np.int16); m = (a.min(2) > 205) & (a.max(2) - a.min(2) < 35)
+    lab, n = ndimage.label(m)
+    if n == 0: return prev
+    k = np.argmax(ndimage.sum(m, lab, range(1, n + 1))) + 1; ys, xs = np.nonzero(lab == k)
+    c = np.array([xs.mean(), ys.mean()]); P = np.stack([xs, ys], 1) - c
+    ev, evec = np.linalg.eigh(np.cov(P.T)); u = evec[:, 1] if abs(evec[1, 1]) > abs(evec[0, 1]) else evec[:, 0]   # ось вдоль высоты
+    if u[1] < 0: u = -u
+    v = np.array([u[1], -u[0]]) * -1                                          # ось вдоль ширины (вправо)
+    if v[0] < 0: v = -v
+    pu, pv = P @ u, P @ v; h0, h1, w0, w1 = np.percentile(pu, .3), np.percentile(pu, 99.7), np.percentile(pv, .3), np.percentile(pv, 99.7)
+    q = np.array([c + v * w0 + u * h0, c + v * w1 + u * h0, c + v * w1 + u * h1, c + v * w0 + u * h1])
+    if prev is not None: q = .6 * np.array(prev) + .4 * q
+    return [tuple(map(float, p)) for p in q]
+
+
+def rounded(img, r):
+    m = Image.new("L", img.size); ImageDraw.Draw(m).rounded_rectangle((0, 0, img.width - 1, img.height - 1), r, fill=255)
+    out = img.convert("RGBA"); out.putalpha(m); return out
 
 
 # ---------- переходы, камера, свет ----------
@@ -189,6 +217,14 @@ def whip(a, b, k):
     return ndimage.uniform_filter1d(s, blur, axis=1)
 
 
+def zoom_in(a, b, k):
+    """Влёт в экран: план B (экран крупно) вырастает из центра поверх A (камера уже наехала на телефон)."""
+    e = 1 - (1 - min(max(k, 0), 1)) ** 3; f = .36 + .64 * e
+    if f >= .999: return b
+    w, h = int(FW * f), int(FH * f); small = Image.fromarray(b).resize((w, h), Image.BICUBIC)
+    out = Image.fromarray(a); out.paste(small, ((FW - w) // 2, (FH - h) // 2)); return np.array(out)
+
+
 VIG = None
 
 
@@ -212,9 +248,12 @@ def load_edit(reel):
 def render(reel, t_from=None, t_to=None, png=False):
     E = load_edit(reel); S = E["shots"]; END = E["end"]; OFF = E.get("voice_off", .3)
     clips = {}   # открываем клип при первом обращении (проба куска не трогает остальные клипы)
-    def clip(c):
-        if c not in clips: clips[c] = Clip(ensure_60(reel, c))
-        return clips[c]
+    def clip(c, vf=None, size=(None, None)):
+        key = (c, vf)
+        if key not in clips:
+            path = f"{reel}/{c}" if "/" in c else ensure_60(reel, c)
+            clips[key] = Clip(path, vf or ("scale=1080:-2,crop=1080:1920:0:0" if "/" in c else None), size)
+        return clips[key]
     for m in E["moments"]:
         for w in m["words"]: w["_spr"] = sprite(w["text"], w["kind"], w["size"], w["color"], w.get("stroke", 0), w.get("arc", 0))
     uis = {k: Image.open(f"{reel}/{v}").convert("RGBA") for k, v in E.get("screens_ui", {}).items()}
@@ -228,9 +267,16 @@ def render(reel, t_from=None, t_to=None, png=False):
         """Кадр плана si в момент t (до камеры): клип + экран + текст."""
         s = S[si]; src = s.get("src", 0) + (t - s["t"]) * s.get("speed", 1)
         if "src2" in s and t >= s["t2"]: src = s["src2"] + (t - s["t2"]) * s.get("speed", 1)
-        rgb = clip(s["clip"]).get(int(round(src * FPS))); img = Image.fromarray(rgb).convert("RGBA")
+        rgb = clip(s.get("path") or s["clip"]).get(int(round(src * FPS))); img = Image.fromarray(rgb).convert("RGBA")
         for sc in s.get("screens", []):
-            if sc["t0"] <= t: img = put_screen(img, uis[sc["ui"]], sc["quad"])
+            if sc["t0"] > t: continue
+            if "video" in sc:   # запись экрана внутрь телефона в руке: экран ищем в каждом кадре
+                q = track_screen(rgb, getattr(render, "_q", None)); render._q = q
+                if not q: continue
+                vw = int(((q[1][0] - q[0][0]) ** 2 + (q[1][1] - q[0][1]) ** 2) ** .5 * 2); vh = int(vw * sc.get("aspect", 1766 / 888))
+                vid = clip(sc["video"], f"scale={vw}:{vh}", (vw, vh)).get(int(round((sc.get("vsrc", 0) + t - sc["t0"]) * FPS)))
+                img = put_screen(img, rounded(Image.fromarray(vid), int(vw * .09)), q)
+            else: img = put_screen(img, uis[sc["ui"]], sc["quad"])
         for m in E["moments"]:
             if m["shot"] == si:
                 subj = head_mask(rgb, m["mask_box"]) if any(w.get("behind") for w in m["words"]) else None
@@ -240,6 +286,12 @@ def render(reel, t_from=None, t_to=None, png=False):
     def cam(si, t):
         s = S[si]; t1 = starts[si + 1] if si + 1 < len(S) else END; k = (t - s["t"]) / max(.1, t1 - s["t"])
         z0, z1 = s.get("zoom", (1.0, 1.04)); cx, cy = s.get("center", (.5, .5)); z = z0 + (z1 - z0) * k
+        if "camk" in s:   # ключевые точки камеры, между ними — плавный разгон/торможение
+            K = s["camk"]; d = t - s["t"]; i = max(j for j in range(len(K)) if K[j][0] <= d or j == 0)
+            if i + 1 < len(K):
+                u = (d - K[i][0]) / (K[i + 1][0] - K[i][0]); u = u * u * (3 - 2 * u) if 0 < u < 1 else min(max(u, 0), 1)
+                z, cx, cy = [K[i][j] + (K[i + 1][j] - K[i][j]) * u for j in (1, 2, 3)]
+            else: z, cx, cy = K[i][1:4]
         for m in E["moments"]:
             if m.get("punch") and m["shot"] == si:
                 d = t - m["punch"]
@@ -247,7 +299,7 @@ def render(reel, t_from=None, t_to=None, png=False):
                 elif .07 <= d < .25: z *= 1 + .1 * (1 - (d - .07) / .18) ** 2
         return z, cx, cy
 
-    DUR = {"pixel": .18, "whip": .2}
+    DUR = {"pixel": .18, "whip": .2, "zoom": .22}
 
     def full(si, t):
         z, cx, cy = cam(si, t); return np.array(camera(shot_frame(si, t), z, cx, cy).convert("RGB"))
@@ -261,7 +313,8 @@ def render(reel, t_from=None, t_to=None, png=False):
         else:
             Tb, D = S[j]["t"], DUR[S[j]["trans"]]; k = (t - (Tb - D / 2)) / D
             A = full(j - 1, min(t, Tb - 1 / FPS)); B = full(j, max(t, Tb))
-            cur = pixel_trans(A, B, k, j) if S[j]["trans"] == "pixel" else whip(A, B, k)
+            tr = S[j]["trans"]
+            cur = pixel_trans(A, B, k, j) if tr == "pixel" else zoom_in(A, B, k) if tr == "zoom" else whip(A, B, k)
         frame = grade(cur, n)
         if png: Image.fromarray(frame).save(f"{reel}/out/still_{t:06.2f}.jpg", quality=90)
         else: enc.stdin.write(frame.tobytes())
