@@ -187,5 +187,11 @@
   "app": "xai/grok-imagine-image-2.0",
   "status": "completed",
   "sec": 36
+ },
+ "k10c": {
+  "request_id": "f71ff99e-fa99-4d42-80fc-0432619bd76f",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 61
  }
 }
