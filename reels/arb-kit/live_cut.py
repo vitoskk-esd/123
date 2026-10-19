@@ -184,7 +184,8 @@ def track_screen(rgb, prev=None):
     if v[0] < 0: v = -v
     pu, pv = P @ u, P @ v; h0, h1, w0, w1 = np.percentile(pu, .3), np.percentile(pu, 99.7), np.percentile(pv, .3), np.percentile(pv, 99.7)
     q = np.array([c + v * w0 + u * h0, c + v * w1 + u * h0, c + v * w1 + u * h1, c + v * w0 + u * h1])
-    if prev is not None: q = .6 * np.array(prev) + .4 * q
+    q = c + (q - c) * 1.03                                                   # чуть шире белого: края экрана не просвечивают
+    if prev is not None and np.abs(np.array(prev) - q).max() < 40: q = .3 * np.array(prev) + .7 * q   # дрожь гасим, движение руки — нет
     return [tuple(map(float, p)) for p in q]
 
 
