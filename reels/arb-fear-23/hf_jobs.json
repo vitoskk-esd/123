@@ -230,5 +230,122 @@
    "prompt": "Edit this image. Keep everything exactly the same — the room, the window with the curtain and the city lights, the stack of notebooks, objects, light, colors, framing and the character's design. Only change: the notebook from his hand now lies on top of the stack; the white room door on the far right (the one with the coat hook) is now opened, warm yellow light from the dormitory corridor falls into the room through the doorway; the jacket is gone from the hook because the watermelon guy now wears it over his hoodie; he stands in that right doorway with one foot stepping out into the corridor and looks back at the camera with a determined smile. The window stays closed and unchanged."
   }
  ],
- "clips": []
+ "clips": [
+  {
+   "id": "v01",
+   "from": "k1b",
+   "to": "k1f",
+   "duration": 4,
+   "prompt": "Dormitory room at night, static camera. The watermelon-headed guy in a red backwards cap and grey hoodie sits at the desk with the laptop and the open notebook.",
+   "beats": [
+    "he watches the laptop screen attentively, then lowers the pen and starts writing in the notebook, nodding seriously"
+   ]
+  },
+  {
+   "id": "v02",
+   "from": "k2a",
+   "to": "k2b",
+   "duration": 6,
+   "prompt": "Dormitory room at night, static camera, the wall covered with sticky notes. The watermelon-headed guy in a red backwards cap and grey hoodie stands by the wall.",
+   "beats": [
+    "he presses one more sticky note onto the wall with his finger and smooths it",
+    "he takes an empty brown wallet from his pocket, opens it, a small grey moth flutters out and he looks at it sadly"
+   ]
+  },
+  {
+   "id": "v03",
+   "from": "k3a",
+   "to": "k3b",
+   "duration": 7,
+   "prompt": "Dormitory desk at night, static camera, an old brass two-pan balance scale on the desk. The watermelon-headed guy in a red backwards cap and grey hoodie holds a green money pouch and a red money pouch.",
+   "beats": [
+    "he gently puts the green pouch on the left pan, the scale tilts slightly",
+    "he puts the red pouch on the right pan and the right pan drops heavily all the way down, he leans back startled with raised hands"
+   ]
+  },
+  {
+   "id": "v04",
+   "from": "k4a",
+   "to": "k4b",
+   "duration": 6,
+   "prompt": "Dormitory desk at night, static camera. The watermelon-headed guy in a red backwards cap and grey hoodie sits at the open laptop.",
+   "beats": [
+    "he slowly reaches one finger toward the laptop keyboard, hesitates and stops just above the keys",
+    "he pulls back, tugs the grey hood over his head and hides his face behind both hands, peeking through his fingers"
+   ]
+  },
+  {
+   "id": "v05",
+   "from": "k5a",
+   "to": "k5c",
+   "duration": 6,
+   "prompt": "Long dormitory corridor in the evening, static camera, a very tall stepladder and one small wooden step stool.",
+   "beats": [
+    "the watermelon guy looks up at the top of the tall ladder nervously and shakes his head",
+    "he steps onto the small low stool beside it and smiles with relief"
+   ]
+  },
+  {
+   "id": "v06",
+   "from": "k6c",
+   "to": "k6d",
+   "duration": 4,
+   "prompt": "Close shot of the dormitory desk, static camera, one yellow sticky note with an empty square box. The watermelon-headed guy in a red backwards cap and grey hoodie holds a pen above it.",
+   "beats": [
+    "he draws one bold check mark inside the box and leans back with a satisfied smile"
+   ]
+  },
+  {
+   "id": "v07",
+   "from": "k7a",
+   "to": "k7b",
+   "duration": 5,
+   "prompt": "Dormitory room, static camera. The watermelon-headed guy in a red backwards cap and grey hoodie sits completely still on a chair in the middle of the room.",
+   "beats": [
+    "time-lapse feeling: grey dust and cobwebs slowly gather on him and the chair while he stays still, a small spider lowers on a thread from his cap and his nose twitches before a sneeze"
+   ]
+  },
+  {
+   "id": "v08",
+   "from": "k8d",
+   "to": "k8g",
+   "duration": 9,
+   "prompt": "A tiny 24-hour shop in a student dormitory at night, static camera, a cashier woman behind the counter, a payment terminal, a grocery bag and a black phone on the counter. The watermelon-headed guy in a red backwards cap and grey hoodie stands at the counter.",
+   "beats": [
+    "he taps the plain bank card on the payment terminal and a small green light blinks",
+    "the phone on the counter lights up, he picks it up and looks at the screen",
+    "his face breaks into a big happy surprised grin while the cashier lifts the grocery bag and holds it out to him"
+   ]
+  },
+  {
+   "id": "v08c",
+   "from": "k8c",
+   "duration": 4,
+   "prompt": "Close-up of a smartphone lying flat on the shop counter next to the payment terminal and the grocery bag, static camera. The phone stays completely still and its screen stays plain bright white; only the warm lamp light flickers softly and a faint shadow of the cashier passes over the counter.",
+   "beats": [
+    "the lamp light flickers softly"
+   ]
+  },
+  {
+   "id": "v09",
+   "from": "k9a",
+   "to": "k9b",
+   "duration": 4,
+   "prompt": "Dormitory room by the window at night, city lights behind, static camera. The watermelon-headed guy in a red backwards cap and grey hoodie holds his phone and looks at the camera.",
+   "beats": [
+    "he raises his free index finger straight up and winks at the camera with a confident smile"
+   ]
+  },
+  {
+   "id": "v10",
+   "from": "k10a",
+   "to": "k10c",
+   "duration": 6,
+   "prompt": "Dormitory room at night, static camera, a tall stack of notebooks, the room door on the right with a coat hook and a jacket.",
+   "beats": [
+    "the watermelon guy puts the thick notebook on top of the stack",
+    "he takes the jacket from the hook, puts it on, opens the right door to the bright corridor and looks back at the camera with a determined smile"
+   ]
+  }
+ ]
 }
