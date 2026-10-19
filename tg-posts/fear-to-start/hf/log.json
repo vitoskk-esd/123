@@ -1,0 +1,23 @@
+{
+ "_uploads": {
+  "reels/arb-story-20/hf/d01.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/fe8bdc06-bc61-460b-b41d-aa762f03aed8.png"
+ },
+ "c1": {
+  "request_id": "f6203a32-9a1f-4e1c-a2b1-dff25e8600e4",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 65
+ },
+ "c2": {
+  "request_id": "ac2ebbd5-14e1-49ca-b80b-c83a922595a6",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 45
+ },
+ "c3": {
+  "request_id": "6b9025dc-8c29-437f-ad29-ebc6018b7eb4",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 53
+ }
+}

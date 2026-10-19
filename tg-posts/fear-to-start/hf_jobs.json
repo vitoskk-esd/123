@@ -1,0 +1,36 @@
+{
+ "_": "Обложки поста «Почему страшно начать зарабатывать» (19.10): владелец — «в стиле Арбузова, но без мрачных фонов, что-нибудь светлое».",
+ "style": "Bright cheerful hand-painted digital illustration with confident ink linework and soft painterly shading, in the same character style as the reference. LIGHT AIRY PALETTE: clean bright daylight, soft sky blue, warm white, pale peach and fresh mint, high-key lighting, light background, no dark areas, no night, no gloomy interiors. Simple uncluttered composition with lots of light empty space at the top for a title. Square 1:1. No text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "design": "reels/arb-story-20/hf/d01.png",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "designs": [],
+ "brand": [],
+ "clips": [],
+ "images": [
+  {
+   "id": "c1",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A sunny backyard summer day: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, stands at the very end of a tiny diving board only one step high above a small inflatable kiddie pool, clinging to the rail in comic terror, knees shaking, while a cheerful duck float bobs in the shallow water. Bright blue sky, white clouds, green lawn."
+  },
+  {
+   "id": "c2",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A bright minimal light-peach studio background: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, stands next to a giant staircase made of big pastel bank cards; the first step is tiny and right in front of him, he lifts one foot over it nervously, sweat drop on his head, while a big friendly gold coin sits waiting on the top step. Soft daylight, clean shadows."
+  },
+  {
+   "id": "c3",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A bright sky-blue background with soft clouds: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, holds an old brass balance scale; a tiny red money pouch on one pan easily outweighs a big green money pouch on the other pan, and he stares at it with comic disbelief, one eyebrow raised. Clean bright daylight, light composition."
+  }
+ ]
+}
