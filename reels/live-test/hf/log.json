@@ -1,0 +1,25 @@
+{
+ "_uploads": {
+  "reels/arb-later-22/hf/r02.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/c9482aa8-3dc0-4f87-8ef5-7d19aa79a154.png",
+  "reels/live-test/hf/k_a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/6b8e118a-a234-4f84-8994-c42b0c98e891.png",
+  "reels/live-test/hf/k_b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/beb05837-0fd9-48cf-b476-d226980305c1.png"
+ },
+ "k_a": {
+  "request_id": "9ae3a907-6d83-49d1-9ae1-4d33a89444d9",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 78
+ },
+ "k_b": {
+  "request_id": "400a309c-606b-405f-b810-11af6ff0991f",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "v_box": {
+  "request_id": "c64ce579-80ed-4c52-943e-60ffe5bcf3a3",
+  "app": "kling-video/v3.0/pro/image-to-video",
+  "status": "completed",
+  "sec": 237
+ }
+}

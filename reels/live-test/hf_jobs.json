@@ -1,0 +1,37 @@
+{
+ "_": "Проба живого видео (17–19.10): действие по двум ключевым кадрам (Qwen edit) + Kling 3.0 Pro первый→последний кадр. Сцена коробки «потом» из рилса 22.",
+ "style": "Satirical hand-painted digital illustration for an adult YouTube channel about money, in one consistent art style for the whole series: confident ink linework, painterly shading with visible brush texture, volumetric light, soft shadows. ONE consistent color grade for every scene: warm tungsten evening light with muted teal shadows, slightly desaturated. Extremely detailed lived-in everyday life of a young guy in a Russian city (small rented one-room apartment in a panel building: bedroom, hallway, kitchen, balcony; the courtyard of the block): many small, carefully drawn, recognizable objects and textures — worn surfaces, stickers, cables, dishes, posters with no readable text. Expressive slightly grotesque faces, cinematic composition, vertical 9:16. Food is always served properly: soup in bowls, buckwheat and cutlets on plates, bread on a saucer — nothing lies loose directly on a tray or table. Not a kids cartoon, not glossy 3D, not flat vector. No text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "design": "reels/arb-story-20/hf/d01.png",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "clip_app": "kling-video/v3.0/pro/image-to-video",
+ "designs": [],
+ "brand": [],
+ "images": [
+  {
+   "id": "k_a",
+   "raw": true,
+   "refs": [
+    "reels/arb-later-22/hf/r02.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the room, the box, light, colors, framing and the character's design. Only change: the watermelon guy now holds an old black dumbbell in both green hands right above the open empty cardboard box, about to put it inside; next to him on the floor lie a dark-blue textbook, a pink piggy bank and a dark-green sports bag, waiting their turn."
+  },
+  {
+   "id": "k_b",
+   "raw": true,
+   "refs": [
+    "reels/arb-later-22/hf/r02.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the room, the box, light, colors, framing and the character's design. Only change: the open cardboard box is now full: the black dumbbell, the dark-blue textbook, the pink piggy bank and the dark-green sports bag are inside the box, partly sticking out over its edges; the floor next to him is empty; the watermelon guy pats the top of the box with one hand and smiles guiltily at the camera."
+  }
+ ],
+ "clips": [
+  {
+   "id": "v_box",
+   "from": "k_a",
+   "to": "k_b",
+   "duration": 8,
+   "prompt": "The watermelon guy puts the dumbbell into the open cardboard box, then picks up the textbook from the floor and puts it in, then the piggy bank, then the sports bag, one by one with natural hand movements; finally he pats the full box and smiles guiltily at the camera. Smooth, clearly drawn hand-drawn animation, same art style, static camera, no text."
+  }
+ ]
+}
