@@ -1,0 +1,64 @@
+{
+ "_uploads": {
+  "reels/arb-story-20/hf/d01.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/778ba1b2-edd6-4e6f-9e50-dfa35579fc3c.png",
+  "reels/arb-fear-23/hf/k1a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/5e499874-e642-4c81-9bd8-3c397fd000ad.png",
+  "reels/arb-fear-23/hf/k1f.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/15ca186b-803d-47fb-b686-ef45b8b9ea42.png",
+  "reels/arb-fear-23/hf/k2a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/ecd3c69a-4131-475b-929a-03f9235874da.png",
+  "reels/arb-fear-23/hf/k3a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/bc2d5140-70e3-4ec4-a482-cf5d9e62c8de.png"
+ },
+ "k1a": {
+  "request_id": "311f7755-f82a-4b0c-bce8-0a7a7280fd6f",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 52
+ },
+ "k5a": {
+  "request_id": "5ff8b032-73b4-4da2-a99f-8cd7c0f2716b",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 74
+ },
+ "k8a": {
+  "request_id": "f9b3ab7a-88fb-48e7-a59c-307154cabde5",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 52
+ },
+ "k1f": {
+  "request_id": "f6648dcd-56a5-4c12-921d-ef6d288c5b59",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 40
+ },
+ "k1b": {
+  "request_id": "9e1ee074-d7b5-4e0c-b179-8e75a0d44750",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 52
+ },
+ "k2a": {
+  "request_id": "5311536c-6c12-4c87-ab9c-16d2895436eb",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "k2b": {
+  "request_id": "34f3e057-64b4-4d3d-ac37-043aa8a08603",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "k3a": {
+  "request_id": "846f530c-7d44-4c11-9828-374546b36ad4",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 82
+ },
+ "k3b": {
+  "request_id": "9d28d60e-3560-4b3a-847f-bfc1204af3a4",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 65
+ },
+ "k4a": {}
+}

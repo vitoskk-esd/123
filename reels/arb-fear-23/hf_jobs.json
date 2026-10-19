@@ -1,0 +1,185 @@
+{
+ "_": "Рилс 23 «Почему ты боишься начать зарабатывать» — живое видео в каждом плане (SKILL: «Живое видео в каждом кадре», «Плавность»). Обстановка новая: студенческое общежитие (комната, коридор) и круглосуточный магазин на первом этаже. Ключевые кадры A/B (Qwen edit) → клипы Kling 3.0 Pro первый→последний кадр, действия списком beats (≥ 3 с на действие).",
+ "style": "Satirical hand-painted digital illustration for an adult YouTube channel about money, in one consistent art style for the whole series: confident ink linework, painterly shading with visible brush texture, volumetric light, soft shadows. ONE consistent color grade for every scene: warm tungsten evening light with muted teal shadows, slightly desaturated. Extremely detailed lived-in everyday life of a young guy in a Russian city (an old Russian student dormitory: a cramped shared room, the long dorm corridor, and a tiny 24-hour shop on the ground floor of the campus): many small, carefully drawn, recognizable objects and textures — worn surfaces, stickers, cables, dishes, posters with no readable text. Expressive slightly grotesque faces, cinematic composition, vertical 9:16. Food is always served properly: soup in bowls, buckwheat and cutlets on plates, bread on a saucer — nothing lies loose directly on a tray or table. Not a kids cartoon, not glossy 3D, not flat vector. No text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "design": "reels/arb-story-20/hf/d01.png",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "clip_app": "kling-video/v3.0/pro/image-to-video",
+ "designs": [],
+ "brand": [],
+ "images": [
+  {
+   "id": "k1a",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Late evening in a cramped Russian student dormitory room: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, sits at a small desk under a desk lamp, watching a laptop that faces away from the camera (we see only the back of its lid), headphones around his neck, a pen in his green hand and an open thick notebook in front of him. Bunk bed, a kettle, instant noodle cups, clothes on a chair, a window with city lights, posters with no readable text. Medium shot from the side-front, the whole desk visible."
+  },
+  {
+   "id": "k1f",
+   "raw": true,
+   "refs": [
+    "reels/arb-fear-23/hf/k1a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: remove the apple logo from the back of the laptop lid — the lid is plain grey aluminium with no logo, no marks."
+  },
+  {
+   "id": "k1b",
+   "refs": [
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the watermelon guy now looks at the laptop screen with wide attentive eyes, the pen raised in his hand above the notebook, not writing yet.",
+   "raw": true
+  },
+  {
+   "id": "k2a",
+   "refs": [
+    "@design",
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "The same dormitory room as in reference image 2, wider shot showing the wall above the desk: the wall is completely covered with dozens of small yellow sticky notes with scribbles (no readable text), a tall stack of thick notebooks on the desk. the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, stands and presses one more sticky note onto the wall with his finger."
+  },
+  {
+   "id": "k2b",
+   "refs": [
+    "reels/arb-fear-23/hf/k2a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the watermelon guy now holds an open empty brown wallet in both hands in front of his chest; a small grey moth flies out of the empty wallet; he looks at it sadly.",
+   "raw": true
+  },
+  {
+   "id": "k3a",
+   "refs": [
+    "@design",
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "The same dormitory room as in reference image 2, medium close shot at the desk: an old brass two-pan balance scale stands on the desk with both pans empty and level. the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, holds a small green cloth money pouch with coins in his left hand and an identical red cloth money pouch with coins in his right hand, one above each pan, thoughtful."
+  },
+  {
+   "id": "k3b",
+   "refs": [
+    "reels/arb-fear-23/hf/k3a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: both pouches now lie on the pans: the pan with the red pouch has dropped all the way down and the pan with the green pouch is high up; the watermelon guy leans back startled, hands raised.",
+   "raw": true
+  },
+  {
+   "id": "k4a",
+   "refs": [
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the watermelon guy slowly reaches one finger toward the laptop keyboard, hesitant and nervous, sweat drop on his head.",
+   "raw": true
+  },
+  {
+   "id": "k4b",
+   "refs": [
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the laptop lid is now closed and pushed away; the watermelon guy has pulled the grey hood over his head and cap and hides his face behind both hands, peeking through his fingers.",
+   "raw": true
+  },
+  {
+   "id": "k5a",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A long old Russian dormitory corridor in the evening: worn linoleum, doors with numbers on tape, a fire extinguisher, a bicycle, a laundry rack. In the middle stands a very tall aluminium stepladder reaching the ceiling. the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, stands in front of it, looking up at the top nervously. Next to the ladder on the floor stands a small low wooden step stool. Medium-wide shot."
+  },
+  {
+   "id": "k5b",
+   "refs": [
+    "reels/arb-fear-23/hf/k5a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the watermelon guy now stands on top of the small low wooden step stool next to the tall ladder, one step up from the floor, smiling with relief, arms slightly spread for balance.",
+   "raw": true
+  },
+  {
+   "id": "k6a",
+   "refs": [
+    "@design",
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "The same dormitory desk as in reference image 2, close shot: one single yellow sticky note on the desk with one empty hand-drawn square box on it and nothing else written. the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, holds a pen above the empty box, focused. The laptop is closed."
+  },
+  {
+   "id": "k6b",
+   "refs": [
+    "reels/arb-fear-23/hf/k6a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the square box on the sticky note now has one bold check mark inside; the watermelon guy leans back with a satisfied smile, the pen in his hand.",
+   "raw": true
+  },
+  {
+   "id": "k7a",
+   "refs": [
+    "@design",
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "The same dormitory room as in reference image 2: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, sits completely still on a chair in the middle of the room with his hands on his knees, looking at the camera, waiting. Medium shot, the room around him clean and normal."
+  },
+  {
+   "id": "k7b",
+   "refs": [
+    "reels/arb-fear-23/hf/k7a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the watermelon guy and his chair are now covered in a thick layer of grey dust and cobwebs, a small spider hangs on a thread from his cap, he is about to sneeze; the rest of the room is the same.",
+   "raw": true
+  },
+  {
+   "id": "k8a",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A tiny 24-hour shop on the ground floor of a Russian student dormitory at night: a counter with a card payment terminal, shelves with snacks and drinks behind, a tired friendly cashier woman in a vest behind the counter. the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, holds a plain new bank card with no logos and no text above the payment terminal, about to tap it; a packed shopping bag with bread, milk and noodles on the counter. Medium shot."
+  },
+  {
+   "id": "k8b",
+   "refs": [
+    "reels/arb-fear-23/hf/k8a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the payment terminal now shows a small green light; the watermelon guy holds the shopping bag in one hand and his phone in the other hand, looking at the phone with a big surprised happy grin; the phone screen faces him, not the camera.",
+   "raw": true
+  },
+  {
+   "id": "k8c",
+   "refs": [
+    "reels/arb-fear-23/hf/k8a.png"
+   ],
+   "prompt": "Close-up shot in the same shop as in reference image 1, same light and style: a smartphone lies flat on the shop counter screen up, next to the card payment terminal and the shopping bag; the phone screen is lit, plain bright white and completely empty, no text, no icons. Top-down three-quarter view, the phone large in the center of the frame."
+  },
+  {
+   "id": "k9a",
+   "refs": [
+    "@design",
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "The same dormitory room as in reference image 2, by the window at night with city lights behind: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, holds his phone in one hand at chest level with the screen facing him, and looks straight at the camera with a warm confident smile. Medium close shot."
+  },
+  {
+   "id": "k9b",
+   "refs": [
+    "reels/arb-fear-23/hf/k9a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the watermelon guy now points his free hand's index finger straight up and winks at the camera.",
+   "raw": true
+  },
+  {
+   "id": "k10a",
+   "refs": [
+    "@design",
+    "reels/arb-fear-23/hf/k1f.png"
+   ],
+   "prompt": "The same dormitory room as in reference image 2, view toward the room door: the watermelon guy from reference image 1 (watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, stands next to the tall stack of thick notebooks, holding one more thick notebook in his hand, about to put it on top of the stack; his jacket hangs on a hook by the door."
+  },
+  {
+   "id": "k10b",
+   "refs": [
+    "reels/arb-fear-23/hf/k10a.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, objects, light, colors, framing and the character's design. Only change: the notebook now lies on top of the stack; the watermelon guy wears the jacket over his hoodie and has opened the room door, warm light from the corridor, he looks back at the camera with a determined smile, one foot already stepping out.",
+   "raw": true
+  }
+ ],
+ "clips": []
+}
