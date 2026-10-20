@@ -96,7 +96,7 @@ def word_state(w, t, out_t):
         if .11 <= a < .32: rnd = np.random.default_rng(int(t * 1000)); st["dx"], st["dy"] = rnd.integers(-7, 8, 2)
     elif anim == "rise":
         k = min(1, a / .14); st["alpha"] = k; st["dy"] = (1 - k) ** 2 * 26
-    elif anim == "pop":
+    elif anim in ("pop", "scramble"):
         k = a / .12; st["scale"] = .7 + .3 * ease_back(k) if k < 1 else 1.0; st["alpha"] = min(1, k * 2)
     if t > out_t: st["out"] = (t - out_t) / .14
     return st
@@ -119,6 +119,11 @@ def draw_moment(frame, m, t, subject=None):
         st = word_state(w, t, m["out"])
         if not st: continue
         spr = w["_spr"]
+        if w.get("anim") == "scramble" and t - w["t"] < .35:   # «скрембл»: буквы перебираются и встают на место слева направо
+            k = int(len(w["text"]) * (t - w["t"]) / .35); rnd = np.random.default_rng(int(t * FPS))
+            AB = "АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЮЯ0123456789"
+            txt = w["text"][:k] + "".join(c if c == " " else AB[rnd.integers(len(AB))] for c in w["text"][k:])
+            spr = sprite(txt, w["kind"], w["size"], w["color"], w.get("stroke", 0))
         if w.get("count"):   # счётчик: число бежит к w["count"][1]
             a, b = w["count"]; k = min(1, (t - w["t"]) / w.get("count_dur", .5)); v = round(a + (b - a) * (1 - (1 - k) ** 3))
             spr = sprite(w["fmt"].format(v), w["kind"], w["size"], w["color"], w.get("stroke", 0))
