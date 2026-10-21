@@ -332,7 +332,10 @@ def render(reel, t_from=None, t_to=None, png=False):
 
 def mix(reel, E, video, off):
     """Звук: TL (музыка + SFX) → youtube/kit/audio.js; голос со сдвигом off; сведение — mix.sh (−14 LUFS)."""
-    tl = dict(duration=E["end"], bpm=E.get("bpm", 92), music=E.get("music", [{"t": 0, "part": "main"}]), sfx=E["sfx"], sfxGain=E.get("sfxGain", 1))
+    sfx = dict(E["sfx"])
+    if E.get("auto_risers", True):   # S6: райзер за 0,7 с до каждого текстового момента — удар слова не приходит «из ниоткуда»
+        sfx["riser"] = sfx.get("riser", []) + [[max(0, m["words"][0]["t"] - .7), m["words"][0]["t"]] for m in E["moments"]]
+    tl = dict(duration=E["end"], bpm=E.get("bpm", 92), music=E.get("music", [{"t": 0, "part": "main"}]), sfx=sfx, sfxGain=E.get("sfxGain", 1))
     open(f"{reel}/out/live_tl.js", "w").write("window.TL = " + json.dumps(tl, ensure_ascii=False) + ";\n")
     subprocess.run(["node", f"{ROOT}/youtube/kit/audio.js", f"{reel}/out/live_tl.js", "live_music_sfx.wav"], check=True, capture_output=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{reel}/out/voice/voice.wav", "-af", f"adelay={int(off * 1000)}:all=1",
