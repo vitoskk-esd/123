@@ -148,13 +148,21 @@ def head_mask(rgb, box):
     lab, n = ndimage.label(ndimage.binary_opening(green, iterations=2))
     if n == 0: return np.zeros((FH, FW), np.uint8)
     head = lab == (np.argmax(ndimage.sum(lab > 0, lab, range(1, n + 1))) + 1)   # арбуз — самое большое зелёное пятно
-    ys, xs = np.nonzero(head); hw, hh = xs.max() - xs.min(), ys.max() - ys.min()
-    zone = np.zeros_like(head); zone[max(0, ys.min() - int(.6 * hh)):ys.max(), max(0, xs.min() - int(.3 * hw)):xs.max() + int(.45 * hw)] = True
-    rl, rn = ndimage.label(red & zone); near = ndimage.binary_dilation(head, iterations=6)   # кепка — только над/у головы (ковёр на стене не берём)
-    cap = np.isin(rl, [i for i in np.unique(rl[near & red & zone]) if i])
+    ys, xs = np.nonzero(head); hh = ys.max() - ys.min()
+    dist = ndimage.distance_transform_edt(~head)                                   # кепка лежит на арбузе: дальше 0,45 высоты головы — не кепка
+    red0 = red
+    red = ndimage.binary_opening(red & (dist < .62 * hh), iterations=6)            # рвём тонкие мостики к ковру и прочему красному на стене
+    xx = np.arange(head.shape[1])[None, :]
+    visor = red0 & (dist < .3 * hh) & (xx > xs.mean())                             # тонкий козырёк (кепка назад — справа у головы) вернуть
+    rl, rn = ndimage.label(red); near = ndimage.binary_dilation(head, iterations=6)
+    cap = ndimage.binary_dilation(np.isin(rl, [i for i in np.unique(rl[near & red]) if i]), iterations=6) & (dist < .68 * hh) | visor
     big = ndimage.binary_dilation(ndimage.binary_fill_holes(ndimage.binary_closing(head | cap, iterations=6)), iterations=2)
     out = np.zeros((FH, FW), np.uint8); out[y0:y1, x0:x1] = big * 255
-    return np.array(Image.fromarray(out).filter(ImageFilter.GaussianBlur(1.5)))
+    out = np.array(Image.fromarray(out).filter(ImageFilter.GaussianBlur(1.5))).astype(np.float32)
+    prev = getattr(head_mask, "_prev", None)
+    if prev is not None and prev.shape == out.shape and np.abs(prev - out).mean() < 8: out = .5 * prev + .5 * out   # края не мигают
+    head_mask._prev = out
+    return out.astype(np.uint8)
 
 
 # ---------- экран телефона ----------
