@@ -274,7 +274,7 @@ def render(reel, t_from=None, t_to=None, png=False):
     n0, n1 = int((t_from or 0) * FPS), int((t_to or END) * FPS)
     out = f"{reel}/out/live.mp4" if t_from is None else f"{reel}/out/live_{t_from:g}-{t_to:g}.mp4"
     enc = None if png else subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{FW}x{FH}", "-r", str(FPS),
-                                             "-i", "-", "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p", out], stdin=subprocess.PIPE)
+                                             "-i", "-", "-c:v", "libx264", "-crf", "20", "-preset", "fast", "-pix_fmt", "yuv420p", out], stdin=subprocess.PIPE)
     starts = [s["t"] for s in S]
 
     def shot_frame(si, t):
@@ -349,13 +349,13 @@ def mix(reel, E, video, off):
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{reel}/out/voice/voice.wav", "-af", f"adelay={int(off * 1000)}:all=1",
                     f"{reel}/out/voice_off.wav"], check=True)
     os.replace(f"{reel}/out/out/live_music_sfx.wav", f"{reel}/out/live_music_sfx.wav")   # audio.js пишет в <папка TL>/out/
-    # мастер 60 к/с (crf 16, ~450 МБ) сразу ужимаем в две прохода до ~26 МБ (≈ 4,6 Мбит/с) — и для отправки, и чтобы не забить диск
+    # мастер 60 к/с (crf 20, ~150–200 МБ; crf 16 давал ~450 МБ и забивал диск 22.10) сразу ужимаем в две прохода до ~26 МБ (≈ 4,6 Мбит/с) — и для отправки, и чтобы не забить диск
     small = f"{reel}/out/live_small.mp4"; log = f"{reel}/out/x264pass"
     for p in (1, 2):
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", video, "-c:v", "libx264", "-b:v", "4600k", "-maxrate", "7000k", "-bufsize", "9000k",
                         "-preset", "slow", "-pass", str(p), "-passlogfile", log, "-pix_fmt", "yuv420p", "-an"] +
                        (["-f", "null", "/dev/null"] if p == 1 else [small]), check=True)
-    os.remove(video)
+    os.remove(video); [os.remove(f) for f in __import__("glob").glob(log + "*")]
     subprocess.run(["bash", f"{ROOT}/youtube/02-bank-earns/mix.sh", small, f"{reel}/out/voice_off.wav", f"{reel}/out/live_music_sfx.wav",
                     f"{reel}/reel_1080p.mp4"], check=True)
     print(f"→ {reel}/reel_1080p.mp4")
