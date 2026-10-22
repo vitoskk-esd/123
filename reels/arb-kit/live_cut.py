@@ -259,8 +259,15 @@ def load_edit(reel):
     return mod.edit(W)
 
 
+def check_disk(reel, seconds):
+    """Мастер crf 20 при 60 к/с ≈ 5 МБ/с ролика + сжатая копия, звук и mix.sh; диск сессии маленький — дважды ловили ENOSPC посреди рендера."""
+    need = seconds * 6 + 150; st = os.statvfs(reel); free = st.f_bavail * st.f_frsize / 2**20
+    if free < need: sys.exit(f"мало места: свободно {free:.0f} МБ, нужно ≈ {need:.0f} МБ — удалить out/clips60 старых рилсов, кэши, пробные куски")
+
+
 def render(reel, t_from=None, t_to=None, png=False):
     E = load_edit(reel); S = E["shots"]; END = E["end"]; OFF = E.get("voice_off", .3)
+    if not png: check_disk(reel, (t_to or END) - (t_from or 0))
     clips = {}   # открываем клип при первом обращении (проба куска не трогает остальные клипы)
     def clip(c, vf=None, size=(None, None)):
         key = (c, vf)
