@@ -1,0 +1,45 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body { background: linear-gradient(160deg, #fff6ef 0%, #ffe3d8 55%, #ffd0c4 100%); color: var(--ink); }
+.blob { position: absolute; border-radius: 50%; filter: blur(10px); }
+h1 { position: absolute; left: 70px; top: 80px; font-size: 90px; line-height: 1; color: var(--ink); }
+h1 em { font-style: normal; color: var(--red); }
+.sub { position: absolute; left: 74px; top: 290px; font-size: 36px; font-weight: 700; color: #5a4a46; }
+.receipt { position: absolute; left: 70px; top: 420px; width: 560px; padding: 44px 44px 60px; background: #fff; color: var(--ink);
+  border-radius: 26px 26px 0 0; box-shadow: 0 30px 70px rgba(150, 40, 20, .18); transform: rotate(-2deg); }
+.receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -22px; height: 24px;
+  background: linear-gradient(-45deg, transparent 16px, #fff 0) 0 0 / 32px 24px repeat-x, linear-gradient(45deg, transparent 16px, #fff 0) 0 0 / 32px 24px repeat-x; }
+.receipt .t { font-family: "Unb"; font-weight: 800; font-size: 26px; letter-spacing: .1em; color: #9a8a86; margin-bottom: 22px; }
+.row { display: flex; justify-content: space-between; align-items: center; font-size: 31px; font-weight: 700; padding: 15px 0; border-bottom: 2px dashed #eee1dc; }
+.row .ok { display: inline-flex; width: 38px; height: 38px; border-radius: 50%; background: var(--mint); color: #fff; align-items: center; justify-content: center; font-size: 24px; margin-right: 16px; }
+.row span:last-child { color: #8a7a76; }
+.bonus { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; padding: 22px 26px; border-radius: 20px; background: var(--red); color: #fff; }
+.bonus b { font-size: 30px; font-weight: 800; } .bonus .unb { font-size: 42px; white-space: nowrap; }
+.note { margin-top: 18px; font-size: 21px; color: #a0908c; }
+.card { right: -40px; top: 470px; transform: rotate(14deg) scale(.86); }
+.chips { position: absolute; right: 60px; top: 900px; width: 380px; display: flex; flex-direction: column; gap: 18px; }
+.chip2 { padding: 24px 28px; border-radius: 24px; background: var(--ink); color: #fff; }
+.chip2 .unb { font-size: 40px; display: block; } .chip2 span { font-size: 24px; opacity: .7; }
+.avatar { width: 120px; height: 120px; right: 44px; top: 40px; }
+.foot { color: var(--ink); }
+</style></head><body>
+<div class="blob" style="width:520px;height:520px;right:-120px;top:-120px;background:rgba(239,49,36,.25)"></div>
+<img class="avatar" src="../avatar.png">
+<h1 class="unb">5 ПОКУПОК<br><em>= +1 000 ₽</em></h1>
+<div class="sub">кредиткой в день получения · сумма любая</div>
+<div class="card"><div class="logo"><b>А</b><i></i></div><div class="chip"></div><div class="num">•••• 1000</div><div class="kind">CREDIT</div><div class="pay"></div></div>
+<div class="receipt">
+  <div class="t">ЧЕК ДНЯ</div>
+  <div class="row"><span><span class="ok">✓</span>Кофе</span><span>190 ₽</span></div>
+  <div class="row"><span><span class="ok">✓</span>Проезд</span><span>80 ₽</span></div>
+  <div class="row"><span><span class="ok">✓</span>Жвачка</span><span>59 ₽</span></div>
+  <div class="row"><span><span class="ok">✓</span>Булочка</span><span>85 ₽</span></div>
+  <div class="row"><span><span class="ok">✓</span>Вода</span><span>49 ₽</span></div>
+  <div class="bonus"><b>Бонус от банка</b><span class="unb">+1 000 ₽</span></div>
+  <div class="note">суммы — пример; траты верни до конца льготного периода</div>
+</div>
+<div class="chips">
+  <div class="chip2"><span class="unb">0 ₽</span><span>вложений</span></div>
+  <div class="chip2"><span class="unb">1 день</span><span>от заявки до бонуса</span></div>
+</div>
+<div class="foot">Реклама. АО «Альфа-Банк». Условия акции, кредитования и ПСК — по ссылке в посте.</div>
+</body></html>

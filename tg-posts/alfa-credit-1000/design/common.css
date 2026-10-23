@@ -1,0 +1,32 @@
+/* Общие стили инфографики поста про кредитку (1080×1350, рендер design/render.mjs) */
+@font-face { font-family: "Unb"; src: url("../../../reels/arb-kit/fonts/Unbounded[wght].ttf"); font-weight: 100 900; }
+@font-face { font-family: "Man"; src: url("../../../reels/arb-kit/fonts/Manrope[wght].ttf"); font-weight: 200 800; }
+:root { --red: #ef3124; --red2: #b3120a; --ink: #14161c; --paper: #f6f4ef; --mint: #3fe0b0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1350px; overflow: hidden; }
+body { font-family: "Man", sans-serif; color: #fff; position: relative; }
+.unb { font-family: "Unb", sans-serif; font-weight: 900; letter-spacing: -0.02em; }
+
+/* кредитка: красный градиент, блик, чип, размытый логотип банка (владелец 23.10: «логотип можно, но заблюрить») */
+.card { position: absolute; width: 560px; height: 353px; border-radius: 34px; overflow: hidden;
+  background: linear-gradient(135deg, #ff4b3a 0%, var(--red) 42%, var(--red2) 100%);
+  box-shadow: 0 40px 80px rgba(120, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .35); }
+.card::before { content: ""; position: absolute; inset: -40% -10% auto auto; width: 70%; height: 140%;
+  background: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.28) 50%, rgba(255,255,255,0) 70%); transform: rotate(8deg); }
+.card .chip { position: absolute; left: 46px; top: 120px; width: 78px; height: 58px; border-radius: 12px;
+  background: linear-gradient(135deg, #f5d98a, #c79a3a); box-shadow: inset 0 0 0 2px rgba(0,0,0,.12); }
+.card .logo { position: absolute; left: 46px; top: 40px; filter: blur(7px); opacity: .95; }
+.card .logo b { display: block; font-family: "Unb"; font-weight: 900; font-size: 64px; line-height: 1; color: #fff; }
+.card .logo i { display: block; width: 46px; height: 8px; background: #fff; margin-top: 4px; }
+.card .num { position: absolute; left: 46px; bottom: 74px; font-family: "Unb"; font-weight: 500; font-size: 30px; letter-spacing: .14em; opacity: .9; }
+.card .kind { position: absolute; left: 46px; bottom: 34px; font-weight: 700; font-size: 22px; letter-spacing: .2em; opacity: .75; }
+.card .pay { position: absolute; right: 40px; bottom: 34px; width: 92px; height: 56px; }
+.card .pay::before, .card .pay::after { content: ""; position: absolute; top: 0; width: 56px; height: 56px; border-radius: 50%; }
+.card .pay::before { left: 0; background: rgba(255,255,255,.55); }
+.card .pay::after { right: 0; background: rgba(255,255,255,.3); }
+
+.glass { background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .18); border-radius: 30px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+.avatar { position: absolute; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+.foot { position: absolute; left: 70px; right: 70px; bottom: 44px; font-size: 21px; opacity: .55; line-height: 1.35; }
+.ico { width: 46px; height: 46px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
