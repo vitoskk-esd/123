@@ -2,7 +2,9 @@
  "_uploads": {
   "reels/arb-story-20/hf/d01.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/e2184bd6-8d73-440c-a855-c46238c31456.png",
   "reels/arb-scroll-24/hf/s1.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/5599cf1d-772c-4ced-8ad0-ba1f94d58021.png",
-  "reels/arb-friend-21/hf/c_ogur.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/053725e4-de6e-4681-bb86-14604bd4b620.png"
+  "reels/arb-friend-21/hf/c_ogur.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/053725e4-de6e-4681-bb86-14604bd4b620.png",
+  "reels/arb-scroll-24/hf/a04.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/7c77904a-636c-4fab-a9f8-b73642447f31.png",
+  "reels/arb-scroll-24/hf/a07.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/58b7d54f-26d5-41f8-94ee-9d7c5251dbaf.png"
  },
  "s1": {
   "request_id": "bdf02687-ffcc-4092-b5af-b6a71572bc27",
@@ -55,7 +57,8 @@
  "a03": {
   "request_id": "16dc18db-6410-4e98-9167-c2ee0079f334",
   "app": "xai/grok-imagine-image-2.0",
-  "status": "queued"
+  "status": "completed",
+  "sec": 57
  },
  "a04": {
   "request_id": "a39e939b-8991-4dba-87eb-8e0facbecfa2",
@@ -78,6 +81,49 @@
  "a07": {
   "request_id": "619f6994-f541-4296-9b89-fd8a409b68a4",
   "app": "alibaba/qwen-image-3/edit",
-  "status": "queued"
+  "status": "completed",
+  "sec": 2
+ },
+ "a08": {
+  "request_id": "2b3cfda6-5bde-419f-8378-670138d599b6",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 78
+ },
+ "a09": {
+  "request_id": "5584bb18-fe70-4612-8559-20af9f9d45ec",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 61
+ },
+ "a10": {
+  "request_id": "88935092-ed8b-46c6-969b-fa56032a90f8",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 69
+ },
+ "a11": {
+  "request_id": "eba5b3c1-3e21-4706-b91e-747fe38613d7",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 94
+ },
+ "a12": {
+  "request_id": "9e851095-53eb-4c9b-baeb-6c94373923e8",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 103
+ },
+ "a04f": {
+  "request_id": "74eb1858-20f9-410a-963d-c4234bb9d656",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 53
+ },
+ "a07f": {
+  "request_id": "7e0fa2ce-99c4-472a-abb7-3455482cbbb3",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
  }
 }
