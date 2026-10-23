@@ -4,7 +4,8 @@
   "reels/arb-scroll-24/hf/s1.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/5599cf1d-772c-4ced-8ad0-ba1f94d58021.png",
   "reels/arb-friend-21/hf/c_ogur.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/053725e4-de6e-4681-bb86-14604bd4b620.png",
   "reels/arb-scroll-24/hf/a04.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/7c77904a-636c-4fab-a9f8-b73642447f31.png",
-  "reels/arb-scroll-24/hf/a07.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/58b7d54f-26d5-41f8-94ee-9d7c5251dbaf.png"
+  "reels/arb-scroll-24/hf/a07.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/58b7d54f-26d5-41f8-94ee-9d7c5251dbaf.png",
+  "reels/arb-scroll-24/hf/p2.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/399a62a7-d54e-4ece-a631-cd18befc323c.png"
  },
  "s1": {
   "request_id": "bdf02687-ffcc-4092-b5af-b6a71572bc27",
@@ -125,5 +126,17 @@
   "app": "alibaba/qwen-image-3/edit",
   "status": "completed",
   "sec": 57
+ },
+ "a07g": {
+  "request_id": "52a77701-8eb7-4e13-9bbd-8c4c4b7559bf",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 78
+ },
+ "a07h": {
+  "request_id": "a86c4e22-59d3-4595-9d35-b25776574ed2",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 91
  }
 }

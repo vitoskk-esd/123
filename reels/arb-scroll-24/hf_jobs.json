@@ -154,6 +154,20 @@
     "reels/arb-scroll-24/hf/a07.png"
    ],
    "prompt": "Edit this image. Keep everything exactly the same — the campus, the lawn, the sky, the box, the hourglass, the poses, colours and framing. Only change: every student is an ordinary human young man or woman with a normal human head and natural hair, no watermelon heads, no caps at all; give them varied clothes (denim jacket, yellow sweater, striped shirt, green hoodie) instead of identical grey hoodies."
+  },
+  {
+   "id": "a07g",
+   "refs": [
+    "reels/arb-scroll-24/hf/p2.png"
+   ],
+   "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its people, boat or sea. A sunny green university campus lawn, blue sky, trees: five clearly different students — a red-haired girl in a yellow sweater, a tall guy with glasses and a denim jacket, a girl with black braids in a white shirt, a bearded guy in a striped T-shirt, a curly-haired girl in a green cardigan sit in a circle on the grass and one by one drop their smartphones into a cardboard box in the middle; a big wooden sand hourglass stands next to the box. Happy relaxed faces. Nobody wears a cap, hat or beanie; all heads are ordinary human heads — no watermelon, vegetable or fruit heads, no red caps anywhere. Fresh saturated green and sky blue, medium-wide shot from slightly above."
+  },
+  {
+   "id": "a07h",
+   "refs": [
+    "reels/arb-scroll-24/hf/p2.png"
+   ],
+   "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its people, boat or sea. A sunny green university campus lawn, blue sky, trees: four clearly different students — a blonde girl with a ponytail in a pink hoodie, a dark-skinned guy with short hair in an orange shirt, a girl with a bob haircut in a blue denim jacket, a guy with glasses and a moustache in a beige sweater sit in a circle on the grass and one by one drop their smartphones into a cardboard box in the middle; a big wooden sand hourglass stands next to the box. Happy relaxed faces. Nobody wears a cap, hat or beanie; all heads are ordinary human heads — no watermelon, vegetable or fruit heads, no red caps anywhere. Fresh saturated green and sky blue, close low angle from the grass, the box and hourglass large in the foreground and the students' hands dropping phones into it."
   }
  ],
  "clips": []
