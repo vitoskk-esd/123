@@ -261,7 +261,8 @@ def load_edit(reel):
 
 def check_disk(reel, seconds):
     """Мастер crf 20 при 60 к/с ≈ 5 МБ/с ролика + сжатая копия, звук и mix.sh; диск сессии маленький — дважды ловили ENOSPC посреди рендера."""
-    need = seconds * 6 + 150; st = os.statvfs(reel); free = st.f_bavail * st.f_frsize / 2**20
+    need = seconds * 6 + 150   # мастер можно вынести на RAM-диск: out/live.mp4 → ссылка в /dev/shm, тогда меряем место там
+    st = os.statvfs(os.path.dirname(os.path.realpath(f"{reel}/out/live.mp4"))); free = st.f_bavail * st.f_frsize / 2**20
     if free < need: sys.exit(f"мало места: свободно {free:.0f} МБ, нужно ≈ {need:.0f} МБ — удалить out/clips60 старых рилсов, кэши, пробные куски")
 
 
