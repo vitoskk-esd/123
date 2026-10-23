@@ -233,48 +233,62 @@
   "sec": 133
  },
  "v04": {
-  "request_id": "d1d9b444-5c17-491c-a774-96f91b155799",
+  "request_id": "956ec824-a5e6-4ee1-aa65-9136f6f09fc6",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 259
  },
  "v05": {
-  "request_id": "544bca45-9504-484e-8059-774216420c2d",
+  "request_id": "bfc3ce78-172c-4935-a49e-2017a9e627e9",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 211
  },
  "v06": {
-  "request_id": "ea0df73a-298d-44e8-84f3-0bd49018d561",
+  "request_id": "f83e511c-2c5f-4df5-8fe1-0d419f2c9142",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 161
  },
  "v07": {
-  "request_id": "1fc3e919-1cf3-4fd6-af75-f5b66ce8bb65",
+  "request_id": "47ee59bf-13a1-4ab9-b6e2-12cd7c4aa3e0",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 141
  },
  "v08": {
-  "request_id": "8f06da27-3b42-4b66-9bae-60ec8fe732c4",
+  "request_id": "2dd64c84-9ec8-4676-a07d-d682f18e9c27",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 111
  },
  "v09": {
-  "request_id": "3937c858-4580-47d7-9ca7-449640f28af6",
+  "request_id": "a4f3eace-f632-49fa-b7c5-9f34c6824ca3",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 115
  },
  "v10": {
-  "request_id": "dfca4a53-5a0f-4bf2-9e2e-aa584ce6eb58",
+  "request_id": "88b2083e-4403-4e01-bb7b-ab0c9930ff24",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 182
  },
  "v11": {
-  "request_id": "0734f098-8a52-4122-be63-daa3c987339b",
+  "request_id": "4a542bcf-61bb-440f-8f0b-f39c11a090c4",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 99
  },
  "v12": {
-  "request_id": "26601db1-f5b4-42ea-b6e8-37e9d71a48c0",
+  "request_id": "096bd7bf-5f36-4d85-867a-107d697fa05c",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "failed"
+  "status": "completed",
+  "sec": 136
+ },
+ "v03r": {
+  "request_id": "a3ae2635-5eae-4d98-80ea-c5b58056317e",
+  "app": "kling-video/v3.0/pro/image-to-video",
+  "status": "queued"
  }
 }
