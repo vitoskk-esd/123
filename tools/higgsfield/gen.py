@@ -148,7 +148,12 @@ def main():
         st = res.get("status") if isinstance(res, dict) else None
         url = first_url(res)
         if st not in (None, "completed") or not url:
-            print(f"{j['id']}: не получилось (статус {st}); за неудачные и NSFW деньги не списываются"); log.setdefault(j["id"], {})["status"] = st; continue
+            err = res.get("error", "") if isinstance(res, dict) else ""
+            print(f"{j['id']}: не получилось (статус {st}{', ' + err if err else ''}); за неудачные и NSFW деньги не списываются")
+            log.setdefault(j["id"], {})["status"] = st; save(log, logf)
+            if "balance" in err.lower() or "credit" in err.lower():   # рилс 24: 9 клипов подряд ушли в отказ из-за пустого баланса
+                print("Баланс API пуст — остальные задания не отправляю. Пополнить: console.higgsfield.ai → Billing."); break
+            continue
         dst.write_bytes(retry(lambda: httpx.get(url, timeout=300, follow_redirects=True).raise_for_status().content))
         log.setdefault(j["id"], {}).update(status="completed", app=app, sec=round(time.time() - t0))
         print(f"{j['id']}: готово за {time.time() - t0:.0f} с → {dst.relative_to(ROOT)}")
