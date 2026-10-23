@@ -2,6 +2,8 @@
 Время — секунды ролика; голос идёт со сдвигом OFF. Текст на экране — 4 момента: «У НЕГО — ГРЕЧКА», «ЗАВИСТЬ», «10 МИНУТ», «СЕБЯ ВЧЕРАШНЕГО».
 Стиль v2: каждый план — новое место и своя краска (владелец 23.10). Вставки кодом (ui.py): лента out/feed.mp4, пуш out/push.mp4;
 ТГ-канал владельца — out/tg_blur.mp4 из рилса 23.
+По проверке кадров: v03 → v03r (ноги проваливались), v04 с 1,95 с (рывок стрелки на 1,6–1,9 с), v05 с 1,8 с (лишняя рука до 1,4 с),
+v09 — наезд 1,2 (справа проступает тень-силуэт).
 """
 import os
 
@@ -18,13 +20,13 @@ def edit(W):
         dict(clip="v01", t=0, src=0, zoom=(1.06, 1.0), center=(.5, .45)),
         dict(clip="feed", path="out/feed.mp4", t=T("всех") - .25, src=0, zoom=(1.0, 1.03), center=(.5, .5), trans="whip"),
         dict(clip="v01", t=T("него") - .12, src=2.6, zoom=(1.12, 1.18), center=(.45, .5), trans="whip"),
-        dict(clip="v03", t=T("двадцать"), src=0, zoom=(1.0, 1.06), center=(.5, .5), trans="pixel"),
-        dict(clip="v04", t=T("психологи"), src=0, zoom=(1.0, 1.05), center=(.55, .45), trans="whip"),
-        dict(clip="v05", t=T("растет") - .15, src=0, zoom=(1.0, 1.06), center=(.5, .5), trans="pixel"),
+        dict(clip="v03r", t=T("двадцать"), src=0, zoom=(1.0, 1.06), center=(.5, .5), trans="pixel"),
+        dict(clip="v04", t=T("психологи"), src=1.95, speed=.8, zoom=(1.0, 1.05), center=(.55, .45), trans="whip"),
+        dict(clip="v05", t=T("растет") - .15, src=1.8, zoom=(1.0, 1.06), center=(.5, .5), trans="pixel"),
         dict(clip="v06", t=T("ты") - .1, src=0, zoom=(1.0, 1.06), center=(.5, .5), trans="pixel"),
         dict(clip="v07", t=T("другом") - .2, src=0, speed=.9, zoom=(1.04, 1.0), center=(.5, .55), trans="whip"),
         dict(clip="v08", t=T("поэтому"), src=0, speed=.9, zoom=(1.0, 1.06), center=(.5, .5), trans="pixel"),
-        dict(clip="v09", t=T("второе"), src=0, zoom=(1.0, 1.05), center=(.5, .45), trans="whip"),
+        dict(clip="v09", t=T("второе"), src=0, zoom=(1.2, 1.24), center=(.42, .5), trans="whip"),
         dict(clip="v10", t=T("третье"), src=0, zoom=(1.0, 1.06), center=(.5, .5), trans="pixel"),
         dict(clip="push", path="out/push.mp4", t=T("заплатил") - .25, src=0, zoom=(1.0, 1.03), center=(.5, .4), trans="whip"),
         # «…в своём телеграме»: Арбузов показывает белый экран → камера наезжает на телефон → влёт в запись канала владельца (как в рилсе 23)
