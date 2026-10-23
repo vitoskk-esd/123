@@ -40,6 +40,30 @@
     "tg-posts/alfa-credit-1000/hf/c1.png"
    ],
    "prompt": "Edit this image. Keep everything exactly the same — the character, the red card, the background, the coins, colours and framing. Only change: the fanned paper banknotes in his right hand become generic Russian-looking ruble notes in warm orange-red and soft pink tones with no readable text or numbers, instead of green dollar bills."
+  },
+  {
+   "id": "h1",
+   "ar": "9:16",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Big close-up hero shot, waist-up: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical fills the lower 60% of the frame, he leans toward the viewer and holds a plain glossy red credit card with no logo right at the camera with one hand, the other hand gives a thumbs up, huge excited grin, eyebrows up. Flat clean background of one solid colour with a soft radial light, no room, no objects in the background. Leave the whole upper 40% of the frame empty. Background: deep dark burgundy-black."
+  },
+  {
+   "id": "h2",
+   "ar": "9:16",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Big dynamic hero shot, full figure from the knees up: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical strides confidently toward the viewer carrying five small shopping items in his arms — a paper coffee cup, a pastry bag, a water bottle, a chewing gum pack and a metro ticket — and holds a plain red credit card with no logo between two fingers, cheeky confident smile. He fills the lower 60% of the frame, slightly to the right. Flat clean background of one solid colour with a soft radial light, no room, no objects in the background. Leave the whole upper 40% of the frame empty. Background: warm light peach-pink."
+  },
+  {
+   "id": "h3",
+   "ar": "9:16",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Big close-up hero shot, chest-up: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical stares at the smartphone in his hand (we see the back of the phone) with an over-the-top delighted shocked face — mouth wide open, eyes huge, sparkles around his head — the other hand clenched in a 'yes!' fist. He fills the lower 60% of the frame on the left side. Flat clean background of one solid colour with a soft radial light, no room, no objects in the background. Leave the whole upper 40% of the frame empty. Background: vivid red-orange."
   }
  ]
 }

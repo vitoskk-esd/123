@@ -5,7 +5,7 @@ const puppeteer = createRequire("/opt/node22/lib/node_modules/hyperframes/")("pu
 const here = path.dirname(fileURLToPath(import.meta.url));
 const b = await puppeteer.launch({ executablePath: process.env.HYPERFRAMES_BROWSER_PATH, timeout: 30000,
   args: ["--no-sandbox", "--allow-file-access-from-files", "--disable-gpu", "--disable-dev-shm-usage"] });
-for (const v of ["v1", "v2", "v3"]) {
+for (const v of (process.argv.slice(2).length ? process.argv.slice(2) : ["v1", "v2", "v3"])) {
   const p = await b.newPage(); await p.setViewport({ width: 1080, height: 1350 });
   await p.goto("file://" + path.join(here, v + ".html"), { waitUntil: "domcontentloaded", timeout: 20000 });
   await Promise.race([p.evaluate("document.fonts.ready.then(() => 1)"), new Promise(r => setTimeout(r, 5000))]);   // шрифты, но не дольше 5 с

@@ -26,5 +26,23 @@
   "app": "alibaba/qwen-image-3/edit",
   "status": "completed",
   "sec": 53
+ },
+ "h1": {
+  "request_id": "1fd9d8ea-46f0-4693-9f12-db95573b04ef",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 66
+ },
+ "h2": {
+  "request_id": "0e3a05cb-2c6d-4e82-a965-64f7fb9bd5b5",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "h3": {
+  "request_id": "9f17adf4-586d-4977-8865-b9986ebb6426",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 53
  }
 }

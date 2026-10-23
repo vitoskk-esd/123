@@ -1,0 +1,28 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body { background: #f42f14; }   /* цвет фона рисунка h3 — без шва на краю */
+.hero { position: absolute; left: -40px; bottom: 0; width: 760px; -webkit-mask-image: linear-gradient(to right, #000 78%, transparent 100%); }
+h1 { position: absolute; left: 60px; top: 60px; font-size: 84px; line-height: 1.02; }
+.push { position: absolute; right: 40px; top: 420px; width: 470px; padding: 24px; border-radius: 30px; background: rgba(255,255,255,.96); color: var(--ink);
+  display: flex; gap: 18px; box-shadow: 0 30px 60px rgba(90,0,0,.4); transform: rotate(3deg); }
+.push .ic { width: 70px; height: 70px; border-radius: 18px; background: var(--red); flex: none; position: relative; overflow: hidden; }
+.push .ic b { position: absolute; left: 17px; top: 6px; font-family: "Unb"; font-weight: 900; font-size: 48px; color: #fff; filter: blur(5px); }
+.push small { display: block; font-size: 19px; color: #888; font-weight: 800; } .push strong { display: block; font-family: "Unb"; font-weight: 900; font-size: 40px; margin-top: 4px; }
+.push p { font-size: 21px; color: #444; margin-top: 4px; font-weight: 600; }
+.prog { position: absolute; right: 40px; top: 640px; width: 440px; padding: 22px 26px; border-radius: 26px; background: rgba(30,6,4,.82); }
+.prog .lab { font-size: 22px; font-weight: 800; } .dots { display: flex; gap: 10px; margin-top: 14px; }
+.dots i { flex: 1; height: 16px; border-radius: 99px; background: var(--mint); box-shadow: 0 0 16px rgba(63,224,176,.8); }
+.stats { position: absolute; right: 40px; top: 820px; width: 440px; display: flex; flex-direction: column; gap: 14px; }
+.stat { padding: 18px 26px; border-radius: 22px; background: rgba(30,6,4,.82); display: flex; align-items: center; gap: 18px; }
+.stat .unb { font-size: 40px; color: #ffd6cf; min-width: 120px; } .stat span { font-size: 23px; font-weight: 700; line-height: 1.15; }
+.foot { left: auto; right: 40px; width: 440px; bottom: 34px; font-size: 18px; opacity: .75; }
+</style></head><body>
+<img class="hero" src="../hf/h3.png">
+<h1 class="unb">Кредитка,<br>которая платит<br>тебе</h1>
+<div class="push"><div class="ic"><b>А</b></div><div><small>БАНК · сейчас</small><strong>+1 000 ₽</strong><p>Бонус за 5 покупок зачислен</p></div></div>
+<div class="prog"><div class="lab">Покупки по карте: 5 из 5</div><div class="dots"><i></i><i></i><i></i><i></i><i></i></div></div>
+<div class="stats">
+  <div class="stat"><span class="unb">0 ₽</span><span>вложений</span></div>
+  <div class="stat"><span class="unb">≈2 ч</span><span>от заявки<br>до бонуса</span></div>
+</div>
+<div class="foot">Реклама. АО «Альфа-Банк». Условия акции, кредитования и ПСК — по ссылке в посте.</div>
+</body></html>
