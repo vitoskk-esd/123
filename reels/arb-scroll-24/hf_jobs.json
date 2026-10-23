@@ -250,5 +250,118 @@
    "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: the grey 'yesterday' Arbuzov has lowered his phone and looks up at the colourful Arbuzov with a small hopeful smile."
   }
  ],
- "clips": []
+ "clips": [
+  {
+   "id": "v01",
+   "from": "a01",
+   "to": "b01",
+   "duration": 5,
+   "prompt": "Bright university canteen at lunch, the watermelon-headed guy in a red backwards cap at a table with a buckwheat lunch box, scrolling his phone. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "his thumb slowly scrolls the phone screen while he pushes the fork into the buckwheat without looking, his frown slowly deepening"
+   ]
+  },
+  {
+   "id": "v03",
+   "from": "a03",
+   "to": "b03",
+   "duration": 5,
+   "prompt": "Surreal violet sea of glowing smartphones, the watermelon-headed guy in a swim ring under a small rain cloud. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "he slowly sinks deeper into the glowing phones while the rain cloud drizzles and he looks up at it sadly"
+   ]
+  },
+  {
+   "id": "v04",
+   "from": "a04f",
+   "to": "b04",
+   "duration": 5,
+   "prompt": "Bright psychology lab, two scientists in white coats watch a girl scrolling her phone, a big mood gauge on the wall. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "the gauge needle slowly creeps into the red zone while the girl slumps lower over her phone and the left scientist writes on her clipboard"
+   ]
+  },
+  {
+   "id": "v05",
+   "from": "a05",
+   "to": "b05",
+   "duration": 5,
+   "prompt": "Extreme close-up of the watermelon-headed guy's face on a hot magenta background, lit by phone light from below. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "his face slowly fills with a deeper toxic green glow, his eyes narrow and his jaw clenches harder"
+   ]
+  },
+  {
+   "id": "v06",
+   "from": "a06",
+   "to": "b06",
+   "duration": 5,
+   "prompt": "Grey garage photo shoot: the cucumber-headed guy in sunglasses poses with a coconut in front of a beach banner, a friend holds a ring light, a desk fan blows. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "the fan gently ruffles the banner and his shorts while he slowly lowers his sunglasses with one finger and grins at the camera, the friend rolls his eyes"
+   ]
+  },
+  {
+   "id": "v07",
+   "from": "a07h",
+   "to": "b07",
+   "duration": 6,
+   "prompt": "Sunny campus lawn, students sitting around a cardboard box and a sand hourglass. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "one by one the students gently drop their phones into the box",
+    "they put their hands on their knees and laugh while the sand keeps running"
+   ]
+  },
+  {
+   "id": "v08",
+   "from": "a08",
+   "to": "b08",
+   "duration": 6,
+   "prompt": "Golden autumn park, the watermelon-headed guy in a red backwards cap on a bench, his phone face down beside him, a pigeon. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "he slowly finishes a happy stretch with his arms up, leaves drifting down",
+    "he lowers his arms, puts his hands behind his head and leans back with his eyes closed and a calm smile"
+   ]
+  },
+  {
+   "id": "v09",
+   "from": "a09",
+   "to": "b09",
+   "duration": 5,
+   "prompt": "Bright coworking, the watermelon-headed guy in a red backwards cap at a whiteboard with a column of red plus signs. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "he finishes drawing the last plus sign with the red marker, caps the marker and steps back half a step, admiring the column with a proud smile"
+   ]
+  },
+  {
+   "id": "v10",
+   "from": "a10",
+   "to": "b10",
+   "duration": 6,
+   "prompt": "Sunny street, a yellow coffee kiosk, the watermelon-headed guy in a red backwards cap pays at the window, a friendly barista. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "he holds the plain bank card to the payment terminal until its small light turns green",
+    "he takes the paper coffee cup from the barista and grins happily"
+   ]
+  },
+  {
+   "id": "v11",
+   "from": "a11",
+   "duration": 5,
+   "prompt": "City rooftop at dusk, the watermelon-headed guy in a red backwards cap holds his phone with the plain white screen facing the camera. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "he keeps the phone perfectly still facing the camera, points at the screen with his other hand and winks, the city lights twinkle softly behind him"
+   ]
+  },
+  {
+   "id": "v12",
+   "from": "a12",
+   "to": "b12",
+   "duration": 5,
+   "prompt": "River embankment at golden sunset: a grey colourless watermelon guy on a bench with a phone and a colourful watermelon guy in a red cap standing next to him with a hand on his head. Static camera. The illustration stays crisp and stable: only the described small movements happen; every character keeps the same design, proportions and clothes in every frame, the watermelon guy's red backwards cap never leaves his head; background and objects do not change.",
+   "beats": [
+    "the grey one slowly lowers his phone and looks up at the colourful one with a small hopeful smile, the river glitters in the sunset"
+   ]
+  }
+ ]
 }
