@@ -1,0 +1,143 @@
+{
+ "_": "Рилс 24 «Почему чужая жизнь в соцсетях кажется лучше твоей». Стиль v2 (разбор reels/lab/breakdowns/amo-vs-arb-2026-10-23.md): контур, насыщенный цвет с одной главной краской, крупный герой, мало значимых предметов. s1–s4 — проба стиля на кадре-хуке. Владелец 23.10: «хватит одного тусклого фона и одних форматов, везде дряхлая однушка и Арбузов» → каждый план — новое место и своя краска, другие персонажи, метафоры, закулисье.",
+ "style": "Bold satirical editorial illustration for an adult YouTube channel about money, studio-quality hand-painted digital art: clean confident dark ink outlines around every character and key object, crisp readable silhouettes, cel-shaded forms with subtle painterly brush texture inside the shapes — no muddy blending, no soft airbrushed edges. Saturated high-contrast colour: the scene is built around ONE dominant bold colour plus warm accents, deep clean blacks and bright highlights; never murky, never brownish-grey, never desaturated. Big expressive exaggerated emotions, graphic cinematic composition with one clear focal point, the character large in frame. Only a few meaningful, clearly drawn props; simplified uncluttered background. Everyday life of a young guy in Russia. Not a kids cartoon, not glossy 3D, not flat vector, not anime. No text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "design": "reels/arb-story-20/hf/d01.png",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "clip_app": "kling-video/v3.0/pro/image-to-video",
+ "designs": [],
+ "brand": [],
+ "images": [
+  {
+   "id": "s1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A tiny rented one-room flat in an old Soviet panel building at night: a fold-out sofa bed, a string of warm fairy lights on the wall, a bowl of buckwheat with a spoon. Close-up: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head lies on a pillow holding a smartphone above his face (we see only the back of the phone), the cold cyan glow of the screen lights his face, his expression sour and envious, eyebrows pulled together. Head and shoulders fill most of the frame. Dominant colour: deep saturated night blue, warm yellow dots of the fairy lights, the buckwheat bowl on the nightstand at the edge of the frame."
+  },
+  {
+   "id": "s2",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A tiny rented one-room flat in an old Soviet panel building at night: a fold-out sofa bed, a string of warm fairy lights on the wall, a bowl of buckwheat with a spoon. Medium shot slightly from above: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head sits cross-legged on the sofa bed with the buckwheat bowl in his lap, staring at the smartphone in his other hand (back of the phone to camera), the spoon frozen halfway to his mouth, gloomy disappointed face. Dominant colour: hot saturated orange-red blanket and wall, the phone glow cold white on his face."
+  },
+  {
+   "id": "s3",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A tiny rented one-room flat in an old Soviet panel building at night: a fold-out sofa bed, a string of warm fairy lights on the wall, a bowl of buckwheat with a spoon. Top-down view straight from the ceiling: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head lies on his back on a bright yellow blanket, holding the smartphone above his face (back of the phone to camera), the buckwheat bowl on the blanket next to him, a crumpled sock, a charger cable. Bored envious face. Dominant colour: bright saturated yellow."
+  },
+  {
+   "id": "s4",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A tiny rented one-room flat in an old Soviet panel building at night: a fold-out sofa bed, a string of warm fairy lights on the wall, a bowl of buckwheat with a spoon. Frontal symmetric composition: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head sits on the edge of the sofa bed facing the camera, hunched over the smartphone held low in both hands (back of the phone to camera), its glow lighting his face from below, tired envious eyes. Behind him an acid-green wall with one dark window with city lights; the buckwheat bowl on a stool beside him. Dominant colour: acid green."
+  },
+  {
+   "id": "a01",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Lunch time in a bright modern university canteen, turquoise tiled wall, big sunny windows, students eating in the soft-focus background. Medium close-up: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head sits at a table with an open plastic lunch container of plain buckwheat, a fork stuck in it, scrolling a smartphone (we see only the back of the phone), sour envious face. Dominant colour: fresh turquoise with warm sunlight. Keep the upper third of the frame calm and uncluttered (space for a big title)."
+  },
+  {
+   "id": "p1",
+   "refs": [
+    "reels/arb-scroll-24/hf/s1.png"
+   ],
+   "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its room, character or objects. A glossy travel-influencer photo in the same illustration style: a young woman in a white dress on a rope swing over turquoise water on Bali, palm trees, perfect sunset. Square composition, no people looking at camera required.",
+   "ar": "1:1"
+  },
+  {
+   "id": "p2",
+   "refs": [
+    "reels/arb-scroll-24/hf/s1.png"
+   ],
+   "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its room, character or objects. A glossy lifestyle-influencer photo in the same illustration style: three smiling young friends on the deck of a white yacht in a sparkling blue sea, holding glasses of lemonade, sunny day.",
+   "ar": "1:1"
+  },
+  {
+   "id": "p3",
+   "refs": [
+    "reels/arb-scroll-24/hf/s1.png"
+   ],
+   "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its room, character or objects. A glossy food-influencer photo in the same illustration style: a candle-lit dinner table on a rooftop restaurant above a big city at golden hour, beautiful plates of pasta and steak, city skyline.",
+   "ar": "1:1"
+  },
+  {
+   "id": "a03",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Surreal metaphor: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head sits in a small kids' inflatable swim ring in the middle of an endless sea made of thousands of glowing smartphones, slowly sinking, a small dark rain cloud above his head, gloomy face. Dominant colour: vivid violet-indigo with neon cyan glow of the phone screens."
+  },
+  {
+   "id": "a04",
+   "refs": [
+    "reels/arb-scroll-24/hf/s1.png"
+   ],
+   "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its room, character or objects. A bright clean psychology laboratory, white walls and cyan accents: two scientists in white coats with clipboards watch through a large observation window a young female student who sits on a chair scrolling her smartphone; on the lab wall a big round analogue mood gauge with a needle dropping into the red zone (no text on it). Wide shot, clear graphic composition."
+  },
+  {
+   "id": "a05",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Extreme close-up of the face of the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head: his green watermelon stripes glow toxic acid green with envy, eyes narrowed, jaw clenched, cold phone light from below. Background: flat hot magenta. Comic, expressive. Keep the upper third of the frame calm and uncluttered (space for a big title)."
+  },
+  {
+   "id": "a06",
+   "refs": [
+    "@design",
+    "reels/arb-friend-21/hf/c_ogur.png"
+   ],
+   "prompt": "Behind the scenes of a fake perfect photo: Ogurtsov from reference image 2 — a young guy whose head is a green bumpy cucumber with thick round glasses — keep his design identical in swimming shorts and sunglasses poses with a coconut in a cramped grey concrete garage, in front of a huge printed banner of a tropical beach with palms; a friend holds a ring light, a desk fan blows at him, a plastic palm tree in a bucket, an old car tyre on the floor. Wide shot that clearly reveals the fake. Dominant: grey garage against the over-saturated banner."
+  },
+  {
+   "id": "a07",
+   "refs": [
+    "reels/arb-scroll-24/hf/s1.png"
+   ],
+   "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its room, character or objects. A sunny green university campus lawn, blue sky: a circle of cheerful students sit on the grass and drop their smartphones into a cardboard box in the middle; a big sand hourglass stands next to the box; one student laughs. Fresh saturated green and sky blue."
+  },
+  {
+   "id": "a08",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A city park in golden autumn, bright orange and yellow leaves, sunlight: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head sits on a park bench, puts his smartphone face down on the bench and stretches his arms up with relief, a pigeon next to him. Dominant colour: glowing orange. Keep the upper third of the frame calm and uncluttered (space for a big title)."
+  },
+  {
+   "id": "a09",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A bright modern coworking space with big windows: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head stands at a large clean whiteboard and draws a vertical column of big red plus signs with a red marker, smiling proudly. The whiteboard has only the plus signs, no words. Dominant colour: white with strong red accents."
+  },
+  {
+   "id": "a10",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A sunny city street in the daytime: a small bright yellow coffee kiosk, a friendly barista girl hands out a paper cup through the window, the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head taps a plain bank card with no logo on the payment terminal on the counter, happy face. Dominant colour: sunny yellow."
+  },
+  {
+   "id": "a11",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A city rooftop at dusk, purple and orange sky, city lights below: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head holds his smartphone with the screen facing the camera at chest height, the screen is a plain glowing white rectangle with nothing on it, he points at it with his other hand and winks. Medium shot."
+  },
+  {
+   "id": "a12",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A river embankment at golden sunset: two versions of the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head. On the left the 'yesterday' Arbuzov hunches on a bench scrolling his phone, drawn drained of colour in greyish tones; on the right the 'today' Arbuzov in full bright colour stands tall, puts a friendly hand on his shoulder and looks at the sunset. Dominant colour: golden orange. Keep the upper third of the frame calm and uncluttered (space for a big title)."
+  }
+ ],
+ "clips": []
+}
