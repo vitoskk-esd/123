@@ -168,6 +168,86 @@
     "reels/arb-scroll-24/hf/p2.png"
    ],
    "prompt": "Use reference image 1 ONLY for the art style (ink outlines, cel shading, saturated colour); do not copy its people, boat or sea. A sunny green university campus lawn, blue sky, trees: four clearly different students — a blonde girl with a ponytail in a pink hoodie, a dark-skinned guy with short hair in an orange shirt, a girl with a bob haircut in a blue denim jacket, a guy with glasses and a moustache in a beige sweater sit in a circle on the grass and one by one drop their smartphones into a cardboard box in the middle; a big wooden sand hourglass stands next to the box. Happy relaxed faces. Nobody wears a cap, hat or beanie; all heads are ordinary human heads — no watermelon, vegetable or fruit heads, no red caps anywhere. Fresh saturated green and sky blue, close low angle from the grass, the box and hourglass large in the foreground and the students' hands dropping phones into it."
+  },
+  {
+   "id": "b01",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a01.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: he has pushed the fork deeper into the buckwheat without looking, still staring at the phone, his frown even deeper and lips pressed tighter."
+  },
+  {
+   "id": "b03",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a03.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: he has sunk lower — the glowing phones now reach his chest, the swim ring is half under them, he looks up at the rain cloud with a sad face."
+  },
+  {
+   "id": "b04",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a04f.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: the gauge needle is now deep in the red zone, the girl slumps lower in the chair over her phone, the left scientist is writing on her clipboard."
+  },
+  {
+   "id": "b05",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a05.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: his face is even more intensely toxic green, eyes narrowed to slits, a small vein pulsing on the side of his head, teeth clenched harder."
+  },
+  {
+   "id": "b06",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a06.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: Ogurtsov has lowered his sunglasses with one finger and grins slyly at the camera, the friend with the ring light rolls his eyes."
+  },
+  {
+   "id": "b07",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a07h.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: all the phones are now inside the box, the students' hands are back on their knees, everyone laughs, the sand has partly run into the lower half of the hourglass."
+  },
+  {
+   "id": "b08",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a08.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: he has lowered his arms and leans back on the bench with his eyes closed and a calm happy smile, hands behind his head, the phone still face down beside him."
+  },
+  {
+   "id": "b09",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a09.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: he has stepped back half a step from the whiteboard, holding the capped marker, looking at the column of red plus signs with a proud satisfied smile."
+  },
+  {
+   "id": "b10",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a10.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: he now holds the paper coffee cup in one hand and the bank card in the other, the small light on the payment terminal is green, he grins happily at the barista."
+  },
+  {
+   "id": "b12",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a12.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the place, characters and their design, objects, light, colours and framing. Only change: the grey 'yesterday' Arbuzov has lowered his phone and looks up at the colourful Arbuzov with a small hopeful smile."
   }
  ],
  "clips": []
