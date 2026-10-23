@@ -289,6 +289,7 @@
  "v03r": {
   "request_id": "a3ae2635-5eae-4d98-80ea-c5b58056317e",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "queued"
+  "status": "completed",
+  "sec": 129
  }
 }
