@@ -277,7 +277,14 @@ def render(reel, t_from=None, t_to=None, png=False):
             clips[key] = Clip(path, vf or ("scale=1080:-2,crop=1080:1920:0:0" if "/" in c else None), size)
         return clips[key]
     for m in E["moments"]:
-        for w in m["words"]: w["_spr"] = sprite(w["text"], w["kind"], w["size"], w["color"], w.get("stroke", 0), w.get("arc", 0))
+        s = S[m["shot"]]; zmax = max(max(s.get("zoom", (1.0, 1.04))), *[k[1] for k in s.get("camk", [])])
+        for w in m["words"]:
+            w["_spr"] = sprite(w["text"], w["kind"], w["size"], w["color"], w.get("stroke", 0), w.get("arc", 0))
+            fit = .92 * FW / zmax   # слово шире кадра с учётом наезда камеры (рилс 24: «ГРЕЧКА», «ЗАВИСТЬ») — уменьшаем размер
+            if w["_spr"].width > fit:
+                size = int(w["size"] * fit / w["_spr"].width)
+                w["_spr"] = sprite(w["text"], w["kind"], size, w["color"], w.get("stroke", 0), w.get("arc", 0))
+                print(f"  «{w['text']}» не влезало в кадр — размер {w['size']} → {size}")
     uis = {k: Image.open(f"{reel}/{v}").convert("RGBA") for k, v in E.get("screens_ui", {}).items()}
     n0, n1 = int((t_from or 0) * FPS), int((t_to or END) * FPS)
     out = f"{reel}/out/live.mp4" if t_from is None else f"{reel}/out/live_{t_from:g}-{t_to:g}.mp4"
