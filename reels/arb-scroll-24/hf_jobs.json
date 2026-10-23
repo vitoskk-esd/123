@@ -72,7 +72,8 @@
    "refs": [
     "@design"
    ],
-   "prompt": "Surreal metaphor: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head sits in a small kids' inflatable swim ring in the middle of an endless sea made of thousands of glowing smartphones, slowly sinking, a small dark rain cloud above his head, gloomy face. Dominant colour: vivid violet-indigo with neon cyan glow of the phone screens."
+   "prompt": "Surreal metaphor: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head sits in a small kids' inflatable swim ring in the middle of an endless sea made of thousands of glowing smartphones, slowly sinking, a small dark rain cloud above his head, gloomy face. Dominant colour: vivid violet-indigo with neon cyan glow of the phone screens.",
+   "app": "xai/grok-imagine-image-2.0"
   },
   {
    "id": "a04",
@@ -137,6 +138,14 @@
     "@design"
    ],
    "prompt": "A river embankment at golden sunset: two versions of the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, the red cap always on his head. On the left the 'yesterday' Arbuzov hunches on a bench scrolling his phone, drawn drained of colour in greyish tones; on the right the 'today' Arbuzov in full bright colour stands tall, puts a friendly hand on his shoulder and looks at the sunset. Dominant colour: golden orange. Keep the upper third of the frame calm and uncluttered (space for a big title)."
+  },
+  {
+   "id": "a04f",
+   "raw": true,
+   "refs": [
+    "reels/arb-scroll-24/hf/a04.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the lab, the scientists, the window, the gauge, the light, colours and framing. Only change: the scientist on the right has no cap — short dark hair instead of the red cap; the girl scrolling the phone looks sad and envious (downturned mouth, tired eyes) instead of smiling."
   }
  ],
  "clips": []
