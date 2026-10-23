@@ -1,0 +1,45 @@
+{
+ "_": "ТГ-пост «+1 000 ₽ за пару часов — кредитка Альфа-Банка» (владелец 23.10): 3 картинки 1:1, светлые, стиль v2; карта красная без логотипа.",
+ "style": "Bright cheerful bold editorial illustration, studio-quality hand-painted digital art: clean confident dark ink outlines, cel-shaded forms with subtle painterly texture, saturated high-contrast colour on a LIGHT background, high-key daylight, no dark areas, no night. Big expressive happy emotions, one clear focal point, simple uncluttered composition with lots of clean empty space at the top for a title. Square 1:1. No text, no letters, no numbers, no logos, no brand marks, no watermarks.",
+ "style_vertical": "",
+ "design": "reels/arb-story-20/hf/d01.png",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "designs": [],
+ "brand": [],
+ "clips": [],
+ "images": [
+  {
+   "id": "c1",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "Bright warm-yellow background with soft rays: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical holds up a plain glossy red credit card with no logo in one hand and fans out paper banknotes in the other, beaming with joy, a few gold coins flying around him. He stands in the lower two thirds of the frame."
+  },
+  {
+   "id": "c2",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A bright sunny doorway of a modern apartment, light mint walls: a friendly courier in a cap hands a small white envelope to the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical, who is grinning and already holding a plain red credit card with no logo; a big round wall clock behind them. Characters in the lower two thirds of the frame."
+  },
+  {
+   "id": "c3",
+   "ar": "1:1",
+   "refs": [
+    "@design"
+   ],
+   "prompt": "A clean light sky-blue background: the watermelon guy from reference image 1 (round striped watermelon head, red cap worn backwards, grey hoodie, green hands) — keep his design identical in the centre-bottom of the frame proudly holds a plain red credit card with no logo; around him in an arc float five small purchases, each with a green check mark — a paper coffee cup, a metro token, a pack of chewing gum, a shawarma wrap and a cupcake. Joyful face."
+  },
+  {
+   "id": "c1f",
+   "raw": true,
+   "ar": "1:1",
+   "refs": [
+    "tg-posts/alfa-credit-1000/hf/c1.png"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the character, the red card, the background, the coins, colours and framing. Only change: the fanned paper banknotes in his right hand become generic Russian-looking ruble notes in warm orange-red and soft pink tones with no readable text or numbers, instead of green dollar bills."
+  }
+ ]
+}

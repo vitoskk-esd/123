@@ -1,0 +1,30 @@
+{
+ "_uploads": {
+  "reels/arb-story-20/hf/d01.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/e9e9e295-1477-474c-a357-82a76e5e8e23.png",
+  "tg-posts/alfa-credit-1000/hf/c1.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/cc5a2b0b-984f-45f7-988d-fb7d3c341140.png"
+ },
+ "c1": {
+  "request_id": "bdb221d8-15e9-430c-8326-d94d50d56f60",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 48
+ },
+ "c2": {
+  "request_id": "51c9d702-7440-414f-97ae-1d0321e767fc",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 78
+ },
+ "c3": {
+  "request_id": "565ff190-94ba-41cb-9210-0550912f3e67",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 48
+ },
+ "c1f": {
+  "request_id": "59ea1cd6-9173-4915-a114-59f7905d8a3a",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 53
+ }
+}
