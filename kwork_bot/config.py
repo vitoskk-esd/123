@@ -37,14 +37,15 @@ class BotConfig:
     gemini_key: str = os.getenv("GEMINI_API_KEY", "")
     effort: str = os.getenv("KWORK_BOT_EFFORT", "medium")
 
-    # Картинки: несколько ИИ-фонов на человека (Higgsfield API), текст поверх рисуется бесплатно.
+    # Картинки: уникальный ИИ-фон для каждого кворка (Higgsfield API), текст поверх рисуется бесплатно.
     hf_key: str = os.getenv("HF_KEY", "")  # формат key-id:key-secret
     # higgsfield — ИИ-фоны, template — только градиенты (бесплатно). По умолчанию higgsfield, если есть ключ.
     images: str = os.getenv("KWORK_BOT_IMAGES", "higgsfield" if os.getenv("HF_KEY") else "template")
     # Recraft V4.1 ($0.035) выиграл пробу 25.10: чистые фоны без надписей. Z-Image ($0.015) и
     # Soul 2 ($0.006) дешевле, но рисовали «каракули» вместо текста.
     image_model: str = os.getenv("KWORK_BOT_IMAGE_MODEL", "recraft/v4.1/text-to-image")
-    backgrounds: int = int(os.getenv("KWORK_BOT_BACKGROUNDS", "4"))
+    # Сколько фонов рисуется одновременно (у каждого кворка свой фон, ~15 с на штуку).
+    image_parallel: int = int(os.getenv("KWORK_BOT_IMAGE_PARALLEL", "8"))
     # Сколько запросов к модели идёт одновременно при генерации текстов.
     parallel: int = int(os.getenv("KWORK_BOT_PARALLEL", "6"))
     max_listings: int = int(os.getenv("KWORK_BOT_MAX_LISTINGS", "300"))
@@ -68,7 +69,7 @@ class BotConfig:
 
     @property
     def images_enabled(self) -> bool:
-        return self.images == "higgsfield" and self.backgrounds > 0
+        return self.images == "higgsfield"
 
     @property
     def payments_enabled(self) -> bool:

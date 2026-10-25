@@ -23,6 +23,7 @@ sys.modules.setdefault("anthropic", types.SimpleNamespace(Anthropic=lambda: None
 
 from kwork_agent import storage  # noqa: E402
 from kwork_agent.config import CONFIG  # noqa: E402
+from kwork_agent.uniqueness import find_duplicate  # noqa: E402
 from kwork_bot import content, db, examples, images, payments  # noqa: E402
 from kwork_bot.config import BOT_CONFIG  # noqa: E402
 
@@ -228,48 +229,116 @@ class ExamplesAndImagesTests(Base):
         self.assertIn("АКТИВНЫЕ КВОРКИ ПРОДАВЦА", cc.prompts[0][1])  # образцы — в кэшируемой части
         self.assertIn("стиле кворков продавца", cc.prompts[0][0])
 
-    def test_ai_backgrounds_and_cover_switch(self):
+    def _fake_images(self, seeds):
+        """Подделка Higgsfield: каждая «картинка» — шум с заданным зерном (одинаковое зерно — одинаковая картинка)."""
+        import random
+
         from PIL import Image
 
-        prompts = []
+        calls = []
 
         def fake_generate(model, args, out):
-            prompts.append((model, args["prompt"]))
+            seed = seeds[len(calls)] if len(calls) < len(seeds) else len(calls) + 1000
+            calls.append((model, args["prompt"]))
+            rnd = random.Random(seed)
+            img = Image.new("RGB", (64, 42))
+            img.putdata([(rnd.randrange(256), 40, 200) for _ in range(64 * 42)])
             out.parent.mkdir(parents=True, exist_ok=True)
-            Image.new("RGB", (900, 600), (200, 30, 30)).save(out)
+            img.resize((1248, 832), Image.NEAREST).save(out)
             return out
 
-        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(BOT_CONFIG, "backgrounds", 2), \
-             mock.patch.object(images, "hf_generate", fake_generate):
-            content.ensure_visual_brief(self.uid, llm=FakeLLM())
+        return calls, fake_generate
+
+    def _listings(self, n):
+        listings = [fake_listing(i, id=f"k{i}", palette=1, visual_brief=f"brief number {i} with pencils")
+                    for i in range(1, n + 1)]
+        db.save_listings(self.uid, listings)
+        return listings
+
+    def test_every_kwork_gets_its_own_background(self):
+        from PIL import Image
+
+        calls, fake = self._fake_images(seeds=[1, 2, 3])
+        listings = self._listings(3)
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
             prog = {}
-            self.assertEqual(len(images.make_backgrounds(self.uid, prog)), 2)
-            self.assertEqual(prog["done"], 2)
-        # В промпт картинки — английское описание, без русского текста (его модели рисуют каракулями).
-        self.assertEqual({m for m, _ in prompts}, {BOT_CONFIG.image_model})
-        for _, text in prompts:
-            self.assertIn("pencils and paper", text)
-            self.assertFalse(any("а" <= ch <= "я" for ch in text.lower()))
-            llm = FakeLLM()
-            content.generate_ideas(self.uid, 2, {}, llm=llm)
-            first = content.generate_listings(self.uid, {}, llm=llm)[0]
-        cover = Image.open(db.cover_path(self.uid, first["id"]))
+            self.assertEqual(images.make_backgrounds(self.uid, listings, prog), 3)
+        self.assertEqual(prog["done"], 3)
+        marks = [images.fingerprint(images.background_path(self.uid, l["id"])) for l in listings]
+        self.assertFalse(any(images.too_similar(a, b) for i, a in enumerate(marks) for b in marks[i + 1:]))
+        # Фон рисуется по описанию именно этого кворка, на английском (русский текст модели рисуют каракулями).
+        for l in listings:
+            self.assertTrue(any(l["visual_brief"] in prompt for _, prompt in calls))
+        for _, prompt in calls:
+            self.assertFalse(any("а" <= ch <= "я" for ch in prompt.lower()))
+        cover = Image.open(db.cover_path(self.uid, "k1"))
         self.assertEqual(cover.size, (660, 440))
-        self.assertGreater(cover.getpixel((650, 220))[0], 150)  # справа виден красный фон
-        self.assertLess(cover.getpixel((5, 430))[0], 60)        # слева тень под текстом
-        self.assertEqual(content.next_cover(self.uid, first["id"])["bg"], first["bg"] + 1)
+        self.assertGreater(cover.getpixel((650, 220))[2], 120)  # справа виден синий фон
+        self.assertLess(cover.getpixel((5, 430))[2], 60)        # слева тень под текстом
+
+    def test_similar_background_is_redrawn(self):
+        calls, fake = self._fake_images(seeds=[7, 7, 8])  # второй кворк сначала получает копию первого
+        listings = self._listings(2)
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(BOT_CONFIG, "image_parallel", 1), \
+             mock.patch.object(images, "hf_generate", fake):
+            images.make_backgrounds(self.uid, listings, {})
+        self.assertEqual(len(calls), 3)
+        a, b = (images.fingerprint(images.background_path(self.uid, l["id"])) for l in listings)
+        self.assertFalse(images.too_similar(a, b))
+
+    def test_new_background_button(self):
+        calls, fake = self._fake_images(seeds=[1, 2])
+        listings = self._listings(1)
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
+            images.make_backgrounds(self.uid, listings, {})
+            before = images.fingerprint(images.background_path(self.uid, "k1"))
+            content.next_cover(self.uid, "k1")
+        after = images.fingerprint(images.background_path(self.uid, "k1"))
+        self.assertNotEqual(before, after)
+        self.assertEqual(db.load_listings(self.uid)[0]["bg_round"], 1)
+        content.delete_listing(self.uid, "k1")
+        self.assertFalse(images.background_path(self.uid, "k1").exists())
+
+    def test_next_batch_never_repeats_previous_one(self):
+        calls, fake = self._fake_images(seeds=[1, 1, 2])
+        first = self._listings(1)
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
+            images.make_backgrounds(self.uid, first, {})
+            old_mark = images.fingerprint(images.background_path(self.uid, "k1"))
+            content.reset(self.uid)  # первая партия уходит в историю
+            self.assertEqual(db.load_history(self.uid)[0]["title"], first[0]["title"])
+            # Новая партия: тот же текст отклоняется, а фон-копия прошлого перерисовывается.
+            self.assertTrue(find_duplicate(first[0], content.previous_texts(self.uid)))
+            second = [fake_listing(2, id="n1", visual_brief="other")]
+            db.save_listings(self.uid, second)
+            images.make_backgrounds(self.uid, second, {})
+        self.assertEqual(len(calls), 3)  # второй вызов дал копию прошлого фона — нарисован заново
+        self.assertFalse(images.too_similar(old_mark, images.fingerprint(images.background_path(self.uid, "n1"))))
+        self.assertEqual(content.uniqueness_report(self.uid), (0, 0))
+
+    def test_uniqueness_report_catches_twins(self):
+        import shutil
+
+        calls, fake = self._fake_images(seeds=[1, 2])
+        listings = self._listings(2)
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
+            images.make_backgrounds(self.uid, listings, {})
+        self.assertEqual(content.uniqueness_report(self.uid), (0, 0))
+        shutil.copy(images.background_path(self.uid, "k1"), images.background_path(self.uid, "k2"))
+        listings[1].update(title=listings[0]["title"])
+        db.save_listings(self.uid, listings)
+        self.assertEqual(content.uniqueness_report(self.uid), (1, 1))
 
     def test_image_errors_fall_back_to_gradients(self):
         def boom(*a):
             raise RuntimeError("429")
 
+        listings = self._listings(1)
         with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", boom):
             prog = {}
-            self.assertEqual(images.make_backgrounds(self.uid, prog), [])
+            self.assertEqual(images.make_backgrounds(self.uid, listings, prog), 0)
             self.assertIn("429", prog["error"])
-        l = {"id": "x", "title": "t", "cover_text": "Тест", "days": 1, "price_rub": 500}
-        self.assertTrue(images.render_cover(self.uid, l).exists())
-
+        self.assertTrue(images.render_cover(self.uid, listings[0]).exists())
 
 class SetupWizardTests(unittest.TestCase):
     def test_clean(self):
@@ -445,13 +514,14 @@ class ArchiveSizeTests(Base):
         from kwork_bot.export import build_zip
 
         # Фон с шумом — худший случай для сжатия (реальные фоны Recraft сжимаются лучше).
-        bg = images.backgrounds_dir(self.uid) / "bg1.png"
-        bg.parent.mkdir(parents=True, exist_ok=True)
-        noise = Image.effect_noise((1248, 832), 40).convert("RGB")
-        Image.blend(Image.new("RGB", noise.size, (40, 60, 120)), noise, 0.35).save(bg)
+        noise = Image.effect_noise((990, 660), 40).convert("RGB")
+        noisy = Image.blend(Image.new("RGB", noise.size, (40, 60, 120)), noise, 0.35)
         listings = []
         for no in range(1, 301):
-            l = fake_listing(no, id=f"id{no:03d}", palette=1, bg=0, cover_text=f"Услуга номер {no} для бизнеса")
+            l = fake_listing(no, id=f"id{no:03d}", palette=1, cover_text=f"Услуга номер {no} для бизнеса")
+            bg = images.background_path(self.uid, l["id"])
+            bg.parent.mkdir(parents=True, exist_ok=True)
+            noisy.save(bg, "JPEG", quality=90)
             images.render_cover(self.uid, l)
             listings.append(l)
         db.save_listings(self.uid, listings)
@@ -647,6 +717,7 @@ class DialogTest(Base):
                 await asyncio.sleep(0.05)
             await asyncio.sleep(0.1)
             self.assertIn("Готово: <b>5</b>", " ".join(tg.texts()))
+            self.assertIn("все тексты и фоны уникальны", " ".join(tg.texts()))
             await press("v:0")
             self.assertIn("1/5", tg.texts()[-1])
             lid = db.load_listings(self.uid)[0]["id"]

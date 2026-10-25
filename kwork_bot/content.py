@@ -65,18 +65,14 @@ PROFILE_SCHEMA = {
     },
 }
 
-VISUAL_SCHEMA = {
-    "type": "object",
-    "additionalProperties": False,
-    "required": ["visual_brief"],
-    "properties": {"visual_brief": {"type": "string", "description": VISUAL_BRIEF_HINT}},
-}
+
 
 # Та же схема, что у агента, плюс номер идеи — чтобы связать ответ с идеей.
 BOT_LISTING_SCHEMA = copy.deepcopy(LISTING_SCHEMA)
 _item = BOT_LISTING_SCHEMA["properties"]["listings"]["items"]
 _item["properties"]["idea_no"] = {"type": "integer", "description": "Номер идеи из списка"}
-_item["required"].append("idea_no")
+_item["properties"]["visual_brief"] = {"type": "string", "description": VISUAL_BRIEF_HINT}
+_item["required"] += ["idea_no", "visual_brief"]
 
 SYSTEM = ("Ты — сильный копирайтер, который помогает фрилансерам продавать услуги на Kwork. "
           "Пишешь по-русски, живо и конкретно, без воды и канцелярита.")
@@ -138,7 +134,7 @@ def generate_ideas(uid: int, n: int, progress: dict, llm=None) -> list[dict]:
     profile = db.load_profile(uid)
     ideas: list[dict] = []
     progress.update(stage="ideas", done=0, total=n)
-    own = [e["title"] for e in profile.get("examples", [])]
+    own = [e["title"] for e in profile.get("examples", []) + db.load_history(uid)]
     for _ in range(n // IDEAS_PER_CALL + 4):
         need = min(IDEAS_PER_CALL, n - len(ideas))
         if need <= 0:
@@ -200,16 +196,34 @@ def _listing_prompt(profile: dict, ideas: list[dict], hints: dict[int, str]) -> 
 - Цена в рублях не ниже {profile.get('min_price', CONFIG.price_min)} и не выше {CONFIG.price_max},
   срок 1–30 дней — реалистично для объёма работы.
 - cover_text — 2–5 слов крупно на обложку.
+- visual_brief — по-английски, предметы и цвета для фона обложки ИМЕННО этой услуги (у каждого
+  кворка свой, не повторяй); никаких слов, которые нужно нарисовать.
 - Обещай только то, что фрилансер реально сделает; без гарантий дохода и позиций."""
 
 
-def _new_listing(uid: int, cand: dict, idea: dict, palette: int, lid: str | None = None,
-                 bg: int | None = None) -> dict:
+def _new_listing(uid: int, cand: dict, idea: dict, palette: int, lid: str | None = None) -> dict:
     cand = {k: v for k, v in cand.items() if k != "idea_no"}
-    cand.update(id=lid or uuid.uuid4().hex[:10], idea_no=idea["no"], idea=idea["name"], palette=palette,
-                bg=idea["no"] - 1 if bg is None else bg)  # фоны чередуются по кругу
+    cand.update(id=lid or uuid.uuid4().hex[:10], idea_no=idea["no"], idea=idea["name"], palette=palette)
     images.render_cover(uid, cand)
     return cand
+
+
+def previous_texts(uid: int) -> list[dict]:
+    """С чем новый кворк не должен совпадать: образцы клиента и все его прошлые партии."""
+    profile = db.load_profile(uid)
+    return [{"title": e["title"], "description": e["description"]}
+            for e in profile.get("examples", []) + db.load_history(uid)]
+
+
+def uniqueness_report(uid: int) -> tuple[int, int]:
+    """Финальная проверка партии: (пар похожих текстов, пар похожих фонов) — должно быть (0, 0)."""
+    listings = db.load_listings(uid)
+    texts = sum(1 for i, l in enumerate(listings) for other in listings[i + 1:] if find_duplicate(l, [other]))
+    texts += sum(1 for l in listings if find_duplicate(l, previous_texts(uid)))
+    marks = [images.fingerprint(p) for l in listings if (p := images.background_path(uid, l["id"])).exists()]
+    old = [h["fp"] for h in db.load_history(uid) if h.get("fp") is not None]
+    pics = sum(1 for i, a in enumerate(marks) for b in marks[i + 1:] + old if images.too_similar(a, b))
+    return texts, pics
 
 
 def missing_ideas(uid: int) -> list[dict]:
@@ -223,7 +237,7 @@ def generate_listings(uid: int, progress: dict, llm=None) -> list[dict]:
     profile = db.load_profile(uid)
     palette = profile.get("palette", 0)
     context = examples_block(profile)
-    own = [{"title": e["title"], "description": e["description"]} for e in profile.get("examples", [])]
+    own = previous_texts(uid)
     listings = db.load_listings(uid)
     lock = threading.Lock()
     hints: dict[int, str] = {}
@@ -270,28 +284,16 @@ def generate_listings(uid: int, progress: dict, llm=None) -> list[dict]:
     return listings
 
 
-def ensure_visual_brief(uid: int, llm=None) -> str:
-    """Английское описание ниши для картинок (если человек пришёл без образцов)."""
-    profile = db.load_profile(uid)
-    if not profile.get("visual_brief"):
-        llm = llm or _llm(BOT_CONFIG.ideas_model)
-        data = llm.ask(f"Услуги фрилансера: {profile.get('skills', '')}", system=SYSTEM, schema=VISUAL_SCHEMA,
-                       effort="low", max_tokens=2000)
-        profile["visual_brief"] = data["visual_brief"]
-        db.save_profile(uid, profile)
-    return profile["visual_brief"]
+def make_images(uid: int, progress: dict) -> None:
+    """Уникальные фоны для всех кворков, у которых их ещё нет (после текстов)."""
+    images.make_backgrounds(uid, db.load_listings(uid), progress)
 
 
 def generate_all(uid: int, count: int, progress: dict) -> None:
-    """Полный цикл для новой партии: фоны обложек → идеи → тексты."""
-    if BOT_CONFIG.images_enabled and not images.backgrounds(uid):
-        try:
-            ensure_visual_brief(uid)
-        except Exception as e:  # noqa: BLE001 — без описания фоны всё равно получатся, просто общее
-            progress["error"] = f"описание для картинок: {type(e).__name__}: {e}"[:300]
-        images.make_backgrounds(uid, progress)
+    """Полный цикл для новой партии: идеи → тексты → уникальный фон каждому кворку."""
     generate_ideas(uid, count, progress)
     generate_listings(uid, progress)
+    make_images(uid, progress)
 
 
 # --- Правки одного кворка -----------------------------------------------------------
@@ -307,7 +309,7 @@ def rewrite_listing(uid: int, lid: str, wish: str = "", llm=None) -> dict:
     old = _find(listings, lid)
     idea = next((i for i in profile["ideas"] if i["no"] == old["idea_no"]),
                 {"no": old["idea_no"], "name": old["idea"], "audience": "", "result": ""})
-    others = [l for l in listings if l["id"] != lid] + profile.get("examples", [])
+    others = [l for l in listings if l["id"] != lid] + previous_texts(uid)
     hint = f"Напиши заново и по-другому, чем «{old['title']}»." + (f" Пожелание: {wish}" if wish else "")
     for _ in range(ROUNDS):
         data = llm.ask(_listing_prompt(profile, [idea], {idea["no"]: hint}), system=SYSTEM,
@@ -319,7 +321,7 @@ def rewrite_listing(uid: int, lid: str, wish: str = "", llm=None) -> dict:
         if dup:
             errors.append(f"слишком похоже на «{dup['title']}»")
         if not errors:
-            new = _new_listing(uid, cand, idea, old.get("palette", 0), lid=lid, bg=old.get("bg"))
+            new = _new_listing(uid, cand, idea, old.get("palette", 0), lid=lid)  # фон кворка остаётся прежним
             listings[listings.index(old)] = new
             db.save_listings(uid, listings)
             return new
@@ -328,14 +330,14 @@ def rewrite_listing(uid: int, lid: str, wish: str = "", llm=None) -> dict:
 
 
 def next_cover(uid: int, lid: str) -> dict:
-    """Другая обложка: следующий ИИ-фон, а если фонов нет — следующий цвет."""
+    """Другая обложка: новый уникальный ИИ-фон (если картинки включены) или следующий цвет."""
     listings = db.load_listings(uid)
     l = _find(listings, lid)
-    if images.backgrounds(uid):
-        l["bg"] = l.get("bg", 0) + 1
+    if BOT_CONFIG.images_enabled:
+        images.new_background(uid, l)
     else:
         l["palette"] = (l.get("palette", 0) + 1) % len(PALETTES)
-    images.render_cover(uid, l)
+        images.render_cover(uid, l)
     db.save_listings(uid, listings)
     return l
 
@@ -361,6 +363,7 @@ def delete_listing(uid: int, lid: str) -> None:
             idea["skipped"] = True
     db.save_profile(uid, profile)
     db.cover_path(uid, lid).unlink(missing_ok=True)
+    images.background_path(uid, lid).unlink(missing_ok=True)
     db.save_listings(uid, [l for l in listings if l["id"] != lid])
 
 
@@ -380,6 +383,13 @@ def reset(uid: int) -> None:
     """Новая партия: убираем прошлые кворки, образцы и фоны (оплата и настройки остаются)."""
     import shutil
 
+    # Прошлая партия уходит в историю: следующие не будут повторять её тексты и фоны.
+    history = db.load_history(uid)
+    for l in db.load_listings(uid):
+        bg = images.background_path(uid, l["id"])
+        history.append({"title": l["title"], "description": l["description"],
+                        "fp": images.fingerprint(bg) if bg.exists() else None})
+    db.save_history(uid, history)
     for sub in ("covers", "examples", "backgrounds"):
         shutil.rmtree(db.user_dir(uid) / sub, ignore_errors=True)
     db.save_listings(uid, [])

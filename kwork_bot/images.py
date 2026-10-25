@@ -1,9 +1,9 @@
 """Обложки: несколько ИИ-фонов на пользователя (Higgsfield API) + текст, который рисуем сами.
 
-Почему так дёшево: на 300 кворков генерируется всего KWORK_BOT_BACKGROUNDS картинок
-(по умолчанию 4 × Recraft V4.1 ≈ $0.035 = $0.14 на человека), а заголовок и цену
-на каждую обложку накладывает Pillow — бесплатно и без «кривых» русских букв, которые
-нейросети рисуют плохо. Если ключа Higgsfield нет или генерация не удалась, обложки
+У каждого кворка свой фон (по его теме) — одинаковых обложек Kwork не любит. Фон без
+текста; заголовок и цену накладывает Pillow — без «кривых» русских букв, которые нейросети
+рисуют плохо. Новый фон сравнивается с уже готовыми по «отпечатку» и при сходстве
+перерисовывается. Recraft V4.1 ≈ $0.035 за фон. Если ключа Higgsfield нет или генерация не удалась, обложки
 получаются градиентными (как раньше), тоже бесплатно.
 """
 
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 import urllib.request
@@ -83,9 +84,8 @@ def backgrounds_dir(uid: int) -> Path:
     return db.user_dir(uid) / "backgrounds"
 
 
-def backgrounds(uid: int) -> list[Path]:
-    d = backgrounds_dir(uid)
-    return sorted(d.glob("bg*.png")) if d.exists() else []
+def background_path(uid: int, lid: str) -> Path:
+    return backgrounds_dir(uid) / f"{lid}.jpg"
 
 
 def background_prompt(brief: str, i: int) -> str:
@@ -95,28 +95,99 @@ def background_prompt(brief: str, i: int) -> str:
             "The left half must be calm and dark: a large white headline will be placed there.")
 
 
-def make_backgrounds(uid: int, progress: dict | None = None) -> list[Path]:
-    """Генерирует фоны параллельно. Ошибки не роняют работу — останутся градиентные обложки."""
+# --- Уникальность: «отпечаток» картинки -------------------------------------------------------
+# Средний хэш 16×16: картинку уменьшаем до 16×16 в оттенках серого, каждый пиксель — бит
+# «светлее/темнее среднего». У разных картинок отпечатки отличаются на ~половину битов,
+# у почти одинаковых — на единицы. Ближе SIMILAR_BITS считаем повтором и перерисовываем.
+HASH_SIDE = 16
+SIMILAR_BITS = 40  # из 256
+
+
+def fingerprint(path: Path) -> int:
+    from PIL import Image
+
+    pixels = list(Image.open(path).convert("L").resize((HASH_SIDE, HASH_SIDE), Image.LANCZOS).getdata())
+    mean = sum(pixels) / len(pixels)
+    return sum(1 << i for i, v in enumerate(pixels) if v > mean)
+
+
+def too_similar(a: int, b: int) -> bool:
+    return bin(a ^ b).count("1") <= SIMILAR_BITS
+
+
+def _store(raw: Path, out: Path) -> Path:
+    """Фон храним в JPEG 990×660: для обложки 660×440 хватает, а места в 10 раз меньше, чем PNG."""
+    from PIL import Image, ImageOps
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    ImageOps.fit(Image.open(raw).convert("RGB"), (990, 660), Image.LANCZOS).save(out, "JPEG", quality=90)
+    return out
+
+
+def make_background(uid: int, listing: dict, taken: dict[str, int], lock: threading.Lock,
+                    attempt_offset: int = 0) -> Path:
+    """Рисует фон этого кворка, не похожий ни на один уже готовый (taken: id → отпечаток)."""
+    brief = listing.get("visual_brief") or db.load_profile(uid).get("visual_brief", "")
+    out = background_path(uid, listing["id"])
+    with tempfile.TemporaryDirectory() as tmp:
+        for attempt in range(3):
+            variant = listing.get("idea_no", 0) + attempt_offset + attempt
+            raw = hf_generate(BOT_CONFIG.image_model,
+                              {"prompt": background_prompt(brief, variant), "aspect_ratio": "3:2"},
+                              Path(tmp) / f"raw{attempt}.png")
+            mark = fingerprint(raw)
+            with lock:
+                twin = next((lid for lid, other in taken.items()
+                             if lid != listing["id"] and too_similar(mark, other)), None)
+                if twin is None or attempt == 2:
+                    taken[listing["id"]] = mark
+                    return _store(raw, out)
+    raise AssertionError("недостижимо")
+
+
+def _previous_fingerprints(uid: int) -> dict[str, int]:
+    """Отпечатки фонов прошлых партий клиента — новые фоны не должны на них походить."""
+    return {f"history-{i}": h["fp"] for i, h in enumerate(db.load_history(uid)) if h.get("fp") is not None}
+
+
+def make_backgrounds(uid: int, listings: list[dict], progress: dict | None = None) -> int:
+    """Уникальный фон каждому кворку без фона; обложка перерисовывается сразу.
+    Ошибки не роняют работу — у таких кворков останется градиентная обложка."""
     if not BOT_CONFIG.images_enabled:
-        return []
-    brief = db.load_profile(uid).get("visual_brief", "")
-    n = BOT_CONFIG.backgrounds
+        return 0
     progress = progress if progress is not None else {}
-    progress.update(stage="images", done=0, total=n)
+    todo = [l for l in listings if not background_path(uid, l["id"]).exists()]
+    progress.update(stage="images", done=0, total=len(todo))
+    taken = _previous_fingerprints(uid)
+    taken.update({l["id"]: fingerprint(background_path(uid, l["id"]))
+                  for l in listings if background_path(uid, l["id"]).exists()})
+    lock = threading.Lock()
 
-    def one(i: int) -> Path | None:
-        path = backgrounds_dir(uid) / f"bg{i + 1}.png"
-        if not path.exists():
-            try:
-                hf_generate(BOT_CONFIG.image_model, {"prompt": background_prompt(brief, i), "aspect_ratio": "3:2"}, path)
-            except Exception as e:  # noqa: BLE001
-                progress["error"] = f"картинки: {type(e).__name__}: {e}"[:300]
-                return None
-        progress["done"] = progress.get("done", 0) + 1
-        return path
+    def one(listing: dict) -> bool:
+        try:
+            make_background(uid, listing, taken, lock)
+            render_cover(uid, listing)
+        except Exception as e:  # noqa: BLE001
+            progress["error"] = f"картинки: {type(e).__name__}: {e}"[:300]
+            return False
+        with lock:
+            progress["done"] = progress.get("done", 0) + 1
+        return True
 
-    with ThreadPoolExecutor(max_workers=n) as pool:
-        return [p for p in pool.map(one, range(n)) if p]
+    with ThreadPoolExecutor(max_workers=BOT_CONFIG.image_parallel) as pool:
+        return sum(pool.map(one, todo))
+
+
+def new_background(uid: int, listing: dict) -> Path:
+    """Кнопка «Новый фон»: другой уникальный фон для одного кворка."""
+    others = _previous_fingerprints(uid)
+    for path in backgrounds_dir(uid).glob("*.jpg") if backgrounds_dir(uid).exists() else []:
+        if path.stem != listing["id"]:
+            others[path.stem] = fingerprint(path)
+    listing["bg_round"] = listing.get("bg_round", 0) + 1
+    path = make_background(uid, listing, others, threading.Lock(), attempt_offset=listing["bg_round"] * 3)
+    render_cover(uid, listing)
+    return path
 
 
 def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> Path:
@@ -142,15 +213,13 @@ def _save_jpeg(img, out: Path) -> Path:
 
 
 def render_cover(uid: int, listing: dict) -> Path:
-    """Рисует обложку кворка: на ИИ-фоне (если есть) или градиентную."""
+    """Рисует обложку кворка: на его собственном ИИ-фоне (если он уже есть) или градиентную."""
     from PIL import Image
 
-    bgs = backgrounds(uid)
+    bg = background_path(uid, listing["id"])
     style = listing.get("palette", 0)
     out = db.cover_path(uid, listing["id"])
-    if not bgs:
+    if not bg.exists():
         with tempfile.TemporaryDirectory() as tmp:
             return _save_jpeg(Image.open(make_cover(listing, out_dir=Path(tmp), palette=style)), out)
-    accent = PALETTES[style % len(PALETTES)][1]
-    bg = bgs[listing.get("bg", 0) % len(bgs)]
-    return _cover_on_background(listing, bg, accent, out)
+    return _cover_on_background(listing, bg, PALETTES[style % len(PALETTES)][1], out)

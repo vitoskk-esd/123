@@ -68,6 +68,19 @@ def save_listings(uid: int, items: list[dict]) -> None:
         _write(user_dir(uid) / "listings.json", items)
 
 
+# --- История: все кворки прошлых партий -------------------------------------------
+# Прошлые партии уже на Kwork — новые тексты и фоны не должны их повторять.
+
+def load_history(uid: int) -> list[dict]:
+    """[{"title", "description", "fp"}] — fp: отпечаток фона (число) или None."""
+    return _read(user_dir(uid) / "history.json", [])
+
+
+def save_history(uid: int, items: list[dict]) -> None:
+    with _lock:
+        _write(user_dir(uid) / "history.json", items)
+
+
 # --- Доступ ---------------------------------------------------------------------
 
 def owner_id() -> int | None:

@@ -484,9 +484,9 @@ async def cb_continue(call: CallbackQuery) -> None:
 
 def progress_text(p: dict) -> str:
     if p.get("stage") == "images":
-        return f"🎨 Рисую фоны для обложек в вашем стиле: <b>{p['done']} из {p['total']}</b>"
+        return f"🎨 Рисую уникальный фон для каждого кворка: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "listings":
-        return f"✍️ Пишу тексты и делаю обложки: <b>{p['done']} из {p['total']}</b>"
+        return f"✍️ Пишу тексты: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "ideas":
         return f"💡 Придумываю услуги: <b>{p['done']} из {p['total']}</b>"
     return "⏳ Начинаю…"
@@ -504,6 +504,7 @@ async def run_job(bot: Bot, uid: int, chat_id: int, ideas_count: int | None) -> 
             content.generate_all(uid, ideas_count, progress)
         else:
             content.generate_listings(uid, progress)
+            content.make_images(uid, progress)
 
     msg = await bot.send_message(chat_id, progress_text(progress) + "\n\nЭто займёт несколько минут — "
                                  "можно закрыть чат, я пришлю сообщение, когда закончу.")
@@ -531,6 +532,12 @@ async def run_job(bot: Bot, uid: int, chat_id: int, ideas_count: int | None) -> 
     n = len(db.load_listings(uid))
     left = len(content.missing_ideas(uid))
     text = f"✅ Готово: <b>{n}</b> кворков."
+    same_texts, same_pics = await asyncio.to_thread(content.uniqueness_report, uid)
+    if not same_texts and not same_pics:
+        text += "\n🔒 Проверено: все тексты и фоны уникальны — и между собой, и с вашими прошлыми кворками."
+    else:
+        text += (f"\n⚠️ Похожих пар: текстов {same_texts}, фонов {same_pics}. "
+                 "Нажмите «Переписать» или «Новый фон» у таких кворков.")
     if left:
         text += f"\nЕщё {left} не прошли проверку — нажмите «Дописать недостающие»."
     if progress.get("error") and db.is_admin(uid):
@@ -550,7 +557,7 @@ def card(l: dict, i: int, total: int) -> tuple[str, InlineKeyboardMarkup]:
     lid = l["id"]
     markup = kb(
         [("◀️", f"v:{(i - 1) % total}"), (f"{i + 1}/{total}", f"v:{i}"), ("▶️", f"v:{(i + 1) % total}")],
-        [("✏️ Переписать", f"rw:{lid}"), ("🎨 Обложка", f"cv:{lid}")],
+        [("✏️ Переписать", f"rw:{lid}"), ("🎨 Новый фон" if BOT_CONFIG.images_enabled else "🎨 Цвет", f"cv:{lid}")],
         [("💰 Цена", f"pr:{lid}"), ("📄 Весь текст", f"full:{lid}"), ("🗑", f"del:{lid}")],
         [("📦 Архив", "zip"), ("🏠 Меню", "menu")],
     )
@@ -604,10 +611,24 @@ async def cb_full(call: CallbackQuery) -> None:
 async def cb_cover(call: CallbackQuery) -> None:
     if not await guard(call):
         return
-    await call.answer("Другой цвет")
     uid, lid = call.from_user.id, call.data[3:]
-    content.next_cover(uid, lid)
-    await show_card(call.message, uid, index_of(uid, lid), edit=True)
+    if not BOT_CONFIG.images_enabled:
+        await call.answer("Другой цвет")
+        content.next_cover(uid, lid)
+        await show_card(call.message, uid, index_of(uid, lid), edit=True)
+        return
+    await call.answer()
+    wait = await call.message.answer("🎨 Рисую новый фон — секунд 15…")
+    JOBS[uid] = {}
+    try:
+        await asyncio.to_thread(content.next_cover, uid, lid)
+    except Exception as e:  # noqa: BLE001
+        await wait.edit_text(f"Не получилось нарисовать фон: {esc(str(e)[:200])}")
+        return
+    finally:
+        JOBS.pop(uid, None)
+    await wait.delete()
+    await show_card(call.message, uid, index_of(uid, lid), edit=False)
 
 
 @router.callback_query(F.data.startswith("del:"))
