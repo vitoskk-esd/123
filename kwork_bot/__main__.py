@@ -8,14 +8,27 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import ssl
 import sys
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.types import BotCommand
 
 from .bot import router
 from .config import BOT_CONFIG
+
+
+def make_session() -> AiohttpSession:
+    """aiogram берёт сертификаты из certifi и не смотрит на SSL_CERT_FILE. Там, где HTTPS идёт
+    через прокси со своим сертификатом (облачная среда Claude Code, корпоративные сети),
+    без этого Telegram недоступен: «self-signed certificate in certificate chain»."""
+    session = AiohttpSession()
+    cafile = os.getenv("SSL_CERT_FILE")
+    if cafile and os.path.exists(cafile):
+        session._connector_init["ssl"] = ssl.create_default_context(cafile=cafile)  # в aiogram нет публичной настройки
+    return session
 
 
 async def main() -> int:
@@ -30,7 +43,7 @@ async def main() -> int:
     if not BOT_CONFIG.payments_enabled:
         print("ЮKassa не настроена (YOOKASSA_SHOP_ID / YOOKASSA_SECRET_KEY): оплата выключена, "
               "бесплатный доступ — только у владельца.")
-    bot = Bot(BOT_CONFIG.token, default=DefaultBotProperties(parse_mode="HTML"))
+    bot = Bot(BOT_CONFIG.token, session=make_session(), default=DefaultBotProperties(parse_mode="HTML"))
     dp = Dispatcher()
     dp.include_router(router)
     await bot.set_my_commands([BotCommand(command="start", description="Главное меню")])
