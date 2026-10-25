@@ -20,7 +20,7 @@ from kwork_agent.generator import LISTING_SCHEMA, validate
 from kwork_agent.uniqueness import find_duplicate, title_similarity
 
 from . import db, images
-from .kwork_rules import PRICES, category_list, normalize, snap_price
+from .kwork_rules import PORTFOLIO_REQUIRED, PRICES, category_list, find_category, normalize, snap_price
 from .config import BOT_CONFIG
 
 IDEAS_PER_CALL = 50
@@ -76,7 +76,13 @@ _item["properties"]["type_hint"] = {
     "description": "Как на Kwork называется тип услуги внутри рубрики (поле «Тип»), 1–3 слова: "
                    "например «Чат-боты», «Логотипы», «Лендинги», «Парсеры»",
 }
-_item["required"] += ["idea_no", "type_hint"]
+_item["properties"]["volume"] = {
+    "type": "string",
+    "description": "Объём услуг в 1 кворке (обязательное поле Kwork): что входит в базовую цену, "
+                   "коротко и с числом, до 60 символов — например «1 логотип в 3 вариантах», "
+                   "«до 1000 символов текста», «1 чат-бот до 10 команд»",
+}
+_item["required"] += ["idea_no", "type_hint", "volume"]
 
 VISUAL_SCHEMA = {
     "type": "object",
@@ -207,6 +213,7 @@ def _listing_prompt(profile: dict, ideas: list[dict], hints: dict[int, str]) -> 
 - category_hint — СТРОГО одна строка из списка рубрик Kwork ниже, как написано.
 - Цена в рублях — одна из допустимых на Kwork: {", ".join(str(p) for p in PRICES if p >= profile.get('min_price', 0))};
   срок 1–30 дней — реалистично для объёма работы.
+- volume — объём услуг в 1 кворке: что входит в цену, с числом, до 60 символов.
 - cover_text — 2–5 слов крупно на обложку; у каждого кворка свой.
 - Обещай только то, что фрилансер реально сделает; без гарантий дохода и позиций.
 
@@ -237,6 +244,21 @@ def uniqueness_report(uid: int) -> tuple[int, int]:
     old = [h["fp"] for h in db.load_history(uid) if h.get("fp") is not None]
     pics = sum(1 for i, a in enumerate(marks) for b in marks[i + 1:] + old if images.covers_similar(a, b))
     return texts, pics
+
+
+def portfolio_note(uid: int) -> str:
+    """Предупреждение о рубриках, где Kwork требует работы в портфолио — их добавляет сам продавец."""
+    n = 0
+    for l in db.load_listings(uid):
+        if "needs_portfolio" not in l:  # кворки, созданные до появления признака
+            cat = find_category(l.get("category_hint", ""))
+            l["needs_portfolio"] = bool(cat and cat["portfolio"] in PORTFOLIO_REQUIRED)
+        n += bool(l["needs_portfolio"])
+    if not n:
+        return ""
+    return (f"\n📁 {n} кворков — в рубриках, где Kwork требует работы в портфолио (новому продавцу — 3). "
+            "Расширение заполнит всё остальное и остановится на шаге «Портфолио»: добавьте свои работы "
+            "и нажмите «Готово» — дальше оно продолжит само.")
 
 
 def missing_ideas(uid: int) -> list[dict]:

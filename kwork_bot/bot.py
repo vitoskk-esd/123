@@ -684,6 +684,7 @@ async def run_bulk_finish(bot: Bot, uid: int, chat_id: int) -> None:
     else:
         text += (f"\n⚠️ Похожих пар: текстов {same_texts}, фото {same_pics}. "
                  "Нажмите «Другой фон» у таких кворков — я обработаю фото.")
+    text += content.portfolio_note(uid)
     await bot.send_message(chat_id, text, reply_markup=kb([("📋 Смотреть кворки", "v:0")],
                                                           [("📦 Скачать архивом", "zip"), ("🏠 Меню", "menu")]))
 
@@ -752,6 +753,7 @@ async def run_job(bot: Bot, uid: int, chat_id: int, ideas_count: int | None) -> 
     else:
         text += (f"\n⚠️ Похожих пар: текстов {same_texts}, фонов {same_pics}. "
                  "Нажмите «Переписать» или «Новый фон» у таких кворков.")
+    text += content.portfolio_note(uid)
     if left:
         text += f"\nЕщё {left} не прошли проверку — нажмите «Дописать недостающие»."
     if progress.get("error") and db.is_admin(uid):
@@ -818,6 +820,7 @@ async def cb_full(call: CallbackQuery) -> None:
         await call.message.answer(
             f"<b>{esc(l['title'])}</b>\n\n{esc(l['description'])}\n\n"
             f"<b>Что нужно от покупателя:</b>\n{esc(l['requirements'])}\n\n"
+            f"<b>Объём услуг в 1 кворке:</b> {esc(l.get('volume') or '—')}\n\n"
             f"<b>Теги:</b> {esc(', '.join(l['tags']))}")
 
 

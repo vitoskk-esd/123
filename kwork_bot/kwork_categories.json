@@ -8,57 +8,68 @@
     {
      "id": 25,
      "name": "Логотип и брендинг",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 24,
      "name": "Веб и мобильный дизайн",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 28,
      "name": "Арт и иллюстрации",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 27,
      "name": "Полиграфия",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 90,
      "name": "Интерьер и экстерьер",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 250,
      "name": "Промышленный дизайн",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 306,
      "name": "ИИ-генерация изображений",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 270,
      "name": "Презентации и инфографика",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 68,
      "name": "Обработка и редактирование",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 272,
      "name": "Наружная реклама",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 286,
      "name": "Маркетплейсы и соцсети",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     }
    ]
   },
@@ -69,47 +80,56 @@
     {
      "id": 38,
      "name": "Доработка и настройка сайта",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 37,
      "name": "Создание сайта",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 41,
      "name": "Скрипты, боты и mini apps",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 79,
      "name": "Верстка",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 80,
      "name": "Десктоп программирование",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 39,
      "name": "Мобильные приложения",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 40,
      "name": "Игры",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     },
     {
      "id": 255,
      "name": "Сервера и хостинг",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 81,
      "name": "Юзабилити, тесты и помощь",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     }
    ]
   },
@@ -120,32 +140,38 @@
     {
      "id": 235,
      "name": "Резюме и вакансии",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "pdf"
     },
     {
      "id": 75,
      "name": "Набор текста",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 74,
      "name": "Продающие и бизнес-тексты",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "pdf"
     },
     {
      "id": 73,
      "name": "Тексты и наполнение сайта",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "pdf"
     },
     {
      "id": 35,
      "name": "Переводы",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 303,
      "name": "ИИ-тексты",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "pdf"
     }
    ]
   },
@@ -156,37 +182,44 @@
     {
      "id": 72,
      "name": "Трафик",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 71,
      "name": "Семантическое ядро",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 59,
      "name": "Ссылки",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 56,
      "name": "Статистика и аналитика",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "pdf"
     },
     {
      "id": 44,
      "name": "SEO аудиты, консультации",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 43,
      "name": "Внутренняя оптимизация",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 273,
      "name": "Продвижение сайта в топ",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     }
    ]
   },
@@ -197,32 +230,38 @@
     {
      "id": 113,
      "name": "Базы данных и клиентов",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 112,
      "name": "Маркетплейсы и доски объявлений",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 108,
      "name": "E-mail маркетинг и рассылки",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 49,
      "name": "Контекстная реклама",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 47,
      "name": "Маркетинг и PR",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 46,
      "name": "Соцсети и SMM",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     }
    ]
   },
@@ -233,37 +272,44 @@
     {
      "id": 106,
      "name": "Редактирование аудио",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "audio"
     },
     {
      "id": 78,
      "name": "Видеосъемка и монтаж",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "video"
     },
     {
      "id": 77,
      "name": "Интро и анимация логотипа",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "video"
     },
     {
      "id": 76,
      "name": "Видеоролики",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "video"
     },
     {
      "id": 23,
      "name": "Музыка и песни",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "audio"
     },
     {
      "id": 20,
      "name": "Аудиозапись и озвучка",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "audio"
     },
     {
      "id": 300,
      "name": "ИИ-генерация видео",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "video"
     }
    ]
   },
@@ -274,44 +320,53 @@
     {
      "id": 114,
      "name": "Продажа сайтов и групп",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 84,
      "name": "Персональный помощник",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 64,
      "name": "Бухгалтерия и налоги",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 63,
      "name": "Юридическая помощь",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 55,
      "name": "Обучение и консалтинг",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 262,
      "name": "Обзвоны и продажи",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 265,
      "name": "Подбор персонала",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "none"
     },
     {
      "id": 65,
      "name": "Стройка и ремонт",
-     "max_days": 30
+     "max_days": 30,
+     "portfolio": "photo"
     }
    ]
   }
- ]
+ ],
+ "portfolio_note": "portfolio — тип портфолио рубрики (photo/video/audio/pdf/none); photo, video и audio Kwork требует от продавца (нового — 3 работы)"
 }

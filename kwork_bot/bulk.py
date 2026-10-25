@@ -42,6 +42,7 @@ COLUMNS = [
     ("days", ("срок", "дн", "days")),
     ("category_hint", ("рубрик", "категор", "раздел", "category")),
     ("tags", ("тег", "tag", "ключев")),
+    ("volume", ("объём", "объем", "volume")),
 ]
 
 CATEGORY_SCHEMA = {
@@ -49,9 +50,11 @@ CATEGORY_SCHEMA = {
     "additionalProperties": False,
     "required": ["items"],
     "properties": {"items": {"type": "array", "items": {
-        "type": "object", "additionalProperties": False, "required": ["row", "category_hint"],
+        "type": "object", "additionalProperties": False, "required": ["row", "category_hint", "volume"],
         "properties": {"row": {"type": "integer"},
-                       "category_hint": {"type": "string", "description": "Рубрика Kwork «Раздел > Подраздел»"}}}}},
+                       "category_hint": {"type": "string", "description": "Рубрика Kwork «Раздел > Подраздел»"},
+                       "volume": {"type": "string", "description": "Объём услуг в 1 кворке: что входит в цену, "
+                                                                   "с числом, до 60 символов"}}}}},
 }
 
 
@@ -109,6 +112,7 @@ def read_table(path: Path) -> list[dict]:
             "category_hint": str(item.get("category_hint", "")).strip(),
             "tags": [t.strip() for t in re.split(r"[,;#]", str(item.get("tags", ""))) if t.strip()],
             "photo": str(item.get("photo", "")).strip(),
+            "volume": str(item.get("volume", "")).strip(),
         })
     return out
 
@@ -129,12 +133,14 @@ def template_xlsx() -> bytes:
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Кворки"
-    ws.append(["Фото", "Название", "Описание", "Что нужно от покупателя", "Цена", "Срок, дней", "Рубрика", "Теги"])
+    ws.append(["Фото", "Название", "Описание", "Что нужно от покупателя", "Цена", "Срок, дней", "Рубрика", "Теги",
+               "Объём услуг"])
     ws.append(["1.jpg", "Разработаю логотип для вашего бизнеса",
                "Создам уникальный логотип с учётом вашей сферы и аудитории.\n\nВы получите:\n— 3 варианта\n— исходники",
-               "Название компании, сфера, пожелания по цветам", 3000, 3, "Дизайн > Логотипы", "логотип, дизайн"])
-    ws.append(["2.jpg", "Сделаю дизайн визитки", "…", "", "", "", "", ""])
-    for col, width in zip("ABCDEFGH", (10, 40, 60, 35, 10, 12, 25, 25)):
+               "Название компании, сфера, пожелания по цветам", 3000, 3, "Дизайн > Логотипы", "логотип, дизайн",
+               "1 логотип в 3 вариантах"])
+    ws.append(["2.jpg", "Сделаю дизайн визитки", "…", "", "", "", "", "", ""])
+    for col, width in zip("ABCDEFGHI", (10, 40, 60, 35, 10, 12, 25, 25, 25)):
         ws.column_dimensions[col].width = width
     for cell in ws[1]:
         cell.font = Font(bold=True)
@@ -334,18 +340,26 @@ def uniquify_photo(src: Path, seed: str, strength: float):
 
 
 def classify(rows: list[dict], llm=None) -> None:
-    """Подбирает рубрику Kwork строкам, где её нет (одним-двумя запросами к ИИ)."""
-    todo = [r for r in rows if not find_category(r["category_hint"])]
+    """Подбирает рубрику Kwork и «объём услуг в 1 кворке» строкам, где их нет (одним-двумя запросами к ИИ)."""
+    todo = [r for r in rows if not find_category(r["category_hint"]) or not r.get("volume")]
+    if not todo:
+        return
     llm = llm or content._llm()
     for i in range(0, len(todo), 40):
         chunk = todo[i:i + 40]
         listing = "\n".join(f"{r['row']}. {r['title']} — {r['description'][:150]}" for r in chunk)
-        data = llm.ask("Подбери каждому кворку рубрику СТРОГО из списка рубрик Kwork (строку как есть).\n\n"
+        data = llm.ask("Подбери каждому кворку рубрику СТРОГО из списка рубрик Kwork (строку как есть) и объём "
+                       "услуг в 1 кворке — что входит в цену, коротко и с числом («1 логотип в 3 вариантах», "
+                       "«до 1000 символов текста»).\n\n"
                        f"КВОРКИ:\n{listing}\n\nРУБРИКИ KWORK:\n{category_list()}",
                        system=content.SYSTEM, schema=CATEGORY_SCHEMA, effort="low", max_tokens=8000)
-        found = {it["row"]: it["category_hint"] for it in data["items"]}
+        found = {it["row"]: it for it in data["items"]}
         for r in chunk:
-            r["category_hint"] = found.get(r["row"], "")
+            got = found.get(r["row"], {})
+            if not find_category(r["category_hint"]):
+                r["category_hint"] = got.get("category_hint", "")
+            if not r.get("volume"):
+                r["volume"] = str(got.get("volume", "")).strip()
 
 
 def own_photo_path(uid: int, lid: str) -> Path:
@@ -409,7 +423,7 @@ def finish(uid: int, progress: dict, llm=None) -> int:
             "id": lid, "idea_no": n, "idea": r["title"], "title": r["title"], "description": r["description"],
             "requirements": r["requirements"], "price_rub": r["price_rub"],
             "days": r["days"], "category_hint": r["category_hint"], "tags": r["tags"],
-            "cover_text": r["title"], "own_photo": True, "fp": mark, "row": r["row"],
+            "volume": r.get("volume", ""), "cover_text": r["title"], "own_photo": True, "fp": mark, "row": r["row"],
         }
         normalize(listing)  # рубрика → номера Kwork, цена из допустимых, «что нужно» ≥ 100 символов
         listings.append(listing)

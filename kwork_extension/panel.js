@@ -23,16 +23,18 @@ async function onFormPage() {
 async function getState() { return Object.assign(defaultState(), await store.get(KW.state, {})); }
 async function saveState(st) { await store.set(KW.state, st); render(); }
 
-// Записи журнала идут по очереди: одновременные чтение-запись теряли строки.
-let logChain = Promise.resolve();
+// Изменения состояния идут строго по очереди: одновременные чтение-запись затирали друг друга
+// (терялись строки журнала, три настройки подряд сохранялись как одна).
+let stateChain = Promise.resolve();
+function updateState(change) {
+  const run = stateChain.then(async () => { const st = await getState(); await change(st); await saveState(st); return st; });
+  stateChain = run.catch(() => {});
+  return run;
+}
+
 function log(text) {
-  logChain = logChain.then(async () => {
-    const st = await getState();
-    const d = new Date(), hhmm = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-    st.log = [hhmm + " " + text, ...st.log].slice(0, 12);
-    await saveState(st);
-  });
-  return logChain;
+  const d = new Date(), hhmm = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  return updateState((st) => { st.log = [hhmm + " " + text, ...st.log].slice(0, 12); });
 }
 
 // --- Загрузка kwork.zip ----------------------------------------------------------------------
@@ -51,7 +53,11 @@ function fromB64(b64) {
 
 async function loadZip(file) {
   const files = await kwUnzip(await file.arrayBuffer());
-  if (!files["listings.json"]) throw new Error("в архиве нет listings.json — это точно kwork.zip из бота?");
+  if (!files["listings.json"]) {
+    throw new Error(Object.keys(files).some((n) => n.endsWith("manifest.json"))
+      ? "это архив самого расширения — выберите kwork.zip, который прислал бот («📦 Скачать всё архивом»)"
+      : "в архиве нет listings.json — выберите kwork.zip из бота");
+  }
   const listings = JSON.parse(new TextDecoder().decode(await kwEntryBytes(files["listings.json"])));
   const old = await store.get(KW.queue, []);
   await chrome.storage.local.remove(old.map((l) => KW.cover(l.id)));
@@ -64,27 +70,24 @@ async function loadZip(file) {
   await store.set(KW.queue, listings.map((l) => ({
     id: l.id, title: l.title, description: l.description, requirements: l.requirements,
     price_rub: l.price_rub, days: l.days, category_hint: l.category_hint,
-    section_id: l.section_id, category_id: l.category_id, type_hint: l.type_hint || "",
+    section_id: l.section_id, category_id: l.category_id, type_hint: l.type_hint || "", volume: l.volume || "",
   })));
-  const st = defaultState();
-  const prev = await getState();
-  Object.assign(st, {manual: prev.manual, limit: prev.limit, pause: prev.pause, message: `Загружено кворков: ${listings.length}`});
-  await saveState(st);
+  await updateState((st) => Object.assign(st, defaultState(),
+    {manual: st.manual, limit: st.limit, pause: st.pause, message: `Загружено кворков: ${listings.length}`}));
 }
 
 // --- Выкладка ------------------------------------------------------------------------------------
 
-async function stop(message) {
-  const st = await getState();
-  st.running = false; st.phase = "idle"; st.message = message;
-  await saveState(st);
+function stop(message) {
+  return updateState((st) => { st.running = false; st.phase = "idle"; st.message = message; });
 }
 
-async function fail(st, item, reason) {
-  st.failed.push({id: item.id, title: item.title, reason});
-  st.running = false; st.phase = "idle";
-  st.message = `Остановлено на «${item.title.slice(0, 40)}»: ${reason}`;
-  await saveState(st);
+function fail(_st, item, reason) {
+  return updateState((st) => {
+    st.failed.push({id: item.id, title: item.title, reason});
+    st.running = false; st.phase = "idle";
+    st.message = `Остановлено на «${item.title.slice(0, 40)}»: ${reason}`;
+  });
 }
 
 function isManual(st) { return st.index - st.runStart < st.manual; }
@@ -104,18 +107,18 @@ async function resume() {
     if (onNew) { // снова форма — Kwork не принял кворк
       return fail(st, item, kwFormErrors() || "Kwork вернул форму — проверьте кворк вручную");
     }
-    st.done.push(item.id); st.index += 1; st.phase = "wait"; st.attempts = 0; st.coverDone = null;
-    st.message = `Выложен: «${item.title.slice(0, 40)}»`;
-    await saveState(st);
+    st = await updateState((s) => {
+      s.done.push(item.id); s.index += 1; s.phase = "wait"; s.attempts = 0; s.coverDone = null;
+      s.message = `Выложен: «${item.title.slice(0, 40)}»`;
+    });
   }
 
   const end = Math.min(queue.length, st.runStart + st.limit);
   if (st.index >= end) return stop(`Готово: выложено ${st.done.length}. ` + (st.index < queue.length ? "Нажмите «Старт», чтобы продолжить." : "Все кворки из архива выложены."));
 
   if (!onNew) {
-    st.navs = (st.navs || 0) + 1;
+    st = await updateState((s) => { s.navs = (s.navs || 0) + 1; });
     if (st.navs > 3) return stop("Не открывается форма «Создать кворк» — откройте её вручную и нажмите «Старт».");
-    await saveState(st);
     if (st.phase === "wait" && st.pause > 0 && !isManual(st)) { // пауза между кворками, чтобы не выглядеть как бот
       for (let s = st.pause; s > 0; s--) {
         if (!(await getState()).running) return;
@@ -128,36 +131,41 @@ async function resume() {
   }
 
   const item = queue[st.index];
-  if (st.phase === "filling") { // страница перезагрузилась посреди заполнения (Kwork сохранил черновик)
-    st.attempts = (st.attempts || 0) + 1;
-    if (st.attempts > 3) return fail(st, item, "страница всё время перезагружается при заполнении — пришлите скриншот разработчику");
-    log("страница перезагрузилась — продолжаю");
-  } else {
-    st.attempts = 0; st.coverDone = null;
+  if (st.phase === "review") return waitForHuman(); // страницу обновили, пока кворк ждал «Готово» — правки не трогаем
+  const reloaded = st.phase === "filling"; // страница перезагрузилась посреди заполнения (Kwork сохранил черновик)
+  // Новый кворк — только на чистой форме: на открытом черновике мы бы переписали другой кворк.
+  if (!reloaded && /draft_id|[?&]id=/.test(location.search) && !st.navs) {
+    await updateState((s) => { s.navs = 1; });
+    location.href = NEW_URL;
+    return;
   }
-  st.phase = "filling"; st.navs = 0; st.message = `Заполняю ${st.index + 1} из ${end}: «${item.title.slice(0, 40)}»`;
-  await saveState(st);
+  st = await updateState((s) => {
+    if (reloaded) s.attempts = (s.attempts || 0) + 1;
+    else { s.attempts = 0; s.coverDone = null; }
+    s.phase = "filling"; s.navs = 0; s.message = `Заполняю ${s.index + 1} из ${end}: «${item.title.slice(0, 40)}»`;
+  });
+  if (st.attempts > 3) return fail(st, item, "страница всё время перезагружается при заполнении — пришлите скриншот разработчику");
+  if (reloaded) log("страница перезагрузилась — продолжаю");
+  let filled = {};
   try {
     const cover = await store.get(KW.cover(item.id), null);
-    await kwFill(item, cover ? fromB64(cover) : null, (t) => log(t), {
+    filled = await kwFill(item, cover ? fromB64(cover) : null, (t) => log(t), {
       coverDone: st.coverDone === item.id,
-      onCover: async () => { const s = await getState(); s.coverDone = item.id; await saveState(s); },
+      onCover: () => updateState((s) => { s.coverDone = item.id; }),
     });
   } catch (e) {
     return fail(await getState(), item, e.message);
   }
   st = await getState();
   if (!st.running) return;
-  if (isManual(st)) {
-    st.phase = "review";
-    st.message = `Проверьте кворк ${st.index + 1} и нажмите «Готово» на странице (проверка вручную: ${st.index - st.runStart + 1} из ${st.manual}).`;
-    await saveState(st);
-    const save = document.querySelector(".js-save-kwork");
-    if (save) {
-      save.style.outline = "4px solid #f5a623";
-      save.addEventListener("click", () => afterSubmit(), {once: true});
-    }
-    return;
+  if (isManual(st) || filled.needsPortfolio) {
+    await updateState((s) => {
+      s.phase = "review";
+      s.message = filled.needsPortfolio
+        ? `Кворк ${s.index + 1}: рубрика «${item.category_hint}» требует работы в портфолио. Добавьте их на шаге 4 и нажмите «Готово» — дальше расширение продолжит само.`
+        : `Проверьте кворк ${s.index + 1} и нажмите «Готово» на странице (проверка вручную: ${s.index - s.runStart + 1} из ${s.manual}).`;
+    });
+    return waitForHuman();
   }
   try {
     await afterSubmit(true);
@@ -166,10 +174,17 @@ async function resume() {
   }
 }
 
+// Кворк ждёт человека: подсвечиваем «Готово», после нажатия выкладка продолжится сама.
+function waitForHuman() {
+  const save = document.querySelector(".js-save-kwork");
+  if (save) {
+    save.style.outline = "4px solid #f5a623";
+    save.addEventListener("click", () => afterSubmit(), {once: true});
+  }
+}
+
 async function afterSubmit(clickSave) {
-  const st = await getState();
-  st.phase = "submitted";
-  await saveState(st);
+  await updateState((st) => { st.phase = "submitted"; });
   if (clickSave) await kwClickSave();
   // Если через 30 с мы всё ещё на форме — Kwork показал ошибки или ждёт действия.
   await kwSleep(30000);
@@ -220,7 +235,7 @@ function buildPanel() {
       .hide{display:none}
     </style>
     <div class="p">
-      <div class="h"><span>🧩 Kwork — выкладка</span><a id="fold" href="#">свернуть</a></div>
+      <div class="h"><span>🧩 Kwork — выкладка v${chrome.runtime.getManifest().version}</span><a id="fold" href="#">свернуть</a></div>
       <div id="body">
         <div id="count"></div>
         <div class="row"><input type="file" id="zip" accept=".zip"></div>
@@ -240,27 +255,22 @@ function buildPanel() {
     try { await loadZip($("#zip").files[0]); } catch (e) { setStatus("Не получилось: " + e.message); }
   };
   for (const id of ["manual", "limit", "pause"]) {
-    $("#" + id).onchange = async () => { const st = await getState(); st[id] = Math.max(0, Number($("#" + id).value) || 0); await saveState(st); };
+    $("#" + id).onchange = () => { const v = Math.max(0, Number($("#" + id).value) || 0); updateState((st) => { st[id] = v; }); };
   }
   $("#start").onclick = async () => {
-    const st = await getState();
-    Object.assign(st, {running: true, runStart: st.index, phase: "start", message: "Начинаю…"});
-    await saveState(st);
+    await updateState((st) => Object.assign(st, {running: true, runStart: st.index, phase: "start", message: "Начинаю…"}));
     resume();
   };
   $("#stop").onclick = () => stop("Остановлено вами.");
   $("#skip").onclick = async () => {
-    const st = await getState();
     const queue = await store.get(KW.queue, []);
-    if (st.running || st.index >= queue.length) return;
-    st.index += 1; st.message = `Пропущен кворк №${st.index}. Нажмите «Старт», чтобы продолжить.`;
-    await saveState(st);
+    await updateState((st) => {
+      if (st.running || st.index >= queue.length) return;
+      st.index += 1; st.message = `Пропущен кворк №${st.index}. Нажмите «Старт», чтобы продолжить.`;
+    });
   };
-  $("#reset").onclick = async () => {
-    const st = await getState();
-    Object.assign(st, {running: false, index: 0, runStart: 0, phase: "idle", done: [], failed: [], log: [], message: "Начнём с первого кворка."});
-    await saveState(st);
-  };
+  $("#reset").onclick = () => updateState((st) => Object.assign(st, {running: false, index: 0, runStart: 0, phase: "idle",
+    done: [], failed: [], log: [], message: "Начнём с первого кворка."}));
 }
 
 if (window.top === window && !window.__kwPanel) {

@@ -55,8 +55,13 @@ def find_category(text: str) -> dict | None:
     return _cat(*best) if best and score >= 0.6 else None
 
 
+# В этих рубриках Kwork не даст сохранить кворк без работ в портфолио (новому продавцу — 3 работы).
+PORTFOLIO_REQUIRED = ("photo", "video", "audio")
+
+
 def _cat(s: dict, c: dict) -> dict:
-    return {"section_id": s["id"], "section": s["name"], "id": c["id"], "name": c["name"], "max_days": c["max_days"]}
+    return {"section_id": s["id"], "section": s["name"], "id": c["id"], "name": c["name"], "max_days": c["max_days"],
+            "portfolio": c.get("portfolio", "none")}
 
 
 def snap_price(price: int | None) -> int:
@@ -74,20 +79,36 @@ def fit_instruction(text: str) -> str:
     return text[:INSTRUCTION_MAX]
 
 
+VOLUME_MAX = 60
+DEFAULT_VOLUME = "1 задача в рамках описания кворка"
+
+
+def fit_volume(text: str) -> str:
+    """«Объём услуг в 1 кворке» Kwork требует всегда. Пустой — общая фраза, длинный — обрезаем по слову."""
+    text = " ".join(str(text or "").split())
+    if not text:
+        return DEFAULT_VOLUME
+    if len(text) > VOLUME_MAX:
+        text = text[:VOLUME_MAX].rsplit(" ", 1)[0].rstrip(",.;:")
+    return text
+
+
 def normalize(listing: dict) -> list[str]:
     """Приводит кворк к форме Kwork: рубрика из списка (+ её номера для расширения), цена из
-    допустимых, срок не больше максимума рубрики, «что нужно от покупателя» ≥ 100 символов.
+    допустимых, срок не больше максимума рубрики, «что нужно от покупателя» ≥ 100 символов,
+    «объём услуг» заполнен.
     Возвращает ошибки, которые автоматически не исправить."""
     errors = []
     cat = find_category(listing.get("category_hint", ""))
     days = max(1, int(listing.get("days") or 1))
     if cat:
         listing.update(category_hint=f"{cat['section']} > {cat['name']}", category_id=cat["id"],
-                       section_id=cat["section_id"])
+                       section_id=cat["section_id"], needs_portfolio=cat["portfolio"] in PORTFOLIO_REQUIRED)
         days = min(days, cat["max_days"])
     else:
         errors.append("рубрика не из списка Kwork")
     listing["days"] = min(days, 30)
     listing["price_rub"] = snap_price(listing.get("price_rub"))
     listing["requirements"] = fit_instruction(listing.get("requirements", ""))
+    listing["volume"] = fit_volume(listing.get("volume", ""))
     return errors

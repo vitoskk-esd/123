@@ -41,11 +41,16 @@ function kwStepErrors(scope) {
   return [...new Set(texts)].join("; ");
 }
 
+// Когда видна «Готово» (черновик, все шаги уже открыты), Kwork прячет все «Продолжить» —
+// тогда шаг просто считается пройденным, ошибки полей покажет «Готово».
+const kwSaveShown = () => kwShown(document.querySelector(".js-save-kwork"));
+
 async function kwNext(n, log) {
   const step = `.js-step[data-step="${n}"]`;
-  const btn = await kwWaitFor(() => { const b = document.querySelector(step + " .js-next-step-btn"); return kwShown(b) && b; }, 20000);
-  if (!btn) throw new Error(`шаг ${n}: Kwork не даёт продолжить — ` + (kwStepErrors(step) || "проверьте поля шага"));
-  btn.click();
+  const nextBtn = () => document.querySelector(step + " .js-next-step-btn");
+  const ready = await kwWaitFor(() => (kwShown(nextBtn()) && "next") || (kwSaveShown() && "open"), 20000);
+  if (!ready) throw new Error(`шаг ${n}: Kwork не даёт продолжить — ` + (kwStepErrors(step) || "проверьте поля шага"));
+  if (ready === "next") nextBtn().click();
   log(`шаг ${n} заполнен`);
   await kwSleep(1500);
 }
@@ -102,20 +107,47 @@ function kwBestOption(select, wanted, mode) {
   return values.find((v) => v >= wanted) || values[values.length - 1];
 }
 
+const KW_DEFAULT_VOLUME = "1 задача в рамках описания кворка";
+
+// «Объём услуг в 1 кворке» — обязательное поле шага 3. У одних рубрик это текст (#step2-service-size),
+// у других число с единицей (#step2-volume, единицу Kwork ставит сам по рубрике).
+async function kwFillVolume(listing, log) {
+  const text = String(listing.volume || "").trim() || KW_DEFAULT_VOLUME;
+  const textInput = document.querySelector("#step2-service-size");
+  if (textInput && kwShown(document.querySelector("#service-size-block"))) {
+    await kwMain("text", "#step2-service-size", text.slice(0, 60));
+    log("объём: " + text.slice(0, 60));
+  }
+  const numInput = document.querySelector("#step2-volume");
+  if (numInput && kwShown(numInput)) {
+    const num = (text.match(/\d+/) || ["1"])[0];
+    await kwMain("value", "#step2-volume", num);
+    log("объём: " + num);
+  }
+}
+
 async function kwUploadCover(bytes, name, log) {
   log("загружаю обложку…");
   // Kwork принимает файл только больше 30 КБ (size > 30720) и от 660×440.
   if (bytes.length <= 30720) throw new Error(`обложка весит ${Math.round(bytes.length / 1024)} КБ, а Kwork принимает больше 30 КБ — скачайте kwork.zip из бота заново`);
-  const input = document.querySelector('input.js-kwork-photo-input-first[data-pre-upload="true"]')
-    || document.querySelector("input.js-kwork-photo-input-first");
-  if (!input) throw new Error("не нашёл поле обложки");
-  const pathInput = () => document.querySelector('input[name="first_photo_path"]');
-  const before = pathInput() ? pathInput().value : "";
-  const dt = new DataTransfer();
-  dt.items.add(new File([bytes], name, {type: "image/jpeg"}));
-  input.files = dt.files;
-  input.dispatchEvent(new Event("change", {bubbles: true}));
-  const ok = await kwWaitFor(() => pathInput() && pathInput().value && pathInput().value !== before, 60000, 500);
+  // Первое такое поле — скрытый шаблон Kwork (.js-template-photo-block), к нему загрузчик не
+  // подключён. Настоящее поле Kwork добавляет из шаблона в .js-photo__block — берём последнее.
+  const inputs = [...document.querySelectorAll(".js-first-photo-block input.js-kwork-photo-input-first, input.js-kwork-photo-input-first")]
+    .filter((el, i, all) => all.indexOf(el) === i && !el.closest(".js-template-photo-block"));
+  if (!inputs.length) throw new Error("не нашёл поле обложки");
+  const pathValue = () => [...document.querySelectorAll('input[name="first_photo_path"]')].map((i) => i.value).filter(Boolean).join("|");
+  const before = pathValue();
+  let ok = false;
+  // Если полей несколько, пробуем с последнего; поле без загрузчика ничего не делает за 10 секунд.
+  for (const [n, input] of inputs.reverse().entries()) {
+    const dt = new DataTransfer();
+    dt.items.add(new File([bytes], name, {type: "image/jpeg"}));
+    input.files = dt.files;
+    input.dispatchEvent(new Event("change", {bubbles: true}));
+    const last = n === inputs.length - 1;
+    ok = await kwWaitFor(() => pathValue() !== before && pathValue(), last ? 60000 : 10000, 500);
+    if (ok || document.querySelector(".js-add-photo_error")?.innerText.trim()) break;
+  }
   if (!ok) {
     const kworkError = [...document.querySelectorAll(".js-add-photo_error")].map((e) => e.innerText.trim()).filter(Boolean).join("; ");
     throw new Error("обложка не загрузилась — " + (kworkError || kwStepErrors('.js-step[data-step="1"]') || "Kwork не ответил на загрузку"));
@@ -125,15 +157,26 @@ async function kwUploadCover(bytes, name, log) {
 
 // Заполняет все шаги и останавливается перед «Готово». coverDone — обложка этого кворка уже
 // загружена (Kwork после загрузки сохраняет черновик и может перезагрузить страницу).
+// Возвращает {needsPortfolio: true}, если рубрика требует портфолио — тогда «Готово» жмёт человек.
 async function kwFill(listing, coverBytes, log, opts = {}) {
   if (!await kwWaitFor(() => document.querySelector("#step1-name"), 20000)) throw new Error("форма «Создать кворк» не открылась");
+  // Kwork запускает форму позже, чем появляется её разметка; до этого выбор рубрики ничего не делает.
+  let ready = false, why = "";
+  for (let t = Date.now(); !ready && Date.now() - t < 30000; await kwSleep(500)) {
+    ready = await kwMain("ready", ".js-category_parent").then(() => true, (e) => { why = e.message; return false; });
+  }
+  if (!ready) throw new Error("форма Kwork не загрузилась до конца — обновите страницу (" + why + ")");
 
   // Шаг 1: название, рубрика, тип, обложка
   log("заполняю название и рубрику…");
   await kwMain("text", "#step1-name", listing.title.slice(0, 70));
   if (!listing.section_id || !listing.category_id) throw new Error("у кворка нет рубрики Kwork — пересоберите архив в боте");
-  await kwMain("select", ".js-category_parent", listing.section_id);
-  const sub = await kwWaitFor(() => document.querySelector(`.js-category_sub option[value="${listing.category_id}"]`), 15000);
+  const subOption = () => document.querySelector(`.js-category_sub option[value="${listing.category_id}"]`);
+  let sub = null;
+  for (let attempt = 0; attempt < 3 && !sub; attempt++) { // список подрубрик Kwork строит по change раздела
+    await kwMain("select", ".js-category_parent", listing.section_id);
+    sub = await kwWaitFor(subOption, 5000);
+  }
   if (!sub) throw new Error("подрубрика " + listing.category_hint + " не появилась в списке");
   await kwMain("select", ".js-category_sub", listing.category_id);
   log("рубрика: " + listing.category_hint);
@@ -161,14 +204,22 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
     await kwMain("select", "#step2-work-time", days);
     log(`срок: ${days} дн.`);
   }
+  await kwFillVolume(listing, log);
   await kwNext(3, log);
 
-  // Шаг 4 (портфолио) есть не у всех рубрик
+  // Шаг 4 — портфолио. В рубриках без портфолио Kwork помечает его disabled-step. Где портфолио
+  // необязательно (тексты), проходим «Продолжить». Где обязательно (дизайн, сайты, видео, аудио —
+  // для нового продавца 3 работы), заполнить его может только сам продавец своими работами.
   const step4 = document.querySelector('.js-step[data-step="4"]');
-  if (step4 && kwShown(step4) && !step4.classList.contains("hidden")) {
-    const b = step4.querySelector(".js-next-step-btn");
-    if (kwShown(b)) { b.click(); await kwSleep(1000); }
+  if (step4 && !step4.classList.contains("disabled-step") && !kwSaveShown()) {
+    const b = await kwWaitFor(() => { const x = step4.querySelector(".js-next-step-btn"); return kwShown(x) && x; }, 3000);
+    if (b) { b.click(); await kwWaitFor(kwSaveShown, 4000); }
+    if (!kwSaveShown()) {
+      log("рубрике нужны работы в портфолио — добавьте их на шаге 4");
+      return {needsPortfolio: true};
+    }
   }
+  return {};
 }
 
 async function kwClickSave() {

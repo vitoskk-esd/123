@@ -172,10 +172,12 @@ def _store(raw: Path, out: Path) -> Path:
     return out
 
 
-def vary(bg: Path, seed: str):
+def vary(bg: Path, seed: str, boost: int = 0):
     """Своя обработка общего фона для каждой обложки: фрагмент и масштаб, лёгкий поворот,
     оттенок, яркость, контраст, насыщенность, декоративные круги, зерно. Без отражения:
-    главный предмет фона должен остаться справа, слева — тень под заголовком."""
+    главный предмет фона должен остаться справа, слева — тень под заголовком.
+    boost (номер попытки) усиливает круги: на гладком фоне (градиент) одни сдвиги и оттенки
+    почти не меняют отпечаток, а заметные круги меняют."""
     from PIL import Image, ImageDraw, ImageEnhance
 
     r = random.Random(seed)
@@ -196,14 +198,15 @@ def vary(bg: Path, seed: str):
     img = ImageEnhance.Color(img).enhance(r.uniform(0.8, 1.25))
     over = Image.new("RGBA", SIZE, (0, 0, 0, 0))
     draw = ImageDraw.Draw(over)
-    for _ in range(r.randint(1, 3)):
-        cx, cy, rad = r.randint(int(w * .55), w), r.randint(0, h), r.randint(30, 140)
+    b = min(boost, 6)
+    for _ in range(r.randint(1, 3) + b):
+        cx, cy, rad = r.randint(int(w * .55), w), r.randint(0, h), r.randint(30, 140 + 15 * b)
         color = (r.randint(120, 255), r.randint(120, 255), r.randint(120, 255))
         box = [cx - rad, cy - rad, cx + rad, cy + rad]
         if r.random() < .5:
-            draw.ellipse(box, fill=color + (r.randint(25, 60),))
+            draw.ellipse(box, fill=color + (r.randint(25, 60) + 12 * b,))
         else:
-            draw.ellipse(box, outline=color + (90,), width=r.randint(2, 6))
+            draw.ellipse(box, outline=color + (90 + 15 * b,), width=r.randint(2, 6))
     img = Image.alpha_composite(img.convert("RGBA"), over).convert("RGB")
     return Image.blend(img, Image.effect_noise(SIZE, r.uniform(8, 18)).convert("RGB"), 0.04)
 
@@ -256,7 +259,7 @@ def new_look(uid: int, listing: dict, listings: list[dict]) -> None:
 def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> Path:
     from PIL import Image, ImageDraw
 
-    img = vary(bg, f"{listing['id']}:{listing.get('variant', 0)}")
+    img = vary(bg, f"{listing['id']}:{listing.get('variant', 0)}", listing.get("variant", 0))
     # Затемняем левую часть, чтобы белый текст читался на любом фоне:
     # до половины ширины — плотная тень, к 85% ширины она сходит на нет.
     w, h = SIZE

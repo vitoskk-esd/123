@@ -72,7 +72,7 @@ class FakeLLM:
                     "summary": "вы дизайнер логотипов", "visual_brief": "pencils, sketches, color swatches"}
         if list(schema["properties"]) == ["items"]:  # рубрики для загруженных кворков
             nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
-            return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы"} for n in nos]}
+            return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}"} for n in nos]}
         if list(schema["properties"]) == ["visual_brief"]:
             return {"visual_brief": "pencils and paper"}
         if "ideas" in schema["properties"]:
@@ -294,6 +294,21 @@ class ExamplesAndImagesTests(Base):
         self.assertEqual(cover.size, (660, 440))
         self.assertLess(cover.getpixel((5, 430))[2], 60)  # слева тень под текстом
         self.assertEqual(content.uniqueness_report(self.uid), (0, 0))
+
+    def test_gradient_covers_stay_unique(self):
+        """Без ИИ-фонов (градиент) обложки тоже не похожи: раньше примерно каждая 15-я партия
+        из 5 обложек оставалась с похожей парой — гладкий градиент почти не менял отпечаток."""
+        import random
+
+        rnd = random.Random(7)
+        for batch in range(8):
+            uid = 100 + batch
+            db.save_profile(uid, {**db.load_profile(uid), "palette": batch})
+            ls = [fake_listing(i + 1, id="%010x" % rnd.getrandbits(40), palette=batch % 6) for i in range(6)]
+            db.save_listings(uid, ls)
+            self.assertEqual(images.unique_covers(uid, ls), 0, batch)
+            marks = [l["fp"] for l in ls]
+            self.assertFalse([1 for i, a in enumerate(marks) for b in marks[i + 1:] if images.covers_similar(a, b)])
 
     def test_similar_cover_gets_other_variation(self):
         self._backgrounds(1)
@@ -616,6 +631,10 @@ class BulkImportTests(Base):
         self.assertTrue(all(l["own_photo"] and l["category_hint"] == "Дизайн > Логотип и брендинг"
                             and (l["section_id"], l["category_id"]) == (15, 25)
                             and len(l["requirements"]) >= 100 for l in listings))
+        # Объёма в таблице нет — его подобрал ИИ вместе с рубрикой; рубрика требует портфолио.
+        self.assertEqual(sorted(l["volume"] for l in listings), ["1 макет №2", "1 макет №3", "1 макет №5"])
+        self.assertTrue(all(l["needs_portfolio"] for l in listings))
+        self.assertIn("3 кворков", content.portfolio_note(self.uid))
         self.assertEqual(content.uniqueness_report(self.uid), (0, 0))  # копию фото уникализировали
         # Фото клиента не перерисовывается при правке цены, а «Другой фон» обрабатывает его, а не рисует обложку.
         before = db.cover_path(self.uid, listings[0]["id"]).read_bytes()
@@ -637,10 +656,15 @@ class BulkImportTests(Base):
         from kwork_bot import bulk, disk
 
         path = Path(self.tmp.name) / "t.csv"
-        path.write_bytes("Название;Описание кворка;Цена, руб.;Рубрика\nЛого;Текст;1 500 руб.;Дизайн\n;;;\n".encode("cp1251"))
+        path.write_bytes("Название;Описание кворка;Цена, руб.;Рубрика;Объём услуг\nЛого;Текст;1 500 руб.;Дизайн;1 логотип\n;;;;\n"
+                         .encode("cp1251"))
         rows = bulk.read_table(path)
         self.assertEqual(len(rows), 1)
-        self.assertEqual((rows[0]["title"], rows[0]["price_rub"], rows[0]["category_hint"]), ("Лого", 1500, "Дизайн"))
+        self.assertEqual((rows[0]["title"], rows[0]["price_rub"], rows[0]["category_hint"], rows[0]["volume"]),
+                         ("Лого", 1500, "Дизайн", "1 логотип"))
+        template = Path(self.tmp.name) / "template.xlsx"
+        template.write_bytes(bulk.template_xlsx())
+        self.assertEqual(bulk.read_table(template)[0]["volume"], "1 логотип в 3 вариантах")
         self.assertEqual(disk.find_link("вот https://disk.yandex.ru/d/AbC-12_x."), "https://disk.yandex.ru/d/AbC-12_x")
         self.assertIsNone(disk.find_link("https://evil.com/disk.yandex.ru"))
 
@@ -732,6 +756,22 @@ class KworkRulesTests(unittest.TestCase):
         self.assertTrue(r.INSTRUCTION_MIN <= len(listing["requirements"]) <= r.INSTRUCTION_MAX)
         self.assertEqual(r.normalize({"category_hint": "что-то своё"}), ["рубрика не из списка Kwork"])
 
+    def test_volume_and_portfolio(self):
+        """«Объём услуг в 1 кворке» Kwork требует всегда; в части рубрик нужно ещё и портфолио."""
+        from kwork_bot import kwork_rules as r
+
+        logo = {"category_hint": "Дизайн > Логотип и брендинг", "volume": "  1 логотип   в 3 вариантах "}
+        helper = {"category_hint": "Бизнес и жизнь > Персональный помощник"}
+        self.assertEqual(r.normalize(logo) + r.normalize(helper), [])
+        self.assertEqual(logo["volume"], "1 логотип в 3 вариантах")
+        self.assertEqual(helper["volume"], r.DEFAULT_VOLUME)
+        self.assertEqual((logo["needs_portfolio"], helper["needs_portfolio"]), (True, False))
+        long = r.fit_volume("слово " * 30)
+        self.assertLessEqual(len(long), r.VOLUME_MAX)
+        self.assertFalse(long.endswith(" "))
+        types = {c.get("portfolio") for s in r.sections() for c in s["subs"]}
+        self.assertEqual(types, {"photo", "video", "audio", "pdf", "none"})  # у каждой рубрики есть тип
+
 
 class CoverWeightTests(unittest.TestCase):
     def test_kwork_minimum_30kb(self):
@@ -770,6 +810,20 @@ class ExtensionPackageTests(unittest.TestCase):
             z = zipfile.ZipFile(io.BytesIO(build_zip(7)))
         self.assertEqual(z.getinfo("listings.json").compress_type, zipfile.ZIP_STORED)
         self.assertEqual(z.getinfo("covers/x1.jpg").compress_type, zipfile.ZIP_STORED)
+
+    def test_old_kworks_get_volume_in_archive(self):
+        """Кворки, созданные до поля «Объём», в архиве получают объём — иначе Kwork не даст сохранить."""
+        from kwork_bot.export import build_zip
+        from kwork_bot.kwork_rules import DEFAULT_VOLUME
+
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(BOT_CONFIG, "data_dir", Path(tmp)):
+            db.save_listings(7, [fake_listing(1, id="x1"), fake_listing(2, id="x2", volume="до 10 страниц")])
+            z = zipfile.ZipFile(io.BytesIO(build_zip(7)))
+        listings = json.loads(z.read("listings.json"))
+        self.assertEqual([l["volume"] for l in listings], [DEFAULT_VOLUME, "до 10 страниц"])
+        table = z.read("kworks.csv").decode("utf-8-sig")
+        self.assertIn("Объём услуг в 1 кворке", table.splitlines()[0])
+        self.assertIn("до 10 страниц", table)
 
 
 class KworkLimitTests(Base):

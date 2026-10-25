@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
     target: {tabId: sender.tab.id},
     world: "MAIN",
     func: mainAction,
-    args: [msg.action, msg.selector, msg.value],
+    args: [msg.action, msg.selector, msg.value === undefined ? null : msg.value], // undefined Chrome не передаёт
   }).then(([res]) => reply({ok: true, result: res && res.result}))
     .catch((e) => reply({ok: false, error: String(e)}));
   return true; // ответ асинхронный
@@ -14,6 +14,11 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
 
 // Эта функция выполняется внутри страницы Kwork. Она должна быть самодостаточной.
 function mainAction(action, selector, value) {
+  if (action === "ready") { // форма Kwork запущена: модуль сохранения есть и список рубрик получил данные
+    const $ = window.jQuery;
+    const block = $ && $(selector).closest(".js-category-select");
+    return window.KworkSaveModule && block && block.length && block.data("options") ? "ok" : "not ready";
+  }
   const el = document.querySelector(selector);
   if (!el) return "нет элемента " + selector;
   const $ = window.jQuery;
@@ -31,11 +36,18 @@ function mainAction(action, selector, value) {
     if ($) $(el).trigger("input").trigger("change").trigger("keyup"); else { fire(el, "input"); fire(el, "change"); }
     return "ok";
   }
-  if (action === "text") { // название: видимый редактор #editor-title + скрытый textarea
-    const editor = document.querySelector("#editor-title");
+  if (action === "text") { // название, объём: видимый редактор (contenteditable) + скрытое поле рядом
+    const editor = (el.parentElement && el.parentElement.querySelector('.js-content-editor[contenteditable="true"]'))
+      || document.querySelector("#editor-title");
     if (editor) { editor.textContent = value; ["input", "keyup", "change"].forEach((t) => fire(editor, t)); }
     el.value = value;
     if ($) $(el).trigger("input").trigger("change").trigger("keyup"); else { fire(el, "input"); fire(el, "change"); }
+    return "ok";
+  }
+  if (action === "value") { // обычное поле ввода (число объёма)
+    el.value = String(value);
+    if ($) $(el).trigger("input").trigger("change").trigger("keyup").trigger("blur");
+    else ["input", "change", "keyup", "blur"].forEach((t) => fire(el, t));
     return "ok";
   }
   return "неизвестное действие " + action;
