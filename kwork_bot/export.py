@@ -9,6 +9,7 @@ import zipfile
 from pathlib import Path
 
 from . import db
+from .images import MIN_COVER_BYTES, save_cover_jpeg
 
 HOW_TO = """КАК ВЫЛОЖИТЬ КВОРКИ
 
@@ -81,6 +82,10 @@ def build_zip(uid: int) -> bytes:
         z.writestr("КАК_ВЫЛОЖИТЬ.txt", HOW_TO)
         for l in listings:
             cover = db.cover_path(uid, l["id"])
+            if cover.exists() and cover.stat().st_size <= MIN_COVER_BYTES:  # обложки старых партий
+                from PIL import Image
+
+                save_cover_jpeg(Image.open(cover), cover)
             if cover.exists():
                 z.write(cover, f"covers/{cover.name}", compress_type=zipfile.ZIP_STORED)
     return buf.getvalue()

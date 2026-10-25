@@ -71,7 +71,12 @@ PROFILE_SCHEMA = {
 BOT_LISTING_SCHEMA = copy.deepcopy(LISTING_SCHEMA)
 _item = BOT_LISTING_SCHEMA["properties"]["listings"]["items"]
 _item["properties"]["idea_no"] = {"type": "integer", "description": "Номер идеи из списка"}
-_item["required"].append("idea_no")
+_item["properties"]["type_hint"] = {
+    "type": "string",
+    "description": "Как на Kwork называется тип услуги внутри рубрики (поле «Тип»), 1–3 слова: "
+                   "например «Чат-боты», «Логотипы», «Лендинги», «Парсеры»",
+}
+_item["required"] += ["idea_no", "type_hint"]
 
 VISUAL_SCHEMA = {
     "type": "object",

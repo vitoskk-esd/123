@@ -270,9 +270,30 @@ def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> P
     return _save_jpeg(img, out)
 
 
-def _save_jpeg(img, out: Path) -> Path:
-    img.convert("RGB").save(out, "JPEG", quality=90, optimize=True, progressive=True)
+# Kwork не принимает обложку, если файл не больше 30 КБ (проверка size > 30720 в его коде),
+# а у тёмных и простых обложек 660×440 JPEG легко выходит меньше — держим запас.
+MIN_COVER_BYTES = 32 * 1024
+
+
+def save_cover_jpeg(img, out: Path) -> Path:
+    """JPEG обложки не легче MIN_COVER_BYTES: сначала выше качество, потом невидимое зерно."""
+    from PIL import Image
+
+    img = img.convert("RGB")
+    for quality in (90, 95, 98, 100):
+        img.save(out, "JPEG", quality=quality, optimize=True, progressive=True)
+        if out.stat().st_size > MIN_COVER_BYTES:
+            return out
+    for amount in (0.03, 0.06, 0.1):  # мелкое зерно почти не видно, но JPEG становится тяжелее
+        noisy = Image.blend(img, Image.effect_noise(img.size, 64).convert("RGB"), amount)
+        noisy.save(out, "JPEG", quality=100, optimize=False)
+        if out.stat().st_size > MIN_COVER_BYTES:
+            break
     return out
+
+
+def _save_jpeg(img, out: Path) -> Path:
+    return save_cover_jpeg(img, out)
 
 
 def gradient_background(uid: int, palette: int) -> Path:

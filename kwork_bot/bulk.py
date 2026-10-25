@@ -359,7 +359,7 @@ def make_unique(src: Path, out: Path, lid: str, taken: list[int], start: int) ->
     if not any(images.covers_similar(mark, o) for o in taken) and start == 1:
         return None
     for attempt in range(start, start + 15):
-        uniquify_photo(src, f"{lid}:{attempt}", 1 + attempt / 3).save(out, "JPEG", quality=90)
+        images.save_cover_jpeg(uniquify_photo(src, f"{lid}:{attempt}", 1 + attempt / 3), out)
         mark = images.cover_fingerprint(out)
         if not any(images.covers_similar(mark, o) for o in taken):
             break
@@ -372,8 +372,7 @@ def new_look_photo(uid: int, listing: dict, listings: list[dict]) -> None:
     taken += [o["fp"] for o in listings if o["id"] != listing["id"] and "fp" in o]
     listing["variant"] = listing.get("variant", 0) + 1
     out = db.cover_path(uid, listing["id"])
-    uniquify_photo(own_photo_path(uid, listing["id"]), f"{listing['id']}:v{listing['variant']}", 1.5).save(
-        out, "JPEG", quality=90)
+    images.save_cover_jpeg(uniquify_photo(own_photo_path(uid, listing["id"]), f"{listing['id']}:v{listing['variant']}", 1.5), out)
     listing["fp"] = make_unique(own_photo_path(uid, listing["id"]), out, listing["id"], taken,
                                 start=listing["variant"] * 20) or images.cover_fingerprint(out)
 
@@ -401,7 +400,7 @@ def finish(uid: int, progress: dict, llm=None) -> int:
         src.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(photo_path(uid, r), src)
         out = db.cover_path(uid, lid)
-        ImageOps.fit(Image.open(src).convert("RGB"), SIZE, Image.LANCZOS).save(out, "JPEG", quality=90)
+        images.save_cover_jpeg(ImageOps.fit(Image.open(src).convert("RGB"), SIZE, Image.LANCZOS), out)
         mark = images.cover_fingerprint(out)
         if fix:
             mark = make_unique(src, out, lid, taken, start=1) or mark

@@ -50,14 +50,20 @@ async function kwNext(n, log) {
   await kwSleep(1500);
 }
 
-// Выбор «Типа» рубрики: вариант, у которого больше всего общих слов с названием и описанием.
-function kwPickAttribute(radios, text) {
-  const stems = (s) => new Set((s.toLowerCase().match(/[а-яёa-z]{4,}/g) || []).map((w) => w.slice(0, 5)));
-  const want = stems(text);
-  let best = radios[0], score = -1;
+// Основа слова: «боты»/«бота» → «бот», «скрипты»/«скрипт» → «скри», «парсеры»/«парсинг» → «парс».
+function kwStems(s) {
+  return new Set((String(s || "").toLowerCase().match(/[а-яёa-z]{3,}/g) || []).map((w) => w.slice(0, w.length <= 4 ? 3 : 4)));
+}
+
+// Выбор «Типа» рубрики: сначала по подсказке бота (type_hint, например «Чат-боты»), потом по
+// словам названия и описания. Совпадений нет — первый вариант.
+function kwPickAttribute(radios, text, hint) {
+  const want = kwStems(text), wantHint = kwStems(hint);
+  let best = radios[0], score = 0;
   for (const r of radios) {
     const label = (document.querySelector(`label[for="${r.id}"]`) || r.parentElement || {}).innerText || "";
-    const s = [...stems(label)].filter((w) => want.has(w)).length;
+    const words = [...kwStems(label)];
+    const s = 3 * words.filter((w) => wantHint.has(w)).length + words.filter((w) => want.has(w)).length;
     if (s > score) { best = r; score = s; }
   }
   return best;
@@ -80,7 +86,7 @@ async function kwChooseAttributes(listing, log, step, waitMs) {
     for (const name of names) {
       done.add(name);
       if (groups[name].some((r) => r.checked)) continue;
-      const pick = kwPickAttribute(groups[name], text);
+      const pick = kwPickAttribute(groups[name], text, listing.type_hint);
       const label = document.querySelector(`label[for="${pick.id}"]`);
       (label || pick).click();
       log("тип: " + ((label && label.innerText.trim()) || pick.value));
@@ -97,6 +103,9 @@ function kwBestOption(select, wanted, mode) {
 }
 
 async function kwUploadCover(bytes, name, log) {
+  log("загружаю обложку…");
+  // Kwork принимает файл только больше 30 КБ (size > 30720) и от 660×440.
+  if (bytes.length <= 30720) throw new Error(`обложка весит ${Math.round(bytes.length / 1024)} КБ, а Kwork принимает больше 30 КБ — скачайте kwork.zip из бота заново`);
   const input = document.querySelector('input.js-kwork-photo-input-first[data-pre-upload="true"]')
     || document.querySelector("input.js-kwork-photo-input-first");
   if (!input) throw new Error("не нашёл поле обложки");
@@ -107,15 +116,20 @@ async function kwUploadCover(bytes, name, log) {
   input.files = dt.files;
   input.dispatchEvent(new Event("change", {bubbles: true}));
   const ok = await kwWaitFor(() => pathInput() && pathInput().value && pathInput().value !== before, 60000, 500);
-  if (!ok) throw new Error("обложка не загрузилась — " + (kwStepErrors('.js-step[data-step="1"]') || "проверьте файл"));
+  if (!ok) {
+    const kworkError = [...document.querySelectorAll(".js-add-photo_error")].map((e) => e.innerText.trim()).filter(Boolean).join("; ");
+    throw new Error("обложка не загрузилась — " + (kworkError || kwStepErrors('.js-step[data-step="1"]') || "Kwork не ответил на загрузку"));
+  }
   log("обложка загружена");
 }
 
-// Заполняет все шаги и останавливается перед «Готово».
-async function kwFill(listing, coverBytes, log) {
+// Заполняет все шаги и останавливается перед «Готово». coverDone — обложка этого кворка уже
+// загружена (Kwork после загрузки сохраняет черновик и может перезагрузить страницу).
+async function kwFill(listing, coverBytes, log, opts = {}) {
   if (!await kwWaitFor(() => document.querySelector("#step1-name"), 20000)) throw new Error("форма «Создать кворк» не открылась");
 
-  // Шаг 1: название, рубрика, обложка
+  // Шаг 1: название, рубрика, тип, обложка
+  log("заполняю название и рубрику…");
   await kwMain("text", "#step1-name", listing.title.slice(0, 70));
   if (!listing.section_id || !listing.category_id) throw new Error("у кворка нет рубрики Kwork — пересоберите архив в боте");
   await kwMain("select", ".js-category_parent", listing.section_id);
@@ -124,7 +138,9 @@ async function kwFill(listing, coverBytes, log) {
   await kwMain("select", ".js-category_sub", listing.category_id);
   log("рубрика: " + listing.category_hint);
   await kwChooseAttributes(listing, log, 1, 6000);
-  if (coverBytes) await kwUploadCover(coverBytes, listing.id + ".jpg", log);
+  const path = document.querySelector('input[name="first_photo_path"]');
+  if (opts.coverDone && path && path.value) log("обложка уже загружена");
+  else if (coverBytes) { await kwUploadCover(coverBytes, listing.id + ".jpg", log); if (opts.onCover) await opts.onCover(); }
   await kwNext(1, log);
 
   // Шаг 2: описание и «От покупателя нужно»

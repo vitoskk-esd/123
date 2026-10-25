@@ -11,7 +11,13 @@ const store = {
 
 function defaultState() {
   return {running: false, index: 0, runStart: 0, manual: 3, limit: 6, pause: 30, phase: "idle",
-          done: [], failed: [], log: [], message: ""};
+          done: [], failed: [], log: [], message: "", attempts: 0, coverDone: null, navs: 0};
+}
+
+// Страница формы — там, где есть сама форма: kwork.ru/new или черновик «Изменить».
+async function onFormPage() {
+  if (/\/login|\/signin/.test(location.pathname)) return false;
+  return !!(await kwWaitFor(() => document.querySelector("#step1-name"), location.pathname === "/new" ? 15000 : 4000));
 }
 
 async function getState() { return Object.assign(defaultState(), await store.get(KW.state, {})); }
@@ -58,7 +64,7 @@ async function loadZip(file) {
   await store.set(KW.queue, listings.map((l) => ({
     id: l.id, title: l.title, description: l.description, requirements: l.requirements,
     price_rub: l.price_rub, days: l.days, category_hint: l.category_hint,
-    section_id: l.section_id, category_id: l.category_id,
+    section_id: l.section_id, category_id: l.category_id, type_hint: l.type_hint || "",
   })));
   const st = defaultState();
   const prev = await getState();
@@ -88,15 +94,17 @@ async function resume() {
   let st = await getState();
   if (!st.running) return;
   const queue = await store.get(KW.queue, []);
-  const onNew = location.pathname === "/new";
   if (/\/login|\/signin/.test(location.pathname)) return stop("Войдите в аккаунт Kwork и нажмите «Старт» снова.");
+  const onNew = await onFormPage();
+  st = await getState();
+  if (!st.running) return;
 
   if (st.phase === "submitted") {
     const item = queue[st.index];
     if (onNew) { // снова форма — Kwork не принял кворк
       return fail(st, item, kwFormErrors() || "Kwork вернул форму — проверьте кворк вручную");
     }
-    st.done.push(item.id); st.index += 1; st.phase = "wait";
+    st.done.push(item.id); st.index += 1; st.phase = "wait"; st.attempts = 0; st.coverDone = null;
     st.message = `Выложен: «${item.title.slice(0, 40)}»`;
     await saveState(st);
   }
@@ -105,6 +113,9 @@ async function resume() {
   if (st.index >= end) return stop(`Готово: выложено ${st.done.length}. ` + (st.index < queue.length ? "Нажмите «Старт», чтобы продолжить." : "Все кворки из архива выложены."));
 
   if (!onNew) {
+    st.navs = (st.navs || 0) + 1;
+    if (st.navs > 3) return stop("Не открывается форма «Создать кворк» — откройте её вручную и нажмите «Старт».");
+    await saveState(st);
     if (st.phase === "wait" && st.pause > 0 && !isManual(st)) { // пауза между кворками, чтобы не выглядеть как бот
       for (let s = st.pause; s > 0; s--) {
         if (!(await getState()).running) return;
@@ -117,11 +128,21 @@ async function resume() {
   }
 
   const item = queue[st.index];
-  st.phase = "filling"; st.message = `Заполняю ${st.index + 1} из ${end}: «${item.title.slice(0, 40)}»`;
+  if (st.phase === "filling") { // страница перезагрузилась посреди заполнения (Kwork сохранил черновик)
+    st.attempts = (st.attempts || 0) + 1;
+    if (st.attempts > 3) return fail(st, item, "страница всё время перезагружается при заполнении — пришлите скриншот разработчику");
+    log("страница перезагрузилась — продолжаю");
+  } else {
+    st.attempts = 0; st.coverDone = null;
+  }
+  st.phase = "filling"; st.navs = 0; st.message = `Заполняю ${st.index + 1} из ${end}: «${item.title.slice(0, 40)}»`;
   await saveState(st);
   try {
     const cover = await store.get(KW.cover(item.id), null);
-    await kwFill(item, cover ? fromB64(cover) : null, (t) => log(t));
+    await kwFill(item, cover ? fromB64(cover) : null, (t) => log(t), {
+      coverDone: st.coverDone === item.id,
+      onCover: async () => { const s = await getState(); s.coverDone = item.id; await saveState(s); },
+    });
   } catch (e) {
     return fail(await getState(), item, e.message);
   }

@@ -733,6 +733,19 @@ class KworkRulesTests(unittest.TestCase):
         self.assertEqual(r.normalize({"category_hint": "что-то своё"}), ["рубрика не из списка Kwork"])
 
 
+class CoverWeightTests(unittest.TestCase):
+    def test_kwork_minimum_30kb(self):
+        """Kwork молча не загружает обложку, если файл не больше 30 720 байт."""
+        from PIL import Image
+
+        with tempfile.TemporaryDirectory() as tmp:
+            for color in ((0, 0, 0), (12, 18, 38), (250, 250, 250)):  # однотонные — самые лёгкие
+                out = Path(tmp) / "c.jpg"
+                images.save_cover_jpeg(Image.new("RGB", (660, 440), color), out)
+                self.assertGreater(out.stat().st_size, 30720, color)
+                self.assertEqual(Image.open(out).size, (660, 440))
+
+
 class ExtensionPackageTests(unittest.TestCase):
     def test_extension_zip(self):
         from kwork_bot.export import extension_zip
