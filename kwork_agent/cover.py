@@ -34,11 +34,32 @@ def _font(size: int):
     return ImageFont.load_default()
 
 
-def make_cover(listing: dict) -> Path:
+def _wrap(draw, text: str, font, max_w: int) -> list[str]:
+    lines: list[str] = []
+    for word in text.split():
+        if lines and draw.textlength(f"{lines[-1]} {word}", font=font) <= max_w:
+            lines[-1] += f" {word}"
+        else:
+            lines.append(word)
+    return lines
+
+
+def _fit(draw, text: str, max_w: int):
+    """Самый крупный шрифт, при котором текст влезает по ширине в 4 строки."""
+    for size in (56, 50, 44, 38, 32, 28):
+        font = _font(size)
+        lines = _wrap(draw, text, font, max_w)
+        if len(lines) <= 4 and all(draw.textlength(l, font=font) <= max_w for l in lines):
+            return font, lines
+    return font, textwrap.wrap(text, width=30)[:4]
+
+
+def make_cover(listing: dict, out_dir: Path | None = None, palette: int | None = None) -> Path:
+    """palette — номер цвета из PALETTES; по умолчанию выбирается по id объявления."""
     from PIL import Image, ImageDraw
 
     seed = int(hashlib.md5(listing["id"].encode()).hexdigest(), 16)
-    bg, accent = PALETTES[seed % len(PALETTES)]
+    bg, accent = PALETTES[(seed if palette is None else palette) % len(PALETTES)]
     img = Image.new("RGB", SIZE, bg)
     draw = ImageDraw.Draw(img)
 
@@ -51,9 +72,8 @@ def make_cover(listing: dict) -> Path:
             draw.line([(x, y), (x + 4, y)], fill=color)
 
     draw.rectangle([40, 48, 120, 56], fill=accent)
-    text = listing.get("cover_text") or listing["title"]
-    lines = textwrap.wrap(text.upper(), width=18)[:4]
-    font = _font(52 if len(lines) <= 2 else 42)
+    text = (listing.get("cover_text") or listing["title"]).upper()
+    font, lines = _fit(draw, text, w - 80)
     y = 90
     for line in lines:
         draw.text((40, y), line, font=font, fill=(255, 255, 255))
@@ -62,8 +82,14 @@ def make_cover(listing: dict) -> Path:
     sub = _font(22)
     draw.text((40, h - 70), f"{listing['days']} дн. · от {listing['price_rub']} ₽", font=sub, fill=accent)
 
-    out_dir = CONFIG.data_dir / "covers"
+    out_dir = out_dir or CONFIG.data_dir / "covers"
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{listing['id']}.png"
     img.save(path)
     return path
+
+
+def cover_for(listing: dict) -> Path:
+    """Готовая обложка (например, пришла из бота через import) или новая."""
+    path = CONFIG.data_dir / "covers" / f"{listing['id']}.png"
+    return path if path.exists() else make_cover(listing)

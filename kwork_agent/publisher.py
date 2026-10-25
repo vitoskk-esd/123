@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 
 from . import storage
 from .config import CONFIG
-from .cover import make_cover
+from .cover import cover_for
 from .llm import LLM
 
 SNAPSHOT_JS = r"""
@@ -238,7 +238,7 @@ def _observation(browser: KworkBrowser, prefix: str) -> list[dict]:
 
 
 def publish_one(llm: LLM, browser: KworkBrowser, listing: dict) -> tuple[str, str]:
-    cover = make_cover(listing)
+    cover = cover_for(listing)
     browser.page.goto(CONFIG.kwork_new_url, wait_until="domcontentloaded")
     browser.page.wait_for_timeout(2500)
 

@@ -5,6 +5,7 @@
     python -m kwork_agent reflect     # только обновление стратегии
     python -m kwork_agent generate 5  # сгенерировать N объявлений
     python -m kwork_agent publish     # опубликовать черновики
+    python -m kwork_agent import kwork.zip  # добавить объявления из архива Telegram-бота
     python -m kwork_agent setup       # мастер первого запуска (ключ, вход, секреты GitHub)
     python -m kwork_agent login       # войти в Kwork вручную и сохранить сессию
     python -m kwork_agent status      # статистика
@@ -89,6 +90,14 @@ def main(argv: list[str]) -> int:
         from .publisher import publish_pending
         from .ramp import daily_target, record_result
         record_result(*publish_pending(_llm(), int(argv[1]) if len(argv) > 1 else daily_target()))
+    elif cmd == "import":
+        from pathlib import Path
+
+        from .importer import import_archive
+        if len(argv) < 2:
+            print("Укажите архив: python -m kwork_agent import kwork.zip")
+            return 2
+        import_archive(Path(argv[1]))
     elif cmd == "setup":
         from .setup import run_setup
         return run_setup()

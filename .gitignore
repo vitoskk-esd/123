@@ -20,6 +20,7 @@ data/KWORK_STATE_B64.txt
 data/screenshots/
 data/covers/
 data/logs/
+data/bot/
 *.tmp
 youtube/03-banks-pay-you/voice/out/
 youtube/03-banks-pay-you/voice/ya/

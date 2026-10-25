@@ -1,0 +1,322 @@
+"""Офлайн-тесты бота: без Claude API, Telegram и Kwork.
+
+    python -m unittest discover -s kwork_bot/tests -t .
+"""
+
+from __future__ import annotations
+
+import asyncio
+import datetime as dt
+import io
+import json
+import sys
+import tempfile
+import threading
+import types
+import unittest
+import zipfile
+from pathlib import Path
+from unittest import mock
+
+sys.modules.setdefault("anthropic", types.SimpleNamespace(Anthropic=lambda: None))
+
+from kwork_agent import storage  # noqa: E402
+from kwork_agent.config import CONFIG  # noqa: E402
+from kwork_bot import content, db, payments  # noqa: E402
+from kwork_bot.config import BOT_CONFIG  # noqa: E402
+
+NICHES = ["Нарисую логотип", "Сделаю фирменный стиль", "Оформлю карточки Wildberries", "Создам баннер для сайта",
+          "Разработаю брендбук", "Сверстаю презентацию", "Нарисую иконки для приложения", "Оформлю Instagram",
+          "Сделаю обложку для YouTube", "Создам визитку", "Нарисую стикеры для Telegram", "Подготовлю макет буклета"]
+
+
+def desc(no: int, words: str = "") -> str:
+    # Уникальные «слова», чтобы проверка на похожесть не склеила разные кворки.
+    return (words + " " + " ".join(f"u{no:03d}w{j:03d}" for j in range(60))).strip()
+
+
+def fake_listing(no: int, **kw) -> dict:
+    base = dict(idea_no=no, idea=NICHES[(no - 1) % len(NICHES)], title=NICHES[(no - 1) % len(NICHES)],
+                category_hint="Дизайн > Логотипы", description=desc(no), requirements="Название и пожелания.",
+                price_rub=1500, days=3, tags=["логотип"], cover_text="Логотип")
+    base.update(kw)
+    return base
+
+
+class FakeLLM:
+    """Отвечает на запрос идей списком ниш, на запрос текстов — кворками по номерам идей из промпта."""
+
+    def __init__(self, broken: set[int] = frozenset()):
+        self.broken = set(broken)  # номера идей, которые в первый раз «пишутся» с ошибкой
+        self.prompts: list[str] = []
+        self.lock = threading.Lock()
+
+    def ask(self, prompt, schema=None, **kw):
+        with self.lock:
+            self.prompts.append(prompt)
+        if "ideas" in schema["properties"]:
+            start = prompt.count("\n- ") if "(пока нет)" not in prompt else 0
+            need = int(prompt.split("Придумай ")[1].split()[0])
+            return {"ideas": [{"name": f"Логотип для: {NICHES[(start + k) % len(NICHES)]} {start + k}",
+                               "audience": "малый бизнес", "result": "логотип"} for k in range(need)]}
+        nos = [int(line.split(".")[0]) for line in prompt.split("ИДЕИ")[1].split("ТРЕБОВАНИЯ")[0].splitlines()
+               if line[:1].isdigit()]
+        out = []
+        for no in nos:
+            with self.lock:
+                bad = no in self.broken
+                self.broken.discard(no)
+            out.append(fake_listing(no, description="коротко") if bad else fake_listing(no))
+        return {"listings": out}
+
+
+class Base(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        BOT_CONFIG.data_dir = Path(self.tmp.name) / "bot"
+        CONFIG.data_dir = Path(self.tmp.name) / "agent"
+        self.uid = 42
+        db.save_profile(self.uid, {**db.load_profile(self.uid), "skills": "логотипы", "min_price": 1000, "palette": 2})
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+
+class ContentTests(Base):
+    def test_ideas_and_listings_end_to_end(self):
+        progress = {}
+        llm = FakeLLM(broken={3})
+        ideas = content.generate_ideas(self.uid, 12, progress, llm=llm)
+        self.assertEqual(len(ideas), 12)
+        listings = content.generate_listings(self.uid, progress, llm=llm)
+        self.assertEqual(len(listings), 12)  # идея №3 сначала не прошла проверку и была переписана
+        self.assertEqual(progress["done"], 12)
+        self.assertTrue(any("ПРОШЛАЯ ПОПЫТКА ОТКЛОНЕНА" in p for p in llm.prompts))
+        self.assertEqual({l["palette"] for l in listings}, {2})
+        for l in listings:
+            self.assertTrue((db.covers_dir(self.uid) / f"{l['id']}.png").exists())
+        self.assertEqual(content.missing_ideas(self.uid), [])
+
+    def test_price_below_user_minimum_is_rejected(self):
+        content.generate_ideas(self.uid, 1, {}, llm=FakeLLM())
+
+        class Cheap(FakeLLM):
+            def ask(self, prompt, schema=None, **kw):
+                return {"listings": [fake_listing(1, price_rub=600)]}
+
+        self.assertEqual(content.generate_listings(self.uid, {}, llm=Cheap()), [])
+
+    def test_edits(self):
+        llm = FakeLLM()
+        content.generate_ideas(self.uid, 3, {}, llm=llm)
+        first, second, _ = content.generate_listings(self.uid, {}, llm=llm)
+
+        class Rewriter:
+            def ask(self, prompt, schema=None, **kw):
+                return {"listings": [fake_listing(first["idea_no"], title="Нарисую новый логотип",
+                                                  description=desc(99, "другой"))]}
+
+        new = content.rewrite_listing(self.uid, first["id"], "короче", llm=Rewriter())
+        self.assertEqual(new["id"], first["id"])
+        self.assertEqual(new["title"], "Нарисую новый логотип")
+        self.assertEqual(len(list(db.covers_dir(self.uid).glob("*.png"))), 3)
+
+        self.assertEqual(content.next_cover(self.uid, first["id"])["palette"], 3)
+        self.assertEqual(content.set_price(self.uid, first["id"], 2500)["price_rub"], 2500)
+        with self.assertRaises(ValueError):
+            content.set_price(self.uid, first["id"], 10)
+
+        content.delete_listing(self.uid, second["id"])
+        self.assertEqual(len(db.load_listings(self.uid)), 2)
+        self.assertEqual(content.missing_ideas(self.uid), [])  # удалённый не вернётся при «Дописать»
+
+    def test_export_and_import_into_agent(self):
+        llm = FakeLLM()
+        content.generate_ideas(self.uid, 4, {}, llm=llm)
+        content.generate_listings(self.uid, {}, llm=llm)
+        from kwork_bot.export import build_zip
+
+        data = build_zip(self.uid)
+        z = zipfile.ZipFile(io.BytesIO(data))
+        self.assertEqual(len([n for n in z.namelist() if n.startswith("covers/")]), 4)
+        csv_text = z.read("kworks.csv").decode("utf-8-sig")
+        self.assertEqual(len(csv_text.strip().splitlines()), 5)
+        self.assertIn("Название", csv_text.splitlines()[0])
+
+        from kwork_agent.importer import import_archive
+
+        path = Path(self.tmp.name) / "kwork.zip"
+        path.write_bytes(data)
+        self.assertEqual(import_archive(path), 4)
+        self.assertEqual(import_archive(path), 0)  # повторный импорт не дублирует
+        queue = storage.load_listings()
+        self.assertEqual({l["status"] for l in queue}, {"draft"})
+
+        from kwork_agent.cover import cover_for
+
+        cover = CONFIG.data_dir / "covers" / f"{queue[0]['id']}.png"
+        self.assertEqual(cover_for(queue[0]), cover)
+        self.assertEqual(cover.read_bytes(), z.read(f"covers/{queue[0]['id']}.png"))
+
+
+class AccessAndPaymentTests(Base):
+    def test_first_user_becomes_owner(self):
+        self.assertFalse(db.has_access(1))
+        self.assertTrue(db.claim_owner(1))
+        self.assertFalse(db.claim_owner(2))
+        self.assertTrue(db.has_access(1))
+        self.assertFalse(db.has_access(2))
+
+    def test_yookassa_requests(self):
+        sent = []
+
+        class Resp(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        def fake_urlopen(req, timeout):
+            sent.append(req)
+            if req.get_method() == "POST":
+                return Resp(json.dumps({"id": "pay_1", "status": "pending",
+                                        "confirmation": {"confirmation_url": "https://yoomoney.ru/pay"}}).encode())
+            return Resp(json.dumps({"id": "pay_1", "status": "succeeded"}).encode())
+
+        with mock.patch.object(BOT_CONFIG, "yookassa_shop_id", "123"), \
+             mock.patch.object(BOT_CONFIG, "yookassa_secret", "sec"), \
+             mock.patch.object(BOT_CONFIG, "receipts", True), \
+             mock.patch("urllib.request.urlopen", fake_urlopen):
+            self.assertEqual(payments.create_payment(7, "a@b.ru"), ("pay_1", "https://yoomoney.ru/pay"))
+            self.assertEqual(payments.payment_status("pay_1"), "succeeded")
+        body = json.loads(sent[0].data)
+        self.assertEqual(body["amount"], {"value": f"{BOT_CONFIG.price_rub}.00", "currency": "RUB"})
+        self.assertEqual(body["receipt"]["customer"]["email"], "a@b.ru")
+        self.assertIn("Idempotence-key", sent[0].headers)
+        self.assertTrue(sent[0].headers["Authorization"].startswith("Basic "))
+        self.assertTrue(sent[1].full_url.endswith("/payments/pay_1"))
+
+
+# --- Диалог целиком: настоящий aiogram, поддельный Telegram ------------------------------------------------
+
+class FakeTelegram:
+    """Подменяет HTTP-сессию aiogram: запоминает вызовы API и возвращает правдоподобные ответы."""
+
+    def __init__(self):
+        from aiogram.client.session.base import BaseSession
+        from aiogram.types import Chat, Message, User
+
+        calls = self.calls = []
+        counter = iter(range(1000, 10**6))
+
+        class Session(BaseSession):
+            async def make_request(self, bot, method, timeout=None):
+                calls.append(method)
+                ret = method.__returning__
+                if ret is Message or getattr(ret, "__origin__", None) is None and ret is not bool and \
+                        "Message" in str(ret):
+                    return Message(message_id=next(counter), date=dt.datetime.now(),
+                                   chat=Chat(id=1, type="private"),
+                                   text=getattr(method, "text", None) or getattr(method, "caption", None) or "")
+                if ret is User:
+                    return User(id=1, is_bot=True, first_name="bot", username="test_bot")
+                return True
+
+            async def close(self):
+                pass
+
+            async def stream_content(self, *a, **kw):
+                yield b""
+
+        self.session = Session()
+
+    def texts(self) -> list[str]:
+        return [getattr(c, "text", None) or getattr(c, "caption", None) or "" for c in self.calls]
+
+    def buttons(self) -> list[str]:
+        """callback_data всех кнопок из последнего сообщения с клавиатурой."""
+        for c in reversed(self.calls):
+            markup = getattr(c, "reply_markup", None)
+            if markup:
+                return [b.callback_data or b.url for row in markup.inline_keyboard for b in row]
+        return []
+
+
+class DialogTest(Base):
+    def test_full_dialog(self):
+        from aiogram import Bot, Dispatcher
+        from aiogram.types import CallbackQuery, Chat, Message, Update, User
+
+        from kwork_bot import bot as botmod
+
+        tg = FakeTelegram()
+        bot = Bot("1:TEST", session=tg.session)
+        dp = Dispatcher()
+        botmod.router._parent_router = None  # роутер можно подключить заново в каждом тесте
+        dp.include_router(botmod.router)
+        user = User(id=self.uid, is_bot=False, first_name="Тест")
+        chat = Chat(id=self.uid, type="private")
+        n = iter(range(1, 10**6))
+        llm = FakeLLM()
+
+        async def text(t):
+            msg = Message(message_id=next(n), date=dt.datetime.now(), chat=chat, from_user=user, text=t)
+            await dp.feed_update(bot, Update(update_id=next(n), message=msg))
+
+        async def press(data):
+            msg = Message(message_id=next(n), date=dt.datetime.now(), chat=chat, from_user=user, text="x")
+            cb = CallbackQuery(id=str(next(n)), from_user=user, chat_instance="c", data=data, message=msg)
+            await dp.feed_update(bot, Update(update_id=next(n), callback_query=cb))
+
+        async def scenario():
+            await text("/start")
+            self.assertIn("владелец", " ".join(tg.texts()))
+            self.assertIn("new", tg.buttons())
+            await press("new")
+            await text("Рисую логотипы и фирменный стиль для малого бизнеса")
+            await press("exp_skip")
+            await press("mp:1000")
+            self.assertIn("cnt:5", tg.buttons())
+            await press("cnt:5")
+            self.assertIn("pal:0", tg.buttons())
+            await press("pal:1")
+            while botmod.JOBS or not db.load_listings(self.uid):
+                await asyncio.sleep(0.05)
+            await asyncio.sleep(0.1)
+            self.assertIn("Готово: <b>5</b>", " ".join(tg.texts()))
+            await press("v:0")
+            self.assertIn("1/5", tg.texts()[-1])
+            lid = db.load_listings(self.uid)[0]["id"]
+            await press(f"pr:{lid}")
+            await text("2 500 ₽")
+            self.assertEqual(db.load_listings(self.uid)[0]["price_rub"], 2500)
+            await press("zip")
+            self.assertEqual(type(tg.calls[-1]).__name__, "SendDocument")
+
+        with mock.patch.object(content, "_llm", lambda: llm):
+            asyncio.run(scenario())
+        self.assertEqual(db.load_profile(self.uid)["palette"], 1)
+
+    def test_stranger_sees_paywall(self):
+        db.claim_owner(1)
+        from aiogram import Bot, Dispatcher
+        from aiogram.types import Chat, Message, Update, User
+
+        from kwork_bot import bot as botmod
+
+        tg = FakeTelegram()
+        bot = Bot("1:TEST", session=tg.session)
+        dp = Dispatcher()
+        botmod.router._parent_router = None
+        dp.include_router(botmod.router)
+        msg = Message(message_id=1, date=dt.datetime.now(), chat=Chat(id=5, type="private"),
+                      from_user=User(id=5, is_bot=False, first_name="X"), text="/start")
+        with mock.patch.object(BOT_CONFIG, "yookassa_shop_id", "1"), mock.patch.object(BOT_CONFIG, "yookassa_secret", "s"):
+            asyncio.run(dp.feed_update(bot, Update(update_id=1, message=msg)))
+        self.assertIn(f"{BOT_CONFIG.price_rub} ₽", tg.texts()[-1])
+        self.assertEqual(tg.buttons(), ["pay"])
+
+
+if __name__ == "__main__":
+    unittest.main()
