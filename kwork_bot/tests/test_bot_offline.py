@@ -9,6 +9,7 @@ import asyncio
 import datetime as dt
 import io
 import json
+import os
 import sys
 import tempfile
 import threading
@@ -265,6 +266,42 @@ class ExamplesAndImagesTests(Base):
             self.assertIn("429", prog["error"])
         l = {"id": "x", "title": "t", "cover_text": "Тест", "days": 1, "price_rub": 500}
         self.assertTrue(images.render_cover(self.uid, l).exists())
+
+
+class SetupWizardTests(unittest.TestCase):
+    def test_clean(self):
+        from kwork_bot.setup import clean
+
+        self.assertEqual(clean('  "HF_KEY=abc:def" ', "HF_KEY"), "abc:def")
+        self.assertEqual(clean("kwork_bot_token = 1:x", "KWORK_BOT_TOKEN"), "1:x")
+        self.assertEqual(clean("sk-ant-1 ", "ANTHROPIC_API_KEY"), "sk-ant-1")
+
+    def test_wizard_retries_bad_key_and_writes_env(self):
+        from kwork_bot import setup
+
+        def tg(token):
+            if token != "1:good":
+                raise ValueError("Telegram не принял токен")
+            return "my_bot"
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / ".env.local").write_text("HF_KEY=id:secret\n")
+            answers = iter(["1:bad", "KWORK_BOT_TOKEN=1:good", "", "sk-ant-ok"])
+            steps = [(n, t, h, {"KWORK_BOT_TOKEN": tg}.get(n, lambda v: None), r) for n, t, h, _, r in setup.STEPS]
+            clean_env = {k: v for k, v in os.environ.items()
+                         if k not in ("KWORK_BOT_TOKEN", "ANTHROPIC_API_KEY", "HF_KEY", "KWORK_BOT_RETURN_URL")}
+            with mock.patch.object(setup, "ROOT", root), mock.patch.object(setup, "ENV", root / ".env"), \
+                 mock.patch.object(setup, "STEPS", steps), mock.patch.dict(os.environ, clean_env, clear=True), \
+                 mock.patch("builtins.print"):
+                self.assertTrue(setup.needs_setup())
+                setup.run_setup(ask=lambda prompt: next(answers))
+                self.assertFalse(setup.needs_setup())
+            env = (root / ".env").read_text()
+        self.assertIn("KWORK_BOT_TOKEN=1:good", env)
+        self.assertIn("KWORK_BOT_RETURN_URL=https://t.me/my_bot", env)
+        self.assertIn("ANTHROPIC_API_KEY=sk-ant-ok", env)  # пустой ответ на обязательный ключ — переспросили
+        self.assertIn("HF_KEY=id:secret", env)              # взят из .env.local без вопросов
 
 
 class HiggsfieldClientTests(unittest.TestCase):

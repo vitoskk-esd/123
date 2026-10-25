@@ -1,4 +1,7 @@
-"""Запуск бота: python -m kwork_bot"""
+"""Запуск бота: python -m kwork_bot (без ключей сначала откроется мастер настройки)
+
+    python -m kwork_bot setup   # заново пройти настройку ключей
+"""
 
 from __future__ import annotations
 
@@ -36,6 +39,30 @@ async def main() -> int:
     return 0
 
 
+def apply_env() -> None:
+    """Настройки читаются при импорте — после мастера подхватываем свежие ключи."""
+    BOT_CONFIG.token = os.getenv("KWORK_BOT_TOKEN", "")
+    BOT_CONFIG.hf_key = os.getenv("HF_KEY", "")
+    BOT_CONFIG.return_url = os.getenv("KWORK_BOT_RETURN_URL", BOT_CONFIG.return_url)
+    if BOT_CONFIG.hf_key and not os.getenv("KWORK_BOT_IMAGES"):
+        BOT_CONFIG.images = "higgsfield"
+
+
 if __name__ == "__main__":
+    from .setup import needs_setup, run_setup
+
+    if sys.argv[1:] == ["setup"] or needs_setup():
+        try:
+            run_setup()
+        except (KeyboardInterrupt, EOFError):
+            print("\nНастройка прервана.")
+            sys.exit(1)
+        apply_env()
+        if sys.argv[1:] == ["setup"]:
+            print("Запустить бота: python -m kwork_bot")
+            sys.exit(0)
     logging.basicConfig(level=logging.WARNING)
-    sys.exit(asyncio.run(main()))
+    try:
+        sys.exit(asyncio.run(main()))
+    except KeyboardInterrupt:
+        print("Бот остановлен.")
