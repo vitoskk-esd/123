@@ -195,6 +195,9 @@ class ExamplesAndImagesTests(Base):
 
     def test_only_kwork_urls(self):
         self.assertEqual(examples.find_urls("a https://kwork.ru/x/1/y, b http://evil.ru/z"), ["https://kwork.ru/x/1/y"])
+        text = "профиль https://kwork.ru/user/Nik.Design и https://kwork.ru/logo/1/a"
+        self.assertEqual(examples.find_profile(text), "Nik.Design")
+        self.assertEqual(examples.find_urls(text), ["https://kwork.ru/logo/1/a"])  # профиль — не кворк
         for bad in ("https://kwork.ru.evil.com/a", "http://kwork.ru/a", "https://evil.com/kwork.ru"):
             with self.assertRaises(ValueError):
                 examples._get(bad, 10)
@@ -456,6 +459,33 @@ class ArchiveSizeTests(Base):
         self.assertLess(size_mb, 45, f"архив {size_mb:.1f} МБ")
 
 
+class SellerKworksTests(Base):
+    def test_list_request(self):
+        sent = {}
+
+        class Resp(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        def fake_urlopen(req, timeout):
+            sent.update(url=req.full_url, body=json.loads(req.data), headers=dict(req.headers))
+            return Resp(json.dumps({"success": True, "data": {"total": 12, "data": [
+                {"url": "/logo/1/a"}, {"url": "/logo/2/b"}]}}).encode())
+
+        with mock.patch("urllib.request.urlopen", fake_urlopen):
+            self.assertEqual(examples.seller_kworks("Nik"),
+                             (12, ["https://kwork.ru/logo/1/a", "https://kwork.ru/logo/2/b"]))
+        self.assertEqual(sent["url"], "https://kwork.ru/user_kworks/nik")
+        self.assertEqual(sent["body"], {"username": "Nik", "offset": 0, "limit": 10})  # больше 10 Kwork не отдаёт
+
+        with mock.patch("urllib.request.urlopen", lambda req, timeout: Resp(b'{"success":false,"data":null}')):
+            with self.assertRaises(ValueError):
+                examples.seller_kworks("Nik")
+
+
 class KworkLimitTests(Base):
     def test_room_respects_kwork_limit(self):
         profile = db.load_profile(self.uid)
@@ -470,9 +500,16 @@ class KworkLimitTests(Base):
         self.assertEqual(content.room(self.uid), 0)
 
     def test_seller_count_from_profile(self):
+        with mock.patch.object(examples, "seller_kworks", lambda name: (7, [])):
+            self.assertEqual(examples.seller_kwork_count("WasilevDesign"), 7)
+
+        def broken(name):
+            raise ValueError("нет")
+
         page = b'<script>{"user":{"totalKworks":12,"totalReviewsCount":501}}</script>'
-        with mock.patch.object(examples, "_get", lambda url, limit: page) as _:
-            self.assertEqual(examples.seller_kwork_count("WasilevDesign"), 12)
+        with mock.patch.object(examples, "seller_kworks", broken), \
+             mock.patch.object(examples, "_get", lambda url, limit: page):
+            self.assertEqual(examples.seller_kwork_count("WasilevDesign"), 12)  # запасной путь — страница профиля
         self.assertIsNone(examples.seller_kwork_count("../etc/passwd"))
         self.assertEqual(examples.parse_page(PAGE.replace('"gtitle"', '"username":"Nik","gtitle"'), "u")["username"], "Nik")
 
@@ -623,6 +660,43 @@ class DialogTest(Base):
              mock.patch.object(examples, "fetch_kwork", lambda url: dict(EXAMPLE, url=url)):
             asyncio.run(scenario())
         self.assertEqual(db.load_profile(self.uid)["palette"], 1)
+
+    def test_profile_link_takes_kworks_automatically(self):
+        from aiogram import Bot, Dispatcher
+        from aiogram.types import Chat, Message, Update, User
+
+        from kwork_bot import bot as botmod
+
+        tg = FakeTelegram()
+        bot = Bot("1:TEST", session=tg.session)
+        dp = Dispatcher()
+        botmod.router._parent_router = None
+        dp.include_router(botmod.router)
+        user, chat = User(id=self.uid, is_bot=False, first_name="Т"), Chat(id=self.uid, type="private")
+        links = [f"https://kwork.ru/logo/{i}/k{i}" for i in range(1, 8)]
+
+        def fake_fetch(url):
+            no = int(url.split("/")[-2])
+            return dict(EXAMPLE, title=f"Кворк продавца {no}", description=desc(600 + no), url=url, username="Seller")
+
+        async def scenario():
+            for n, t in enumerate(["/start", "https://kwork.ru/user/seller"], 1):
+                if t != "/start":
+                    await botmod.ask_examples(Message(message_id=99, date=dt.datetime.now(), chat=chat, text="x").as_(bot),
+                                              dp.fsm.get_context(bot, self.uid, self.uid))
+                msg = Message(message_id=n, date=dt.datetime.now(), chat=chat, from_user=user, text=t)
+                await dp.feed_update(bot, Update(update_id=n, message=msg))
+
+        with mock.patch.object(examples, "fetch_kwork", fake_fetch), \
+             mock.patch.object(examples, "seller_kworks", lambda name: (7, links)), \
+             mock.patch.object(examples, "seller_kwork_count", lambda name: 7), \
+             mock.patch.object(content, "_llm", lambda *a, **k: FakeLLM()):
+            asyncio.run(scenario())
+        got = db.load_profile(self.uid)["examples"]
+        self.assertEqual(len(got), examples.MAX_EXAMPLES)          # из профиля взяли ровно 5
+        self.assertIn("Взял из вашего профиля кворков: 5", " ".join(tg.texts()))
+        self.assertEqual(db.load_profile(self.uid)["existing_kworks"], 7)  # и сразу перешли к разбору
+        self.assertIn("можно создать ещё <b>293</b>", " ".join(tg.texts()))
 
     def test_stranger_sees_paywall(self):
         db.claim_owner(1)

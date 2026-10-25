@@ -234,9 +234,11 @@ async def cb_new_ok(call: CallbackQuery, state: FSMContext) -> None:
 async def ask_examples(message: Message, state: FSMContext) -> None:
     await state.set_state(Form.examples)
     await message.answer(
-        f"<b>Шаг 1.</b> Пришлите ссылки на 3–{examples.MAX_EXAMPLES} ваших активных кворков — можно все "
-        "одним сообщением.\n\n<i>Например: https://kwork.ru/logo/123456/razrabotka-logotipa</i>\n\n"
-        "Нет ссылки — вставьте текст кворка: название в первой строке, ниже описание.",
+        "<b>Шаг 1.</b> Пришлите ссылку на ваш профиль Kwork — я сам возьму из него до "
+        f"{examples.MAX_EXAMPLES} кворков.\n\n<i>Например: https://kwork.ru/user/ваш_логин</i>\n"
+        "<i>Откройте свой профиль на Kwork и скопируйте адрес из адресной строки.</i>\n\n"
+        "Подойдёт и ссылка на любой ваш кворк. А если хотите показать конкретные — пришлите "
+        "ссылки на них или вставьте текст кворка (название в первой строке, ниже описание).",
         reply_markup=kb([("У меня пока нет кворков", "no_examples")]),
     )
 
@@ -246,15 +248,39 @@ async def got_examples(message: Message, state: FSMContext) -> None:
     uid = message.from_user.id
     text = message.text or message.caption or ""
     urls = examples.find_urls(text)
+    seller = examples.find_profile(text)
+    have = len(db.load_profile(uid).get("examples", []))
     report, found = [], []
-    for source in urls[:examples.MAX_EXAMPLES] or [None]:
+
+    async def take(source: str | None) -> None:
         try:
             found.append(await asyncio.to_thread(examples.fetch_kwork, source) if source
                          else examples.from_text(text))
         except Exception as e:  # noqa: BLE001 — сеть, чужая ссылка, не страница кворка
             why = esc(e) if isinstance(e, ValueError) else "страница не открылась, попробуйте ещё раз"
             report.append(f"⚠️ {esc(source) if source else 'Текст'}: {why}")
-    n = len(db.load_profile(uid).get("examples", []))
+
+    if not urls and not seller:
+        await take(None)
+    for url in urls[:examples.MAX_EXAMPLES]:
+        await take(url)
+    # Ссылка на профиль или на один свой кворк — остальные кворки берём из профиля сами.
+    if seller is None and len(urls) == 1 and found:
+        seller = found[0].get("username") or None
+    room = examples.MAX_EXAMPLES - have - len(found)
+    if seller and room > 0:
+        try:
+            _, links = await asyncio.to_thread(examples.seller_kworks, seller)
+        except Exception as e:  # noqa: BLE001
+            links = []
+            why = esc(e) if isinstance(e, ValueError) else "профиль не открылся, попробуйте ещё раз"
+            report.append(f"⚠️ Профиль: {why}")
+        before = len(found)
+        for url in [u for u in links if u not in urls][:room]:
+            await take(url)
+        if len(found) > before:
+            report.append(f"🔎 Взял из вашего профиля кворков: {len(found) - before}")
+    n = have
     for ex in found:
         n = await asyncio.to_thread(examples.add_example, uid, ex)
         report.append(f"✅ «{esc(ex['title'])}»")
@@ -264,7 +290,7 @@ async def got_examples(message: Message, state: FSMContext) -> None:
         return
     hint = ("Пришлите ещё или нажмите «Готово»." if n >= 3 else
             f"Пришлите ещё {3 - n} — по 3–5 кворкам я лучше пойму ваш стиль." if n else
-            "Не получилось — пришлите ссылку на кворк вида https://kwork.ru/…")
+            "Не получилось — пришлите ссылку на профиль вида https://kwork.ru/user/ваш_логин")
     buttons = [[(f"Готово ({n}) — дальше", "ex_done")]] if n else []
     await message.answer("\n".join(report + [f"\nОбразцов: <b>{n}</b>. {hint}"]), reply_markup=kb(*buttons))
 
