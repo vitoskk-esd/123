@@ -21,6 +21,8 @@ async def main() -> int:
         return 2
     if not os.getenv("ANTHROPIC_API_KEY"):
         print("Внимание: нет ANTHROPIC_API_KEY — бот запустится, но не сможет писать тексты.")
+    if not BOT_CONFIG.images_enabled:
+        print("Нет HF_KEY — обложки будут простыми градиентными (без ИИ-фонов Higgsfield).")
     if not BOT_CONFIG.payments_enabled:
         print("ЮKassa не настроена (YOOKASSA_SHOP_ID / YOOKASSA_SECRET_KEY): оплата выключена, "
               "бесплатный доступ — только у владельца.")

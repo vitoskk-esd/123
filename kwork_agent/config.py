@@ -13,7 +13,7 @@ def _load_dotenv() -> None:
     env = ROOT / ".env"
     if not env.exists():
         return
-    for line in env.read_text(encoding="utf-8").splitlines():
+    for line in env.read_text(encoding="utf-8-sig").splitlines():  # -sig: Блокнот Windows может добавить BOM
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
