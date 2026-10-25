@@ -20,6 +20,7 @@ from kwork_agent.generator import LISTING_SCHEMA, validate
 from kwork_agent.uniqueness import find_duplicate, title_similarity
 
 from . import db, images
+from .kwork_rules import PRICES, category_list, normalize, snap_price
 from .config import BOT_CONFIG
 
 IDEAS_PER_CALL = 50
@@ -197,11 +198,15 @@ def _listing_prompt(profile: dict, ideas: list[dict], hints: dict[int, str]) -> 
   что именно он получит → как идёт работа → почему можно доверять. Первые фразы у
   разных кворков должны отличаться.
 - Никаких контактов, ссылок, e-mail, телефонов и названий мессенджеров — Kwork это запрещает.
-- requirements — что покупатель присылает для старта (до {CONFIG.requirements_max} символов).
-- Цена в рублях не ниже {profile.get('min_price', CONFIG.price_min)} и не выше {CONFIG.price_max},
+- requirements — что покупатель присылает для старта ({CONFIG.requirements_min}–{CONFIG.requirements_max} символов).
+- category_hint — СТРОГО одна строка из списка рубрик Kwork ниже, как написано.
+- Цена в рублях — одна из допустимых на Kwork: {", ".join(str(p) for p in PRICES if p >= profile.get('min_price', 0))};
   срок 1–30 дней — реалистично для объёма работы.
 - cover_text — 2–5 слов крупно на обложку; у каждого кворка свой.
-- Обещай только то, что фрилансер реально сделает; без гарантий дохода и позиций."""
+- Обещай только то, что фрилансер реально сделает; без гарантий дохода и позиций.
+
+РУБРИКИ KWORK:
+{category_list()}"""
 
 
 def _new_listing(uid: int, cand: dict, idea: dict, palette: int, lid: str | None = None) -> dict:
@@ -254,7 +259,7 @@ def generate_listings(uid: int, progress: dict, llm=None) -> list[dict]:
             idea = by_no.pop(cand.get("idea_no"), None)
             if idea is None:
                 continue
-            errors = validate(cand)
+            errors = normalize(cand) + validate(cand)
             if cand["price_rub"] < profile.get("min_price", 0):
                 errors.append(f"цена ниже {profile['min_price']} ₽")
             with lock:
@@ -339,7 +344,7 @@ def rewrite_listing(uid: int, lid: str, wish: str = "", llm=None) -> dict:
         cand = data["listings"][0]
         if old.get("own_photo"):  # обложка — фото клиента, она остаётся
             cand.update(own_photo=True, fp=old.get("fp"))
-        errors = validate(cand)
+        errors = normalize(cand) + validate(cand)
         dup = find_duplicate(cand, others)
         if dup:
             errors.append(f"слишком похоже на «{dup['title']}»")
@@ -364,6 +369,7 @@ def next_cover(uid: int, lid: str) -> dict:
 def set_price(uid: int, lid: str, price: int) -> dict:
     if not CONFIG.price_min <= price <= CONFIG.price_max:
         raise ValueError(f"цена должна быть от {CONFIG.price_min} до {CONFIG.price_max} ₽")
+    price = snap_price(price)  # на Kwork цена выбирается из списка: 500, 1000, 1500 …
     listings = db.load_listings(uid)
     l = _find(listings, lid)
     l["price_rub"] = price

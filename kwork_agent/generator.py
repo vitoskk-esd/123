@@ -58,8 +58,8 @@ def validate(listing: dict) -> list[str]:
             f"описание должно быть {CONFIG.description_min}–{CONFIG.description_max} символов "
             f"(сейчас {len(listing['description'])})"
         )
-    if len(listing["requirements"]) > CONFIG.requirements_max:
-        errors.append(f"«что нужно от покупателя» длиннее {CONFIG.requirements_max} символов")
+    if not CONFIG.requirements_min <= len(listing["requirements"]) <= CONFIG.requirements_max:
+        errors.append(f"«что нужно от покупателя» должно быть {CONFIG.requirements_min}–{CONFIG.requirements_max} символов")
     if not CONFIG.price_min <= listing["price_rub"] <= CONFIG.price_max:
         errors.append(f"цена вне диапазона {CONFIG.price_min}–{CONFIG.price_max}")
     if not 1 <= listing["days"] <= 30:
@@ -103,7 +103,7 @@ def _prompt(n: int, kb: dict, strategy: str, existing: list[dict], rejected: lis
 - Название до {CONFIG.title_max} символов, начинается с глагола в 1-м лице («Настрою…», «Создам…»).
 - Описание {CONFIG.description_min}–{CONFIG.description_max} символов, на русском, живым языком,
   с абзацами; без контактов, ссылок, e-mail, телефонов и названий мессенджеров.
-- requirements — что покупатель должен прислать для старта (до {CONFIG.requirements_max} символов).
+- requirements — что покупатель должен прислать для старта ({CONFIG.requirements_min}–{CONFIG.requirements_max} символов).
 - Цена в рублях {CONFIG.price_min}–{CONFIG.price_max}, срок 1–30 дней, реалистичные для объёма.
 - Все {n} объявлений должны решать разные задачи и отличаться по смыслу и тексту.
 - Обещай только то, что реально сделать; никаких гарантий дохода.{rejected_txt}"""

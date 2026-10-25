@@ -34,7 +34,7 @@ def listing(**kw):
     base = dict(
         idea="Обработка заявок", title="Настрою ИИ-обработку заявок в CRM",
         category_hint="Разработка и IT > Скрипты", description=DESC,
-        requirements="Доступ к CRM и примеры заявок.", price_rub=3000, days=3,
+        requirements="Доступ к CRM и примеры заявок за последний месяц, описание текущего процесса обработки и контакт ответственного.", price_rub=3000, days=3,
         tags=["ии", "crm"], cover_text="ИИ обработка заявок",
     )
     base.update(kw)

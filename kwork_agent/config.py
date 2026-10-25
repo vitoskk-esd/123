@@ -55,10 +55,13 @@ class Config:
 
     # Ограничения полей кворка. Проверьте актуальные правила Kwork и при
     # необходимости поменяйте через переменные окружения.
-    title_max: int = _int("KWORK_TITLE_MAX", 80)
-    description_min: int = _int("KWORK_DESCRIPTION_MIN", 300)
+    # Сняты с формы kwork.ru/new 25.10.2026: название до 70, описание 100–1200,
+    # «От покупателя нужно» 100–500 символов.
+    title_max: int = _int("KWORK_TITLE_MAX", 70)
+    description_min: int = _int("KWORK_DESCRIPTION_MIN", 100)
     description_max: int = _int("KWORK_DESCRIPTION_MAX", 1200)
-    requirements_max: int = _int("KWORK_REQUIREMENTS_MAX", 600)
+    requirements_min: int = _int("KWORK_REQUIREMENTS_MIN", 100)
+    requirements_max: int = _int("KWORK_REQUIREMENTS_MAX", 500)
     price_min: int = _int("KWORK_PRICE_MIN", 500)
     price_max: int = _int("KWORK_PRICE_MAX", 50000)
 

@@ -25,6 +25,7 @@ from kwork_agent.generator import validate
 from kwork_agent.uniqueness import find_duplicate
 
 from . import content, db, disk, images
+from .kwork_rules import category_list, find_category, fit_instruction, normalize
 
 PHOTO_EXT = {".jpg", ".jpeg", ".png", ".webp"}
 TABLE_EXT = {".xlsx", ".csv"}
@@ -261,7 +262,8 @@ def check_rows(uid: int, rows: list[dict]) -> tuple[list[dict], list[str]]:
     previous = content.previous_texts(uid)
     for r in rows:
         probe = {**r, "price_rub": r["price_rub"] or CONFIG.price_min, "days": r["days"] or 1}
-        errors = [e for e in validate(probe) if not e.startswith("описание должно быть")]
+        probe["requirements"] = fit_instruction(r["requirements"])  # короткое дополним сами
+        errors = validate(probe)
         if r["price_rub"] and not CONFIG.price_min <= r["price_rub"] <= CONFIG.price_max:
             errors.append(f"цена вне {CONFIG.price_min}–{CONFIG.price_max} ₽")
         dup = find_duplicate(r, previous + ok)
@@ -333,12 +335,13 @@ def uniquify_photo(src: Path, seed: str, strength: float):
 
 def classify(rows: list[dict], llm=None) -> None:
     """Подбирает рубрику Kwork строкам, где её нет (одним-двумя запросами к ИИ)."""
-    todo = [r for r in rows if not r["category_hint"]]
+    todo = [r for r in rows if not find_category(r["category_hint"])]
     llm = llm or content._llm()
     for i in range(0, len(todo), 40):
         chunk = todo[i:i + 40]
         listing = "\n".join(f"{r['row']}. {r['title']} — {r['description'][:150]}" for r in chunk)
-        data = llm.ask(f"Подбери каждому кворку рубрику Kwork в виде «Раздел > Подраздел».\n\n{listing}",
+        data = llm.ask("Подбери каждому кворку рубрику СТРОГО из списка рубрик Kwork (строку как есть).\n\n"
+                       f"КВОРКИ:\n{listing}\n\nРУБРИКИ KWORK:\n{category_list()}",
                        system=content.SYSTEM, schema=CATEGORY_SCHEMA, effort="low", max_tokens=8000)
         found = {it["row"]: it["category_hint"] for it in data["items"]}
         for r in chunk:
@@ -403,12 +406,14 @@ def finish(uid: int, progress: dict, llm=None) -> int:
         if fix:
             mark = make_unique(src, out, lid, taken, start=1) or mark
         taken.append(mark)
-        listings.append({
+        listing = {
             "id": lid, "idea_no": n, "idea": r["title"], "title": r["title"], "description": r["description"],
-            "requirements": r["requirements"] or "Подробности задачи и пожелания.", "price_rub": r["price_rub"],
+            "requirements": r["requirements"], "price_rub": r["price_rub"],
             "days": r["days"], "category_hint": r["category_hint"], "tags": r["tags"],
             "cover_text": r["title"], "own_photo": True, "fp": mark, "row": r["row"],
-        })
+        }
+        normalize(listing)  # рубрика → номера Kwork, цена из допустимых, «что нужно» ≥ 100 символов
+        listings.append(listing)
         progress["done"] = n
     db.save_listings(uid, listings)
     profile = db.load_profile(uid)

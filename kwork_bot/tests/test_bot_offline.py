@@ -126,9 +126,13 @@ class ContentTests(Base):
     def test_price_below_user_minimum_is_rejected(self):
         content.generate_ideas(self.uid, 1, {}, llm=FakeLLM())
 
+        profile = db.load_profile(self.uid)
+        profile["min_price"] = 1500
+        db.save_profile(self.uid, profile)
+
         class Cheap(FakeLLM):
             def ask(self, prompt, schema=None, **kw):
-                return {"listings": [fake_listing(1, price_rub=600)]}
+                return {"listings": [fake_listing(1, price_rub=600)]}  # 600 → допустимые 1000 < 1500
 
         self.assertEqual(content.generate_listings(self.uid, {}, llm=Cheap()), [])
 
@@ -608,7 +612,10 @@ class BulkImportTests(Base):
         self.assertEqual(bulk.finish(self.uid, {}, llm=FakeLLM()), 3)
         listings = db.load_listings(self.uid)
         self.assertEqual({l["price_rub"] for l in listings}, {2000, 1500})
-        self.assertTrue(all(l["own_photo"] and l["category_hint"] == "Дизайн > Логотипы" for l in listings))
+        # Рубрика — настоящая из списка Kwork, с номерами для расширения; «что нужно» дополнено до 100 символов.
+        self.assertTrue(all(l["own_photo"] and l["category_hint"] == "Дизайн > Логотип и брендинг"
+                            and (l["section_id"], l["category_id"]) == (15, 25)
+                            and len(l["requirements"]) >= 100 for l in listings))
         self.assertEqual(content.uniqueness_report(self.uid), (0, 0))  # копию фото уникализировали
         # Фото клиента не перерисовывается при правке цены, а «Другой фон» обрабатывает его, а не рисует обложку.
         before = db.cover_path(self.uid, listings[0]["id"]).read_bytes()
@@ -708,6 +715,22 @@ class SellerKworksTests(Base):
         with mock.patch("urllib.request.urlopen", lambda req, timeout: Resp(b'{"success":false,"data":null}')):
             with self.assertRaises(ValueError):
                 examples.seller_kworks("Nik")
+
+
+class KworkRulesTests(unittest.TestCase):
+    def test_rules_from_real_form(self):
+        from kwork_bot import kwork_rules as r
+
+        self.assertEqual(sum(len(x["subs"]) for x in r.sections()), 54)
+        cat = r.find_category("Дизайн > Логотипы")
+        self.assertEqual((cat["section_id"], cat["id"]), (15, 25))
+        self.assertIsNone(r.find_category("абракадабра"))
+        self.assertEqual([r.snap_price(p) for p in (None, 600, 4500, 26000, 10**6)], [500, 1000, 4500, 28000, 28000])
+        listing = {"category_hint": "полиграфия", "days": 99, "price_rub": 4200, "requirements": "ТЗ"}
+        self.assertEqual(r.normalize(listing), [])
+        self.assertEqual((listing["category_id"], listing["days"], listing["price_rub"]), (27, 30, 4500))
+        self.assertTrue(r.INSTRUCTION_MIN <= len(listing["requirements"]) <= r.INSTRUCTION_MAX)
+        self.assertEqual(r.normalize({"category_hint": "что-то своё"}), ["рубрика не из списка Kwork"])
 
 
 class KworkLimitTests(Base):
