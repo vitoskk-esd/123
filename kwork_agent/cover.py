@@ -54,6 +54,22 @@ def _fit(draw, text: str, max_w: int):
     return font, textwrap.wrap(text, width=30)[:4]
 
 
+def draw_texts(img, listing: dict, accent: tuple, max_w: int | None = None) -> None:
+    """Полоска-акцент, крупный заголовок и строка «срок · цена» поверх картинки."""
+    from PIL import ImageDraw
+
+    draw = ImageDraw.Draw(img)
+    w, h = img.size
+    draw.rectangle([40, 48, 120, 56], fill=accent)
+    text = (listing.get("cover_text") or listing["title"]).upper()
+    font, lines = _fit(draw, text, max_w or w - 80)
+    y = 90
+    for line in lines:
+        draw.text((40, y), line, font=font, fill=(255, 255, 255))
+        y += font.size + 12 if hasattr(font, "size") else 50
+    draw.text((40, h - 70), f"{listing['days']} дн. · от {listing['price_rub']} ₽", font=_font(22), fill=accent)
+
+
 def make_cover(listing: dict, out_dir: Path | None = None, palette: int | None = None) -> Path:
     """palette — номер цвета из PALETTES; по умолчанию выбирается по id объявления."""
     from PIL import Image, ImageDraw
@@ -71,16 +87,7 @@ def make_cover(listing: dict, out_dir: Path | None = None, palette: int | None =
             color = tuple(int(bg[i] + (accent[i] - bg[i]) * t) for i in range(3))
             draw.line([(x, y), (x + 4, y)], fill=color)
 
-    draw.rectangle([40, 48, 120, 56], fill=accent)
-    text = (listing.get("cover_text") or listing["title"]).upper()
-    font, lines = _fit(draw, text, w - 80)
-    y = 90
-    for line in lines:
-        draw.text((40, y), line, font=font, fill=(255, 255, 255))
-        y += font.size + 12 if hasattr(font, "size") else 50
-
-    sub = _font(22)
-    draw.text((40, h - 70), f"{listing['days']} дн. · от {listing['price_rub']} ₽", font=sub, fill=accent)
+    draw_texts(img, listing, accent)
 
     out_dir = out_dir or CONFIG.data_dir / "covers"
     out_dir.mkdir(parents=True, exist_ok=True)

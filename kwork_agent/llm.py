@@ -28,12 +28,17 @@ class LLM:
         self.client = client or anthropic.Anthropic()
         self.model = model or CONFIG.model
 
+    def _extra(self, output_config: dict) -> dict:
+        # У Haiku нет серверного фолбэка: параметр fallbacks ему не передаём.
+        if self.model.startswith("claude-haiku"):
+            return {"betas": [], "extra_body": {"output_config": output_config}}
+        return {"betas": [FALLBACK_BETA], "extra_body": {"fallbacks": "default", "output_config": output_config}}
+
     def _stream(self, *, max_tokens: int, output_config: dict, **kwargs: Any):
         with self.client.beta.messages.stream(
             model=self.model,
             max_tokens=max_tokens,
-            betas=[FALLBACK_BETA],
-            extra_body={"fallbacks": "default", "output_config": output_config},
+            **self._extra(output_config),
             **kwargs,
         ) as stream:
             return stream.get_final_message()
@@ -41,12 +46,7 @@ class LLM:
     def create(self, **kwargs: Any):
         """Обычный (не потоковый) вызов — для браузерного агента с инструментами."""
         output_config = kwargs.pop("output_config", {"effort": "high"})
-        return self.client.beta.messages.create(
-            model=self.model,
-            betas=[FALLBACK_BETA],
-            extra_body={"fallbacks": "default", "output_config": output_config},
-            **kwargs,
-        )
+        return self.client.beta.messages.create(model=self.model, **self._extra(output_config), **kwargs)
 
     def ask(
         self,
@@ -58,11 +58,21 @@ class LLM:
         schema: dict | None = None,
         effort: str = "high",
         max_tokens: int = 32000,
+        cached_context: str = "",
     ) -> Any:
-        """Возвращает текст ответа или (если передана schema) распарсенный JSON."""
+        """Возвращает текст ответа или (если передана schema) распарсенный JSON.
+
+        cached_context — общий для многих запросов текст (например, примеры кворков):
+        он кэшируется, и повторные запросы читают его примерно в 10 раз дешевле.
+        """
         messages: list[dict] = [{"role": "user", "content": prompt}]
         kwargs: dict[str, Any] = {"messages": messages}
-        if system:
+        if cached_context:
+            kwargs["system"] = [
+                {"type": "text", "text": system},
+                {"type": "text", "text": cached_context, "cache_control": {"type": "ephemeral"}},
+            ]
+        elif system:
             kwargs["system"] = system
         if web:
             tools = [dict(t) for t in WEB_TOOLS]

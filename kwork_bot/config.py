@@ -18,9 +18,18 @@ def _ids(name: str) -> set[int]:
 class BotConfig:
     token: str = os.getenv("KWORK_BOT_TOKEN", "")
     data_dir: Path = Path(os.getenv("KWORK_BOT_DATA", ROOT / "data" / "bot"))
-    # Модель для текстов. Opus — лучше пишет, Sonnet — примерно вдвое дешевле.
-    model: str = os.getenv("KWORK_BOT_MODEL", "claude-opus-5-5")
+    # Тексты кворков (их много) — самая дешёвая модель Haiku. Идеи и разбор образцов
+    # (несколько запросов на человека) — Sonnet: от них зависит качество всей партии.
+    model: str = os.getenv("KWORK_BOT_MODEL", "claude-haiku-5-5")
+    ideas_model: str = os.getenv("KWORK_BOT_IDEAS_MODEL", "claude-sonnet-5-5")
     effort: str = os.getenv("KWORK_BOT_EFFORT", "medium")
+
+    # Картинки: несколько ИИ-фонов на человека, текст поверх рисуется бесплатно.
+    gemini_key: str = os.getenv("GEMINI_API_KEY", "")
+    # gemini — ИИ-фоны, template — только градиенты (бесплатно). По умолчанию gemini, если есть ключ.
+    images: str = os.getenv("KWORK_BOT_IMAGES", "gemini" if os.getenv("GEMINI_API_KEY") else "template")
+    image_model: str = os.getenv("KWORK_BOT_IMAGE_MODEL", "gemini-3.1-flash-lite-image")
+    backgrounds: int = int(os.getenv("KWORK_BOT_BACKGROUNDS", "4"))
     # Сколько запросов к модели идёт одновременно при генерации текстов.
     parallel: int = int(os.getenv("KWORK_BOT_PARALLEL", "6"))
     max_listings: int = int(os.getenv("KWORK_BOT_MAX_LISTINGS", "300"))
@@ -39,6 +48,10 @@ class BotConfig:
     return_url: str = os.getenv("KWORK_BOT_RETURN_URL", "https://t.me")
     # 1 — отправлять чеки по 54-ФЗ через ЮKassa (бот спросит e-mail покупателя перед оплатой).
     receipts: bool = os.getenv("YOOKASSA_RECEIPTS", "0") in ("1", "true", "yes")
+
+    @property
+    def images_enabled(self) -> bool:
+        return self.images == "gemini" and self.backgrounds > 0
 
     @property
     def payments_enabled(self) -> bool:

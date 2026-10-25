@@ -22,7 +22,7 @@ sys.modules.setdefault("anthropic", types.SimpleNamespace(Anthropic=lambda: None
 
 from kwork_agent import storage  # noqa: E402
 from kwork_agent.config import CONFIG  # noqa: E402
-from kwork_bot import content, db, payments  # noqa: E402
+from kwork_bot import content, db, examples, images, payments  # noqa: E402
 from kwork_bot.config import BOT_CONFIG  # noqa: E402
 
 NICHES = ["Нарисую логотип", "Сделаю фирменный стиль", "Оформлю карточки Wildberries", "Создам баннер для сайта",
@@ -43,6 +43,17 @@ def fake_listing(no: int, **kw) -> dict:
     return base
 
 
+EXAMPLE = {"title": "Разработаю логотип для вашего бренда", "description": desc(500, "логотип бренда"),
+           "requirements": "Название компании", "price_rub": 1200, "days": 2, "category_hint": "Логотипы",
+           "cover_url": "", "url": ""}
+
+PAGE = ('<meta property="og:title" content="Разработка логотипа за 3 000 руб., исполнитель X – Kwork">'
+        '<meta property="og:image" content="https://cdn-edge.kwork.ru/pics/t3/1.jpg">'
+        '<script>window.x={"cartItems":[],"kwork":{"gtitle":"Разработка логотипа","price":3000,"days":"3",'
+        '"categoryTitle":"Логотип и брендинг","gdesc":"<p><strong>С нуля.</strong></p><p>&mdash; исходники</p>",'
+        '"ginst":"<p>Название компании</p>","packages":{"standard":{"price":3000}}},"other":1};</script>')
+
+
 class FakeLLM:
     """Отвечает на запрос идей списком ниш, на запрос текстов — кворками по номерам идей из промпта."""
 
@@ -54,6 +65,9 @@ class FakeLLM:
     def ask(self, prompt, schema=None, **kw):
         with self.lock:
             self.prompts.append(prompt)
+        if "summary" in schema["properties"]:
+            return {"skills": "логотипы и фирменный стиль", "style": "коротко, списками",
+                    "summary": "вы дизайнер логотипов"}
         if "ideas" in schema["properties"]:
             start = prompt.count("\n- ") if "(пока нет)" not in prompt else 0
             need = int(prompt.split("Придумай ")[1].split()[0])
@@ -159,6 +173,122 @@ class ContentTests(Base):
         self.assertEqual(cover.read_bytes(), z.read(f"covers/{queue[0]['id']}.png"))
 
 
+class ExamplesAndImagesTests(Base):
+    def test_parse_kwork_page(self):
+        k = examples.parse_page(PAGE, "https://kwork.ru/logo/1/x")
+        self.assertEqual(k["title"], "Разработка логотипа")
+        self.assertEqual(k["price_rub"], 3000)
+        self.assertEqual(k["days"], 3)
+        self.assertEqual(k["description"], "С нуля.\n— исходники")
+        self.assertEqual(k["requirements"], "Название компании")
+        self.assertEqual(k["cover_url"], "https://cdn-edge.kwork.ru/pics/t3/1.jpg")
+        with self.assertRaises(ValueError):
+            examples.parse_page("<html>не кворк</html>", "https://kwork.ru/")
+
+    def test_only_kwork_urls(self):
+        self.assertEqual(examples.find_urls("a https://kwork.ru/x/1/y, b http://evil.ru/z"), ["https://kwork.ru/x/1/y"])
+        for bad in ("https://kwork.ru.evil.com/a", "http://kwork.ru/a", "https://evil.com/kwork.ru"):
+            with self.assertRaises(ValueError):
+                examples._get(bad, 10)
+
+    def test_pasted_text(self):
+        k = examples.from_text("Сделаю логотип\n" + "Описание услуги. " * 20 + "\nЦена 1 500 ₽")
+        self.assertEqual(k["title"], "Сделаю логотип")
+        self.assertEqual(k["price_rub"], 1500)
+        with self.assertRaises(ValueError):
+            examples.from_text("коротко")
+
+    def test_examples_shape_generation_and_block_duplicates(self):
+        examples.add_example(self.uid, dict(EXAMPLE))
+        llm = FakeLLM()
+        profile = content.analyze_examples(self.uid, llm=llm)
+        self.assertEqual(profile["min_price"], max(CONFIG.price_min, 1200))
+        content.generate_ideas(self.uid, 2, {}, llm=llm)
+
+        class Copycat(FakeLLM):
+            def ask(self, prompt, schema=None, cached_context="", **kw):
+                self.prompts.append((prompt, cached_context))
+                return {"listings": [fake_listing(1, title=EXAMPLE["title"], description=EXAMPLE["description"]),
+                                     fake_listing(2)]}
+
+        cc = Copycat()
+        out = content.generate_listings(self.uid, {}, llm=cc)
+        self.assertEqual([l["idea_no"] for l in out], [2])  # копия образца отклонена
+        self.assertIn("АКТИВНЫЕ КВОРКИ ПРОДАВЦА", cc.prompts[0][1])  # образцы — в кэшируемой части
+        self.assertIn("стиле кворков продавца", cc.prompts[0][0])
+
+    def test_ai_backgrounds_and_cover_switch(self):
+        from PIL import Image
+
+        def fake_generate(prompt, refs, out):
+            out.parent.mkdir(parents=True, exist_ok=True)
+            Image.new("RGB", (900, 600), (200, 30, 30)).save(out)
+            return out
+
+        with mock.patch.object(BOT_CONFIG, "images", "gemini"), mock.patch.object(BOT_CONFIG, "backgrounds", 2), \
+             mock.patch.object(images, "generate_image", fake_generate):
+            prog = {}
+            self.assertEqual(len(images.make_backgrounds(self.uid, [], prog)), 2)
+            self.assertEqual(prog["done"], 2)
+            llm = FakeLLM()
+            content.generate_ideas(self.uid, 2, {}, llm=llm)
+            first = content.generate_listings(self.uid, {}, llm=llm)[0]
+        cover = Image.open(db.covers_dir(self.uid) / f"{first['id']}.png")
+        self.assertEqual(cover.size, (660, 440))
+        self.assertGreater(cover.getpixel((650, 220))[0], 150)  # справа виден красный фон
+        self.assertLess(cover.getpixel((5, 430))[0], 60)        # слева тень под текстом
+        self.assertEqual(content.next_cover(self.uid, first["id"])["bg"], first["bg"] + 1)
+
+    def test_image_errors_fall_back_to_gradients(self):
+        def boom(*a):
+            raise RuntimeError("429")
+
+        with mock.patch.object(BOT_CONFIG, "images", "gemini"), mock.patch.object(images, "generate_image", boom):
+            prog = {}
+            self.assertEqual(images.make_backgrounds(self.uid, [], prog), [])
+            self.assertIn("429", prog["error"])
+        l = {"id": "x", "title": "t", "cover_text": "Тест", "days": 1, "price_rub": 500}
+        self.assertTrue(images.render_cover(self.uid, l).exists())
+
+
+class LLMRequestTests(unittest.TestCase):
+    def _capture(self, model, **ask_kw):
+        from kwork_agent.llm import LLM
+
+        sent = {}
+
+        class Stream:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def get_final_message(self):
+                return types.SimpleNamespace(stop_reason="end_turn",
+                                             content=[types.SimpleNamespace(type="text", text='{"ok": 1}')])
+
+        def stream(**kw):
+            sent.update(kw)
+            return Stream()
+
+        client = types.SimpleNamespace(beta=types.SimpleNamespace(messages=types.SimpleNamespace(stream=stream)))
+        LLM(client=client, model=model).ask("q", system="sys", schema={"type": "object"}, **ask_kw)
+        return sent
+
+    def test_haiku_has_no_fallbacks(self):
+        sent = self._capture("claude-haiku-5-5")
+        self.assertEqual(sent["betas"], [])
+        self.assertNotIn("fallbacks", sent["extra_body"])
+        self.assertEqual(sent["extra_body"]["output_config"]["format"]["type"], "json_schema")
+
+    def test_sonnet_keeps_fallbacks_and_cache(self):
+        sent = self._capture("claude-sonnet-5-5", cached_context="образцы")
+        self.assertEqual(sent["extra_body"]["fallbacks"], "default")
+        self.assertEqual(sent["system"][0], {"type": "text", "text": "sys"})
+        self.assertEqual(sent["system"][1]["cache_control"], {"type": "ephemeral"})
+
+
 class AccessAndPaymentTests(Base):
     def test_first_user_becomes_owner(self):
         self.assertFalse(db.has_access(1))
@@ -218,7 +348,8 @@ class FakeTelegram:
                         "Message" in str(ret):
                     return Message(message_id=next(counter), date=dt.datetime.now(),
                                    chat=Chat(id=1, type="private"),
-                                   text=getattr(method, "text", None) or getattr(method, "caption", None) or "")
+                                   text=getattr(method, "text", None) or getattr(method, "caption", None) or ""
+                                   ).as_(bot)  # как настоящий aiogram: ответ привязан к боту
                 if ret is User:
                     return User(id=1, is_bot=True, first_name="bot", username="test_bot")
                 return True
@@ -274,11 +405,17 @@ class DialogTest(Base):
             self.assertIn("владелец", " ".join(tg.texts()))
             self.assertIn("new", tg.buttons())
             await press("new")
-            await text("Рисую логотипы и фирменный стиль для малого бизнеса")
-            await press("exp_skip")
-            await press("mp:1000")
-            self.assertIn("cnt:5", tg.buttons())
-            await press("cnt:5")
+            self.assertIn("no_examples", tg.buttons())
+            await text("Мои кворки: https://kwork.ru/logo/1/a https://kwork.ru/logo/2/b")
+            self.assertIn("ex_done", tg.buttons())
+            self.assertIn("Образцов: <b>1</b>", tg.texts()[-1])  # два одинаковых названия — один образец
+            await press("ex_done")
+            self.assertIn("вы дизайнер логотипов", " ".join(tg.texts()))
+            self.assertIn("cnt_custom", tg.buttons())
+            await press("cnt_custom")
+            await text("пять")
+            self.assertIn("от 1 до", tg.texts()[-1])
+            await text("5")
             self.assertIn("pal:0", tg.buttons())
             await press("pal:1")
             while botmod.JOBS or not db.load_listings(self.uid):
@@ -294,7 +431,8 @@ class DialogTest(Base):
             await press("zip")
             self.assertEqual(type(tg.calls[-1]).__name__, "SendDocument")
 
-        with mock.patch.object(content, "_llm", lambda: llm):
+        with mock.patch.object(content, "_llm", lambda *a, **k: llm), \
+             mock.patch.object(examples, "fetch_kwork", lambda url: dict(EXAMPLE, url=url)):
             asyncio.run(scenario())
         self.assertEqual(db.load_profile(self.uid)["palette"], 1)
 

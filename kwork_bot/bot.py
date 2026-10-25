@@ -1,4 +1,4 @@
-"""Диалог бота: анкета → идеи → тексты и обложки → просмотр и правки → архив для выкладки."""
+"""Диалог бота: 3–5 кворков-образцов → сколько сделать → идеи, тексты, обложки → правки → архив."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from aiogram.types import (BufferedInputFile, CallbackQuery, FSInputFile, Inline
 from kwork_agent.config import CONFIG
 from kwork_agent.cover import PALETTES, make_cover
 
-from . import content, db, payments
+from . import content, db, examples, payments
 from .config import BOT_CONFIG
 from .export import HOW_TO, build_zip
 
@@ -32,12 +32,14 @@ def background(coro) -> None:
     _TASKS.add(task)
     task.add_done_callback(_TASKS.discard)
 
+
 PALETTE_NAMES = ["Зелёный", "Фиолетовый", "Синий", "Оранжевый", "Бирюзовый", "Жёлтый"]
 
 
 class Form(StatesGroup):
+    examples = State()
     skills = State()
-    experience = State()
+    count = State()
     price = State()
     wish = State()
     email = State()
@@ -60,7 +62,7 @@ def esc(s: object) -> str:
 
 def menu_markup(uid: int) -> InlineKeyboardMarkup:
     listings = db.load_listings(uid)
-    rows = [[("📝 Новая анкета", "new")]]
+    rows = [[("✨ Новая партия кворков", "new")]]
     if listings:
         rows.append([(f"📋 Мои кворки ({len(listings)})", "v:0")])
         rows.append([("📦 Скачать всё архивом", "zip")])
@@ -73,8 +75,8 @@ def menu_markup(uid: int) -> InlineKeyboardMarkup:
 async def show_menu(message: Message, uid: int) -> None:
     n = len(db.load_listings(uid))
     text = (f"Готово кворков: <b>{n}</b>. Что делаем дальше?" if n else
-            "Я помогу подготовить кворки для Kwork: придумаю услуги, напишу тексты и сделаю "
-            "обложки. Начнём с короткой анкеты — 5 вопросов.")
+            "Пришлите 3–5 своих кворков с Kwork — я изучу их и сделаю столько новых, сколько "
+            "нужно: другие услуги, в вашем стиле, с текстами и обложками.")
     await message.answer(text, reply_markup=menu_markup(uid))
 
 
@@ -210,10 +212,12 @@ async def cb_new(call: CallbackQuery, state: FSMContext) -> None:
     await call.answer()
     n = len(db.load_listings(call.from_user.id))
     if n:
-        await call.message.answer(f"У вас уже есть {n} кворков. Начать заново? Старые удалятся.",
-                                  reply_markup=kb([("Да, заново", "new_ok"), ("Нет", "menu")]))
+        await call.message.answer(f"У вас уже есть {n} кворков. Начать новую партию? Старые удалятся "
+                                  "(скачайте архив, если ещё не скачали).",
+                                  reply_markup=kb([("Да, новая партия", "new_ok"), ("Нет", "menu")]))
         return
-    await ask_skills(call.message, state)
+    content.reset(call.from_user.id)
+    await ask_examples(call.message, state)
 
 
 @router.callback_query(F.data == "new_ok")
@@ -221,17 +225,88 @@ async def cb_new_ok(call: CallbackQuery, state: FSMContext) -> None:
     if not await guard(call):
         return
     await call.answer()
-    uid = call.from_user.id
-    for l in db.load_listings(uid):
-        (db.covers_dir(uid) / f"{l['id']}.png").unlink(missing_ok=True)
-    db.save_listings(uid, [])
-    await ask_skills(call.message, state)
+    content.reset(call.from_user.id)
+    await ask_examples(call.message, state)
 
 
-async def ask_skills(message: Message, state: FSMContext) -> None:
+# --- Шаг 1: кворки-образцы ---------------------------------------------------------------
+
+async def ask_examples(message: Message, state: FSMContext) -> None:
+    await state.set_state(Form.examples)
+    await message.answer(
+        f"<b>Шаг 1.</b> Пришлите ссылки на 3–{examples.MAX_EXAMPLES} ваших активных кворков — можно все "
+        "одним сообщением.\n\n<i>Например: https://kwork.ru/logo/123456/razrabotka-logotipa</i>\n\n"
+        "Нет ссылки — вставьте текст кворка: название в первой строке, ниже описание.",
+        reply_markup=kb([("У меня пока нет кворков", "no_examples")]),
+    )
+
+
+@router.message(Form.examples)
+async def got_examples(message: Message, state: FSMContext) -> None:
+    uid = message.from_user.id
+    text = message.text or message.caption or ""
+    urls = examples.find_urls(text)
+    report, found = [], []
+    for source in urls[:examples.MAX_EXAMPLES] or [None]:
+        try:
+            found.append(await asyncio.to_thread(examples.fetch_kwork, source) if source
+                         else examples.from_text(text))
+        except Exception as e:  # noqa: BLE001 — сеть, чужая ссылка, не страница кворка
+            why = esc(e) if isinstance(e, ValueError) else "страница не открылась, попробуйте ещё раз"
+            report.append(f"⚠️ {esc(source) if source else 'Текст'}: {why}")
+    n = len(db.load_profile(uid).get("examples", []))
+    for ex in found:
+        n = await asyncio.to_thread(examples.add_example, uid, ex)
+        report.append(f"✅ «{esc(ex['title'])}»")
+    if n >= examples.MAX_EXAMPLES:
+        await message.answer("\n".join(report) + f"\n\nПринял {n} кворков — этого достаточно.")
+        await analyze(message, uid, state)
+        return
+    hint = ("Пришлите ещё или нажмите «Готово»." if n >= 3 else
+            f"Пришлите ещё {3 - n} — по 3–5 кворкам я лучше пойму ваш стиль." if n else
+            "Не получилось — пришлите ссылку на кворк вида https://kwork.ru/…")
+    buttons = [[(f"Готово ({n}) — дальше", "ex_done")]] if n else []
+    await message.answer("\n".join(report + [f"\nОбразцов: <b>{n}</b>. {hint}"]), reply_markup=kb(*buttons))
+
+
+@router.callback_query(F.data == "ex_done")
+async def cb_examples_done(call: CallbackQuery, state: FSMContext) -> None:
+    if not await guard(call):
+        return
+    await call.answer()
+    await analyze(call.message, call.from_user.id, state)
+
+
+async def analyze(message: Message, uid: int, state: FSMContext) -> None:
+    if not db.load_profile(uid).get("examples"):
+        await ask_examples(message, state)
+        return
+    await state.set_state(None)
+    wait = await message.answer("🔎 Изучаю ваши кворки…")
+    JOBS[uid] = {}
+    try:
+        profile = await asyncio.to_thread(content.analyze_examples, uid)
+    except Exception as e:  # noqa: BLE001
+        details = f"\n<code>{esc(type(e).__name__)}: {esc(str(e)[:300])}</code>" if db.is_admin(uid) else ""
+        await wait.edit_text("😔 Не получилось разобрать кворки, попробуйте ещё раз." + details,
+                             reply_markup=kb([("🔁 Ещё раз", "ex_done")]))
+        return
+    finally:
+        JOBS.pop(uid, None)
+    await wait.edit_text(f"Понял: {esc(profile['summary'])}\n"
+                         f"Цены новых кворков — от {profile['min_price']} ₽.")
+    await ask_count(message, state)
+
+
+# --- Если своих кворков нет: коротко о себе ------------------------------------------
+
+@router.callback_query(F.data == "no_examples")
+async def cb_no_examples(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
     await state.set_state(Form.skills)
-    await message.answer("<b>1/5.</b> Что вы умеете и какие услуги хотите продавать?\n\n"
-                         "<i>Например: «Делаю логотипы, баннеры и обложки для соцсетей, работаю в Figma».</i>")
+    await call.message.answer("Тогда расскажите, что вы умеете и какие услуги хотите продавать, "
+                              "и какой у вас опыт.\n\n<i>Например: «Делаю логотипы и баннеры в Figma, "
+                              "3 года, 150 проектов».</i>")
 
 
 @router.message(Form.skills)
@@ -240,50 +315,71 @@ async def got_skills(message: Message, state: FSMContext) -> None:
     if len(text) < 10:
         await message.answer("Напишите чуть подробнее — хотя бы одно предложение.")
         return
-    await state.update_data(skills=text[:1500])
-    await state.set_state(Form.experience)
-    await message.answer("<b>2/5.</b> Какой у вас опыт? Чем можете похвастаться?\n\n"
-                         "<i>Например: «4 года, 200+ проектов, работал с сетью кофеен».</i>",
-                         reply_markup=kb([("Пропустить", "exp_skip")]))
-
-
-@router.callback_query(F.data == "exp_skip", Form.experience)
-async def skip_experience(call: CallbackQuery, state: FSMContext) -> None:
-    await call.answer()
-    await state.update_data(experience="")
-    await ask_price(call.message, state)
-
-
-@router.message(Form.experience)
-async def got_experience(message: Message, state: FSMContext) -> None:
-    await state.update_data(experience=(message.text or "").strip()[:800])
-    await ask_price(message, state)
-
-
-async def ask_price(message: Message, state: FSMContext) -> None:
+    uid = message.from_user.id
+    profile = db.load_profile(uid)
+    profile.update(skills=text[:1500], examples=[])
+    db.save_profile(uid, profile)
     await state.set_state(None)
     prices = [p for p in (500, 1000, 2000, 5000) if p >= CONFIG.price_min]
-    await message.answer("<b>3/5.</b> Минимальная цена одного кворка?",
+    await message.answer("Минимальная цена одного кворка?",
                          reply_markup=kb([(f"{p} ₽", f"mp:{p}") for p in prices]))
 
 
 @router.callback_query(F.data.startswith("mp:"))
 async def got_price(call: CallbackQuery, state: FSMContext) -> None:
     await call.answer()
-    await state.update_data(min_price=int(call.data[3:]))
-    counts = sorted({5, 30, 100, BOT_CONFIG.max_listings})
-    await call.message.answer("<b>4/5.</b> Сколько кворков подготовить?\n"
-                              "<i>Для начала советую 5 — посмотрите качество, потом сделаем остальные.</i>",
-                              reply_markup=kb([(f"{c}" + (" (проба)" if c == 5 else ""), f"cnt:{c}") for c in counts]))
+    profile = db.load_profile(call.from_user.id)
+    profile["min_price"] = int(call.data[3:])
+    db.save_profile(call.from_user.id, profile)
+    await ask_count(call.message, state)
+
+
+# --- Шаг 2: сколько кворков ------------------------------------------------------------
+
+async def ask_count(message: Message, state: FSMContext) -> None:
+    await state.set_state(None)
+    counts = [c for c in (10, 30, 50, 100, 300) if c <= BOT_CONFIG.max_listings]
+    await message.answer(
+        "<b>Шаг 2.</b> Сколько новых кворков создать?\n"
+        "<i>Для начала можно 10 — посмотрите качество, потом доделаем остальные.</i>",
+        reply_markup=kb([(str(c), f"cnt:{c}") for c in counts[:3]], [(str(c), f"cnt:{c}") for c in counts[3:]],
+                        [("✍️ Своё число", "cnt_custom")]),
+    )
+
+
+@router.callback_query(F.data == "cnt_custom")
+async def cb_count_custom(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.set_state(Form.count)
+    await call.message.answer(f"Напишите число от 1 до {BOT_CONFIG.max_listings}:")
+
+
+@router.message(Form.count)
+async def got_count_text(message: Message, state: FSMContext) -> None:
+    digits = "".join(ch for ch in (message.text or "") if ch.isdigit())
+    count = int(digits or 0)
+    if not 1 <= count <= BOT_CONFIG.max_listings:
+        await message.answer(f"Нужно число от 1 до {BOT_CONFIG.max_listings}. Напишите ещё раз.")
+        return
+    await state.set_state(None)
+    await chose_count(message, message.from_user.id, state, count)
 
 
 @router.callback_query(F.data.startswith("cnt:"))
 async def got_count(call: CallbackQuery, state: FSMContext) -> None:
     await call.answer()
-    await state.update_data(count=int(call.data[4:]))
-    await call.message.answer_photo(
+    await chose_count(call.message, call.from_user.id, state, min(int(call.data[4:]), BOT_CONFIG.max_listings))
+
+
+async def chose_count(message: Message, uid: int, state: FSMContext, count: int) -> None:
+    await state.update_data(count=count)
+    if BOT_CONFIG.images_enabled:
+        # Обложки будут на ИИ-фонах в стиле образцов, цвет нужен только для акцента.
+        await start_generation(message, uid, state, palette=5)
+        return
+    await message.answer_photo(
         BufferedInputFile(palette_preview(), "styles.png"),
-        caption="<b>5/5.</b> Выберите цвет обложек:",
+        caption="<b>Шаг 3.</b> Выберите цвет обложек:",
         reply_markup=kb(*[[(f"{i + 1}. {n}", f"pal:{i}") for i, n in list(enumerate(PALETTE_NAMES))[r:r + 3]]
                           for r in (0, 3)]),
     )
@@ -311,17 +407,19 @@ async def got_palette(call: CallbackQuery, state: FSMContext) -> None:
     if not await guard(call):
         return
     await call.answer()
-    uid = call.from_user.id
-    data = await state.get_data()
+    await start_generation(call.message, call.from_user.id, state, palette=int(call.data[4:]))
+
+
+async def start_generation(message: Message, uid: int, state: FSMContext, palette: int) -> None:
+    count = (await state.get_data()).get("count")
     await state.clear()
-    if "skills" not in data:
-        await call.message.answer("Анкета устарела — начнём заново.", reply_markup=kb([("📝 Анкета", "new")]))
-        return
     profile = db.load_profile(uid)
-    profile.update(skills=data["skills"], experience=data.get("experience", ""),
-                   min_price=data.get("min_price", CONFIG.price_min), palette=int(call.data[4:]), ideas=[])
+    if not count or not profile.get("skills"):
+        await message.answer("Давайте начнём заново.", reply_markup=kb([("✨ Новая партия", "new")]))
+        return
+    profile.update(palette=palette, ideas=[])
     db.save_profile(uid, profile)
-    background(run_job(call.bot, uid, call.message.chat.id, data.get("count", 5)))
+    background(run_job(message.bot, uid, message.chat.id, count))
 
 
 @router.callback_query(F.data == "continue")
@@ -335,6 +433,8 @@ async def cb_continue(call: CallbackQuery) -> None:
 # --- Генерация с прогрессом ------------------------------------------------------------
 
 def progress_text(p: dict) -> str:
+    if p.get("stage") == "images":
+        return f"🎨 Рисую фоны для обложек в вашем стиле: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "listings":
         return f"✍️ Пишу тексты и делаю обложки: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "ideas":
@@ -351,8 +451,9 @@ async def run_job(bot: Bot, uid: int, chat_id: int, ideas_count: int | None) -> 
 
     def work() -> None:
         if ideas_count:
-            content.generate_ideas(uid, ideas_count, progress)
-        content.generate_listings(uid, progress)
+            content.generate_all(uid, ideas_count, progress)
+        else:
+            content.generate_listings(uid, progress)
 
     msg = await bot.send_message(chat_id, progress_text(progress) + "\n\nЭто займёт несколько минут — "
                                  "можно закрыть чат, я пришлю сообщение, когда закончу.")
