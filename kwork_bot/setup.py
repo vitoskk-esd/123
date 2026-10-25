@@ -16,6 +16,8 @@ import urllib.request
 
 from kwork_agent.config import ROOT
 
+from .config import BOT_CONFIG
+
 ENV = ROOT / ".env"
 
 
@@ -75,6 +77,31 @@ def check_anthropic(key: str) -> None:
         raise ValueError("нет связи с Claude API — проверьте интернет") from e
 
 
+GEMINI_MODELS = "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1"
+
+
+def check_gemini(key: str) -> None:
+    req = urllib.request.Request(GEMINI_MODELS, headers={"x-goog-api-key": key} if key else {})
+    try:
+        with urllib.request.urlopen(req, timeout=20):
+            pass
+    except urllib.error.HTTPError as e:
+        if e.code in (400, 401, 403):
+            raise ValueError("Google не принял ключ — скопируйте его на aistudio.google.com целиком") from e
+        raise ValueError(f"Gemini ответил ошибкой {e.code}, попробуйте ещё раз") from e
+    except urllib.error.URLError as e:
+        raise ValueError("нет связи с Gemini — проверьте интернет") from e
+
+
+def gemini_keyless() -> bool:
+    """В облачной среде Claude Code ключ Gemini подставляет прокси — свой ключ не нужен."""
+    try:
+        check_gemini("")
+        return True
+    except ValueError:
+        return False
+
+
 def check_higgsfield(key: str) -> None:
     if key.count(":") != 1:
         raise ValueError("ключ Higgsfield состоит из двух частей через двоеточие: key-id:key-secret")
@@ -97,14 +124,23 @@ def check_higgsfield(key: str) -> None:
 
 # --- Диалог ---------------------------------------------------------------------------------
 
-STEPS = [
-    ("KWORK_BOT_TOKEN", "Токен бота",
-     "Telegram → @BotFather → /mybots → ваш бот → API Token. Вид: 1234567890:AAH…", check_telegram, True),
-    ("ANTHROPIC_API_KEY", "Ключ Claude",
-     "console.anthropic.com → API Keys → Create Key. Начинается с sk-ant-", check_anthropic, True),
-    ("HF_KEY", "Ключ Higgsfield (для обложек)",
-     "Тот же, что для рилсов, вид key-id:key-secret. Пустая строка — без ИИ-обложек", check_higgsfield, False),
-]
+def _steps(llm: str) -> list:
+    text_step = (
+        ("GEMINI_API_KEY", "Ключ Gemini (пишет тексты)",
+         "aistudio.google.com → Get API key → Create API key. Бесплатно, начинается обычно с AIza", check_gemini, True)
+        if llm == "gemini" else
+        ("ANTHROPIC_API_KEY", "Ключ Claude (пишет тексты)",
+         "console.anthropic.com → API Keys → Create Key. Начинается с sk-ant-", check_anthropic, True))
+    return [
+        ("KWORK_BOT_TOKEN", "Токен бота",
+         "Telegram → @BotFather → /mybots → ваш бот → API Token. Вид: 1234567890:AAH…", check_telegram, True),
+        text_step,
+        ("HF_KEY", "Ключ Higgsfield (для обложек)",
+         "Тот же, что для рилсов, вид key-id:key-secret. Пустая строка — без ИИ-обложек", check_higgsfield, False),
+    ]
+
+
+STEPS = _steps(BOT_CONFIG.llm)
 
 
 def run_setup(ask=input) -> int:
@@ -112,6 +148,9 @@ def run_setup(ask=input) -> int:
     print("Вставляйте ключ (правая кнопка мыши или Ctrl+V / Cmd+V) и нажимайте Enter.\n")
     for n, (name, title, hint, check, required) in enumerate(STEPS, 1):
         current = os.getenv(name, "") or (_env_local(name) if name == "HF_KEY" else "")
+        if not current and name == "GEMINI_API_KEY" and gemini_keyless():
+            print(f"{n}. {title}: ✓ уже подключён в облачной среде")
+            continue
         if current:
             try:
                 result = check(current)
@@ -148,4 +187,8 @@ def run_setup(ask=input) -> int:
 
 
 def needs_setup() -> bool:
-    return not (os.getenv("KWORK_BOT_TOKEN") and os.getenv("ANTHROPIC_API_KEY"))
+    if not os.getenv("KWORK_BOT_TOKEN"):
+        return True
+    if BOT_CONFIG.llm == "claude":
+        return not os.getenv("ANTHROPIC_API_KEY")
+    return not os.getenv("GEMINI_API_KEY") and not gemini_keyless()

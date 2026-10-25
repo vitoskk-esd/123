@@ -22,8 +22,9 @@ async def main() -> int:
     if not BOT_CONFIG.token:
         print("Нет токена бота. Создайте бота в @BotFather и впишите KWORK_BOT_TOKEN в .env")
         return 2
-    if not os.getenv("ANTHROPIC_API_KEY"):
+    if BOT_CONFIG.llm == "claude" and not os.getenv("ANTHROPIC_API_KEY"):
         print("Внимание: нет ANTHROPIC_API_KEY — бот запустится, но не сможет писать тексты.")
+    print(f"Тексты пишет: {BOT_CONFIG.llm} ({BOT_CONFIG.model}), обложки: {BOT_CONFIG.images}.")
     if not BOT_CONFIG.images_enabled:
         print("Нет HF_KEY — обложки будут простыми градиентными (без ИИ-фонов Higgsfield).")
     if not BOT_CONFIG.payments_enabled:
@@ -43,6 +44,7 @@ def apply_env() -> None:
     """Настройки читаются при импорте — после мастера подхватываем свежие ключи."""
     BOT_CONFIG.token = os.getenv("KWORK_BOT_TOKEN", "")
     BOT_CONFIG.hf_key = os.getenv("HF_KEY", "")
+    BOT_CONFIG.gemini_key = os.getenv("GEMINI_API_KEY", "")
     BOT_CONFIG.return_url = os.getenv("KWORK_BOT_RETURN_URL", BOT_CONFIG.return_url)
     if BOT_CONFIG.hf_key and not os.getenv("KWORK_BOT_IMAGES"):
         BOT_CONFIG.images = "higgsfield"

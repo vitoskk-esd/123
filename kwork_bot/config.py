@@ -14,14 +14,27 @@ def _ids(name: str) -> set[int]:
     return {int(x) for x in os.getenv(name, "").replace(" ", "").split(",") if x}
 
 
+# Кто пишет тексты: gemini (по умолчанию; в облачной среде ключ уже подключён) или claude.
+_LLM = os.getenv("KWORK_BOT_LLM", "gemini")
+_GEMINI = _LLM == "gemini"
+
+
 @dataclass
 class BotConfig:
     token: str = os.getenv("KWORK_BOT_TOKEN", "")
     data_dir: Path = Path(os.getenv("KWORK_BOT_DATA", ROOT / "data" / "bot"))
-    # Тексты кворков (их много) — самая дешёвая модель Haiku. Идеи и разбор образцов
-    # (несколько запросов на человека) — Sonnet: от них зависит качество всей партии.
-    model: str = os.getenv("KWORK_BOT_MODEL", "claude-haiku-5-5")
-    ideas_model: str = os.getenv("KWORK_BOT_IDEAS_MODEL", "claude-sonnet-5-5")
+    llm: str = _LLM
+    # Тексты кворков (их много) — быстрая дешёвая модель; идеи и разбор образцов (несколько
+    # запросов на человека) — та же Gemini с «высоким» размышлением или Claude Sonnet.
+    model: str = os.getenv("KWORK_BOT_MODEL", "gemini-3.5-flash" if _GEMINI else "claude-haiku-5-5")
+    ideas_model: str = os.getenv("KWORK_BOT_IDEAS_MODEL", "gemini-3.5-flash" if _GEMINI else "claude-sonnet-5-5")
+    # Gemini: если модель перегружена (503) — пробуем следующие. Проверено 25.10: отвечали все три,
+    # но то одна, то другая выдавала 503/502.
+    fallback_models: list[str] = field(default_factory=lambda: [
+        m for m in os.getenv("KWORK_BOT_FALLBACK_MODELS",
+                             "gemini-3-flash-preview,gemini-flash-lite-latest").split(",") if m])
+    # Ключ Gemini из aistudio.google.com. В облачной среде Claude Code его подставляет прокси — можно не задавать.
+    gemini_key: str = os.getenv("GEMINI_API_KEY", "")
     effort: str = os.getenv("KWORK_BOT_EFFORT", "medium")
 
     # Картинки: несколько ИИ-фонов на человека (Higgsfield API), текст поверх рисуется бесплатно.

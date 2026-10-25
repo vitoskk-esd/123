@@ -288,12 +288,12 @@ class SetupWizardTests(unittest.TestCase):
             root = Path(tmp)
             (root / ".env.local").write_text("HF_KEY=id:secret\n")
             answers = iter(["1:bad", "KWORK_BOT_TOKEN=1:good", "", "sk-ant-ok"])
-            steps = [(n, t, h, {"KWORK_BOT_TOKEN": tg}.get(n, lambda v: None), r) for n, t, h, _, r in setup.STEPS]
+            steps = [(n, t, h, {"KWORK_BOT_TOKEN": tg}.get(n, lambda v: None), r) for n, t, h, _, r in setup._steps("claude")]
             clean_env = {k: v for k, v in os.environ.items()
                          if k not in ("KWORK_BOT_TOKEN", "ANTHROPIC_API_KEY", "HF_KEY", "KWORK_BOT_RETURN_URL")}
             with mock.patch.object(setup, "ROOT", root), mock.patch.object(setup, "ENV", root / ".env"), \
                  mock.patch.object(setup, "STEPS", steps), mock.patch.dict(os.environ, clean_env, clear=True), \
-                 mock.patch("builtins.print"):
+                 mock.patch("builtins.print"), mock.patch.object(BOT_CONFIG, "llm", "claude"):
                 self.assertTrue(setup.needs_setup())
                 setup.run_setup(ask=lambda prompt: next(answers))
                 self.assertFalse(setup.needs_setup())
@@ -337,6 +337,63 @@ class HiggsfieldClientTests(unittest.TestCase):
         with mock.patch.object(images, "_hf", lambda *a, **k: next(replies)):
             with self.assertRaises(RuntimeError):
                 images.hf_generate("m", {}, Path("/nonexistent/x.png"))
+
+
+class GeminiTests(unittest.TestCase):
+    def _http_error(self, code):
+        import urllib.error
+
+        return urllib.error.HTTPError("u", code, "x", {}, io.BytesIO(b'{"error":"busy"}'))
+
+    def test_request_shape_and_fallback(self):
+        from kwork_bot import gemini_llm
+
+        sent = []
+        replies = iter([self._http_error(503),
+                        {"candidates": [{"content": {"parts": [{"text": "думаю", "thought": True},
+                                                               {"text": '{"ok": 1}'}]}}]}])
+
+        def fake_post(self_, model, body):
+            sent.append((model, body))
+            r = next(replies)
+            if isinstance(r, Exception):
+                raise r
+            return r
+
+        with mock.patch.object(gemini_llm.GeminiLLM, "_post", fake_post):
+            llm = gemini_llm.GeminiLLM("main-model", fallbacks=["spare-model"])
+            out = llm.ask("вопрос", system="сис", schema={"type": "object"}, effort="high", cached_context="образцы")
+        self.assertEqual(out, {"ok": 1})
+        self.assertEqual([m for m, _ in sent], ["main-model", "spare-model"])  # 503 → запасная модель
+        body = sent[0][1]
+        self.assertEqual(body["systemInstruction"]["parts"][0]["text"], "образцы\n\nсис")
+        self.assertEqual(body["generationConfig"]["responseJsonSchema"], {"type": "object"})
+        self.assertEqual(body["generationConfig"]["thinkingConfig"], {"thinkingLevel": "high"})
+
+    def test_retries_then_gives_up(self):
+        from kwork_bot import gemini_llm
+
+        calls = []
+
+        def busy(self_, model, body):
+            calls.append(model)
+            raise self._http_error(503)
+
+        with mock.patch.object(gemini_llm.GeminiLLM, "_post", busy), \
+             mock.patch.object(gemini_llm.time, "sleep", lambda s: None):
+            with self.assertRaises(gemini_llm.GeminiError):
+                gemini_llm.GeminiLLM("a", fallbacks=["b"]).ask("q")
+        self.assertEqual(len(calls), 2 * gemini_llm.ROUNDS)
+
+    def test_bad_request_is_not_retried_forever(self):
+        from kwork_bot import gemini_llm
+
+        def forbidden(self_, model, body):
+            raise self._http_error(403)
+
+        with mock.patch.object(gemini_llm.GeminiLLM, "_post", forbidden):
+            with self.assertRaises(gemini_llm.GeminiError):
+                gemini_llm.GeminiLLM("a", fallbacks=[]).ask("q")
 
 
 class LLMRequestTests(unittest.TestCase):

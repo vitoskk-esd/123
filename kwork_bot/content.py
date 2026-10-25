@@ -3,8 +3,8 @@
 Функции синхронные (бот вызывает их в отдельном потоке) и сообщают прогресс через
 словарь progress: {"stage": ..., "done": ..., "total": ...}.
 
-Экономия: разбор образцов и идеи (несколько запросов) — на BOT_CONFIG.ideas_model,
-тексты (десятки запросов) — на дешёвой BOT_CONFIG.model. Образцы кворков идут в
+Экономия: разбор образцов и идеи (несколько запросов) — с глубоким размышлением на
+BOT_CONFIG.ideas_model, тексты (десятки запросов) — быстро на BOT_CONFIG.model. Образцы кворков идут в
 кэшируемую часть промпта: каждый следующий запрос читает их в ~10 раз дешевле.
 """
 
@@ -83,6 +83,10 @@ SYSTEM = ("Ты — сильный копирайтер, который помо
 
 
 def _llm(model: str | None = None):
+    if BOT_CONFIG.llm == "gemini":
+        from .gemini_llm import GeminiLLM
+
+        return GeminiLLM(model=model or BOT_CONFIG.model)
     from kwork_agent.llm import LLM
 
     return LLM(model=model or BOT_CONFIG.model)
@@ -118,7 +122,7 @@ def analyze_examples(uid: int, llm=None) -> dict:
     profile = db.load_profile(uid)
     llm = llm or _llm(BOT_CONFIG.ideas_model)
     data = llm.ask("Изучи кворки продавца и опиши его нишу и стиль.\n\n" + examples_block(profile),
-                   system=SYSTEM, schema=PROFILE_SCHEMA, effort=BOT_CONFIG.effort, max_tokens=8000)
+                   system=SYSTEM, schema=PROFILE_SCHEMA, effort="high", max_tokens=8000)
     prices = [e["price_rub"] for e in profile["examples"] if e.get("price_rub")]
     profile.update(skills=data["skills"], style=data["style"], summary=data["summary"],
                    visual_brief=data["visual_brief"],
@@ -152,7 +156,7 @@ def generate_ideas(uid: int, n: int, progress: dict, llm=None) -> list[dict]:
 
 Уже есть (не повторяй ни по смыслу, ни по формулировке):
 {taken}""",
-            system=SYSTEM, schema=IDEAS_SCHEMA, effort=BOT_CONFIG.effort, max_tokens=32000,
+            system=SYSTEM, schema=IDEAS_SCHEMA, effort="high", max_tokens=32000,
             cached_context=examples_block(profile),
         )
         for idea in data["ideas"]:
