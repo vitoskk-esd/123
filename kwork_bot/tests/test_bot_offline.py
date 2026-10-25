@@ -116,7 +116,7 @@ class ContentTests(Base):
         self.assertTrue(any("ПРОШЛАЯ ПОПЫТКА ОТКЛОНЕНА" in p for p in llm.prompts))
         self.assertEqual({l["palette"] for l in listings}, {2})
         for l in listings:
-            self.assertTrue((db.covers_dir(self.uid) / f"{l['id']}.png").exists())
+            self.assertTrue(db.cover_path(self.uid, l["id"]).exists())
         self.assertEqual(content.missing_ideas(self.uid), [])
 
     def test_price_below_user_minimum_is_rejected(self):
@@ -141,7 +141,7 @@ class ContentTests(Base):
         new = content.rewrite_listing(self.uid, first["id"], "короче", llm=Rewriter())
         self.assertEqual(new["id"], first["id"])
         self.assertEqual(new["title"], "Нарисую новый логотип")
-        self.assertEqual(len(list(db.covers_dir(self.uid).glob("*.png"))), 3)
+        self.assertEqual(len(list(db.covers_dir(self.uid).glob("*.jpg"))), 3)
 
         self.assertEqual(content.next_cover(self.uid, first["id"])["palette"], 3)
         self.assertEqual(content.set_price(self.uid, first["id"], 2500)["price_rub"], 2500)
@@ -176,9 +176,9 @@ class ContentTests(Base):
 
         from kwork_agent.cover import cover_for
 
-        cover = CONFIG.data_dir / "covers" / f"{queue[0]['id']}.png"
+        cover = CONFIG.data_dir / "covers" / f"{queue[0]['id']}.jpg"
         self.assertEqual(cover_for(queue[0]), cover)
-        self.assertEqual(cover.read_bytes(), z.read(f"covers/{queue[0]['id']}.png"))
+        self.assertEqual(cover.read_bytes(), z.read(f"covers/{queue[0]['id']}.jpg"))
 
 
 class ExamplesAndImagesTests(Base):
@@ -250,7 +250,7 @@ class ExamplesAndImagesTests(Base):
             llm = FakeLLM()
             content.generate_ideas(self.uid, 2, {}, llm=llm)
             first = content.generate_listings(self.uid, {}, llm=llm)[0]
-        cover = Image.open(db.covers_dir(self.uid) / f"{first['id']}.png")
+        cover = Image.open(db.cover_path(self.uid, first["id"]))
         self.assertEqual(cover.size, (660, 440))
         self.assertGreater(cover.getpixel((650, 220))[0], 150)  # справа виден красный фон
         self.assertLess(cover.getpixel((5, 430))[0], 60)        # слева тень под текстом
@@ -375,6 +375,28 @@ class LLMRequestTests(unittest.TestCase):
         self.assertEqual(sent["extra_body"]["fallbacks"], "default")
         self.assertEqual(sent["system"][0], {"type": "text", "text": "sys"})
         self.assertEqual(sent["system"][1]["cache_control"], {"type": "ephemeral"})
+
+
+class ArchiveSizeTests(Base):
+    def test_300_covers_fit_telegram_limit(self):
+        """Бот может отправить файл до 50 МБ — архив на 300 кворков с ИИ-фонами должен влезать с запасом."""
+        from PIL import Image
+
+        from kwork_bot.export import build_zip
+
+        # Фон с шумом — худший случай для сжатия (реальные фоны Recraft сжимаются лучше).
+        bg = images.backgrounds_dir(self.uid) / "bg1.png"
+        bg.parent.mkdir(parents=True, exist_ok=True)
+        noise = Image.effect_noise((1248, 832), 40).convert("RGB")
+        Image.blend(Image.new("RGB", noise.size, (40, 60, 120)), noise, 0.35).save(bg)
+        listings = []
+        for no in range(1, 301):
+            l = fake_listing(no, id=f"id{no:03d}", palette=1, bg=0, cover_text=f"Услуга номер {no} для бизнеса")
+            images.render_cover(self.uid, l)
+            listings.append(l)
+        db.save_listings(self.uid, listings)
+        size_mb = len(build_zip(self.uid)) / 1024 / 1024
+        self.assertLess(size_mb, 45, f"архив {size_mb:.1f} МБ")
 
 
 class AccessAndPaymentTests(Base):

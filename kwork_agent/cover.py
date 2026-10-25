@@ -98,5 +98,8 @@ def make_cover(listing: dict, out_dir: Path | None = None, palette: int | None =
 
 def cover_for(listing: dict) -> Path:
     """Готовая обложка (например, пришла из бота через import) или новая."""
-    path = CONFIG.data_dir / "covers" / f"{listing['id']}.png"
-    return path if path.exists() else make_cover(listing)
+    for ext in ("jpg", "png"):
+        path = CONFIG.data_dir / "covers" / f"{listing['id']}.{ext}"
+        if path.exists():
+            return path
+    return make_cover(listing)

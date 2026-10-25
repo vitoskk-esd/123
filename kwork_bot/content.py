@@ -356,7 +356,7 @@ def delete_listing(uid: int, lid: str) -> None:
         if idea["no"] == gone["idea_no"]:
             idea["skipped"] = True
     db.save_profile(uid, profile)
-    (db.covers_dir(uid) / f"{lid}.png").unlink(missing_ok=True)
+    db.cover_path(uid, lid).unlink(missing_ok=True)
     db.save_listings(uid, [l for l in listings if l["id"] != lid])
 
 

@@ -515,7 +515,7 @@ async def show_card(message: Message, uid: int, i: int, edit: bool) -> None:
     i %= len(listings)
     l = listings[i]
     text, markup = card(l, i, len(listings))
-    photo = FSInputFile(db.covers_dir(uid) / f"{l['id']}.png")
+    photo = FSInputFile(db.cover_path(uid, l["id"]))
     if edit and message.photo:
         try:
             await message.edit_media(InputMediaPhoto(media=photo, caption=text), reply_markup=markup)

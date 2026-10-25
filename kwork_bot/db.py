@@ -37,6 +37,12 @@ def covers_dir(uid: int) -> Path:
     return d
 
 
+def cover_path(uid: int, lid: str) -> Path:
+    # JPEG: обложка на ИИ-фоне весит ~40 КБ против ~220 КБ в PNG, и архив на 300 кворков
+    # (~14 МБ) проходит в лимит Telegram на файлы от бота (50 МБ).
+    return covers_dir(uid) / f"{lid}.jpg"
+
+
 # --- Профиль: анкета, оплата, идеи ------------------------------------------
 
 def load_profile(uid: int) -> dict:

@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 import urllib.request
@@ -132,16 +133,24 @@ def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> P
         draw.line([(x, 0), (x, h)], fill=int(235 * (1 - t)))
     img = Image.composite(Image.new("RGB", SIZE, (8, 10, 18)), img, mask)
     draw_texts(img, listing, accent, max_w=int(w * 0.62))
-    img.save(out)
+    return _save_jpeg(img, out)
+
+
+def _save_jpeg(img, out: Path) -> Path:
+    img.convert("RGB").save(out, "JPEG", quality=90, optimize=True, progressive=True)
     return out
 
 
 def render_cover(uid: int, listing: dict) -> Path:
     """Рисует обложку кворка: на ИИ-фоне (если есть) или градиентную."""
+    from PIL import Image
+
     bgs = backgrounds(uid)
     style = listing.get("palette", 0)
+    out = db.cover_path(uid, listing["id"])
     if not bgs:
-        return make_cover(listing, out_dir=db.covers_dir(uid), palette=style)
+        with tempfile.TemporaryDirectory() as tmp:
+            return _save_jpeg(Image.open(make_cover(listing, out_dir=Path(tmp), palette=style)), out)
     accent = PALETTES[style % len(PALETTES)][1]
     bg = bgs[listing.get("bg", 0) % len(bgs)]
-    return _cover_on_background(listing, bg, accent, db.covers_dir(uid) / f"{listing['id']}.png")
+    return _cover_on_background(listing, bg, accent, out)

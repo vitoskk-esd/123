@@ -35,7 +35,6 @@ COLUMNS = [
 
 def build_zip(uid: int) -> bytes:
     listings = db.load_listings(uid)
-    covers = db.covers_dir(uid)
     table = io.StringIO()
     # Точка с запятой и BOM — чтобы русский Excel открыл файл двойным щелчком без «кракозябр».
     writer = csv.writer(table, delimiter=";")
@@ -49,7 +48,7 @@ def build_zip(uid: int) -> bytes:
         z.writestr("listings.json", json.dumps(listings, ensure_ascii=False, indent=2))
         z.writestr("КАК_ВЫЛОЖИТЬ.txt", HOW_TO)
         for l in listings:
-            cover = covers / f"{l['id']}.png"
+            cover = db.cover_path(uid, l["id"])
             if cover.exists():
-                z.write(cover, f"covers/{l['id']}.png")
+                z.write(cover, f"covers/{cover.name}")
     return buf.getvalue()

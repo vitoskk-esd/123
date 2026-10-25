@@ -13,7 +13,7 @@ REQUIRED = ("id", "title", "category_hint", "description", "requirements", "pric
 
 
 def import_archive(path: Path) -> int:
-    """Добавляет объявления из ZIP (listings.json + covers/<id>.png). Возвращает, сколько добавлено."""
+    """Добавляет объявления из ZIP (listings.json + covers/<id>.jpg|png). Возвращает, сколько добавлено."""
     listings = storage.load_listings()
     known = {l["id"] for l in listings}
     covers = CONFIG.data_dir / "covers"
@@ -27,9 +27,11 @@ def import_archive(path: Path) -> int:
                 continue
             if item["id"] in known:
                 continue
-            cover = f"covers/{item['id']}.png"
-            if cover in z.namelist():
-                (covers / f"{item['id']}.png").write_bytes(z.read(cover))
+            for ext in ("jpg", "png"):
+                cover = f"covers/{item['id']}.{ext}"
+                if cover in z.namelist():
+                    (covers / f"{item['id']}.{ext}").write_bytes(z.read(cover))
+                    break
             item.setdefault("idea", item["title"])
             item.setdefault("cover_text", item["title"])
             item.update(status="draft", attempts=0, created=storage.today())
