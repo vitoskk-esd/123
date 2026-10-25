@@ -725,7 +725,7 @@ class KworkRulesTests(unittest.TestCase):
         cat = r.find_category("Дизайн > Логотипы")
         self.assertEqual((cat["section_id"], cat["id"]), (15, 25))
         self.assertIsNone(r.find_category("абракадабра"))
-        self.assertEqual([r.snap_price(p) for p in (None, 600, 4500, 26000, 10**6)], [500, 1000, 4500, 28000, 28000])
+        self.assertEqual([r.snap_price(p) for p in (None, 600, 4500, 26000, 10**6)], [500, 1000, 4500, 27000, 130000])
         listing = {"category_hint": "полиграфия", "days": 99, "price_rub": 4200, "requirements": "ТЗ"}
         self.assertEqual(r.normalize(listing), [])
         self.assertEqual((listing["category_id"], listing["days"], listing["price_rub"]), (27, 30, 4500))
