@@ -76,7 +76,17 @@ def parse_page(page: str, url: str) -> dict:
         "category_hint": data.get("categoryTitle", ""),
         "cover_url": _meta(page, "og:image"),
         "url": url,
+        "username": data.get("username", ""),
     }
+
+
+def seller_kwork_count(username: str) -> int | None:
+    """Сколько активных кворков у продавца — из профиля kwork.ru/user/<имя> ("totalKworks")."""
+    if not re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", username or ""):
+        return None
+    page = _get(f"https://kwork.ru/user/{username.lower()}", 3_000_000).decode("utf-8", "replace")
+    m = re.search(r'"totalKworks"\s*:\s*(\d+)', page)
+    return int(m.group(1)) if m else None
 
 
 def fetch_kwork(url: str) -> dict:

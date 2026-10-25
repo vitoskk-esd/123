@@ -35,6 +35,8 @@ class BotConfig:
     # Сколько запросов к модели идёт одновременно при генерации текстов.
     parallel: int = int(os.getenv("KWORK_BOT_PARALLEL", "6"))
     max_listings: int = int(os.getenv("KWORK_BOT_MAX_LISTINGS", "300"))
+    # Сколько кворков Kwork разрешает держать одному продавцу (вместе с уже имеющимися).
+    kwork_limit: int = int(os.getenv("KWORK_LIMIT", "300"))
 
     # Доступ: админы пользуются бесплатно. Если список пуст — владельцем станет
     # первый, кто напишет боту /start (он сохраняется в data/bot/owner.json).

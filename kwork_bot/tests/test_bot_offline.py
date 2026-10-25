@@ -399,6 +399,27 @@ class ArchiveSizeTests(Base):
         self.assertLess(size_mb, 45, f"архив {size_mb:.1f} МБ")
 
 
+class KworkLimitTests(Base):
+    def test_room_respects_kwork_limit(self):
+        profile = db.load_profile(self.uid)
+        profile.update(examples=[dict(EXAMPLE)], existing_kworks=None)
+        db.save_profile(self.uid, profile)
+        self.assertEqual(content.room(self.uid), 299)  # профиль не открылся — считаем образцы
+        profile["existing_kworks"] = 295
+        db.save_profile(self.uid, profile)
+        self.assertEqual(content.room(self.uid), 5)
+        profile["existing_kworks"] = 310
+        db.save_profile(self.uid, profile)
+        self.assertEqual(content.room(self.uid), 0)
+
+    def test_seller_count_from_profile(self):
+        page = b'<script>{"user":{"totalKworks":12,"totalReviewsCount":501}}</script>'
+        with mock.patch.object(examples, "_get", lambda url, limit: page) as _:
+            self.assertEqual(examples.seller_kwork_count("WasilevDesign"), 12)
+        self.assertIsNone(examples.seller_kwork_count("../etc/passwd"))
+        self.assertEqual(examples.parse_page(PAGE.replace('"gtitle"', '"username":"Nik","gtitle"'), "u")["username"], "Nik")
+
+
 class AccessAndPaymentTests(Base):
     def test_first_user_becomes_owner(self):
         self.assertFalse(db.has_access(1))

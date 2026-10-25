@@ -360,6 +360,18 @@ def delete_listing(uid: int, lid: str) -> None:
     db.save_listings(uid, [l for l in listings if l["id"] != lid])
 
 
+def existing_kworks(uid: int) -> int:
+    """Сколько кворков уже на аккаунте: из профиля Kwork, иначе — хотя бы присланные образцы."""
+    profile = db.load_profile(uid)
+    found = profile.get("existing_kworks")
+    return found if found is not None else len(profile.get("examples", []))
+
+
+def room(uid: int) -> int:
+    """Сколько новых кворков можно создать, не превысив лимит Kwork."""
+    return max(0, min(BOT_CONFIG.max_listings, BOT_CONFIG.kwork_limit - existing_kworks(uid)))
+
+
 def reset(uid: int) -> None:
     """Новая партия: убираем прошлые кворки, образцы и фоны (оплата и настройки остаются)."""
     import shutil
@@ -368,6 +380,6 @@ def reset(uid: int) -> None:
         shutil.rmtree(db.user_dir(uid) / sub, ignore_errors=True)
     db.save_listings(uid, [])
     profile = db.load_profile(uid)
-    for key in ("examples", "ideas", "skills", "style", "summary", "min_price", "visual_brief"):
+    for key in ("examples", "ideas", "skills", "style", "summary", "min_price", "visual_brief", "existing_kworks"):
         profile.pop(key, None)
     db.save_profile(uid, profile)

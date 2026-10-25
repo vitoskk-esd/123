@@ -82,7 +82,7 @@ async def show_menu(message: Message, uid: int) -> None:
 
 async def show_paywall(message: Message) -> None:
     text = (f"Доступ к боту — <b>{BOT_CONFIG.price_rub} ₽ разово</b>.\n\n"
-            f"Что входит:\n• до {BOT_CONFIG.max_listings} уникальных кворков под ваши навыки\n"
+            f"Что входит:\n• до {BOT_CONFIG.max_listings} уникальных кворков под ваши навыки (лимит Kwork)\n"
             "• названия, описания, цены и сроки по правилам Kwork\n"
             "• обложки в едином стиле\n• правки: переписать, другая обложка, цена\n"
             "• архив с таблицей и картинками для быстрой выкладки")
@@ -293,8 +293,21 @@ async def analyze(message: Message, uid: int, state: FSMContext) -> None:
         return
     finally:
         JOBS.pop(uid, None)
-    await wait.edit_text(f"Понял: {esc(profile['summary'])}\n"
-                         f"Цены новых кворков — от {profile['min_price']} ₽.")
+    usernames = [e.get("username") for e in profile["examples"] if e.get("username")]
+    try:
+        found = await asyncio.to_thread(examples.seller_kwork_count, usernames[0]) if usernames else None
+    except Exception:  # noqa: BLE001 — профиль не открылся: считаем по образцам
+        found = None
+    profile = db.load_profile(uid)
+    profile["existing_kworks"] = found
+    db.save_profile(uid, profile)
+    have = content.existing_kworks(uid)
+    await wait.edit_text(
+        f"Понял: {esc(profile['summary'])}\nЦены новых кворков — от {profile['min_price']} ₽.\n\n"
+        f"На Kwork можно держать до {BOT_CONFIG.kwork_limit} кворков. "
+        + (f"В вашем профиле сейчас {have} — можно создать ещё <b>{content.room(uid)}</b>."
+           if found is not None else
+           f"Сколько у вас уже есть, узнать не получилось — учту только присланные ({have})."))
     await ask_count(message, state)
 
 
@@ -338,12 +351,18 @@ async def got_price(call: CallbackQuery, state: FSMContext) -> None:
 
 async def ask_count(message: Message, state: FSMContext) -> None:
     await state.set_state(None)
-    counts = [c for c in (10, 30, 50, 100, 300) if c <= BOT_CONFIG.max_listings]
+    free = content.room(message.chat.id)
+    if free == 0:
+        await message.answer(f"У вас уже {BOT_CONFIG.kwork_limit} кворков — это лимит Kwork. Чтобы добавить "
+                             "новые, сначала удалите или архивируйте часть старых.", reply_markup=kb([("🏠 Меню", "menu")]))
+        return
+    counts = [c for c in (10, 30, 50, 100) if c < free]
+    buttons = [(str(c), f"cnt:{c}") for c in counts] + [(f"Все {free}", f"cnt:{free}")]
     await message.answer(
-        "<b>Шаг 2.</b> Сколько новых кворков создать?\n"
-        "<i>Для начала можно 10 — посмотрите качество, потом доделаем остальные.</i>",
-        reply_markup=kb([(str(c), f"cnt:{c}") for c in counts[:3]], [(str(c), f"cnt:{c}") for c in counts[3:]],
-                        [("✍️ Своё число", "cnt_custom")]),
+        f"<b>Шаг 2.</b> Сколько новых кворков создать? Свободно мест: <b>{free}</b>.\n"
+        "<i>Для начала можно 10 — посмотрите качество, потом доделаем остальные.</i>\n"
+        "<i>Кворки на модерации и на паузе в профиле не видны — если такие есть, берите с запасом.</i>",
+        reply_markup=kb(buttons[:3], buttons[3:], [("✍️ Своё число", "cnt_custom")]),
     )
 
 
@@ -351,15 +370,16 @@ async def ask_count(message: Message, state: FSMContext) -> None:
 async def cb_count_custom(call: CallbackQuery, state: FSMContext) -> None:
     await call.answer()
     await state.set_state(Form.count)
-    await call.message.answer(f"Напишите число от 1 до {BOT_CONFIG.max_listings}:")
+    await call.message.answer(f"Напишите число от 1 до {content.room(call.from_user.id)}:")
 
 
 @router.message(Form.count)
 async def got_count_text(message: Message, state: FSMContext) -> None:
     digits = "".join(ch for ch in (message.text or "") if ch.isdigit())
-    count = int(digits or 0)
-    if not 1 <= count <= BOT_CONFIG.max_listings:
-        await message.answer(f"Нужно число от 1 до {BOT_CONFIG.max_listings}. Напишите ещё раз.")
+    count, free = int(digits or 0), content.room(message.from_user.id)
+    if not 1 <= count <= free:
+        await message.answer(f"Нужно число от 1 до {free} — столько мест свободно до лимита Kwork. "
+                             "Напишите ещё раз.")
         return
     await state.set_state(None)
     await chose_count(message, message.from_user.id, state, count)
@@ -368,7 +388,11 @@ async def got_count_text(message: Message, state: FSMContext) -> None:
 @router.callback_query(F.data.startswith("cnt:"))
 async def got_count(call: CallbackQuery, state: FSMContext) -> None:
     await call.answer()
-    await chose_count(call.message, call.from_user.id, state, min(int(call.data[4:]), BOT_CONFIG.max_listings))
+    count = min(int(call.data[4:]), content.room(call.from_user.id))
+    if count < 1:
+        await call.message.answer("Свободных мест до лимита Kwork не осталось.")
+        return
+    await chose_count(call.message, call.from_user.id, state, count)
 
 
 async def chose_count(message: Message, uid: int, state: FSMContext, count: int) -> None:
