@@ -484,7 +484,9 @@ async def cb_continue(call: CallbackQuery) -> None:
 
 def progress_text(p: dict) -> str:
     if p.get("stage") == "images":
-        return f"🎨 Рисую уникальный фон для каждого кворка: <b>{p['done']} из {p['total']}</b>"
+        return f"🎨 Рисую фоны для обложек: <b>{p['done']} из {p['total']}</b>"
+    if p.get("stage") == "covers":
+        return f"🖼 Делаю каждую обложку уникальной: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "listings":
         return f"✍️ Пишу тексты: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "ideas":
@@ -557,7 +559,7 @@ def card(l: dict, i: int, total: int) -> tuple[str, InlineKeyboardMarkup]:
     lid = l["id"]
     markup = kb(
         [("◀️", f"v:{(i - 1) % total}"), (f"{i + 1}/{total}", f"v:{i}"), ("▶️", f"v:{(i + 1) % total}")],
-        [("✏️ Переписать", f"rw:{lid}"), ("🎨 Новый фон" if BOT_CONFIG.images_enabled else "🎨 Цвет", f"cv:{lid}")],
+        [("✏️ Переписать", f"rw:{lid}"), ("🎨 Другой фон", f"cv:{lid}")],
         [("💰 Цена", f"pr:{lid}"), ("📄 Весь текст", f"full:{lid}"), ("🗑", f"del:{lid}")],
         [("📦 Архив", "zip"), ("🏠 Меню", "menu")],
     )
@@ -612,13 +614,8 @@ async def cb_cover(call: CallbackQuery) -> None:
     if not await guard(call):
         return
     uid, lid = call.from_user.id, call.data[3:]
-    if not BOT_CONFIG.images_enabled:
-        await call.answer("Другой цвет")
-        content.next_cover(uid, lid)
-        await show_card(call.message, uid, index_of(uid, lid), edit=True)
-        return
     await call.answer()
-    wait = await call.message.answer("🎨 Рисую новый фон — секунд 15…")
+    wait = await call.message.answer("🎨 Подбираю другой вид фона…")
     JOBS[uid] = {}
     try:
         await asyncio.to_thread(content.next_cover, uid, lid)

@@ -16,7 +16,6 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 
 from kwork_agent.config import CONFIG
-from kwork_agent.cover import PALETTES
 from kwork_agent.generator import LISTING_SCHEMA, validate
 from kwork_agent.uniqueness import find_duplicate, title_similarity
 
@@ -71,8 +70,14 @@ PROFILE_SCHEMA = {
 BOT_LISTING_SCHEMA = copy.deepcopy(LISTING_SCHEMA)
 _item = BOT_LISTING_SCHEMA["properties"]["listings"]["items"]
 _item["properties"]["idea_no"] = {"type": "integer", "description": "Номер идеи из списка"}
-_item["properties"]["visual_brief"] = {"type": "string", "description": VISUAL_BRIEF_HINT}
-_item["required"] += ["idea_no", "visual_brief"]
+_item["required"].append("idea_no")
+
+VISUAL_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["visual_brief"],
+    "properties": {"visual_brief": {"type": "string", "description": VISUAL_BRIEF_HINT}},
+}
 
 SYSTEM = ("Ты — сильный копирайтер, который помогает фрилансерам продавать услуги на Kwork. "
           "Пишешь по-русски, живо и конкретно, без воды и канцелярита.")
@@ -195,9 +200,7 @@ def _listing_prompt(profile: dict, ideas: list[dict], hints: dict[int, str]) -> 
 - requirements — что покупатель присылает для старта (до {CONFIG.requirements_max} символов).
 - Цена в рублях не ниже {profile.get('min_price', CONFIG.price_min)} и не выше {CONFIG.price_max},
   срок 1–30 дней — реалистично для объёма работы.
-- cover_text — 2–5 слов крупно на обложку.
-- visual_brief — по-английски, предметы и цвета для фона обложки ИМЕННО этой услуги (у каждого
-  кворка свой, не повторяй); никаких слов, которые нужно нарисовать.
+- cover_text — 2–5 слов крупно на обложку; у каждого кворка свой.
 - Обещай только то, что фрилансер реально сделает; без гарантий дохода и позиций."""
 
 
@@ -220,9 +223,9 @@ def uniqueness_report(uid: int) -> tuple[int, int]:
     listings = db.load_listings(uid)
     texts = sum(1 for i, l in enumerate(listings) for other in listings[i + 1:] if find_duplicate(l, [other]))
     texts += sum(1 for l in listings if find_duplicate(l, previous_texts(uid)))
-    marks = [images.fingerprint(p) for l in listings if (p := images.background_path(uid, l["id"])).exists()]
+    marks = [images.cover_fingerprint(p) for l in listings if (p := db.cover_path(uid, l["id"])).exists()]
     old = [h["fp"] for h in db.load_history(uid) if h.get("fp") is not None]
-    pics = sum(1 for i, a in enumerate(marks) for b in marks[i + 1:] + old if images.too_similar(a, b))
+    pics = sum(1 for i, a in enumerate(marks) for b in marks[i + 1:] + old if images.covers_similar(a, b))
     return texts, pics
 
 
@@ -284,13 +287,31 @@ def generate_listings(uid: int, progress: dict, llm=None) -> list[dict]:
     return listings
 
 
+def ensure_visual_brief(uid: int, llm=None) -> str:
+    """Английское описание ниши для картинок (если человек пришёл без образцов)."""
+    profile = db.load_profile(uid)
+    if not profile.get("visual_brief"):
+        llm = llm or _llm(BOT_CONFIG.ideas_model)
+        data = llm.ask(f"Услуги фрилансера: {profile.get('skills', '')}", system=SYSTEM, schema=VISUAL_SCHEMA,
+                       effort="low", max_tokens=2000)
+        profile["visual_brief"] = data["visual_brief"]
+        db.save_profile(uid, profile)
+    return profile["visual_brief"]
+
+
 def make_images(uid: int, progress: dict) -> None:
-    """Уникальные фоны для всех кворков, у которых их ещё нет (после текстов)."""
-    images.make_backgrounds(uid, db.load_listings(uid), progress)
+    """Уникальная обложка каждому кворку: своя обработка общего фона + проверка отпечатков."""
+    images.unique_covers(uid, db.load_listings(uid), progress)
 
 
 def generate_all(uid: int, count: int, progress: dict) -> None:
-    """Полный цикл для новой партии: идеи → тексты → уникальный фон каждому кворку."""
+    """Полный цикл для новой партии: общие фоны → идеи → тексты → уникальные обложки."""
+    if BOT_CONFIG.images_enabled and not images.backgrounds(uid):
+        try:
+            ensure_visual_brief(uid)
+        except Exception as e:  # noqa: BLE001 — без описания фоны всё равно получатся, просто общее
+            progress["error"] = f"описание для картинок: {type(e).__name__}: {e}"[:300]
+        images.make_backgrounds(uid, progress)
     generate_ideas(uid, count, progress)
     generate_listings(uid, progress)
     make_images(uid, progress)
@@ -330,14 +351,10 @@ def rewrite_listing(uid: int, lid: str, wish: str = "", llm=None) -> dict:
 
 
 def next_cover(uid: int, lid: str) -> dict:
-    """Другая обложка: новый уникальный ИИ-фон (если картинки включены) или следующий цвет."""
+    """Другая обложка: другая обработка фона (бесплатно), тоже непохожая на остальные."""
     listings = db.load_listings(uid)
     l = _find(listings, lid)
-    if BOT_CONFIG.images_enabled:
-        images.new_background(uid, l)
-    else:
-        l["palette"] = (l.get("palette", 0) + 1) % len(PALETTES)
-        images.render_cover(uid, l)
+    images.new_look(uid, l, listings)
     db.save_listings(uid, listings)
     return l
 
@@ -363,7 +380,6 @@ def delete_listing(uid: int, lid: str) -> None:
             idea["skipped"] = True
     db.save_profile(uid, profile)
     db.cover_path(uid, lid).unlink(missing_ok=True)
-    images.background_path(uid, lid).unlink(missing_ok=True)
     db.save_listings(uid, [l for l in listings if l["id"] != lid])
 
 
@@ -386,9 +402,9 @@ def reset(uid: int) -> None:
     # Прошлая партия уходит в историю: следующие не будут повторять её тексты и фоны.
     history = db.load_history(uid)
     for l in db.load_listings(uid):
-        bg = images.background_path(uid, l["id"])
+        cover = db.cover_path(uid, l["id"])
         history.append({"title": l["title"], "description": l["description"],
-                        "fp": images.fingerprint(bg) if bg.exists() else None})
+                        "fp": l.get("fp") or (images.cover_fingerprint(cover) if cover.exists() else None)})
     db.save_history(uid, history)
     for sub in ("covers", "examples", "backgrounds"):
         shutil.rmtree(db.user_dir(uid) / sub, ignore_errors=True)

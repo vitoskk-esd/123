@@ -144,7 +144,9 @@ class ContentTests(Base):
         self.assertEqual(new["title"], "Нарисую новый логотип")
         self.assertEqual(len(list(db.covers_dir(self.uid).glob("*.jpg"))), 3)
 
-        self.assertEqual(content.next_cover(self.uid, first["id"])["palette"], 3)
+        changed = content.next_cover(self.uid, first["id"])
+        self.assertEqual(changed["variant"], 1)  # другая обработка фона, бесплатно
+        self.assertIn("fp", changed)
         self.assertEqual(content.set_price(self.uid, first["id"], 2500)["price_rub"], 2500)
         with self.assertRaises(ValueError):
             content.set_price(self.uid, first["id"], 10)
@@ -250,81 +252,98 @@ class ExamplesAndImagesTests(Base):
         return calls, fake_generate
 
     def _listings(self, n):
-        listings = [fake_listing(i, id=f"k{i}", palette=1, visual_brief=f"brief number {i} with pencils")
-                    for i in range(1, n + 1)]
+        listings = [fake_listing(i, id=f"k{i}", palette=1, cover_text=f"Услуга номер {i}") for i in range(1, n + 1)]
         db.save_listings(self.uid, listings)
         return listings
 
-    def test_every_kwork_gets_its_own_background(self):
+    def _backgrounds(self, n=2):
+        calls, fake = self._fake_images(seeds=list(range(1, n + 1)))
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(BOT_CONFIG, "backgrounds", n), \
+             mock.patch.object(images, "hf_generate", fake):
+            content.ensure_visual_brief(self.uid, llm=FakeLLM())
+            prog = {}
+            self.assertEqual(len(images.make_backgrounds(self.uid, prog)), n)
+        self.assertEqual(prog["done"], n)
+        return calls
+
+    def test_few_backgrounds_many_unique_covers(self):
+        import hashlib
+
         from PIL import Image
 
-        calls, fake = self._fake_images(seeds=[1, 2, 3])
-        listings = self._listings(3)
-        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
-            prog = {}
-            self.assertEqual(images.make_backgrounds(self.uid, listings, prog), 3)
-        self.assertEqual(prog["done"], 3)
-        marks = [images.fingerprint(images.background_path(self.uid, l["id"])) for l in listings]
-        self.assertFalse(any(images.too_similar(a, b) for i, a in enumerate(marks) for b in marks[i + 1:]))
-        # Фон рисуется по описанию именно этого кворка, на английском (русский текст модели рисуют каракулями).
-        for l in listings:
-            self.assertTrue(any(l["visual_brief"] in prompt for _, prompt in calls))
-        for _, prompt in calls:
+        calls = self._backgrounds(2)  # ИИ рисует только 2 фона…
+        for _, prompt in calls:      # …по английскому описанию ниши (русский текст модели рисуют каракулями)
+            self.assertIn("pencils and paper", prompt)
             self.assertFalse(any("а" <= ch <= "я" for ch in prompt.lower()))
+        listings = self._listings(12)  # …а обложек 12, и все разные
+        prog = {}
+        self.assertEqual(images.unique_covers(self.uid, listings, prog), 0)
+        self.assertEqual(prog["done"], 12)
+        marks = [images.cover_fingerprint(db.cover_path(self.uid, l["id"])) for l in listings]
+        self.assertFalse(any(images.covers_similar(a, b) for i, a in enumerate(marks) for b in marks[i + 1:]))
+        files = {hashlib.sha256(db.cover_path(self.uid, l["id"]).read_bytes()).digest() for l in listings}
+        self.assertEqual(len(files), 12)
         cover = Image.open(db.cover_path(self.uid, "k1"))
         self.assertEqual(cover.size, (660, 440))
-        self.assertGreater(cover.getpixel((650, 220))[2], 120)  # справа виден синий фон
-        self.assertLess(cover.getpixel((5, 430))[2], 60)        # слева тень под текстом
+        self.assertLess(cover.getpixel((5, 430))[2], 60)  # слева тень под текстом
+        self.assertEqual(content.uniqueness_report(self.uid), (0, 0))
 
-    def test_similar_background_is_redrawn(self):
-        calls, fake = self._fake_images(seeds=[7, 7, 8])  # второй кворк сначала получает копию первого
+    def test_similar_cover_gets_other_variation(self):
+        self._backgrounds(1)
         listings = self._listings(2)
-        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(BOT_CONFIG, "image_parallel", 1), \
-             mock.patch.object(images, "hf_generate", fake):
-            images.make_backgrounds(self.uid, listings, {})
-        self.assertEqual(len(calls), 3)
-        a, b = (images.fingerprint(images.background_path(self.uid, l["id"])) for l in listings)
-        self.assertFalse(images.too_similar(a, b))
+        real = images.render_cover
+        tries = []
 
-    def test_new_background_button(self):
-        calls, fake = self._fake_images(seeds=[1, 2])
-        listings = self._listings(1)
-        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
-            images.make_backgrounds(self.uid, listings, {})
-            before = images.fingerprint(images.background_path(self.uid, "k1"))
+        def first_two_same(uid, listing):
+            import shutil
+
+            tries.append(listing.get("variant", 0))
+            # первая попытка второго кворка — точная копия обложки первого
+            if listing["id"] == "k2" and listing.get("variant", 0) == 0:
+                out = db.cover_path(uid, "k2")
+                shutil.copy(db.cover_path(uid, "k1"), out)
+                return out
+            return real(uid, listing)
+
+        with mock.patch.object(images, "render_cover", first_two_same):
+            images.unique_covers(self.uid, listings, {})
+        self.assertEqual(listings[1]["variant"], 1)  # копию заметили и сменили обработку
+        self.assertFalse(images.covers_similar(listings[0]["fp"], listings[1]["fp"]))
+
+    def test_other_background_button_is_free_and_unique(self):
+        self._backgrounds(1)
+        listings = self._listings(2)
+        images.unique_covers(self.uid, listings, {})
+        before = listings[0]["fp"]
+        with mock.patch.object(images, "hf_generate", side_effect=AssertionError("платно!")):
             content.next_cover(self.uid, "k1")
-        after = images.fingerprint(images.background_path(self.uid, "k1"))
-        self.assertNotEqual(before, after)
-        self.assertEqual(db.load_listings(self.uid)[0]["bg_round"], 1)
-        content.delete_listing(self.uid, "k1")
-        self.assertFalse(images.background_path(self.uid, "k1").exists())
+        after = db.load_listings(self.uid)[0]
+        self.assertNotEqual(before, after["fp"])
+        self.assertFalse(images.covers_similar(after["fp"], listings[1]["fp"]))
 
     def test_next_batch_never_repeats_previous_one(self):
-        calls, fake = self._fake_images(seeds=[1, 1, 2])
+        self._backgrounds(1)
         first = self._listings(1)
-        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
-            images.make_backgrounds(self.uid, first, {})
-            old_mark = images.fingerprint(images.background_path(self.uid, "k1"))
-            content.reset(self.uid)  # первая партия уходит в историю
-            self.assertEqual(db.load_history(self.uid)[0]["title"], first[0]["title"])
-            # Новая партия: тот же текст отклоняется, а фон-копия прошлого перерисовывается.
-            self.assertTrue(find_duplicate(first[0], content.previous_texts(self.uid)))
-            second = [fake_listing(2, id="n1", visual_brief="other")]
-            db.save_listings(self.uid, second)
-            images.make_backgrounds(self.uid, second, {})
-        self.assertEqual(len(calls), 3)  # второй вызов дал копию прошлого фона — нарисован заново
-        self.assertFalse(images.too_similar(old_mark, images.fingerprint(images.background_path(self.uid, "n1"))))
-        self.assertEqual(content.uniqueness_report(self.uid), (0, 0))
+        images.unique_covers(self.uid, first, {})
+        old_mark = db.load_listings(self.uid)[0]["fp"]
+        content.reset(self.uid)  # первая партия уходит в историю
+        self.assertEqual(db.load_history(self.uid)[0]["fp"], old_mark)
+        self.assertTrue(find_duplicate(first[0], content.previous_texts(self.uid)))  # тот же текст не пройдёт
+        self._backgrounds(1)  # тот же фон (то же зерно) и та же обработка — копия прошлой обложки
+        second = [fake_listing(1, id="k1", palette=1, cover_text=first[0]["cover_text"])]
+        db.save_listings(self.uid, second)
+        images.unique_covers(self.uid, second, {})
+        self.assertGreater(second[0].get("variant", 0), 0)
+        self.assertFalse(images.covers_similar(old_mark, second[0]["fp"]))
 
     def test_uniqueness_report_catches_twins(self):
         import shutil
 
-        calls, fake = self._fake_images(seeds=[1, 2])
+        self._backgrounds(1)
         listings = self._listings(2)
-        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", fake):
-            images.make_backgrounds(self.uid, listings, {})
+        images.unique_covers(self.uid, listings, {})
         self.assertEqual(content.uniqueness_report(self.uid), (0, 0))
-        shutil.copy(images.background_path(self.uid, "k1"), images.background_path(self.uid, "k2"))
+        shutil.copy(db.cover_path(self.uid, "k1"), db.cover_path(self.uid, "k2"))
         listings[1].update(title=listings[0]["title"])
         db.save_listings(self.uid, listings)
         self.assertEqual(content.uniqueness_report(self.uid), (1, 1))
@@ -336,7 +355,7 @@ class ExamplesAndImagesTests(Base):
         listings = self._listings(1)
         with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", boom):
             prog = {}
-            self.assertEqual(images.make_backgrounds(self.uid, listings, prog), 0)
+            self.assertEqual(images.make_backgrounds(self.uid, prog), [])
             self.assertIn("429", prog["error"])
         self.assertTrue(images.render_cover(self.uid, listings[0]).exists())
 
@@ -514,16 +533,14 @@ class ArchiveSizeTests(Base):
         from kwork_bot.export import build_zip
 
         # Фон с шумом — худший случай для сжатия (реальные фоны Recraft сжимаются лучше).
-        noise = Image.effect_noise((990, 660), 40).convert("RGB")
-        noisy = Image.blend(Image.new("RGB", noise.size, (40, 60, 120)), noise, 0.35)
-        listings = []
-        for no in range(1, 301):
-            l = fake_listing(no, id=f"id{no:03d}", palette=1, cover_text=f"Услуга номер {no} для бизнеса")
-            bg = images.background_path(self.uid, l["id"])
-            bg.parent.mkdir(parents=True, exist_ok=True)
-            noisy.save(bg, "JPEG", quality=90)
+        noise = Image.effect_noise((1320, 880), 40).convert("RGB")
+        bg = images.backgrounds_dir(self.uid) / "bg1.jpg"
+        bg.parent.mkdir(parents=True, exist_ok=True)
+        Image.blend(Image.new("RGB", noise.size, (40, 60, 120)), noise, 0.35).save(bg, "JPEG", quality=90)
+        listings = [fake_listing(no, id=f"id{no:03d}", palette=1, cover_text=f"Услуга номер {no} для бизнеса")
+                    for no in range(1, 301)]
+        for l in listings:
             images.render_cover(self.uid, l)
-            listings.append(l)
         db.save_listings(self.uid, listings)
         size_mb = len(build_zip(self.uid)) / 1024 / 1024
         self.assertLess(size_mb, 45, f"архив {size_mb:.1f} МБ")

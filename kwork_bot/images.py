@@ -1,23 +1,24 @@
 """Обложки: несколько ИИ-фонов на пользователя (Higgsfield API) + текст, который рисуем сами.
 
-У каждого кворка свой фон (по его теме) — одинаковых обложек Kwork не любит. Фон без
-текста; заголовок и цену накладывает Pillow — без «кривых» русских букв, которые нейросети
-рисуют плохо. Новый фон сравнивается с уже готовыми по «отпечатку» и при сходстве
-перерисовывается. Recraft V4.1 ≈ $0.035 за фон. Если ключа Higgsfield нет или генерация не удалась, обложки
+Дёшево: на клиента ИИ рисует только 4 фона (Recraft V4.1, ≈ $0.035 за фон), а уникальной
+каждую обложку делает бесплатная обработка (фрагмент, поворот, оттенок, декор, зерно) и
+свой заголовок. Отпечаток каждой обложки сверяется со всеми остальными и с прошлыми
+партиями — при сходстве обработка меняется. Текст на фон накладывает Pillow — без «кривых»
+русских букв, которые нейросети рисуют плохо. Если ключа Higgsfield нет или генерация не удалась, обложки
 получаются градиентными (как раньше), тоже бесплатно.
 """
 
 from __future__ import annotations
 
 import json
+import random
 import tempfile
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 import urllib.request
 from pathlib import Path
 
-from kwork_agent.cover import PALETTES, SIZE, draw_texts, make_cover
+from kwork_agent.cover import PALETTES, SIZE, draw_texts
 
 from . import db
 from .config import BOT_CONFIG
@@ -84,8 +85,9 @@ def backgrounds_dir(uid: int) -> Path:
     return db.user_dir(uid) / "backgrounds"
 
 
-def background_path(uid: int, lid: str) -> Path:
-    return backgrounds_dir(uid) / f"{lid}.jpg"
+def backgrounds(uid: int) -> list[Path]:
+    d = backgrounds_dir(uid)
+    return sorted(d.glob("bg*.jpg")) if d.exists() else []
 
 
 def background_prompt(brief: str, i: int) -> str:
@@ -98,15 +100,16 @@ def background_prompt(brief: str, i: int) -> str:
 # --- Уникальность: «отпечаток» картинки -------------------------------------------------------
 # Средний хэш 16×16: картинку уменьшаем до 16×16 в оттенках серого, каждый пиксель — бит
 # «светлее/темнее среднего». У разных картинок отпечатки отличаются на ~половину битов,
-# у почти одинаковых — на единицы. Ближе SIMILAR_BITS считаем повтором и перерисовываем.
+# у почти одинаковых — на единицы. Ближе SIMILAR_BITS считаем повтором.
 HASH_SIDE = 16
 SIMILAR_BITS = 40  # из 256
 
 
-def fingerprint(path: Path) -> int:
+def fingerprint(source) -> int:
     from PIL import Image
 
-    pixels = list(Image.open(path).convert("L").resize((HASH_SIDE, HASH_SIDE), Image.LANCZOS).getdata())
+    img = source if isinstance(source, Image.Image) else Image.open(source)
+    pixels = list(img.convert("L").resize((HASH_SIDE, HASH_SIDE), Image.LANCZOS).tobytes())
     mean = sum(pixels) / len(pixels)
     return sum(1 << i for i, v in enumerate(pixels) if v > mean)
 
@@ -115,85 +118,141 @@ def too_similar(a: int, b: int) -> bool:
     return bin(a ^ b).count("1") <= SIMILAR_BITS
 
 
+# Обложки сравниваем по видимой части фона — правым 45%: слева у всех одинаковая раскладка
+# (тень и белый заголовок), она забивала бы разницу. Повтор — отличие меньше ~10% отпечатка.
+# Проверено 25.10 на 4 настоящих фонах Recraft: 300 обложек, ни одной пары ближе 24 бит.
+COVER_SIMILAR_BITS = 24
+
+
+def cover_fingerprint(path: Path) -> int:
+    from PIL import Image
+
+    img = Image.open(path)
+    return fingerprint(img.crop((int(img.width * 0.55), 0, img.width, img.height)))
+
+
+def covers_similar(a: int, b: int) -> bool:
+    return bin(a ^ b).count("1") <= COVER_SIMILAR_BITS
+
+
+def make_backgrounds(uid: int, progress: dict | None = None) -> list[Path]:
+    """4 общих ИИ-фона на клиента (~$0.14). Уникальной каждую обложку делает обработка
+    фона в vary() и проверка отпечатков в unique_covers()."""
+    if not BOT_CONFIG.images_enabled:
+        return []
+    brief = db.load_profile(uid).get("visual_brief", "")
+    n = BOT_CONFIG.backgrounds
+    progress = progress if progress is not None else {}
+    progress.update(stage="images", done=0, total=n)
+
+    def one(i: int) -> Path | None:
+        out = backgrounds_dir(uid) / f"bg{i + 1}.jpg"
+        if not out.exists():
+            try:
+                with tempfile.TemporaryDirectory() as tmp:
+                    raw = hf_generate(BOT_CONFIG.image_model,
+                                      {"prompt": background_prompt(brief, i), "aspect_ratio": "3:2"}, Path(tmp) / "raw.png")
+                    _store(raw, out)
+            except Exception as e:  # noqa: BLE001
+                progress["error"] = f"картинки: {type(e).__name__}: {e}"[:300]
+                return None
+        progress["done"] = progress.get("done", 0) + 1
+        return out
+
+    with ThreadPoolExecutor(max_workers=n) as pool:
+        return [p for p in pool.map(one, range(n)) if p]
+
+
 def _store(raw: Path, out: Path) -> Path:
-    """Фон храним в JPEG 990×660: для обложки 660×440 хватает, а места в 10 раз меньше, чем PNG."""
+    """Фон храним в JPEG 1320×880: запас для кадрирования, а места в разы меньше, чем PNG."""
     from PIL import Image, ImageOps
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    ImageOps.fit(Image.open(raw).convert("RGB"), (990, 660), Image.LANCZOS).save(out, "JPEG", quality=90)
+    ImageOps.fit(Image.open(raw).convert("RGB"), (1320, 880), Image.LANCZOS).save(out, "JPEG", quality=90)
     return out
 
 
-def make_background(uid: int, listing: dict, taken: dict[str, int], lock: threading.Lock,
-                    attempt_offset: int = 0) -> Path:
-    """Рисует фон этого кворка, не похожий ни на один уже готовый (taken: id → отпечаток)."""
-    brief = listing.get("visual_brief") or db.load_profile(uid).get("visual_brief", "")
-    out = background_path(uid, listing["id"])
-    with tempfile.TemporaryDirectory() as tmp:
-        for attempt in range(3):
-            variant = listing.get("idea_no", 0) + attempt_offset + attempt
-            raw = hf_generate(BOT_CONFIG.image_model,
-                              {"prompt": background_prompt(brief, variant), "aspect_ratio": "3:2"},
-                              Path(tmp) / f"raw{attempt}.png")
-            mark = fingerprint(raw)
-            with lock:
-                twin = next((lid for lid, other in taken.items()
-                             if lid != listing["id"] and too_similar(mark, other)), None)
-                if twin is None or attempt == 2:
-                    taken[listing["id"]] = mark
-                    return _store(raw, out)
-    raise AssertionError("недостижимо")
+def vary(bg: Path, seed: str):
+    """Своя обработка общего фона для каждой обложки: фрагмент и масштаб, лёгкий поворот,
+    оттенок, яркость, контраст, насыщенность, декоративные круги, зерно. Без отражения:
+    главный предмет фона должен остаться справа, слева — тень под заголовком."""
+    from PIL import Image, ImageDraw, ImageEnhance
+
+    r = random.Random(seed)
+    w, h = SIZE
+    src = Image.open(bg).convert("RGB")
+    zoom = r.uniform(1.0, 1.45)
+    cw, ch = int(src.width / zoom), int(src.height / zoom)
+    x, y = r.randint((src.width - cw) // 3, src.width - cw), r.randint(0, src.height - ch)
+    img = src.crop((x, y, x + cw, y + ch)).resize((w, h), Image.LANCZOS)
+    img = img.rotate(r.uniform(-5, 5), resample=Image.BICUBIC).resize((int(w * 1.12), int(h * 1.12)), Image.LANCZOS)
+    ox, oy = r.randint(0, int(w * .12)), r.randint(0, int(h * .12))
+    img = img.crop((ox, oy, ox + w, oy + h))
+    hue, sat, val = img.convert("HSV").split()
+    shift = r.randint(-30, 30)
+    img = Image.merge("HSV", (hue.point(lambda p: (p + shift) % 256), sat, val)).convert("RGB")
+    img = ImageEnhance.Brightness(img).enhance(r.uniform(0.85, 1.15))
+    img = ImageEnhance.Contrast(img).enhance(r.uniform(0.85, 1.2))
+    img = ImageEnhance.Color(img).enhance(r.uniform(0.8, 1.25))
+    over = Image.new("RGBA", SIZE, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(over)
+    for _ in range(r.randint(1, 3)):
+        cx, cy, rad = r.randint(int(w * .55), w), r.randint(0, h), r.randint(30, 140)
+        color = (r.randint(120, 255), r.randint(120, 255), r.randint(120, 255))
+        box = [cx - rad, cy - rad, cx + rad, cy + rad]
+        if r.random() < .5:
+            draw.ellipse(box, fill=color + (r.randint(25, 60),))
+        else:
+            draw.ellipse(box, outline=color + (90,), width=r.randint(2, 6))
+    img = Image.alpha_composite(img.convert("RGBA"), over).convert("RGB")
+    return Image.blend(img, Image.effect_noise(SIZE, r.uniform(8, 18)).convert("RGB"), 0.04)
 
 
-def _previous_fingerprints(uid: int) -> dict[str, int]:
-    """Отпечатки фонов прошлых партий клиента — новые фоны не должны на них походить."""
-    return {f"history-{i}": h["fp"] for i, h in enumerate(db.load_history(uid)) if h.get("fp") is not None}
+def _previous_fingerprints(uid: int) -> list[int]:
+    """Отпечатки обложек прошлых партий клиента — новые не должны на них походить."""
+    return [h["fp"] for h in db.load_history(uid) if h.get("fp") is not None]
 
 
-def make_backgrounds(uid: int, listings: list[dict], progress: dict | None = None) -> int:
-    """Уникальный фон каждому кворку без фона; обложка перерисовывается сразу.
-    Ошибки не роняют работу — у таких кворков останется градиентная обложка."""
-    if not BOT_CONFIG.images_enabled:
-        return 0
+MAX_TRIES = 15
+
+
+def unique_covers(uid: int, listings: list[dict], progress: dict | None = None) -> int:
+    """Рисует обложки так, чтобы каждая заметно отличалась от остальных и от прошлых партий:
+    при сходстве меняет обработку фона (listing["variant"]). Возвращает, сколько не удалось развести."""
     progress = progress if progress is not None else {}
-    todo = [l for l in listings if not background_path(uid, l["id"]).exists()]
-    progress.update(stage="images", done=0, total=len(todo))
+    progress.update(stage="covers", done=0, total=len(listings))
     taken = _previous_fingerprints(uid)
-    taken.update({l["id"]: fingerprint(background_path(uid, l["id"]))
-                  for l in listings if background_path(uid, l["id"]).exists()})
-    lock = threading.Lock()
-
-    def one(listing: dict) -> bool:
-        try:
-            make_background(uid, listing, taken, lock)
-            render_cover(uid, listing)
-        except Exception as e:  # noqa: BLE001
-            progress["error"] = f"картинки: {type(e).__name__}: {e}"[:300]
-            return False
-        with lock:
-            progress["done"] = progress.get("done", 0) + 1
-        return True
-
-    with ThreadPoolExecutor(max_workers=BOT_CONFIG.image_parallel) as pool:
-        return sum(pool.map(one, todo))
+    failed = 0
+    for l in listings:
+        for attempt in range(MAX_TRIES):
+            mark = cover_fingerprint(render_cover(uid, l))
+            if not any(covers_similar(mark, other) for other in taken):
+                break
+            l["variant"] = l.get("variant", 0) + 1
+        else:
+            failed += 1
+        l["fp"] = mark
+        taken.append(mark)
+        progress["done"] += 1
+    db.save_listings(uid, listings)
+    return failed
 
 
-def new_background(uid: int, listing: dict) -> Path:
-    """Кнопка «Новый фон»: другой уникальный фон для одного кворка."""
-    others = _previous_fingerprints(uid)
-    for path in backgrounds_dir(uid).glob("*.jpg") if backgrounds_dir(uid).exists() else []:
-        if path.stem != listing["id"]:
-            others[path.stem] = fingerprint(path)
-    listing["bg_round"] = listing.get("bg_round", 0) + 1
-    path = make_background(uid, listing, others, threading.Lock(), attempt_offset=listing["bg_round"] * 3)
-    render_cover(uid, listing)
-    return path
+def new_look(uid: int, listing: dict, listings: list[dict]) -> None:
+    """Кнопка «Другой фон»: другая обработка фона, тоже непохожая на остальные обложки."""
+    taken = _previous_fingerprints(uid) + [o["fp"] for o in listings if o["id"] != listing["id"] and "fp" in o]
+    for _ in range(MAX_TRIES):
+        listing["variant"] = listing.get("variant", 0) + 1
+        mark = cover_fingerprint(render_cover(uid, listing))
+        if not any(covers_similar(mark, other) for other in taken):
+            break
+    listing["fp"] = mark
 
 
 def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> Path:
-    from PIL import Image, ImageDraw, ImageOps
+    from PIL import Image, ImageDraw
 
-    img = ImageOps.fit(Image.open(bg).convert("RGB"), SIZE, Image.LANCZOS)
+    img = vary(bg, f"{listing['id']}:{listing.get('variant', 0)}")
     # Затемняем левую часть, чтобы белый текст читался на любом фоне:
     # до половины ширины — плотная тень, к 85% ширины она сходит на нет.
     w, h = SIZE
@@ -212,14 +271,29 @@ def _save_jpeg(img, out: Path) -> Path:
     return out
 
 
-def render_cover(uid: int, listing: dict) -> Path:
-    """Рисует обложку кворка: на его собственном ИИ-фоне (если он уже есть) или градиентную."""
-    from PIL import Image
+def gradient_background(uid: int, palette: int) -> Path:
+    """Фон без ИИ (нет ключа Higgsfield): градиент цвета палитры. Дальше — та же уникальная
+    обработка, что и у ИИ-фонов, поэтому обложки и без ИИ не повторяются."""
+    from PIL import Image, ImageDraw
 
-    bg = background_path(uid, listing["id"])
+    out = backgrounds_dir(uid) / f"gradient{palette % len(PALETTES)}.jpg"
+    if not out.exists():
+        bg, accent = PALETTES[palette % len(PALETTES)]
+        w, h = 1320, 880
+        img = Image.new("RGB", (w, h), bg)
+        draw = ImageDraw.Draw(img)
+        for y in range(0, h, 2):
+            for x in range(0, w, 8):
+                t = min(1.0, (x / w * 0.5 + y / h * 0.5) ** 2 * 0.8)
+                draw.rectangle([x, y, x + 8, y + 2], fill=tuple(int(bg[i] + (accent[i] - bg[i]) * t) for i in range(3)))
+        out.parent.mkdir(parents=True, exist_ok=True)
+        img.save(out, "JPEG", quality=90)
+    return out
+
+
+def render_cover(uid: int, listing: dict) -> Path:
+    """Обложка кворка: общий фон (ИИ или градиент) со своей обработкой и заголовком."""
     style = listing.get("palette", 0)
-    out = db.cover_path(uid, listing["id"])
-    if not bg.exists():
-        with tempfile.TemporaryDirectory() as tmp:
-            return _save_jpeg(Image.open(make_cover(listing, out_dir=Path(tmp), palette=style)), out)
-    return _cover_on_background(listing, bg, PALETTES[style % len(PALETTES)][1], out)
+    bgs = backgrounds(uid) or [gradient_background(uid, style)]
+    bg = bgs[(listing.get("idea_no", 1) - 1) % len(bgs)]
+    return _cover_on_background(listing, bg, PALETTES[style % len(PALETTES)][1], db.cover_path(uid, listing["id"]))
