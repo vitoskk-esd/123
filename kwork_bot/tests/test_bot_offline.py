@@ -733,6 +733,32 @@ class KworkRulesTests(unittest.TestCase):
         self.assertEqual(r.normalize({"category_hint": "что-то своё"}), ["рубрика не из списка Kwork"])
 
 
+class ExtensionPackageTests(unittest.TestCase):
+    def test_extension_zip(self):
+        from kwork_bot.export import extension_zip
+
+        z = zipfile.ZipFile(io.BytesIO(extension_zip()))
+        names = set(z.namelist())
+        for f in ("manifest.json", "background.js", "filler.js", "panel.js", "unzip.js"):
+            self.assertIn(f"kwork_extension/{f}", names)
+        manifest = json.loads(z.read("kwork_extension/manifest.json"))
+        self.assertEqual(manifest["manifest_version"], 3)
+        self.assertIn("https://kwork.ru/*", manifest["host_permissions"])
+        self.assertLessEqual(int(manifest["minimum_chrome_version"]), 109)  # Chrome на Windows 7
+
+    def test_bot_archive_readable_by_extension(self):
+        """listings.json и обложки — без сжатия: расширение читает их без сторонних библиотек."""
+        from kwork_bot.export import build_zip
+
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(BOT_CONFIG, "data_dir", Path(tmp)):
+            l = fake_listing(1, id="x1")
+            db.save_listings(7, [l])
+            images.render_cover(7, l)
+            z = zipfile.ZipFile(io.BytesIO(build_zip(7)))
+        self.assertEqual(z.getinfo("listings.json").compress_type, zipfile.ZIP_STORED)
+        self.assertEqual(z.getinfo("covers/x1.jpg").compress_type, zipfile.ZIP_STORED)
+
+
 class KworkLimitTests(Base):
     def test_room_respects_kwork_limit(self):
         profile = db.load_profile(self.uid)

@@ -6,6 +6,7 @@ import csv
 import io
 import json
 import zipfile
+from pathlib import Path
 
 from . import db
 
@@ -14,6 +15,10 @@ HOW_TO = """КАК ВЫЛОЖИТЬ КВОРКИ
 kworks.csv — все кворки таблицей (открывается в Excel / Google Таблицах).
 covers/    — обложки 660×440, имя файла = колонка «id».
 listings.json — тот же список для автозагрузчика.
+
+Расширением (проще всего): установите расширение «Kwork — выкладка кворков» (бот пришлёт его
+по кнопке «🧩 Расширение»), откройте kwork.ru — справа внизу появится панель. Выберите в ней
+этот kwork.zip и нажмите «Старт».
 
 Вручную: Kwork → «Создать кворк», копируйте поля из таблицы, загрузите обложку.
 
@@ -33,6 +38,31 @@ COLUMNS = [
 ]
 
 
+EXTENSION_DIR = Path(__file__).resolve().parent.parent / "kwork_extension"
+
+EXTENSION_HELP = (
+    "🧩 <b>Расширение для выкладки кворков</b>\n\n"
+    "<b>Установка (один раз, Chrome или Яндекс Браузер):</b>\n"
+    "1. Распакуйте этот архив в любую папку.\n"
+    "2. Откройте адрес <code>chrome://extensions</code> (в Яндекс Браузере — <code>browser://extensions</code>).\n"
+    "3. Включите «Режим разработчика» (переключатель справа вверху).\n"
+    "4. Нажмите «Загрузить распакованное расширение» и выберите распакованную папку.\n\n"
+    "<b>Выкладка:</b> откройте kwork.ru — справа внизу появится панель. Выберите в ней kwork.zip из бота, "
+    "задайте «Проверять вручную первых» и «Всего за запуск» и нажмите «Старт».\n"
+    "При ручной проверке расширение заполняет форму и ждёт, пока вы нажмёте «Готово»; дальше — само."
+)
+
+
+def extension_zip() -> bytes:
+    """Архив расширения из папки kwork_extension (всегда текущая версия)."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in sorted(EXTENSION_DIR.iterdir()):
+            if f.is_file():
+                z.write(f, f"kwork_extension/{f.name}")
+    return buf.getvalue()
+
+
 def build_zip(uid: int) -> bytes:
     listings = db.load_listings(uid)
     table = io.StringIO()
@@ -45,10 +75,12 @@ def build_zip(uid: int) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("kworks.csv", "﻿" + table.getvalue())
-        z.writestr("listings.json", json.dumps(listings, ensure_ascii=False, indent=2))
+        # listings.json и обложки — без сжатия: расширение читает архив без сторонних библиотек
+        # (JPEG всё равно не сжимается).
+        z.writestr("listings.json", json.dumps(listings, ensure_ascii=False, indent=2), compress_type=zipfile.ZIP_STORED)
         z.writestr("КАК_ВЫЛОЖИТЬ.txt", HOW_TO)
         for l in listings:
             cover = db.cover_path(uid, l["id"])
             if cover.exists():
-                z.write(cover, f"covers/{cover.name}")
+                z.write(cover, f"covers/{cover.name}", compress_type=zipfile.ZIP_STORED)
     return buf.getvalue()

@@ -20,7 +20,7 @@ from kwork_agent.cover import PALETTES, make_cover
 
 from . import bulk, content, db, disk, examples, payments
 from .config import BOT_CONFIG
-from .export import HOW_TO, build_zip
+from .export import EXTENSION_HELP, HOW_TO, build_zip, extension_zip
 
 router = Router()
 JOBS: dict[int, dict] = {}  # кто сейчас ждёт генерацию: uid → прогресс
@@ -70,7 +70,7 @@ def menu_markup(uid: int) -> InlineKeyboardMarkup:
         rows.append([("📦 Скачать всё архивом", "zip")])
     if db.load_profile(uid)["ideas"] and content.missing_ideas(uid):
         rows.append([("▶️ Дописать недостающие", "continue")])
-    rows.append([("❓ Как выложить на Kwork", "howto")])
+    rows.append([("🧩 Расширение для выкладки", "ext"), ("❓ Как выложить", "howto")])
     return kb(*rows)
 
 
@@ -130,6 +130,13 @@ async def cb_menu(call: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
     await call.answer()
     await show_menu(call.message, call.from_user.id)
+
+
+@router.callback_query(F.data == "ext")
+async def cb_extension(call: CallbackQuery) -> None:
+    await call.answer()
+    await call.message.answer_document(BufferedInputFile(await asyncio.to_thread(extension_zip), "kwork_extension.zip"))
+    await call.message.answer(EXTENSION_HELP, reply_markup=kb([("🏠 Меню", "menu")]))
 
 
 @router.callback_query(F.data == "howto")

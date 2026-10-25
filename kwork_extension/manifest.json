@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Kwork — выкладка кворков",
+  "version": "0.1.0",
+  "description": "Выкладывает кворки из kwork.zip (Telegram-бот) через форму «Создать кворк» в вашем браузере.",
+  "minimum_chrome_version": "100",
+  "permissions": ["storage", "unlimitedStorage", "scripting"],
+  "host_permissions": ["https://kwork.ru/*"],
+  "background": {"service_worker": "background.js"},
+  "content_scripts": [{
+    "matches": ["https://kwork.ru/*"],
+    "js": ["unzip.js", "filler.js", "panel.js"],
+    "run_at": "document_idle"
+  }]
+}
