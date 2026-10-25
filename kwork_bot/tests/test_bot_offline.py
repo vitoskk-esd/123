@@ -70,6 +70,9 @@ class FakeLLM:
         if "summary" in schema["properties"]:
             return {"skills": "логотипы и фирменный стиль", "style": "коротко, списками",
                     "summary": "вы дизайнер логотипов", "visual_brief": "pencils, sketches, color swatches"}
+        if list(schema["properties"]) == ["items"]:  # рубрики для загруженных кворков
+            nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
+            return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы"} for n in nos]}
         if list(schema["properties"]) == ["visual_brief"]:
             return {"visual_brief": "pencils and paper"}
         if "ideas" in schema["properties"]:
@@ -544,6 +547,140 @@ class ArchiveSizeTests(Base):
         db.save_listings(self.uid, listings)
         size_mb = len(build_zip(self.uid)) / 1024 / 1024
         self.assertLess(size_mb, 45, f"архив {size_mb:.1f} МБ")
+
+
+class BulkImportTests(Base):
+    """Готовые кворки с Яндекс Диска: папка «фото» + таблица."""
+
+    def make_disk(self):
+        import random
+
+        import openpyxl
+        from PIL import Image
+
+        src = Path(self.tmp.name) / "disk"
+        (src / "фото").mkdir(parents=True)
+        for name, seed in (("1.jpg", 1), ("2.jpg", 2), ("3.jpg", 3), ("4.jpg", 2)):  # 4.jpg — копия 2.jpg
+            rnd = random.Random(seed)
+            img = Image.new("RGB", (60, 40))
+            img.putdata([(rnd.randrange(256), rnd.randrange(256), 90) for _ in range(60 * 40)])
+            img.resize((1200, 800), Image.NEAREST).save(src / "фото" / name)
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(["Фото", "Название кворка", "Описание", "Цена", "Срок"])
+        ws.append(["1.jpg", "Разработаю логотип", desc(1, "логотип"), 2000, 3])
+        ws.append(["2", "Сделаю визитку", desc(2, "визитка"), None, None])
+        ws.append(["3.jpg", "Нарисую баннер", desc(3, "баннер") + " пишите t.me/me", 1000, 2])
+        ws.append(["4.jpg", "Оформлю презентацию", desc(4, "презентация"), 1500, 2])
+        ws.append(["9.jpg", "Создам лендинг", desc(5, "лендинг"), 3000, 5])
+        wb.save(src / "кворки.xlsx")
+
+        def item(path):
+            return {"name": path.name, "type": "dir" if path.is_dir() else "file",
+                    "path": "/" + str(path.relative_to(src)), "file": str(path), "size": 1}
+
+        def list_dir(link, path="/"):
+            return [item(x) for x in sorted((src / path.lstrip("/")).iterdir())]
+
+        def download(it, out):
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(it["file"], out)
+            return out
+
+        import shutil
+        return mock.patch.multiple("kwork_bot.disk", list_dir=list_dir, download=download)
+
+    def test_prepare_checks_and_finish(self):
+        from kwork_bot import bulk
+
+        with self.make_disk():
+            st = bulk.prepare(self.uid, "https://disk.yandex.ru/d/abc", {})
+        self.assertEqual([r["row"] for r in st["rows"]], [2, 3, 5])
+        problems = " ".join(st["problems"])
+        self.assertIn("строка 4", problems)        # контакты в тексте — Kwork запрещает
+        self.assertIn("строка 6", problems)        # фото 9.jpg нет в папке
+        self.assertEqual(st["twins"], [[3, 5]])    # 2.jpg и 4.jpg одинаковые
+        self.assertEqual(bulk.missing(st), {"price": 1, "days": 1})
+        bulk.apply_defaults(self.uid, 1500, 5)
+        profile = db.load_profile(self.uid)
+        profile["bulk"]["photo_choice"] = "uniquify"
+        db.save_profile(self.uid, profile)
+        self.assertEqual(bulk.finish(self.uid, {}, llm=FakeLLM()), 3)
+        listings = db.load_listings(self.uid)
+        self.assertEqual({l["price_rub"] for l in listings}, {2000, 1500})
+        self.assertTrue(all(l["own_photo"] and l["category_hint"] == "Дизайн > Логотипы" for l in listings))
+        self.assertEqual(content.uniqueness_report(self.uid), (0, 0))  # копию фото уникализировали
+        # Фото клиента не перерисовывается при правке цены, а «Другой фон» обрабатывает его, а не рисует обложку.
+        before = db.cover_path(self.uid, listings[0]["id"]).read_bytes()
+        content.set_price(self.uid, listings[0]["id"], 2500)
+        self.assertEqual(db.cover_path(self.uid, listings[0]["id"]).read_bytes(), before)
+        content.next_cover(self.uid, listings[0]["id"])
+        self.assertNotEqual(db.cover_path(self.uid, listings[0]["id"]).read_bytes(), before)
+
+    def test_without_choice_twins_stay(self):
+        from kwork_bot import bulk
+
+        with self.make_disk():
+            bulk.prepare(self.uid, "https://disk.yandex.ru/d/abc", {})
+        bulk.apply_defaults(self.uid, 1500, 5)
+        bulk.finish(self.uid, {}, llm=FakeLLM())
+        self.assertEqual(content.uniqueness_report(self.uid)[1], 1)  # без «уникализировать» копия остаётся
+
+    def test_csv_cp1251_and_links(self):
+        from kwork_bot import bulk, disk
+
+        path = Path(self.tmp.name) / "t.csv"
+        path.write_bytes("Название;Описание кворка;Цена, руб.;Рубрика\nЛого;Текст;1 500 руб.;Дизайн\n;;;\n".encode("cp1251"))
+        rows = bulk.read_table(path)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual((rows[0]["title"], rows[0]["price_rub"], rows[0]["category_hint"]), ("Лого", 1500, "Дизайн"))
+        self.assertEqual(disk.find_link("вот https://disk.yandex.ru/d/AbC-12_x."), "https://disk.yandex.ru/d/AbC-12_x")
+        self.assertIsNone(disk.find_link("https://evil.com/disk.yandex.ru"))
+
+    def test_bot_dialog(self):
+        from aiogram import Bot, Dispatcher
+        from aiogram.types import CallbackQuery, Chat, Message, Update, User
+
+        from kwork_bot import bot as botmod
+
+        tg = FakeTelegram()
+        bot = Bot("1:TEST", session=tg.session)
+        dp = Dispatcher()
+        botmod.router._parent_router = None
+        dp.include_router(botmod.router)
+        user, chat = User(id=self.uid, is_bot=False, first_name="Т"), Chat(id=self.uid, type="private")
+        n = iter(range(1, 10**6))
+
+        async def text(t):
+            msg = Message(message_id=next(n), date=dt.datetime.now(), chat=chat, from_user=user, text=t)
+            await dp.feed_update(bot, Update(update_id=next(n), message=msg))
+
+        async def press(data):
+            msg = Message(message_id=next(n), date=dt.datetime.now(), chat=chat, from_user=user, text="x")
+            cb = CallbackQuery(id=str(next(n)), from_user=user, chat_instance="c", data=data, message=msg)
+            await dp.feed_update(bot, Update(update_id=next(n), callback_query=cb))
+
+        async def scenario():
+            await text("/start")
+            self.assertIn("bulk", tg.buttons())
+            await press("bulk")
+            self.assertIn("SendDocument", [type(c).__name__ for c in tg.calls])  # шаблон таблицы
+            await text("https://disk.yandex.ru/d/abc")
+            while botmod.JOBS:
+                await asyncio.sleep(0.05)
+            self.assertIn("Нашёл кворков с фото: <b>3</b>", " ".join(tg.texts()))
+            self.assertIn("bp:1000", tg.buttons())
+            await press("bp:1000")
+            await press("bd:5")
+            self.assertIn("tw:uniq", tg.buttons())
+            await press("tw:uniq")
+            while botmod.JOBS or "Готово" not in " ".join(tg.texts()):
+                await asyncio.sleep(0.05)
+
+        with self.make_disk(), mock.patch.object(content, "_llm", lambda *a, **k: FakeLLM()):
+            asyncio.run(scenario())
+        self.assertIn("Готово: <b>3</b> кворков из вашей таблицы", " ".join(tg.texts()))
+        self.assertIn("все тексты и фото уникальны", " ".join(tg.texts()))
 
 
 class SellerKworksTests(Base):

@@ -240,6 +240,10 @@ def unique_covers(uid: int, listings: list[dict], progress: dict | None = None) 
 
 def new_look(uid: int, listing: dict, listings: list[dict]) -> None:
     """Кнопка «Другой фон»: другая обработка фона, тоже непохожая на остальные обложки."""
+    if listing.get("own_photo"):
+        from .bulk import new_look_photo
+
+        return new_look_photo(uid, listing, listings)
     taken = _previous_fingerprints(uid) + [o["fp"] for o in listings if o["id"] != listing["id"] and "fp" in o]
     for _ in range(MAX_TRIES):
         listing["variant"] = listing.get("variant", 0) + 1
@@ -292,7 +296,10 @@ def gradient_background(uid: int, palette: int) -> Path:
 
 
 def render_cover(uid: int, listing: dict) -> Path:
-    """Обложка кворка: общий фон (ИИ или градиент) со своей обработкой и заголовком."""
+    """Обложка кворка: общий фон (ИИ или градиент) со своей обработкой и заголовком.
+    У кворков с фото клиента (own_photo) обложка — само фото, её не перерисовываем."""
+    if listing.get("own_photo"):
+        return db.cover_path(uid, listing["id"])
     style = listing.get("palette", 0)
     bgs = backgrounds(uid) or [gradient_background(uid, style)]
     bg = bgs[(listing.get("idea_no", 1) - 1) % len(bgs)]

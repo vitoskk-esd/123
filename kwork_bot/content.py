@@ -337,6 +337,8 @@ def rewrite_listing(uid: int, lid: str, wish: str = "", llm=None) -> dict:
                        schema=BOT_LISTING_SCHEMA, effort=BOT_CONFIG.effort, max_tokens=16000,
                        cached_context=examples_block(profile))
         cand = data["listings"][0]
+        if old.get("own_photo"):  # обложка — фото клиента, она остаётся
+            cand.update(own_photo=True, fp=old.get("fp"))
         errors = validate(cand)
         dup = find_duplicate(cand, others)
         if dup:
@@ -380,6 +382,7 @@ def delete_listing(uid: int, lid: str) -> None:
             idea["skipped"] = True
     db.save_profile(uid, profile)
     db.cover_path(uid, lid).unlink(missing_ok=True)
+    (db.user_dir(uid) / "photos" / f"{lid}.jpg").unlink(missing_ok=True)
     db.save_listings(uid, [l for l in listings if l["id"] != lid])
 
 
@@ -406,7 +409,7 @@ def reset(uid: int) -> None:
         history.append({"title": l["title"], "description": l["description"],
                         "fp": l.get("fp") or (images.cover_fingerprint(cover) if cover.exists() else None)})
     db.save_history(uid, history)
-    for sub in ("covers", "examples", "backgrounds"):
+    for sub in ("covers", "examples", "backgrounds", "photos"):
         shutil.rmtree(db.user_dir(uid) / sub, ignore_errors=True)
     db.save_listings(uid, [])
     profile = db.load_profile(uid)

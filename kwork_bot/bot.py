@@ -18,7 +18,7 @@ from aiogram.types import (BufferedInputFile, CallbackQuery, FSInputFile, Inline
 from kwork_agent.config import CONFIG
 from kwork_agent.cover import PALETTES, make_cover
 
-from . import content, db, examples, payments
+from . import bulk, content, db, disk, examples, payments
 from .config import BOT_CONFIG
 from .export import HOW_TO, build_zip
 
@@ -38,6 +38,8 @@ PALETTE_NAMES = ["Зелёный", "Фиолетовый", "Синий", "Ора
 
 class Form(StatesGroup):
     examples = State()
+    disk = State()
+    bulk_price = State()
     skills = State()
     count = State()
     price = State()
@@ -62,7 +64,7 @@ def esc(s: object) -> str:
 
 def menu_markup(uid: int) -> InlineKeyboardMarkup:
     listings = db.load_listings(uid)
-    rows = [[("✨ Новая партия кворков", "new")]]
+    rows = [[("✨ Создать кворки с ИИ", "new")], [("📂 Загрузить готовые (Яндекс Диск)", "bulk")]]
     if listings:
         rows.append([(f"📋 Мои кворки ({len(listings)})", "v:0")])
         rows.append([("📦 Скачать всё архивом", "zip")])
@@ -75,8 +77,10 @@ def menu_markup(uid: int) -> InlineKeyboardMarkup:
 async def show_menu(message: Message, uid: int) -> None:
     n = len(db.load_listings(uid))
     text = (f"Готово кворков: <b>{n}</b>. Что делаем дальше?" if n else
-            "Пришлите 3–5 своих кворков с Kwork — я изучу их и сделаю столько новых, сколько "
-            "нужно: другие услуги, в вашем стиле, с текстами и обложками.")
+            "✨ <b>С ИИ:</b> пришлите ссылку на свой профиль Kwork — я изучу ваши кворки и сделаю "
+            "столько новых, сколько нужно: другие услуги, в вашем стиле, с текстами и обложками.\n\n"
+            "📂 <b>Готовые:</b> если у вас уже есть тексты и фото — загрузите их папкой с Яндекс Диска, "
+            "я проверю уникальность и правила Kwork и соберу файл для выкладки.")
     await message.answer(text, reply_markup=menu_markup(uid))
 
 
@@ -480,9 +484,210 @@ async def cb_continue(call: CallbackQuery) -> None:
     background(run_job(call.bot, call.from_user.id, call.message.chat.id, None))
 
 
+# --- Готовые кворки с Яндекс Диска -------------------------------------------------------
+
+BULK_HELP = (
+    "📂 <b>Как подготовить папку</b>\n"
+    "1. На Яндекс Диске создайте папку. Внутри — папка <b>«фото»</b> с картинками (jpg, png) "
+    "и таблица — вот шаблон ⬆️ (Excel; можно и CSV).\n"
+    "2. В таблице одна строка — один кворк. В столбце «Фото» — имя файла картинки (например, 1.jpg). "
+    "Цену, срок и рубрику можно не заполнять — спрошу и подберу сам.\n"
+    "3. Откройте доступ: правой кнопкой по папке → «Поделиться» → «Скопировать ссылку».\n"
+    "4. Пришлите ссылку сюда.\n\n"
+    "Я проверю правила Kwork и уникальность каждого текста и фото — и соберу файл для выкладки."
+)
+
+
+@router.callback_query(F.data == "bulk")
+async def cb_bulk(call: CallbackQuery, state: FSMContext) -> None:
+    if not await guard(call):
+        return
+    await call.answer()
+    n = len(db.load_listings(call.from_user.id))
+    if n:
+        await call.message.answer(f"У вас уже есть {n} кворков. Загрузить новые? Старые удалятся "
+                                  "(скачайте архив, если ещё не скачали).",
+                                  reply_markup=kb([("Да, загрузить", "bulk_ok"), ("Нет", "menu")]))
+        return
+    await ask_disk(call.message, state)
+
+
+@router.callback_query(F.data == "bulk_ok")
+async def cb_bulk_ok(call: CallbackQuery, state: FSMContext) -> None:
+    if not await guard(call):
+        return
+    await call.answer()
+    await ask_disk(call.message, state)
+
+
+async def ask_disk(message: Message, state: FSMContext) -> None:
+    await state.set_state(Form.disk)
+    await message.answer_document(BufferedInputFile(bulk.template_xlsx(), "шаблон_кворков.xlsx"))
+    await message.answer(BULK_HELP, reply_markup=kb([("🏠 Меню", "menu")]))
+
+
+async def with_progress(bot: Bot, uid: int, chat_id: int, work, first: str) -> tuple[bool, object]:
+    """Запускает work(progress) в потоке и обновляет сообщение с прогрессом. (успех, результат)."""
+    progress: dict = {}
+    JOBS[uid] = progress
+    msg = await bot.send_message(chat_id, first)
+    shown = first
+    task = asyncio.create_task(asyncio.to_thread(work, progress))
+    try:
+        while not task.done():
+            await asyncio.wait({task}, timeout=4)
+            text = progress_text(progress) if progress.get("stage") else first
+            if text != shown:
+                shown = text
+                try:
+                    await msg.edit_text(text)
+                except Exception:  # noqa: BLE001
+                    pass
+        return True, task.result()
+    except ValueError as e:
+        await bot.send_message(chat_id, f"😔 {esc(e)}")
+    except Exception as e:  # noqa: BLE001
+        details = f"\n<code>{esc(type(e).__name__)}: {esc(str(e)[:300])}</code>" if db.is_admin(uid) else ""
+        await bot.send_message(chat_id, "😔 Не получилось. Попробуйте ещё раз через минуту." + details)
+    finally:
+        JOBS.pop(uid, None)
+    return False, None
+
+
+@router.message(Form.disk)
+async def got_disk_link(message: Message, state: FSMContext) -> None:
+    uid = message.from_user.id
+    link = disk.find_link(message.text or "")
+    if not link:
+        await message.answer("Пришлите ссылку на папку Яндекс Диска — вида https://disk.yandex.ru/d/…")
+        return
+    if uid in JOBS:
+        await message.answer("Подождите, я ещё работаю над прошлой задачей.")
+        return
+    await state.set_state(None)
+    ok, result = await with_progress(message.bot, uid, message.chat.id,
+                                     lambda p: bulk.prepare(uid, link, p), "📂 Читаю папку на Яндекс Диске…")
+    if not ok:
+        await state.set_state(Form.disk)
+        await message.answer("Исправьте и пришлите ссылку ещё раз.", reply_markup=kb([("🏠 Меню", "menu")]))
+        return
+    rows, problems = result["rows"], result["problems"]
+    text = f"📂 Нашёл кворков с фото: <b>{len(rows)}</b>."
+    if result["over_limit"]:
+        text += f"\nЕщё {result['over_limit']} не влезли в лимит Kwork ({BOT_CONFIG.kwork_limit} кворков)."
+    if problems:
+        shown = "\n".join(f"• {esc(p)}" for p in problems[:25])
+        more = f"\n…и ещё {len(problems) - 25}" if len(problems) > 25 else ""
+        text += f"\n\n⚠️ Не взял ({len(problems)}) — исправьте в таблице, если они нужны:\n{shown}{more}"
+    await message.answer(text)
+    if not rows:
+        await state.set_state(Form.disk)
+        await message.answer("Исправьте таблицу или фото и пришлите ссылку ещё раз.")
+        return
+    await bulk_next(message, uid, state)
+
+
+async def bulk_next(message: Message, uid: int, state: FSMContext) -> None:
+    """Следующий вопрос по загрузке: цена → срок → похожие фото → сборка."""
+    st = db.load_profile(uid).get("bulk")
+    if not st:
+        await message.answer("Загрузка устарела — пришлите ссылку ещё раз.", reply_markup=kb([("📂 Загрузить", "bulk")]))
+        return
+    need = bulk.missing(st)
+    if need["price"]:
+        prices = [p for p in (500, 1000, 2000, 3000, 5000) if p >= CONFIG.price_min]
+        await message.answer(f"У {need['price']} кворков нет цены. Какую поставить?",
+                             reply_markup=kb([(f"{p} ₽", f"bp:{p}") for p in prices], [("✍️ Своя цена", "bp_custom")]))
+        return
+    if need["days"]:
+        await message.answer(f"У {need['days']} кворков нет срока. Сколько дней?",
+                             reply_markup=kb([(f"{d} дн.", f"bd:{d}") for d in (1, 2, 3, 5, 7)]))
+        return
+    if st["twins"] and not st.get("photo_choice"):
+        pairs = [f"строки {a} и {b}" if b else f"строка {a} — как ваш прошлый кворк" for a, b in st["twins"][:15]]
+        more = f"\n…и ещё {len(st['twins']) - 15}" if len(st["twins"]) > 15 else ""
+        await message.answer(
+            f"🖼 Похожие фото ({len(st['twins'])}):\n" + "\n".join(f"• {p}" for p in pairs) + more +
+            "\n\nKwork не любит одинаковые обложки. Что сделать?",
+            reply_markup=kb([("✨ Уникализировать автоматически", "tw:uniq")], [("🔄 Заменю фото сам", "tw:replace")]))
+        return
+    background(run_bulk_finish(message.bot, uid, message.chat.id))
+
+
+@router.callback_query(F.data.startswith("bp:"))
+async def cb_bulk_price(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await asyncio.to_thread(bulk.apply_defaults, call.from_user.id, int(call.data[3:]), None)
+    await bulk_next(call.message, call.from_user.id, state)
+
+
+@router.callback_query(F.data == "bp_custom")
+async def cb_bulk_price_custom(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.set_state(Form.bulk_price)
+    await call.message.answer(f"Напишите цену в рублях (от {CONFIG.price_min} до {CONFIG.price_max}):")
+
+
+@router.message(Form.bulk_price)
+async def got_bulk_price(message: Message, state: FSMContext) -> None:
+    price = int("".join(ch for ch in (message.text or "") if ch.isdigit()) or 0)
+    if not CONFIG.price_min <= price <= CONFIG.price_max:
+        await message.answer(f"Нужно число от {CONFIG.price_min} до {CONFIG.price_max}.")
+        return
+    await state.set_state(None)
+    await asyncio.to_thread(bulk.apply_defaults, message.from_user.id, price, None)
+    await bulk_next(message, message.from_user.id, state)
+
+
+@router.callback_query(F.data.startswith("bd:"))
+async def cb_bulk_days(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await asyncio.to_thread(bulk.apply_defaults, call.from_user.id, None, int(call.data[3:]))
+    await bulk_next(call.message, call.from_user.id, state)
+
+
+@router.callback_query(F.data.startswith("tw:"))
+async def cb_bulk_twins(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    uid = call.from_user.id
+    profile = db.load_profile(uid)
+    if not profile.get("bulk"):
+        await call.message.answer("Загрузка устарела — пришлите ссылку ещё раз.", reply_markup=kb([("📂 Загрузить", "bulk")]))
+        return
+    if call.data == "tw:replace":
+        await state.set_state(Form.disk)
+        await call.message.answer("Хорошо. Замените фото в этих строках на Яндекс Диске (имена файлов можно "
+                                  "оставить) и пришлите ссылку на папку ещё раз — проверю заново.")
+        return
+    profile["bulk"]["photo_choice"] = "uniquify"
+    db.save_profile(uid, profile)
+    await bulk_next(call.message, uid, state)
+
+
+async def run_bulk_finish(bot: Bot, uid: int, chat_id: int) -> None:
+    if uid in JOBS:
+        return
+    ok, count = await with_progress(bot, uid, chat_id, lambda p: bulk.finish(uid, p), "🧩 Собираю кворки…")
+    if not ok:
+        return
+    text = f"✅ Готово: <b>{count}</b> кворков из вашей таблицы."
+    same_texts, same_pics = await asyncio.to_thread(content.uniqueness_report, uid)
+    if not same_texts and not same_pics:
+        text += "\n🔒 Проверено: все тексты и фото уникальны — и между собой, и с вашими прошлыми кворками."
+    else:
+        text += (f"\n⚠️ Похожих пар: текстов {same_texts}, фото {same_pics}. "
+                 "Нажмите «Другой фон» у таких кворков — я обработаю фото.")
+    await bot.send_message(chat_id, text, reply_markup=kb([("📋 Смотреть кворки", "v:0")],
+                                                          [("📦 Скачать архивом", "zip"), ("🏠 Меню", "menu")]))
+
+
 # --- Генерация с прогрессом ------------------------------------------------------------
 
 def progress_text(p: dict) -> str:
+    if p.get("stage") == "bulk_list":
+        return "📂 Читаю папку на Яндекс Диске…"
+    if p.get("stage") == "bulk_photos":
+        return f"⬇️ Скачиваю фото: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "images":
         return f"🎨 Рисую фоны для обложек: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "covers":
