@@ -67,7 +67,9 @@ class FakeLLM:
             self.prompts.append(prompt)
         if "summary" in schema["properties"]:
             return {"skills": "логотипы и фирменный стиль", "style": "коротко, списками",
-                    "summary": "вы дизайнер логотипов"}
+                    "summary": "вы дизайнер логотипов", "visual_brief": "pencils, sketches, color swatches"}
+        if list(schema["properties"]) == ["visual_brief"]:
+            return {"visual_brief": "pencils and paper"}
         if "ideas" in schema["properties"]:
             start = prompt.count("\n- ") if "(пока нет)" not in prompt else 0
             need = int(prompt.split("Придумай ")[1].split()[0])
@@ -89,6 +91,11 @@ class Base(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         BOT_CONFIG.data_dir = Path(self.tmp.name) / "bot"
         CONFIG.data_dir = Path(self.tmp.name) / "agent"
+        # Тесты никогда не ходят в платный Higgsfield, даже если ключ есть в окружении.
+        for name, value in (("images", "template"), ("hf_key", "")):
+            patcher = mock.patch.object(BOT_CONFIG, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
         self.uid = 42
         db.save_profile(self.uid, {**db.load_profile(self.uid), "skills": "логотипы", "min_price": 1000, "palette": 2})
 
@@ -220,16 +227,25 @@ class ExamplesAndImagesTests(Base):
     def test_ai_backgrounds_and_cover_switch(self):
         from PIL import Image
 
-        def fake_generate(prompt, refs, out):
+        prompts = []
+
+        def fake_generate(model, args, out):
+            prompts.append((model, args["prompt"]))
             out.parent.mkdir(parents=True, exist_ok=True)
             Image.new("RGB", (900, 600), (200, 30, 30)).save(out)
             return out
 
-        with mock.patch.object(BOT_CONFIG, "images", "gemini"), mock.patch.object(BOT_CONFIG, "backgrounds", 2), \
-             mock.patch.object(images, "generate_image", fake_generate):
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(BOT_CONFIG, "backgrounds", 2), \
+             mock.patch.object(images, "hf_generate", fake_generate):
+            content.ensure_visual_brief(self.uid, llm=FakeLLM())
             prog = {}
-            self.assertEqual(len(images.make_backgrounds(self.uid, [], prog)), 2)
+            self.assertEqual(len(images.make_backgrounds(self.uid, prog)), 2)
             self.assertEqual(prog["done"], 2)
+        # В промпт картинки — английское описание, без русского текста (его модели рисуют каракулями).
+        self.assertEqual({m for m, _ in prompts}, {BOT_CONFIG.image_model})
+        for _, text in prompts:
+            self.assertIn("pencils and paper", text)
+            self.assertFalse(any("а" <= ch <= "я" for ch in text.lower()))
             llm = FakeLLM()
             content.generate_ideas(self.uid, 2, {}, llm=llm)
             first = content.generate_listings(self.uid, {}, llm=llm)[0]
@@ -243,12 +259,47 @@ class ExamplesAndImagesTests(Base):
         def boom(*a):
             raise RuntimeError("429")
 
-        with mock.patch.object(BOT_CONFIG, "images", "gemini"), mock.patch.object(images, "generate_image", boom):
+        with mock.patch.object(BOT_CONFIG, "images", "higgsfield"), mock.patch.object(images, "hf_generate", boom):
             prog = {}
-            self.assertEqual(images.make_backgrounds(self.uid, [], prog), [])
+            self.assertEqual(images.make_backgrounds(self.uid, prog), [])
             self.assertIn("429", prog["error"])
         l = {"id": "x", "title": "t", "cover_text": "Тест", "days": 1, "price_rub": 500}
         self.assertTrue(images.render_cover(self.uid, l).exists())
+
+
+class HiggsfieldClientTests(unittest.TestCase):
+    def test_submit_poll_download(self):
+        calls = []
+        replies = iter([
+            {"request_id": "r1", "status_url": "https://api.higgsfield.ai/requests/r1/status"},
+            {"status": "queued"},
+            {"status": "completed", "images": [{"url": "https://cdn.higgsfield.ai/r1.png"}]},
+        ])
+
+        def fake_hf(method, url, body=None):
+            calls.append((method, url, body))
+            return next(replies)
+
+        class Resp(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(images, "_hf", fake_hf), \
+             mock.patch.object(images.time, "sleep", lambda s: None), \
+             mock.patch("urllib.request.urlopen", lambda url, timeout: Resp(b"PNG")):
+            out = images.hf_generate("recraft/v4.1/text-to-image", {"prompt": "p"}, Path(tmp) / "a.png")
+            self.assertEqual(out.read_bytes(), b"PNG")
+        self.assertEqual(calls[0], ("POST", "https://api.higgsfield.ai/recraft/v4.1/text-to-image", {"prompt": "p"}))
+        self.assertEqual(calls[1][1], "https://api.higgsfield.ai/requests/r1/status")
+
+    def test_failed_job_raises(self):
+        replies = iter([{"request_id": "r2"}, {"status": "nsfw"}])
+        with mock.patch.object(images, "_hf", lambda *a, **k: next(replies)):
+            with self.assertRaises(RuntimeError):
+                images.hf_generate("m", {}, Path("/nonexistent/x.png"))
 
 
 class LLMRequestTests(unittest.TestCase):

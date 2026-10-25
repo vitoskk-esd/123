@@ -20,7 +20,7 @@ from kwork_agent.cover import PALETTES
 from kwork_agent.generator import LISTING_SCHEMA, validate
 from kwork_agent.uniqueness import find_duplicate, title_similarity
 
-from . import db, examples, images
+from . import db, images
 from .config import BOT_CONFIG
 
 IDEAS_PER_CALL = 50
@@ -48,15 +48,28 @@ IDEAS_SCHEMA = {
     },
 }
 
+# Генераторы картинок рисуют русский текст из промпта «каракулями» — поэтому нишу
+# описываем им по-английски и только предметами, цветами и материалами.
+VISUAL_BRIEF_HINT = ("In ENGLISH: 1–2 sentences describing objects, materials and colors that visually "
+                     "represent this niche for a background image. No words to render, no brand names.")
+
 PROFILE_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["skills", "style", "summary"],
+    "required": ["skills", "style", "summary", "visual_brief"],
     "properties": {
         "skills": {"type": "string", "description": "Что продавец умеет и в какой нише работает, 1–3 предложения"},
         "style": {"type": "string", "description": "Как написаны его кворки: тон, структура, приёмы"},
         "summary": {"type": "string", "description": "Одна фраза для продавца: что ты понял о нём"},
+        "visual_brief": {"type": "string", "description": VISUAL_BRIEF_HINT},
     },
+}
+
+VISUAL_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["visual_brief"],
+    "properties": {"visual_brief": {"type": "string", "description": VISUAL_BRIEF_HINT}},
 }
 
 # Та же схема, что у агента, плюс номер идеи — чтобы связать ответ с идеей.
@@ -108,6 +121,7 @@ def analyze_examples(uid: int, llm=None) -> dict:
                    system=SYSTEM, schema=PROFILE_SCHEMA, effort=BOT_CONFIG.effort, max_tokens=8000)
     prices = [e["price_rub"] for e in profile["examples"] if e.get("price_rub")]
     profile.update(skills=data["skills"], style=data["style"], summary=data["summary"],
+                   visual_brief=data["visual_brief"],
                    min_price=max(CONFIG.price_min, min(prices)) if prices else CONFIG.price_min)
     db.save_profile(uid, profile)
     return profile
@@ -252,10 +266,26 @@ def generate_listings(uid: int, progress: dict, llm=None) -> list[dict]:
     return listings
 
 
+def ensure_visual_brief(uid: int, llm=None) -> str:
+    """Английское описание ниши для картинок (если человек пришёл без образцов)."""
+    profile = db.load_profile(uid)
+    if not profile.get("visual_brief"):
+        llm = llm or _llm(BOT_CONFIG.ideas_model)
+        data = llm.ask(f"Услуги фрилансера: {profile.get('skills', '')}", system=SYSTEM, schema=VISUAL_SCHEMA,
+                       effort="low", max_tokens=2000)
+        profile["visual_brief"] = data["visual_brief"]
+        db.save_profile(uid, profile)
+    return profile["visual_brief"]
+
+
 def generate_all(uid: int, count: int, progress: dict) -> None:
     """Полный цикл для новой партии: фоны обложек → идеи → тексты."""
     if BOT_CONFIG.images_enabled and not images.backgrounds(uid):
-        images.make_backgrounds(uid, examples.cover_paths(uid), progress)
+        try:
+            ensure_visual_brief(uid)
+        except Exception as e:  # noqa: BLE001 — без описания фоны всё равно получатся, просто общее
+            progress["error"] = f"описание для картинок: {type(e).__name__}: {e}"[:300]
+        images.make_backgrounds(uid, progress)
     generate_ideas(uid, count, progress)
     generate_listings(uid, progress)
 
@@ -338,6 +368,6 @@ def reset(uid: int) -> None:
         shutil.rmtree(db.user_dir(uid) / sub, ignore_errors=True)
     db.save_listings(uid, [])
     profile = db.load_profile(uid)
-    for key in ("examples", "ideas", "skills", "style", "summary", "min_price"):
+    for key in ("examples", "ideas", "skills", "style", "summary", "min_price", "visual_brief"):
         profile.pop(key, None)
     db.save_profile(uid, profile)

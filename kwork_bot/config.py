@@ -24,11 +24,13 @@ class BotConfig:
     ideas_model: str = os.getenv("KWORK_BOT_IDEAS_MODEL", "claude-sonnet-5-5")
     effort: str = os.getenv("KWORK_BOT_EFFORT", "medium")
 
-    # Картинки: несколько ИИ-фонов на человека, текст поверх рисуется бесплатно.
-    gemini_key: str = os.getenv("GEMINI_API_KEY", "")
-    # gemini — ИИ-фоны, template — только градиенты (бесплатно). По умолчанию gemini, если есть ключ.
-    images: str = os.getenv("KWORK_BOT_IMAGES", "gemini" if os.getenv("GEMINI_API_KEY") else "template")
-    image_model: str = os.getenv("KWORK_BOT_IMAGE_MODEL", "gemini-3.1-flash-lite-image")
+    # Картинки: несколько ИИ-фонов на человека (Higgsfield API), текст поверх рисуется бесплатно.
+    hf_key: str = os.getenv("HF_KEY", "")  # формат key-id:key-secret
+    # higgsfield — ИИ-фоны, template — только градиенты (бесплатно). По умолчанию higgsfield, если есть ключ.
+    images: str = os.getenv("KWORK_BOT_IMAGES", "higgsfield" if os.getenv("HF_KEY") else "template")
+    # Recraft V4.1 ($0.035) выиграл пробу 25.10: чистые фоны без надписей. Z-Image ($0.015) и
+    # Soul 2 ($0.006) дешевле, но рисовали «каракули» вместо текста.
+    image_model: str = os.getenv("KWORK_BOT_IMAGE_MODEL", "recraft/v4.1/text-to-image")
     backgrounds: int = int(os.getenv("KWORK_BOT_BACKGROUNDS", "4"))
     # Сколько запросов к модели идёт одновременно при генерации текстов.
     parallel: int = int(os.getenv("KWORK_BOT_PARALLEL", "6"))
@@ -51,7 +53,7 @@ class BotConfig:
 
     @property
     def images_enabled(self) -> bool:
-        return self.images == "gemini" and self.backgrounds > 0
+        return self.images == "higgsfield" and self.backgrounds > 0
 
     @property
     def payments_enabled(self) -> bool:

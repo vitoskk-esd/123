@@ -7,7 +7,6 @@ import html
 import json
 import re
 import urllib.request
-from pathlib import Path
 from urllib.parse import urlparse
 
 from . import db
@@ -94,34 +93,13 @@ def from_text(text: str) -> dict:
             "price_rub": min(prices) if prices else 0, "days": 0, "category_hint": "", "cover_url": "", "url": ""}
 
 
-def save_cover(uid: int, example: dict, n: int) -> Path | None:
-    """Скачивает обложку образца — она нужна как образец стиля для ИИ-фонов."""
-    if not example.get("cover_url"):
-        return None
-    try:
-        data = _get(example["cover_url"], 5_000_000)
-    except Exception:  # noqa: BLE001 — без обложки образец всё равно полезен
-        return None
-    path = db.user_dir(uid) / "examples" / f"{n}.jpg"
-    path.parent.mkdir(exist_ok=True)
-    path.write_bytes(data)
-    return path
-
-
 def add_example(uid: int, example: dict) -> int:
     """Добавляет образец в профиль. Возвращает, сколько образцов теперь."""
     profile = db.load_profile(uid)
     examples = profile.setdefault("examples", [])
     if any(e["title"] == example["title"] for e in examples) or len(examples) >= MAX_EXAMPLES:
         return len(examples)
-    cover = save_cover(uid, example, len(examples) + 1)
-    example["cover_file"] = cover.name if cover else ""
     examples.append(example)
     db.save_profile(uid, profile)
     return len(examples)
 
-
-def cover_paths(uid: int) -> list[Path]:
-    d = db.user_dir(uid) / "examples"
-    return [d / e["cover_file"] for e in db.load_profile(uid).get("examples", [])
-            if e.get("cover_file") and (d / e["cover_file"]).exists()]

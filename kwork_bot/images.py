@@ -1,16 +1,17 @@
-"""Обложки: несколько ИИ-фонов на пользователя (Gemini) + текст, который рисуем сами.
+"""Обложки: несколько ИИ-фонов на пользователя (Higgsfield API) + текст, который рисуем сами.
 
 Почему так дёшево: на 300 кворков генерируется всего KWORK_BOT_BACKGROUNDS картинок
-(по умолчанию 4), а заголовок и цену на каждую обложку накладывает Pillow — бесплатно
-и без «кривых» русских букв, которые нейросети рисуют плохо. Если Gemini не настроен,
-обложки получаются градиентными (как раньше), тоже бесплатно.
+(по умолчанию 4 × Recraft V4.1 ≈ $0.035 = $0.14 на человека), а заголовок и цену
+на каждую обложку накладывает Pillow — бесплатно и без «кривых» русских букв, которые
+нейросети рисуют плохо. Если ключа Higgsfield нет или генерация не удалась, обложки
+получаются градиентными (как раньше), тоже бесплатно.
 """
 
 from __future__ import annotations
 
-import base64
 import json
-import mimetypes
+import time
+from concurrent.futures import ThreadPoolExecutor
 import urllib.request
 from pathlib import Path
 
@@ -19,40 +20,62 @@ from kwork_agent.cover import PALETTES, SIZE, draw_texts, make_cover
 from . import db
 from .config import BOT_CONFIG
 
-API = "https://generativelanguage.googleapis.com/v1beta/models"
+API = "https://api.higgsfield.ai"
 
+# Промпты на английском: модели картинок понимают его лучше.
 VARIANTS = [
-    "композиция: предметы ниши справа, слева спокойный тёмный фон",
-    "композиция: крупный план одного предмета ниши справа, мягкий свет",
-    "композиция: абстрактные формы и линии в цветах ниши, справа акцент",
-    "композиция: рабочее место специалиста этой ниши, вид сверху, справа",
-    "композиция: минимализм, один яркий объект справа, много пустого места слева",
-    "композиция: объёмные 3D-элементы по теме ниши справа",
+    "objects related to the niche on the right side, calm dark empty space on the left",
+    "close-up of one object related to the niche on the right, soft studio light",
+    "abstract shapes and flowing lines in the niche colors, accent on the right",
+    "top-down view of a specialist's desk for this niche, items on the right",
+    "minimalism, one bright object on the right, lots of empty space on the left",
+    "3D rendered elements related to the niche on the right",
 ]
 
 
-def generate_image(prompt: str, refs: list[Path], out: Path) -> Path:
-    parts: list[dict] = [{"text": prompt}]
-    for r in refs[:3]:
-        parts.append({"inline_data": {"mime_type": mimetypes.guess_type(r.name)[0] or "image/jpeg",
-                                      "data": base64.b64encode(r.read_bytes()).decode()}})
-    body = {"contents": [{"parts": parts}],
-            "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "3:2"}}}
-    headers = {"Content-Type": "application/json"}
-    if BOT_CONFIG.gemini_key:
-        headers["x-goog-api-key"] = BOT_CONFIG.gemini_key
-    req = urllib.request.Request(f"{API}/{BOT_CONFIG.image_model}:generateContent",
-                                 json.dumps(body).encode(), headers)
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        data = json.load(resp)
-    for cand in data.get("candidates", []):
-        for part in cand.get("content", {}).get("parts", []):
-            inline = part.get("inline_data") or part.get("inlineData")
-            if inline:
-                out.parent.mkdir(parents=True, exist_ok=True)
-                out.write_bytes(base64.b64decode(inline["data"]))
-                return out
-    raise RuntimeError("Gemini не вернул картинку")
+def _hf(method: str, url: str, body: dict | None = None) -> dict:
+    headers = {"Authorization": f"Key {BOT_CONFIG.hf_key}", "Content-Type": "application/json"}
+    req = urllib.request.Request(url, json.dumps(body).encode() if body is not None else None, headers, method=method)
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return json.load(resp)
+
+
+def first_url(x) -> str | None:
+    """Первая ссылка на результат в ответе Higgsfield (images[0].url, image.url и т. п.)."""
+    if isinstance(x, str):
+        return x if x.startswith("https://") else None
+    if isinstance(x, dict):
+        for k in ("images", "image", "output", "url"):
+            if k in x and (u := first_url(x[k])):
+                return u
+    if isinstance(x, list):
+        for v in x:
+            if (u := first_url(v)):
+                return u
+    return None
+
+
+def hf_generate(model: str, args: dict, out: Path, timeout: int = 300) -> Path:
+    """Отправляет задание в Higgsfield, ждёт готовности и сохраняет картинку."""
+    job = _hf("POST", f"{API}/{model}", args)
+    status_url = job.get("status_url") or f"{API}/requests/{job['request_id']}/status"
+    deadline = time.monotonic() + timeout
+    while True:
+        data = _hf("GET", status_url)
+        if data["status"] == "completed":
+            break
+        if data["status"] in ("failed", "nsfw", "canceled"):
+            raise RuntimeError(f"Higgsfield: {data['status']}")
+        if time.monotonic() > deadline:
+            raise TimeoutError("Higgsfield не успел за отведённое время")
+        time.sleep(3)
+    url = first_url(data)
+    if not url:
+        raise RuntimeError("Higgsfield не вернул ссылку на картинку")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with urllib.request.urlopen(url, timeout=60) as resp:
+        out.write_bytes(resp.read())
+    return out
 
 
 def backgrounds_dir(uid: int) -> Path:
@@ -64,34 +87,35 @@ def backgrounds(uid: int) -> list[Path]:
     return sorted(d.glob("bg*.png")) if d.exists() else []
 
 
-def make_backgrounds(uid: int, refs: list[Path], progress: dict | None = None) -> list[Path]:
-    """Генерирует фоны в стиле обложек пользователя. Ошибки не роняют работу — будут градиенты."""
+def background_prompt(brief: str, i: int) -> str:
+    return (f"Background image for a freelance service cover. Theme: {brief or 'professional services'}. "
+            f"{VARIANTS[i % len(VARIANTS)]}. Modern, clean, professional, high quality. "
+            "Absolutely no text, letters, numbers, typography, signs, logos or watermarks. No people, no hands. "
+            "The left half must be calm and dark: a large white headline will be placed there.")
+
+
+def make_backgrounds(uid: int, progress: dict | None = None) -> list[Path]:
+    """Генерирует фоны параллельно. Ошибки не роняют работу — останутся градиентные обложки."""
     if not BOT_CONFIG.images_enabled:
         return []
-    profile = db.load_profile(uid)
-    niche = profile.get("skills", "")[:400]
-    style = ("Повтори стиль, цвета и настроение приложенных обложек, но не копируй их. " if refs else "")
+    brief = db.load_profile(uid).get("visual_brief", "")
     n = BOT_CONFIG.backgrounds
-    if progress is not None:
-        progress.update(stage="images", done=0, total=n)
-    out = []
-    for i in range(n):
+    progress = progress if progress is not None else {}
+    progress.update(stage="images", done=0, total=n)
+
+    def one(i: int) -> Path | None:
         path = backgrounds_dir(uid) / f"bg{i + 1}.png"
         if not path.exists():
-            prompt = (f"Фон для обложки услуги фрилансера на бирже Kwork. Ниша: {niche}. {style}"
-                      f"{VARIANTS[i % len(VARIANTS)]}. Современно, чисто, профессионально. "
-                      "Никакого текста, букв, цифр, логотипов и водяных знаков. Без лиц людей. "
-                      "Левая половина — спокойная и тёмная: поверх будет крупный белый заголовок.")
             try:
-                generate_image(prompt, refs, path)
+                hf_generate(BOT_CONFIG.image_model, {"prompt": background_prompt(brief, i), "aspect_ratio": "3:2"}, path)
             except Exception as e:  # noqa: BLE001
-                if progress is not None:
-                    progress["error"] = f"картинки: {type(e).__name__}: {e}"[:300]
-                continue
-        out.append(path)
-        if progress is not None:
-            progress["done"] = len(out)
-    return out
+                progress["error"] = f"картинки: {type(e).__name__}: {e}"[:300]
+                return None
+        progress["done"] = progress.get("done", 0) + 1
+        return path
+
+    with ThreadPoolExecutor(max_workers=n) as pool:
+        return [p for p in pool.map(one, range(n)) if p]
 
 
 def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> Path:
