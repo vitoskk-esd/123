@@ -83,6 +83,20 @@ function kwScore(label, ctx) {
 // Нет подходящего варианта — «Другие/Другое», если есть, иначе первый.
 const kwFallback = (inputs) => inputs.find((i) => /^(друг|проч|ин(ое|ые)\b)/i.test(kwLabelOf(i))) || inputs[0];
 
+// Варианты, которые бот подобрал заранее по настоящим полям рубрики (listing.attributes:
+// [{field, ids, labels}]): сначала по номеру варианта, если Kwork поменял номера — по названиям.
+function kwPlanned(listing, title, inputs) {
+  const plan = listing.attributes || [];
+  const ids = new Set(plan.flatMap((a) => a.ids || []));
+  const byId = inputs.filter((i) => ids.has(i.value));
+  if (byId.length) return byId;
+  const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+  const field = plan.find((a) => norm(a.field) === norm(title));
+  if (!field) return [];
+  const labels = new Set((field.labels || []).map(norm));
+  return inputs.filter((i) => labels.has(norm(kwLabelOf(i))));
+}
+
 // Возвращает названия полей, где вариант выбран без совпадения (их стоит проверить человеку).
 async function kwChooseAttributes(listing, log, step, waitMs) {
   const hints = [listing.type_hint, ...(listing.attribute_hints || [])].join(" ");
@@ -106,9 +120,13 @@ async function kwChooseAttributes(listing, log, step, waitMs) {
       if (!inputs.length) continue;
       const required = list.dataset.required === "1";
       const multiple = inputs[0].type === "checkbox";
+      const planned = kwPlanned(listing, title, inputs);
       const scored = inputs.map((i) => ({i, s: kwScore(kwLabelOf(i), ctx)})).filter((x) => x.s > 0).sort((a, b) => b.s - a.s);
       let picks;
-      if (multiple) {
+      if (planned.length) {
+        picks = multiple ? planned.slice(0, Number(list.dataset.multipleMaxCount) || planned.length) : planned.slice(0, 1);
+        if ((listing.attributes_guessed || []).includes(title)) guessed.push(title); // бот сам не нашёл подходящий
+      } else if (multiple) {
         const max = Math.min(Number(list.dataset.multipleMaxCount) || 3, 3);
         picks = scored.slice(0, max).map((x) => x.i);
         if (!picks.length && !required) continue; // необязательные галочки без совпадений не трогаем

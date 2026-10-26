@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import html
 import io
+import logging
 import tempfile
 from pathlib import Path
 
@@ -23,6 +24,7 @@ from .config import BOT_CONFIG
 from .export import HOW_TO, build_zip, extension_filename, extension_help, extension_version, extension_zip
 
 router = Router()
+log = logging.getLogger(__name__)
 JOBS: dict[int, dict] = {}  # кто сейчас ждёт генерацию: uid → прогресс
 _TASKS: set[asyncio.Task] = set()  # ссылки на фоновые задачи, чтобы их не собрал сборщик мусора
 
@@ -944,10 +946,22 @@ async def cb_zip(call: CallbackQuery) -> None:
         return
     await call.answer("Собираю архив…")
     uid = call.from_user.id
+    check = 0
+    if content.needs_attributes(uid):
+        wait = await call.message.answer("⏳ Подбираю поля рубрик Kwork («Тип», «Платформа», «Язык»…) — до минуты.")
+        try:
+            check = await asyncio.to_thread(content.ensure_attributes, uid)
+        except Exception as e:  # noqa: BLE001 — без полей архив всё равно годится, расширение подберёт само
+            log.warning("поля рубрик: %s", e)
+        await wait.delete()
+    else:
+        check = sum(1 for l in db.load_listings(uid) if l.get("attributes_guessed"))
     data = await asyncio.to_thread(build_zip, uid)
     await call.message.answer_document(
         BufferedInputFile(data, "kwork.zip"),
         caption=f"Все {len(db.load_listings(uid))} кворков: таблица kworks.csv, обложки и инструкция "
                 "«КАК_ВЫЛОЖИТЬ.txt». Этот файл выбирайте в панели расширения — нужна версия расширения "
-                f"v{extension_version()} или новее (номер виден в заголовке панели).",
+                f"v{extension_version()} или новее (номер виден в заголовке панели)."
+                + (f"\nУ {check} кворков подходящий вариант поля рубрики не нашёлся — на них расширение "
+                   "остановится и попросит проверить эти поля." if check else ""),
     )

@@ -74,6 +74,9 @@ class FakeLLM:
             nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
             return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}",
                                "attribute_hints": ["Figma", "Логотип"]} for n in nos]}
+        if list(schema["properties"]) == ["kworks"]:  # варианты полей рубрики Kwork
+            nos = [int(line.split(".")[0]) for line in prompt.split("КВОРКИ:")[1].splitlines() if line[:1].isdigit()]
+            return {"kworks": [{"no": n, "ids": []} for n in nos]}
         if list(schema["properties"]) == ["visual_brief"]:
             return {"visual_brief": "pencils and paper"}
         if "ideas" in schema["properties"]:
@@ -778,6 +781,61 @@ class KworkRulesTests(unittest.TestCase):
         self.assertFalse(long.endswith(" "))
         types = {c.get("portfolio") for s in r.sections() for c in s["subs"]}
         self.assertEqual(types, {"photo", "video", "audio", "pdf", "none"})  # у каждой рубрики есть тип
+
+
+class KworkFieldsTests(Base):
+    """Поля рубрик Kwork («Тип», «Язык разработки», «Платформа»…) — снимок дерева и выбор вариантов."""
+
+    def test_snapshot_covers_all_categories(self):
+        from kwork_bot import kwork_fields as kf
+        from kwork_bot.kwork_rules import sections
+
+        ids = [c["id"] for s in sections() for c in s["subs"]]
+        self.assertTrue(all(isinstance(kf.tree_for(i), list) for i in ids))
+        self.assertGreater(sum(1 for i in ids if kf.tree_for(i)), 45)
+        bots = kf.tree_for(41)
+        self.assertEqual(bots[0]["title"], "Тип")
+        chat = next(o for o in bots[0]["options"] if o["label"] == "Чат-боты")
+        self.assertIn("Платформа", [f["title"] for f in chat["fields"]])
+        self.assertIn("Поле «Тип»", kf.describe(bots))
+
+    def test_resolve_follows_tree_and_limits(self):
+        from kwork_bot import kwork_fields as kf
+
+        tree = [{"id": "1", "title": "Тип", "required": True, "multiple": False, "max": 0, "options": [
+            {"id": "10", "label": "Парсеры"},
+            {"id": "11", "label": "Чат-боты", "fields": [
+                {"id": "2", "title": "Платформа", "required": True, "multiple": True, "max": 2, "options": [
+                    {"id": "20", "label": "Telegram"}, {"id": "21", "label": "Сайт"}, {"id": "22", "label": "Email"},
+                    {"id": "23", "label": "Другие"}]},
+                {"id": "3", "title": "Язык", "required": True, "multiple": True, "max": 0, "options": [
+                    {"id": "30", "label": "C++"}, {"id": "31", "label": "Python"}]}]}]}]
+        attrs, guessed = kf.resolve(tree, ["11", "22", "20", "21", "31", "99"])
+        self.assertEqual([(a["field"], a["ids"]) for a in attrs],
+                         [("Тип", ["11"]), ("Платформа", ["22", "20"]), ("Язык", ["31"])])  # лимит 2, порядок ИИ
+        self.assertEqual(guessed, [])
+        attrs, guessed = kf.resolve(tree, ["11", "31"])  # платформу ИИ не выбрал — «Другие», на проверку
+        self.assertEqual(attrs[1], {"field": "Платформа", "ids": ["23"], "labels": ["Другие"]})
+        self.assertEqual(guessed, ["Платформа"])
+        attrs, _ = kf.resolve(tree, ["10", "20"])  # «Платформа» не показывается под «Парсерами»
+        self.assertEqual([a["field"] for a in attrs], ["Тип"])
+
+    def test_archive_gets_fields_for_old_kworks(self):
+        """Кворки без полей (созданные раньше) получают их при сборке архива; повторно ИИ не спрашиваем."""
+        db.save_listings(self.uid, [fake_listing(1, id="a1", category_hint="Разработка и IT > Скрипты, боты и mini apps")])
+        from kwork_bot.kwork_rules import normalize
+        listings = db.load_listings(self.uid)
+        normalize(listings[0])
+        db.save_listings(self.uid, listings)
+        self.assertTrue(content.needs_attributes(self.uid))
+        llm = FakeLLM()
+        self.assertEqual(content.ensure_attributes(self.uid, llm=llm), 1)  # ИИ ничего не выбрал — проверить вручную
+        l = db.load_listings(self.uid)[0]
+        self.assertEqual(l["attributes"][0]["field"], "Тип")
+        self.assertIn("Тип", l["attributes_guessed"])
+        self.assertFalse(content.needs_attributes(self.uid))
+        content.ensure_attributes(self.uid, llm=llm)
+        self.assertEqual(len(llm.prompts), 1)
 
 
 class CoverWeightTests(unittest.TestCase):

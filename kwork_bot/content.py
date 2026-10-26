@@ -253,6 +253,24 @@ def uniqueness_report(uid: int) -> tuple[int, int]:
     return texts, pics
 
 
+def needs_attributes(uid: int) -> bool:
+    from . import kwork_fields
+
+    return any(l.get("attributes_cat") != l.get("category_id") and kwork_fields.tree_for(l.get("category_id"))
+               for l in db.load_listings(uid))
+
+
+def ensure_attributes(uid: int, llm=None) -> int:
+    """Варианты полей рубрики Kwork («Тип», «Язык разработки», «Платформа»…) кворкам без них —
+    по ним расширение отмечает поля. Возвращает, у скольких кворков поля нужно проверить вручную."""
+    from . import kwork_fields
+
+    listings = db.load_listings(uid)
+    if kwork_fields.choose(listings, llm or _llm(), system=SYSTEM):
+        db.save_listings(uid, listings)
+    return sum(1 for l in listings if l.get("attributes_guessed"))
+
+
 def portfolio_note(uid: int) -> str:
     """Предупреждение о рубриках, где Kwork требует работы в портфолио — их добавляет сам продавец."""
     n = 0

@@ -87,7 +87,7 @@ async function loadZip(file) {
     id: l.id, title: l.title, description: l.description, requirements: l.requirements,
     price_rub: l.price_rub, days: l.days, category_hint: l.category_hint,
     section_id: l.section_id, category_id: l.category_id, type_hint: l.type_hint || "", volume: l.volume || "",
-    attribute_hints: l.attribute_hints || [],
+    attribute_hints: l.attribute_hints || [], attributes: l.attributes || [], attributes_guessed: l.attributes_guessed || [],
   })));
   await updateState((st) => Object.assign(st, defaultState(),
     {manual: st.manual, limit: st.limit, pause: st.pause, message: `Загружено кворков: ${listings.length}`}));
@@ -107,7 +107,8 @@ function fail(_st, item, reason) {
   });
 }
 
-function isManual(st) { return st.index - st.runStart < st.manual; }
+// «Проверять вручную первых N» — первые N выложенных кворков, а не N с каждого нажатия «Старт».
+function isManual(st) { return st.done.length < st.manual; }
 
 async function resume() {
   render();
@@ -189,7 +190,7 @@ async function resume() {
       if (guessed.length) parts.push(`проверьте поля «${guessed.join("», «")}»: подходящего варианта не нашлось, выбран «Другие» или первый`);
       s.message = parts.length
         ? `Кворк ${s.index + 1}: ${parts.join("; ")}. Затем нажмите «Готово» — дальше расширение продолжит само.`
-        : `Проверьте кворк ${s.index + 1} и нажмите «Готово» на странице (проверка вручную: ${s.index - s.runStart + 1} из ${s.manual}).`;
+        : `Проверьте кворк ${s.index + 1} и нажмите «Готово» на странице (проверка вручную: ${s.done.length + 1} из ${s.manual}).`;
     });
     return waitForHuman();
   }
