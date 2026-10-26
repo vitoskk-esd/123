@@ -1,18 +1,20 @@
 #!/bin/bash
-# Двойной клик — и бот запускается. Первый раз: поставит библиотеки, откроет .env для настроек,
-# попросит войти в служебный аккаунт Telegram. Дальше — сразу запуск.
+# Двойной клик — и бот запускается. Python ставить не нужно: при первом запуске всё нужное
+# скачается в папку tools рядом с ботом (около 100 МБ, пара минут). Ничего не устанавливается в систему.
 cd "$(dirname "$0")"
 pause() { read -p "Нажмите Enter, чтобы закрыть"; }
-if ! command -v python3 >/dev/null 2>&1 || ! python3 -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)"; then
-    echo "Нужен Python 3.10 или новее. Установите его с https://www.python.org/downloads/ и запустите этот файл снова."
-    pause; exit 1
+export UV_PYTHON_INSTALL_DIR="$PWD/tools/python" UV_CACHE_DIR="$PWD/tools/cache"
+if [ ! -x tools/uv ]; then
+    echo "Первый запуск: скачиваю всё нужное (пара минут)..."
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$PWD/tools" UV_NO_MODIFY_PATH=1 sh >/dev/null \
+        || { echo "Не получилось скачать — проверьте интернет и запустите файл снова."; pause; exit 1; }
 fi
-if [ ! -d venv ]; then
-    echo "Первый запуск: готовлю окружение..."
-    python3 -m venv venv || { echo "Не получилось создать окружение Python."; pause; exit 1; }
+if [ ! -x venv/bin/python ]; then
+    tools/uv venv venv --python 3.12 --python-preference only-managed -q \
+        || { echo "Не получилось скачать Python — проверьте интернет и запустите файл снова."; rm -rf venv; pause; exit 1; }
 fi
-echo "Проверяю и ставлю нужные библиотеки (первый раз — пара минут)..."
-venv/bin/python -m pip install -q --disable-pip-version-check -r requirements.txt || { echo "Не поставились библиотеки — проверьте интернет."; pause; exit 1; }
+tools/uv pip install -q -p venv/bin/python -r requirements.txt \
+    || { echo "Не поставились библиотеки — проверьте интернет и запустите файл снова."; pause; exit 1; }
 if [ ! -f .env ]; then
     cp .env.example .env
     echo
