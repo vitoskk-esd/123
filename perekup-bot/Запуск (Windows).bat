@@ -19,19 +19,17 @@ if errorlevel 1 goto fail
 if not exist .env (
     copy .env.example .env >nul
     echo.
-    echo Создал файл настроек .env и открываю его. Впишите туда BOT_TOKEN, ADMIN_IDS, TG_API_ID и TG_API_HASH,
+    echo Создал файл настроек .env и открываю его. Впишите туда BOT_TOKEN, TG_API_ID и TG_API_HASH,
     echo сохраните ^(Ctrl+S^) и запустите этот файл снова.
     start notepad .env
     pause
     exit /b 0
 )
-set SESSION=main
-for /f "tokens=2 delims==, " %%a in ('findstr /b "TG_SESSIONS=" .env') do set SESSION=%%a
-if not exist "sessions\%SESSION%.session" (
+if not exist "sessions\main.session" (
     echo.
-    echo Вход в служебный аккаунт Telegram "%SESSION%" ^(один раз^).
+    echo Вход в служебный аккаунт Telegram ^(один раз^).
     echo Введите номер телефона этого аккаунта в формате +79991234567, потом код, который придет в Telegram.
-    venv\Scripts\python -m bot login %SESSION%
+    venv\Scripts\python -m bot login
     if errorlevel 1 goto fail
 )
 echo.

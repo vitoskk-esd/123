@@ -13,8 +13,7 @@ SCHEMA = """
 PRAGMA journal_mode=WAL;
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY, username TEXT, first_name TEXT, source TEXT, ref_by INTEGER, created_at REAL,
-  trial_until REAL DEFAULT 0, paid_until REAL DEFAULT 0, autopay INTEGER DEFAULT 0, pm_id TEXT DEFAULT '',
-  email TEXT DEFAULT '', blocked INTEGER DEFAULT 0, missed INTEGER DEFAULT 0, missed_good INTEGER DEFAULT 0
+  trial_until REAL DEFAULT 0, paid_until REAL DEFAULT 0, blocked INTEGER DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS filters (
   id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, text TEXT, data TEXT, active INTEGER DEFAULT 1, created_at REAL
@@ -111,11 +110,15 @@ class DB:
         await self.event(uid, "start", source)
         return True
 
+    async def first_user(self) -> int | None:
+        row = await self._one("SELECT id FROM users ORDER BY created_at LIMIT 1")
+        return row["id"] if row else None
+
     async def user(self, uid: int):
         return await self._one("SELECT * FROM users WHERE id=?", uid)
 
     async def set_user(self, uid: int, **fields) -> None:
-        assert set(fields) <= {"trial_until", "paid_until", "autopay", "pm_id", "email", "missed", "missed_good"}, fields
+        assert set(fields) <= {"trial_until", "paid_until"}, fields
         await self._run(f"UPDATE users SET {', '.join(f'{k}=?' for k in fields)} WHERE id=?", *fields.values(), uid)
 
     async def mark_blocked(self, uid: int) -> None:
@@ -192,10 +195,6 @@ class DB:
 
     async def channel_failed(self, cid: int, error: str) -> None:
         await self._run("UPDATE channels SET status='failed', error=? WHERE id=?", error[:200], cid)
-
-    async def account_load(self) -> dict[str, int]:
-        return {r["account"]: r["n"] for r in await self._all(
-            "SELECT account, COUNT(*) n FROM channels WHERE status='joined' GROUP BY account")}
 
     async def base_channels(self) -> list:
         return await self._all("SELECT * FROM channels WHERE base=1 ORDER BY title, username")
@@ -279,11 +278,6 @@ class DB:
                                     "VALUES (?,?,?,?,?,?,?,?)", [r + (now,) for r in rows])
         await self.conn.commit()
 
-    async def add_missed_many(self, uids: list[int], good: bool) -> None:
-        await self.conn.executemany("UPDATE users SET missed=missed+1, missed_good=missed_good+? WHERE id=?",
-                                    [(int(good), u) for u in uids])
-        await self.conn.commit()
-
     async def user_stats(self, uid: int, since: float) -> dict:
         r = await self._one("SELECT COUNT(*) n, SUM(discount>=10) good, SUM(discount>=20) great, AVG(latency_ms) lat, "
                             "MIN(latency_ms) best FROM deliveries WHERE user_id=? AND at>?", uid, since)
@@ -336,16 +330,14 @@ class DB:
             "with_filters": (await one("SELECT COUNT(DISTINCT user_id) n FROM filters WHERE active=1"))["n"],
             "trial": (await one("SELECT COUNT(*) n FROM users WHERE trial_until>? AND paid_until<=?", now, now))["n"],
             "paying": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>?", now))["n"],
-            "autopay": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND autopay=1", now))["n"],
             "ever_paid": (await one("SELECT COUNT(DISTINCT user_id) n FROM payments WHERE status='succeeded'"))["n"],
             "revenue30": (await one("SELECT COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY))["s"],
             "churned": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>0 AND paid_until<=?", now))["n"],
             "blocked": (await one("SELECT COUNT(*) n FROM users WHERE blocked=1"))["n"],
             "posts24": (await one("SELECT COUNT(*) n, SUM(make IS NOT NULL AND price IS NOT NULL) cars, SUM(dup) dups, "
-                                  "SUM(parsed_by='llm') llm, AVG(CASE WHEN matched>0 THEN latency_ms END) lat FROM posts WHERE at>?", now - DAY)),
+                                  "AVG(CASE WHEN matched>0 THEN latency_ms END) lat FROM posts WHERE at>?", now - DAY)),
             "deliveries24": (await one("SELECT COUNT(*) n FROM deliveries WHERE at>?", now - DAY))["n"],
             "channels": await self._all("SELECT status, base, COUNT(*) n FROM channels GROUP BY status, base"),
-            "accounts": await self.account_load(),
             "sources": await self._all(
                 "SELECT u.source, COUNT(*) users, SUM(EXISTS(SELECT 1 FROM payments p WHERE p.user_id=u.id AND p.status='succeeded')) paid "
                 "FROM users u GROUP BY u.source ORDER BY users DESC LIMIT 15"),

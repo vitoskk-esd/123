@@ -12,7 +12,6 @@ class Ctx:
     cfg: Config
     dict: Dictionary
     channels: dict[int, dict] = field(default_factory=dict)   # tg_id → строка channels (быстрый поиск на каждом посте)
-    reader: object = None                                      # userbot.Reader, когда запущен
     pay: object = None                                         # payments.YooKassa
 
     def reload(self) -> Dictionary:

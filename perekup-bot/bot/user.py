@@ -37,7 +37,8 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     new = await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, source, None,
                                 ctx.cfg.trial_days)
     channels = await ctx.db.channel_count_for(msg.from_user.id)
-    await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=ctx.cfg.trial_days), reply_markup=K.menu())
+    trial = T.WELCOME_TRIAL.format(days=ctx.cfg.trial_days) if ctx.cfg.payments_on else ""
+    await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu())
     if new or not await ctx.db.filters(msg.from_user.id):
         await msg.answer(T.ASK_FILTER, reply_markup=K.new_filter())
         await state.set_state(S.filter)
@@ -229,81 +230,60 @@ async def show_stats(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None 
 
 # ---------- подписка ----------
 async def show_sub(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = None) -> None:
+    c = ctx.cfg
+    if not c.payments_on:
+        return await msg.answer(T.SUB_FREE)
     u = await ctx.db.user(uid or msg.chat.id)
-    now, c = time.time(), ctx.cfg
-    if u["paid_until"] > now:
-        text = T.SUB_ACTIVE.format(until=fmt_date(u["paid_until"]), auto=T.SUB_AUTO_ON if u["autopay"] else T.SUB_AUTO_OFF if c.autopay else "")
-    elif u["trial_until"] > now:
-        text = T.SUB_TRIAL.format(until=fmt_date(u["trial_until"]), price=c.price, days=c.period_days)
+    until = max(u["trial_until"], u["paid_until"])
+    if until > time.time():
+        tpl = T.SUB_ACTIVE if u["paid_until"] > time.time() else T.SUB_TRIAL
+        text = tpl.format(until=fmt_date(until), price=c.price, days=c.period_days)
     else:
-        missed = T.SUB_MISSED.format(n=u["missed"], good=u["missed_good"]) if u["missed"] else ""
-        text = T.SUB_NONE.format(missed=missed, price=c.price, days=c.period_days)
-    await msg.answer(text, reply_markup=K.sub(u["paid_until"] > now, bool(u["autopay"]), c.price))
+        text = T.SUB_NONE.format(price=c.price, days=c.period_days)
+    await msg.answer(text, reply_markup=K.pay(c.price))
 
 
 @router.callback_query(F.data == "s:pay")
 async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
     c = ctx.cfg
-    if not ctx.pay or not ctx.pay.enabled:
-        await cb.message.answer(T.PAY_DISABLED.format(support=f": {c.support}" if c.support else ""))
-        return await cb.answer()
-    u = await ctx.db.user(cb.from_user.id)
     try:
-        pid, url = await ctx.pay.create(cb.from_user.id, u["email"])
+        pid, url = await ctx.pay.create(cb.from_user.id)
     except Exception:
         await cb.message.answer(T.PAY_ERROR)
         return await cb.answer()
     await ctx.db.add_payment(cb.from_user.id, pid, c.price)
-    await ctx.db.event(cb.from_user.id, "pay_click")
-    offer = T.PAY_OFFER.format(url=c.offer_url, auto=T.PAY_OFFER_AUTO.format(days=c.period_days) if c.autopay else "") if c.offer_url else ""
-    await cb.message.answer(T.PAY_LINK.format(price=c.price, days=c.period_days, offer=offer),
-                            reply_markup=K.pay_link(url, c.price), disable_web_page_preview=True)
+    await cb.message.answer(T.PAY_LINK.format(price=c.price, days=c.period_days), reply_markup=K.pay_link(url, c.price))
     await cb.answer()
 
 
-async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str, method: str) -> float | None:
+async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str) -> float | None:
     """Итог платежа → продление. Возвращает новую дату доступа, если продлили именно сейчас."""
     if status not in ("succeeded", "canceled") or not await ctx.db.finish_payment(yk_id, status):
         return None
     if status == "canceled":
         return None
-    until = await ctx.db.extend(uid, ctx.cfg.period_days)
-    if method:
-        await ctx.db.set_user(uid, pm_id=method, autopay=1)
     await ctx.db.event(uid, "paid")
-    return until
+    return await ctx.db.extend(uid, ctx.cfg.period_days)
 
 
 @router.callback_query(F.data == "s:check")
 async def check(cb: CallbackQuery, ctx: Ctx) -> None:
     p = await ctx.db.last_pending(cb.from_user.id)
-    if not p or not ctx.pay:
+    if not p:
         return await cb.answer(T.PAY_WAIT, show_alert=True)
-    status, method = await ctx.pay.status(p["yk_id"])
-    until = await apply_payment(ctx, cb.from_user.id, p["yk_id"], status, method)
+    status = await ctx.pay.status(p["yk_id"])
+    until = await apply_payment(ctx, cb.from_user.id, p["yk_id"], status)
     if until:
         await cb.message.edit_reply_markup(reply_markup=None)
         await cb.message.answer(T.PAY_OK.format(until=fmt_date(until)))
         await cb.answer()
-    elif status == "canceled":
-        await cb.answer(T.PAY_FAIL, show_alert=True)
     else:
-        await cb.answer(T.PAY_WAIT, show_alert=True)
-
-
-@router.callback_query(F.data == "s:autooff")
-async def autopay_off(cb: CallbackQuery, ctx: Ctx) -> None:
-    await ctx.db.set_user(cb.from_user.id, autopay=0, pm_id="")
-    await ctx.db.event(cb.from_user.id, "autopay_off")
-    u = await ctx.db.user(cb.from_user.id)
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.message.answer(T.AUTO_OFF_DONE.format(until=fmt_date(u["paid_until"])))
-    await cb.answer()
+        await cb.answer(T.PAY_FAIL if status == "canceled" else T.PAY_WAIT, show_alert=True)
 
 
 # ---------- помощь и меню ----------
 async def show_help(msg: Message, ctx: Ctx, state: FSMContext) -> None:
-    await msg.answer(T.HELP.format(support=f"\n\nПоддержка: {ctx.cfg.support}" if ctx.cfg.support else ""), reply_markup=K.menu())
+    await msg.answer(T.HELP, reply_markup=K.menu())
 
 
 MENU = {T.MENU_FILTERS: show_filters, T.MENU_CHANNELS: show_channels, T.MENU_STATS: show_stats,

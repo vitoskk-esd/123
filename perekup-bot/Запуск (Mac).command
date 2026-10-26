@@ -16,18 +16,16 @@ venv/bin/python -m pip install -q --disable-pip-version-check -r requirements.tx
 if [ ! -f .env ]; then
     cp .env.example .env
     echo
-    echo "Создал файл настроек .env и открываю его. Впишите туда BOT_TOKEN, ADMIN_IDS, TG_API_ID и TG_API_HASH,"
+    echo "Создал файл настроек .env и открываю его. Впишите туда BOT_TOKEN, TG_API_ID и TG_API_HASH,"
     echo "сохраните (Cmd+S) и запустите этот файл снова."
     open -e .env
     pause; exit 0
 fi
-SESSION=$(grep -E '^TG_SESSIONS=' .env | cut -d= -f2 | cut -d'#' -f1 | cut -d, -f1 | tr -d ' ')
-SESSION=${SESSION:-main}
-if [ ! -f "sessions/$SESSION.session" ]; then
+if [ ! -f sessions/main.session ]; then
     echo
-    echo "Вход в служебный аккаунт Telegram «$SESSION» (один раз)."
+    echo "Вход в служебный аккаунт Telegram (один раз)."
     echo "Введите номер телефона этого аккаунта в формате +79991234567, потом код, который придёт в Telegram."
-    venv/bin/python -m bot login "$SESSION" || { pause; exit 1; }
+    venv/bin/python -m bot login || { pause; exit 1; }
 fi
 echo
 echo "Запускаю бота. Чтобы остановить — закройте это окно или нажмите Ctrl+C."

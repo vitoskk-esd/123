@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 
-from bot import market
 from bot.parse import car_key, fingerprint, parse_post
 from bot.query import Filter, describe, matches, parse_filter
 from bot.words import load_dictionary
@@ -74,9 +73,3 @@ def test_matching():
     assert not matches(f, parse_post("Toyota Camry 2012, Москва", D), None)                        # без цены — не шлём
     cheap = parse_filter("камри ниже рынка на 15%", D)
     assert matches(cheap, ok, 18) and not matches(cheap, ok, 10) and not matches(cheap, ok, None)
-
-
-def test_market():
-    assert market.estimate([1_000_000] * 4) is None                 # мало объявлений — не врём
-    assert market.estimate([900_000, 1_000_000, 1_100_000, 1_200_000, 5_000_000]) == 1_100_000   # медиана не боится выбросов
-    assert market.discount(880_000, 1_100_000) == 20

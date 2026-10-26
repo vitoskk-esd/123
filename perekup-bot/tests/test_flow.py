@@ -9,12 +9,12 @@ import pytest
 from aiogram import Bot
 from aiogram.client.session.base import BaseSession
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.methods import (AnswerCallbackQuery, CopyMessages, EditMessageReplyMarkup, EditMessageText, SendMessage)
-from aiogram.types import CallbackQuery, Chat, Message, MessageId, Update, User
+from aiogram.methods import AnswerCallbackQuery, EditMessageReplyMarkup, EditMessageText, SendMessage
+from aiogram.types import CallbackQuery, Chat, Message, Update, User
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
 from bot import jobs
-from bot.__main__ import build_dispatcher, seed_channels
+from bot.__main__ import build_dispatcher
 from bot.config import Config
 from bot.ctx import Ctx
 from bot.db import DB
@@ -38,8 +38,6 @@ class FakeSession(BaseSession):
         self.sent.append(method)
         if isinstance(method, (AnswerCallbackQuery, EditMessageReplyMarkup)):
             return True
-        if isinstance(method, CopyMessages):
-            return [MessageId(message_id=next(ids)) for _ in method.message_ids]
         if isinstance(method, (SendMessage, EditMessageText)):
             return Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=method.chat_id or USER, type="private"),
                            text=method.text)
@@ -54,26 +52,18 @@ class FakeSession(BaseSession):
     def texts(self, chat_id):
         return [m.text for m in self.sent if isinstance(m, (SendMessage, EditMessageText)) and m.chat_id == chat_id]
 
-    def copies(self, chat_id):
-        return [m for m in self.sent if isinstance(m, CopyMessages) and m.chat_id == chat_id]
-
 
 class FakePay:
-    enabled = True
-
     def __init__(self):
         self.statuses: dict[str, str] = {}
 
-    async def create(self, uid, email=""):
+    async def create(self, uid):
         pid = f"pay{next(ids)}"
         self.statuses[pid] = "pending"
         return pid, f"https://yoomoney.example/{pid}"
 
     async def status(self, pid):
-        return self.statuses[pid], ""
-
-    async def charge(self, uid, method, email=""):
-        return f"auto{next(ids)}", "pending"
+        return self.statuses[pid]
 
 
 def user(uid):
@@ -91,10 +81,8 @@ def cb(data, uid=USER):
                                                                     data=data, message=m))
 
 
-def post(chat_id, text, media=True, forwarded=(501, 502)):
-    async def forward():
-        return list(forwarded)
-    return RawPost(chat_id, [next(ids)], text, time.time() - 1.5, media, forward)
+def post(chat_id, text):
+    return RawPost(chat_id, next(ids), text, time.time() - 1.5)
 
 
 DP = None   # роутеры живут на уровне модулей и подключаются к диспетчеру один раз
@@ -104,7 +92,7 @@ DP = None   # роутеры живут на уровне модулей и по
 async def env(tmp_path):
     global DP
     cfg = Config(token="1:x", admins=frozenset({ADMIN}), db_path=tmp_path / "t.db", cars_path=ROOT / "cars.yaml",
-                 channels_path=tmp_path / "none.yaml", buffer_channel=-1009999999999, llm_fallback=False)
+                 yk_shop_id="shop", yk_secret="secret")
     ctx = Ctx(db=await DB(cfg.db_path).open(), cfg=cfg, dict=load_dictionary(cfg.cars_path), pay=FakePay())
     for tg, uname, base in ((CH1, "avto_msk", 1), (CH2, "perekup_rf", 1), (OWN, "my_secret_cars", 0)):
         cid, _ = await ctx.db.add_channel(username=uname, base=bool(base), region="msk" if tg == CH1 else None)
@@ -141,7 +129,9 @@ async def test_filter_delivery_market_and_dedup(env):
     card = s.texts(USER)[-1]
     assert "−17% к рынку" in card and "1 250 000 ₽" in card and "срочно · торг" in card and "Москва и МО" in card
     assert "рынок ≈ 1 500 000 ₽ (5 объявл.)" in card and "⏱ 1," in card
-    assert s.copies(USER)[-1].message_ids == [501, 502] and s.copies(USER)[-1].from_chat_id == ctx.cfg.buffer_channel
+    assert "<blockquote expandable>СРОЧНО Toyota Camry 2012" in card                 # сам пост — в том же сообщении
+    sent = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert sent.link_preview_options.url == "https://t.me/avto_msk/" + sent.link_preview_options.url.rsplit("/", 1)[1]
 
     # та же машина в другом канале (другие слова, другой номер) — второй раз не присылаем
     r2 = await process(bot, ctx, post(CH2, "Продаю камри 2012 года! пробег 180 тыс, отдам за 1 250 000. Тел 8 999 000 11 22"))
@@ -152,22 +142,20 @@ async def test_filter_delivery_market_and_dedup(env):
     await dp.feed_update(bot, msg("📊 Статистика"))
     assert "<b>За 7 дней</b>: 1 машин" in s.texts(USER)[-1]
     await dp.feed_update(bot, msg("/admin", ADMIN))
-    assert "Доставок: 1" in s.texts(ADMIN)[-1] and "дубли: 1" in s.texts(ADMIN)[-1]
+    assert "Отправлено людям: 1" in s.texts(ADMIN)[-1] and "дублей 1" in s.texts(ADMIN)[-1]
     await dp.feed_update(bot, msg("/admin"))                            # не админ — тишина
     assert "Бизнес" not in s.texts(USER)[-1]
-    await dp.feed_update(bot, msg("/delbase @avto_msk", ADMIN))          # владелец канала попросил убрать
+    await dp.feed_update(bot, msg("/del @avto_msk", ADMIN))          # владелец канала попросил убрать
     assert CH1 not in ctx.channels
     assert not (await process(bot, ctx, post(CH1, "Toyota Camry 2013, 1 200 000 ₽"))).sent
 
 
-async def test_scam_warning_and_no_forward(env):
+async def test_scam_warning(env):
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "любые до 1 млн")
-    r = await process(bot, ctx, post(CH1, "Toyota RAV4 2019 всего 900 000 ₽! Дистанционное оформление, доставка в любой регион",
-                                     forwarded=()))
+    r = await process(bot, ctx, post(CH1, "Toyota RAV4 2019 всего 900 000 ₽! Дистанционное оформление, доставка в любой регион"))
     assert r.scam and r.sent == [USER]
-    assert "похоже на мошенников" in s.texts(USER)[-2] and "дистанционно" in s.texts(USER)[-2]
-    assert "<blockquote>" in s.texts(USER)[-1]                           # фото не переслались — досылаем текст поста
+    assert "похоже на мошенников" in s.texts(USER)[-1] and "дистанционно" in s.texts(USER)[-1]
 
 
 async def test_channels_own_and_disable(env):
@@ -199,9 +187,9 @@ async def test_no_access_missed_then_payment(env):
     await make_filter(dp, bot, "приора до 300к")
     await ctx.db._run("UPDATE users SET trial_until=0 WHERE id=?", USER)     # пробный период кончился
     r = await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))
-    assert r.sent == [] and r.missed == [USER]
+    assert r.sent == []
     await dp.feed_update(bot, msg("💳 Подписка"))
-    assert "не активна" in s.texts(USER)[-1] and "<b>1</b> машин" in s.texts(USER)[-1]
+    assert "не активна" in s.texts(USER)[-1]
 
     await dp.feed_update(bot, cb("s:pay"))
     pid = (await ctx.db.last_pending(USER))["yk_id"]
@@ -216,18 +204,13 @@ async def test_no_access_missed_then_payment(env):
     assert (await process(bot, ctx, post(CH1, "Приора 2012, 280 000 руб"))).sent == [USER]
 
 
-async def test_jobs_trial_reminder_and_seed(env, tmp_path):
+async def test_jobs_access_reminder(env):
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "веста до 1 млн")
     await ctx.db._run("UPDATE users SET trial_until=? WHERE id=?", time.time() + 3600, USER)
     await jobs.tick(bot, ctx)
     await jobs.tick(bot, ctx)                                               # второй раз — не дублируем
-    assert sum("Завтра заканчивается пробный период" in t for t in s.texts(USER)) == 1
-
-    seed = tmp_path / "channels.yaml"
-    seed.write_text("channels:\n  - https://t.me/avto_kzn\n  - {link: '@avto_msk', region: msk}\n", encoding="utf-8")
-    object.__setattr__(ctx.cfg, "channels_path", seed)
-    assert await seed_channels(ctx) == 1                                   # @avto_msk уже в базе
+    assert sum("Завтра заканчивается доступ" in t for t in s.texts(USER)) == 1
 
 
 class FakeTelethon:
@@ -248,11 +231,26 @@ async def test_reader_joins_queue_and_notifies(env):
     cid, _ = await ctx.db.add_channel(username="avto_kzn", base=False, added_by=USER)
     await ctx.db.set_channel_state(USER, cid, "own")
     await ctx.db.add_waiter(cid, USER)
-    reader = Reader(bot, ctx)
-    reader.clients = {"main": FakeTelethon()}
+    reader = Reader(bot, ctx, FakeTelethon())
     await reader.join_one(await ctx.db.channel(cid))
     ch = await ctx.db.channel(cid)
     assert ch["status"] == "joined" and ch["tg_id"] == -1000000000777 and ch["account"] == "main"
-    assert reader.clients["main"].calls == ["JoinChannelRequest"]
-    assert -1000000000777 in ctx.channels and reader._mine("main", -1000000000777)
+    assert reader.client.calls == ["JoinChannelRequest"] and -1000000000777 in ctx.channels
     assert "Канал «Авто Казань» подключён" in s.texts(USER)[-1]
+
+
+async def test_free_mode_without_yookassa(env):
+    """ЮKassa не настроена — бот бесплатный для всех, первый написавший /start — админ."""
+    dp, bot, s, ctx = env
+    object.__setattr__(ctx.cfg, "yk_shop_id", "")
+    object.__setattr__(ctx.cfg, "admins", frozenset())
+    await make_filter(dp, bot, "приора до 300к")
+    await ctx.db._run("UPDATE users SET trial_until=0 WHERE id=?", USER)
+    assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == [USER]
+    await dp.feed_update(bot, msg("💳 Подписка"))
+    assert "бесплатно" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("/admin"))
+    assert "Оплата не подключена" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("/start", OTHER))
+    await dp.feed_update(bot, msg("/admin", OTHER))                        # второй человек — не админ
+    assert not any("Людей" in t for t in s.texts(OTHER))

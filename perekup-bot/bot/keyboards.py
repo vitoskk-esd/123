@@ -65,10 +65,3 @@ def pay(price: int) -> InlineKeyboardMarkup:
 
 def pay_link(url: str, price: int) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_PAY.format(price=price), url=url)], [B(text=T.BTN_PAID, callback_data="s:check")])
-
-
-def sub(active: bool, autopay: bool, price: int) -> InlineKeyboardMarkup:
-    rows = [[B(text=T.BTN_PAY.format(price=price), callback_data="s:pay")]]
-    if active and autopay:
-        rows.append([B(text=T.BTN_AUTO_OFF, callback_data="s:autooff")])
-    return kb(*rows)

@@ -1,5 +1,5 @@
 """Разбор поста о продаже машины: марка, модель, год, цена, пробег, регион, маркеры. Быстрые правила, без сети —
-миллисекунды на пост. Сложные тексты, где правила не нашли модель или цену, добивает ИИ (llm.py)."""
+доли миллисекунды на пост."""
 import hashlib
 import re
 from dataclasses import dataclass, field
@@ -156,9 +156,3 @@ def car_key(L: Listing) -> str | None:
         return None
     km = L.mileage // 1000 if L.mileage else "-"
     return f"{L.make}|{L.model}|{L.year}|{L.price}|{km}"
-
-
-def looks_like_ad(text: str) -> bool:
-    """Похоже на объявление о продаже — стоит ли звать ИИ, если правила не справились."""
-    t = text.lower()
-    return len(t) > 25 and bool(re.search(r"пробег|км\b|₽|руб|цена|продам|продаю|продается|продаётся|торг|год", t))
