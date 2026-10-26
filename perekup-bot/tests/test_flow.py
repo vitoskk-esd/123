@@ -179,7 +179,8 @@ async def test_channels_own_and_disable(env):
     await dp.feed_update(bot, cb("c:add"))
     await dp.feed_update(bot, msg("https://t.me/new_cars_spb\n@avto_msk\nкакая-то ерунда"))
     reply = s.texts(USER)[-1]
-    assert "подключаю" in reply and "уже есть в общей базе" in reply and "не похоже на ссылку" in reply
+    assert "в очереди на подключение" in reply and "уже есть в общей базе" in reply and "не похоже на ссылку" in reply
+    assert "Подключение займёт время — примерно 2 мин." in reply and "раз в 1,5 мин" in reply   # один канал × 90 с
     queued = await ctx.db.queued_channels()
     assert [q["username"] for q in queued] == ["new_cars_spb"]
 

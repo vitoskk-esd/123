@@ -8,6 +8,7 @@ from aiogram.types import Message
 
 from ctx import Ctx
 from links import label, parse_link
+import texts as T
 from pipeline import seconds
 
 router = Router(name="admin")
@@ -19,6 +20,15 @@ async def is_admin(msg: Message, ctx: Ctx) -> bool:
         return msg.from_user.id in ctx.cfg.admins
     return msg.from_user.id == await ctx.db.first_user()
 
+
+async def queue_wait(ctx: Ctx, channel_ids: list[int]) -> str:
+    """Сколько ждать, пока подключится последний из этих каналов: каналы впереди в очереди + свои, по одному за паузу."""
+    queue = [r["id"] for r in await ctx.db.queued_channels()]
+    last = max((queue.index(c) for c in channel_ids if c in queue), default=-1)
+    interval = ctx.cfg.join_interval
+    minutes = max(1, round((last + 1) * interval / 60))
+    every = f"{interval} с" if interval < 60 else f"{interval / 60:g} мин".replace(".", ",")
+    return T.CHANNELS_WAIT.format(minutes=minutes, interval=every)
 
 @router.message(Command("admin"))
 async def admin(msg: Message, ctx: Ctx) -> None:
@@ -50,7 +60,7 @@ async def addbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
         return
     parts = (command.args or "").split()
     region = parts[-1] if parts and parts[-1] in ctx.dict.regions else None
-    added, bad = [], []
+    added, bad, queued = [], [], []
     for p in parts[:-1] if region else parts:
         link = parse_link(p)
         if not link:
@@ -59,11 +69,12 @@ async def addbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
         cid, new = await ctx.db.add_channel(**{link[0]: link[1]}, region=region, base=True, added_by=msg.from_user.id)
         if (await ctx.db.channel(cid))["status"] != "joined":   # уже подключён — ждать нечего
             await ctx.db.add_waiter(cid, msg.from_user.id)
+            queued.append(cid)
         added.append(label(*link) + ("" if new else " (уже был)"))
     await msg.answer(
         (f"В очередь на подключение: {len(added)}\n" + "\n".join(added) if added else "Пришли ссылки: /add @канал1 t.me/канал2") +
         (f"\n\nНе понял: {', '.join(bad)}" if bad else "") +
-        f"\n\nПодключаю по одному раз в {ctx.cfg.join_interval} с — так Telegram не заблокирует аккаунт. Ход — в /list.")
+        (await queue_wait(ctx, queued) + "\nХод подключения — в /list." if queued else ""))
 
 
 @router.message(Command("del"))

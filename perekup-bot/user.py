@@ -11,7 +11,7 @@ from aiogram.types import CallbackQuery, Message
 
 import keyboards as K
 import texts as T
-from admin import is_admin
+from admin import is_admin, queue_wait
 from ctx import Ctx
 from db import DAY
 from links import label, parse_link
@@ -158,7 +158,7 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
         return await MENU[msg.text](msg, ctx, state) if msg.text in MENU else None
     await state.clear()
     uid = msg.from_user.id
-    replies = []
+    replies, mine = [], []
     for line in [x for x in re.split(r"[\s,]+", msg.text) if x]:
         link = parse_link(line)
         if not link:
@@ -184,7 +184,10 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
                 await ctx.db._run("UPDATE channels SET status='queued', error=NULL WHERE id=?", cid)
             await ctx.db.add_waiter(cid, uid)
             replies.append(T.CHANNEL_QUEUED.format(name=name))
-    await msg.answer("\n".join(replies) or T.ASK_CHANNEL, reply_markup=K.menu())
+            mine.append(cid)
+    wait = await queue_wait(ctx, mine) if mine else ""
+    await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL, reply_markup=K.menu())
+
 
 
 @router.callback_query(F.data.startswith("c:base:") | F.data.startswith("c:tg:"))
