@@ -82,7 +82,12 @@ _item["properties"]["volume"] = {
                    "коротко и с числом, до 60 символов — например «1 логотип в 3 вариантах», "
                    "«до 1000 символов текста», «1 чат-бот до 10 команд»",
 }
-_item["required"] += ["idea_no", "type_hint", "volume"]
+_item["properties"]["attribute_hints"] = {
+    "type": "array", "items": {"type": "string"},
+    "description": "3–8 коротких слов для обязательных полей рубрики Kwork: платформа, язык программирования, "
+                   "программа, формат, площадка — например «Telegram», «Python», «Excel», «Wildberries», «Figma»",
+}
+_item["required"] += ["idea_no", "type_hint", "volume", "attribute_hints"]
 
 VISUAL_SCHEMA = {
     "type": "object",
@@ -214,6 +219,8 @@ def _listing_prompt(profile: dict, ideas: list[dict], hints: dict[int, str]) -> 
 - Цена в рублях — одна из допустимых на Kwork: {", ".join(str(p) for p in PRICES if p >= profile.get('min_price', 0))};
   срок 1–30 дней — реалистично для объёма работы.
 - volume — объём услуг в 1 кворке: что входит в цену, с числом, до 60 символов.
+- attribute_hints — 3–8 слов для полей рубрики Kwork («Платформа», «Язык разработки», «Программа»…):
+  только то, что правда относится к услуге (Telegram, Python, Excel, Figma, Wildberries).
 - cover_text — 2–5 слов крупно на обложку; у каждого кворка свой.
 - Обещай только то, что фрилансер реально сделает; без гарантий дохода и позиций.
 

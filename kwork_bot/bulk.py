@@ -50,11 +50,13 @@ CATEGORY_SCHEMA = {
     "additionalProperties": False,
     "required": ["items"],
     "properties": {"items": {"type": "array", "items": {
-        "type": "object", "additionalProperties": False, "required": ["row", "category_hint", "volume"],
+        "type": "object", "additionalProperties": False, "required": ["row", "category_hint", "volume", "attribute_hints"],
         "properties": {"row": {"type": "integer"},
                        "category_hint": {"type": "string", "description": "Рубрика Kwork «Раздел > Подраздел»"},
                        "volume": {"type": "string", "description": "Объём услуг в 1 кворке: что входит в цену, "
-                                                                   "с числом, до 60 символов"}}}}},
+                                                                   "с числом, до 60 символов"},
+                       "attribute_hints": {"type": "array", "items": {"type": "string"},
+                                           "description": "3–8 слов для полей рубрики: платформа, язык, программа"}}}}},
 }
 
 
@@ -341,7 +343,7 @@ def uniquify_photo(src: Path, seed: str, strength: float):
 
 def classify(rows: list[dict], llm=None) -> None:
     """Подбирает рубрику Kwork и «объём услуг в 1 кворке» строкам, где их нет (одним-двумя запросами к ИИ)."""
-    todo = [r for r in rows if not find_category(r["category_hint"]) or not r.get("volume")]
+    todo = [r for r in rows if not find_category(r["category_hint"]) or not r.get("volume") or not r.get("attribute_hints")]
     if not todo:
         return
     llm = llm or content._llm()
@@ -350,7 +352,8 @@ def classify(rows: list[dict], llm=None) -> None:
         listing = "\n".join(f"{r['row']}. {r['title']} — {r['description'][:150]}" for r in chunk)
         data = llm.ask("Подбери каждому кворку рубрику СТРОГО из списка рубрик Kwork (строку как есть) и объём "
                        "услуг в 1 кворке — что входит в цену, коротко и с числом («1 логотип в 3 вариантах», "
-                       "«до 1000 символов текста»).\n\n"
+                       "«до 1000 символов текста»), и 3–8 слов для полей рубрики Kwork: платформа, язык "
+                       "программирования, программа (Telegram, Python, Excel) — только то, что есть в услуге.\n\n"
                        f"КВОРКИ:\n{listing}\n\nРУБРИКИ KWORK:\n{category_list()}",
                        system=content.SYSTEM, schema=CATEGORY_SCHEMA, effort="low", max_tokens=8000)
         found = {it["row"]: it for it in data["items"]}
@@ -360,6 +363,8 @@ def classify(rows: list[dict], llm=None) -> None:
                 r["category_hint"] = got.get("category_hint", "")
             if not r.get("volume"):
                 r["volume"] = str(got.get("volume", "")).strip()
+            if not r.get("attribute_hints"):
+                r["attribute_hints"] = [str(h) for h in got.get("attribute_hints") or []]
 
 
 def own_photo_path(uid: int, lid: str) -> Path:
@@ -423,7 +428,8 @@ def finish(uid: int, progress: dict, llm=None) -> int:
             "id": lid, "idea_no": n, "idea": r["title"], "title": r["title"], "description": r["description"],
             "requirements": r["requirements"], "price_rub": r["price_rub"],
             "days": r["days"], "category_hint": r["category_hint"], "tags": r["tags"],
-            "volume": r.get("volume", ""), "cover_text": r["title"], "own_photo": True, "fp": mark, "row": r["row"],
+            "volume": r.get("volume", ""), "attribute_hints": r.get("attribute_hints", []),
+            "cover_text": r["title"], "own_photo": True, "fp": mark, "row": r["row"],
         }
         normalize(listing)  # рубрика → номера Kwork, цена из допустимых, «что нужно» ≥ 100 символов
         listings.append(listing)

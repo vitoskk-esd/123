@@ -111,4 +111,6 @@ def normalize(listing: dict) -> list[str]:
     listing["price_rub"] = snap_price(listing.get("price_rub"))
     listing["requirements"] = fit_instruction(listing.get("requirements", ""))
     listing["volume"] = fit_volume(listing.get("volume", ""))
+    hints = listing.get("attribute_hints") or []
+    listing["attribute_hints"] = [str(h).strip()[:40] for h in hints if str(h).strip()][:10] if isinstance(hints, list) else []
     return errors

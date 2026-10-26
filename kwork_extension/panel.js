@@ -87,6 +87,7 @@ async function loadZip(file) {
     id: l.id, title: l.title, description: l.description, requirements: l.requirements,
     price_rub: l.price_rub, days: l.days, category_hint: l.category_hint,
     section_id: l.section_id, category_id: l.category_id, type_hint: l.type_hint || "", volume: l.volume || "",
+    attribute_hints: l.attribute_hints || [],
   })));
   await updateState((st) => Object.assign(st, defaultState(),
     {manual: st.manual, limit: st.limit, pause: st.pause, message: `Загружено кворков: ${listings.length}`}));
@@ -179,11 +180,15 @@ async function resume() {
   }
   st = await getState();
   if (!st.running) return;
-  if (isManual(st) || filled.needsPortfolio) {
+  const guessed = [...new Set(filled.guessed || [])];
+  if (isManual(st) || filled.needsPortfolio || guessed.length) {
     await updateState((s) => {
       s.phase = "review";
-      s.message = filled.needsPortfolio
-        ? `Кворк ${s.index + 1}: рубрика «${item.category_hint}» требует работы в портфолио. Добавьте их на шаге 4 и нажмите «Готово» — дальше расширение продолжит само.`
+      const parts = [];
+      if (filled.needsPortfolio) parts.push(`рубрика «${item.category_hint}» требует работы в портфолио — добавьте их на шаге 4`);
+      if (guessed.length) parts.push(`проверьте поля «${guessed.join("», «")}»: подходящего варианта не нашлось, выбран «Другие» или первый`);
+      s.message = parts.length
+        ? `Кворк ${s.index + 1}: ${parts.join("; ")}. Затем нажмите «Готово» — дальше расширение продолжит само.`
         : `Проверьте кворк ${s.index + 1} и нажмите «Готово» на странице (проверка вручную: ${s.index - s.runStart + 1} из ${s.manual}).`;
     });
     return waitForHuman();

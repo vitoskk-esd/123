@@ -60,44 +60,73 @@ function kwStems(s) {
   return new Set((String(s || "").toLowerCase().match(/[а-яёa-z]{3,}/g) || []).map((w) => w.slice(0, w.length <= 4 ? 3 : 4)));
 }
 
-// Выбор «Типа» рубрики: сначала по подсказке бота (type_hint, например «Чат-боты»), потом по
-// словам названия и описания. Совпадений нет — первый вариант.
-function kwPickAttribute(radios, text, hint) {
-  const want = kwStems(text), wantHint = kwStems(hint);
-  let best = radios[0], score = 0;
-  for (const r of radios) {
-    const label = (document.querySelector(`label[for="${r.id}"]`) || r.parentElement || {}).innerText || "";
-    const words = [...kwStems(label)];
-    const s = 3 * words.filter((w) => wantHint.has(w)).length + words.filter((w) => want.has(w)).length;
-    if (s > score) { best = r; score = s; }
-  }
-  return best;
+// Поля рубрики Kwork («Тип», «Вид», «Язык разработки», «Платформа»…): каждое — блок .js-attribute-list,
+// варианты — кружки (один) или галочки (несколько, до data-multiple-max-count). После выбора Kwork
+// может подгрузить следующие поля. Вариант выбираем по подсказкам бота (type_hint, attribute_hints —
+// «Чат-боты», «Telegram», «Python») и словам названия и описания.
+const kwStem = (t) => t.slice(0, t.length <= 4 ? 3 : 4);
+const kwTokens = (s) => String(s || "").toLowerCase().match(/[a-zа-яё0-9+#]+/g) || [];
+
+function kwLabelOf(input) {
+  return ((document.querySelector(`label[for="${input.id}"]`) || input.parentElement || {}).innerText || "").trim();
 }
 
-// «Тип» стоит в шаге 1 сразу после рубрики и подгружается после её выбора; у некоторых рубрик
-// бывает вложенный (после выбора появляется следующий) или ещё один на шаге 3.
+function kwScore(label, ctx) {
+  let score = 0;
+  for (const t of kwTokens(label)) {
+    if (ctx.hints.has(t) || (t.length >= 3 && ctx.hintStems.has(kwStem(t)))) score += 3;
+    else if (t.length >= 3 && ctx.textStems.has(kwStem(t))) score += 1;
+  }
+  return score;
+}
+
+// Нет подходящего варианта — «Другие/Другое», если есть, иначе первый.
+const kwFallback = (inputs) => inputs.find((i) => /^(друг|проч|ин(ое|ые)\b)/i.test(kwLabelOf(i))) || inputs[0];
+
+// Возвращает названия полей, где вариант выбран без совпадения (их стоит проверить человеку).
 async function kwChooseAttributes(listing, log, step, waitMs) {
-  const text = listing.title + " " + listing.description;
-  const sel = `.js-step[data-step="${step}"] input[type="radio"][name^="attribute["]`;
-  if (waitMs) await kwWaitFor(() => document.querySelector(sel), waitMs);
+  const hints = [listing.type_hint, ...(listing.attribute_hints || [])].join(" ");
+  const ctx = {hints: new Set(kwTokens(hints)), hintStems: new Set(kwTokens(hints).filter((t) => t.length >= 3).map(kwStem)),
+               textStems: new Set(kwTokens(listing.title + " " + listing.description).filter((t) => t.length >= 3).map(kwStem))};
+  const sel = `.js-step[data-step="${step}"] .js-attribute-list`;
+  if (waitMs) await kwWaitFor(() => document.querySelector(sel + " input"), waitMs);
+  const guessed = [];
   const done = new Set();
-  for (let level = 0; level < 4; level++) {
-    const groups = {};
-    for (const r of document.querySelectorAll(sel)) {
-      if (!done.has(r.name) && (kwShown(r) || kwShown(r.parentElement))) (groups[r.name] = groups[r.name] || []).push(r);
-    }
-    const names = Object.keys(groups);
-    if (!names.length) return;
-    for (const name of names) {
-      done.add(name);
-      if (groups[name].some((r) => r.checked)) continue;
-      const pick = kwPickAttribute(groups[name], text, listing.type_hint);
-      const label = document.querySelector(`label[for="${pick.id}"]`);
-      (label || pick).click();
-      log("тип: " + ((label && label.innerText.trim()) || pick.value));
-      await kwSleep(1200);
+  for (let level = 0, idle = 0; level < 10 && idle < 2; level++) {
+    const lists = [...document.querySelectorAll(sel)].filter((l) => !done.has(l) && (kwShown(l) || kwShown(l.parentElement))
+      && !l.querySelector("input:checked"));
+    if (!lists.length) { idle++; await kwSleep(1500); continue; } // вдруг Kwork ещё грузит вложенное поле
+    idle = 0;
+    for (const list of lists) {
+      done.add(list);
+      const block = list.closest(".js-field-block");
+      const title = ((block && block.querySelector(".kwork-save-step__field-label-name")) || {}).innerText?.trim() || "поле рубрики";
+      const inputs = [...list.querySelectorAll('input[type="radio"], input[type="checkbox"]')]
+        .filter((i) => !i.disabled && !i.closest(".attribute-item-custom"));
+      if (!inputs.length) continue;
+      const required = list.dataset.required === "1";
+      const multiple = inputs[0].type === "checkbox";
+      const scored = inputs.map((i) => ({i, s: kwScore(kwLabelOf(i), ctx)})).filter((x) => x.s > 0).sort((a, b) => b.s - a.s);
+      let picks;
+      if (multiple) {
+        const max = Math.min(Number(list.dataset.multipleMaxCount) || 3, 3);
+        picks = scored.slice(0, max).map((x) => x.i);
+        if (!picks.length && !required) continue; // необязательные галочки без совпадений не трогаем
+      } else {
+        picks = scored.length ? [scored[0].i] : [];
+      }
+      if (!picks.length) { picks = [kwFallback(inputs)]; if (inputs.length > 1) guessed.push(title); }
+      for (const pick of picks) {
+        const label = document.querySelector(`label[for="${pick.id}"]`);
+        (label || pick).click();
+        if (!pick.checked) pick.click(); // подпись без for — жмём сам вариант
+        await kwSleep(800);
+      }
+      log(`${title.toLowerCase()}: ${picks.map(kwLabelOf).join(", ")}`);
+      await kwSleep(700);
     }
   }
+  return guessed;
 }
 
 function kwBestOption(select, wanted, mode) {
@@ -182,7 +211,8 @@ async function kwUploadCover(bytes, name, log) {
 
 // Заполняет все шаги и останавливается перед «Готово». coverDone — обложка этого кворка уже
 // загружена (Kwork после загрузки сохраняет черновик и может перезагрузить страницу).
-// Возвращает {needsPortfolio: true}, если рубрика требует портфолио — тогда «Готово» жмёт человек.
+// Возвращает {needsPortfolio, guessed}: рубрика требует портфолио / поля, где вариант выбран без
+// совпадения, — тогда «Готово» жмёт человек.
 async function kwFill(listing, coverBytes, log, opts = {}) {
   if (!await kwWaitFor(() => document.querySelector("#step1-name"), 20000)) throw new Error("форма «Создать кворк» не открылась");
   // Kwork запускает форму позже, чем появляется её разметка; до этого выбор рубрики ничего не делает.
@@ -205,7 +235,7 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
   if (!sub) throw new Error("подрубрика " + listing.category_hint + " не появилась в списке");
   await kwMain("select", ".js-category_sub", listing.category_id);
   log("рубрика: " + listing.category_hint);
-  await kwChooseAttributes(listing, log, 1, 6000);
+  const guessed = await kwChooseAttributes(listing, log, 1, 6000);
   const path = document.querySelector('input[name="first_photo_path"]');
   if (opts.coverDone && path && path.value) log("обложка уже загружена");
   else if (coverBytes) { await kwUploadCover(coverBytes, listing.id + ".jpg", log); if (opts.onCover) await opts.onCover(); }
@@ -217,7 +247,7 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
   await kwNext(2, log);
 
   // Шаг 3: цена, срок (и «Тип», если он есть здесь)
-  await kwChooseAttributes(listing, log, 3, 0);
+  guessed.push(...await kwChooseAttributes(listing, log, 3, 0));
   const priceSel = await kwWaitFor(() => document.querySelector("#typicalPriceSelect"), 10000);
   if (!priceSel) throw new Error("не нашёл выбор цены — у этой рубрики, видимо, только пакеты; укажите цену вручную");
   const price = kwBestOption(priceSel, listing.price_rub, "min");
@@ -241,10 +271,10 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
     if (b) { b.click(); await kwWaitFor(kwSaveShown, 4000); }
     if (!kwSaveShown()) {
       log("рубрике нужны работы в портфолио — добавьте их на шаге 4");
-      return {needsPortfolio: true};
+      return {needsPortfolio: true, guessed};
     }
   }
-  return {};
+  return {guessed};
 }
 
 async function kwClickSave() {

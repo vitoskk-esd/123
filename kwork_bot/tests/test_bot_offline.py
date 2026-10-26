@@ -72,7 +72,8 @@ class FakeLLM:
                     "summary": "вы дизайнер логотипов", "visual_brief": "pencils, sketches, color swatches"}
         if list(schema["properties"]) == ["items"]:  # рубрики для загруженных кворков
             nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
-            return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}"} for n in nos]}
+            return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}",
+                               "attribute_hints": ["Figma", "Логотип"]} for n in nos]}
         if list(schema["properties"]) == ["visual_brief"]:
             return {"visual_brief": "pencils and paper"}
         if "ideas" in schema["properties"]:
@@ -634,6 +635,7 @@ class BulkImportTests(Base):
         # Объёма в таблице нет — его подобрал ИИ вместе с рубрикой; рубрика требует портфолио.
         self.assertEqual(sorted(l["volume"] for l in listings), ["1 макет №2", "1 макет №3", "1 макет №5"])
         self.assertTrue(all(l["needs_portfolio"] for l in listings))
+        self.assertTrue(all(l["attribute_hints"] == ["Figma", "Логотип"] for l in listings))  # для полей рубрики
         self.assertIn("3 кворков", content.portfolio_note(self.uid))
         self.assertEqual(content.uniqueness_report(self.uid), (0, 0))  # копию фото уникализировали
         # Фото клиента не перерисовывается при правке цены, а «Другой фон» обрабатывает его, а не рисует обложку.
@@ -766,6 +768,11 @@ class KworkRulesTests(unittest.TestCase):
         self.assertEqual(logo["volume"], "1 логотип в 3 вариантах")
         self.assertEqual(helper["volume"], r.DEFAULT_VOLUME)
         self.assertEqual((logo["needs_portfolio"], helper["needs_portfolio"]), (True, False))
+        bot = {"category_hint": "Скрипты, боты", "attribute_hints": [" Telegram ", "", "Python", 3] + ["x"] * 20}
+        r.normalize(bot)
+        self.assertEqual(bot["attribute_hints"][:3], ["Telegram", "Python", "3"])
+        self.assertLessEqual(len(bot["attribute_hints"]), 10)
+        self.assertIn("attribute_hints", content.BOT_LISTING_SCHEMA["properties"]["listings"]["items"]["required"])
         long = r.fit_volume("слово " * 30)
         self.assertLessEqual(len(long), r.VOLUME_MAX)
         self.assertFalse(long.endswith(" "))
