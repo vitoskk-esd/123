@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS reminders_due ON reminders(sent, due_at);
 """
 
 # шаги воронки по порядку — для статистики в админке
-FUNNEL = [("start", "Запустили бота"), ("age_ok", "Подтвердили 18+"), ("consent", "Приняли правила"),
+FUNNEL = [("start", "Запустили бота"), ("age_ok", "Подтвердили 18+"),
           ("quiz_done", "Прошли квиз"), ("offer_view", "Открыли акцию"), ("click", "Взяли ссылку"),
           ("claim", "Нажали «Я оформил»"), ("approved", "Одобрено"), ("paid", "Получили выплату")]
 
@@ -81,10 +81,11 @@ class DB:
     async def user(self, uid: int):
         return await self._one("SELECT * FROM users WHERE id=?", uid)
 
-    async def set_flag(self, uid: int, flag: str) -> None:
+    async def set_flag(self, uid: int, flag: str, log: bool = True) -> None:
         assert flag in ("age_ok", "consent")
         await self._run(f"UPDATE users SET {flag}=1 WHERE id=?", uid)
-        await self.event(uid, flag)
+        if log:
+            await self.event(uid, flag)
 
     async def set_banks(self, uid: int, banks: set[str]) -> None:
         await self._run("UPDATE users SET has_banks=? WHERE id=?", json.dumps(sorted(banks)), uid)

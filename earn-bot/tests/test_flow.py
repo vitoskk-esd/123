@@ -88,7 +88,7 @@ async def test_full_funnel(env):
     feed = lambda u: dp.feed_update(bot, u)
     await feed(msg("/start reels"))
     assert "Как это работает" in s.texts(USER)[-1]
-    await feed(cb("go")); await feed(cb("age:y")); await feed(cb("ok"))
+    await feed(cb("go")); await feed(cb("age:y"))
     await feed(cb("qb:alfa")); await feed(cb("qb:alfa")); await feed(cb("qb:tbank"))   # Альфу отметил и снял, Т-Банк — клиент
     await feed(cb("qdone"))
     assert "доступно акций: <b>1</b>" in " ".join(s.texts(USER))                     # осталась только Альфа
@@ -113,7 +113,7 @@ async def test_full_funnel(env):
 async def test_nudge_and_admin_stats(env):
     dp, bot, s, ctx = env
     feed = lambda u: dp.feed_update(bot, u)
-    await feed(msg("/start")); await feed(cb("go")); await feed(cb("age:y")); await feed(cb("ok")); await feed(cb("qdone"))
+    await feed(msg("/start")); await feed(cb("go")); await feed(cb("age:y")); await feed(cb("qdone"))
     await feed(cb("lnk:tbank_debit"))
     await ctx.db._run("UPDATE reminders SET due_at=0 WHERE kind='nudge'")               # «прошло» 3 дня
     assert await reminders.tick(bot, ctx) == 3

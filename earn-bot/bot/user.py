@@ -1,4 +1,4 @@
-"""Воронка пользователя: старт → 18+ → правила (без согласия на данные — владелец 26.10) → квиз «где уже клиент» → каталог → ссылка → «Я оформил» → баланс → вывод."""
+"""Воронка пользователя: старт → 18+ → квиз «где уже клиент» → каталог → ссылка → «Я оформил» → баланс → вывод."""
 import re
 
 from aiogram import Bot, F, Router
@@ -65,28 +65,20 @@ async def go(cb: CallbackQuery) -> None:
 
 # ---------- 2. возраст ----------
 @router.callback_query(F.data.startswith("age:"))
-async def age(cb: CallbackQuery, ctx: Ctx) -> None:
+async def age(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
     await cb.message.edit_reply_markup(reply_markup=None)
     if cb.data == "age:n":
         await cb.message.answer(T.AGE_NO)
         await ctx.db.cancel(cb.from_user.id, "stall")
     else:
         await ctx.db.set_flag(cb.from_user.id, "age_ok")
-        await cb.message.answer(T.RULES, reply_markup=K.consent())
+        await ctx.db.set_flag(cb.from_user.id, "consent", log=False)   # вступление пройдено: повторный /start — сразу в каталог
+        await state.update_data(banks=[])
+        await cb.message.answer(T.QUIZ, reply_markup=K.quiz(ctx.catalog.banks, set()))
     await cb.answer()
 
 
-# ---------- 3. правила ----------
-@router.callback_query(F.data == "ok")
-async def consent(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await ctx.db.set_flag(cb.from_user.id, "consent")
-    await state.update_data(banks=[])
-    await cb.message.answer(T.QUIZ, reply_markup=K.quiz(ctx.catalog.banks, set()))
-    await cb.answer()
-
-
-# ---------- 4. квиз: где уже есть карта ----------
+# ---------- 3. квиз: где уже есть карта ----------
 @router.callback_query(F.data.startswith("qb:"))
 async def quiz_toggle(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
     picked = set((await state.get_data()).get("banks", []))

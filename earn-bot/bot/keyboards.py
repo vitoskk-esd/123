@@ -22,10 +22,6 @@ def age() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_AGE_YES, callback_data="age:y"), B(text=T.BTN_AGE_NO, callback_data="age:n")])
 
 
-def consent() -> InlineKeyboardMarkup:
-    return kb([B(text=T.BTN_CONSENT, callback_data="ok")])
-
-
 def quiz(banks: dict[str, str], picked: set[str]) -> InlineKeyboardMarkup:
     rows = [[B(text=("✅ " if k in picked else "▫️ ") + name, callback_data=f"qb:{k}")] for k, name in banks.items()]
     rows.append([B(text=T.BTN_QUIZ_DONE if picked else T.BTN_NO_BANKS, callback_data="qdone")])
