@@ -61,6 +61,7 @@ class FakeLLM:
 
     def __init__(self, broken: set[int] = frozenset()):
         self.broken = set(broken)  # номера идей, которые в первый раз «пишутся» с ошибкой
+        self.ocr = ""  # текст, который «видно» на проверяемых картинках
         self.prompts: list[str] = []
         self.lock = threading.Lock()
 
@@ -74,9 +75,12 @@ class FakeLLM:
             nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
             return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}",
                                "attribute_hints": ["Figma", "Логотип"]} for n in nos]}
+        if list(schema["properties"]) == ["text", "watermark"]:  # что написано на картинке
+            return {"text": self.ocr, "watermark": False}
         if list(schema["properties"]) == ["covers"]:  # тексты обложек для кворков прошлых партий
             nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
-            return {"covers": [{"no": n, "text": f"Обложка {n}"} for n in nos]}
+            return {"covers": [{"no": n, "text": f"Обложка {n}", "points": ["Быстрый старт", "Скидка 10%", "Поддержка"]}
+                               for n in nos]}
         if list(schema["properties"]) == ["kworks"]:  # варианты полей рубрики Kwork
             nos = [int(line.split(".")[0]) for line in prompt.split("КВОРКИ:")[1].splitlines() if line[:1].isdigit()]
             return {"kworks": [{"no": n, "ids": []} for n in nos]}
@@ -108,6 +112,10 @@ class Base(unittest.TestCase):
             patcher = mock.patch.object(BOT_CONFIG, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)
+        # И в платный/настоящий ИИ тоже: тесты, которым нужен свой ответ, передают llm сами.
+        patcher = mock.patch.object(content, "_llm", lambda *a, **k: FakeLLM())
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.uid = 42
         db.save_profile(self.uid, {**db.load_profile(self.uid), "skills": "логотипы", "min_price": 1000, "palette": 2})
 
@@ -651,6 +659,25 @@ class BulkImportTests(Base):
         content.next_cover(self.uid, listings[0]["id"])
         self.assertNotEqual(db.cover_path(self.uid, listings[0]["id"]).read_bytes(), before)
 
+    def test_photos_with_price_or_contacts_are_rejected(self):
+        """Модерация Kwork отклоняет обложку с ценой, скидкой, контактами — такие фото не берём."""
+        from kwork_bot import bulk, moderation
+
+        llm = FakeLLM()
+        llm.ocr = "ЛОГОТИП\nСКИДКА 50%\n@designer"
+        disk_mock = self.make_disk()
+        with disk_mock:
+            st = bulk.prepare(self.uid, "https://disk.yandex.ru/d/abc", {}, llm=llm)
+        self.assertEqual(st["rows"], [])
+        problems = " ".join(st["problems"])
+        self.assertIn("цена, скидка или проценты", problems)
+        self.assertIn("контакты, ссылка или @логин", problems)
+        llm.ocr = "ЛОГОТИП ДЛЯ БИЗНЕСА"  # обычная надпись — фото годится
+        with disk_mock:
+            self.assertEqual(len(bulk.prepare(self.uid, "https://disk.yandex.ru/d/abc", {}, llm=llm)["rows"]), 3)
+        self.assertEqual(moderation.text_problems("до 1000 символов, рост продаж на 30%"), [])
+        self.assertEqual(len(moderation.text_problems("Сделаю логотип всего за 500 руб")), 1)
+
     def test_without_choice_twins_stay(self):
         from kwork_bot import bulk
 
@@ -859,6 +886,15 @@ class CoverModerationTests(Base):
         with mock.patch.object(ImageDraw.ImageDraw, "text", lambda self, xy, text, *a, **k: (drawn.append(text), real(self, xy, text, *a, **k))):
             images.render_cover(self.uid, fake_listing(1, id="p1", price_rub=1500, days=2, cover_text="Логотип"))
         self.assertEqual(drawn, ["ЛОГОТИП"])
+        # Внизу — пункты «что получит покупатель»; цены и контакты в них не попадают.
+        from kwork_bot.kwork_rules import fit_cover_points
+
+        self.assertEqual(fit_cover_points(["Логотип в 3 вариантах", "Скидка 20%", "пишите @me", "x" * 40, "Исходники"]),
+                         ["Логотип в 3 вариантах", "Исходники"])
+        drawn.clear()
+        with mock.patch.object(ImageDraw.ImageDraw, "text", lambda self, xy, text, *a, **k: (drawn.append(text), real(self, xy, text, *a, **k))):
+            images.render_cover(self.uid, fake_listing(1, id="p1", cover_text="Логотип", cover_points=["Три варианта", "Исходники"]))
+        self.assertEqual(drawn, ["ЛОГОТИП", "Три варианта", "Исходники"])
 
     def test_past_batches_get_fix_covers_in_archive(self):
         """Кворки прошлых партий (в истории только название) получают обложки без цены для замены."""
@@ -871,6 +907,7 @@ class CoverModerationTests(Base):
         images.unique_covers(self.uid, db.load_listings(self.uid))
         self.assertEqual(len(images.history_to_fix(self.uid)), 2)
         self.assertEqual(content.fix_history_covers(self.uid, llm=FakeLLM()), 2)
+        self.assertEqual(db.load_history(self.uid)[-1]["cover_points"], ["Быстрый старт", "Поддержка"])  # без скидки
         self.assertEqual(images.history_to_fix(self.uid), [])  # второй раз не рисуем
         z = zipfile.ZipFile(io.BytesIO(build_zip(self.uid)))
         fix = json.loads(z.read("fix.json"))

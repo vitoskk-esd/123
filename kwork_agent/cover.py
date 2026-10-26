@@ -44,14 +44,19 @@ def _wrap(draw, text: str, font, max_w: int) -> list[str]:
     return lines
 
 
-def _fit(draw, text: str, max_w: int):
-    """Самый крупный шрифт, при котором текст влезает по ширине в 4 строки."""
+def _fit(draw, text: str, max_w: int, max_bottom: int = 10_000):
+    """Самый крупный шрифт, при котором текст влезает по ширине в 4 строки и не ниже max_bottom."""
     for size in (56, 50, 44, 38, 32, 28):
         font = _font(size)
         lines = _wrap(draw, text, font, max_w)
-        if len(lines) <= 4 and all(draw.textlength(l, font=font) <= max_w for l in lines):
+        if (len(lines) <= 4 and all(draw.textlength(l, font=font) <= max_w for l in lines)
+                and TITLE_TOP + len(lines) * (size + 12) - 12 <= max_bottom):
             return font, lines
-    return font, textwrap.wrap(text, width=30)[:4]
+    return font, textwrap.wrap(text, width=30)[:3]
+
+
+TITLE_TOP = 90
+POINT_H = 34
 
 
 def draw_texts(img, listing: dict, accent: tuple, max_w: int | None = None) -> None:
@@ -61,13 +66,26 @@ def draw_texts(img, listing: dict, accent: tuple, max_w: int | None = None) -> N
 
     draw = ImageDraw.Draw(img)
     w, h = img.size
+    max_w = max_w or w - 80
     draw.rectangle([40, 48, 120, 56], fill=accent)
+    # Внизу — 2–3 пункта «что получит покупатель» (без цены: её модерация сверяет с ценой кворка).
+    points = [str(p).strip() for p in listing.get("cover_points") or [] if str(p).strip()][:3]
+    points_top = h - 30 - len(points) * POINT_H
     text = (listing.get("cover_text") or listing["title"]).upper()
-    font, lines = _fit(draw, text, max_w or w - 80)
-    y = 90
+    font, lines = _fit(draw, text, max_w, points_top - 22 if points else h - 40)
+    y = TITLE_TOP
     for line in lines:
         draw.text((40, y), line, font=font, fill=(255, 255, 255))
         y += font.size + 12 if hasattr(font, "size") else 50
+    pfont = _font(21)
+    for n, point in enumerate(points):
+        top = points_top + n * POINT_H
+        while len(point) > 3 and draw.textlength(point, font=pfont) > max_w - 34:
+            point = point[:-2].rstrip() + "…"
+        cy = top + 13
+        draw.ellipse([40, cy - 8, 56, cy + 8], fill=accent)
+        draw.line([(44, cy), (47, cy + 4), (53, cy - 4)], fill=(15, 15, 25), width=3)  # галочка
+        draw.text((66, top), point, font=pfont, fill=(236, 238, 245))
 
 
 def make_cover(listing: dict, out_dir: Path | None = None, palette: int | None = None) -> Path:

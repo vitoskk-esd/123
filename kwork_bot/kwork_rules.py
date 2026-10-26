@@ -113,6 +113,24 @@ def fit_cover_text(text: str, title: str) -> str:
 _TAIL = {"за", "на", "для", "в", "во", "с", "со", "и", "по", "от", "до", "к", "из", "под", "под", "о", "об"}
 
 
+POINT_MAX = 30  # столько помещается в строку под заголовком
+
+
+def fit_cover_points(points) -> list[str]:
+    """До 3 пунктов на обложку: без цен и контактов, не длиннее POINT_MAX (длинный пункт отбрасываем —
+    обрезанный по словам теряет смысл)."""
+    from kwork_agent.generator import _FORBIDDEN
+
+    out = []
+    for p in points if isinstance(points, list) else []:
+        p = " ".join(str(p).split()).strip(" .;,—-")
+        if not p or _PRICE_RE.search(p) or _FORBIDDEN.search(p) or "@" in p:
+            continue
+        if len(p) <= POINT_MAX and p not in out:
+            out.append(p)
+    return out[:3]
+
+
 def normalize(listing: dict) -> list[str]:
     """Приводит кворк к форме Kwork: рубрика из списка (+ её номера для расширения), цена из
     допустимых, срок не больше максимума рубрики, «что нужно от покупателя» ≥ 100 символов,
@@ -133,6 +151,8 @@ def normalize(listing: dict) -> list[str]:
     listing["volume"] = fit_volume(listing.get("volume", ""))
     if "cover_text" in listing or "title" in listing:
         listing["cover_text"] = fit_cover_text(listing.get("cover_text", ""), listing.get("title", ""))
+    if "cover_points" in listing:
+        listing["cover_points"] = fit_cover_points(listing["cover_points"])
     hints = listing.get("attribute_hints") or []
     listing["attribute_hints"] = [str(h).strip()[:40] for h in hints if str(h).strip()][:10] if isinstance(hints, list) else []
     return errors

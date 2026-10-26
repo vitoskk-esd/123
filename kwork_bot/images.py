@@ -218,7 +218,8 @@ def _previous_fingerprints(uid: int) -> list[int]:
 
 MAX_TRIES = 15
 # 2 — без строки «срок · цена»: модерация Kwork отклоняла обложку, если цена расходилась с ценой кворка.
-COVER_VERSION = 2
+# 3 — внизу 3 пункта «что получит покупатель» вместо пустого места.
+COVER_VERSION = 3
 
 
 def outdated_covers(listings: list[dict]) -> bool:
@@ -366,17 +367,18 @@ def history_to_fix(uid: int) -> list[dict]:
 
 
 def fix_history_covers(uid: int, cover_texts) -> int:
-    """Рисует обложки без цены кворкам прошлых партий; cover_texts(titles) → тексты для тех, у кого
-    текста обложки в истории нет. Каждая обложка непохожа на остальные. Возвращает, сколько нарисовано."""
-    from .kwork_rules import fit_cover_text
+    """Рисует обложки без цены кворкам прошлых партий; cover_texts(items) → текст и пункты обложки для
+    тех, у кого их в истории нет. Каждая обложка непохожа на остальные. Возвращает, сколько нарисовано."""
+    from .kwork_rules import fit_cover_points, fit_cover_text
 
     todo = history_to_fix(uid)
     if not todo:
         return 0
-    need = [h for h in todo if not h.get("cover_text")]
-    texts = cover_texts([h["title"] for h in need]) if need else []
-    for h, text in zip(need, texts):
-        h["cover_text"] = text
+    need = [h for h in todo if not h.get("cover_text") or not h.get("cover_points")]
+    extras = cover_texts(need) if need else []
+    for h, extra in zip(need, extras):
+        h["cover_text"] = h.get("cover_text") or extra["text"]
+        h["cover_points"] = fit_cover_points(extra["points"])
     history = db.load_history(uid)
     by_title = {h["title"]: h for h in history}
     taken = [l["fp"] for l in db.load_listings(uid) if l.get("fp") is not None]
@@ -386,7 +388,7 @@ def fix_history_covers(uid: int, cover_texts) -> int:
         h = by_title[t["title"]]
         hid = history_id(h)
         item = {"id": hid, "title": h["title"], "cover_text": fit_cover_text(t.get("cover_text", ""), h["title"]),
-                "idea_no": n + 1, "palette": palette, "variant": 0}
+                "cover_points": t.get("cover_points", []), "idea_no": n + 1, "palette": palette, "variant": 0}
         for _ in range(MAX_TRIES):
             mark = cover_fingerprint(render_cover(uid, item, fix_cover_path(uid, hid)))
             if not any(covers_similar(mark, o) for o in taken):
@@ -394,7 +396,8 @@ def fix_history_covers(uid: int, cover_texts) -> int:
             item["variant"] += 1
         for same in history:  # один и тот же кворк мог попасть в историю дважды
             if same["title"] == h["title"]:
-                same.update(id=hid, cover_text=item["cover_text"], fix_fp=mark, fix_v=COVER_VERSION)
+                same.update(id=hid, cover_text=item["cover_text"], cover_points=item["cover_points"], fix_fp=mark,
+                            fix_v=COVER_VERSION)
         taken.append(mark)
     db.save_history(uid, history)
     return len(todo)

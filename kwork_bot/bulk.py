@@ -24,7 +24,7 @@ from kwork_agent.cover import SIZE
 from kwork_agent.generator import validate
 from kwork_agent.uniqueness import find_duplicate
 
-from . import content, db, disk, images
+from . import content, db, disk, images, moderation
 from .kwork_rules import category_list, find_category, fit_instruction, normalize
 
 PHOTO_EXT = {".jpg", ".jpeg", ".png", ".webp"}
@@ -187,7 +187,7 @@ def match_photos(rows: list[dict], photo_names: list[str]) -> list[str]:
     return problems
 
 
-def prepare(uid: int, link: str, progress: dict) -> dict:
+def prepare(uid: int, link: str, progress: dict, llm=None) -> dict:
     """Скачивает папку, разбирает таблицу, проверяет. Результат кладёт в profile["bulk"]."""
     progress.update(stage="bulk_list", done=0, total=0)
     root = disk.list_dir(link)
@@ -226,6 +226,28 @@ def prepare(uid: int, link: str, progress: dict) -> dict:
                     if r["photo"] == name:
                         r["photo"] = ""
     shutil.rmtree(wd / "raw", ignore_errors=True)
+
+    # Модерация Kwork отклоняет обложку с ценой, скидкой, контактами — фото клиента проверяем заранее.
+    progress.update(stage="bulk_check", done=0, total=len({r["photo"] for r in rows if r["photo"]}))
+    llm = llm or content._llm()
+
+    def check(name: str) -> tuple[list[str], list[str]]:
+        try:
+            return moderation.image_problems((wd / "photos" / f"{Path(name).stem}.jpg").read_bytes(), llm)
+        except Exception:  # noqa: BLE001 — ИИ недоступен: фото не теряем, проверит модерация
+            return [], []
+        finally:
+            progress["done"] += 1
+
+    names = sorted({r["photo"] for r in rows if r["photo"]})
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for name, (block, warn) in zip(names, pool.map(check, names)):
+            for text in block + warn:
+                problems.append(f"фото «{name}»: {text}" + (" — Kwork отклонит, замените фото" if text in block else ""))
+            if block:
+                for r in rows:
+                    if r["photo"] == name:
+                        r["photo"] = ""
 
     rows, more = check_rows(uid, [r for r in rows if r["photo"]])
     problems += more
@@ -274,6 +296,8 @@ def check_rows(uid: int, rows: list[dict]) -> tuple[list[dict], list[str]]:
         errors = validate(probe)
         if r["price_rub"] and not CONFIG.price_min <= r["price_rub"] <= CONFIG.price_max:
             errors.append(f"цена вне {CONFIG.price_min}–{CONFIG.price_max} ₽")
+        errors += [e for e in moderation.text_problems(" ".join([r["title"], r["description"], r["requirements"]]))
+                   if e not in errors and "контакт" not in e]  # контакты validate уже проверил
         dup = find_duplicate(r, previous + ok)
         if dup:
             errors.append(f"текст похож на «{dup['title'][:50]}»")

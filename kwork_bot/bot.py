@@ -696,6 +696,8 @@ async def run_bulk_finish(bot: Bot, uid: int, chat_id: int) -> None:
 def progress_text(p: dict) -> str:
     if p.get("stage") == "bulk_list":
         return "📂 Читаю папку на Яндекс Диске…"
+    if p.get("stage") == "bulk_check":
+        return f"🔎 Проверяю фото на цены, скидки и контакты (за них Kwork отклоняет): <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "bulk_photos":
         return f"⬇️ Скачиваю фото: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "images":
@@ -949,7 +951,13 @@ async def cb_zip(call: CallbackQuery) -> None:
     check = 0
     listings = db.load_listings(uid)
     if images.outdated_covers(listings):
-        wait = await call.message.answer("🖼 Обновляю обложки: убираю с них цену — модерация Kwork её не принимает.")
+        wait = await call.message.answer("🖼 Обновляю обложки: без цены (модерация Kwork её не принимает), "
+                                         "внизу — что получит покупатель.")
+        try:
+            await asyncio.to_thread(content.ensure_cover_points, uid)
+        except Exception as e:  # noqa: BLE001 — без пунктов обложка всё равно годится
+            log.warning("пункты обложек: %s", e)
+        listings = db.load_listings(uid)
         await asyncio.to_thread(images.unique_covers, uid, listings)
         await wait.delete()
     if images.history_to_fix(uid):
