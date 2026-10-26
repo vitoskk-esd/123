@@ -5,3 +5,4 @@ sessions/*.session-journal
 __pycache__/
 *.pyc
 .pytest_cache/
+venv/
