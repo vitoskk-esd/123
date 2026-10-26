@@ -1,0 +1,16 @@
+# systemd: бот работает круглосуточно и сам поднимается после сбоя или перезагрузки сервера.
+# Установка (на сервере, от root):  cp deploy/earn-bot.service /etc/systemd/system/ && systemctl enable --now earn-bot
+[Unit]
+Description=Earn bot (Telegram)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/opt/earn-bot
+ExecStart=/opt/earn-bot/venv/bin/python -m bot
+Restart=always
+RestartSec=5
+User=earnbot
+
+[Install]
+WantedBy=multi-user.target
