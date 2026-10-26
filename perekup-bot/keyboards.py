@@ -1,7 +1,7 @@
 """Клавиатуры. callback_data короткие (лимит Telegram — 64 байта)."""
 from aiogram.types import InlineKeyboardButton as B, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 
-from . import texts as T
+import texts as T
 
 PAGE = 8
 

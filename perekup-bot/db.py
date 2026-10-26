@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS payments (
 CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, kind TEXT, meta TEXT, at REAL);
 CREATE INDEX IF NOT EXISTS events_kind ON events(kind, at);
 CREATE TABLE IF NOT EXISTS marks (key TEXT PRIMARY KEY, at REAL);
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
 """
 
 DAY = 86400
@@ -315,6 +316,13 @@ class DB:
     # ---------- события и отметки ----------
     async def event(self, uid: int, kind: str, meta: str | None = None) -> None:
         await self._run("INSERT INTO events (user_id, kind, meta, at) VALUES (?,?,?,?)", uid, kind, meta, time.time())
+
+    async def get_setting(self, key: str) -> str:
+        row = await self._one("SELECT value FROM settings WHERE key=?", key)
+        return row["value"] if row else ""
+
+    async def set_setting(self, key: str, value: str) -> None:
+        await self._run("INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)", key, value)
 
     async def mark_once(self, key: str) -> bool:
         """True, если ключа ещё не было (и ставит его): напоминание уходит ровно один раз."""

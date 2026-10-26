@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from bot.parse import car_key, fingerprint, parse_post
-from bot.query import Filter, describe, matches, parse_filter
-from bot.words import load_dictionary
+from parse import car_key, fingerprint, parse_post
+from query import Filter, describe, matches, parse_filter
+from words import load_dictionary
 from tests.samples import POSTS
 
 D = load_dictionary(Path(__file__).resolve().parents[1] / "cars.yaml")

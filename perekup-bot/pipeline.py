@@ -16,12 +16,12 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
 from aiogram.types import LinkPreviewOptions
 
-from . import keyboards as K
-from . import texts as T
-from .ctx import Ctx
-from .db import DAY, DEDUP_DAYS, has_access
-from .parse import Listing, car_key, fingerprint, parse_post
-from .query import Filter, matches
+import keyboards as K
+import texts as T
+from ctx import Ctx
+from db import DAY, DEDUP_DAYS, has_access
+from parse import Listing, car_key, fingerprint, parse_post
+from query import Filter, matches
 
 log = logging.getLogger(__name__)
 NOT_CLEAN = {"damaged", "parts", "notrun"}      # такие цены не идут в оценку рынка

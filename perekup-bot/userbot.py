@@ -1,9 +1,10 @@
 """Служебный аккаунт Telegram (Telethon), который читает каналы. Обычный бот чужие каналы читать не может —
 поэтому посты получает отдельный аккаунт: Telegram присылает ему новые посты сразу, без опроса.
 
+Подключается из чата с ботом: админ пишет /connect (см. connect.py). Ключ входа (сессия) хранится в базе,
+поэтому после перезапуска в облаке входить заново не нужно.
 Вступление в каналы — по одному с паузой JOIN_INTERVAL: массовые вступления Telegram наказывает блокировкой.
 Один аккаунт — до 500 каналов (лимит Telegram).
-Вход в аккаунт (один раз): python -m bot login — его сам делает файл «Запуск».
 """
 import asyncio
 import logging
@@ -11,51 +12,72 @@ import time
 
 from aiogram import Bot
 from telethon import TelegramClient, errors, events, utils
+from telethon.sessions import StringSession
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 
-from . import texts as T
-from .config import ROOT
-from .ctx import Ctx
-from .pipeline import RawPost, process
+import texts as T
+from ctx import Ctx
+from pipeline import RawPost, process
 
 log = logging.getLogger(__name__)
-SESSION = ROOT / "sessions" / "main"
 CONNECT_TIMEOUT = 60
 FATAL = (errors.InviteHashExpiredError, errors.InviteHashInvalidError, errors.UsernameNotOccupiedError,
          errors.UsernameInvalidError, errors.ChannelPrivateError, errors.ChannelInvalidError,
          errors.ChannelsTooMuchError, ValueError)
 
 
-def make_client(ctx: Ctx) -> TelegramClient:
-    SESSION.parent.mkdir(exist_ok=True)
-    return TelegramClient(str(SESSION), ctx.cfg.api_id, ctx.cfg.api_hash, device_model="Perekhvat reader",
-                          flood_sleep_threshold=60)
+async def api_keys(ctx: Ctx) -> tuple[int, str]:
+    """Ключи из переменных окружения, а если их нет — те, что админ прислал в /connect."""
+    if ctx.cfg.api_id and ctx.cfg.api_hash:
+        return ctx.cfg.api_id, ctx.cfg.api_hash
+    api_id = await ctx.db.get_setting("api_id")
+    return int(api_id or 0), await ctx.db.get_setting("api_hash")
 
 
-async def connect(client: TelegramClient) -> None:
-    log.info("подключаюсь к Telegram…")
-    try:
-        await asyncio.wait_for(client.connect(), CONNECT_TIMEOUT)
-    except (OSError, asyncio.TimeoutError) as e:
-        raise SystemExit(f"Не получилось подключиться к Telegram ({str(e) or 'нет ответа'}). Проверь интернет; если Telegram "
-                         "у тебя работает только через VPN — включи VPN на весь компьютер.")
+async def new_client(ctx: Ctx, session: str = "") -> TelegramClient:
+    api_id, api_hash = await api_keys(ctx)
+    c = TelegramClient(StringSession(session), api_id, api_hash, device_model="Perekhvat reader", flood_sleep_threshold=60)
+    await asyncio.wait_for(c.connect(), CONNECT_TIMEOUT)
+    return c
 
 
 class Reader:
     def __init__(self, bot: Bot, ctx: Ctx, client=None):
         self.bot, self.ctx, self.client = bot, ctx, client
         self.tasks: set[asyncio.Task] = set()
+        self.runner: asyncio.Task | None = None
 
-    async def start(self) -> None:
-        self.client = make_client(self.ctx)
-        await connect(self.client)
-        if not await self.client.is_user_authorized():
-            await self.client.disconnect()
-            raise SystemExit("Служебный аккаунт не подключён. Удали папку sessions и запусти файл «Запуск» снова.")
-        self.client.add_event_handler(self._on_message, events.NewMessage())
+    @property
+    def online(self) -> bool:
+        return bool(self.runner and not self.runner.done())
+
+    async def resume(self) -> bool:
+        """При запуске бота: если аккаунт уже подключали — входим по сохранённой сессии."""
+        session = await self.ctx.db.get_setting("session")
+        if not session:
+            return False
+        try:
+            client = await new_client(self.ctx, session)
+            if not await client.is_user_authorized():
+                await client.disconnect()
+                return False
+        except Exception as e:
+            log.warning("служебный аккаунт не подключился: %s", e)
+            return False
+        await self.attach(client)
+        return True
+
+    async def attach(self, client: TelegramClient) -> None:
+        """Начать читать каналы этим (уже вошедшим) клиентом."""
+        if self.online:
+            self.runner.cancel()
+        self.client = client
+        await self.ctx.db.set_setting("session", client.session.save())
+        client.add_event_handler(self._on_message, events.NewMessage())
         await self.ctx.refresh_channels()
-        log.info("каналов подключено: %d", len(self.ctx.channels))
+        self.runner = asyncio.create_task(self.run())
+        log.info("служебный аккаунт читает каналы: %d", len(self.ctx.channels))
 
     async def _on_message(self, e: events.NewMessage.Event) -> None:
         m = e.message
@@ -126,13 +148,3 @@ class Reader:
 
     async def run(self) -> None:
         await asyncio.gather(self.join_loop(), self.client.run_until_disconnected())
-
-
-async def login(ctx: Ctx) -> None:
-    """Вход: телефон → код из Telegram → (пароль 2FA). Создаёт sessions/main.session."""
-    c = make_client(ctx)
-    await connect(c)
-    await c.start()
-    me = await c.get_me()
-    print(f"Готово: служебный аккаунт — {me.first_name} (@{me.username}).")
-    await c.disconnect()

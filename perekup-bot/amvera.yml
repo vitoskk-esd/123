@@ -1,0 +1,10 @@
+# Настройки для облака Amvera: Python, запуск main.py, база и вход служебного аккаунта — в постоянной папке /data.
+meta:
+  environment: python
+  toolchain:
+    name: pip
+    version: "3.12"
+
+run:
+  scriptName: main.py
+  persistenceMount: /data

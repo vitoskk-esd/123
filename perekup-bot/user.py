@@ -9,13 +9,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from . import keyboards as K
-from . import texts as T
-from .ctx import Ctx
-from .db import DAY
-from .links import label, parse_link
-from .pipeline import seconds
-from .query import describe, parse_filter
+import keyboards as K
+import texts as T
+from admin import is_admin
+from ctx import Ctx
+from db import DAY
+from links import label, parse_link
+from pipeline import seconds
+from query import describe, parse_filter
 
 router = Router(name="user")
 
@@ -39,6 +40,9 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     channels = await ctx.db.channel_count_for(msg.from_user.id)
     trial = T.WELCOME_TRIAL.format(days=ctx.cfg.trial_days) if ctx.cfg.payments_on else ""
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu())
+    if ctx.reader and not ctx.reader.online and await is_admin(msg, ctx):
+        await msg.answer(T.NEED_CONNECT)
+        return
     if new or not await ctx.db.filters(msg.from_user.id):
         await msg.answer(T.ASK_FILTER, reply_markup=K.new_filter())
         await state.set_state(S.filter)

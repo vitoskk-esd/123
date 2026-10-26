@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import date
 
-from .words import Dictionary, norm
+from words import Dictionary, norm
 
 YEAR_MAX = date.today().year + 1
 YEAR = r"(19[7-9]\d|20[0-4]\d)"

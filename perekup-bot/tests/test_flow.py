@@ -1,5 +1,6 @@
 """Сквозная проверка без Telegram: апдейты идут в диспетчер aiogram, посты — в pipeline, ответы бота перехватывает
 подменная сессия, служебный аккаунт и ЮKassa — заглушки."""
+import asyncio
 import itertools
 import time
 from datetime import datetime
@@ -13,14 +14,15 @@ from aiogram.methods import AnswerCallbackQuery, EditMessageReplyMarkup, EditMes
 from aiogram.types import CallbackQuery, Chat, Message, Update, User
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
-from bot import jobs
-from bot.__main__ import build_dispatcher
-from bot.config import Config
-from bot.ctx import Ctx
-from bot.db import DB
-from bot.pipeline import RawPost, process
-from bot.userbot import Reader
-from bot.words import load_dictionary
+import jobs
+from main import build_dispatcher
+from config import Config
+from ctx import Ctx
+from db import DB
+from pipeline import RawPost, process
+import connect
+from userbot import Reader
+from words import load_dictionary
 
 ROOT = Path(__file__).resolve().parents[1]
 USER, OTHER, ADMIN = 111, 222, 999
@@ -254,3 +256,54 @@ async def test_free_mode_without_yookassa(env):
     await dp.feed_update(bot, msg("/start", OTHER))
     await dp.feed_update(bot, msg("/admin", OTHER))                        # второй человек — не админ
     assert not any("Людей" in t for t in s.texts(OTHER))
+
+
+class FakeLogin:
+    """Клиент Telethon для входа: код → облачный пароль → готово."""
+    def __init__(self):
+        self.signed = []
+        self.session = type("S", (), {"save": lambda self: "SESSION-STRING"})()
+
+    async def send_code_request(self, phone):
+        self.phone = phone
+        return type("R", (), {"phone_code_hash": "HASH"})()
+
+    async def sign_in(self, phone=None, code=None, phone_code_hash=None, password=None):
+        self.signed.append((phone, code, phone_code_hash, password))
+        if password is None:
+            from telethon.errors import SessionPasswordNeededError
+            raise SessionPasswordNeededError(request=None)
+
+    def add_event_handler(self, *a):
+        pass
+
+    async def get_me(self):
+        return type("U", (), {"first_name": "Служебный", "username": "svc"})()
+
+    async def run_until_disconnected(self):
+        await asyncio.Event().wait()
+
+
+async def test_connect_service_account_in_chat(env, monkeypatch):
+    """Админ подключает служебный аккаунт прямо в чате: api_id → api_hash → телефон → код → пароль."""
+    dp, bot, s, ctx = env
+    fake = FakeLogin()
+
+    async def fake_client(ctx, session=""):
+        return fake
+    monkeypatch.setattr(connect, "new_client", fake_client)
+    ctx.reader = Reader(bot, ctx)
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    assert "/connect" in s.texts(ADMIN)[-1]                                 # админу сразу подсказка
+    for text in ("/connect", "12345", "0123456789abcdef0123456789abcdef", "8 (999) 123-45-67", "1 2 3 4 5", "секрет"):
+        await dp.feed_update(bot, msg(text, ADMIN))
+    assert fake.phone == "+79991234567"
+    assert fake.signed == [("+79991234567", "12345", "HASH", None), (None, None, None, "секрет")]
+    assert "Готово" in s.texts(ADMIN)[-1] and ctx.reader.online
+    assert await ctx.db.get_setting("session") == "SESSION-STRING"         # после перезапуска входить не нужно
+    assert await ctx.db.get_setting("api_id") == "12345"
+    deleted = [m for m in s.sent if type(m).__name__ == "DeleteMessage"]
+    assert len(deleted) >= 3                                               # hash, код и пароль убраны из чата
+    await dp.feed_update(bot, msg("/connect", USER))                        # не админ — ничего
+    assert not any("api_id" in t for t in s.texts(USER))
+    ctx.reader.runner.cancel()

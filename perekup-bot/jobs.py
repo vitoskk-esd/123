@@ -7,11 +7,11 @@ import time
 from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError
 
-from . import keyboards as K
-from . import texts as T
-from .ctx import Ctx
-from .db import DAY
-from .user import apply_payment, fmt_date
+import keyboards as K
+import texts as T
+from ctx import Ctx
+from db import DAY
+from user import apply_payment, fmt_date
 
 log = logging.getLogger(__name__)
 

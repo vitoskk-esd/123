@@ -1,9 +1,12 @@
-"""Настройки из файла .env рядом с ботом. Обязательны только три строки: BOT_TOKEN, TG_API_ID, TG_API_HASH."""
+"""Настройки — из переменных окружения (в облаке) или файла .env рядом с ботом. Обязателен только BOT_TOKEN:
+ключи служебного аккаунта бот спросит у админа сам в чате (/connect) и сохранит в базе."""
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent
+# в облаке Amvera постоянное хранилище — /data (переживает перезапуски); на своём компьютере — папка data
+DATA = Path("/data") if Path("/data").is_dir() else ROOT / "data"
 
 
 def load_env(path: Path = ROOT / ".env") -> None:
@@ -22,7 +25,7 @@ class Config:
     token: str
     db_path: Path
     cars_path: Path
-    api_id: int = 0                  # служебный аккаунт, который читает каналы (my.telegram.org)
+    api_id: int = 0                  # служебный аккаунт (my.telegram.org); можно не задавать — бот спросит в /connect
     api_hash: str = ""
     admins: frozenset[int] = frozenset()   # пусто — админом станет первый, кто напишет боту /start
     price: int = 990
@@ -45,7 +48,7 @@ def get_config() -> Config:
     e = os.environ.get
     return Config(
         token=e("BOT_TOKEN", ""),
-        db_path=ROOT / "data" / "bot.db",
+        db_path=DATA / "bot.db",
         cars_path=ROOT / "cars.yaml",
         api_id=int(e("TG_API_ID", "0") or 0),
         api_hash=e("TG_API_HASH", ""),

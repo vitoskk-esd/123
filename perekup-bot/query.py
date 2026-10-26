@@ -6,8 +6,8 @@ import json
 import re
 from dataclasses import asdict, dataclass, field
 
-from .parse import MLN, THS, YEAR_MAX, _to_int
-from .words import Dictionary, _tok_match, norm
+from parse import MLN, THS, YEAR_MAX, _to_int
+from words import Dictionary, _tok_match, norm
 
 EXCLUDE_START = r"(?:без|кроме|не надо|не нужн\w*|исключ\w*|не показывай)"
 ALL_RF = re.compile(r"вся росси|всей росси|вся рф|всей рф|любой (город|регион)|все регионы|по рф\b")

@@ -1,9 +1,9 @@
 """Общие объекты: база, справочник (меняется по /reload), настройки, кэш каналов. Передаются в обработчики через dispatcher."""
 from dataclasses import dataclass, field
 
-from .config import Config
-from .db import DB
-from .words import Dictionary, load_dictionary
+from config import Config
+from db import DB
+from words import Dictionary, load_dictionary
 
 
 @dataclass
@@ -13,6 +13,7 @@ class Ctx:
     dict: Dictionary
     channels: dict[int, dict] = field(default_factory=dict)   # tg_id → строка channels (быстрый поиск на каждом посте)
     pay: object = None                                         # payments.YooKassa
+    reader: object = None                                      # userbot.Reader
 
     def reload(self) -> Dictionary:
         self.dict = load_dictionary(self.cfg.cars_path)

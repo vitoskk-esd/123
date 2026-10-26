@@ -6,7 +6,7 @@ import json
 import urllib.request
 import uuid
 
-from .config import Config
+from config import Config
 
 API = "https://api.yookassa.ru/v3/payments"
 

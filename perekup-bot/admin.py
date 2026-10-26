@@ -6,9 +6,9 @@ from aiogram.exceptions import TelegramForbiddenError
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 
-from .ctx import Ctx
-from .links import label, parse_link
-from .pipeline import seconds
+from ctx import Ctx
+from links import label, parse_link
+from pipeline import seconds
 
 router = Router(name="admin")
 
@@ -30,7 +30,9 @@ async def admin(msg: Message, ctx: Ctx) -> None:
     pay = (f"Пробный период: {s['trial']} · Платят сейчас: <b>{s['paying']}</b> · "
            f"выручка за 30 дней: {s['revenue30']:,} ₽".replace(",", " ")) if ctx.cfg.payments_on else "Оплата не подключена — бот бесплатный для всех."
     src = "\n".join(f"• {r['source']}: {r['users']} чел." for r in s["sources"])
+    reader = "✅ подключён" if ctx.reader and ctx.reader.online else "❌ не подключён — /connect"
     await msg.answer(
+        f"🤖 Служебный аккаунт: {reader}\n"
         f"👥 Людей: <b>{s['users']}</b>, с фильтрами: {s['with_filters']}\n{pay}\n\n"
         f"⚡ За сутки: постов {p['n']}, машин с ценой {p['cars'] or 0}, дублей {p['dups'] or 0}\n"
         f"Отправлено людям: {s['deliveries24']} · средняя задержка: <b>{seconds(p['lat'] and int(p['lat']))}</b>\n\n"
