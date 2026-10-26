@@ -10,6 +10,7 @@ import tempfile
 from pathlib import Path
 
 from aiogram import Bot, F, Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -25,6 +26,22 @@ from .export import HOW_TO, build_zip, extension_filename, extension_help, exten
 
 router = Router()
 log = logging.getLogger(__name__)
+
+# Нажатия кнопок, сделанные, пока бот был выключен, приходят после запуска: ответить на такие
+# Telegram уже не даёт («query is too old»). Не падаем на ответе — само действие выполняем.
+_answer = CallbackQuery.answer
+
+
+async def _answer_safely(self, *args, **kwargs):
+    try:
+        return await _answer(self, *args, **kwargs)
+    except TelegramBadRequest as e:
+        if "query is too old" in str(e) or "query ID is invalid" in str(e):
+            return None
+        raise
+
+
+CallbackQuery.answer = _answer_safely
 JOBS: dict[int, dict] = {}  # кто сейчас ждёт генерацию: uid → прогресс
 _TASKS: set[asyncio.Task] = set()  # ссылки на фоновые задачи, чтобы их не собрал сборщик мусора
 
