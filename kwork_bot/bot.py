@@ -20,7 +20,7 @@ from kwork_agent.cover import PALETTES, make_cover
 
 from . import bulk, content, db, disk, examples, payments
 from .config import BOT_CONFIG
-from .export import EXTENSION_HELP, HOW_TO, build_zip, extension_zip
+from .export import HOW_TO, build_zip, extension_filename, extension_help, extension_version, extension_zip
 
 router = Router()
 JOBS: dict[int, dict] = {}  # кто сейчас ждёт генерацию: uid → прогресс
@@ -135,8 +135,8 @@ async def cb_menu(call: CallbackQuery, state: FSMContext) -> None:
 @router.callback_query(F.data == "ext")
 async def cb_extension(call: CallbackQuery) -> None:
     await call.answer()
-    await call.message.answer_document(BufferedInputFile(await asyncio.to_thread(extension_zip), "kwork_extension.zip"))
-    await call.message.answer(EXTENSION_HELP, reply_markup=kb([("🏠 Меню", "menu")]))
+    await call.message.answer_document(BufferedInputFile(await asyncio.to_thread(extension_zip), extension_filename()))
+    await call.message.answer(extension_help(), reply_markup=kb([("🏠 Меню", "menu")]))
 
 
 @router.callback_query(F.data == "howto")
@@ -948,5 +948,6 @@ async def cb_zip(call: CallbackQuery) -> None:
     await call.message.answer_document(
         BufferedInputFile(data, "kwork.zip"),
         caption=f"Все {len(db.load_listings(uid))} кворков: таблица kworks.csv, обложки и инструкция "
-                "«КАК_ВЫЛОЖИТЬ.txt».",
+                "«КАК_ВЫЛОЖИТЬ.txt». Этот файл выбирайте в панели расширения — нужна версия расширения "
+                f"v{extension_version()} или новее (номер виден в заголовке панели).",
     )

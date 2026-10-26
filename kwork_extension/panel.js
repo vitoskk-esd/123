@@ -2,6 +2,15 @@
 // страницу, поэтому состояние хранится в chrome.storage и продолжается на каждой загрузке.
 
 const KW = {queue: "kw_queue", state: "kw_state", cover: (id) => "kw_cover_" + id};
+const KW_VERSION = chrome.runtime.getManifest().version;
+const KW_TITLE = "Kwork — выкладка";
+
+// "0.1.10" новее "0.1.9"
+function kwNewer(a, b) {
+  const x = String(a || "0").split(".").map(Number), y = String(b || "0").split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
+  return false;
+}
 const NEW_URL = "https://kwork.ru/new";
 
 const store = {
@@ -58,6 +67,13 @@ async function loadZip(file) {
       ? "это архив самого расширения — выберите kwork.zip, который прислал бот («📦 Скачать всё архивом»)"
       : "в архиве нет listings.json — выберите kwork.zip из бота");
   }
+  if (files["kwork_meta.json"]) { // бот пишет, для какой версии расширения собран архив
+    const meta = JSON.parse(new TextDecoder().decode(await kwEntryBytes(files["kwork_meta.json"])));
+    if (kwNewer(meta.extension_version, KW_VERSION)) {
+      throw new Error(`архив собран для расширения v${meta.extension_version}, а у вас v${KW_VERSION}. ` +
+        "Обновите расширение: в боте «🧩 Расширение для выкладки» — там написано, как");
+    }
+  }
   const listings = JSON.parse(new TextDecoder().decode(await kwEntryBytes(files["listings.json"])));
   const old = await store.get(KW.queue, []);
   await chrome.storage.local.remove(old.map((l) => KW.cover(l.id)));
@@ -102,6 +118,11 @@ async function resume() {
   st = await getState();
   if (!st.running) return;
 
+  if (st.phase === "review" && !onNew) {
+    // Ждали «Готово», а страница уже не форма: Kwork сохранил кворк и ушёл со страницы раньше,
+    // чем записалась отметка о нажатии.
+    st = await updateState((s) => { s.phase = "submitted"; });
+  }
   if (st.phase === "submitted") {
     const item = queue[st.index];
     if (onNew) { // снова форма — Kwork не принял кворк
@@ -179,7 +200,8 @@ function waitForHuman() {
   const save = document.querySelector(".js-save-kwork");
   if (save) {
     save.style.outline = "4px solid #f5a623";
-    save.addEventListener("click", () => afterSubmit(), {once: true});
+    // capture — отметку «нажато» начинаем писать раньше, чем Kwork начнёт сохранять и уйдёт со страницы
+    save.addEventListener("click", () => afterSubmit(false), {once: true, capture: true});
   }
 }
 
@@ -189,15 +211,48 @@ async function afterSubmit(clickSave) {
   // Если через 30 с мы всё ещё на форме — Kwork показал ошибки или ждёт действия.
   await kwSleep(30000);
   const now = await getState();
-  if (now.phase === "submitted" && location.pathname === "/new") {
+  if (now.phase !== "submitted" || !document.querySelector("#step1-name")) return;
+  const reason = kwFormErrors() || "после «Готово» Kwork остался на форме";
+  if (clickSave) {
     const queue = await store.get(KW.queue, []);
-    await fail(now, queue[now.index], kwFormErrors() || "после «Готово» Kwork остался на форме — проверьте вручную");
+    return fail(now, queue[now.index], reason + " — проверьте вручную");
   }
+  // «Готово» жал человек: даём исправить и нажать ещё раз, выкладку не останавливаем
+  await updateState((st) => {
+    st.phase = "review";
+    st.message = `Kwork не принял кворк ${st.index + 1}: ${reason}. Исправьте и нажмите «Готово» ещё раз.`;
+  });
+  waitForHuman();
 }
 
 // --- Панель --------------------------------------------------------------------------------------
 
-let ui = null;
+let ui = null, uiHost = null, duplicate = "";
+
+// Если в браузере осталась ещё одна копия расширения (например, старая папка после обновления),
+// на странице две панели и два заполнителя — выкладка ломается. Находим чужую панель по заголовку.
+function otherPanels() {
+  return [...document.documentElement.children].filter((el) => el !== uiHost && el.shadowRoot
+    && (el.shadowRoot.querySelector(".h span")?.textContent || "").includes(KW_TITLE));
+}
+
+function checkDuplicates() {
+  const others = otherPanels();
+  duplicate = others.map((el) => el.dataset.kwVersion ? "v" + el.dataset.kwVersion : "старая, без номера версии").join(", ");
+  for (const el of others) {
+    const box = el.shadowRoot.querySelector(".p");
+    if (box && !el.shadowRoot.querySelector(".kw-old")) {
+      const note = document.createElement("div");
+      note.className = "kw-old";
+      note.style.cssText = "background:#c0392b;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;font-weight:bold";
+      note.textContent = `Это лишняя копия расширения. Удалите её на странице расширений — рабочая панель v${KW_VERSION} слева.`;
+      box.prepend(note);
+    }
+  }
+  if (others.length && uiHost) { uiHost.style.right = ""; uiHost.style.left = "16px"; } // чтобы панели не перекрывались
+  render();
+  return !others.length;
+}
 
 function setStatus(text) { if (ui) ui.querySelector("#status").textContent = text; }
 
@@ -208,8 +263,11 @@ async function render() {
   const $ = (id) => ui.querySelector(id);
   $("#count").textContent = queue.length ? `В архиве: ${queue.length} · выложено: ${st.done.length} · следующий: №${Math.min(st.index + 1, queue.length)}` : "Архив не загружен";
   $("#status").textContent = st.message || (st.running ? "Работаю…" : "");
+  $("#dup").textContent = duplicate ? `⚠️ В браузере включена ещё одна копия этого расширения (${duplicate}). ` +
+    "Она мешает выкладке. Откройте страницу расширений (browser://extensions или chrome://extensions), " +
+    `удалите «Kwork — выкладка кворков» с версией не ${KW_VERSION} и обновите эту страницу.` : "";
   $("#manual").value = st.manual; $("#limit").value = st.limit; $("#pause").value = st.pause;
-  $("#start").disabled = st.running || !queue.length || st.index >= queue.length;
+  $("#start").disabled = !!duplicate || st.running || !queue.length || st.index >= queue.length;
   $("#stop").disabled = !st.running;
   $("#skip").disabled = st.running || st.index >= queue.length;
   $("#log").textContent = st.log.join("\n");
@@ -218,6 +276,7 @@ async function render() {
 
 function buildPanel() {
   const host = document.createElement("div");
+  host.dataset.kwVersion = KW_VERSION;
   host.style.cssText = "position:fixed;right:16px;bottom:16px;z-index:2147483647";
   const root = host.attachShadow({mode: "open"});
   root.innerHTML = `
@@ -233,9 +292,12 @@ function buildPanel() {
       #failed{color:#c0392b;white-space:pre-wrap;font-size:12px}
       #log{white-space:pre-wrap;font-size:11px;color:#666;max-height:120px;overflow:auto;margin-top:6px}
       .hide{display:none}
+      #dup{color:#fff;background:#c0392b;border-radius:6px;font-weight:bold;white-space:pre-wrap}
+      #dup:not(:empty){padding:8px;margin-bottom:8px}
     </style>
     <div class="p">
-      <div class="h"><span>🧩 Kwork — выкладка v${chrome.runtime.getManifest().version}</span><a id="fold" href="#">свернуть</a></div>
+      <div class="h"><span>🧩 ${KW_TITLE} v${KW_VERSION}</span><a id="fold" href="#">свернуть</a></div>
+      <div id="dup"></div>
       <div id="body">
         <div id="count"></div>
         <div class="row"><input type="file" id="zip" accept=".zip"></div>
@@ -247,18 +309,25 @@ function buildPanel() {
       </div>
     </div>`;
   document.documentElement.appendChild(host);
-  ui = root;
+  ui = root; uiHost = host;
   const $ = (id) => root.querySelector(id);
   $("#fold").onclick = (e) => { e.preventDefault(); $("#body").classList.toggle("hide"); };
   $("#zip").onchange = async () => {
     setStatus("Читаю архив…");
-    try { await loadZip($("#zip").files[0]); } catch (e) { setStatus("Не получилось: " + e.message); }
+    try { await loadZip($("#zip").files[0]); } catch (e) {
+      // в состояние, а не только на экран: иначе следующая перерисовка панели стирала сообщение
+      await updateState((st) => { st.message = "Не получилось: " + e.message; });
+      $("#zip").value = "";
+    }
   };
   for (const id of ["manual", "limit", "pause"]) {
     $("#" + id).onchange = () => { const v = Math.max(0, Number($("#" + id).value) || 0); updateState((st) => { st[id] = v; }); };
   }
   $("#start").onclick = async () => {
-    await updateState((st) => Object.assign(st, {running: true, runStart: st.index, phase: "start", message: "Начинаю…"}));
+    if (!checkDuplicates()) return;
+    // Каждый запуск — с чистой панелью: ошибки и журнал прошлого запуска убираем.
+    await updateState((st) => Object.assign(st, {running: true, runStart: st.index, phase: "start", message: "Начинаю…",
+      failed: [], log: [], attempts: 0, coverDone: null, navs: 0}));
     resume();
   };
   $("#stop").onclick = () => stop("Остановлено вами.");
@@ -276,5 +345,7 @@ function buildPanel() {
 if (window.top === window && !window.__kwPanel) {
   window.__kwPanel = true;
   buildPanel();
-  resume();
+  // Копии расширения стартуют в любом порядке — проверяем дважды. Пока есть копия, сами не продолжаем.
+  setTimeout(() => { if (checkDuplicates()) resume(); else stop("Выкладка на паузе: удалите лишнюю копию расширения."); }, 1200);
+  setTimeout(checkDuplicates, 5000);
 }

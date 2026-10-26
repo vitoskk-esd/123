@@ -788,13 +788,18 @@ class CoverWeightTests(unittest.TestCase):
 
 class ExtensionPackageTests(unittest.TestCase):
     def test_extension_zip(self):
-        from kwork_bot.export import extension_zip
+        from kwork_bot.export import extension_filename, extension_help, extension_version, extension_zip
 
         z = zipfile.ZipFile(io.BytesIO(extension_zip()))
         names = set(z.namelist())
+        # Папка и файл — с номером версии: новую папку не спутать со старой при обновлении.
+        folder = f"kwork_extension_v{extension_version()}"
         for f in ("manifest.json", "background.js", "filler.js", "panel.js", "unzip.js"):
-            self.assertIn(f"kwork_extension/{f}", names)
-        manifest = json.loads(z.read("kwork_extension/manifest.json"))
+            self.assertIn(f"{folder}/{f}", names)
+        self.assertIn(extension_version(), extension_filename())
+        self.assertIn(folder, extension_help())
+        self.assertIn("Удалить", extension_help())
+        manifest = json.loads(z.read(f"{folder}/manifest.json"))
         self.assertEqual(manifest["manifest_version"], 3)
         self.assertIn("https://kwork.ru/*", manifest["host_permissions"])
         self.assertLessEqual(int(manifest["minimum_chrome_version"]), 109)  # Chrome на Windows 7
@@ -810,6 +815,9 @@ class ExtensionPackageTests(unittest.TestCase):
             z = zipfile.ZipFile(io.BytesIO(build_zip(7)))
         self.assertEqual(z.getinfo("listings.json").compress_type, zipfile.ZIP_STORED)
         self.assertEqual(z.getinfo("covers/x1.jpg").compress_type, zipfile.ZIP_STORED)
+        # Версия расширения, для которой собран архив: старое расширение попросит обновиться.
+        from kwork_bot.export import extension_version
+        self.assertEqual(json.loads(z.read("kwork_meta.json")), {"extension_version": extension_version()})
 
     def test_old_kworks_get_volume_in_archive(self):
         """Кворки, созданные до поля «Объём», в архиве получают объём — иначе Kwork не даст сохранить."""
