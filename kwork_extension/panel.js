@@ -19,7 +19,7 @@ const store = {
 };
 
 function defaultState() {
-  return {running: false, index: 0, runStart: 0, manual: 3, limit: 6, pause: 30, phase: "idle",
+  return {running: false, mode: "publish", covers: null, index: 0, runStart: 0, manual: 3, limit: 6, pause: 30, phase: "idle",
           done: [], failed: [], log: [], message: "", attempts: 0, coverDone: null, navs: 0};
 }
 
@@ -116,6 +116,7 @@ async function resume() {
   if (!st.running) return;
   const queue = await store.get(KW.queue, []);
   if (/\/login|\/signin/.test(location.pathname)) return stop("Войдите в аккаунт Kwork и нажмите «Старт» снова.");
+  if (st.mode === "covers") return resumeCovers();
   const onNew = await onFormPage();
   st = await getState();
   if (!st.running) return;
@@ -201,6 +202,127 @@ async function resume() {
   }
 }
 
+// --- Замена обложек в уже созданных кворках (например, отклонённых модерацией) ------------------
+
+const kwNorm = (s) => String(s || "").toLowerCase().replace(/[«»"…]/g, "").replace(/\s+/g, " ").trim();
+
+// На странице «Мои кворки» находим кворки из архива по названию и адрес их редактирования:
+// ссылка «Изменить» в той же карточке, иначе /edit?id=<номер кворка из ссылки на него>.
+function findKworksOnPage(queue) {
+  const byTitle = new Map(queue.map((l) => [kwNorm(l.title), l]));
+  const found = new Map();
+  for (const a of document.querySelectorAll("a[href]")) {
+    const text = kwNorm(a.innerText);
+    if (text.length < 10) continue;
+    const l = byTitle.get(text) || queue.find((q) => a.innerText.trim().endsWith("…") && kwNorm(q.title).startsWith(text));
+    if (!l || found.has(l.id)) continue;
+    // поднимаемся до карточки с одной ссылкой «Изменить»; где их больше — это уже список, не карточка
+    let card = a, edit = null;
+    for (let up = 0; up < 8 && card && !edit; up++) {
+      card = card.parentElement;
+      const edits = card ? card.querySelectorAll('a[href*="/edit"]') : [];
+      if (edits.length > 1) break;
+      if (edits.length === 1) edit = edits[0];
+    }
+    const id = (a.href.match(/\/(\d{4,})(?:\/|$|\?)/) || [])[1];
+    const url = edit ? edit.href : id ? `https://kwork.ru/edit?id=${id}` : null;
+    if (url) found.set(l.id, {id: l.id, title: l.title, url});
+  }
+  return [...found.values()];
+}
+
+async function startCoverReplace() {
+  const queue = await store.get(KW.queue, []);
+  if (!queue.length) return updateState((st) => { st.message = "Сначала выберите kwork.zip — в нём новые обложки."; });
+  const list = findKworksOnPage(queue);
+  if (!list.length) {
+    return updateState((st) => {
+      st.message = "На этой странице нет кворков из архива. Откройте «Мои кворки» (вкладку с отклонёнными) и нажмите кнопку снова.";
+    });
+  }
+  await updateState((st) => Object.assign(st, {running: true, mode: "covers", log: [], failed: [],
+    covers: {list, i: 0, done: [], failed: [], phase: "open", navs: 0},
+    message: `Заменю обложки у ${list.length} кворков: ${list.map((x) => "«" + x.title.slice(0, 25) + "»").join(", ")}`}));
+  resumeCovers();
+}
+
+async function resumeCovers() {
+  let st = await getState();
+  if (!st.running || st.mode !== "covers") return;
+  let job = st.covers;
+  const finish = () => updateState((s) => {
+    const j = s.covers;
+    Object.assign(s, {running: false, mode: "publish", phase: "idle",
+      message: `Обложки заменены: ${j.done.length} из ${j.list.length}.` + (j.failed.length ? ` Не получилось: ${j.failed.length} — причины ниже.` : "")});
+  });
+  const next = (failed) => updateState((s) => {
+    const j = s.covers, item = j.list[j.i];
+    if (failed) { j.failed.push({id: item.id, reason: failed}); s.failed.push({id: item.id, title: item.title, reason: failed}); }
+    else j.done.push(item.id);
+    j.i += 1; j.phase = "open"; j.navs = 0;
+  });
+
+  if (job.phase === "review") { // ждали, пока человек проверит первую замену и сохранит
+    if (await onFormPage()) return waitForSave();
+    await updateState((s) => { s.covers.phase = "saved"; });
+    st = await getState(); job = st.covers;
+  }
+  if (job.phase === "saved") { // после «Сохранить» Kwork уходит со страницы формы
+    const stillForm = await onFormPage();
+    await next(stillForm ? (kwFormErrors() || "Kwork не сохранил изменения — проверьте кворк") : null);
+    st = await getState(); job = st.covers;
+    if (!stillForm) log("обложка заменена и отправлена на модерацию");
+  }
+  if (job.i >= job.list.length) return finish();
+  const item = job.list[job.i];
+  const target = new URL(item.url);
+  const here = location.pathname + location.search === target.pathname + target.search;
+  if (!here && !job.navs) {
+    await updateState((s) => { s.covers.navs = 1; s.message = `Обложка ${job.i + 1} из ${job.list.length}: «${item.title.slice(0, 40)}»`; });
+    location.href = item.url;
+    return;
+  }
+  try {
+    const cover = await store.get(KW.cover(item.id), null);
+    await kwReplaceCover(item, cover ? fromB64(cover) : null, (t) => log(t));
+    if (!job.done.length && st.manual > 0) { // первую замену сохраняет человек — посмотреть, что всё верно
+      await updateState((s) => {
+        s.covers.phase = "review";
+        s.message = `Обложка заменена у «${item.title.slice(0, 40)}». Проверьте и сохраните кворк (кнопка подсвечена) — остальные расширение заменит и сохранит само.`;
+      });
+      return waitForSave();
+    }
+    await updateState((s) => { s.covers.phase = "saved"; });
+    await kwClickSave();
+  } catch (e) {
+    await next(e.message);
+    return resumeCovers();
+  }
+  // Через 30 с всё ещё на форме — Kwork не принял изменения (ошибки покажем в причине).
+  await kwSleep(30000);
+  st = await getState();
+  if (st.running && st.mode === "covers" && st.covers.phase === "saved" && document.querySelector("#step1-name")) {
+    await next(kwFormErrors() || "после «Сохранить» Kwork остался на странице");
+    resumeCovers();
+  }
+}
+
+// Первая замена обложки: человек жмёт «Сохранить», дальше замена идёт сама.
+function waitForSave() {
+  const save = document.querySelector(".js-save-kwork");
+  if (!save) return;
+  save.style.outline = "4px solid #f5a623";
+  save.addEventListener("click", async () => {
+    await updateState((s) => { if (s.covers) s.covers.phase = "saved"; });
+    await kwSleep(30000); // Kwork не ушёл со страницы — не принял изменения
+    const st = await getState();
+    if (st.running && st.mode === "covers" && st.covers.phase === "saved" && document.querySelector("#step1-name")) {
+      await updateState((s) => { s.covers.phase = "review"; s.message = "Kwork не сохранил кворк: " + (kwFormErrors() || "проверьте форму") + ". Исправьте и нажмите «Сохранить» ещё раз."; });
+      waitForSave();
+    }
+  }, {once: true, capture: true});
+}
+
 // Кворк ждёт человека: подсвечиваем «Готово», после нажатия выкладка продолжится сама.
 function waitForHuman() {
   const save = document.querySelector(".js-save-kwork");
@@ -275,6 +397,7 @@ async function render() {
   $("#manual").value = st.manual; $("#limit").value = st.limit; $("#pause").value = st.pause;
   $("#start").disabled = !!duplicate || st.running || !queue.length || st.index >= queue.length;
   $("#stop").disabled = !st.running;
+  $("#covers").disabled = st.running || !queue.length;
   $("#skip").disabled = st.running || st.index >= queue.length;
   $("#log").textContent = st.log.join("\n");
   $("#failed").textContent = st.failed.slice(-3).map((f) => `✗ ${f.title.slice(0, 30)}: ${f.reason}`).join("\n");
@@ -311,6 +434,7 @@ function buildPanel() {
         <div class="row"><label>Всего за запуск</label><input type="number" id="limit" min="1" max="300"></div>
         <div class="row"><label>Пауза между кворками, с</label><input type="number" id="pause" min="0" max="600"></div>
         <div class="row"><button class="go" id="start">▶ Старт</button><button id="stop">■ Стоп</button><button id="skip">Пропустить</button><button id="reset">Сначала</button></div>
+        <div class="row"><button id="covers" title="Откройте «Мои кворки» и нажмите: обложки кворков из архива заменятся новыми">🖼 Заменить обложки</button></div>
         <div id="status"></div><div id="failed"></div><div id="log"></div>
       </div>
     </div>`;
@@ -332,11 +456,12 @@ function buildPanel() {
   $("#start").onclick = async () => {
     if (!checkDuplicates()) return;
     // Каждый запуск — с чистой панелью: ошибки и журнал прошлого запуска убираем.
-    await updateState((st) => Object.assign(st, {running: true, runStart: st.index, phase: "start", message: "Начинаю…",
+    await updateState((st) => Object.assign(st, {running: true, mode: "publish", runStart: st.index, phase: "start", message: "Начинаю…",
       failed: [], log: [], attempts: 0, coverDone: null, navs: 0}));
     resume();
   };
   $("#stop").onclick = () => stop("Остановлено вами.");
+  $("#covers").onclick = () => startCoverReplace();
   $("#skip").onclick = async () => {
     const queue = await store.get(KW.queue, []);
     await updateState((st) => {
