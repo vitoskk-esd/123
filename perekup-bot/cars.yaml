@@ -1,0 +1,469 @@
+# Справочник для разбора объявлений: марки и модели, города и регионы РФ, слова-маркеры.
+# Правь здесь и жми /reload в боте — перезапуск не нужен.
+#
+# Как пишутся названия: всё в нижнем регистре, ё можно писать как е. Окончания бот понимает сам:
+# «приора» найдёт и «приору», «москва» — и «москве». Короткие слова (до 4 букв) ищутся только целиком.
+# Если модель называют вместе с маркой («мазда 3»), так и пиши — одиночная цифра «3» искаться не будет.
+
+makes:
+  lada:
+    name: Lada
+    aliases: [lada, лада, ваз, vaz, жигули, автоваз]
+    models:
+      Granta: [granta, гранта]
+      Vesta: [vesta, веста]
+      Priora: [priora, приора, 2170, 2171, 2172]
+      Kalina: [kalina, калина, 1118, 1119]
+      Largus: [largus, ларгус]
+      XRAY: [xray, иксрей, x-ray, хрей]
+      Niva: [niva legend, нива легенд, нива 4х4, нива 4x4, lada 4x4, 21214, 2121, нива, niva]
+      Niva Travel: [niva travel, нива тревел, нива шевроле, шнива]
+      "2107": [2107, семерка, семёрка]
+      "2106": [2106, шестерка, шестёрка]
+      "2109": [2109, девятка]
+      "2110": [2110, десятка]
+      "2112": [2112, двенашка]
+      "2114": [2114, четырка, четырнашка]
+      "2115": [2115, пятнашка]
+  toyota:
+    name: Toyota
+    aliases: [toyota, тойота, тоета, тоёта, тайота]
+    models:
+      Camry: [camry, камри, кэмри]
+      Corolla: [corolla, королла, каролла]
+      RAV4: [rav4, rav 4, рав4, рав 4, рафик]
+      Land Cruiser Prado: [prado, прадо, land cruiser prado, ленд крузер прадо]
+      Land Cruiser: [land cruiser, ленд крузер, лэнд крузер, крузак, lc200, lc300, lc 200, lc 300]
+      Highlander: [highlander, хайлендер, хайландер]
+      Avensis: [avensis, авенсис]
+      Auris: [auris, аурис]
+      Mark II: [mark ii, mark 2, марк 2, марк ii, марк]
+      Crown: [crown, краун]
+      Prius: [prius, приус]
+      Vitz: [vitz, витц]
+      C-HR: [c-hr, chr, си-эйч-ар]
+      Hilux: [hilux, хайлюкс, хайлакс]
+  kia:
+    name: Kia
+    aliases: [kia, киа, кия]
+    models:
+      Rio: [rio, рио, x-line, икслайн]
+      Ceed: [ceed, сид, сиид, cee'd]
+      Sportage: [sportage, спортейдж, спортэйдж]
+      Sorento: [sorento, соренто]
+      Optima: [optima, оптима]
+      K5: [k5, к5]
+      Cerato: [cerato, церато, серато]
+      Soul: [soul, соул]
+      Picanto: [picanto, пиканто]
+      Seltos: [seltos, селтос]
+      Spectra: [spectra, спектра]
+  hyundai:
+    name: Hyundai
+    aliases: [hyundai, хендай, хендэ, хундай, хёндай, хюндай, хендей]
+    models:
+      Solaris: [solaris, солярис]
+      Creta: [creta, крета]
+      Elantra: [elantra, элантра]
+      Tucson: [tucson, туссан, тусан]
+      Santa Fe: [santa fe, санта фе, сантафе]
+      Sonata: [sonata, соната]
+      i30: [i30, ай30]
+      i40: [i40, ай40]
+      ix35: [ix35, их35]
+      Accent: [accent, акцент]
+      Getz: [getz, гетц]
+      Starex: [starex, старекс, h1, h-1]
+  volkswagen:
+    name: Volkswagen
+    aliases: [volkswagen, фольксваген, фольц, vw]
+    models:
+      Polo: [polo, поло]
+      Golf: [golf, гольф]
+      Passat: [passat, пассат]
+      Tiguan: [tiguan, тигуан]
+      Jetta: [jetta, джетта]
+      Touareg: [touareg, туарег]
+      Touran: [touran, туран]
+      Caddy: [caddy, кадди]
+      Transporter: [transporter, транспортер, транспортёр, t5, t6]
+  skoda:
+    name: Skoda
+    aliases: [skoda, шкода]
+    models:
+      Octavia: [octavia, октавия, октавиа]
+      Rapid: [rapid, рапид]
+      Fabia: [fabia, фабия]
+      Superb: [superb, суперб]
+      Kodiaq: [kodiaq, кодиак]
+      Yeti: [yeti, йети]
+      Karoq: [karoq, карок]
+  renault:
+    name: Renault
+    aliases: [renault, рено]
+    models:
+      Logan: [logan, логан]
+      Sandero: [sandero, сандеро, stepway, степвей]
+      Duster: [duster, дастер]
+      Kaptur: [kaptur, каптур]
+      Megane: [megane, меган]
+      Fluence: [fluence, флюенс]
+      Arkana: [arkana, аркана]
+      Symbol: [symbol, симбол]
+  nissan:
+    name: Nissan
+    aliases: [nissan, ниссан, нисан]
+    models:
+      Almera: [almera, альмера]
+      Qashqai: [qashqai, кашкай]
+      X-Trail: [x-trail, xtrail, x trail, икстрейл, х-трейл, хтрейл]
+      Juke: [juke, жук, джук]
+      Note: [note, ноут]
+      Teana: [teana, теана]
+      Tiida: [tiida, тиида]
+      Murano: [murano, мурано]
+      Pathfinder: [pathfinder, патфайндер]
+      Patrol: [patrol, патрол]
+      Primera: [primera, примера]
+      Terrano: [terrano, террано]
+  mitsubishi:
+    name: Mitsubishi
+    aliases: [mitsubishi, митсубиси, мицубиси, митсубиши, мицубиши, митсу]
+    models:
+      Lancer: [lancer, лансер]
+      Outlander: [outlander, аутлендер, аутлэндер]
+      Pajero Sport: [pajero sport, паджеро спорт]
+      Pajero: [pajero, паджеро]
+      ASX: [asx, асх]
+      L200: [l200, л200]
+      Galant: [galant, галант]
+  mazda:
+    name: Mazda
+    aliases: [mazda, мазда]
+    models:
+      "3": [mazda 3, mazda3, мазда 3, мазда3]
+      "6": [mazda 6, mazda6, мазда 6, мазда6]
+      CX-5: [cx-5, cx5, сх-5, сх5]
+      CX-7: [cx-7, cx7, сх-7, сх7]
+      Demio: [demio, демио]
+  honda:
+    name: Honda
+    aliases: [honda, хонда]
+    models:
+      Civic: [civic, цивик, сивик]
+      Accord: [accord, аккорд]
+      CR-V: [cr-v, crv, срв]
+      Fit: [honda fit, хонда фит, фит]
+  ford:
+    name: Ford
+    aliases: [ford, форд]
+    models:
+      Focus: [focus, фокус]
+      Mondeo: [mondeo, мондео]
+      Fiesta: [fiesta, фиеста]
+      Kuga: [kuga, куга]
+      EcoSport: [ecosport, экоспорт]
+      Explorer: [explorer, эксплорер]
+      Transit: [transit, транзит]
+      Fusion: [fusion, фьюжн, фьюжен]
+  chevrolet:
+    name: Chevrolet
+    aliases: [chevrolet, шевроле, шевролет, шеви]
+    models:
+      Cruze: [cruze, круз]
+      Aveo: [aveo, авео]
+      Lacetti: [lacetti, лачетти, лачети]
+      Cobalt: [cobalt, кобальт]
+      Spark: [spark, спарк]
+      Captiva: [captiva, каптива]
+      Lanos: [chevrolet lanos, шевроле ланос]
+  daewoo:
+    name: Daewoo
+    aliases: [daewoo, дэу, деу]
+    models:
+      Nexia: [nexia, нексия]
+      Matiz: [matiz, матиз]
+      Gentra: [gentra, джентра]
+      Lanos: [lanos, ланос]
+  opel:
+    name: Opel
+    aliases: [opel, опель]
+    models:
+      Astra: [astra, астра]
+      Corsa: [corsa, корса]
+      Vectra: [vectra, вектра]
+      Insignia: [insignia, инсигния]
+      Zafira: [zafira, зафира]
+      Mokka: [mokka, мокка]
+  bmw:
+    name: BMW
+    aliases: [bmw, бмв, бэха, бэху, бумер]
+    models:
+      1 серии: [bmw 1, бмв 1, 1 серии, 1-series, 116i, 118i, 120i]
+      3 серии: [bmw 3, бмв 3, 3 серии, 3-series, 316i, 318i, 320i, 320d, 325i, 328i, 330i, e46, e90, f30, g20]
+      5 серии: [bmw 5, бмв 5, 5 серии, 5-series, 520i, 520d, 523i, 525i, 528i, 530i, 530d, 535i, e39, e60, f10, g30]
+      7 серии: [bmw 7, бмв 7, 7 серии, 7-series, 730d, 740i, 750i, e65, f01, g11]
+      X1: [x1, х1]
+      X3: [x3, х3]
+      X5: [x5, х5]
+      X6: [x6, х6]
+  mercedes:
+    name: Mercedes-Benz
+    aliases: [mercedes, mercedes-benz, мерседес, мерс, мерина, benz]
+    models:
+      A-класс: [a-class, a-класс, а-класс, a180, a200]
+      C-класс: [c-class, c-класс, с-класс, c180, c200, c250, w203, w204, w205]
+      E-класс: [e-class, e-класс, е-класс, e200, e220, e300, w211, w212, w213, w210, w124]
+      S-класс: [s-class, s-класс, s500, s350, w221, w222, w220]
+      GLA: [gla]
+      GLC: [glc]
+      GLE: [gle]
+      ML: [ml, ml350, w164, w166]
+      GL: [gl, gl350, gl500]
+      G-класс: [g-class, гелик, гелендваген, g500, g63]
+      Vito: [vito, вито]
+      Sprinter: [sprinter, спринтер]
+  audi:
+    name: Audi
+    aliases: [audi, ауди]
+    models:
+      A3: [audi a3, ауди а3, a3]
+      A4: [audi a4, ауди а4, a4]
+      A6: [audi a6, ауди а6, a6, c6, c7]
+      A8: [audi a8, ауди а8, a8]
+      Q3: [q3, ку3]
+      Q5: [q5, ку5]
+      Q7: [q7, ку7]
+      "100": [audi 100, ауди 100, бочка]
+      "80": [audi 80, ауди 80]
+  lexus:
+    name: Lexus
+    aliases: [lexus, лексус]
+    models:
+      RX: [rx, rx350, rx300, rx330, rx270]
+      ES: [es, es250, es350]
+      NX: [nx, nx200]
+      LX: [lx, lx570, lx470]
+      GX: [gx, gx460, gx470]
+      IS: [is250, is300]
+  subaru:
+    name: Subaru
+    aliases: [subaru, субару]
+    models:
+      Forester: [forester, форестер]
+      Outback: [outback, аутбек]
+      Impreza: [impreza, импреза]
+      XV: [subaru xv, субару xv]
+      Legacy: [legacy, легаси]
+  suzuki:
+    name: Suzuki
+    aliases: [suzuki, сузуки]
+    models:
+      SX4: [sx4, сх4]
+      Grand Vitara: [grand vitara, гранд витара]
+      Vitara: [vitara, витара]
+      Swift: [swift, свифт]
+      Jimny: [jimny, джимни]
+  volvo:
+    name: Volvo
+    aliases: [volvo, вольво]
+    models:
+      XC60: [xc60, хс60]
+      XC90: [xc90, хс90]
+      XC70: [xc70, хс70]
+      S60: [s60]
+      S80: [s80]
+  peugeot:
+    name: Peugeot
+    aliases: [peugeot, пежо]
+    models:
+      "206": [peugeot 206, пежо 206]
+      "207": [peugeot 207, пежо 207]
+      "308": [peugeot 308, пежо 308]
+      "408": [peugeot 408, пежо 408]
+      "3008": [peugeot 3008, пежо 3008]
+  citroen:
+    name: Citroen
+    aliases: [citroen, ситроен, ситроэн]
+    models:
+      C4: [citroen c4, ситроен с4, c4 picasso]
+      C3: [citroen c3, ситроен с3]
+      C5: [citroen c5, ситроен с5]
+      Berlingo: [berlingo, берлинго]
+  haval:
+    name: Haval
+    aliases: [haval, хавал, хавейл]
+    models:
+      Jolion: [jolion, джолион]
+      F7: [haval f7, хавал ф7, f7x]
+      H6: [haval h6, хавал н6]
+      Dargo: [dargo, дарго]
+      H9: [haval h9, хавал н9]
+  chery:
+    name: Chery
+    aliases: [chery, чери, черри]
+    models:
+      Tiggo 7 Pro: [tiggo 7 pro, тигго 7 про]
+      Tiggo 8: [tiggo 8, тигго 8]
+      Tiggo 4: [tiggo 4, тигго 4]
+      Tiggo 2: [tiggo 2, тигго 2]
+      Tiggo: [tiggo, тигго]
+  geely:
+    name: Geely
+    aliases: [geely, джили, джилли]
+    models:
+      Coolray: [coolray, кулрей]
+      Atlas: [atlas, атлас]
+      Monjaro: [monjaro, монжаро]
+      Tugella: [tugella, тугела, тугелла]
+      Emgrand: [emgrand, эмгранд]
+  changan:
+    name: Changan
+    aliases: [changan, чанган, чанъань]
+    models:
+      CS35: [cs35]
+      CS55: [cs55]
+      CS75: [cs75]
+      UNI-K: [uni-k, unik, юни-к]
+      UNI-V: [uni-v, univ, юни-в]
+  exeed:
+    name: Exeed
+    aliases: [exeed, эксид]
+    models:
+      TXL: [txl]
+      LX: [exeed lx, эксид lx]
+      VX: [vx]
+  tank:
+    name: Tank
+    aliases: [tank, танк]
+    models:
+      "300": [tank 300, танк 300]
+      "500": [tank 500, танк 500]
+  uaz:
+    name: УАЗ
+    aliases: [uaz, уаз]
+    models:
+      Patriot: [patriot, патриот]
+      Hunter: [hunter, хантер]
+      Буханка: [буханка, 452, буханку]
+  gaz:
+    name: ГАЗ
+    aliases: [газ 31105, газ 3110, гaz]
+    models:
+      Газель: [газель, gazelle, газели]
+      Соболь: [соболь]
+      Волга: [волга, 31105, 3110]
+  datsun:
+    name: Datsun
+    aliases: [datsun, датсун]
+    models:
+      on-DO: [on-do, ондо, он-до]
+      mi-DO: [mi-do, мидо, ми-до]
+  infiniti:
+    name: Infiniti
+    aliases: [infiniti, инфинити]
+    models:
+      FX: [fx35, fx37, fx45, fx50]
+      QX50: [qx50]
+      QX60: [qx60]
+      QX70: [qx70]
+      QX80: [qx80, qx56]
+  landrover:
+    name: Land Rover
+    aliases: [land rover, ленд ровер, лэнд ровер, landrover]
+    models:
+      Range Rover Evoque: [evoque, эвок]
+      Range Rover Sport: [range rover sport, рендж ровер спорт]
+      Range Rover: [range rover, рендж ровер, ренж ровер]
+      Discovery: [discovery, дискавери]
+      Freelander: [freelander, фрилендер]
+      Defender: [defender, дефендер]
+  porsche:
+    name: Porsche
+    aliases: [porsche, порше]
+    models:
+      Cayenne: [cayenne, кайен]
+      Macan: [macan, макан]
+      Panamera: [panamera, панамера]
+  jeep:
+    name: Jeep
+    aliases: [jeep]
+    models:
+      Grand Cherokee: [grand cherokee, гранд чероки]
+      Cherokee: [cherokee, чероки]
+      Compass: [compass, компас]
+
+# Регионы. Фильтр «Москва» берёт и Подмосковье: города области записаны в тот же регион.
+regions:
+  msk: {name: Москва и МО, aliases: [москва, мск, moscow, подмосковье, московская область, мо, химки, балашиха, подольск, мытищи, люберцы, королев, одинцово, красногорск, домодедово, электросталь, сергиев посад, щелково, раменское, долгопрудный, пушкино, реутов, жуковский, коломна, серпухов, ногинск, зеленоград, видное]}
+  spb: {name: Санкт-Петербург и ЛО, aliases: [санкт-петербург, петербург, спб, питер, ленинградская область, ло, гатчина, всеволожск, колпино, кудрово, мурино]}
+  krd: {name: Краснодар и край, aliases: [краснодар, крд, краснодарский край, кубань, сочи, новороссийск, анапа, армавир, геленджик]}
+  kzn: {name: Казань, aliases: [казань, кзн, татарстан, набережные челны, челны, альметьевск]}
+  ekb: {name: Екатеринбург, aliases: [екатеринбург, екб, ебург, свердловская область, нижний тагил]}
+  nsk: {name: Новосибирск, aliases: [новосибирск, нск, новосиб]}
+  nnov: {name: Нижний Новгород, aliases: [нижний новгород, нижний, ннов, дзержинск]}
+  sam: {name: Самара и Тольятти, aliases: [самара, тольятти, тлт, самарская область]}
+  rnd: {name: Ростов-на-Дону, aliases: [ростов-на-дону, ростов на дону, ростов, рнд, таганрог, шахты]}
+  ufa: {name: Уфа, aliases: [уфа, уфе, уфы, башкирия, башкортостан, стерлитамак]}
+  chel: {name: Челябинск, aliases: [челябинск, челяба, магнитогорск]}
+  perm: {name: Пермь, aliases: [пермь, пермский край]}
+  vrn: {name: Воронеж, aliases: [воронеж, врн]}
+  vlg: {name: Волгоград, aliases: [волгоград, волжский]}
+  krsk: {name: Красноярск, aliases: [красноярск, крск]}
+  omsk: {name: Омск, aliases: [омск, омске, омска]}
+  tmn: {name: Тюмень, aliases: [тюмень, тюмени]}
+  srt: {name: Саратов, aliases: [саратов, энгельс]}
+  izh: {name: Ижевск, aliases: [ижевск]}
+  brn: {name: Барнаул, aliases: [барнаул, алтайский край]}
+  uln: {name: Ульяновск, aliases: [ульяновск]}
+  irk: {name: Иркутск, aliases: [иркутск]}
+  khv: {name: Хабаровск, aliases: [хабаровск]}
+  vvo: {name: Владивосток, aliases: [владивосток, владик, приморье, уссурийск, находка]}
+  yar: {name: Ярославль, aliases: [ярославль]}
+  mhk: {name: Махачкала, aliases: [махачкала, дагестан]}
+  tom: {name: Томск, aliases: [томск]}
+  orb: {name: Оренбург, aliases: [оренбург, орск]}
+  kem: {name: Кемерово и Новокузнецк, aliases: [кемерово, новокузнецк, кузбасс]}
+  rzn: {name: Рязань, aliases: [рязань, рязани]}
+  ast: {name: Астрахань, aliases: [астрахань, астрахани]}
+  pnz: {name: Пенза, aliases: [пенза, пензе, пензы]}
+  lip: {name: Липецк, aliases: [липецк]}
+  tula: {name: Тула, aliases: [тула, туле, тулы, тульская область]}
+  kir: {name: Киров, aliases: [киров, кирове]}
+  chb: {name: Чебоксары, aliases: [чебоксары, чебоксарах]}
+  kgd: {name: Калининград, aliases: [калининград]}
+  brk: {name: Брянск, aliases: [брянск]}
+  krs: {name: Курск, aliases: [курск]}
+  tver: {name: Тверь, aliases: [тверь, твери]}
+  blg: {name: Белгород, aliases: [белгород]}
+  stv: {name: Ставрополь, aliases: [ставрополь, пятигорск, кмв]}
+  sgt: {name: Сургут, aliases: [сургут, нижневартовск, хмао]}
+  vld: {name: Владимир, aliases: [владимир]}
+  arh: {name: Архангельск, aliases: [архангельск]}
+  sml: {name: Смоленск, aliases: [смоленск]}
+  klg: {name: Калуга, aliases: [калуга, калуге, калуги, обнинск]}
+  yak: {name: Якутск, aliases: [якутск]}
+  ulu: {name: Улан-Удэ, aliases: [улан-удэ]}
+  cht: {name: Чита, aliases: [чита, чите, читы]}
+  gro: {name: Грозный, aliases: [грозный, грозном, чечня]}
+  mur: {name: Мурманск, aliases: [мурманск]}
+  vol: {name: Вологда и Череповец, aliases: [вологда, вологде, череповец]}
+
+# Слова-маркеры. kind: good — повод звонить первым, bad — проблема машины, scam — похоже на мошенников.
+# Фильтр «без битых» исключает объявления с маркером damaged и т.п. (см. exclude в words.py).
+markers:
+  - {id: urgent,   kind: good,  label: срочно,          words: [срочно, срочная продажа, срочный выкуп, нужны деньги, срочняк]}
+  - {id: haggle,   kind: good,  label: торг,            words: [торг, уместный торг, торгуемся, хороший торг, торг у капота]}
+  - {id: moving,   kind: good,  label: переезд,         words: [переезд, в связи с переездом, уезжаю]}
+  - {id: owner1,   kind: good,  label: 1 владелец,      words: [1 владелец, один владелец, 1 хозяин, один хозяин, первый владелец]}
+  - {id: cheap,    kind: good,  label: ниже рынка,      words: [ниже рынка, дешевле рынка, под перепродажу, под перекуп]}
+  - {id: damaged,  kind: bad,   label: битая,           words: [битая, битый, бита, после дтп, дтп, авария, под восстановление, тотал, удар]}
+  - {id: parts,    kind: bad,   label: на запчасти,     words: [на запчасти, в разбор, на разбор, донор]}
+  - {id: notrun,   kind: bad,   label: не на ходу,      words: [не на ходу, не заводится, стуканул, клин двигателя, капремонт, на эвакуаторе]}
+  - {id: invest,   kind: bad,   label: требует вложений, words: [требует вложений, требует ремонта, нужен ремонт, вложения]}
+  - {id: dupdoc,   kind: bad,   label: дубликат ПТС,    words: [дубликат птс, дубликат, без птс, без документов, птс утерян]}
+  - {id: credit,   kind: bad,   label: кредит/залог,    words: [кредитная, в кредите, залог, в залоге, обременение, арест, запрет на регистрацию]}
+  - {id: taxi,     kind: bad,   label: такси,           words: [такси, из такси, каршеринг, лицензия такси, желтая]}
+  - {id: remote,   kind: scam,  label: дистанционно,    words: [дистанционное оформление, оформление дистанционно, доставка в любой регион, доставим в любой регион, доставка по всей россии]}
+  - {id: prepay,   kind: scam,  label: предоплата,      words: [предоплата, предоплату, бронь, внесите депозит, забронировать]}
+  - {id: newreg,   kind: scam,  label: новые регионы,   words: [новых регионов, новые регионы, из днр, из лнр, без растаможки]}
