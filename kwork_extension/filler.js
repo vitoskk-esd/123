@@ -24,7 +24,7 @@ async function kwMain(action, selector, value) {
   if (window.kwMainOverride) return window.kwMainOverride(action, selector, value);
   const r = await chrome.runtime.sendMessage({type: "main", action, selector, value});
   if (!r || !r.ok) throw new Error("не удалось выполнить действие на странице: " + (r && r.error));
-  if (r.result !== "ok") throw new Error(r.result);
+  if (r.result !== "ok" && !String(r.result).startsWith("ok:")) throw new Error(r.result);
   return r.result;
 }
 
@@ -136,21 +136,46 @@ async function kwUploadCover(bytes, name, log) {
     .filter((el, i, all) => all.indexOf(el) === i && !el.closest(".js-template-photo-block"));
   if (!inputs.length) throw new Error("не нашёл поле обложки");
   const pathValue = () => [...document.querySelectorAll('input[name="first_photo_path"]')].map((i) => i.value).filter(Boolean).join("|");
+  const kworkError = () => [...document.querySelectorAll(".js-add-photo_error")].map((e) => e.innerText.trim()).filter(Boolean).join("; ");
+  // Главный признак — ответ Kwork на сам запрос загрузки (/temp-image-upload): поле пути к файлу
+  // на сайте может не измениться (например, при повторной загрузке того же файла путь тот же).
+  const uploads = async () => {
+    try { return JSON.parse((await kwMain("coverStatus", "body")).slice(3)).uploads || []; } catch (e) { return []; }
+  };
+  await kwMain("coverWatch", "body");
   const before = pathValue();
-  let ok = false;
-  // Если полей несколько, пробуем с последнего; поле без загрузчика ничего не делает за 10 секунд.
+  let result = null; // {ok: true} или {error: "..."}
+  // Если полей несколько, пробуем с последнего; поле без загрузчика за 10 секунд ничего не отправляет.
   for (const [n, input] of inputs.reverse().entries()) {
     const dt = new DataTransfer();
     dt.items.add(new File([bytes], name, {type: "image/jpeg"}));
     input.files = dt.files;
     input.dispatchEvent(new Event("change", {bubbles: true}));
     const last = n === inputs.length - 1;
-    ok = await kwWaitFor(() => pathValue() !== before && pathValue(), last ? 60000 : 10000, 500);
-    if (ok || document.querySelector(".js-add-photo_error")?.innerText.trim()) break;
+    for (const t = Date.now(); !result && Date.now() - t < (last ? 90000 : 10000); await kwSleep(500)) {
+      const sent = await uploads();
+      const done = sent.find((u) => typeof u.status === "number");
+      if (done) {
+        let body = {};
+        try { body = JSON.parse(done.body || "{}"); } catch (e) { /* не JSON */ }
+        if (done.status === 200 && body.success) result = {ok: true};
+        else if (done.status === 200 && body.success === false) result = {error: "Kwork отклонил файл: " + ([].concat(body.data || [])[0] || kworkError() || "без пояснений")};
+        else if (done.status >= 400 || done.status === 0) result = {error: `сервер Kwork ответил ошибкой ${done.status || "сети"} — попробуйте ещё раз`};
+      } else if (pathValue() && pathValue() !== before) {
+        result = {ok: true};
+      } else if (kworkError()) {
+        result = {error: kworkError()};
+      } else if (!sent.length && Date.now() - t > 10000 && !last) {
+        break; // это поле не запустило загрузку — пробуем следующее
+      }
+    }
+    if (result) break;
   }
-  if (!ok) {
-    const kworkError = [...document.querySelectorAll(".js-add-photo_error")].map((e) => e.innerText.trim()).filter(Boolean).join("; ");
-    throw new Error("обложка не загрузилась — " + (kworkError || kwStepErrors('.js-step[data-step="1"]') || "Kwork не ответил на загрузку"));
+  if (!result || result.error) {
+    const sent = await uploads();
+    const why = result ? result.error : sent.length ? "Kwork не дождался ответа сервера за 90 секунд — попробуйте ещё раз"
+      : "Kwork не начал загрузку файла" + (document.querySelector(".js-first-photo-block .thumb-img") ? " (превью есть)" : "");
+    throw new Error("обложка не загрузилась — " + why);
   }
   log("обложка загружена");
 }

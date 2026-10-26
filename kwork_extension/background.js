@@ -19,6 +19,26 @@ function mainAction(action, selector, value) {
     const block = $ && $(selector).closest(".js-category-select");
     return window.KworkSaveModule && block && block.length && block.data("options") ? "ok" : "not ready";
   }
+  if (action === "coverWatch") { // запоминаем запросы Kwork на загрузку обложки и их ответы
+    if (!window.__kwUploads) {
+      window.__kwUploads = [];
+      const open = XMLHttpRequest.prototype.open, send = XMLHttpRequest.prototype.send;
+      XMLHttpRequest.prototype.open = function (method, url) { this.__kwUrl = String(url); return open.apply(this, arguments); };
+      XMLHttpRequest.prototype.send = function () {
+        if (/temp-image-upload/.test(this.__kwUrl || "")) {
+          const rec = {status: "sent"};
+          window.__kwUploads.push(rec);
+          this.addEventListener("loadend", () => { rec.status = this.status; rec.body = String(this.responseText || "").slice(0, 3000); });
+        }
+        return send.apply(this, arguments);
+      };
+    }
+    window.__kwUploadsFrom = window.__kwUploads.length;
+    return "ok";
+  }
+  if (action === "coverStatus") {
+    return "ok:" + JSON.stringify({uploads: (window.__kwUploads || []).slice(window.__kwUploadsFrom || 0)});
+  }
   const el = document.querySelector(selector);
   if (!el) return "нет элемента " + selector;
   const $ = window.jQuery;
