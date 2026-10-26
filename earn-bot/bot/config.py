@@ -24,7 +24,6 @@ class Config:
     db_path: Path
     offers_path: Path
     min_payout: int
-    privacy_url: str
 
 
 def get_config() -> Config:
@@ -36,5 +35,4 @@ def get_config() -> Config:
         db_path=ROOT / os.environ.get("DB_PATH", "data/bot.db"),
         offers_path=ROOT / os.environ.get("OFFERS_PATH", "offers.yaml"),
         min_payout=int(os.environ.get("MIN_PAYOUT", "300")),
-        privacy_url=os.environ.get("PRIVACY_URL", ""),
     )

@@ -71,7 +71,7 @@ DP = None   # роутеры живут на уровне модулей и по
 async def env(tmp_path):
     global DP
     cfg = Config(token="1:x", admins=frozenset({ADMIN}), db_path=tmp_path / "f.db", offers_path=ROOT / "offers.yaml",
-                 min_payout=300, privacy_url="https://example.com/privacy")
+                 min_payout=300)
     ctx = Ctx(db=await DB(cfg.db_path).open(), cfg=cfg, catalog=load_catalog(cfg.offers_path))
     try:
         DP = DP or build_dispatcher(ctx)

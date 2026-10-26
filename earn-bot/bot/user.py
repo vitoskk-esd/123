@@ -1,4 +1,4 @@
-"""Воронка пользователя: старт → 18+ → правила → квиз «где уже клиент» → каталог → ссылка → «Я оформил» → баланс → вывод."""
+"""Воронка пользователя: старт → 18+ → правила (без согласия на данные — владелец 26.10) → квиз «где уже клиент» → каталог → ссылка → «Я оформил» → баланс → вывод."""
 import re
 
 from aiogram import Bot, F, Router
@@ -72,12 +72,11 @@ async def age(cb: CallbackQuery, ctx: Ctx) -> None:
         await ctx.db.cancel(cb.from_user.id, "stall")
     else:
         await ctx.db.set_flag(cb.from_user.id, "age_ok")
-        rules = T.RULES + (T.RULES_PRIVACY.format(url=ctx.cfg.privacy_url) if ctx.cfg.privacy_url else "")
-        await cb.message.answer(rules, reply_markup=K.consent(), disable_web_page_preview=True)
+        await cb.message.answer(T.RULES, reply_markup=K.consent())
     await cb.answer()
 
 
-# ---------- 3. правила и согласие ----------
+# ---------- 3. правила ----------
 @router.callback_query(F.data == "ok")
 async def consent(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
     await cb.message.edit_reply_markup(reply_markup=None)
