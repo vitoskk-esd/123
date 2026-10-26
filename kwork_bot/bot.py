@@ -952,6 +952,13 @@ async def cb_zip(call: CallbackQuery) -> None:
         wait = await call.message.answer("🖼 Обновляю обложки: убираю с них цену — модерация Kwork её не принимает.")
         await asyncio.to_thread(images.unique_covers, uid, listings)
         await wait.delete()
+    if images.history_to_fix(uid):
+        wait = await call.message.answer("🖼 Рисую обложки без цены и для кворков прошлых партий — для кнопки «Заменить обложки».")
+        try:
+            await asyncio.to_thread(content.fix_history_covers, uid)
+        except Exception as e:  # noqa: BLE001 — архив для выкладки нужен и без них
+            log.warning("обложки прошлых партий: %s", e)
+        await wait.delete()
     if content.needs_attributes(uid):
         wait = await call.message.answer("⏳ Подбираю поля рубрик Kwork («Тип», «Платформа», «Язык»…) — до минуты.")
         try:

@@ -1,7 +1,7 @@
 // Панель на страницах kwork.ru и пошаговая выкладка. После «Готово» Kwork уходит на другую
 // страницу, поэтому состояние хранится в chrome.storage и продолжается на каждой загрузке.
 
-const KW = {queue: "kw_queue", state: "kw_state", cover: (id) => "kw_cover_" + id};
+const KW = {queue: "kw_queue", fix: "kw_fix", state: "kw_state", cover: (id) => "kw_cover_" + id};
 const KW_VERSION = chrome.runtime.getManifest().version;
 const KW_TITLE = "Kwork — выкладка";
 
@@ -75,14 +75,17 @@ async function loadZip(file) {
     }
   }
   const listings = JSON.parse(new TextDecoder().decode(await kwEntryBytes(files["listings.json"])));
-  const old = await store.get(KW.queue, []);
+  // fix.json — все кворки продавца (и прошлых партий) для «Заменить обложки»; заново их не выкладываем
+  const fix = files["fix.json"] ? JSON.parse(new TextDecoder().decode(await kwEntryBytes(files["fix.json"]))) : [];
+  const old = [...await store.get(KW.queue, []), ...await store.get(KW.fix, [])];
   await chrome.storage.local.remove(old.map((l) => KW.cover(l.id)));
   const covers = {};
-  for (const l of listings) {
+  for (const l of [...listings, ...fix]) {
     const entry = files[`covers/${l.id}.jpg`] || files[`covers/${l.id}.png`];
     if (entry) covers[KW.cover(l.id)] = toB64(await kwEntryBytes(entry));
   }
   await chrome.storage.local.set(covers);
+  await store.set(KW.fix, fix.map((l) => ({id: l.id, title: l.title})));
   await store.set(KW.queue, listings.map((l) => ({
     id: l.id, title: l.title, description: l.description, requirements: l.requirements,
     price_rub: l.price_rub, days: l.days, category_hint: l.category_hint,
@@ -90,7 +93,7 @@ async function loadZip(file) {
     attribute_hints: l.attribute_hints || [], attributes: l.attributes || [], attributes_guessed: l.attributes_guessed || [],
   })));
   await updateState((st) => Object.assign(st, defaultState(),
-    {manual: st.manual, limit: st.limit, pause: st.pause, message: `Загружено кворков: ${listings.length}`}));
+    {manual: st.manual, limit: st.limit, pause: st.pause, message: `Загружено кворков: ${listings.length}` + (fix.length > listings.length ? `. Для замены обложек: ${fix.length}` : "")}));
 }
 
 // --- Выкладка ------------------------------------------------------------------------------------
@@ -232,7 +235,8 @@ function findKworksOnPage(queue) {
 }
 
 async function startCoverReplace() {
-  const queue = await store.get(KW.queue, []);
+  const fix = await store.get(KW.fix, []);
+  const queue = fix.length ? fix : await store.get(KW.queue, []);
   if (!queue.length) return updateState((st) => { st.message = "Сначала выберите kwork.zip — в нём новые обложки."; });
   const list = findKworksOnPage(queue);
   if (!list.length) {
@@ -397,7 +401,7 @@ async function render() {
   $("#manual").value = st.manual; $("#limit").value = st.limit; $("#pause").value = st.pause;
   $("#start").disabled = !!duplicate || st.running || !queue.length || st.index >= queue.length;
   $("#stop").disabled = !st.running;
-  $("#covers").disabled = st.running || !queue.length;
+  $("#covers").disabled = st.running || !(queue.length || (await store.get(KW.fix, [])).length);
   $("#skip").disabled = st.running || st.index >= queue.length;
   $("#log").textContent = st.log.join("\n");
   $("#failed").textContent = st.failed.slice(-3).map((f) => `✗ ${f.title.slice(0, 30)}: ${f.reason}`).join("\n");

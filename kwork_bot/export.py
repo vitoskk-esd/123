@@ -9,7 +9,7 @@ import zipfile
 from pathlib import Path
 
 from . import db
-from .images import MIN_COVER_BYTES, save_cover_jpeg
+from .images import COVER_VERSION, MIN_COVER_BYTES, fix_cover_path, history_id, save_cover_jpeg
 from .kwork_rules import fit_volume
 
 HOW_TO = """КАК ВЫЛОЖИТЬ КВОРКИ
@@ -105,6 +105,15 @@ def build_zip(uid: int) -> bytes:
         # (JPEG всё равно не сжимается).
         z.writestr("listings.json", json.dumps(listings, ensure_ascii=False, indent=2), compress_type=zipfile.ZIP_STORED)
         z.writestr("КАК_ВЫЛОЖИТЬ.txt", HOW_TO)
+        # Кворки для кнопки «Заменить обложки»: текущие и прошлых партий (новые обложки без цены).
+        # Отдельный список — их не надо выкладывать заново.
+        fix = [{"id": l["id"], "title": l["title"]} for l in listings]
+        for h in db.load_history(uid):
+            hid = history_id(h)
+            if h.get("fix_v") == COVER_VERSION and fix_cover_path(uid, hid).exists() and h["title"] not in {f["title"] for f in fix}:
+                fix.append({"id": hid, "title": h["title"]})
+                z.write(fix_cover_path(uid, hid), f"covers/{hid}.jpg", compress_type=zipfile.ZIP_STORED)
+        z.writestr("fix.json", json.dumps(fix, ensure_ascii=False), compress_type=zipfile.ZIP_STORED)
         # Для какой версии расширения собран архив: более старое расширение скажет «обновите».
         z.writestr("kwork_meta.json", json.dumps({"extension_version": extension_version()}), compress_type=zipfile.ZIP_STORED)
         for l in listings:

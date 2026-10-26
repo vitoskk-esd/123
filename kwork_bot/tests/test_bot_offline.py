@@ -74,6 +74,9 @@ class FakeLLM:
             nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
             return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}",
                                "attribute_hints": ["Figma", "Логотип"]} for n in nos]}
+        if list(schema["properties"]) == ["covers"]:  # тексты обложек для кворков прошлых партий
+            nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
+            return {"covers": [{"no": n, "text": f"Обложка {n}"} for n in nos]}
         if list(schema["properties"]) == ["kworks"]:  # варианты полей рубрики Kwork
             nos = [int(line.split(".")[0]) for line in prompt.split("КВОРКИ:")[1].splitlines() if line[:1].isdigit()]
             return {"kworks": [{"no": n, "ids": []} for n in nos]}
@@ -856,6 +859,26 @@ class CoverModerationTests(Base):
         with mock.patch.object(ImageDraw.ImageDraw, "text", lambda self, xy, text, *a, **k: (drawn.append(text), real(self, xy, text, *a, **k))):
             images.render_cover(self.uid, fake_listing(1, id="p1", price_rub=1500, days=2, cover_text="Логотип"))
         self.assertEqual(drawn, ["ЛОГОТИП"])
+
+    def test_past_batches_get_fix_covers_in_archive(self):
+        """Кворки прошлых партий (в истории только название) получают обложки без цены для замены."""
+        from kwork_bot.export import build_zip
+
+        db.save_history(self.uid, [{"title": "Сделаю бота для вебинаров", "description": "x", "fp": None},
+                                   {"title": "Сделаю бота для вебинаров", "description": "x", "fp": None},  # дубль
+                                   {"title": "Свяжу Tilda с AmoCRM", "description": "y", "fp": None}])
+        db.save_listings(self.uid, [fake_listing(1, id="cur")])
+        images.unique_covers(self.uid, db.load_listings(self.uid))
+        self.assertEqual(len(images.history_to_fix(self.uid)), 2)
+        self.assertEqual(content.fix_history_covers(self.uid, llm=FakeLLM()), 2)
+        self.assertEqual(images.history_to_fix(self.uid), [])  # второй раз не рисуем
+        z = zipfile.ZipFile(io.BytesIO(build_zip(self.uid)))
+        fix = json.loads(z.read("fix.json"))
+        self.assertEqual([f["title"] for f in fix], [NICHES[0], "Сделаю бота для вебинаров", "Свяжу Tilda с AmoCRM"])
+        self.assertTrue(all(f"covers/{f['id']}.jpg" in z.namelist() for f in fix))
+        self.assertEqual(len(json.loads(z.read("listings.json"))), 1)  # выкладывать заново их не будем
+        marks = [l["fp"] for l in db.load_listings(self.uid)] + list({h["title"]: h["fix_fp"] for h in db.load_history(self.uid)}.values())
+        self.assertFalse([1 for i, a in enumerate(marks) for b in marks[i + 1:] if images.covers_similar(a, b)])
 
     def test_old_covers_are_redrawn(self):
         self.assertFalse(images.outdated_covers([fake_listing(2, id="o2", own_photo=True)]))  # фото клиента не трогаем

@@ -327,7 +327,7 @@ def gradient_background(uid: int, palette: int) -> Path:
     return out
 
 
-def render_cover(uid: int, listing: dict) -> Path:
+def render_cover(uid: int, listing: dict, out: Path | None = None) -> Path:
     """Обложка кворка: общий фон (ИИ или градиент) со своей обработкой и заголовком.
     У кворков с фото клиента (own_photo) обложка — само фото, её не перерисовываем."""
     if listing.get("own_photo"):
@@ -335,4 +335,66 @@ def render_cover(uid: int, listing: dict) -> Path:
     style = listing.get("palette", 0)
     bgs = backgrounds(uid) or [gradient_background(uid, style)]
     bg = bgs[(listing.get("idea_no", 1) - 1) % len(bgs)]
-    return _cover_on_background(listing, bg, PALETTES[style % len(PALETTES)][1], db.cover_path(uid, listing["id"]))
+    return _cover_on_background(listing, bg, PALETTES[style % len(PALETTES)][1], out or db.cover_path(uid, listing["id"]))
+
+
+# --- Новые обложки для кворков прошлых партий (например, отклонённых модерацией из-за цены) ------
+
+def history_id(entry: dict) -> str:
+    import hashlib
+
+    return entry.get("id") or "h" + hashlib.md5(entry["title"].encode("utf-8")).hexdigest()[:9]
+
+
+def fix_cover_path(uid: int, hid: str) -> Path:
+    d = db.user_dir(uid) / "covers_fix"
+    d.mkdir(exist_ok=True)
+    return d / f"{hid}.jpg"
+
+
+def history_to_fix(uid: int) -> list[dict]:
+    """Кворки прошлых партий, которым ещё не нарисована обложка без цены."""
+    current = {l["title"] for l in db.load_listings(uid)}
+    seen, todo = set(current), []
+    for h in db.load_history(uid):
+        if h["title"] in seen or h.get("own_photo"):
+            continue
+        seen.add(h["title"])
+        if h.get("fix_v") != COVER_VERSION or not fix_cover_path(uid, history_id(h)).exists():
+            todo.append(h)
+    return todo
+
+
+def fix_history_covers(uid: int, cover_texts) -> int:
+    """Рисует обложки без цены кворкам прошлых партий; cover_texts(titles) → тексты для тех, у кого
+    текста обложки в истории нет. Каждая обложка непохожа на остальные. Возвращает, сколько нарисовано."""
+    from .kwork_rules import fit_cover_text
+
+    todo = history_to_fix(uid)
+    if not todo:
+        return 0
+    need = [h for h in todo if not h.get("cover_text")]
+    texts = cover_texts([h["title"] for h in need]) if need else []
+    for h, text in zip(need, texts):
+        h["cover_text"] = text
+    history = db.load_history(uid)
+    by_title = {h["title"]: h for h in history}
+    taken = [l["fp"] for l in db.load_listings(uid) if l.get("fp") is not None]
+    taken += [h["fix_fp"] for h in history if h.get("fix_fp") is not None and h["title"] not in {t["title"] for t in todo}]
+    palette = db.load_profile(uid).get("palette", 0)
+    for n, t in enumerate(todo):
+        h = by_title[t["title"]]
+        hid = history_id(h)
+        item = {"id": hid, "title": h["title"], "cover_text": fit_cover_text(t.get("cover_text", ""), h["title"]),
+                "idea_no": n + 1, "palette": palette, "variant": 0}
+        for _ in range(MAX_TRIES):
+            mark = cover_fingerprint(render_cover(uid, item, fix_cover_path(uid, hid)))
+            if not any(covers_similar(mark, o) for o in taken):
+                break
+            item["variant"] += 1
+        for same in history:  # один и тот же кворк мог попасть в историю дважды
+            if same["title"] == h["title"]:
+                same.update(id=hid, cover_text=item["cover_text"], fix_fp=mark, fix_v=COVER_VERSION)
+        taken.append(mark)
+    db.save_history(uid, history)
+    return len(todo)

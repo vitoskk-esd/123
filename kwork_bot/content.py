@@ -254,6 +254,33 @@ def uniqueness_report(uid: int) -> tuple[int, int]:
     return texts, pics
 
 
+COVER_TEXT_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["covers"],
+    "properties": {"covers": {"type": "array", "items": {
+        "type": "object", "additionalProperties": False, "required": ["no", "text"],
+        "properties": {"no": {"type": "integer"}, "text": {"type": "string"}}}}},
+}
+
+
+def cover_texts(titles: list[str], llm=None) -> list[str]:
+    """2–5 слов на обложку по названию кворка (для кворков прошлых партий, где текста нет)."""
+    if not titles:
+        return []
+    llm = llm or _llm()
+    data = llm.ask("Для каждого кворка Kwork придумай текст на обложку: 2–5 слов в именительном падеже, "
+                   "о чём услуга. Без цен, сроков, скидок и процентов.\n\n"
+                   + "\n".join(f"{n}. {t}" for n, t in enumerate(titles, 1)),
+                   system=SYSTEM, schema=COVER_TEXT_SCHEMA, effort="low", max_tokens=4000)
+    got = {c["no"]: c["text"] for c in data.get("covers", [])}
+    return [got.get(n, "") for n in range(1, len(titles) + 1)]
+
+
+def fix_history_covers(uid: int, llm=None) -> int:
+    return images.fix_history_covers(uid, lambda titles: cover_texts(titles, llm))
+
+
 def needs_attributes(uid: int) -> bool:
     from . import kwork_fields
 
@@ -465,8 +492,10 @@ def reset(uid: int) -> None:
     history = db.load_history(uid)
     for l in db.load_listings(uid):
         cover = db.cover_path(uid, l["id"])
-        history.append({"title": l["title"], "description": l["description"],
-                        "fp": l.get("fp") or (images.cover_fingerprint(cover) if cover.exists() else None)})
+        history.append({"id": l["id"], "title": l["title"], "description": l["description"],
+                        "fp": l.get("fp") or (images.cover_fingerprint(cover) if cover.exists() else None),
+                        "cover_text": l.get("cover_text", ""), "category_hint": l.get("category_hint", ""),
+                        "own_photo": bool(l.get("own_photo"))})
     db.save_history(uid, history)
     for sub in ("covers", "examples", "backgrounds", "photos"):
         shutil.rmtree(db.user_dir(uid) / sub, ignore_errors=True)
