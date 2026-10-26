@@ -217,6 +217,12 @@ def _previous_fingerprints(uid: int) -> list[int]:
 
 
 MAX_TRIES = 15
+# 2 — без строки «срок · цена»: модерация Kwork отклоняла обложку, если цена расходилась с ценой кворка.
+COVER_VERSION = 2
+
+
+def outdated_covers(listings: list[dict]) -> bool:
+    return any(not l.get("own_photo") and l.get("cover_v") != COVER_VERSION for l in listings)
 
 
 def unique_covers(uid: int, listings: list[dict], progress: dict | None = None) -> int:
@@ -235,6 +241,7 @@ def unique_covers(uid: int, listings: list[dict], progress: dict | None = None) 
         else:
             failed += 1
         l["fp"] = mark
+        l["cover_v"] = COVER_VERSION
         taken.append(mark)
         progress["done"] += 1
     db.save_listings(uid, listings)
@@ -254,6 +261,7 @@ def new_look(uid: int, listing: dict, listings: list[dict]) -> None:
         if not any(covers_similar(mark, other) for other in taken):
             break
     listing["fp"] = mark
+    listing["cover_v"] = COVER_VERSION
 
 
 def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> Path:

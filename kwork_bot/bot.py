@@ -19,7 +19,7 @@ from aiogram.types import (BufferedInputFile, CallbackQuery, FSInputFile, Inline
 from kwork_agent.config import CONFIG
 from kwork_agent.cover import PALETTES, make_cover
 
-from . import bulk, content, db, disk, examples, payments
+from . import bulk, content, db, disk, examples, images, payments
 from .config import BOT_CONFIG
 from .export import HOW_TO, build_zip, extension_filename, extension_help, extension_version, extension_zip
 
@@ -947,6 +947,11 @@ async def cb_zip(call: CallbackQuery) -> None:
     await call.answer("Собираю архив…")
     uid = call.from_user.id
     check = 0
+    listings = db.load_listings(uid)
+    if images.outdated_covers(listings):
+        wait = await call.message.answer("🖼 Обновляю обложки: убираю с них цену — модерация Kwork её не принимает.")
+        await asyncio.to_thread(images.unique_covers, uid, listings)
+        await wait.delete()
     if content.needs_attributes(uid):
         wait = await call.message.answer("⏳ Подбираю поля рубрик Kwork («Тип», «Платформа», «Язык»…) — до минуты.")
         try:

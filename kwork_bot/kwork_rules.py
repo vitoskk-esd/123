@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import re
 from difflib import SequenceMatcher
 from functools import lru_cache
 from pathlib import Path
@@ -93,6 +94,25 @@ def fit_volume(text: str) -> str:
     return text
 
 
+# Цена и скидки на обложке — причина отказа модерации Kwork.
+_PRICE_RE = re.compile(r"\d[\d\s]*(₽|р\b|р\.|руб|rub|\$|%)|скидк|акци|бесплатн|дешев|\bот\s+\d|₽", re.IGNORECASE)
+
+
+def fit_cover_text(text: str, title: str) -> str:
+    """Текст на обложку без цен, процентов и скидок; если в нём только это — начало названия."""
+    text = " ".join(str(text or "").split())
+    if not text or _PRICE_RE.search(text):
+        words = [w for w in str(title or "").split() if not _PRICE_RE.search(w)]
+        words = words[1:] if len(words) > 2 else words  # без глагола «Сделаю», «Создам»
+        while len(" ".join(words)) > 40 or (len(words) > 1 and words[-1].lower() in _TAIL):
+            words = words[:-1]
+        text = " ".join(words)
+    return text
+
+
+_TAIL = {"за", "на", "для", "в", "во", "с", "со", "и", "по", "от", "до", "к", "из", "под", "под", "о", "об"}
+
+
 def normalize(listing: dict) -> list[str]:
     """Приводит кворк к форме Kwork: рубрика из списка (+ её номера для расширения), цена из
     допустимых, срок не больше максимума рубрики, «что нужно от покупателя» ≥ 100 символов,
@@ -111,6 +131,8 @@ def normalize(listing: dict) -> list[str]:
     listing["price_rub"] = snap_price(listing.get("price_rub"))
     listing["requirements"] = fit_instruction(listing.get("requirements", ""))
     listing["volume"] = fit_volume(listing.get("volume", ""))
+    if "cover_text" in listing or "title" in listing:
+        listing["cover_text"] = fit_cover_text(listing.get("cover_text", ""), listing.get("title", ""))
     hints = listing.get("attribute_hints") or []
     listing["attribute_hints"] = [str(h).strip()[:40] for h in hints if str(h).strip()][:10] if isinstance(hints, list) else []
     return errors

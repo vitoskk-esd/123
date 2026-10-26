@@ -55,7 +55,8 @@ def _fit(draw, text: str, max_w: int):
 
 
 def draw_texts(img, listing: dict, accent: tuple, max_w: int | None = None) -> None:
-    """Полоска-акцент, крупный заголовок и строка «срок · цена» поверх картинки."""
+    """Полоска-акцент и крупный заголовок поверх картинки. Цену и срок не пишем: модерация Kwork
+    отклоняет обложку, если цена на ней расходится с ценой кворка (с учётом комиссии)."""
     from PIL import ImageDraw
 
     draw = ImageDraw.Draw(img)
@@ -67,7 +68,6 @@ def draw_texts(img, listing: dict, accent: tuple, max_w: int | None = None) -> N
     for line in lines:
         draw.text((40, y), line, font=font, fill=(255, 255, 255))
         y += font.size + 12 if hasattr(font, "size") else 50
-    draw.text((40, h - 70), f"{listing['days']} дн. · от {listing['price_rub']} ₽", font=_font(22), fill=accent)
 
 
 def make_cover(listing: dict, out_dir: Path | None = None, palette: int | None = None) -> Path:

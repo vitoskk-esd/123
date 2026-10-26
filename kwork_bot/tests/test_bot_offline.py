@@ -838,6 +838,34 @@ class KworkFieldsTests(Base):
         self.assertEqual(len(llm.prompts), 1)
 
 
+class CoverModerationTests(Base):
+    """Модерация Kwork отклоняет обложку с ценой, если она расходится с ценой кворка."""
+
+    def test_no_price_on_cover(self):
+        from kwork_bot.kwork_rules import fit_cover_text
+
+        self.assertEqual(fit_cover_text("Бот для записи", "Создам бота"), "Бот для записи")
+        for bad in ("Логотип от 1500 ₽", "Скидка 50%", "Сайт за 3 000 руб", ""):
+            cleaned = fit_cover_text(bad, "Создам сайт-визитку на Tilda")
+            self.assertEqual(cleaned, "сайт-визитку на Tilda", bad)
+        # На обложке только заголовок: ни цены, ни срока.
+        from PIL import ImageDraw
+
+        drawn = []
+        real = ImageDraw.ImageDraw.text
+        with mock.patch.object(ImageDraw.ImageDraw, "text", lambda self, xy, text, *a, **k: (drawn.append(text), real(self, xy, text, *a, **k))):
+            images.render_cover(self.uid, fake_listing(1, id="p1", price_rub=1500, days=2, cover_text="Логотип"))
+        self.assertEqual(drawn, ["ЛОГОТИП"])
+
+    def test_old_covers_are_redrawn(self):
+        self.assertFalse(images.outdated_covers([fake_listing(2, id="o2", own_photo=True)]))  # фото клиента не трогаем
+        ls = [fake_listing(1, id="o1")]
+        db.save_listings(self.uid, ls)
+        self.assertTrue(images.outdated_covers(ls))  # обложки старых партий — с ценой
+        images.unique_covers(self.uid, ls)
+        self.assertFalse(images.outdated_covers(db.load_listings(self.uid)))
+
+
 class CoverWeightTests(unittest.TestCase):
     def test_kwork_minimum_30kb(self):
         """Kwork молча не загружает обложку, если файл не больше 30 720 байт."""
