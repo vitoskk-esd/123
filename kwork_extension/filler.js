@@ -295,38 +295,6 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
   return {guessed};
 }
 
-// Окна Kwork поверх формы (замечание модерации «Обложка кворка — Проблема» и т.п.): жмём «Хорошо».
-async function kwCloseModals() {
-  for (let n = 0; n < 3; n++) {
-    const btn = [...document.querySelectorAll('[class*="modal"] button, [class*="modal"] .kw-button, [class*="modal"] a')]
-      .find((b) => kwShown(b) && /^(хорошо|понятно|ок|ok)$/i.test(b.innerText.trim()));
-    if (!btn) return;
-    btn.click();
-    await kwSleep(700);
-  }
-}
-
-// Замена обложки в уже созданном кворке (страница «Изменить»): сверяем название, грузим обложку.
-async function kwReplaceCover(item, coverBytes, log) {
-  if (!await kwWaitFor(() => document.querySelector("#step1-name"), 20000)) throw new Error("страница «Изменить» не открылась");
-  let ready = false;
-  for (let t = Date.now(); !ready && Date.now() - t < 30000; await kwSleep(500)) {
-    ready = await kwMain("ready", ".js-category_parent").then(() => true, () => false);
-  }
-  if (!ready) throw new Error("форма Kwork не загрузилась до конца — обновите страницу");
-  await kwCloseModals();
-  const norm = (s) => String(s || "").toLowerCase().replace(/[«»"…]/g, "").replace(/\s+/g, " ").trim();
-  const title = document.querySelector("#step1-name").value;
-  if (norm(title) !== norm(item.title)) throw new Error(`на странице другой кворк («${title.slice(0, 40)}») — обложку не трогаю`);
-  if (!coverBytes) throw new Error("в архиве нет обложки этого кворка");
-  await kwUploadCover(coverBytes, item.id + ".jpg", log);
-  // Кнопка сохранения обычно видна сразу; если нет — проходим шаги «Продолжить» (поля уже заполнены).
-  for (let n = 1; n <= 4 && !kwSaveShown(); n++) {
-    const b = document.querySelector(`.js-step[data-step="${n}"] .js-next-step-btn`);
-    if (kwShown(b)) { b.click(); await kwSleep(1500); }
-  }
-}
-
 async function kwClickSave() {
   const btn = await kwWaitFor(() => { const b = document.querySelector(".js-save-kwork"); return kwShown(b) && b; }, 15000);
   if (!btn) throw new Error("кнопка «Готово» недоступна — " + (kwFormErrors() || "проверьте форму"));

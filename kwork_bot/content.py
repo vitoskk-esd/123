@@ -307,10 +307,6 @@ def ensure_cover_points(uid: int, llm=None) -> int:
     return len(todo)
 
 
-def fix_history_covers(uid: int, llm=None) -> int:
-    return images.fix_history_covers(uid, lambda items: cover_texts(items, llm))
-
-
 def needs_attributes(uid: int) -> bool:
     from . import kwork_fields
 

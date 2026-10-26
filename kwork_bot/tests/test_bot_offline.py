@@ -896,26 +896,13 @@ class CoverModerationTests(Base):
             images.render_cover(self.uid, fake_listing(1, id="p1", cover_text="Логотип", cover_points=["Три варианта", "Исходники"]))
         self.assertEqual(drawn, ["ЛОГОТИП", "Три варианта", "Исходники"])
 
-    def test_past_batches_get_fix_covers_in_archive(self):
-        """Кворки прошлых партий (в истории только название) получают обложки без цены для замены."""
-        from kwork_bot.export import build_zip
-
-        db.save_history(self.uid, [{"title": "Сделаю бота для вебинаров", "description": "x", "fp": None},
-                                   {"title": "Сделаю бота для вебинаров", "description": "x", "fp": None},  # дубль
-                                   {"title": "Свяжу Tilda с AmoCRM", "description": "y", "fp": None}])
-        db.save_listings(self.uid, [fake_listing(1, id="cur")])
-        images.unique_covers(self.uid, db.load_listings(self.uid))
-        self.assertEqual(len(images.history_to_fix(self.uid)), 2)
-        self.assertEqual(content.fix_history_covers(self.uid, llm=FakeLLM()), 2)
-        self.assertEqual(db.load_history(self.uid)[-1]["cover_points"], ["Быстрый старт", "Поддержка"])  # без скидки
-        self.assertEqual(images.history_to_fix(self.uid), [])  # второй раз не рисуем
-        z = zipfile.ZipFile(io.BytesIO(build_zip(self.uid)))
-        fix = json.loads(z.read("fix.json"))
-        self.assertEqual([f["title"] for f in fix], [NICHES[0], "Сделаю бота для вебинаров", "Свяжу Tilda с AmoCRM"])
-        self.assertTrue(all(f"covers/{f['id']}.jpg" in z.namelist() for f in fix))
-        self.assertEqual(len(json.loads(z.read("listings.json"))), 1)  # выкладывать заново их не будем
-        marks = [l["fp"] for l in db.load_listings(self.uid)] + list({h["title"]: h["fix_fp"] for h in db.load_history(self.uid)}.values())
-        self.assertFalse([1 for i, a in enumerate(marks) for b in marks[i + 1:] if images.covers_similar(a, b)])
+    def test_old_kworks_get_cover_points(self):
+        """Кворкам, созданным до пунктов на обложке, их дописывает ИИ (без скидок и цен)."""
+        db.save_listings(self.uid, [fake_listing(1, id="a1"), fake_listing(2, id="a2", cover_points=["Свой пункт"])])
+        self.assertEqual(content.ensure_cover_points(self.uid, llm=FakeLLM()), 1)
+        points = [l.get("cover_points") for l in db.load_listings(self.uid)]
+        self.assertEqual(points, [["Быстрый старт", "Поддержка"], ["Свой пункт"]])
+        self.assertEqual(content.ensure_cover_points(self.uid, llm=FakeLLM()), 0)
 
     def test_old_covers_are_redrawn(self):
         self.assertFalse(images.outdated_covers([fake_listing(2, id="o2", own_photo=True)]))  # фото клиента не трогаем
