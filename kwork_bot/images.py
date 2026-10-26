@@ -217,6 +217,13 @@ def _previous_fingerprints(uid: int) -> list[int]:
 
 
 MAX_TRIES = 15
+# 2 — без строки «срок · цена»: модерация Kwork отклоняла обложку, если цена расходилась с ценой кворка.
+# 3 — внизу 3 пункта «что получит покупатель» вместо пустого места.
+COVER_VERSION = 3
+
+
+def outdated_covers(listings: list[dict]) -> bool:
+    return any(not l.get("own_photo") and l.get("cover_v") != COVER_VERSION for l in listings)
 
 
 def unique_covers(uid: int, listings: list[dict], progress: dict | None = None) -> int:
@@ -235,6 +242,7 @@ def unique_covers(uid: int, listings: list[dict], progress: dict | None = None) 
         else:
             failed += 1
         l["fp"] = mark
+        l["cover_v"] = COVER_VERSION
         taken.append(mark)
         progress["done"] += 1
     db.save_listings(uid, listings)
@@ -254,6 +262,7 @@ def new_look(uid: int, listing: dict, listings: list[dict]) -> None:
         if not any(covers_similar(mark, other) for other in taken):
             break
     listing["fp"] = mark
+    listing["cover_v"] = COVER_VERSION
 
 
 def _cover_on_background(listing: dict, bg: Path, accent: tuple, out: Path) -> Path:
@@ -319,7 +328,7 @@ def gradient_background(uid: int, palette: int) -> Path:
     return out
 
 
-def render_cover(uid: int, listing: dict) -> Path:
+def render_cover(uid: int, listing: dict, out: Path | None = None) -> Path:
     """Обложка кворка: общий фон (ИИ или градиент) со своей обработкой и заголовком.
     У кворков с фото клиента (own_photo) обложка — само фото, её не перерисовываем."""
     if listing.get("own_photo"):
@@ -327,4 +336,4 @@ def render_cover(uid: int, listing: dict) -> Path:
     style = listing.get("palette", 0)
     bgs = backgrounds(uid) or [gradient_background(uid, style)]
     bg = bgs[(listing.get("idea_no", 1) - 1) % len(bgs)]
-    return _cover_on_background(listing, bg, PALETTES[style % len(PALETTES)][1], db.cover_path(uid, listing["id"]))
+    return _cover_on_background(listing, bg, PALETTES[style % len(PALETTES)][1], out or db.cover_path(uid, listing["id"]))

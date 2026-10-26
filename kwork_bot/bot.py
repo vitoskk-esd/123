@@ -5,10 +5,12 @@ from __future__ import annotations
 import asyncio
 import html
 import io
+import logging
 import tempfile
 from pathlib import Path
 
 from aiogram import Bot, F, Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -18,11 +20,28 @@ from aiogram.types import (BufferedInputFile, CallbackQuery, FSInputFile, Inline
 from kwork_agent.config import CONFIG
 from kwork_agent.cover import PALETTES, make_cover
 
-from . import bulk, content, db, disk, examples, payments
+from . import bulk, content, db, disk, examples, images, payments
 from .config import BOT_CONFIG
-from .export import EXTENSION_HELP, HOW_TO, build_zip, extension_zip
+from .export import HOW_TO, build_zip, extension_filename, extension_help, extension_version, extension_zip
 
 router = Router()
+log = logging.getLogger(__name__)
+
+# Нажатия кнопок, сделанные, пока бот был выключен, приходят после запуска: ответить на такие
+# Telegram уже не даёт («query is too old»). Не падаем на ответе — само действие выполняем.
+_answer = CallbackQuery.answer
+
+
+async def _answer_safely(self, *args, **kwargs):
+    try:
+        return await _answer(self, *args, **kwargs)
+    except TelegramBadRequest as e:
+        if "query is too old" in str(e) or "query ID is invalid" in str(e):
+            return None
+        raise
+
+
+CallbackQuery.answer = _answer_safely
 JOBS: dict[int, dict] = {}  # кто сейчас ждёт генерацию: uid → прогресс
 _TASKS: set[asyncio.Task] = set()  # ссылки на фоновые задачи, чтобы их не собрал сборщик мусора
 
@@ -135,8 +154,8 @@ async def cb_menu(call: CallbackQuery, state: FSMContext) -> None:
 @router.callback_query(F.data == "ext")
 async def cb_extension(call: CallbackQuery) -> None:
     await call.answer()
-    await call.message.answer_document(BufferedInputFile(await asyncio.to_thread(extension_zip), "kwork_extension.zip"))
-    await call.message.answer(EXTENSION_HELP, reply_markup=kb([("🏠 Меню", "menu")]))
+    await call.message.answer_document(BufferedInputFile(await asyncio.to_thread(extension_zip), extension_filename()))
+    await call.message.answer(extension_help(), reply_markup=kb([("🏠 Меню", "menu")]))
 
 
 @router.callback_query(F.data == "howto")
@@ -694,6 +713,8 @@ async def run_bulk_finish(bot: Bot, uid: int, chat_id: int) -> None:
 def progress_text(p: dict) -> str:
     if p.get("stage") == "bulk_list":
         return "📂 Читаю папку на Яндекс Диске…"
+    if p.get("stage") == "bulk_check":
+        return f"🔎 Проверяю фото на цены, скидки и контакты (за них Kwork отклоняет): <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "bulk_photos":
         return f"⬇️ Скачиваю фото: <b>{p['done']} из {p['total']}</b>"
     if p.get("stage") == "images":
@@ -944,9 +965,33 @@ async def cb_zip(call: CallbackQuery) -> None:
         return
     await call.answer("Собираю архив…")
     uid = call.from_user.id
+    check = 0
+    listings = db.load_listings(uid)
+    if images.outdated_covers(listings):
+        wait = await call.message.answer("🖼 Обновляю обложки: без цены (модерация Kwork её не принимает), "
+                                         "внизу — что получит покупатель.")
+        try:
+            await asyncio.to_thread(content.ensure_cover_points, uid)
+        except Exception as e:  # noqa: BLE001 — без пунктов обложка всё равно годится
+            log.warning("пункты обложек: %s", e)
+        listings = db.load_listings(uid)
+        await asyncio.to_thread(images.unique_covers, uid, listings)
+        await wait.delete()
+    if content.needs_attributes(uid):
+        wait = await call.message.answer("⏳ Подбираю поля рубрик Kwork («Тип», «Платформа», «Язык»…) — до минуты.")
+        try:
+            check = await asyncio.to_thread(content.ensure_attributes, uid)
+        except Exception as e:  # noqa: BLE001 — без полей архив всё равно годится, расширение подберёт само
+            log.warning("поля рубрик: %s", e)
+        await wait.delete()
+    else:
+        check = sum(1 for l in db.load_listings(uid) if l.get("attributes_guessed"))
     data = await asyncio.to_thread(build_zip, uid)
     await call.message.answer_document(
         BufferedInputFile(data, "kwork.zip"),
         caption=f"Все {len(db.load_listings(uid))} кворков: таблица kworks.csv, обложки и инструкция "
-                "«КАК_ВЫЛОЖИТЬ.txt».",
+                "«КАК_ВЫЛОЖИТЬ.txt». Этот файл выбирайте в панели расширения — нужна версия расширения "
+                f"v{extension_version()} или новее (номер виден в заголовке панели)."
+                + (f"\nУ {check} кворков подходящий вариант поля рубрики не нашёлся — на них расширение "
+                   "остановится и попросит проверить эти поля." if check else ""),
     )

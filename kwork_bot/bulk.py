@@ -24,7 +24,7 @@ from kwork_agent.cover import SIZE
 from kwork_agent.generator import validate
 from kwork_agent.uniqueness import find_duplicate
 
-from . import content, db, disk, images
+from . import content, db, disk, images, moderation
 from .kwork_rules import category_list, find_category, fit_instruction, normalize
 
 PHOTO_EXT = {".jpg", ".jpeg", ".png", ".webp"}
@@ -50,11 +50,13 @@ CATEGORY_SCHEMA = {
     "additionalProperties": False,
     "required": ["items"],
     "properties": {"items": {"type": "array", "items": {
-        "type": "object", "additionalProperties": False, "required": ["row", "category_hint", "volume"],
+        "type": "object", "additionalProperties": False, "required": ["row", "category_hint", "volume", "attribute_hints"],
         "properties": {"row": {"type": "integer"},
                        "category_hint": {"type": "string", "description": "Рубрика Kwork «Раздел > Подраздел»"},
                        "volume": {"type": "string", "description": "Объём услуг в 1 кворке: что входит в цену, "
-                                                                   "с числом, до 60 символов"}}}}},
+                                                                   "с числом, до 60 символов"},
+                       "attribute_hints": {"type": "array", "items": {"type": "string"},
+                                           "description": "3–8 слов для полей рубрики: платформа, язык, программа"}}}}},
 }
 
 
@@ -185,7 +187,7 @@ def match_photos(rows: list[dict], photo_names: list[str]) -> list[str]:
     return problems
 
 
-def prepare(uid: int, link: str, progress: dict) -> dict:
+def prepare(uid: int, link: str, progress: dict, llm=None) -> dict:
     """Скачивает папку, разбирает таблицу, проверяет. Результат кладёт в profile["bulk"]."""
     progress.update(stage="bulk_list", done=0, total=0)
     root = disk.list_dir(link)
@@ -224,6 +226,28 @@ def prepare(uid: int, link: str, progress: dict) -> dict:
                     if r["photo"] == name:
                         r["photo"] = ""
     shutil.rmtree(wd / "raw", ignore_errors=True)
+
+    # Модерация Kwork отклоняет обложку с ценой, скидкой, контактами — фото клиента проверяем заранее.
+    progress.update(stage="bulk_check", done=0, total=len({r["photo"] for r in rows if r["photo"]}))
+    llm = llm or content._llm()
+
+    def check(name: str) -> tuple[list[str], list[str]]:
+        try:
+            return moderation.image_problems((wd / "photos" / f"{Path(name).stem}.jpg").read_bytes(), llm)
+        except Exception:  # noqa: BLE001 — ИИ недоступен: фото не теряем, проверит модерация
+            return [], []
+        finally:
+            progress["done"] += 1
+
+    names = sorted({r["photo"] for r in rows if r["photo"]})
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for name, (block, warn) in zip(names, pool.map(check, names)):
+            for text in block + warn:
+                problems.append(f"фото «{name}»: {text}" + (" — Kwork отклонит, замените фото" if text in block else ""))
+            if block:
+                for r in rows:
+                    if r["photo"] == name:
+                        r["photo"] = ""
 
     rows, more = check_rows(uid, [r for r in rows if r["photo"]])
     problems += more
@@ -272,6 +296,8 @@ def check_rows(uid: int, rows: list[dict]) -> tuple[list[dict], list[str]]:
         errors = validate(probe)
         if r["price_rub"] and not CONFIG.price_min <= r["price_rub"] <= CONFIG.price_max:
             errors.append(f"цена вне {CONFIG.price_min}–{CONFIG.price_max} ₽")
+        errors += [e for e in moderation.text_problems(" ".join([r["title"], r["description"], r["requirements"]]))
+                   if e not in errors and "контакт" not in e]  # контакты validate уже проверил
         dup = find_duplicate(r, previous + ok)
         if dup:
             errors.append(f"текст похож на «{dup['title'][:50]}»")
@@ -341,7 +367,7 @@ def uniquify_photo(src: Path, seed: str, strength: float):
 
 def classify(rows: list[dict], llm=None) -> None:
     """Подбирает рубрику Kwork и «объём услуг в 1 кворке» строкам, где их нет (одним-двумя запросами к ИИ)."""
-    todo = [r for r in rows if not find_category(r["category_hint"]) or not r.get("volume")]
+    todo = [r for r in rows if not find_category(r["category_hint"]) or not r.get("volume") or not r.get("attribute_hints")]
     if not todo:
         return
     llm = llm or content._llm()
@@ -350,7 +376,8 @@ def classify(rows: list[dict], llm=None) -> None:
         listing = "\n".join(f"{r['row']}. {r['title']} — {r['description'][:150]}" for r in chunk)
         data = llm.ask("Подбери каждому кворку рубрику СТРОГО из списка рубрик Kwork (строку как есть) и объём "
                        "услуг в 1 кворке — что входит в цену, коротко и с числом («1 логотип в 3 вариантах», "
-                       "«до 1000 символов текста»).\n\n"
+                       "«до 1000 символов текста»), и 3–8 слов для полей рубрики Kwork: платформа, язык "
+                       "программирования, программа (Telegram, Python, Excel) — только то, что есть в услуге.\n\n"
                        f"КВОРКИ:\n{listing}\n\nРУБРИКИ KWORK:\n{category_list()}",
                        system=content.SYSTEM, schema=CATEGORY_SCHEMA, effort="low", max_tokens=8000)
         found = {it["row"]: it for it in data["items"]}
@@ -360,6 +387,8 @@ def classify(rows: list[dict], llm=None) -> None:
                 r["category_hint"] = got.get("category_hint", "")
             if not r.get("volume"):
                 r["volume"] = str(got.get("volume", "")).strip()
+            if not r.get("attribute_hints"):
+                r["attribute_hints"] = [str(h) for h in got.get("attribute_hints") or []]
 
 
 def own_photo_path(uid: int, lid: str) -> Path:
@@ -423,7 +452,8 @@ def finish(uid: int, progress: dict, llm=None) -> int:
             "id": lid, "idea_no": n, "idea": r["title"], "title": r["title"], "description": r["description"],
             "requirements": r["requirements"], "price_rub": r["price_rub"],
             "days": r["days"], "category_hint": r["category_hint"], "tags": r["tags"],
-            "volume": r.get("volume", ""), "cover_text": r["title"], "own_photo": True, "fp": mark, "row": r["row"],
+            "volume": r.get("volume", ""), "attribute_hints": r.get("attribute_hints", []),
+            "cover_text": r["title"], "own_photo": True, "fp": mark, "row": r["row"],
         }
         normalize(listing)  # рубрика → номера Kwork, цена из допустимых, «что нужно» ≥ 100 символов
         listings.append(listing)

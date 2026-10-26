@@ -24,7 +24,7 @@ async function kwMain(action, selector, value) {
   if (window.kwMainOverride) return window.kwMainOverride(action, selector, value);
   const r = await chrome.runtime.sendMessage({type: "main", action, selector, value});
   if (!r || !r.ok) throw new Error("не удалось выполнить действие на странице: " + (r && r.error));
-  if (r.result !== "ok") throw new Error(r.result);
+  if (r.result !== "ok" && !String(r.result).startsWith("ok:")) throw new Error(r.result);
   return r.result;
 }
 
@@ -60,44 +60,91 @@ function kwStems(s) {
   return new Set((String(s || "").toLowerCase().match(/[а-яёa-z]{3,}/g) || []).map((w) => w.slice(0, w.length <= 4 ? 3 : 4)));
 }
 
-// Выбор «Типа» рубрики: сначала по подсказке бота (type_hint, например «Чат-боты»), потом по
-// словам названия и описания. Совпадений нет — первый вариант.
-function kwPickAttribute(radios, text, hint) {
-  const want = kwStems(text), wantHint = kwStems(hint);
-  let best = radios[0], score = 0;
-  for (const r of radios) {
-    const label = (document.querySelector(`label[for="${r.id}"]`) || r.parentElement || {}).innerText || "";
-    const words = [...kwStems(label)];
-    const s = 3 * words.filter((w) => wantHint.has(w)).length + words.filter((w) => want.has(w)).length;
-    if (s > score) { best = r; score = s; }
-  }
-  return best;
+// Поля рубрики Kwork («Тип», «Вид», «Язык разработки», «Платформа»…): каждое — блок .js-attribute-list,
+// варианты — кружки (один) или галочки (несколько, до data-multiple-max-count). После выбора Kwork
+// может подгрузить следующие поля. Вариант выбираем по подсказкам бота (type_hint, attribute_hints —
+// «Чат-боты», «Telegram», «Python») и словам названия и описания.
+const kwStem = (t) => t.slice(0, t.length <= 4 ? 3 : 4);
+const kwTokens = (s) => String(s || "").toLowerCase().match(/[a-zа-яё0-9+#]+/g) || [];
+
+function kwLabelOf(input) {
+  return ((document.querySelector(`label[for="${input.id}"]`) || input.parentElement || {}).innerText || "").trim();
 }
 
-// «Тип» стоит в шаге 1 сразу после рубрики и подгружается после её выбора; у некоторых рубрик
-// бывает вложенный (после выбора появляется следующий) или ещё один на шаге 3.
+function kwScore(label, ctx) {
+  let score = 0;
+  for (const t of kwTokens(label)) {
+    if (ctx.hints.has(t) || (t.length >= 3 && ctx.hintStems.has(kwStem(t)))) score += 3;
+    else if (t.length >= 3 && ctx.textStems.has(kwStem(t))) score += 1;
+  }
+  return score;
+}
+
+// Нет подходящего варианта — «Другие/Другое», если есть, иначе первый.
+const kwFallback = (inputs) => inputs.find((i) => /^(друг|проч|ин(ое|ые)\b)/i.test(kwLabelOf(i))) || inputs[0];
+
+// Варианты, которые бот подобрал заранее по настоящим полям рубрики (listing.attributes:
+// [{field, ids, labels}]): сначала по номеру варианта, если Kwork поменял номера — по названиям.
+function kwPlanned(listing, title, inputs) {
+  const plan = listing.attributes || [];
+  const ids = new Set(plan.flatMap((a) => a.ids || []));
+  const byId = inputs.filter((i) => ids.has(i.value));
+  if (byId.length) return byId;
+  const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+  const field = plan.find((a) => norm(a.field) === norm(title));
+  if (!field) return [];
+  const labels = new Set((field.labels || []).map(norm));
+  return inputs.filter((i) => labels.has(norm(kwLabelOf(i))));
+}
+
+// Возвращает названия полей, где вариант выбран без совпадения (их стоит проверить человеку).
 async function kwChooseAttributes(listing, log, step, waitMs) {
-  const text = listing.title + " " + listing.description;
-  const sel = `.js-step[data-step="${step}"] input[type="radio"][name^="attribute["]`;
-  if (waitMs) await kwWaitFor(() => document.querySelector(sel), waitMs);
+  const hints = [listing.type_hint, ...(listing.attribute_hints || [])].join(" ");
+  const ctx = {hints: new Set(kwTokens(hints)), hintStems: new Set(kwTokens(hints).filter((t) => t.length >= 3).map(kwStem)),
+               textStems: new Set(kwTokens(listing.title + " " + listing.description).filter((t) => t.length >= 3).map(kwStem))};
+  const sel = `.js-step[data-step="${step}"] .js-attribute-list`;
+  if (waitMs) await kwWaitFor(() => document.querySelector(sel + " input"), waitMs);
+  const guessed = [];
   const done = new Set();
-  for (let level = 0; level < 4; level++) {
-    const groups = {};
-    for (const r of document.querySelectorAll(sel)) {
-      if (!done.has(r.name) && (kwShown(r) || kwShown(r.parentElement))) (groups[r.name] = groups[r.name] || []).push(r);
-    }
-    const names = Object.keys(groups);
-    if (!names.length) return;
-    for (const name of names) {
-      done.add(name);
-      if (groups[name].some((r) => r.checked)) continue;
-      const pick = kwPickAttribute(groups[name], text, listing.type_hint);
-      const label = document.querySelector(`label[for="${pick.id}"]`);
-      (label || pick).click();
-      log("тип: " + ((label && label.innerText.trim()) || pick.value));
-      await kwSleep(1200);
+  for (let level = 0, idle = 0; level < 10 && idle < 2; level++) {
+    const lists = [...document.querySelectorAll(sel)].filter((l) => !done.has(l) && (kwShown(l) || kwShown(l.parentElement))
+      && !l.querySelector("input:checked"));
+    if (!lists.length) { idle++; await kwSleep(1500); continue; } // вдруг Kwork ещё грузит вложенное поле
+    idle = 0;
+    for (const list of lists) {
+      done.add(list);
+      const block = list.closest(".js-field-block");
+      const title = ((block && block.querySelector(".kwork-save-step__field-label-name")) || {}).innerText?.trim() || "поле рубрики";
+      const inputs = [...list.querySelectorAll('input[type="radio"], input[type="checkbox"]')]
+        .filter((i) => !i.disabled && !i.closest(".attribute-item-custom"));
+      if (!inputs.length) continue;
+      const required = list.dataset.required === "1";
+      const multiple = inputs[0].type === "checkbox";
+      const planned = kwPlanned(listing, title, inputs);
+      const scored = inputs.map((i) => ({i, s: kwScore(kwLabelOf(i), ctx)})).filter((x) => x.s > 0).sort((a, b) => b.s - a.s);
+      let picks;
+      if (planned.length) {
+        picks = multiple ? planned.slice(0, Number(list.dataset.multipleMaxCount) || planned.length) : planned.slice(0, 1);
+        if ((listing.attributes_guessed || []).includes(title)) guessed.push(title); // бот сам не нашёл подходящий
+      } else if (multiple) {
+        const max = Math.min(Number(list.dataset.multipleMaxCount) || 3, 3);
+        picks = scored.slice(0, max).map((x) => x.i);
+        if (!picks.length && !required) continue; // необязательные галочки без совпадений не трогаем
+      } else {
+        picks = scored.length ? [scored[0].i] : [];
+      }
+      if (!picks.length) { picks = [kwFallback(inputs)]; if (inputs.length > 1) guessed.push(title); }
+      for (const pick of picks) {
+        const label = document.querySelector(`label[for="${pick.id}"]`);
+        (label || pick).click();
+        if (!pick.checked) pick.click(); // подпись без for — жмём сам вариант
+        await kwSleep(800);
+      }
+      log(`${title.toLowerCase()}: ${picks.map(kwLabelOf).join(", ")}`);
+      await kwSleep(700);
     }
   }
+  return guessed;
 }
 
 function kwBestOption(select, wanted, mode) {
@@ -136,28 +183,54 @@ async function kwUploadCover(bytes, name, log) {
     .filter((el, i, all) => all.indexOf(el) === i && !el.closest(".js-template-photo-block"));
   if (!inputs.length) throw new Error("не нашёл поле обложки");
   const pathValue = () => [...document.querySelectorAll('input[name="first_photo_path"]')].map((i) => i.value).filter(Boolean).join("|");
+  const kworkError = () => [...document.querySelectorAll(".js-add-photo_error")].map((e) => e.innerText.trim()).filter(Boolean).join("; ");
+  // Главный признак — ответ Kwork на сам запрос загрузки (/temp-image-upload): поле пути к файлу
+  // на сайте может не измениться (например, при повторной загрузке того же файла путь тот же).
+  const uploads = async () => {
+    try { return JSON.parse((await kwMain("coverStatus", "body")).slice(3)).uploads || []; } catch (e) { return []; }
+  };
+  await kwMain("coverWatch", "body");
   const before = pathValue();
-  let ok = false;
-  // Если полей несколько, пробуем с последнего; поле без загрузчика ничего не делает за 10 секунд.
+  let result = null; // {ok: true} или {error: "..."}
+  // Если полей несколько, пробуем с последнего; поле без загрузчика за 10 секунд ничего не отправляет.
   for (const [n, input] of inputs.reverse().entries()) {
     const dt = new DataTransfer();
     dt.items.add(new File([bytes], name, {type: "image/jpeg"}));
     input.files = dt.files;
     input.dispatchEvent(new Event("change", {bubbles: true}));
     const last = n === inputs.length - 1;
-    ok = await kwWaitFor(() => pathValue() !== before && pathValue(), last ? 60000 : 10000, 500);
-    if (ok || document.querySelector(".js-add-photo_error")?.innerText.trim()) break;
+    for (const t = Date.now(); !result && Date.now() - t < (last ? 90000 : 10000); await kwSleep(500)) {
+      const sent = await uploads();
+      const done = sent.find((u) => typeof u.status === "number");
+      if (done) {
+        let body = {};
+        try { body = JSON.parse(done.body || "{}"); } catch (e) { /* не JSON */ }
+        if (done.status === 200 && body.success) result = {ok: true};
+        else if (done.status === 200 && body.success === false) result = {error: "Kwork отклонил файл: " + ([].concat(body.data || [])[0] || kworkError() || "без пояснений")};
+        else if (done.status >= 400 || done.status === 0) result = {error: `сервер Kwork ответил ошибкой ${done.status || "сети"} — попробуйте ещё раз`};
+      } else if (pathValue() && pathValue() !== before) {
+        result = {ok: true};
+      } else if (kworkError()) {
+        result = {error: kworkError()};
+      } else if (!sent.length && Date.now() - t > 10000 && !last) {
+        break; // это поле не запустило загрузку — пробуем следующее
+      }
+    }
+    if (result) break;
   }
-  if (!ok) {
-    const kworkError = [...document.querySelectorAll(".js-add-photo_error")].map((e) => e.innerText.trim()).filter(Boolean).join("; ");
-    throw new Error("обложка не загрузилась — " + (kworkError || kwStepErrors('.js-step[data-step="1"]') || "Kwork не ответил на загрузку"));
+  if (!result || result.error) {
+    const sent = await uploads();
+    const why = result ? result.error : sent.length ? "Kwork не дождался ответа сервера за 90 секунд — попробуйте ещё раз"
+      : "Kwork не начал загрузку файла" + (document.querySelector(".js-first-photo-block .thumb-img") ? " (превью есть)" : "");
+    throw new Error("обложка не загрузилась — " + why);
   }
   log("обложка загружена");
 }
 
 // Заполняет все шаги и останавливается перед «Готово». coverDone — обложка этого кворка уже
 // загружена (Kwork после загрузки сохраняет черновик и может перезагрузить страницу).
-// Возвращает {needsPortfolio: true}, если рубрика требует портфолио — тогда «Готово» жмёт человек.
+// Возвращает {needsPortfolio, guessed}: рубрика требует портфолио / поля, где вариант выбран без
+// совпадения, — тогда «Готово» жмёт человек.
 async function kwFill(listing, coverBytes, log, opts = {}) {
   if (!await kwWaitFor(() => document.querySelector("#step1-name"), 20000)) throw new Error("форма «Создать кворк» не открылась");
   // Kwork запускает форму позже, чем появляется её разметка; до этого выбор рубрики ничего не делает.
@@ -180,7 +253,7 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
   if (!sub) throw new Error("подрубрика " + listing.category_hint + " не появилась в списке");
   await kwMain("select", ".js-category_sub", listing.category_id);
   log("рубрика: " + listing.category_hint);
-  await kwChooseAttributes(listing, log, 1, 6000);
+  const guessed = await kwChooseAttributes(listing, log, 1, 6000);
   const path = document.querySelector('input[name="first_photo_path"]');
   if (opts.coverDone && path && path.value) log("обложка уже загружена");
   else if (coverBytes) { await kwUploadCover(coverBytes, listing.id + ".jpg", log); if (opts.onCover) await opts.onCover(); }
@@ -192,7 +265,7 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
   await kwNext(2, log);
 
   // Шаг 3: цена, срок (и «Тип», если он есть здесь)
-  await kwChooseAttributes(listing, log, 3, 0);
+  guessed.push(...await kwChooseAttributes(listing, log, 3, 0));
   const priceSel = await kwWaitFor(() => document.querySelector("#typicalPriceSelect"), 10000);
   if (!priceSel) throw new Error("не нашёл выбор цены — у этой рубрики, видимо, только пакеты; укажите цену вручную");
   const price = kwBestOption(priceSel, listing.price_rub, "min");
@@ -216,10 +289,10 @@ async function kwFill(listing, coverBytes, log, opts = {}) {
     if (b) { b.click(); await kwWaitFor(kwSaveShown, 4000); }
     if (!kwSaveShown()) {
       log("рубрике нужны работы в портфолио — добавьте их на шаге 4");
-      return {needsPortfolio: true};
+      return {needsPortfolio: true, guessed};
     }
   }
-  return {};
+  return {guessed};
 }
 
 async function kwClickSave() {

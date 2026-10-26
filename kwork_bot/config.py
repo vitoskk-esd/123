@@ -61,7 +61,7 @@ class BotConfig:
     # ЮKassa: shopId и секретный ключ из личного кабинета yookassa.ru → Интеграция → Ключи API.
     yookassa_shop_id: str = os.getenv("YOOKASSA_SHOP_ID", "")
     yookassa_secret: str = os.getenv("YOOKASSA_SECRET_KEY", "")
-    price_rub: int = int(os.getenv("KWORK_BOT_PRICE_RUB", "3000"))
+    price_rub: int = int(os.getenv("KWORK_BOT_PRICE_RUB", "5000"))
     # Куда вернуть человека после оплаты (обычно ссылка на бота: https://t.me/имя_бота).
     return_url: str = os.getenv("KWORK_BOT_RETURN_URL", "https://t.me")
     # 1 — отправлять чеки по 54-ФЗ через ЮKassa (бот спросит e-mail покупателя перед оплатой).

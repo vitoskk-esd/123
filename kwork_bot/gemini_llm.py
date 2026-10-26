@@ -7,6 +7,7 @@ Gemini часто отвечает «перегружен» (503/502/429): то�
 
 from __future__ import annotations
 
+import base64
 import json
 import time
 import urllib.error
@@ -49,9 +50,10 @@ class GeminiLLM:
         effort: str = "medium",
         max_tokens: int = 32000,
         cached_context: str = "",
+        images: list[bytes] | None = None,
         **_: Any,
     ) -> Any:
-        """Текст ответа или (если передана schema) распарсенный JSON."""
+        """Текст ответа или (если передана schema) распарсенный JSON. images — JPEG/PNG к запросу."""
         config: dict[str, Any] = {
             "maxOutputTokens": max_tokens,
             # Для массовых текстов хватает «низкого» размышления — быстрее и дешевле.
@@ -61,8 +63,11 @@ class GeminiLLM:
             config.update(responseMimeType="application/json", responseJsonSchema=schema)
         # Общую часть (образцы кворков) ставим в начало: Gemini сам кэширует одинаковое начало запросов.
         instruction = "\n\n".join(t for t in (cached_context, system) if t)
-        body: dict[str, Any] = {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                                "generationConfig": config}
+        parts: list[dict] = [{"text": prompt}]
+        for img in images or []:
+            mime = "image/png" if img[:4] == b"\x89PNG" else "image/jpeg"
+            parts.append({"inline_data": {"mime_type": mime, "data": base64.b64encode(img).decode()}})
+        body: dict[str, Any] = {"contents": [{"role": "user", "parts": parts}], "generationConfig": config}
         if instruction:
             body["systemInstruction"] = {"parts": [{"text": instruction}]}
 

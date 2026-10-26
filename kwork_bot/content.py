@@ -19,7 +19,7 @@ from kwork_agent.config import CONFIG
 from kwork_agent.generator import LISTING_SCHEMA, validate
 from kwork_agent.uniqueness import find_duplicate, title_similarity
 
-from . import db, images
+from . import db, images, moderation
 from .kwork_rules import PORTFOLIO_REQUIRED, PRICES, category_list, find_category, normalize, snap_price
 from .config import BOT_CONFIG
 
@@ -82,7 +82,17 @@ _item["properties"]["volume"] = {
                    "коротко и с числом, до 60 символов — например «1 логотип в 3 вариантах», "
                    "«до 1000 символов текста», «1 чат-бот до 10 команд»",
 }
-_item["required"] += ["idea_no", "type_hint", "volume"]
+_item["properties"]["attribute_hints"] = {
+    "type": "array", "items": {"type": "string"},
+    "description": "3–8 коротких слов для обязательных полей рубрики Kwork: платформа, язык программирования, "
+                   "программа, формат, площадка — например «Telegram», «Python», «Excel», «Wildberries», «Figma»",
+}
+_item["properties"]["cover_points"] = {
+    "type": "array", "items": {"type": "string"},
+    "description": "3 коротких пункта на обложку (до 28 символов, целыми словами, грамотно): что получит "
+                   "покупатель, например «Заявки в одном окне», «Уведомления менеджеру». Без цен, сроков, скидок, контактов",
+}
+_item["required"] += ["idea_no", "type_hint", "volume", "attribute_hints", "cover_points"]
 
 VISUAL_SCHEMA = {
     "type": "object",
@@ -209,12 +219,19 @@ def _listing_prompt(profile: dict, ideas: list[dict], hints: dict[int, str]) -> 
   что именно он получит → как идёт работа → почему можно доверять. Первые фразы у
   разных кворков должны отличаться.
 - Никаких контактов, ссылок, e-mail, телефонов и названий мессенджеров — Kwork это запрещает.
+- Никаких цен, сумм и скидок в названии, описании и requirements: цена — только в поле price_rub,
+  иначе модерация Kwork отклонит кворк за расхождение цен.
 - requirements — что покупатель присылает для старта ({CONFIG.requirements_min}–{CONFIG.requirements_max} символов).
 - category_hint — СТРОГО одна строка из списка рубрик Kwork ниже, как написано.
 - Цена в рублях — одна из допустимых на Kwork: {", ".join(str(p) for p in PRICES if p >= profile.get('min_price', 0))};
   срок 1–30 дней — реалистично для объёма работы.
 - volume — объём услуг в 1 кворке: что входит в цену, с числом, до 60 символов.
-- cover_text — 2–5 слов крупно на обложку; у каждого кворка свой.
+- attribute_hints — 3–8 слов для полей рубрики Kwork («Платформа», «Язык разработки», «Программа»…):
+  только то, что правда относится к услуге (Telegram, Python, Excel, Figma, Wildberries).
+- cover_text — 2–5 слов крупно на обложку; у каждого кворка свой. Без цен, сроков, скидок и
+  процентов: модерация Kwork отклоняет обложку с ценой.
+- cover_points — 3 пункта на обложку под заголовком, до 28 символов: что получит покупатель.
+  Целые слова, без сокращений, без ошибок — модерация проверяет орфографию на обложке.
 - Обещай только то, что фрилансер реально сделает; без гарантий дохода и позиций.
 
 РУБРИКИ KWORK:
@@ -244,6 +261,68 @@ def uniqueness_report(uid: int) -> tuple[int, int]:
     old = [h["fp"] for h in db.load_history(uid) if h.get("fp") is not None]
     pics = sum(1 for i, a in enumerate(marks) for b in marks[i + 1:] + old if images.covers_similar(a, b))
     return texts, pics
+
+
+COVER_TEXT_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["covers"],
+    "properties": {"covers": {"type": "array", "items": {
+        "type": "object", "additionalProperties": False, "required": ["no", "text", "points"],
+        "properties": {"no": {"type": "integer"}, "text": {"type": "string"},
+                       "points": {"type": "array", "items": {"type": "string"}}}}}},
+}
+
+
+def cover_texts(items: list[dict], llm=None) -> list[dict]:
+    """Текст и 3 пункта на обложку по названию (и описанию) кворка — для кворков, где их нет."""
+    if not items:
+        return []
+    llm = llm or _llm()
+    out = []
+    for i in range(0, len(items), 40):
+        chunk = items[i:i + 40]
+        data = llm.ask("Для каждого кворка Kwork придумай обложку: text — 2–5 слов в именительном падеже, "
+                       "о чём услуга; points — 3 пункта до 28 символов: что получит покупатель. Целые слова, "
+                       "без сокращений и обрывов, грамотно — модерация Kwork отклоняет обложки с ошибками. "
+                       "Не помещается — сформулируй короче. Без цен, сроков, скидок, процентов и контактов.\n\n"
+                       + "\n".join(f"{n}. {it['title']} — {it.get('description', '')[:200]}" for n, it in enumerate(chunk, 1)),
+                       system=SYSTEM, schema=COVER_TEXT_SCHEMA, effort="high", max_tokens=16000)
+        got = {c["no"]: c for c in data.get("covers", [])}
+        out += [{"text": got.get(n, {}).get("text", ""), "points": got.get(n, {}).get("points", [])}
+                for n in range(1, len(chunk) + 1)]
+    return out
+
+
+def ensure_cover_points(uid: int, llm=None) -> int:
+    """Пункты на обложку кворкам, созданным до их появления. Возвращает, скольким дописали."""
+    from .kwork_rules import fit_cover_points
+
+    listings = db.load_listings(uid)
+    todo = [l for l in listings if not l.get("own_photo") and not l.get("cover_points")]
+    for l, extra in zip(todo, cover_texts(todo, llm)):
+        l["cover_points"] = fit_cover_points(extra["points"])
+    if todo:
+        db.save_listings(uid, listings)
+    return len(todo)
+
+
+def needs_attributes(uid: int) -> bool:
+    from . import kwork_fields
+
+    return any(l.get("attributes_cat") != l.get("category_id") and kwork_fields.tree_for(l.get("category_id"))
+               for l in db.load_listings(uid))
+
+
+def ensure_attributes(uid: int, llm=None) -> int:
+    """Варианты полей рубрики Kwork («Тип», «Язык разработки», «Платформа»…) кворкам без них —
+    по ним расширение отмечает поля. Возвращает, у скольких кворков поля нужно проверить вручную."""
+    from . import kwork_fields
+
+    listings = db.load_listings(uid)
+    if kwork_fields.choose(listings, llm or _llm(), system=SYSTEM):
+        db.save_listings(uid, listings)
+    return sum(1 for l in listings if l.get("attributes_guessed"))
 
 
 def portfolio_note(uid: int) -> str:
@@ -287,6 +366,8 @@ def generate_listings(uid: int, progress: dict, llm=None) -> list[dict]:
             if idea is None:
                 continue
             errors = normalize(cand) + validate(cand)
+            errors += [e for e in moderation.text_problems(" ".join([cand["title"], cand["description"], cand["requirements"]]))
+                       if "контакт" not in e]  # контакты validate уже проверил
             if cand["price_rub"] < profile.get("min_price", 0):
                 errors.append(f"цена ниже {profile['min_price']} ₽")
             with lock:
@@ -336,6 +417,21 @@ def make_images(uid: int, progress: dict) -> None:
     images.unique_covers(uid, db.load_listings(uid), progress)
 
 
+def check_backgrounds(uid: int, progress: dict, llm=None) -> None:
+    """ИИ-фон с чужими надписями (логотип, водяной знак, «текст» нейросети) перерисовываем один раз:
+    заголовок обложки пишем мы, лишние буквы на фоне — риск отказа модерации."""
+    try:
+        llm = llm or _llm()
+        bad = [bg for bg in images.backgrounds(uid) if moderation.has_text(bg.read_bytes(), llm)]
+    except Exception as e:  # noqa: BLE001 — без проверки фоны всё равно годятся
+        progress["error"] = f"проверка фонов: {type(e).__name__}: {e}"[:300]
+        return
+    for bg in bad:
+        bg.unlink()
+    if bad:
+        images.make_backgrounds(uid, progress)
+
+
 def generate_all(uid: int, count: int, progress: dict) -> None:
     """Полный цикл для новой партии: общие фоны → идеи → тексты → уникальные обложки."""
     if BOT_CONFIG.images_enabled and not images.backgrounds(uid):
@@ -344,6 +440,7 @@ def generate_all(uid: int, count: int, progress: dict) -> None:
         except Exception as e:  # noqa: BLE001 — без описания фоны всё равно получатся, просто общее
             progress["error"] = f"описание для картинок: {type(e).__name__}: {e}"[:300]
         images.make_backgrounds(uid, progress)
+        check_backgrounds(uid, progress)
     generate_ideas(uid, count, progress)
     generate_listings(uid, progress)
     make_images(uid, progress)
@@ -439,8 +536,11 @@ def reset(uid: int) -> None:
     history = db.load_history(uid)
     for l in db.load_listings(uid):
         cover = db.cover_path(uid, l["id"])
-        history.append({"title": l["title"], "description": l["description"],
-                        "fp": l.get("fp") or (images.cover_fingerprint(cover) if cover.exists() else None)})
+        history.append({"id": l["id"], "title": l["title"], "description": l["description"],
+                        "fp": l.get("fp") or (images.cover_fingerprint(cover) if cover.exists() else None),
+                        "cover_text": l.get("cover_text", ""), "cover_points": l.get("cover_points", []),
+                        "category_hint": l.get("category_hint", ""),
+                        "own_photo": bool(l.get("own_photo"))})
     db.save_history(uid, history)
     for sub in ("covers", "examples", "backgrounds", "photos"):
         shutil.rmtree(db.user_dir(uid) / sub, ignore_errors=True)

@@ -43,21 +43,34 @@ COLUMNS = [
 
 EXTENSION_DIR = Path(__file__).resolve().parent.parent / "kwork_extension"
 
-EXTENSION_HELP = (
-    "🧩 <b>Расширение для выкладки кворков</b>\n\n"
-    "<b>Установка (один раз, Chrome или Яндекс Браузер):</b>\n"
-    "1. Распакуйте этот архив в любую папку.\n"
-    "2. Откройте адрес <code>chrome://extensions</code> (в Яндекс Браузере — <code>browser://extensions</code>).\n"
-    "3. Включите «Режим разработчика» (переключатель справа вверху).\n"
-    "4. Нажмите «Загрузить распакованное расширение» и выберите распакованную папку.\n\n"
-    "<b>Выкладка:</b> откройте kwork.ru — справа внизу появится панель. Выберите в ней kwork.zip из бота, "
-    "задайте «Проверять вручную первых» и «Всего за запуск» и нажмите «Старт».\n"
-    "При ручной проверке расширение заполняет форму и ждёт, пока вы нажмёте «Готово»; дальше — само.\n"
-    "В рубриках, где Kwork требует портфолио (дизайн, сайты, видео, аудио), расширение остановится на шаге "
-    "«Портфолио»: добавьте свои работы и нажмите «Готово».\n\n"
-    "<b>Обновление:</b> замените файлы в папке расширения новыми и нажмите ↻ у расширения на странице "
-    "расширений. Номер версии виден в заголовке панели."
-)
+def extension_version() -> str:
+    return json.loads((EXTENSION_DIR / "manifest.json").read_text(encoding="utf-8"))["version"]
+
+
+def extension_filename() -> str:
+    return f"Расширение_Kwork_v{extension_version()}.zip"
+
+
+def extension_help() -> str:
+    v = extension_version()
+    return (
+        f"🧩 <b>Расширение для выкладки кворков, версия {v}</b>\n\n"
+        "<b>Если расширение уже стоит — сначала удалите старое.</b> Откройте <code>browser://extensions</code> "
+        "(в Chrome — <code>chrome://extensions</code>), у «Kwork — выкладка кворков» нажмите «Удалить». "
+        "Просто заменить файлы ненадёжно: браузер может и дальше загружать старую папку.\n\n"
+        "<b>Установка:</b>\n"
+        f"1. Распакуйте этот архив. Появится папка <code>kwork_extension_v{v}</code>.\n"
+        "2. На странице расширений включите «Режим разработчика» (переключатель справа вверху).\n"
+        f"3. Нажмите «Загрузить распакованное расширение» и выберите папку <code>kwork_extension_v{v}</code>.\n"
+        f"4. Обновите страницу kwork.ru. В заголовке панели должно быть <b>v{v}</b>. Нет номера или другой — "
+        "работает старая копия, удалите её.\n\n"
+        "<b>Выкладка:</b> в панели нажмите «Выберите файл» и выберите <b>kwork.zip</b> — архив с кворками "
+        "(кнопка «📦 Скачать архивом»), а не этот архив расширения. Задайте «Проверять вручную первых» "
+        "и «Всего за запуск» и нажмите «Старт».\n"
+        "При ручной проверке расширение заполняет форму и ждёт, пока вы нажмёте «Готово»; дальше — само.\n"
+        "В рубриках, где Kwork требует портфолио (дизайн, сайты, видео, аудио), расширение остановится на шаге "
+        "«Портфолио»: добавьте свои работы и нажмите «Готово»."
+    )
 
 
 def extension_zip() -> bytes:
@@ -66,7 +79,7 @@ def extension_zip() -> bytes:
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(EXTENSION_DIR.iterdir()):
             if f.is_file():
-                z.write(f, f"kwork_extension/{f.name}")
+                z.write(f, f"kwork_extension_v{extension_version()}/{f.name}")
     return buf.getvalue()
 
 
@@ -88,6 +101,8 @@ def build_zip(uid: int) -> bytes:
         # (JPEG всё равно не сжимается).
         z.writestr("listings.json", json.dumps(listings, ensure_ascii=False, indent=2), compress_type=zipfile.ZIP_STORED)
         z.writestr("КАК_ВЫЛОЖИТЬ.txt", HOW_TO)
+        # Для какой версии расширения собран архив: более старое расширение скажет «обновите».
+        z.writestr("kwork_meta.json", json.dumps({"extension_version": extension_version()}), compress_type=zipfile.ZIP_STORED)
         for l in listings:
             cover = db.cover_path(uid, l["id"])
             if cover.exists() and cover.stat().st_size <= MIN_COVER_BYTES:  # обложки старых партий

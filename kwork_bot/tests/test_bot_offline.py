@@ -61,6 +61,7 @@ class FakeLLM:
 
     def __init__(self, broken: set[int] = frozenset()):
         self.broken = set(broken)  # номера идей, которые в первый раз «пишутся» с ошибкой
+        self.ocr = ""  # текст, который «видно» на проверяемых картинках
         self.prompts: list[str] = []
         self.lock = threading.Lock()
 
@@ -72,7 +73,17 @@ class FakeLLM:
                     "summary": "вы дизайнер логотипов", "visual_brief": "pencils, sketches, color swatches"}
         if list(schema["properties"]) == ["items"]:  # рубрики для загруженных кворков
             nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
-            return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}"} for n in nos]}
+            return {"items": [{"row": n, "category_hint": "Дизайн > Логотипы", "volume": f"1 макет №{n}",
+                               "attribute_hints": ["Figma", "Логотип"]} for n in nos]}
+        if list(schema["properties"]) == ["text", "watermark"]:  # что написано на картинке
+            return {"text": self.ocr, "watermark": False}
+        if list(schema["properties"]) == ["covers"]:  # тексты обложек для кворков прошлых партий
+            nos = [int(line.split(".")[0]) for line in prompt.splitlines() if line[:1].isdigit()]
+            return {"covers": [{"no": n, "text": f"Обложка {n}", "points": ["Быстрый старт", "Скидка 10%", "Поддержка"]}
+                               for n in nos]}
+        if list(schema["properties"]) == ["kworks"]:  # варианты полей рубрики Kwork
+            nos = [int(line.split(".")[0]) for line in prompt.split("КВОРКИ:")[1].splitlines() if line[:1].isdigit()]
+            return {"kworks": [{"no": n, "ids": []} for n in nos]}
         if list(schema["properties"]) == ["visual_brief"]:
             return {"visual_brief": "pencils and paper"}
         if "ideas" in schema["properties"]:
@@ -101,6 +112,10 @@ class Base(unittest.TestCase):
             patcher = mock.patch.object(BOT_CONFIG, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)
+        # И в платный/настоящий ИИ тоже: тесты, которым нужен свой ответ, передают llm сами.
+        patcher = mock.patch.object(content, "_llm", lambda *a, **k: FakeLLM())
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.uid = 42
         db.save_profile(self.uid, {**db.load_profile(self.uid), "skills": "логотипы", "min_price": 1000, "palette": 2})
 
@@ -634,6 +649,7 @@ class BulkImportTests(Base):
         # Объёма в таблице нет — его подобрал ИИ вместе с рубрикой; рубрика требует портфолио.
         self.assertEqual(sorted(l["volume"] for l in listings), ["1 макет №2", "1 макет №3", "1 макет №5"])
         self.assertTrue(all(l["needs_portfolio"] for l in listings))
+        self.assertTrue(all(l["attribute_hints"] == ["Figma", "Логотип"] for l in listings))  # для полей рубрики
         self.assertIn("3 кворков", content.portfolio_note(self.uid))
         self.assertEqual(content.uniqueness_report(self.uid), (0, 0))  # копию фото уникализировали
         # Фото клиента не перерисовывается при правке цены, а «Другой фон» обрабатывает его, а не рисует обложку.
@@ -642,6 +658,25 @@ class BulkImportTests(Base):
         self.assertEqual(db.cover_path(self.uid, listings[0]["id"]).read_bytes(), before)
         content.next_cover(self.uid, listings[0]["id"])
         self.assertNotEqual(db.cover_path(self.uid, listings[0]["id"]).read_bytes(), before)
+
+    def test_photos_with_price_or_contacts_are_rejected(self):
+        """Модерация Kwork отклоняет обложку с ценой, скидкой, контактами — такие фото не берём."""
+        from kwork_bot import bulk, moderation
+
+        llm = FakeLLM()
+        llm.ocr = "ЛОГОТИП\nСКИДКА 50%\n@designer"
+        disk_mock = self.make_disk()
+        with disk_mock:
+            st = bulk.prepare(self.uid, "https://disk.yandex.ru/d/abc", {}, llm=llm)
+        self.assertEqual(st["rows"], [])
+        problems = " ".join(st["problems"])
+        self.assertIn("цена, скидка или проценты", problems)
+        self.assertIn("контакты, ссылка или @логин", problems)
+        llm.ocr = "ЛОГОТИП ДЛЯ БИЗНЕСА"  # обычная надпись — фото годится
+        with disk_mock:
+            self.assertEqual(len(bulk.prepare(self.uid, "https://disk.yandex.ru/d/abc", {}, llm=llm)["rows"]), 3)
+        self.assertEqual(moderation.text_problems("до 1000 символов, рост продаж на 30%"), [])
+        self.assertEqual(len(moderation.text_problems("Сделаю логотип всего за 500 руб")), 1)
 
     def test_without_choice_twins_stay(self):
         from kwork_bot import bulk
@@ -766,11 +801,116 @@ class KworkRulesTests(unittest.TestCase):
         self.assertEqual(logo["volume"], "1 логотип в 3 вариантах")
         self.assertEqual(helper["volume"], r.DEFAULT_VOLUME)
         self.assertEqual((logo["needs_portfolio"], helper["needs_portfolio"]), (True, False))
+        bot = {"category_hint": "Скрипты, боты", "attribute_hints": [" Telegram ", "", "Python", 3] + ["x"] * 20}
+        r.normalize(bot)
+        self.assertEqual(bot["attribute_hints"][:3], ["Telegram", "Python", "3"])
+        self.assertLessEqual(len(bot["attribute_hints"]), 10)
+        self.assertIn("attribute_hints", content.BOT_LISTING_SCHEMA["properties"]["listings"]["items"]["required"])
         long = r.fit_volume("слово " * 30)
         self.assertLessEqual(len(long), r.VOLUME_MAX)
         self.assertFalse(long.endswith(" "))
         types = {c.get("portfolio") for s in r.sections() for c in s["subs"]}
         self.assertEqual(types, {"photo", "video", "audio", "pdf", "none"})  # у каждой рубрики есть тип
+
+
+class KworkFieldsTests(Base):
+    """Поля рубрик Kwork («Тип», «Язык разработки», «Платформа»…) — снимок дерева и выбор вариантов."""
+
+    def test_snapshot_covers_all_categories(self):
+        from kwork_bot import kwork_fields as kf
+        from kwork_bot.kwork_rules import sections
+
+        ids = [c["id"] for s in sections() for c in s["subs"]]
+        self.assertTrue(all(isinstance(kf.tree_for(i), list) for i in ids))
+        self.assertGreater(sum(1 for i in ids if kf.tree_for(i)), 45)
+        bots = kf.tree_for(41)
+        self.assertEqual(bots[0]["title"], "Тип")
+        chat = next(o for o in bots[0]["options"] if o["label"] == "Чат-боты")
+        self.assertIn("Платформа", [f["title"] for f in chat["fields"]])
+        self.assertIn("Поле «Тип»", kf.describe(bots))
+
+    def test_resolve_follows_tree_and_limits(self):
+        from kwork_bot import kwork_fields as kf
+
+        tree = [{"id": "1", "title": "Тип", "required": True, "multiple": False, "max": 0, "options": [
+            {"id": "10", "label": "Парсеры"},
+            {"id": "11", "label": "Чат-боты", "fields": [
+                {"id": "2", "title": "Платформа", "required": True, "multiple": True, "max": 2, "options": [
+                    {"id": "20", "label": "Telegram"}, {"id": "21", "label": "Сайт"}, {"id": "22", "label": "Email"},
+                    {"id": "23", "label": "Другие"}]},
+                {"id": "3", "title": "Язык", "required": True, "multiple": True, "max": 0, "options": [
+                    {"id": "30", "label": "C++"}, {"id": "31", "label": "Python"}]}]}]}]
+        attrs, guessed = kf.resolve(tree, ["11", "22", "20", "21", "31", "99"])
+        self.assertEqual([(a["field"], a["ids"]) for a in attrs],
+                         [("Тип", ["11"]), ("Платформа", ["22", "20"]), ("Язык", ["31"])])  # лимит 2, порядок ИИ
+        self.assertEqual(guessed, [])
+        attrs, guessed = kf.resolve(tree, ["11", "31"])  # платформу ИИ не выбрал — «Другие», на проверку
+        self.assertEqual(attrs[1], {"field": "Платформа", "ids": ["23"], "labels": ["Другие"]})
+        self.assertEqual(guessed, ["Платформа"])
+        attrs, _ = kf.resolve(tree, ["10", "20"])  # «Платформа» не показывается под «Парсерами»
+        self.assertEqual([a["field"] for a in attrs], ["Тип"])
+
+    def test_archive_gets_fields_for_old_kworks(self):
+        """Кворки без полей (созданные раньше) получают их при сборке архива; повторно ИИ не спрашиваем."""
+        db.save_listings(self.uid, [fake_listing(1, id="a1", category_hint="Разработка и IT > Скрипты, боты и mini apps")])
+        from kwork_bot.kwork_rules import normalize
+        listings = db.load_listings(self.uid)
+        normalize(listings[0])
+        db.save_listings(self.uid, listings)
+        self.assertTrue(content.needs_attributes(self.uid))
+        llm = FakeLLM()
+        self.assertEqual(content.ensure_attributes(self.uid, llm=llm), 1)  # ИИ ничего не выбрал — проверить вручную
+        l = db.load_listings(self.uid)[0]
+        self.assertEqual(l["attributes"][0]["field"], "Тип")
+        self.assertIn("Тип", l["attributes_guessed"])
+        self.assertFalse(content.needs_attributes(self.uid))
+        content.ensure_attributes(self.uid, llm=llm)
+        self.assertEqual(len(llm.prompts), 1)
+
+
+class CoverModerationTests(Base):
+    """Модерация Kwork отклоняет обложку с ценой, если она расходится с ценой кворка."""
+
+    def test_no_price_on_cover(self):
+        from kwork_bot.kwork_rules import fit_cover_text
+
+        self.assertEqual(fit_cover_text("Бот для записи", "Создам бота"), "Бот для записи")
+        for bad in ("Логотип от 1500 ₽", "Скидка 50%", "Сайт за 3 000 руб", ""):
+            cleaned = fit_cover_text(bad, "Создам сайт-визитку на Tilda")
+            self.assertEqual(cleaned, "сайт-визитку на Tilda", bad)
+        # На обложке только заголовок: ни цены, ни срока.
+        from PIL import ImageDraw
+
+        drawn = []
+        real = ImageDraw.ImageDraw.text
+        with mock.patch.object(ImageDraw.ImageDraw, "text", lambda self, xy, text, *a, **k: (drawn.append(text), real(self, xy, text, *a, **k))):
+            images.render_cover(self.uid, fake_listing(1, id="p1", price_rub=1500, days=2, cover_text="Логотип"))
+        self.assertEqual(drawn, ["ЛОГОТИП"])
+        # Внизу — пункты «что получит покупатель»; цены и контакты в них не попадают.
+        from kwork_bot.kwork_rules import fit_cover_points
+
+        self.assertEqual(fit_cover_points(["Логотип в 3 вариантах", "Скидка 20%", "пишите @me", "x" * 40, "Исходники"]),
+                         ["Логотип в 3 вариантах", "Исходники"])
+        drawn.clear()
+        with mock.patch.object(ImageDraw.ImageDraw, "text", lambda self, xy, text, *a, **k: (drawn.append(text), real(self, xy, text, *a, **k))):
+            images.render_cover(self.uid, fake_listing(1, id="p1", cover_text="Логотип", cover_points=["Три варианта", "Исходники"]))
+        self.assertEqual(drawn, ["ЛОГОТИП", "Три варианта", "Исходники"])
+
+    def test_old_kworks_get_cover_points(self):
+        """Кворкам, созданным до пунктов на обложке, их дописывает ИИ (без скидок и цен)."""
+        db.save_listings(self.uid, [fake_listing(1, id="a1"), fake_listing(2, id="a2", cover_points=["Свой пункт"])])
+        self.assertEqual(content.ensure_cover_points(self.uid, llm=FakeLLM()), 1)
+        points = [l.get("cover_points") for l in db.load_listings(self.uid)]
+        self.assertEqual(points, [["Быстрый старт", "Поддержка"], ["Свой пункт"]])
+        self.assertEqual(content.ensure_cover_points(self.uid, llm=FakeLLM()), 0)
+
+    def test_old_covers_are_redrawn(self):
+        self.assertFalse(images.outdated_covers([fake_listing(2, id="o2", own_photo=True)]))  # фото клиента не трогаем
+        ls = [fake_listing(1, id="o1")]
+        db.save_listings(self.uid, ls)
+        self.assertTrue(images.outdated_covers(ls))  # обложки старых партий — с ценой
+        images.unique_covers(self.uid, ls)
+        self.assertFalse(images.outdated_covers(db.load_listings(self.uid)))
 
 
 class CoverWeightTests(unittest.TestCase):
@@ -788,13 +928,18 @@ class CoverWeightTests(unittest.TestCase):
 
 class ExtensionPackageTests(unittest.TestCase):
     def test_extension_zip(self):
-        from kwork_bot.export import extension_zip
+        from kwork_bot.export import extension_filename, extension_help, extension_version, extension_zip
 
         z = zipfile.ZipFile(io.BytesIO(extension_zip()))
         names = set(z.namelist())
+        # Папка и файл — с номером версии: новую папку не спутать со старой при обновлении.
+        folder = f"kwork_extension_v{extension_version()}"
         for f in ("manifest.json", "background.js", "filler.js", "panel.js", "unzip.js"):
-            self.assertIn(f"kwork_extension/{f}", names)
-        manifest = json.loads(z.read("kwork_extension/manifest.json"))
+            self.assertIn(f"{folder}/{f}", names)
+        self.assertIn(extension_version(), extension_filename())
+        self.assertIn(folder, extension_help())
+        self.assertIn("Удалить", extension_help())
+        manifest = json.loads(z.read(f"{folder}/manifest.json"))
         self.assertEqual(manifest["manifest_version"], 3)
         self.assertIn("https://kwork.ru/*", manifest["host_permissions"])
         self.assertLessEqual(int(manifest["minimum_chrome_version"]), 109)  # Chrome на Windows 7
@@ -810,6 +955,9 @@ class ExtensionPackageTests(unittest.TestCase):
             z = zipfile.ZipFile(io.BytesIO(build_zip(7)))
         self.assertEqual(z.getinfo("listings.json").compress_type, zipfile.ZIP_STORED)
         self.assertEqual(z.getinfo("covers/x1.jpg").compress_type, zipfile.ZIP_STORED)
+        # Версия расширения, для которой собран архив: старое расширение попросит обновиться.
+        from kwork_bot.export import extension_version
+        self.assertEqual(json.loads(z.read("kwork_meta.json")), {"extension_version": extension_version()})
 
     def test_old_kworks_get_volume_in_archive(self):
         """Кворки, созданные до поля «Объём», в архиве получают объём — иначе Kwork не даст сохранить."""
