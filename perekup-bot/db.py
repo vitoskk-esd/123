@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id
 CREATE INDEX IF NOT EXISTS events_kind ON events(kind, at);
 CREATE TABLE IF NOT EXISTS marks (key TEXT PRIMARY KEY, at REAL);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS teasers (chat_id INTEGER, msg_id INTEGER, at REAL, PRIMARY KEY (chat_id, msg_id));
 CREATE TABLE IF NOT EXISTS support (admin_id INTEGER, msg_id INTEGER, user_id INTEGER, at REAL, PRIMARY KEY (admin_id, msg_id));
 """
 
@@ -339,6 +340,17 @@ class DB:
     async def support_user(self, admin_id: int, msg_id: int) -> int | None:
         row = await self._one("SELECT user_id FROM support WHERE admin_id=? AND msg_id=?", admin_id, msg_id)
         return row["user_id"] if row else None
+
+    async def add_teaser(self, chat_id: int, msg_id: int) -> None:
+        """Анонс «скоро в продаже»: запоминаем, чтобы прислать пост, когда его отредактируют в «в продаже»."""
+        await self._run("INSERT OR IGNORE INTO teasers (chat_id, msg_id, at) VALUES (?,?,?)", chat_id, msg_id, time.time())
+        await self._run("DELETE FROM teasers WHERE at<?", time.time() - 3 * DAY)
+
+    async def is_teaser(self, chat_id: int, msg_id: int) -> bool:
+        return bool(await self._one("SELECT 1 FROM teasers WHERE chat_id=? AND msg_id=?", chat_id, msg_id))
+
+    async def drop_teaser(self, chat_id: int, msg_id: int) -> None:
+        await self._run("DELETE FROM teasers WHERE chat_id=? AND msg_id=?", chat_id, msg_id)
 
     async def get_setting(self, key: str) -> str:
         row = await self._one("SELECT value FROM settings WHERE key=?", key)

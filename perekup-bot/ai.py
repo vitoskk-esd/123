@@ -39,13 +39,14 @@ def _schema(marker_ids: list[str]) -> dict:
         "type": "object",
         "properties": {
             "is_car_sale": {"type": "boolean"},
+            "is_teaser": {"type": "boolean"},
             "make": {"type": "string"}, "model": {"type": "string"},
             "year": {"type": "integer"}, "price_rub": {"type": "integer"}, "mileage_km": {"type": "integer"},
             "city": {"type": "string"},
             "accidents": {"type": "integer"},
             "markers": {"type": "array", "items": {"type": "string", "enum": marker_ids}},
         },
-        "required": ["is_car_sale", "markers", "accidents"],
+        "required": ["is_car_sale", "is_teaser", "markers", "accidents"],
     }
 
 
@@ -55,6 +56,8 @@ def _prompt(d: Dictionary, text: str) -> str:
         "Ты помогаешь перекупщику автомобилей. Ниже пост из Telegram-канала. Внимательно прочитай его целиком.\n"
         "1. is_car_sale: true, только если это объявление о ПРОДАЖЕ конкретного легкового автомобиля. "
         "«Куплю», реклама, услуги, подбор, розыгрыши, новости — false.\n"
+        "   is_teaser: true, если это только АНОНС — машина появится в продаже позже («скоро в продаже», "
+        "«через 5 минут в продаже», «скоро выставим»), даже если характеристики уже расписаны.\n"
         "2. Какой автомобиль ПРОДАЁТСЯ (make и model латиницей, как пишет производитель). Если в посте упомянуты другие "
         "машины для сравнения («по цене плохой приоры», «дешевле камри», «рассмотрю обмен на…») — их не бери.\n"
         "3. year, price_rub (цена в рублях; цена в другой валюте — не заполняй), mileage_km, city — только если есть в тексте.\n"
@@ -90,6 +93,9 @@ async def ask(d: Dictionary, text: str, key: str, model: str) -> dict | None:
 def apply(L: Listing, r: dict, d: Dictionary) -> Listing:
     """Поправить разбор правил ответом ИИ. ИИ сказал «это не продажа» — машину убираем, пост никому не уйдёт."""
     L.parsed_by = "ai"
+    if r.get("is_teaser"):
+        L.teaser = True
+        return L
     if not r.get("is_car_sale"):
         L.make = L.model = None
         return L

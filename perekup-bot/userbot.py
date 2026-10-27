@@ -78,6 +78,7 @@ class Reader:
         self.client = client
         await self.ctx.db.set_setting("session", client.session.save())
         client.add_event_handler(self._on_message, events.NewMessage())
+        client.add_event_handler(self._on_edit, events.MessageEdited())
         await self.ensure_buffer()
         await self.ctx.refresh_channels()
         self.runner = asyncio.create_task(self.run())
@@ -120,6 +121,16 @@ class Reader:
             return
         photo = self._photo(e, m.id) if m.photo else None
         task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, m.date.timestamp(), photo)))
+        self.tasks.add(task)
+        task.add_done_callback(self.tasks.discard)
+
+    async def _on_edit(self, e: events.MessageEdited.Event) -> None:
+        """Анонс «скоро в продаже» отредактировали в «в продаже» — теперь это продажа, присылаем."""
+        m = e.message
+        if not m.message or e.chat_id not in self.ctx.channels or not await self.ctx.db.is_teaser(e.chat_id, m.id):
+            return
+        photo = self._photo(e, m.id) if m.photo else None
+        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, time.time(), photo)))
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
 

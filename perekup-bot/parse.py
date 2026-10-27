@@ -31,6 +31,7 @@ class Listing:
     region: str | None = None
     markers: list[str] = field(default_factory=list)
     accidents: int | None = None    # сколько ДТП, если продавец написал; 0 — пишет, что не было
+    teaser: bool = False            # анонс «скоро в продаже» — не шлём, ждём, когда выставят
     tokens: list[str] = field(default_factory=list)
     parsed_by: str = "rules"
 
@@ -178,6 +179,20 @@ def parse_accidents(text: str) -> int | None:
     return NUM_WORDS[m.group(1)] if m else None
 
 
+WHEN = r"(?:\d+|пару|пар\w*|несколько|полчаса|час\w*|минут\w*|день|дня)"
+TEASER = re.compile(
+    r"скоро\s+(?:будет\s+)?(?:в\s+)?продаж"                                 # «скоро в продаже», «скоро продажа»
+    rf"|(?:через|в\s+течени\w+)\s+{WHEN}\s*(?:минут\w*|мин\.?|час\w*|ч\.?)?\s+(?:будет\s+)?(?:в\s+)?продаж"   # «через 5 минут в продаже»
+    rf"|в\s+продаж\w*\s+(?:будет\s+)?через\s+{WHEN}"                       # «в продаже через 10 минут»
+    r"|скоро\s+(?:выставим|выставлю|выложим|выложу|опубликуем|появится)"
+    r"|готовим\s+к\s+продаже|анонс\b|продажа\s+начн\w*|старт\s+продаж")
+
+
+def is_teaser(text: str) -> bool:
+    """Анонс, а не продажа: «скоро в продаже», «через 5 минут в продаже» — машину ещё нельзя купить."""
+    return bool(TEASER.search(text.lower().replace("ё", "е")))
+
+
 def looks_like_ad(text: str) -> bool:
     """Похоже на объявление о продаже — стоит ли звать ИИ, если правила не нашли машину или цену."""
     t = text.lower()
@@ -192,6 +207,7 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
     L.year = parse_year(text)
     L.mileage = parse_mileage(text)
     L.accidents = parse_accidents(text)
+    L.teaser = is_teaser(text)
     regions = d.find_regions(tokens)
     L.region = regions[0] if regions else channel_region
     # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)

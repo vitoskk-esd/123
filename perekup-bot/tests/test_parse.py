@@ -120,3 +120,15 @@ def test_markers_understand_negation(text, expected):
 def test_accidents_count(text, expected):
     from parse import parse_accidents
     assert parse_accidents(text) == expected
+
+
+@pytest.mark.parametrize("text,teaser", [
+    ("СКОРО В ПРОДАЖЕ 🔥 Камри 2012", True), ("Через 5 минут в продаже!", True), ("через 10 мин в продаже", True),
+    ("В продаже через 10 минут", True), ("скоро продажа", True), ("Скоро выставим камри", True),
+    ("Анонс: Toyota Camry", True), ("через пару минут будет в продаже", True),
+    ("В ПРОДАЖЕ! Камри 2012, 900к", False), ("Камри 2012, продам срочно, скоро уезжаю", False),
+    ("Продаю, через неделю переезд", False), ("Через час буду на месте, звоните", False), ("ТОРГ. В продаже до пятницы", False),
+])
+def test_teaser(text, teaser):
+    from parse import is_teaser
+    assert is_teaser(text) is teaser

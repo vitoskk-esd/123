@@ -467,3 +467,16 @@ async def test_ai_check_fixes_rules(env, monkeypatch):
     assert len(calls) == n
     r = await process(bot, ctx, post(CH1, "Toyota Camry 2011 молчит, 850 000 ₽, требует вложений"))
     assert r.sent == [USER] and r.listing.parsed_by == "rules" and "требует вложений" in s.texts(USER)[-1]
+
+
+async def test_teaser_not_sent_until_edited_into_sale(env):
+    """«Через 5 минут в продаже» — не шлём; канал отредактировал пост в «В ПРОДАЖЕ» — шлём."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1 млн")
+    msg_id = next(ids)
+    teaser = "⏳ Через 5 минут в продаже!\nToyota Camry 2012\nЦена 900 000 ₽\nМосква"
+    r = await process(bot, ctx, RawPost(CH1, msg_id, teaser, time.time()))
+    assert r.teaser and r.sent == [] and await ctx.db.is_teaser(CH1, msg_id)
+    sale = "✅ В ПРОДАЖЕ!\nToyota Camry 2012\nЦена 900 000 ₽\nМосква"
+    r = await process(bot, ctx, RawPost(CH1, msg_id, sale, time.time()))       # то же сообщение после правки
+    assert r.sent == [USER] and not await ctx.db.is_teaser(CH1, msg_id)

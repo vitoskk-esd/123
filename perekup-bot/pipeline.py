@@ -56,6 +56,7 @@ class Result:
     samples: int = 0
     sent: list[int] = field(default_factory=list)
     latency_ms: int | None = None
+    teaser: bool = False         # анонс «скоро в продаже» — не шлём
 
 
 class RateLimiter:
@@ -162,10 +163,16 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] |
     """Разбор (правила + ИИ-проверка), дубль, рынок. Без отправки — удобно и для тестов."""
     r = Result()
     L = r.listing = parse_post(raw.text, ctx.dict, channel.get("region"))
+    if L.teaser:                            # «скоро в продаже» — купить ещё нельзя, не отвлекаем людей
+        r.teaser = True
+        return r
     if ctx.cfg.ai_on and worth_ai(L, raw.text, filters or [], ctx.dict):
         checked = await ai.ask(ctx.dict, raw.text, ctx.cfg.ai_key, ctx.cfg.ai_model)
         if checked:
             L = r.listing = ai.apply(L, checked, ctx.dict)
+            if L.teaser:
+                r.teaser = True
+                return r
     if not L.is_car or not L.price:
         return r
     now = time.time()
@@ -190,6 +197,10 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     rows = await ctx.db.subscribers(channel)
     r = await analyse(ctx, raw, channel, [Filter.loads(row["data"]) for row in rows])
     L = r.listing
+    if r.teaser:
+        await ctx.db.add_teaser(raw.chat_id, raw.msg_id)   # пришлём, когда анонс отредактируют в продажу
+        return r
+    await ctx.db.drop_teaser(raw.chat_id, raw.msg_id)
     if not r.post_id:
         return r
     fp, ckey = fingerprint(raw.text), car_key(L)
