@@ -720,3 +720,35 @@ async def test_channel_waits_for_admin_approval(env):
     assert "одобрил заявку" in s.texts(USER)[-1] and "одобрил заявку" in s.texts(OTHER)[-1]
     await reader.check_approvals()                                             # повторно не пишем
     assert sum("одобрил заявку" in t for t in s.texts(USER)) == 1
+
+
+async def test_admin_moves_own_channels_to_base(env):
+    """Админ добавил каналы себе через «📢 Каналы» — /tobase делает их общими: посты идут всем, не только ему."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=ADMIN)
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=USER)
+    await ctx.db.set_channel_state(ADMIN, (await ctx.db.channel_by_tg(OWN))["id"], "own")
+    assert (await process(bot, ctx, post(OWN, "Toyota Camry 2012, 1 100 000 ₽"))).sent == [ADMIN]   # пока только у админа
+    await dp.feed_update(bot, msg("/tobase", ADMIN))
+    assert "перенесено каналов: 1" in s.texts(ADMIN)[-1] and "My Secret Cars" in s.texts(ADMIN)[-1]
+    r = await process(bot, ctx, post(OWN, "Toyota Camry 2013, 1 200 000 ₽"))
+    assert sorted(r.sent) == sorted([USER, ADMIN])
+    await dp.feed_update(bot, msg("/tobase", USER))                                          # не админ — молчим
+    assert not any("перенесено" in t for t in s.texts(USER))
+
+
+async def test_admin_adds_channels_straight_to_base(env):
+    """Админ присылает каналы через «📢 Каналы» — они сразу в общей базе для всех, без лимитов тарифа."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=ADMIN, plan="basic")       # у «Простого» своих каналов нет
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=USER)
+    await dp.feed_update(bot, cb("c:add", ADMIN))
+    assert "общую базу" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, msg("@my_secret_cars\n@avto_kzn", ADMIN))
+    reply = s.texts(ADMIN)[-1]
+    assert "«My Secret Cars» — в общей базе" in reply and "@avto_kzn» — в очереди" in reply and "PRO" not in reply
+    r = await process(bot, ctx, post(OWN, "Toyota Camry 2013, 1 200 000 ₽"))
+    assert r.sent == [USER] and r.delayed == [ADMIN]                               # у админа «Простой» — с задержкой
+    assert (await ctx.db.queued_channels())[0]["base"] == 1
+    await dp.feed_update(bot, cb("c:add"))                                          # обычный человек — как раньше, себе
+    assert "общую базу" not in s.texts(USER)[-1]

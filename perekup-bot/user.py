@@ -188,9 +188,9 @@ async def show_channels(msg: Message, ctx: Ctx, state: FSMContext, uid: int | No
 
 
 @router.callback_query(F.data == "c:add")
-async def ask_channel(cb: CallbackQuery, state: FSMContext) -> None:
+async def ask_channel(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
     await state.set_state(S.channel)
-    await cb.message.answer(T.ASK_CHANNEL)
+    await cb.message.answer(T.ASK_CHANNEL_ADMIN if await is_admin(cb, ctx) else T.ASK_CHANNEL)
     await cb.answer()
 
 
@@ -201,6 +201,8 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
         return await MENU[msg.text](msg, ctx, state) if msg.text in MENU else None
     await state.clear()
     uid = msg.from_user.id
+    if await is_admin(msg, ctx):
+        return await add_to_base(msg, ctx)
     replies, mine, upsell = [], [], False
     for line in [x for x in re.split(r"[\s,]+", msg.text) if x]:
         link = parse_link(line)
@@ -238,6 +240,36 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     markup = K.plans(plans.plans(ctx.cfg), False, only="pro") if upsell else K.menu()
     await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL, reply_markup=markup)
 
+
+
+async def add_to_base(msg: Message, ctx: Ctx) -> None:
+    """Админ присылает каналы через «📢 Каналы» — они сразу идут в общую базу для всех, без лимитов тарифа."""
+    uid = msg.from_user.id
+    replies, queued = [], []
+    for line in [x for x in re.split(r"[\s,]+", msg.text) if x]:
+        link = parse_link(line)
+        if not link:
+            replies.append(T.CHANNEL_BAD.format(link=line[:60]))
+            continue
+        kind, value = link
+        cid, _ = await ctx.db.add_channel(**{kind: value}, base=True, added_by=uid)   # свой канал админа тоже станет общим
+        await ctx.db.set_channel_state(uid, cid, None)
+        ch = await ctx.db.channel(cid)
+        name = ch["title"] or label(kind, value)
+        if ch["status"] == "joined":
+            replies.append(T.CHANNEL_BASE_ADDED.format(name=name))
+        elif ch["status"] == "awaiting":
+            await ctx.db.add_approval_waiter(cid, uid)
+            replies.append(T.CHANNEL_AWAITING.format(name=name))
+        else:
+            if ch["status"] == "failed":
+                await ctx.db._run("UPDATE channels SET status='queued', error=NULL WHERE id=?", cid)
+            await ctx.db.add_waiter(cid, uid)
+            replies.append(T.CHANNEL_BASE_QUEUED.format(name=name))
+            queued.append(cid)
+    await ctx.refresh_channels()
+    wait = await queue_wait(ctx, queued) if queued else ""
+    await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL_ADMIN, reply_markup=K.menu())
 
 
 @router.callback_query(F.data.startswith("c:base:") | F.data.startswith("c:tg:"))

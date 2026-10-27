@@ -240,6 +240,10 @@ class DB:
         return await self._all("SELECT c.* FROM channels c JOIN user_channels uc ON uc.channel_id=c.id "
                                "WHERE uc.user_id=? AND uc.state='own' AND c.base=0 ORDER BY c.id", uid)
 
+    async def channels_to_base(self, ids: list[int]) -> None:
+        """Свои каналы человека становятся общими — посты из них идут всем по их фильтрам."""
+        await self._run(f"UPDATE channels SET base=1 WHERE id IN ({','.join('?' * len(ids))})", *ids)
+
     async def off_channels(self, uid: int) -> set[int]:
         return {r["channel_id"] for r in await self._all("SELECT channel_id FROM user_channels WHERE user_id=? AND state='off'", uid)}
 

@@ -64,6 +64,7 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"{ch.get(('awaiting', 1), 0)} ждут одобрения админа, {ch.get(('failed', 1), 0)} с ошибкой · свои у людей: {ch.get(('joined', 0), 0)}\n\n"
         f"🔗 Откуда пришли:\n{src or '—'}\n\n"
         "Команды:\n/add @канал1 @канал2 — добавить каналы в общую базу\n/list — список каналов\n"
+        "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
         "/del @канал — убрать канал\n/broadcast текст — написать всем")
 
 
@@ -88,10 +89,28 @@ async def addbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
             await ctx.db.add_waiter(cid, msg.from_user.id)
             queued.append(cid)
         added.append(label(*link) + ("" if new else " (уже был)"))
+    await ctx.refresh_channels()            # уже подключённый свой канал стал общим — посты сразу всем
     await msg.answer(
         (f"В очередь на подключение: {len(added)}\n" + "\n".join(added) if added else "Пришли ссылки: /add @канал1 t.me/канал2") +
         (f"\n\nНе понял: {', '.join(bad)}" if bad else "") +
         (await queue_wait(ctx, queued) + "\nХод подключения — в /list." if queued else ""))
+
+
+@router.message(Command("tobase"))
+async def tobase(msg: Message, ctx: Ctx) -> None:
+    """/tobase — все каналы, которые админ добавил себе через «📢 Каналы», переносим в общую базу для всех."""
+    if not await is_admin(msg, ctx):
+        return
+    rows = [r for r in await ctx.db.own_channels(msg.from_user.id) if r["status"] in ("joined", "queued", "awaiting")]
+    if not rows:
+        return await msg.answer("Своих каналов нет — добавь их через «📢 Каналы» или сразу в базу: /add @канал1 @канал2")
+    await ctx.db.channels_to_base([r["id"] for r in rows])
+    await ctx.refresh_channels()
+    names = [r["title"] or (r["username"] and "@" + r["username"]) or "закрытый канал" for r in rows]
+    waiting = sum(r["status"] != "joined" for r in rows)
+    await msg.answer(f"✅ В общую базу перенесено каналов: {len(rows)}. Теперь посты из них приходят всем по их фильтрам.\n\n"
+                     + "\n".join(f"• {n}" for n in names)
+                     + (f"\n\nЕщё подключаются: {waiting} — как подключатся, тоже будут для всех." if waiting else ""))
 
 
 @router.message(Command("del"))
