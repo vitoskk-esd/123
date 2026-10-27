@@ -8,6 +8,8 @@ TIMEOUT: не успел, нет ключа, кончился лимит — р�
 import asyncio
 import json
 import logging
+import time
+import urllib.error
 import urllib.request
 
 from parse import PRICE_MAX, PRICE_MIN, YEAR_MAX, Listing
@@ -79,15 +81,39 @@ def _post(key: str, model: str, body: dict) -> dict:
     return json.loads(data["candidates"][0]["content"]["parts"][0]["text"])
 
 
+FALLBACK = "gemini-flash-lite-latest"     # Google перегружен (503) — сразу спрашиваем запасную модель
+_fails = {"n": 0, "warned": 0.0}            # сбои Google частые и короткие — в лог-тревогу не чаще раза в 30 мин
+
+
+def _busy(e: Exception) -> bool:
+    return isinstance(e, urllib.error.HTTPError) and (e.code == 429 or e.code >= 500)
+
+
 async def ask(d: Dictionary, text: str, key: str, model: str) -> dict | None:
     body = {"contents": [{"role": "user", "parts": [{"text": _prompt(d, text)}]}],
             "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": _schema(list(d.markers)),
                                  "maxOutputTokens": 500, "temperature": 0}}   # без «размышлений» — ответ за ~1 с
-    try:
-        return await asyncio.wait_for(asyncio.to_thread(_post, key, model, body), TIMEOUT + 1)
-    except Exception as e:
-        log.warning("ИИ-проверка не прошла, работаю на правилах: %s", e)
-        return None
+    deadline = time.monotonic() + TIMEOUT + 1
+    for m in dict.fromkeys((model, FALLBACK)):
+        try:
+            left = deadline - time.monotonic()
+            return await asyncio.wait_for(asyncio.to_thread(_post, key, m, body), left)
+        except Exception as e:
+            if _busy(e) and deadline - time.monotonic() > 2:
+                log.info("ИИ %s занят (%s) — спрашиваю %s", m, e, FALLBACK)
+                continue
+            _fail(e)
+            return None
+    return None
+
+
+def _fail(e: Exception) -> None:
+    _fails["n"] += 1
+    if time.monotonic() - _fails["warned"] > 1800 or not _fails["warned"]:
+        log.warning("ИИ-проверка не прошла (%s сбоев за 30 мин), работаю на правилах: %s", _fails["n"], e)
+        _fails.update(n=0, warned=time.monotonic())
+    else:
+        log.info("ИИ-проверка не прошла, работаю на правилах: %s", e)
 
 
 def apply(L: Listing, r: dict, d: Dictionary) -> Listing:
