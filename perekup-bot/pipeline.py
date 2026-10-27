@@ -23,7 +23,8 @@ from aiogram.types import LinkPreviewOptions
 import keyboards as K
 import texts as T
 from ctx import Ctx
-from db import DAY, DEDUP_DAYS, has_access
+import plans
+from db import DAY, DEDUP_DAYS
 import ai
 from parse import Listing, car_key, fingerprint, looks_like_ad, parse_post
 from query import Filter, matches
@@ -227,7 +228,8 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         uid = row["id"]
         if uid in targets or uid in already:
             continue
-        if ctx.cfg.payments_on and not has_access(row, now):
+        plan = plans.current(ctx.cfg, row, now)
+        if not plan or row["frank"] > plan.max_filters:     # нет доступа или фильтр сверх лимита тарифа
             continue
         if matches(Filter.loads(row["data"]), L, r.discount):
             targets[uid] = (row["fid"], row["text"])

@@ -76,7 +76,10 @@ class DB:
         self.conn = await aiosqlite.connect(self.path)
         self.conn.row_factory = aiosqlite.Row
         await self.conn.executescript(SCHEMA)
-        for sql in ("ALTER TABLE posts ADD COLUMN recv_ms INTEGER",):   # новые столбцы в уже созданной базе
+        for sql in ("ALTER TABLE posts ADD COLUMN recv_ms INTEGER",       # новые столбцы в уже созданной базе
+                    "ALTER TABLE users ADD COLUMN plan TEXT DEFAULT ''",
+                    "ALTER TABLE users ADD COLUMN trial_used INTEGER DEFAULT 0",
+                    "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'"):
             try:
                 await self.conn.execute(sql)
             except aiosqlite.OperationalError:
@@ -127,7 +130,7 @@ class DB:
         return await self._one("SELECT * FROM users WHERE id=?", uid)
 
     async def set_user(self, uid: int, **fields) -> None:
-        assert set(fields) <= {"trial_until", "paid_until"}, fields
+        assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used"}, fields
         await self._run(f"UPDATE users SET {', '.join(f'{k}=?' for k in fields)} WHERE id=?", *fields.values(), uid)
 
     async def mark_blocked(self, uid: int) -> None:
@@ -245,14 +248,16 @@ class DB:
     async def subscribers(self, channel) -> list:
         """Активные фильтры людей, которым идут посты этого канала: база — всем, кроме отключивших; свой — только добавившим."""
         if channel["base"]:
-            sql = ("SELECT f.id fid, f.data, f.text, u.* FROM filters f JOIN users u ON u.id=f.user_id "
+            sql = ("SELECT f.id fid, f.data, f.text, (SELECT COUNT(*) FROM filters f2 WHERE f2.user_id=f.user_id AND f2.id<=f.id) frank, "
+                   "u.* FROM filters f JOIN users u ON u.id=f.user_id "
                    "WHERE f.active=1 AND u.blocked=0 AND NOT EXISTS (SELECT 1 FROM user_channels uc "
                    "WHERE uc.user_id=u.id AND uc.channel_id=? AND uc.state='off')")
         else:
-            sql = ("SELECT f.id fid, f.data, f.text, u.* FROM filters f JOIN users u ON u.id=f.user_id "
+            sql = ("SELECT f.id fid, f.data, f.text, (SELECT COUNT(*) FROM filters f2 WHERE f2.user_id=f.user_id AND f2.id<=f.id) frank, "
+                   "u.* FROM filters f JOIN users u ON u.id=f.user_id "
                    "WHERE f.active=1 AND u.blocked=0 AND EXISTS (SELECT 1 FROM user_channels uc "
                    "WHERE uc.user_id=u.id AND uc.channel_id=? AND uc.state='own')")
-        return await self._all(sql, channel["id"])
+        return await self._all(sql + " ORDER BY f.id", channel["id"])
 
     async def channel_count_for(self, uid: int) -> int:
         base = (await self._one("SELECT COUNT(*) n FROM channels WHERE base=1 AND status='joined'"))["n"]
@@ -311,9 +316,9 @@ class DB:
                 "top": [(t["name"], t["n"]) for t in top], "dups": dups["n"]}
 
     # ---------- платежи ----------
-    async def add_payment(self, uid: int, yk_id: str, amount: int, auto: bool = False) -> int:
-        return await self._run("INSERT INTO payments (user_id, yk_id, amount, auto, created_at) VALUES (?,?,?,?,?)",
-                               uid, yk_id, amount, int(auto), time.time())
+    async def add_payment(self, uid: int, yk_id: str, amount: int, plan: str = "basic") -> int:
+        return await self._run("INSERT INTO payments (user_id, yk_id, amount, plan, created_at) VALUES (?,?,?,?,?)",
+                               uid, yk_id, amount, plan, time.time())
 
     async def payment(self, yk_id: str):
         return await self._one("SELECT * FROM payments WHERE yk_id=?", yk_id)
@@ -376,8 +381,10 @@ class DB:
         return {
             "users": (await one("SELECT COUNT(*) n FROM users"))["n"],
             "with_filters": (await one("SELECT COUNT(DISTINCT user_id) n FROM filters WHERE active=1"))["n"],
-            "trial": (await one("SELECT COUNT(*) n FROM users WHERE trial_until>? AND paid_until<=?", now, now))["n"],
-            "paying": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>?", now))["n"],
+            "trial": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan='trial'", now))["n"],
+            "paying": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan!='trial'", now))["n"],
+            "basic": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan IN ('basic','')", now))["n"],
+            "pro": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan='pro'", now))["n"],
             "ever_paid": (await one("SELECT COUNT(DISTINCT user_id) n FROM payments WHERE status='succeeded'"))["n"],
             "revenue30": (await one("SELECT COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY))["s"],
             "churned": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>0 AND paid_until<=?", now))["n"],

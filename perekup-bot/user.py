@@ -11,6 +11,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 import keyboards as K
+import plans
 import texts as T
 from admin import is_admin, queue_wait
 from ctx import Ctx
@@ -39,7 +40,7 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     new = await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, source, None,
                                 ctx.cfg.trial_days)
     channels = await ctx.db.channel_count_for(msg.from_user.id)
-    trial = T.WELCOME_TRIAL.format(days=ctx.cfg.trial_days) if ctx.cfg.payments_on else ""
+    trial = T.WELCOME_TRIAL.format(price=ctx.cfg.price_trial) if ctx.cfg.payments_on else ""
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu())
     if ctx.reader and not ctx.reader.online and await is_admin(msg, ctx):
         await msg.answer(T.NEED_CONNECT)
@@ -54,8 +55,9 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
 @router.callback_query(F.data == "f:new")
 async def ask_filter(ev, ctx: Ctx, state: FSMContext) -> None:
     msg = ev.message if isinstance(ev, CallbackQuery) else ev
-    if len(await ctx.db.filters(ev.from_user.id)) >= ctx.cfg.max_filters:
-        await msg.answer(T.FILTER_LIMIT.format(n=ctx.cfg.max_filters))
+    limit = await filter_limit(ctx, ev.from_user.id)
+    if limit:
+        await msg.answer(limit, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
     else:
         await state.set_data({})          # новый фильтр, а не правка старого
         await state.set_state(S.filter)
@@ -94,14 +96,26 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         n = [r["id"] for r in await ctx.db.filters(uid)].index(data["edit_id"]) + 1
         await cb.message.answer(T.FILTER_UPDATED.format(n=n), reply_markup=K.filter_saved(data["edit_id"]))
         return await cb.answer()
-    if len(await ctx.db.filters(uid)) >= ctx.cfg.max_filters:
-        await cb.message.answer(T.FILTER_LIMIT.format(n=ctx.cfg.max_filters))
+    limit = await filter_limit(ctx, uid)
+    if limit:
+        await cb.message.answer(limit, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
         return await cb.answer()
     fid = await ctx.db.add_filter(uid, data["pending_text"], data["pending"])
     await ctx.db.event(uid, "filter")
+    if not plans.current(ctx.cfg, await ctx.db.user(uid)):      # без тарифа машины не придут — сразу говорим
+        await offer_plans(cb.message, ctx, uid, T.NEED_PLAN)
+        return await cb.answer()
     channels = await ctx.db.channel_count_for(uid)
     await cb.message.answer(T.FILTER_SAVED.format(channels=channels), reply_markup=K.filter_saved(fid))
     await cb.answer()
+
+
+async def filter_limit(ctx: Ctx, uid: int) -> str | None:
+    """Текст «упёрся в лимит тарифа» или None. Без тарифа фильтр создать можно — машины пойдут после оплаты."""
+    plan = plans.current(ctx.cfg, await ctx.db.user(uid)) or plans.plans(ctx.cfg)["basic"]
+    if len(await ctx.db.filters(uid)) >= plan.max_filters:
+        return T.FILTER_LIMIT_PLAN.format(plan=plan.title, n=plan.max_filters)
+    return None
 
 
 @router.callback_query(F.data.startswith("f:e:"))
@@ -181,15 +195,17 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
         return await MENU[msg.text](msg, ctx, state) if msg.text in MENU else None
     await state.clear()
     uid = msg.from_user.id
-    replies, mine = [], []
+    replies, mine, upsell = [], [], False
     for line in [x for x in re.split(r"[\s,]+", msg.text) if x]:
         link = parse_link(line)
         if not link:
             replies.append(T.CHANNEL_BAD.format(link=line[:60]))
             continue
         own = [r for r in await ctx.db.own_channels(uid)]
-        if len(own) >= ctx.cfg.max_own_channels:
-            replies.append(T.OWN_LIMIT.format(n=ctx.cfg.max_own_channels))
+        plan = plans.current(ctx.cfg, await ctx.db.user(uid)) or plans.plans(ctx.cfg)["basic"]
+        if len(own) >= plan.max_own:
+            replies.append(T.OWN_LIMIT_PLAN.format(plan=plan.title, n=plan.max_own))
+            upsell = True
             break
         kind, value = link
         cid, _ = await ctx.db.add_channel(**{kind: value}, base=False, added_by=uid)
@@ -209,7 +225,8 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
             replies.append(T.CHANNEL_QUEUED.format(name=name))
             mine.append(cid)
     wait = await queue_wait(ctx, mine) if mine else ""
-    await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL, reply_markup=K.menu())
+    markup = K.plans(plans.plans(ctx.cfg), False, only="pro") if upsell else K.menu()
+    await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL, reply_markup=markup)
 
 
 
@@ -259,41 +276,68 @@ async def show_stats(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None 
 
 
 # ---------- подписка ----------
+def can_trial(u) -> bool:
+    return not u["trial_used"] and u["paid_until"] <= time.time()
+
+
+def plans_text(ctx: Ctx, u) -> str:
+    p = plans.plans(ctx.cfg)
+    trial = T.PLAN_TRIAL_TEXT.format(price=p["trial"].price) if can_trial(u) else ""
+    return T.PLANS.format(trial=trial, basic=p["basic"].price, pro=p["pro"].price,
+                          basic_filters=p["basic"].max_filters, basic_own=p["basic"].max_own)
+
+
+async def offer_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
+    u = await ctx.db.user(uid)
+    await msg.answer((intro + "\n\n" if intro else "") + plans_text(ctx, u),
+                     reply_markup=K.plans(plans.plans(ctx.cfg), can_trial(u)))
+
+
 async def show_sub(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = None) -> None:
-    c = ctx.cfg
-    if not c.payments_on:
+    if not ctx.cfg.payments_on:
         return await msg.answer(T.SUB_FREE)
     u = await ctx.db.user(uid or msg.chat.id)
-    until = max(u["trial_until"], u["paid_until"])
-    if until > time.time():
-        tpl = T.SUB_ACTIVE if u["paid_until"] > time.time() else T.SUB_TRIAL
-        text = tpl.format(until=fmt_date(until), price=c.price, days=c.period_days)
-    else:
-        text = T.SUB_NONE.format(price=c.price, days=c.period_days)
-    await msg.answer(text, reply_markup=K.pay(c.price))
+    plan = plans.current(ctx.cfg, u)
+    status = (T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
+              if plan else T.SUB_STATUS_NONE)
+    await msg.answer(status + plans_text(ctx, u), reply_markup=K.plans(plans.plans(ctx.cfg), can_trial(u)))
 
 
-@router.callback_query(F.data == "s:pay")
+@router.callback_query(F.data.startswith("s:pay"))
 async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
-    c = ctx.cfg
+    all_plans = plans.plans(ctx.cfg)
+    plan = all_plans.get(cb.data.split(":")[2] if cb.data.count(":") == 2 else "basic", all_plans["basic"])
+    u = await ctx.db.user(cb.from_user.id)
+    if plan.id == "trial" and not can_trial(u):
+        await cb.message.answer(T.TRIAL_USED, reply_markup=K.plans(all_plans, False))
+        return await cb.answer()
     try:
-        pid, url = await ctx.pay.create(cb.from_user.id)
+        pid, url = await ctx.pay.create(cb.from_user.id, plan.price, T.PAY_DESCRIPTION.format(plan=plan.title, days=plan.days))
     except Exception:
         await cb.message.answer(T.PAY_ERROR)
         return await cb.answer()
-    await ctx.db.add_payment(cb.from_user.id, pid, c.price)
-    await cb.message.answer(T.PAY_LINK.format(price=c.price, days=c.period_days), reply_markup=K.pay_link(url, c.price))
+    await ctx.db.add_payment(cb.from_user.id, pid, plan.price, plan.id)
+    current = plans.current(ctx.cfg, u)
+    switch = T.PAY_SWITCH.format(old=current.title) if current and current.id not in (plan.id, "free") and u["plan"] else ""
+    days_word = "день" if plan.days == 1 else "дней"
+    await cb.message.answer(T.PAY_LINK.format(plan=plan.title, price=plan.price, days=plan.days, days_word=days_word) + switch,
+                            reply_markup=K.pay_link(url, plan.price))
     await cb.answer()
 
 
 async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str) -> float | None:
-    """Итог платежа → продление. Возвращает новую дату доступа, если продлили именно сейчас."""
+    """Итог платежа → тариф и срок. Возвращает новую дату доступа, если продлили именно сейчас."""
     if status not in ("succeeded", "canceled") or not await ctx.db.finish_payment(yk_id, status):
         return None
     if status == "canceled":
         return None
-    await ctx.db.event(uid, "paid")
-    return await ctx.db.extend(uid, ctx.cfg.period_days)
+    p = await ctx.db.payment(yk_id)
+    plan_id = p["plan"] or "basic"
+    u = await ctx.db.user(uid)
+    until = plans.new_period(ctx.cfg, u, plan_id)
+    await ctx.db.set_user(uid, paid_until=until, plan=plan_id, **({"trial_used": 1} if plan_id == "trial" else {}))
+    await ctx.db.event(uid, "paid", plan_id)
+    return until
 
 
 @router.callback_query(F.data == "s:check")
@@ -304,8 +348,9 @@ async def check(cb: CallbackQuery, ctx: Ctx) -> None:
     status = await ctx.pay.status(p["yk_id"])
     until = await apply_payment(ctx, cb.from_user.id, p["yk_id"], status)
     if until:
+        plan = plans.plans(ctx.cfg)[p["plan"] or "basic"]
         await cb.message.edit_reply_markup(reply_markup=None)
-        await cb.message.answer(T.PAY_OK.format(until=fmt_date(until)))
+        await cb.message.answer(T.PAY_OK.format(plan=plan.title, until=fmt_date(until)))
         await cb.answer()
     else:
         await cb.answer(T.PAY_FAIL if status == "canceled" else T.PAY_WAIT, show_alert=True)

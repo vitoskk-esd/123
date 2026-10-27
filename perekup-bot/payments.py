@@ -24,11 +24,11 @@ class YooKassa:
         with urllib.request.urlopen(req, timeout=30) as resp:
             return json.load(resp)
 
-    async def create(self, uid: int) -> tuple[str, str]:
+    async def create(self, uid: int, amount: int, description: str) -> tuple[str, str]:
         """(id платежа, ссылка на оплату)."""
-        body = {"amount": {"value": f"{self.cfg.price}.00", "currency": "RUB"}, "capture": True,
+        body = {"amount": {"value": f"{amount}.00", "currency": "RUB"}, "capture": True,
                 "confirmation": {"type": "redirect", "return_url": self.cfg.return_url},
-                "description": f"Подписка «Перехват» на {self.cfg.period_days} дней",
+                "description": description,
                 "metadata": {"telegram_user_id": str(uid)}}
         data = await asyncio.to_thread(self._request, API, body)
         return data["id"], data["confirmation"]["confirmation_url"]

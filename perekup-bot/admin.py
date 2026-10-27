@@ -45,8 +45,10 @@ async def admin(msg: Message, ctx: Ctx) -> None:
     s = await ctx.db.admin_stats()
     p = s["posts24"]
     ch = {(r["status"], r["base"]): r["n"] for r in s["channels"]}
-    pay = (f"Пробный период: {s['trial']} · Платят сейчас: <b>{s['paying']}</b> · "
-           f"выручка за 30 дней: {s['revenue30']:,} ₽".replace(",", " ")) if ctx.cfg.payments_on else "Оплата не подключена — бот бесплатный для всех."
+    mrr = s["basic"] * ctx.cfg.price_basic + s["pro"] * ctx.cfg.price_pro
+    pay = (f"Пробный день: {s['trial']} · Простой: <b>{s['basic']}</b> · PRO: <b>{s['pro']}</b>\n"
+           f"В месяц ≈ <b>{mrr:,} ₽</b> · выручка за 30 дней: {s['revenue30']:,} ₽".replace(",", " ")
+           ) if ctx.cfg.payments_on else "Оплата не подключена — бот бесплатный для всех."
     src = "\n".join(f"• {r['source']}: {r['users']} чел." for r in s["sources"])
     reader = "✅ подключён" if ctx.reader and ctx.reader.online else "❌ не подключён — /connect"
     ai_state = "✅ включена" if ctx.cfg.ai_on else "❌ выключена — добавь GEMINI_API_KEY в «Переменные»"

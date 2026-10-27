@@ -28,9 +28,12 @@ class Config:
     api_id: int = 0                  # служебный аккаунт (my.telegram.org); можно не задавать — бот спросит в /connect
     api_hash: str = ""
     admins: frozenset[int] = frozenset()   # пусто — админом станет первый, кто напишет боту /start
-    price: int = 990
-    period_days: int = 30
-    trial_days: int = 3
+    price_trial: int = 250           # пробный день: всё как в PRO на 24 часа, один раз
+    price_basic: int = 990           # «Простой» на 30 дней
+    price_pro: int = 2500            # PRO на 30 дней, без лимитов
+    basic_filters: int = 3           # лимиты «Простого»
+    basic_own: int = 5
+    trial_days: int = 0              # бесплатных дней при первом запуске (теперь пробный день платный)
     yk_shop_id: str = ""             # ЮKassa; пока не заполнено — бот работает бесплатно для всех (тестовый режим)
     yk_secret: str = ""
     return_url: str = "https://t.me"
@@ -39,8 +42,6 @@ class Config:
     ai_key: str = ""                 # ключ Gemini (aistudio.google.com) — ИИ перепроверяет каждый подходящий пост
     ai_model: str = "gemini-3.1-flash-lite"
     ai_proxy: bool = False           # ключ подставляет прокси (облачная среда разработки) — для проверок без своего ключа
-    max_filters: int = 10
-    max_own_channels: int = 30
 
     @property
     def ai_on(self) -> bool:
@@ -61,10 +62,15 @@ def get_config() -> Config:
         api_id=int(e("TG_API_ID", "0") or 0),
         api_hash=e("TG_API_HASH", ""),
         admins=frozenset(int(x) for x in e("ADMIN_IDS", "").replace(" ", "").split(",") if x),
-        price=int(e("PRICE_RUB", "990")),
-        trial_days=int(e("TRIAL_DAYS", "3")),
+        price_trial=int(e("PRICE_TRIAL", "250")),
+        price_basic=int(e("PRICE_BASIC", "990")),
+        price_pro=int(e("PRICE_PRO", "2500")),
+        basic_filters=int(e("BASIC_FILTERS", "3")),
+        basic_own=int(e("BASIC_OWN_CHANNELS", "5")),
+        trial_days=int(e("TRIAL_DAYS", "0")),
         yk_shop_id=e("YOOKASSA_SHOP_ID", ""),
         yk_secret=e("YOOKASSA_SECRET_KEY", ""),
+        return_url=e("RETURN_URL", "https://t.me"),          # куда вернуть человека после оплаты — ссылка на бота
         poll_rps=float(e("POLL_RPS", "3")),
         ai_key=e("GEMINI_API_KEY", ""),
         ai_model=e("GEMINI_MODEL", "gemini-3.1-flash-lite"),

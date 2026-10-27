@@ -77,8 +77,11 @@ def card(url: str | None, fid: int) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_OPEN, url=url)] if url else [], [B(text=T.BTN_PAUSE, callback_data=f"f:p:{fid}")])
 
 
-def pay(price: int) -> InlineKeyboardMarkup:
-    return kb([B(text=T.BTN_PAY.format(price=price), callback_data="s:pay")])
+def plans(all_plans: dict, trial: bool, only: str | None = None) -> InlineKeyboardMarkup:
+    """Кнопки тарифов; trial — показывать ли пробный день; only — одна кнопка (например, «перейти на PRO»)."""
+    btn = {"trial": T.BTN_PLAN_TRIAL, "basic": T.BTN_PLAN_BASIC, "pro": T.BTN_PLAN_PRO}
+    ids = [only] if only else [p for p in ("trial", "basic", "pro") if p != "trial" or trial]
+    return kb(*[[B(text=btn[p].format(price=all_plans[p].price), callback_data=f"s:pay:{p}")] for p in ids])
 
 
 def pay_link(url: str, price: int) -> InlineKeyboardMarkup:

@@ -63,7 +63,7 @@ class FakePay:
     def __init__(self):
         self.statuses: dict[str, str] = {}
 
-    async def create(self, uid):
+    async def create(self, uid, amount, description):
         pid = f"pay{next(ids)}"
         self.statuses[pid] = "pending"
         return pid, f"https://yoomoney.example/{pid}"
@@ -114,8 +114,12 @@ async def env(tmp_path):
         await ctx.db.close()
 
 
-async def make_filter(dp, bot, text, uid=USER):
+async def make_filter(dp, bot, text, uid=USER, plan="pro"):
+    """Человек с оплаченным тарифом (по умолчанию PRO) создаёт фильтр."""
     await dp.feed_update(bot, msg("/start reels", uid))
+    if plan:
+        ctx = dp["ctx"]
+        await ctx.db.set_user(uid, paid_until=time.time() + 30 * 86400, plan=plan)
     await dp.feed_update(bot, msg(text, uid))
     await dp.feed_update(bot, cb("f:save", uid))
 
@@ -191,35 +195,86 @@ async def test_channels_own_and_disable(env):
     assert [q["username"] for q in queued] == ["new_cars_spb"]
 
 
-async def test_no_access_missed_then_payment(env):
+async def test_no_plan_then_buy_basic(env):
+    """Без тарифа машины не приходят; оплатил «Простой» — приходят 30 дней; повторный «Я оплатил» не продлевает дважды."""
     dp, bot, s, ctx = env
-    await make_filter(dp, bot, "приора до 300к")
-    await ctx.db._run("UPDATE users SET trial_until=0 WHERE id=?", USER)     # пробный период кончился
-    r = await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))
-    assert r.sent == []
+    await make_filter(dp, bot, "приора до 300к", plan=None)
+    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — 250 ₽" in s.texts(USER)[-1]
+    assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == []
     await dp.feed_update(bot, msg("💳 Подписка"))
-    assert "не активна" in s.texts(USER)[-1]
+    assert "Подписки нет" in s.texts(USER)[-1] and "Простой — 990 ₽" in s.texts(USER)[-1] and "PRO — 2500 ₽" in s.texts(USER)[-1]
 
-    await dp.feed_update(bot, cb("s:pay"))
-    pid = (await ctx.db.last_pending(USER))["yk_id"]
+    await dp.feed_update(bot, cb("s:pay:basic"))
+    pay = await ctx.db.last_pending(USER)
+    assert (pay["amount"], pay["plan"]) == (990, "basic")
     await dp.feed_update(bot, cb("s:check"))                              # ещё не оплатил
     assert (await ctx.db.user(USER))["paid_until"] == 0
-    ctx.pay.statuses[pid] = "succeeded"
+    ctx.pay.statuses[pay["yk_id"]] = "succeeded"
     await dp.feed_update(bot, cb("s:check"))
     await dp.feed_update(bot, cb("s:check"))                              # повторное нажатие не продлевает второй раз
     u = await ctx.db.user(USER)
-    assert 29 * 86400 < u["paid_until"] - time.time() <= 30 * 86400
-    assert any("Оплата прошла" in t for t in s.texts(USER))
+    assert 29 * 86400 < u["paid_until"] - time.time() <= 30 * 86400 and u["plan"] == "basic"
+    assert any("Оплата прошла! <b>Простой</b>" in t for t in s.texts(USER))
     assert (await process(bot, ctx, post(CH1, "Приора 2012, 280 000 руб"))).sent == [USER]
+
+
+async def test_trial_day_once_and_basic_limits_and_upgrade(env):
+    """Пробный день — 250 ₽ на 24 часа и только один раз; «Простой» — до 3 фильтров; переход на PRO не сжигает дни."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    assert any("1 день за 250 ₽" in t for t in s.texts(USER))
+    await dp.feed_update(bot, cb("s:pay:trial"))
+    pay = await ctx.db.last_pending(USER)
+    assert (pay["amount"], pay["plan"]) == (250, "trial")
+    ctx.pay.statuses[pay["yk_id"]] = "succeeded"
+    await dp.feed_update(bot, cb("s:check"))
+    u = await ctx.db.user(USER)
+    assert u["trial_used"] == 1 and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
+    await ctx.db.set_user(USER, paid_until=time.time() - 1)                 # день прошёл
+    await dp.feed_update(bot, cb("s:pay:trial"))                            # второй раз — нельзя
+    assert "только один раз" in s.texts(USER)[-1]
+
+    await ctx.db.set_user(USER, paid_until=time.time() + 10 * 86400, plan="basic")   # «Простой», осталось 10 дней
+    for t in ("камри до 1 млн", "солярис до 900к", "приора до 300к"):
+        await dp.feed_update(bot, msg(t)); await dp.feed_update(bot, cb("f:save"))
+    await dp.feed_update(bot, msg("веста до 1 млн")); await dp.feed_update(bot, cb("f:save"))
+    assert len(await ctx.db.filters(USER)) == 3 and "до 3 фильтров" in s.texts(USER)[-1]   # четвёртый — только в PRO
+
+    await dp.feed_update(bot, cb("s:pay:pro"))
+    pay = await ctx.db.last_pending(USER)
+    assert pay["amount"] == 2500 and "пересчитаем" in s.texts(USER)[-1]
+    ctx.pay.statuses[pay["yk_id"]] = "succeeded"
+    await dp.feed_update(bot, cb("s:check"))
+    u = await ctx.db.user(USER)
+    days = (u["paid_until"] - time.time()) / 86400
+    assert u["plan"] == "pro" and 33.8 < days < 34.1                        # 30 дней PRO + 10 дней «Простого» ≈ 3,96 дня PRO
+    await dp.feed_update(bot, msg("веста до 1 млн")); await dp.feed_update(bot, cb("f:save"))
+    assert len(await ctx.db.filters(USER)) == 4                             # в PRO лимита нет
+
+
+async def test_basic_plan_extra_filters_do_not_deliver(env):
+    """Перешёл с PRO на «Простой» с 4 фильтрами — работают первые 3."""
+    dp, bot, s, ctx = env
+    for t in ("солярис до 900к", "приора до 300к", "веста до 1 млн", "камри до 1 млн"):
+        await make_filter(dp, bot, t)
+    await ctx.db.set_user(USER, plan="basic")
+    assert (await process(bot, ctx, post(CH1, "Toyota Camry 2012, 900 000 ₽"))).sent == []
+    assert (await process(bot, ctx, post(CH1, "Lada Priora 2011, 260 000 ₽"))).sent == [USER]
 
 
 async def test_jobs_access_reminder(env):
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "веста до 1 млн")
-    await ctx.db._run("UPDATE users SET trial_until=? WHERE id=?", time.time() + 3600, USER)
+    await ctx.db.set_user(USER, paid_until=time.time() + 3600, plan="basic")
     await jobs.tick(bot, ctx)
     await jobs.tick(bot, ctx)                                               # второй раз — не дублируем
-    assert sum("Завтра заканчивается доступ" in t for t in s.texts(USER)) == 1
+    assert sum("Завтра заканчивается тариф <b>Простой</b>" in t for t in s.texts(USER)) == 1
+    await ctx.db.set_user(USER, paid_until=time.time() + 5 * 3600, plan="trial")
+    await jobs.tick(bot, ctx)
+    assert not any("Через 3 часа" in t for t in s.texts(USER))               # пробный день: рано — за 3 часа
+    await ctx.db.set_user(USER, paid_until=time.time() + 2 * 3600)
+    await jobs.tick(bot, ctx)
+    assert any("Через 3 часа заканчивается тариф <b>Пробный день</b>" in t for t in s.texts(USER))
 
 
 class FakeTelethon:
