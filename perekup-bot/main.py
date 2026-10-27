@@ -43,6 +43,8 @@ async def main() -> None:
     ctx.reader = Reader(bot, ctx)
     if not cfg.payments_on:
         log.warning("Робокасса не настроена — бот бесплатный для всех.")
+    elif not (cfg.seller_name and cfg.seller_inn):
+        log.warning("в оферте нет реквизитов — добавь переменные SELLER_NAME и SELLER_INN")
     if not await ctx.reader.resume():
         log.warning("служебный аккаунт не подключён — напиши боту /start, потом /connect")
     jobs_task = asyncio.create_task(jobs.loop(bot, ctx))

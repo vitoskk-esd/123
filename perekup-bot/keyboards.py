@@ -39,7 +39,7 @@ def filter_saved(fid: int) -> InlineKeyboardMarkup:
 
 
 def help_menu() -> InlineKeyboardMarkup:
-    return kb([B(text=T.BTN_SUPPORT, callback_data="sup")])
+    return kb([B(text=T.BTN_SUPPORT, callback_data="sup")], [B(text=T.BTN_OFFER, callback_data="offer")])
 
 
 def support_cancel() -> InlineKeyboardMarkup:

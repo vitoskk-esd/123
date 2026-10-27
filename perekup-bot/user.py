@@ -77,7 +77,7 @@ async def show_filter_card(msg: Message, ctx: Ctx, state: FSMContext, text: str,
     return True
 
 
-@router.message(S.filter, F.text)
+@router.message(S.filter, F.text & ~F.text.startswith("/"))
 async def got_filter(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     if msg.text.startswith("/") or msg.text in MENU:
         await state.clear()
@@ -194,7 +194,7 @@ async def ask_channel(cb: CallbackQuery, state: FSMContext) -> None:
     await cb.answer()
 
 
-@router.message(S.channel, F.text)
+@router.message(S.channel, F.text & ~F.text.startswith("/"))
 async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     if msg.text.startswith("/") or msg.text in MENU:
         await state.clear()
@@ -412,6 +412,26 @@ async def menu(msg: Message, ctx: Ctx, state: FSMContext) -> None:
 @router.message(Command("help"))
 async def help_cmd(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     await show_help(msg, ctx, state)
+
+
+def offer_text(cfg) -> str:
+    p = plans.plans(cfg)
+    seller = (T.OFFER_SELLER.format(name=cfg.seller_name, inn=cfg.seller_inn,
+                                    contact=cfg.seller_contact + ", " if cfg.seller_contact else "")
+              if cfg.seller_name and cfg.seller_inn else T.OFFER_SELLER_EMPTY)
+    return T.OFFER.format(seller=seller, trial=p["trial"].price, basic=p["basic"].price, pro=p["pro"].price,
+                          contact_tail=f" или {cfg.seller_contact}" if cfg.seller_contact else "")
+
+
+@router.message(Command("offer"))
+async def offer_cmd(msg: Message, ctx: Ctx) -> None:
+    await msg.answer(offer_text(ctx.cfg))
+
+
+@router.callback_query(F.data == "offer")
+async def offer_cb(cb: CallbackQuery, ctx: Ctx) -> None:
+    await cb.message.answer(offer_text(ctx.cfg))
+    await cb.answer()
 
 
 @router.message(F.text & ~F.text.startswith("/"))

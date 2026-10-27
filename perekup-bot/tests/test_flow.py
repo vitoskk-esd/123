@@ -619,3 +619,20 @@ async def test_polling_catches_posts_and_never_duplicates(env):
     assert sum("Toyota Camry 2013" in t for t in s.texts(USER)) == 1
     row = await ctx.db._one("SELECT recv_ms FROM posts ORDER BY id DESC LIMIT 1")
     assert row["recv_ms"] is not None                               # задержка Telegram записана для /admin
+
+
+async def test_offer_with_requisites(env):
+    """Оферта и реквизиты для проверки Робокассой: /offer, кнопка в «Помощи», ссылка в приветствии и при оплате."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    assert any("/offer" in t for t in s.texts(USER))
+    await dp.feed_update(bot, msg("/offer"))
+    assert "Реквизиты исполнителя можно запросить" in s.texts(USER)[-1]
+    for k, v in (("seller_name", "Иванов Иван Иванович"), ("seller_inn", "123456789012"), ("seller_contact", "ivan@mail.ru")):
+        object.__setattr__(ctx.cfg, k, v)
+    await dp.feed_update(bot, cb("offer"))
+    text = s.texts(USER)[-1]
+    assert "Иванов Иван Иванович, ИНН 123456789012" in text and "ivan@mail.ru" in text and "Пробный день — 250 ₽" in text
+    assert "PRO — 2490 ₽" in text and len(text) < 4096
+    await dp.feed_update(bot, cb("s:pay:pro"))
+    assert "условия оферты — /offer" in s.texts(USER)[-1]
