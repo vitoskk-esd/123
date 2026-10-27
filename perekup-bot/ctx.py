@@ -12,7 +12,7 @@ class Ctx:
     cfg: Config
     dict: Dictionary
     channels: dict[int, dict] = field(default_factory=dict)   # tg_id → строка channels (быстрый поиск на каждом посте)
-    pay: object = None                                         # payments.YooKassa
+    pay: object = None                                         # payments.Robokassa
     reader: object = None                                      # userbot.Reader
     pending: set = field(default_factory=set)                 # (человек, пост) в очереди «Простого» — не дублировать
     background: set = field(default_factory=set)              # отложенные отправки

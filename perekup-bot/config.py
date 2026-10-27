@@ -35,9 +35,10 @@ class Config:
     basic_own: int = 0
     basic_delay: int = 60
     trial_days: int = 0              # бесплатных дней при первом запуске (теперь пробный день платный)
-    yk_shop_id: str = ""             # ЮKassa; пока не заполнено — бот работает бесплатно для всех (тестовый режим)
-    yk_secret: str = ""
-    return_url: str = "https://t.me"
+    rk_login: str = ""               # Робокасса; пока не заполнено — бот работает бесплатно для всех (тестовый режим)
+    rk_pass1: str = ""
+    rk_pass2: str = ""
+    rk_hash: str = "md5"             # алгоритм подписи — как в технических настройках магазина
     join_interval: int = 90          # пауза между вступлениями в каналы, сек — чтобы Telegram не заблокировал аккаунт
     poll_rps: float = 3.0            # сколько каналов в секунду опрашиваем сами (Telegram присылает посты больших каналов с опозданием)
     ai_key: str = ""                 # ключ Gemini (aistudio.google.com) — ИИ перепроверяет каждый подходящий пост
@@ -50,7 +51,7 @@ class Config:
 
     @property
     def payments_on(self) -> bool:
-        return bool(self.yk_shop_id and self.yk_secret)
+        return bool(self.rk_login and self.rk_pass1 and self.rk_pass2)
 
 
 def get_config() -> Config:
@@ -70,9 +71,10 @@ def get_config() -> Config:
         basic_own=int(e("BASIC_OWN_CHANNELS", "0")),
         basic_delay=int(e("BASIC_DELAY", "60")),
         trial_days=int(e("TRIAL_DAYS", "0")),
-        yk_shop_id=e("YOOKASSA_SHOP_ID", ""),
-        yk_secret=e("YOOKASSA_SECRET_KEY", ""),
-        return_url=e("RETURN_URL", "https://t.me"),          # куда вернуть человека после оплаты — ссылка на бота
+        rk_login=e("ROBOKASSA_LOGIN", ""),
+        rk_pass1=e("ROBOKASSA_PASSWORD1", ""),
+        rk_pass2=e("ROBOKASSA_PASSWORD2", ""),
+        rk_hash=e("ROBOKASSA_HASH", "md5").lower().replace("-", ""),
         poll_rps=float(e("POLL_RPS", "3")),
         ai_key=e("GEMINI_API_KEY", ""),
         ai_model=e("GEMINI_MODEL", "gemini-3.1-flash-lite"),

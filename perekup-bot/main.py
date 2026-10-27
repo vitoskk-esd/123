@@ -16,7 +16,7 @@ import user
 from config import get_config
 from ctx import Ctx
 from db import DB
-from payments import YooKassa
+from payments import Robokassa
 from words import load_dictionary
 
 log = logging.getLogger("bot")
@@ -37,12 +37,12 @@ async def main() -> None:
     cfg = get_config()
     if not cfg.token:
         raise SystemExit("Нет BOT_TOKEN — впиши токен от @BotFather в переменные (в облаке) или в файл .env.")
-    ctx = Ctx(db=await DB(cfg.db_path).open(), cfg=cfg, dict=load_dictionary(cfg.cars_path), pay=YooKassa(cfg))
+    ctx = Ctx(db=await DB(cfg.db_path).open(), cfg=cfg, dict=load_dictionary(cfg.cars_path), pay=Robokassa(cfg))
     from userbot import Reader
     bot = Bot(cfg.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     ctx.reader = Reader(bot, ctx)
     if not cfg.payments_on:
-        log.warning("ЮKassa не настроена — бот бесплатный для всех.")
+        log.warning("Робокасса не настроена — бот бесплатный для всех.")
     if not await ctx.reader.resume():
         log.warning("служебный аккаунт не подключён — напиши боту /start, потом /connect")
     jobs_task = asyncio.create_task(jobs.loop(bot, ctx))

@@ -1,5 +1,5 @@
 """Сквозная проверка без Telegram: апдейты идут в диспетчер aiogram, посты — в pipeline, ответы бота перехватывает
-подменная сессия, служебный аккаунт и ЮKassa — заглушки."""
+подменная сессия, служебный аккаунт и Робокасса — заглушки."""
 import asyncio
 import itertools
 import time
@@ -102,7 +102,7 @@ DP = None   # роутеры живут на уровне модулей и по
 async def env(tmp_path):
     global DP
     cfg = Config(token="1:x", admins=frozenset({ADMIN}), db_path=tmp_path / "t.db", cars_path=ROOT / "cars.yaml",
-                 yk_shop_id="shop", yk_secret="secret")
+                 rk_login="shop", rk_pass1="p1", rk_pass2="p2")
     ctx = Ctx(db=await DB(cfg.db_path).open(), cfg=cfg, dict=load_dictionary(cfg.cars_path), pay=FakePay())
     for tg, uname, base in ((CH1, "avto_msk", 1), (CH2, "perekup_rf", 1), (OWN, "my_secret_cars", 0)):
         cid, _ = await ctx.db.add_channel(username=uname, base=bool(base), region="msk" if tg == CH1 else None)
@@ -368,9 +368,9 @@ async def test_all_channels_ready_message_after_last(env):
 
 
 async def test_free_mode_without_yookassa(env):
-    """ЮKassa не настроена — бот бесплатный для всех, первый написавший /start — админ."""
+    """Робокасса не настроена — бот бесплатный для всех, первый написавший /start — админ."""
     dp, bot, s, ctx = env
-    object.__setattr__(ctx.cfg, "yk_shop_id", "")
+    object.__setattr__(ctx.cfg, "rk_login", "")
     object.__setattr__(ctx.cfg, "admins", frozenset())
     await make_filter(dp, bot, "приора до 300к")
     await ctx.db._run("UPDATE users SET trial_until=0 WHERE id=?", USER)
