@@ -365,7 +365,7 @@ class DB:
             "revenue30": (await one("SELECT COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY))["s"],
             "churned": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>0 AND paid_until<=?", now))["n"],
             "blocked": (await one("SELECT COUNT(*) n FROM users WHERE blocked=1"))["n"],
-            "posts24": (await one("SELECT COUNT(*) n, SUM(make IS NOT NULL AND price IS NOT NULL) cars, SUM(dup) dups, "
+            "posts24": (await one("SELECT COUNT(*) n, SUM(make IS NOT NULL AND price IS NOT NULL) cars, SUM(dup) dups, SUM(parsed_by='ai') ai, "
                                   "AVG(CASE WHEN matched>0 THEN latency_ms END) lat FROM posts WHERE at>?", now - DAY)),
             "deliveries24": (await one("SELECT COUNT(*) n FROM deliveries WHERE at>?", now - DAY))["n"],
             "channels": await self._all("SELECT status, base, COUNT(*) n FROM channels GROUP BY status, base"),

@@ -24,7 +24,8 @@ import keyboards as K
 import texts as T
 from ctx import Ctx
 from db import DAY, DEDUP_DAYS, has_access
-from parse import Listing, car_key, fingerprint, parse_post
+import ai
+from parse import Listing, car_key, fingerprint, looks_like_ad, parse_post
 from query import Filter, matches
 
 log = logging.getLogger(__name__)
@@ -125,6 +126,8 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
         info.append(f"📍 {d.regions.get(L.region, L.region)}")
     if info:
         lines.append(" · ".join(info))
+    if L.accidents is not None:
+        lines.append(T.CARD_ACCIDENTS.format(n=L.accidents) if L.accidents else T.CARD_NO_ACCIDENTS)
     if r.market:
         lines.append(T.CARD_MARKET.format(market=rub(r.market), n=r.samples))
     good = [d.markers[m].label for m in L.markers if m in d.markers and d.markers[m].kind == "good"]
@@ -142,10 +145,27 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
     return head + ("\n\n<blockquote expandable>" + html.escape(post) + "</blockquote>" if room > 20 else "")
 
 
-async def analyse(ctx: Ctx, raw: RawPost, channel: dict) -> Result:
-    """Разбор, дубль, рынок. Без отправки — удобно и для тестов."""
+def worth_ai(L: Listing, text: str, filters: list[Filter], d) -> bool:
+    """ИИ зовём, только если пост может кому-то подойти — бесплатный лимит не тратим на чужие машины."""
+    if not filters:
+        return False
+    if not (L.is_car and L.price):
+        return looks_like_ad(text)          # правила не поняли пост — пусть посмотрит ИИ
+    if any(not f.cars for f in filters):
+        return True                         # кто-то ищет любые машины
+    if any(mk == L.make for f in filters for mk, _ in f.cars):
+        return True                         # марка кому-то нужна — проверяем модель, метки, ДТП
+    return len({mk for mk, _ in d.find_cars(L.tokens)}) > 1   # в посте несколько марок — правила могли выбрать не ту
+
+
+async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None) -> Result:
+    """Разбор (правила + ИИ-проверка), дубль, рынок. Без отправки — удобно и для тестов."""
     r = Result()
     L = r.listing = parse_post(raw.text, ctx.dict, channel.get("region"))
+    if ctx.cfg.ai_on and worth_ai(L, raw.text, filters or [], ctx.dict):
+        checked = await ai.ask(ctx.dict, raw.text, ctx.cfg.ai_key, ctx.cfg.ai_model)
+        if checked:
+            L = r.listing = ai.apply(L, checked, ctx.dict)
     if not L.is_car or not L.price:
         return r
     now = time.time()
@@ -167,7 +187,8 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     channel = ctx.channels.get(raw.chat_id)
     if not channel:
         return Result()
-    r = await analyse(ctx, raw, channel)
+    rows = await ctx.db.subscribers(channel)
+    r = await analyse(ctx, raw, channel, [Filter.loads(row["data"]) for row in rows])
     L = r.listing
     if not r.post_id:
         return r
@@ -177,7 +198,7 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     already = await ctx.db.delivered_to(fp, ckey, time.time() - DEDUP_DAYS * DAY)
     targets: dict[int, tuple] = {}
     now = time.time()
-    for row in await ctx.db.subscribers(channel):
+    for row in rows:
         uid = row["id"]
         if uid in targets or uid in already:
             continue

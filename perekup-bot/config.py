@@ -35,8 +35,15 @@ class Config:
     yk_secret: str = ""
     return_url: str = "https://t.me"
     join_interval: int = 90          # пауза между вступлениями в каналы, сек — чтобы Telegram не заблокировал аккаунт
+    ai_key: str = ""                 # ключ Gemini (aistudio.google.com) — ИИ перепроверяет каждый подходящий пост
+    ai_model: str = "gemini-3.1-flash-lite"
+    ai_proxy: bool = False           # ключ подставляет прокси (облачная среда разработки) — для проверок без своего ключа
     max_filters: int = 10
     max_own_channels: int = 30
+
+    @property
+    def ai_on(self) -> bool:
+        return bool(self.ai_key) or self.ai_proxy
 
     @property
     def payments_on(self) -> bool:
@@ -57,4 +64,7 @@ def get_config() -> Config:
         trial_days=int(e("TRIAL_DAYS", "3")),
         yk_shop_id=e("YOOKASSA_SHOP_ID", ""),
         yk_secret=e("YOOKASSA_SECRET_KEY", ""),
+        ai_key=e("GEMINI_API_KEY", ""),
+        ai_model=e("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+        ai_proxy=e("AI_PROXY", "0") == "1",
     )

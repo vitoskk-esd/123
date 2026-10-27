@@ -130,6 +130,8 @@ SUPPORT_REPLY_FAILED = "Не получилось отправить ответ:
 
 # карточка машины
 CARD_DISCOUNT = "🔥 <b>−{d}% к рынку</b>"
+CARD_ACCIDENTS = "💥 ДТП: <b>{n}</b> (со слов продавца)"
+CARD_NO_ACCIDENTS = "✅ ДТП: не было (со слов продавца)"
 CARD_TITLE = "<b>{car}{year}</b> · <b>{price}</b>"
 CARD_MARKET = "📊 рынок ≈ {market} ({n} объявл.)"
 CARD_SOURCE = "📢 {channel} · ⏱ {latency}"

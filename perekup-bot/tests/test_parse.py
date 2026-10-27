@@ -109,3 +109,14 @@ def test_negation_only_inside_its_phrase():
 ])
 def test_markers_understand_negation(text, expected):
     assert sorted(parse_post(text, D).markers) == sorted(expected)
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("ДТП: 2", 2), ("2 мелких дтп", 2), ("было одно дтп", 1), ("ДТП - 1 (крыло)", 1), ("2 аварии", 2),
+    ("дтп 3 раза", 3), ("2 владельца, 1 дтп", 1), ("Без ДТП", 0), ("дтп нет", 0), ("ДТП не было", 0),
+    ("в дтп не была", 0), ("не участвовала в дтп", 0), ("по дтп чистая", 0), ("ДТП: 0", 0),
+    ("после дтп", None), ("2012 год, 150 000 км", None),
+])
+def test_accidents_count(text, expected):
+    from parse import parse_accidents
+    assert parse_accidents(text) == expected

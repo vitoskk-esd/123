@@ -30,6 +30,7 @@ class Listing:
     mileage: int | None = None
     region: str | None = None
     markers: list[str] = field(default_factory=list)
+    accidents: int | None = None    # сколько ДТП, если продавец написал; 0 — пишет, что не было
     tokens: list[str] = field(default_factory=list)
     parsed_by: str = "rules"
 
@@ -156,6 +157,33 @@ def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
     return best
 
 
+NUM_WORDS = {"одно": 1, "один": 1, "одна": 1, "одну": 1, "два": 2, "две": 2, "три": 3, "четыре": 4, "пять": 5}
+ACC = r"(?:дтп|авари\w*)"
+
+
+def parse_accidents(text: str) -> int | None:
+    """Сколько ДТП, по словам продавца: «ДТП: 2», «2 мелких дтп», «одно дтп» → число; «без дтп», «дтп нет»,
+    «в дтп не была», «по дтп чистая» → 0; ничего не сказано или просто «после дтп» → None."""
+    t = clean(text).lower().replace("ё", "е")
+    if re.search(rf"(?:без|нет|ноль|0)\s+{ACC}|{ACC}\s*[:\-–—]?\s*(?:нет|0\b|не было|отсутств)|"
+                 rf"{ACC}\s+не\s+(?:был|бывал|участв)|не\s+(?:был\w*|бывал\w*|участвовал\w*)\s+в\s+{ACC}|"
+                 rf"по\s+{ACC}\s+чист", t):
+        return 0
+    m = (re.search(rf"(?<![\d.,])(\d{{1,2}})\s*(?:мелк\w*|незначит\w*|косметич\w*|легк\w*|небольш\w*)?\s*{ACC}", t)
+         or re.search(rf"{ACC}\s*[:\-–—]\s*(\d{{1,2}})(?![\d.,])", t)
+         or re.search(rf"{ACC}\s+(\d{{1,2}})\s*раз", t))
+    if m:
+        return int(m.group(1))
+    m = re.search(rf"\b({'|'.join(NUM_WORDS)})\s+(?:мелк\w*\s+|незначит\w*\s+|небольш\w*\s+)?{ACC}", t)
+    return NUM_WORDS[m.group(1)] if m else None
+
+
+def looks_like_ad(text: str) -> bool:
+    """Похоже на объявление о продаже — стоит ли звать ИИ, если правила не нашли машину или цену."""
+    t = text.lower()
+    return len(t) > 25 and bool(re.search(r"пробег|км\b|₽|руб|цена|продам|продаю|продается|продаётся|торг|год", t))
+
+
 def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> Listing:
     tokens = norm(clean(text)).split()
     L = Listing(text=text, tokens=tokens)
@@ -163,6 +191,7 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
     L.price = parse_price(text)
     L.year = parse_year(text)
     L.mileage = parse_mileage(text)
+    L.accidents = parse_accidents(text)
     regions = d.find_regions(tokens)
     L.region = regions[0] if regions else channel_region
     # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)

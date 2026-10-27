@@ -155,6 +155,8 @@ def matches(f: Filter, L, discount: int | None) -> bool:
         return False
     if any(mk in L.markers for mk in f.exclude_markers):
         return False
+    if "damaged" in f.exclude_markers and getattr(L, "accidents", None):
+        return False                                  # «без битых / без дтп», а продавец пишет про ДТП
     if any(_has_word(w, L.tokens) for w in f.exclude_words):
         return False
     if f.min_discount and (discount is None or discount < f.min_discount):

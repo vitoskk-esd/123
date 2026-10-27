@@ -49,8 +49,10 @@ async def admin(msg: Message, ctx: Ctx) -> None:
            f"выручка за 30 дней: {s['revenue30']:,} ₽".replace(",", " ")) if ctx.cfg.payments_on else "Оплата не подключена — бот бесплатный для всех."
     src = "\n".join(f"• {r['source']}: {r['users']} чел." for r in s["sources"])
     reader = "✅ подключён" if ctx.reader and ctx.reader.online else "❌ не подключён — /connect"
+    ai_state = "✅ включена" if ctx.cfg.ai_on else "❌ выключена — добавь GEMINI_API_KEY в «Переменные»"
     await msg.answer(
         f"🤖 Служебный аккаунт: {reader}\n"
+        f"🧠 ИИ-проверка постов: {ai_state}, проверено за сутки: {p['ai'] or 0}\n"
         f"👥 Людей: <b>{s['users']}</b>, с фильтрами: {s['with_filters']}\n{pay}\n\n"
         f"⚡ За сутки: постов {p['n']}, машин с ценой {p['cars'] or 0}, дублей {p['dups'] or 0}\n"
         f"Отправлено людям: {s['deliveries24']} · средняя задержка: <b>{seconds(p['lat'] and int(p['lat']))}</b>\n\n"

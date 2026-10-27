@@ -428,3 +428,42 @@ async def test_support_chat_in_bot(env):
     # обычное сообщение после этого — не в поддержку, а как всегда (похоже на фильтр → карточка)
     await dp.feed_update(bot, msg("камри до 1 млн"))
     assert "Похоже на фильтр" in s.texts(USER)[-1]
+
+
+async def test_accidents_on_card_and_filter(env):
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1 млн")
+    assert (await process(bot, ctx, post(CH1, "Toyota Camry 2012, 900 000 ₽, ДТП: 2"))).sent == [USER]
+    assert "💥 ДТП: <b>2</b> (со слов продавца)" in s.texts(USER)[-1]
+    assert (await process(bot, ctx, post(CH1, "Toyota Camry 2013, 950 000 ₽, без ДТП"))).sent == [USER]
+    assert "✅ ДТП: не было" in s.texts(USER)[-1]
+    await make_filter(dp, bot, "солярис до 1 млн, без битых", uid=OTHER)
+    assert not (await process(bot, ctx, post(CH1, "Hyundai Solaris 2016, 700 000 ₽, 1 мелкое дтп"))).sent   # «без битых» — ДТП отсекает
+
+
+async def test_ai_check_fixes_rules(env, monkeypatch):
+    """ИИ поправляет правила: снимает ложную метку, отсекает «куплю», не тратится на чужие марки; молчит — работают правила."""
+    import ai
+    dp, bot, s, ctx = env
+    object.__setattr__(ctx.cfg, "ai_proxy", True)
+    calls = []
+
+    async def fake_ask(d, text, key, model):
+        calls.append(text)
+        if text.startswith("КУПЛЮ"):
+            return {"is_car_sale": False, "markers": [], "accidents": -1}
+        if "молчит" in text:
+            return None                                                           # таймаут / лимит
+        return {"is_car_sale": True, "make": "Toyota", "model": "Camry", "year": 2012, "price_rub": 900000,
+                "markers": ["haggle"], "accidents": 0}
+    monkeypatch.setattr(ai, "ask", fake_ask)
+    await make_filter(dp, bot, "камри до 1 млн")
+    r = await process(bot, ctx, post(CH1, "Камри 2012, 900 000 ₽, вложения минимальные, торг"))
+    assert r.sent == [USER] and r.listing.parsed_by == "ai"
+    assert "требует вложений" not in s.texts(USER)[-1] and "торг" in s.texts(USER)[-1] and "ДТП: не было" in s.texts(USER)[-1]
+    assert not (await process(bot, ctx, post(CH1, "КУПЛЮ камри 2012 до 900 000 ₽ в любом состоянии"))).sent
+    n = len(calls)
+    await process(bot, ctx, post(CH1, "BMW X5 2010, 900 000 ₽"))                 # BMW никто не ищет — ИИ не зовём
+    assert len(calls) == n
+    r = await process(bot, ctx, post(CH1, "Toyota Camry 2011 молчит, 850 000 ₽, требует вложений"))
+    assert r.sent == [USER] and r.listing.parsed_by == "rules" and "требует вложений" in s.texts(USER)[-1]
