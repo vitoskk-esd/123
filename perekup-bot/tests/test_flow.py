@@ -367,7 +367,7 @@ async def test_all_channels_ready_message_after_last(env):
     assert "Подключено: <b>2</b>, не получилось: 1" in final and "пришлю сразу" in final
 
 
-async def test_free_mode_without_yookassa(env):
+async def test_free_mode_without_robokassa(env):
     """Робокасса не настроена — бот бесплатный для всех, первый написавший /start — админ."""
     dp, bot, s, ctx = env
     object.__setattr__(ctx.cfg, "rk_login", "")
@@ -375,8 +375,11 @@ async def test_free_mode_without_yookassa(env):
     await make_filter(dp, bot, "приора до 300к")
     await ctx.db._run("UPDATE users SET trial_until=0 WHERE id=?", USER)
     assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == [USER]
-    await dp.feed_update(bot, msg("💳 Подписка"))
-    assert "бесплатно" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("💳 Подписка"))                           # тарифы видно — их проверяет Робокасса
+    sub = s.texts(USER)[-1]
+    assert isinstance(s.sent[-1], SendPhoto) and "бесплатно для всех" in sub and "PRO — 2490 ₽" in sub and len(sub) <= 1024
+    await dp.feed_update(bot, cb("s:pay:pro"))                             # а платить пока некуда
+    assert s.sent[-1].show_alert and "бесплатный" in s.sent[-1].text and await ctx.db.last_pending(USER) is None
     await dp.feed_update(bot, msg("/admin"))
     assert "Оплата не подключена" in s.texts(USER)[-1]
     await dp.feed_update(bot, msg("/start", OTHER))

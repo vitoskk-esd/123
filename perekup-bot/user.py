@@ -305,7 +305,8 @@ async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
     p = plans.plans(ctx.cfg)
     b = p["basic"]
     plan = plans.current(ctx.cfg, u)
-    status = (T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
+    status = (T.SUB_FREE if plan is plans.FREE else
+              T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
               if plan else T.SUB_STATUS_NONE)
     status = (intro + "\n\n" if intro else "") + status
     caption = T.PLANS_CAPTION.format(
@@ -335,13 +336,13 @@ async def offer_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None
 
 
 async def show_sub(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = None) -> None:
-    if not ctx.cfg.payments_on:
-        return await msg.answer(T.SUB_FREE)
     await send_plans(msg, ctx, uid or msg.chat.id)
 
 
 @router.callback_query(F.data.startswith("s:pay"))
 async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
+    if not ctx.cfg.payments_on:      # тарифы видно (их проверяет Робокасса), но платить пока некуда
+        return await cb.answer(T.PAY_SOON, show_alert=True)
     all_plans = plans.plans(ctx.cfg)
     plan = all_plans.get(cb.data.split(":")[2] if cb.data.count(":") == 2 else "basic", all_plans["basic"])
     u = await ctx.db.user(cb.from_user.id)
