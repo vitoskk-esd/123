@@ -13,7 +13,8 @@ import time
 from aiogram import Bot
 from telethon import TelegramClient, errors, events, utils
 from telethon.sessions import StringSession
-from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.functions.channels import CreateChannelRequest, EditAdminRequest, JoinChannelRequest
+from telethon.tl.types import ChatAdminRights, InputPeerChannel
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 
 import keyboards as K
@@ -48,6 +49,7 @@ class Reader:
         self.bot, self.ctx, self.client = bot, ctx, client
         self.tasks: set[asyncio.Task] = set()
         self.runner: asyncio.Task | None = None
+        self.buffer = None                                     # InputPeerChannel канала с фото
 
     @property
     def online(self) -> bool:
@@ -76,15 +78,48 @@ class Reader:
         self.client = client
         await self.ctx.db.set_setting("session", client.session.save())
         client.add_event_handler(self._on_message, events.NewMessage())
+        await self.ensure_buffer()
         await self.ctx.refresh_channels()
         self.runner = asyncio.create_task(self.run())
         log.info("служебный аккаунт читает каналы: %d", len(self.ctx.channels))
+
+    async def ensure_buffer(self) -> None:
+        """Закрытый канал для фото машин: служебный аккаунт создаёт его сам (один раз) и делает бота админом.
+        Не получилось — бот работает, просто без фото."""
+        self.buffer = None
+        cid, access = await self.ctx.db.get_setting("buffer_id"), await self.ctx.db.get_setting("buffer_hash")
+        if not cid:
+            try:
+                ch = (await self.client(CreateChannelRequest(
+                    title="Перехват — фото машин", about="Служебный канал бота: сюда пересылаются фото машин. Не удаляй.",
+                    broadcast=True))).chats[0]
+                me = await self.bot.me()
+                await self.client(EditAdminRequest(ch, me.username, ChatAdminRights(post_messages=True, edit_messages=True,
+                                                                                     delete_messages=True), rank="bot"))
+            except Exception as e:
+                log.warning("канал для фото не создан (%s) — посты будут без фото", e)
+                return
+            cid, access = str(ch.id), str(ch.access_hash)
+            await self.ctx.db.set_setting("buffer_id", cid)
+            await self.ctx.db.set_setting("buffer_hash", access)
+        self.buffer = InputPeerChannel(int(cid), int(access))
+        self.ctx.buffer_chat = int(f"-100{cid}")
+
+    def _photo(self, e: events.NewMessage.Event, msg_id: int):
+        async def forward() -> int | None:
+            if self.buffer is None:
+                return None
+            sent = await self.client.forward_messages(self.buffer, msg_id, from_peer=await e.get_input_chat())
+            sent = sent[0] if isinstance(sent, list) else sent
+            return sent.id if sent else None
+        return forward
 
     async def _on_message(self, e: events.NewMessage.Event) -> None:
         m = e.message
         if not m.message or e.chat_id not in self.ctx.channels:   # фото альбома без подписи — пропускаем
             return
-        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, m.date.timestamp())))
+        photo = self._photo(e, m.id) if m.photo else None
+        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, m.date.timestamp(), photo)))
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
 

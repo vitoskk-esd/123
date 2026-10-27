@@ -3,12 +3,16 @@
 1. Служебный аккаунт получил пост (userbot.py) → RawPost.
 2. Разбор правилами — доли миллисекунды.
 3. Дубль? Цена рынка? Кому подходит? Всё — запросы к локальной SQLite.
-4. Всем подходящим одновременно уходит одно сообщение: оценка, маркеры, текст поста и превью со ссылкой на пост.
+4. Если в посте есть фото — служебный аккаунт пересылает его в закрытый канал-буфер (~0,5 с), и каждому уходит
+   одно сообщение: фото машины, а в подписи — карточка. Фото Telegram копирует у себя, заново оно не загружается.
+   Нет фото или канал запрещает пересылку — уходит обычная карточка с текстом поста.
 """
 import asyncio
 import html
 import logging
+import re
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from statistics import median
 
@@ -29,6 +33,8 @@ MARKET_DAYS = 90         # цены за сколько дней берём дл
 MARKET_MIN = 5           # меньше объявлений — оценку не показываем, чтобы не врать
 SHOW_DISCOUNT = 5        # «ниже рынка» пишем от 5%
 SCAM_DISCOUNT = 45       # дешевле рынка почти вдвое — скорее всего мошенники
+CAPTION_MAX = 1024       # лимит Telegram на подпись к фото
+PHOTO_TIMEOUT = 3        # сколько ждём пересылку фото; дольше — шлём без фото, скорость важнее
 
 
 @dataclass
@@ -37,6 +43,7 @@ class RawPost:
     msg_id: int
     text: str
     date: float                  # время публикации (unix)
+    photo: Callable[[], Awaitable[int | None]] | None = None   # переслать фото в буфер → id сообщения там
 
 
 @dataclass
@@ -106,7 +113,7 @@ def seconds(ms: int | None) -> str:
     return f"{ms / 1000:.1f} с".replace(".", ",") if ms < 60_000 else f"{ms // 60_000} мин"
 
 
-def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: int) -> str:
+def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: int, limit: int = 4096) -> str:
     L, d = r.listing, ctx.dict
     lines = []
     if r.scam:
@@ -136,8 +143,10 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
     name = channel.get("title") or (f"@{channel['username']}" if channel.get("username") else "канал")
     lines.append(T.CARD_SOURCE.format(channel=html.escape(name), latency=seconds(latency_ms)))
     lines.append(T.CARD_FILTER.format(filter=html.escape(filter_text[:80])))
-    lines.append("\n<blockquote expandable>" + html.escape(L.text[:2500]) + "</blockquote>")
-    return "\n".join(lines)
+    head = "\n".join(lines)
+    room = min(2500, limit - len(re.sub(r"<[^>]+>", "", head)) - 10)    # теги в лимит Telegram не входят
+    post = L.text if len(L.text) <= room else L.text[:max(0, room - 1)].rstrip() + "…"
+    return head + ("\n\n<blockquote expandable>" + html.escape(post) + "</blockquote>" if room > 20 else "")
 
 
 async def analyse(ctx: Ctx, raw: RawPost, channel: dict) -> Result:
@@ -191,11 +200,24 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
 
     url = post_url(channel, raw.msg_id)
     preview = LinkPreviewOptions(url=url, prefer_small_media=True) if url else LinkPreviewOptions(is_disabled=True)
+    photo_id = None
+    if raw.photo and ctx.buffer_chat:
+        try:
+            photo_id = await asyncio.wait_for(raw.photo(), PHOTO_TIMEOUT)
+        except Exception as e:     # канал запретил пересылку, сеть — шлём без фото
+            log.info("фото не переслано: %s", e)
     done: list[tuple] = []
 
+    def message(uid: int, fid: int, ftext: str):
+        latency = int((time.time() - raw.date) * 1000)
+        if photo_id:
+            caption = card_text(ctx, r, channel, ftext, latency, CAPTION_MAX)
+            return lambda: bot.copy_message(uid, ctx.buffer_chat, photo_id, caption=caption, reply_markup=K.card(url, fid))
+        text = card_text(ctx, r, channel, ftext, latency)
+        return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid), link_preview_options=preview)
+
     async def send_card(uid: int, fid: int, ftext: str):
-        text = card_text(ctx, r, channel, ftext, int((time.time() - raw.date) * 1000))
-        if await _send(lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid), link_preview_options=preview), uid, ctx):
+        if await _send(message(uid, fid, ftext), uid, ctx):
             r.sent.append(uid)
             done.append((uid, r.post_id, fp, ckey, fid, r.discount, int((time.time() - raw.date) * 1000)))
 

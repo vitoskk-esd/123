@@ -10,8 +10,8 @@ import pytest
 from aiogram import Bot
 from aiogram.client.session.base import BaseSession
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.methods import AnswerCallbackQuery, EditMessageReplyMarkup, EditMessageText, SendMessage
-from aiogram.types import CallbackQuery, Chat, Message, Update, User
+from aiogram.methods import AnswerCallbackQuery, CopyMessage, EditMessageReplyMarkup, EditMessageText, GetMe, SendMessage
+from aiogram.types import CallbackQuery, Chat, Message, MessageId, Update, User
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
 import jobs
@@ -40,6 +40,10 @@ class FakeSession(BaseSession):
         self.sent.append(method)
         if isinstance(method, (AnswerCallbackQuery, EditMessageReplyMarkup)):
             return True
+        if isinstance(method, CopyMessage):
+            return MessageId(message_id=next(ids))
+        if isinstance(method, GetMe):
+            return User(id=42, is_bot=True, first_name="Перехват", username="perekhvat_bot")
         if isinstance(method, (SendMessage, EditMessageText)):
             return Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=method.chat_id or USER, type="private"),
                            text=method.text)
@@ -352,3 +356,44 @@ async def test_edit_filter(env):
     await dp.feed_update(bot, msg("приора до 300к"))
     await dp.feed_update(bot, cb("f:save"))
     assert len(await ctx.db.filters(USER)) == 2
+
+
+async def test_post_comes_with_car_photo(env):
+    """Есть фото — одно сообщение: фото из канала-буфера, карточка в подписи (не длиннее 1024). Нет — обычная карточка."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "любые до 2 млн")
+    ctx.buffer_chat = -1009999999999
+
+    async def forwarded():
+        return 555
+    long_text = "Toyota Camry 2014, 1 500 000 ₽, Москва. " + "Состояние отличное, всё работает. " * 80
+    r = await process(bot, ctx, RawPost(CH1, next(ids), long_text, time.time() - 1, forwarded))
+    assert r.sent == [USER]
+    copy = [m for m in s.sent if isinstance(m, CopyMessage)][-1]
+    assert (copy.chat_id, copy.from_chat_id, copy.message_id) == (USER, -1009999999999, 555)
+    import re
+    visible = re.sub(r"<[^>]+>", "", copy.caption)
+    assert "Toyota Camry 2014" in visible and "1 500 000 ₽" in visible and len(visible) <= 1024 and visible.rstrip().endswith("…")
+
+    async def forbidden():
+        raise RuntimeError("ChatForwardsRestrictedError")
+    r = await process(bot, ctx, RawPost(CH1, next(ids), "Hyundai Solaris 2016, 750 000 ₽", time.time() - 1, forbidden))
+    assert r.sent == [USER] and "Hyundai Solaris 2016" in s.texts(USER)[-1]          # без фото — обычная карточка
+
+
+class FakeCreator(FakeTelethon):
+    async def __call__(self, request):
+        self.calls.append(type(request).__name__)
+        if type(request).__name__ == "CreateChannelRequest":
+            ch = Channel(id=4242, title=request.title, photo=ChatPhotoEmpty(), date=None, access_hash=99)
+            return type("R", (), {"chats": [ch]})()
+
+
+async def test_reader_creates_photo_channel_once(env):
+    dp, bot, s, ctx = env
+    reader = Reader(bot, ctx, FakeCreator())
+    await reader.ensure_buffer()
+    assert reader.client.calls == ["CreateChannelRequest", "EditAdminRequest"]          # создал и сделал бота админом
+    assert ctx.buffer_chat == -1004242 and await ctx.db.get_setting("buffer_hash") == "99"
+    await reader.ensure_buffer()                                                          # после перезапуска — тот же канал
+    assert reader.client.calls == ["CreateChannelRequest", "EditAdminRequest"]
