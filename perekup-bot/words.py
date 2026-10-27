@@ -123,9 +123,10 @@ class Dictionary:
         return list(dict.fromkeys(h.payload[0] for h in self.places.find(tokens)))
 
     def find_markers(self, tokens: list[str]) -> list[str]:
-        """«не требует вложений», «без дтп» — это не маркер: перед фразой стоит отрицание."""
+        """Маркеры одной фразы (текст режем по знакам препинания до вызова). «Без запретов / залогов», «не требует
+        вложений», «без дтп» — не маркер: в той же фразе за несколько слов до него стоит отрицание."""
         return list(dict.fromkeys(h.payload[0] for h in self.marks.find(tokens)
-                                  if not (h.start and tokens[h.start - 1] in NEGATIONS)))
+                                  if not any(t in NEGATIONS for t in tokens[max(0, h.start - 4):h.start])))
 
 
 def load_dictionary(path: Path) -> Dictionary:

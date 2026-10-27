@@ -124,23 +124,50 @@ def parse_mileage(text: str) -> int | None:
     return value if 0 < value < 2_000_000 else None
 
 
+# слова перед названием машины, после которых это сравнение, а не продажа: «по цене плохой приоры», «дешевле камри»
+COMPARE = {"цене", "цена", "дешевле", "дороже", "чем", "как", "вместо", "типа", "уровня", "аналог", "лучше", "хуже",
+           "обмен", "обменяю", "меняю", "поменяю", "рассмотрю", "против", "конкурент"}
+
+
+def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
+    """Какая машина продаётся, если в посте их несколько. Каждое упоминание получает очки:
+    + модель (а не только марка), + названа вместе с маркой («Citroen C4»), + стоит в начале строки (заголовок),
+    + рядом год; − перед ним «по цене», «дешевле», «как», «вместо», «обмен» — значит, это сравнение."""
+    lines = [norm(line).split() for line in clean(text).splitlines()]
+    years = [bool(re.search(YEAR, " ".join(t))) for t in lines]
+    best, best_score = (None, None), -99.0
+    for li, toks in enumerate(lines):
+        hits = d.cars.find(toks)
+        make_before = {h.end: h.payload[1] for h in hits if h.payload[0] == "make"}   # где кончается название марки
+        for h in hits:
+            make, model = h.payload[1], (h.payload[2] if h.payload[0] == "model" else None)
+            score = 2.0 if model else 1.0
+            if model and (h.end - h.start > 1 or make_before.get(h.start) == make):
+                score += 3                                   # «Citroen C4», «Тойота Королла» — марка прямо перед моделью
+            if h.start <= 1:
+                score += 2                                   # строка начинается с машины — это заголовок
+            if any(years[max(0, li - 1):li + 3]):
+                score += 1                                   # рядом год выпуска
+            if set(toks[max(0, h.start - 4):h.start]) & COMPARE:
+                score -= 6                                   # «по цене плохой приоры»
+            score -= li * 0.05                               # при прочих равных — что раньше
+            if score > best_score:
+                best, best_score = (make, model), score
+    return best
+
+
 def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> Listing:
     tokens = norm(clean(text)).split()
     L = Listing(text=text, tokens=tokens)
-    cars = d.find_cars(tokens)
-    makes = [mk for mk, md in cars if md is None]
-    models = [(mk, md) for mk, md in cars if md is not None]
-    if models:
-        # модель той марки, что названа в тексте, важнее случайного совпадения
-        L.make, L.model = next(((mk, md) for mk, md in models if mk in makes), models[0])
-    elif makes:
-        L.make = makes[0]
+    L.make, L.model = pick_car(text, d)
     L.price = parse_price(text)
     L.year = parse_year(text)
     L.mileage = parse_mileage(text)
     regions = d.find_regions(tokens)
     L.region = regions[0] if regions else channel_region
-    L.markers = d.find_markers(tokens)
+    # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)
+    for clause in re.split(r"[.,;!?\n]+", clean(text)):
+        L.markers += [m for m in d.find_markers(norm(clause).split()) if m not in L.markers]
     return L
 
 

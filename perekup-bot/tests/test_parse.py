@@ -73,3 +73,21 @@ def test_matching():
     assert not matches(f, parse_post("Toyota Camry 2012, Москва", D), None)                        # без цены — не шлём
     cheap = parse_filter("камри ниже рынка на 15%", D)
     assert matches(cheap, ok, 18) and not matches(cheap, ok, 10) and not matches(cheap, ok, None)
+
+
+def test_picks_the_car_for_sale_not_the_comparison():
+    """Пост из канала SSA: «по цене плохой приоры» — сравнение, продаётся Citroen C4 из заголовка."""
+    text = ("📢 По цене плохой приоры нужно кому:\n\n🚘 Citroen C4\n2012 год\n1.6 | MT\n5 регистраций\n"
+            "Мотор и коробка в полном порядке 👌\nБез жести по кузову\nНе продавался на Авито 📦\n"
+            "Документов комплект\nБез запретов / залогов ✅\nЦена: 210 000 ₽")
+    L = parse_post(text, D)
+    assert (L.make, L.model, L.year, L.price) == ("citroen", "C4", 2012, 210_000)
+    assert "credit" not in L.markers                                    # «без запретов / залогов» — не залог
+    assert parse_post("Дешевле камри! Тойота Королла 2014, 800 000", D).model == "Corolla"
+    assert parse_post("Продам солярис 2015 790к, рассмотрю обмен на камри", D).model == "Solaris"
+    assert parse_post("Камри 2012 900к, вместо солярис", D).model == "Camry"
+
+
+def test_negation_only_inside_its_phrase():
+    assert "credit" in parse_post("Не бит, не крашен, в кредите. Камри 2012, 900к", D).markers
+    assert "damaged" not in parse_post("Камри 2012, без дтп и вложений, 900к", D).markers
