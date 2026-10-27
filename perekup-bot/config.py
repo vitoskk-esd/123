@@ -30,9 +30,10 @@ class Config:
     admins: frozenset[int] = frozenset()   # пусто — админом станет первый, кто напишет боту /start
     price_trial: int = 250           # пробный день: всё как в PRO на 24 часа, один раз
     price_basic: int = 990           # «Простой» на 30 дней
-    price_pro: int = 2500            # PRO на 30 дней, без лимитов
-    basic_filters: int = 3           # лимиты «Простого»
-    basic_own: int = 5
+    price_pro: int = 2490            # PRO на 30 дней, без лимитов
+    basic_filters: int = 2           # лимиты «Простого»: фильтры, свои каналы (0 — только общая база), задержка, с
+    basic_own: int = 0
+    basic_delay: int = 60
     trial_days: int = 0              # бесплатных дней при первом запуске (теперь пробный день платный)
     yk_shop_id: str = ""             # ЮKassa; пока не заполнено — бот работает бесплатно для всех (тестовый режим)
     yk_secret: str = ""
@@ -64,9 +65,10 @@ def get_config() -> Config:
         admins=frozenset(int(x) for x in e("ADMIN_IDS", "").replace(" ", "").split(",") if x),
         price_trial=int(e("PRICE_TRIAL", "250")),
         price_basic=int(e("PRICE_BASIC", "990")),
-        price_pro=int(e("PRICE_PRO", "2500")),
-        basic_filters=int(e("BASIC_FILTERS", "3")),
-        basic_own=int(e("BASIC_OWN_CHANNELS", "5")),
+        price_pro=int(e("PRICE_PRO", "2490")),
+        basic_filters=int(e("BASIC_FILTERS", "2")),
+        basic_own=int(e("BASIC_OWN_CHANNELS", "0")),
+        basic_delay=int(e("BASIC_DELAY", "60")),
         trial_days=int(e("TRIAL_DAYS", "0")),
         yk_shop_id=e("YOOKASSA_SHOP_ID", ""),
         yk_secret=e("YOOKASSA_SECRET_KEY", ""),

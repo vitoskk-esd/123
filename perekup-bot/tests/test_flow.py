@@ -10,8 +10,8 @@ import pytest
 from aiogram import Bot
 from aiogram.client.session.base import BaseSession
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.methods import AnswerCallbackQuery, CopyMessage, EditMessageReplyMarkup, EditMessageText, GetMe, SendMessage
-from aiogram.types import CallbackQuery, Chat, Message, MessageId, Update, User
+from aiogram.methods import AnswerCallbackQuery, CopyMessage, EditMessageReplyMarkup, EditMessageText, GetMe, SendMessage, SendPhoto
+from aiogram.types import CallbackQuery, Chat, Message, MessageId, PhotoSize, Update, User
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
 import jobs
@@ -47,6 +47,9 @@ class FakeSession(BaseSession):
         if isinstance(method, (SendMessage, EditMessageText)):
             return Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=method.chat_id or USER, type="private"),
                            text=method.text)
+        if isinstance(method, SendPhoto):
+            return Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=method.chat_id, type="private"),
+                           caption=method.caption, photo=[PhotoSize(file_id=f"ph{next(ids)}", file_unique_id="u", width=1080, height=1240)])
         return True
 
     async def stream_content(self, *a, **k):
@@ -56,7 +59,8 @@ class FakeSession(BaseSession):
         pass
 
     def texts(self, chat_id):
-        return [m.text for m in self.sent if isinstance(m, (SendMessage, EditMessageText)) and m.chat_id == chat_id]
+        return [m.caption if isinstance(m, SendPhoto) else m.text for m in self.sent
+                if isinstance(m, (SendMessage, EditMessageText, SendPhoto)) and m.chat_id == chat_id]
 
 
 class FakePay:
@@ -202,7 +206,8 @@ async def test_no_plan_then_buy_basic(env):
     assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — 250 ₽" in s.texts(USER)[-1]
     assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == []
     await dp.feed_update(bot, msg("💳 Подписка"))
-    assert "Подписки нет" in s.texts(USER)[-1] and "Простой — 990 ₽" in s.texts(USER)[-1] and "PRO — 2500 ₽" in s.texts(USER)[-1]
+    assert "Подписки нет" in s.texts(USER)[-1] and "Простой — 990 ₽" in s.texts(USER)[-1] and "PRO — 2490 ₽" in s.texts(USER)[-1]
+    assert isinstance(s.sent[-1], SendPhoto)                              # тарифы — картинкой-сравнением
 
     await dp.feed_update(bot, cb("s:pay:basic"))
     pay = await ctx.db.last_pending(USER)
@@ -215,7 +220,8 @@ async def test_no_plan_then_buy_basic(env):
     u = await ctx.db.user(USER)
     assert 29 * 86400 < u["paid_until"] - time.time() <= 30 * 86400 and u["plan"] == "basic"
     assert any("Оплата прошла! <b>Простой</b>" in t for t in s.texts(USER))
-    assert (await process(bot, ctx, post(CH1, "Приора 2012, 280 000 руб"))).sent == [USER]
+    r = await process(bot, ctx, post(CH1, "Приора 2012, 280 000 руб"))
+    assert r.sent == [] and r.delayed == [USER]                            # «Простой» — с задержкой
 
 
 async def test_trial_day_once_and_basic_limits_and_upgrade(env):
@@ -235,31 +241,67 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     assert "только один раз" in s.texts(USER)[-1]
 
     await ctx.db.set_user(USER, paid_until=time.time() + 10 * 86400, plan="basic")   # «Простой», осталось 10 дней
-    for t in ("камри до 1 млн", "солярис до 900к", "приора до 300к"):
+    for t in ("камри до 1 млн", "солярис до 900к"):
         await dp.feed_update(bot, msg(t)); await dp.feed_update(bot, cb("f:save"))
     await dp.feed_update(bot, msg("веста до 1 млн")); await dp.feed_update(bot, cb("f:save"))
-    assert len(await ctx.db.filters(USER)) == 3 and "до 3 фильтров" in s.texts(USER)[-1]   # четвёртый — только в PRO
+    assert len(await ctx.db.filters(USER)) == 2 and "до 2 фильтров" in s.texts(USER)[-1]   # третий — только в PRO
 
     await dp.feed_update(bot, cb("s:pay:pro"))
     pay = await ctx.db.last_pending(USER)
-    assert pay["amount"] == 2500 and "пересчитаем" in s.texts(USER)[-1]
+    assert pay["amount"] == 2490 and "пересчитаем" in s.texts(USER)[-1]
     ctx.pay.statuses[pay["yk_id"]] = "succeeded"
     await dp.feed_update(bot, cb("s:check"))
     u = await ctx.db.user(USER)
     days = (u["paid_until"] - time.time()) / 86400
-    assert u["plan"] == "pro" and 33.8 < days < 34.1                        # 30 дней PRO + 10 дней «Простого» ≈ 3,96 дня PRO
+    assert u["plan"] == "pro" and 33.8 < days < 34.1                        # 30 дней PRO + 10 дней «Простого» ≈ 3,98 дня PRO
     await dp.feed_update(bot, msg("веста до 1 млн")); await dp.feed_update(bot, cb("f:save"))
-    assert len(await ctx.db.filters(USER)) == 4                             # в PRO лимита нет
+    assert len(await ctx.db.filters(USER)) == 3                             # в PRO лимита нет
 
 
 async def test_basic_plan_extra_filters_do_not_deliver(env):
-    """Перешёл с PRO на «Простой» с 4 фильтрами — работают первые 3."""
+    """Перешёл с PRO на «Простой» с 4 фильтрами — работают первые 2."""
     dp, bot, s, ctx = env
     for t in ("солярис до 900к", "приора до 300к", "веста до 1 млн", "камри до 1 млн"):
         await make_filter(dp, bot, t)
     await ctx.db.set_user(USER, plan="basic")
-    assert (await process(bot, ctx, post(CH1, "Toyota Camry 2012, 900 000 ₽"))).sent == []
-    assert (await process(bot, ctx, post(CH1, "Lada Priora 2011, 260 000 ₽"))).sent == [USER]
+    r = await process(bot, ctx, post(CH1, "Toyota Camry 2012, 900 000 ₽"))
+    assert r.sent == r.delayed == []
+    assert (await process(bot, ctx, post(CH1, "Lada Priora 2011, 260 000 ₽"))).delayed == [USER]
+    for t in list(ctx.background):
+        t.cancel()
+
+
+async def test_basic_vs_pro_speed_market_and_own_channels(env):
+    """PRO получает машину сразу и видит «ниже рынка»; «Простой» — через задержку, с замком и подсказкой про PRO;
+    свои каналы и фильтр «ниже рынка» на «Простом» недоступны."""
+    dp, bot, s, ctx = env
+    object.__setattr__(ctx.cfg, "basic_delay", 2)
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=OTHER, plan="pro")
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=USER, plan="basic")
+    for p in (1_450_000, 1_480_000, 1_500_000, 1_550_000, 1_600_000):            # рынок ≈ 1,5 млн
+        await process(bot, ctx, post(CH2, f"Toyota Camry 2012, цена {p:,} ₽".replace(",", " ")))
+    for t in list(ctx.background):
+        t.cancel()
+    s.sent.clear()
+    r = await process(bot, ctx, RawPost(CH1, next(ids), "Toyota Camry 2012, 1 250 000 ₽", time.time()))
+    assert r.sent == [OTHER] and r.delayed == [USER]
+    assert "−17% к рынку" in s.texts(OTHER)[-1] and "В PRO" not in s.texts(OTHER)[-1]
+    assert not s.texts(USER)                                                       # «Простой» ещё ждёт
+    await asyncio.gather(*ctx.background)
+    card = s.texts(USER)[-1]
+    assert "Toyota Camry 2012" in card and "−17%" not in card and "🔒 Насколько машина ниже рынка — в PRO" in card
+    assert "⚡ В PRO эта машина пришла бы на 2 с раньше" in card
+    # та же машина из другого канала, пока «Простой» ждал, — не дублируется
+    assert USER not in (await process(bot, ctx, post(CH2, "Toyota Camry 2012, 1 250 000 ₽, Москва"))).delayed
+
+    own = await ctx.db.channel_by_tg(OWN)
+    await ctx.db.set_channel_state(USER, own["id"], "own")                         # остался свой канал с PRO
+    r = await process(bot, ctx, post(OWN, "Toyota Camry 2014, 1 100 000 ₽"))
+    assert USER not in r.sent + r.delayed
+    await dp.feed_update(bot, cb("c:add")); await dp.feed_update(bot, msg("@new_cars_spb"))
+    assert "только общая база каналов" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("тойота ниже рынка на 15%")); await dp.feed_update(bot, cb("f:save"))
+    assert "Фильтр «ниже рынка» — в тарифе PRO" in s.texts(USER)[-1]
 
 
 async def test_jobs_access_reminder(env):

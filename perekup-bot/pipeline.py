@@ -57,6 +57,7 @@ class Result:
     market: int | None = None
     samples: int = 0
     sent: list[int] = field(default_factory=list)
+    delayed: list[int] = field(default_factory=list)   # «Простой»: уйдёт позже, через задержку тарифа
     latency_ms: int | None = None
     teaser: bool = False         # анонс «скоро в продаже» — не шлём
 
@@ -115,10 +116,15 @@ def seconds(ms: int | None) -> str:
     return f"{ms / 1000:.1f} с".replace(".", ",") if ms < 60_000 else f"{ms // 60_000} мин"
 
 
-def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: int, limit: int = 4096) -> str:
+def wait_text(sec: int) -> str:
+    return f"{sec // 60} мин" if sec >= 60 and sec % 60 == 0 else f"{sec} с"
+
+
+def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: int, limit: int = 4096,
+              plan: plans.Plan = plans.FREE) -> str:
     L, d = r.listing, ctx.dict
     lines = []
-    if r.discount is not None and r.discount >= SHOW_DISCOUNT:
+    if plan.market and r.discount is not None and r.discount >= SHOW_DISCOUNT:
         lines.append(T.CARD_DISCOUNT.format(d=r.discount))
     lines.append(T.CARD_TITLE.format(car=html.escape(d.car_name(L.make, L.model)), year=f" {L.year}" if L.year else "",
                                      price=rub(L.price)))
@@ -131,8 +137,10 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
         lines.append(" · ".join(info))
     if L.accidents is not None:
         lines.append(T.CARD_ACCIDENTS.format(n=L.accidents) if L.accidents else T.CARD_NO_ACCIDENTS)
-    if r.market:
+    if r.market and plan.market:
         lines.append(T.CARD_MARKET.format(market=rub(r.market), n=r.samples))
+    elif r.market:
+        lines.append(T.CARD_MARKET_LOCKED)                  # «Простой»: оценка есть, но видна в PRO
     good = [d.markers[m].label for m in L.markers if m in d.markers and d.markers[m].kind == "good"]
     bad = [d.markers[m].label for m in L.markers if m in d.markers and d.markers[m].kind == "bad"]
     if good:
@@ -142,6 +150,8 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
     name = channel.get("title") or (f"@{channel['username']}" if channel.get("username") else "канал")
     lines.append(T.CARD_SOURCE.format(channel=html.escape(name), latency=seconds(latency_ms)))
     lines.append(T.CARD_FILTER.format(filter=html.escape(filter_text[:80])))
+    if plan.delay:
+        lines.append(T.CARD_DELAY_UPSELL.format(wait=wait_text(plan.delay)))
     head = "\n".join(lines)
     room = min(2500, limit - len(re.sub(r"<[^>]+>", "", head)) - 10)    # теги в лимит Telegram не входят
     post = L.text if len(L.text) <= room else L.text[:max(0, room - 1)].rstrip() + "…"
@@ -167,14 +177,15 @@ def worth_ai(L: Listing, text: str, filters: list[Filter], d) -> bool:
     return several or bool(TRICKY.search(text))
 
 
-async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None) -> Result:
+async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None,
+                  ai_filters: list[Filter] | None = None) -> Result:
     """Разбор (правила + ИИ-проверка), дубль, рынок. Без отправки — удобно и для тестов."""
     r = Result()
     L = r.listing = parse_post(raw.text, ctx.dict, channel.get("region"))
     if L.teaser:                            # «скоро в продаже» — купить ещё нельзя, не отвлекаем людей
         r.teaser = True
         return r
-    if ctx.cfg.ai_on and worth_ai(L, raw.text, filters or [], ctx.dict):
+    if ctx.cfg.ai_on and worth_ai(L, raw.text, filters if ai_filters is None else ai_filters, ctx.dict):
         checked = await ai.ask(ctx.dict, raw.text, ctx.cfg.ai_key, ctx.cfg.ai_model)
         if checked:
             L = r.listing = ai.apply(L, checked, ctx.dict)
@@ -203,6 +214,9 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     if not channel:
         return Result()
     rows = await ctx.db.subscribers(channel)
+    now = time.time()
+    row_plan = {row["fid"]: plans.current(ctx.cfg, row, now) for row in rows}
+    ai_filters = [Filter.loads(row["data"]) for row in rows if row_plan[row["fid"]] and row_plan[row["fid"]].ai]
     # фото пересылаем сразу, параллельно с ИИ-проверкой, — а не после неё
     photo_task = None
     if raw.photo and ctx.buffer_chat and rows:
@@ -210,7 +224,8 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         if (quick.is_car or looks_like_ad(raw.text)) and not quick.teaser:
             photo_task = asyncio.create_task(raw.photo())
             photo_task.add_done_callback(lambda t: t.cancelled() or t.exception())   # ошибку разберём ниже
-    r = await analyse(ctx, raw, channel, [Filter.loads(row["data"]) for row in rows])
+    # ИИ-проверку зовём, только если машина может подойти тем, у кого она есть в тарифе (PRO, пробный день)
+    r = await analyse(ctx, raw, channel, [Filter.loads(row["data"]) for row in rows], ai_filters)
     L = r.listing
     if r.teaser:
         await ctx.db.add_teaser(raw.chat_id, raw.msg_id)   # пришлём, когда анонс отредактируют в продажу
@@ -223,16 +238,17 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     # кому подходит: первый подходящий фильтр каждого человека; кому эта машина уже уходила — пропускаем
     already = await ctx.db.delivered_to(fp, ckey, time.time() - DEDUP_DAYS * DAY)
     targets: dict[int, tuple] = {}
-    now = time.time()
     for row in rows:
         uid = row["id"]
-        if uid in targets or uid in already:
+        if uid in targets or uid in already or (uid, fp) in ctx.pending or (uid, ckey) in ctx.pending:
             continue
-        plan = plans.current(ctx.cfg, row, now)
+        plan = row_plan[row["fid"]]
         if not plan or row["frank"] > plan.max_filters:     # нет доступа или фильтр сверх лимита тарифа
             continue
+        if not channel["base"] and plan.max_own == 0:       # свои каналы — не в этом тарифе
+            continue
         if matches(Filter.loads(row["data"]), L, r.discount):
-            targets[uid] = (row["fid"], row["text"])
+            targets[uid] = (row["fid"], row["text"], plan)
     recv_ms = int((raw.recv - raw.date) * 1000) if raw.recv else None
     if not targets:
         await ctx.db.finish_post(r.post_id, 0, 0, recv_ms)
@@ -248,20 +264,43 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
             log.info("фото не переслано: %s", e)
     done: list[tuple] = []
 
-    def message(uid: int, fid: int, ftext: str):
+    def message(uid: int, fid: int, ftext: str, plan: plans.Plan):
         latency = int((time.time() - raw.date) * 1000)
         if photo_id:
-            caption = card_text(ctx, r, channel, ftext, latency, CAPTION_MAX)
+            caption = card_text(ctx, r, channel, ftext, latency, CAPTION_MAX, plan)
             return lambda: bot.copy_message(uid, ctx.buffer_chat, photo_id, caption=caption, reply_markup=K.card(url, fid))
-        text = card_text(ctx, r, channel, ftext, latency)
+        text = card_text(ctx, r, channel, ftext, latency, plan=plan)
         return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid), link_preview_options=preview)
 
-    async def send_card(uid: int, fid: int, ftext: str):
-        if await _send(message(uid, fid, ftext), uid, ctx):
+    async def send_card(uid: int, fid: int, ftext: str, plan: plans.Plan, out: list):
+        if await _send(message(uid, fid, ftext, plan), uid, ctx):
             r.sent.append(uid)
-            done.append((uid, r.post_id, fp, ckey, fid, r.discount, int((time.time() - raw.date) * 1000)))
+            out.append((uid, r.post_id, fp, ckey, fid, r.discount, int((time.time() - raw.date) * 1000)))
 
-    results = await asyncio.gather(*(send_card(uid, fid, ft) for uid, (fid, ft) in targets.items()), return_exceptions=True)
+    async def later(uid: int, fid: int, ftext: str, plan: plans.Plan):
+        """«Простой»: машина уходит через задержку тарифа от публикации — PRO успевают первыми."""
+        keys = {(uid, fp), (uid, ckey)}
+        ctx.pending |= keys
+        try:
+            await asyncio.sleep(max(0.0, raw.date + plan.delay - time.time()))
+            out: list = []
+            await send_card(uid, fid, ftext, plan, out)
+            if out:
+                await ctx.db.add_deliveries(out)
+        except Exception as e:
+            log.warning("отложенное сообщение не отправлено: %s", e)
+        finally:
+            ctx.pending -= keys
+
+    for uid, (fid, ftext, plan) in targets.items():
+        if plan.delay:
+            r.delayed.append(uid)
+            task = asyncio.create_task(later(uid, fid, ftext, plan))
+            ctx.background.add(task)
+            task.add_done_callback(ctx.background.discard)
+    now_targets = [(uid, fid, ft, plan) for uid, (fid, ft, plan) in targets.items() if not plan.delay]
+    results = await asyncio.gather(*(send_card(uid, fid, ft, plan, done) for uid, fid, ft, plan in now_targets),
+                                   return_exceptions=True)
     for e in results:
         if isinstance(e, Exception):
             log.warning("сообщение не отправлено: %s", e)

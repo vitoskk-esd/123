@@ -14,6 +14,8 @@ class Ctx:
     channels: dict[int, dict] = field(default_factory=dict)   # tg_id → строка channels (быстрый поиск на каждом посте)
     pay: object = None                                         # payments.YooKassa
     reader: object = None                                      # userbot.Reader
+    pending: set = field(default_factory=set)                 # (человек, пост) в очереди «Простого» — не дублировать
+    background: set = field(default_factory=set)              # отложенные отправки
     buffer_chat: int = 0                                       # закрытый канал с фото машин (id для бота), 0 — без фото
 
     def reload(self) -> Dictionary:

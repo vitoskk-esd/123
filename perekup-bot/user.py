@@ -1,5 +1,6 @@
 """Экраны человека: старт → фильтр обычными словами → каналы (база и свои) → статистика → подписка."""
 import html
+import logging
 import re
 import time
 from datetime import datetime
@@ -17,10 +18,11 @@ from admin import is_admin, queue_wait
 from ctx import Ctx
 from db import DAY
 from links import label, parse_link
-from pipeline import seconds
+from pipeline import seconds, wait_text
 from query import Filter, describe, parse_filter
 
 router = Router(name="user")
+log = logging.getLogger(__name__)
 
 
 class S(StatesGroup):
@@ -99,6 +101,10 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
     limit = await filter_limit(ctx, uid)
     if limit:
         await cb.message.answer(limit, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
+        return await cb.answer()
+    plan = plans.current(ctx.cfg, await ctx.db.user(uid))
+    if plan and not plan.market and Filter.loads(data["pending"]).min_discount:
+        await cb.message.answer(T.DISCOUNT_FILTER_PRO, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
         return await cb.answer()
     fid = await ctx.db.add_filter(uid, data["pending_text"], data["pending"])
     await ctx.db.event(uid, "filter")
@@ -204,7 +210,8 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
         own = [r for r in await ctx.db.own_channels(uid)]
         plan = plans.current(ctx.cfg, await ctx.db.user(uid)) or plans.plans(ctx.cfg)["basic"]
         if len(own) >= plan.max_own:
-            replies.append(T.OWN_LIMIT_PLAN.format(plan=plan.title, n=plan.max_own))
+            what = f"до {plan.max_own} своих каналов" if plan.max_own else "только общая база каналов"
+            replies.append(T.OWN_LIMIT_PLAN.format(plan=plan.title, what=what))
             upsell = True
             break
         kind, value = link
@@ -283,24 +290,54 @@ def can_trial(u) -> bool:
 def plans_text(ctx: Ctx, u) -> str:
     p = plans.plans(ctx.cfg)
     trial = T.PLAN_TRIAL_TEXT.format(price=p["trial"].price) if can_trial(u) else ""
-    return T.PLANS.format(trial=trial, basic=p["basic"].price, pro=p["pro"].price,
-                          basic_filters=p["basic"].max_filters, basic_own=p["basic"].max_own)
+    b = p["basic"]
+    return T.PLANS.format(trial=trial, basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
+                          basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}",
+                          basic_own=f"до {b.max_own} своих каналов" if b.max_own else "только общая база каналов")
+
+
+_plans_photo: dict[tuple, str] = {}     # картинка сравнения тарифов → file_id в Telegram (рисуем один раз)
+
+
+async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
+    """Картинка «Простой против PRO» + короткая подпись + кнопки тарифов."""
+    u = await ctx.db.user(uid)
+    p = plans.plans(ctx.cfg)
+    b = p["basic"]
+    plan = plans.current(ctx.cfg, u)
+    status = (T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
+              if plan else T.SUB_STATUS_NONE)
+    status = (intro + "\n\n" if intro else "") + status
+    caption = T.PLANS_CAPTION.format(
+        status=status,
+        trial=T.PLAN_TRIAL_SHORT.format(price=p["trial"].price) if can_trial(u) else "",
+        basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
+        basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}")
+    markup = K.plans(p, can_trial(u))
+    key = (b, p["pro"], p["trial"])
+    try:
+        if key not in _plans_photo:
+            from aiogram.types import BufferedInputFile
+            import plans_image
+            photo = BufferedInputFile(plans_image.render(b, p["pro"], p["trial"]), "plans.png")
+        else:
+            photo = _plans_photo[key]
+        sent = await msg.answer_photo(photo, caption=caption, reply_markup=markup)
+        if sent.photo:
+            _plans_photo[key] = sent.photo[-1].file_id
+    except Exception as e:      # не нарисовалось (нет шрифта и т.п.) — тарифы текстом
+        log.warning("картинка тарифов: %s", e)
+        await msg.answer(status + plans_text(ctx, u), reply_markup=markup)
 
 
 async def offer_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
-    u = await ctx.db.user(uid)
-    await msg.answer((intro + "\n\n" if intro else "") + plans_text(ctx, u),
-                     reply_markup=K.plans(plans.plans(ctx.cfg), can_trial(u)))
+    await send_plans(msg, ctx, uid, intro)
 
 
 async def show_sub(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = None) -> None:
     if not ctx.cfg.payments_on:
         return await msg.answer(T.SUB_FREE)
-    u = await ctx.db.user(uid or msg.chat.id)
-    plan = plans.current(ctx.cfg, u)
-    status = (T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
-              if plan else T.SUB_STATUS_NONE)
-    await msg.answer(status + plans_text(ctx, u), reply_markup=K.plans(plans.plans(ctx.cfg), can_trial(u)))
+    await send_plans(msg, ctx, uid or msg.chat.id)
 
 
 @router.callback_query(F.data.startswith("s:pay"))
@@ -313,7 +350,8 @@ async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
         return await cb.answer()
     try:
         pid, url = await ctx.pay.create(cb.from_user.id, plan.price, T.PAY_DESCRIPTION.format(plan=plan.title, days=plan.days))
-    except Exception:
+    except Exception as e:
+        log.warning("оплата не создана: %s", e)
         await cb.message.answer(T.PAY_ERROR)
         return await cb.answer()
     await ctx.db.add_payment(cb.from_user.id, pid, plan.price, plan.id)
