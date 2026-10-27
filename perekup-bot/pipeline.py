@@ -32,7 +32,6 @@ NOT_CLEAN = {"damaged", "parts", "notrun"}      # такие цены не ид�
 MARKET_DAYS = 90         # цены за сколько дней берём для оценки рынка
 MARKET_MIN = 5           # меньше объявлений — оценку не показываем, чтобы не врать
 SHOW_DISCOUNT = 5        # «ниже рынка» пишем от 5%
-SCAM_DISCOUNT = 45       # дешевле рынка почти вдвое — скорее всего мошенники
 CAPTION_MAX = 1024       # лимит Telegram на подпись к фото
 PHOTO_TIMEOUT = 3        # сколько ждём пересылку фото; дольше — шлём без фото, скорость важнее
 
@@ -54,7 +53,6 @@ class Result:
     discount: int | None = None
     market: int | None = None
     samples: int = 0
-    scam: bool = False
     sent: list[int] = field(default_factory=list)
     latency_ms: int | None = None
 
@@ -116,12 +114,7 @@ def seconds(ms: int | None) -> str:
 def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: int, limit: int = 4096) -> str:
     L, d = r.listing, ctx.dict
     lines = []
-    if r.scam:
-        why = [d.markers[m].label for m in L.markers if m in d.markers and d.markers[m].kind == "scam"]
-        if r.discount is not None and r.discount >= SCAM_DISCOUNT:
-            why.insert(0, f"цена на {r.discount}% ниже рынка")
-        lines.append(T.CARD_SCAM.format(why=": " + ", ".join(why) if why else ""))
-    elif r.discount is not None and r.discount >= SHOW_DISCOUNT:
+    if r.discount is not None and r.discount >= SHOW_DISCOUNT:
         lines.append(T.CARD_DISCOUNT.format(d=r.discount))
     lines.append(T.CARD_TITLE.format(car=html.escape(d.car_name(L.make, L.model)), year=f" {L.year}" if L.year else "",
                                      price=rub(L.price)))
@@ -158,8 +151,7 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict) -> Result:
     now = time.time()
     fp, ckey = fingerprint(raw.text), car_key(L)
     r.duplicate = await ctx.db.seen_before(fp, ckey, now - DEDUP_DAYS * DAY)
-    scam_marker = any(ctx.dict.markers[m].kind == "scam" for m in L.markers if m in ctx.dict.markers)
-    clean = not (set(L.markers) & NOT_CLEAN) and not scam_marker
+    clean = not (set(L.markers) & NOT_CLEAN)
     r.post_id = await ctx.db.add_post(channel["id"], raw.msg_id, L, fp, ckey, r.duplicate, clean)
     if L.model:
         # рынок — медиана той же модели ±1 год, без дублей и без битых: медиана не боится единичных выбросов
@@ -168,7 +160,6 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict) -> Result:
         if r.samples >= MARKET_MIN:
             r.market = round(median(prices))
             r.discount = round((r.market - L.price) / r.market * 100)
-    r.scam = scam_marker or (r.discount is not None and r.discount >= SCAM_DISCOUNT)
     return r
 
 

@@ -96,7 +96,7 @@ class Finder:
 @dataclass(frozen=True)
 class Marker:
     id: str
-    kind: str      # good | bad | scam
+    kind: str      # good | bad
     label: str
 
 

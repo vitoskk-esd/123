@@ -131,7 +131,7 @@ async def test_filter_delivery_market_and_dedup(env):
         r = await process(bot, ctx, post(CH2, f"Toyota Camry 2012, цена {p:,} ₽, пробег {p // 10} км".replace(",", " ")))
         assert not r.sent
     r = await process(bot, ctx, post(CH1, "СРОЧНО Toyota Camry 2012\nЦена 1 250 000 ₽, торг\nпробег 180 000 км"))
-    assert r.sent == [USER] and r.discount == 17 and not r.scam
+    assert r.sent == [USER] and r.discount == 17
     card = s.texts(USER)[-1]
     assert "−17% к рынку" in card and "1 250 000 ₽" in card and "срочно · торг" in card and "Москва и МО" in card
     assert "рынок ≈ 1 500 000 ₽ (5 объявл.)" in card and "⏱ 1," in card
@@ -156,12 +156,14 @@ async def test_filter_delivery_market_and_dedup(env):
     assert not (await process(bot, ctx, post(CH1, "Toyota Camry 2013, 1 200 000 ₽"))).sent
 
 
-async def test_scam_warning(env):
+async def test_no_scam_warning_and_disclaimer(env):
+    """Предупреждений о мошенниках нет; в приветствии — отказ от ответственности."""
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "любые до 1 млн")
+    welcome = next(t for t in s.texts(USER) if "Это <b>Перехват</b>" in t)
+    assert "не несём никакой ответственности" in welcome and "мошенник" not in welcome
     r = await process(bot, ctx, post(CH1, "Toyota RAV4 2019 всего 900 000 ₽! Дистанционное оформление, доставка в любой регион"))
-    assert r.scam and r.sent == [USER]
-    assert "похоже на мошенников" in s.texts(USER)[-1] and "дистанционно" in s.texts(USER)[-1]
+    assert r.sent == [USER] and "мошенник" not in s.texts(USER)[-1]
 
 
 async def test_channels_own_and_disable(env):

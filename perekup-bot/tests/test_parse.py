@@ -21,8 +21,6 @@ def test_markers_and_negation():
     L = parse_post("СРОЧНО продаю гранту 2018, торг, после дтп, не требует вложений. 450к", D)
     assert L.markers == ["urgent", "haggle", "damaged"]          # «не требует вложений» — не маркер
     assert parse_post("Камри 2015 без дтп 1.6 млн", D).markers == []
-    scam = parse_post("Toyota RAV4 2019 всего 900 000 ₽! Дистанционное оформление, доставка в любой регион, предоплата", D)
-    assert {"remote", "prepay"} <= set(scam.markers)
 
 
 def test_mixed_scripts_and_declension():
