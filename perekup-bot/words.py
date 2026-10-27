@@ -14,7 +14,12 @@ import yaml
 LAT2CYR = str.maketrans("aceopxykmthb", "асеорхукмтнв")
 CYR = re.compile(r"[а-я]")
 LAT = re.compile(r"[a-z]")
-NEGATIONS = {"не", "нет", "без", "ни"}
+# отрицание ПЕРЕД меткой: «без дтп», «не бита», «никаких вложений», «ноль вложений»
+NEGATIONS = {"не", "нет", "без", "ни", "никаких", "никакого", "никакой", "никаких", "ноль", "отсутствие", "исключены"}
+# отрицание ПОСЛЕ метки: «дтп нет», «залогов и ограничений нет», «вложений не требует», «в дтп не была»
+AFTER_NO = {"нет", "отсутствует", "отсутствуют", "отсутствовали", "исключены", "исключено"}
+AFTER_NOT_VERBS = ("треб", "нужн", "нужен", "был", "бывал", "участв", "стоит", "стоял", "имеет", "име", "числ", "наход",
+                   "надо", "понадоб")
 
 
 def _fix_mixed(word: str) -> str:
@@ -53,6 +58,16 @@ def _variants(tok: str) -> list[str]:
     if len(tok) == 4 and tok[-1] in "ая" and CYR.fullmatch(tok[0]):
         return [tok] + [tok[:-1] + e for e in SHORT_ENDINGS if tok[:-1] + e != tok]
     return [tok]
+
+
+def negated(tokens: list[str], h: "Hit") -> bool:
+    """Метку отменяет отрицание в той же фразе: до неё (за 4 слова) или сразу после — «нет», «не требует», «не было»."""
+    if any(t in NEGATIONS for t in tokens[max(0, h.start - 4):h.start]):
+        return True
+    after = tokens[h.end:h.end + 3]
+    if any(t in AFTER_NO for t in after):
+        return True
+    return any(t == "не" and i + 1 < len(after) and after[i + 1].startswith(AFTER_NOT_VERBS) for i, t in enumerate(after))
 
 
 class Finder:
@@ -125,8 +140,7 @@ class Dictionary:
     def find_markers(self, tokens: list[str]) -> list[str]:
         """Маркеры одной фразы (текст режем по знакам препинания до вызова). «Без запретов / залогов», «не требует
         вложений», «без дтп» — не маркер: в той же фразе за несколько слов до него стоит отрицание."""
-        return list(dict.fromkeys(h.payload[0] for h in self.marks.find(tokens)
-                                  if not any(t in NEGATIONS for t in tokens[max(0, h.start - 4):h.start])))
+        return list(dict.fromkeys(h.payload[0] for h in self.marks.find(tokens) if not negated(tokens, h)))
 
 
 def load_dictionary(path: Path) -> Dictionary:

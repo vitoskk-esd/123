@@ -89,3 +89,23 @@ def test_picks_the_car_for_sale_not_the_comparison():
 def test_negation_only_inside_its_phrase():
     assert "credit" in parse_post("Не бит, не крашен, в кредите. Камри 2012, 900к", D).markers
     assert "damaged" not in parse_post("Камри 2012, без дтп и вложений, 900к", D).markers
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("Porsche Cayenne 2008, 990 000 ₽. Никаких вложений не требует! Москва", []),   # пост из Brichcar-sale
+    ("Камри 2012, вложений не требует, 900к", []),
+    ("Камри 2012, вложения не нужны, 900к", []),
+    ("Камри 2012, в ДТП не была, 900к", []),
+    ("Камри 2012, ДТП нет, 900к", []),
+    ("Камри 2012, залогов и ограничений нет, 900к", []),
+    ("Камри 2012, не бита не крашена, 900к", []),
+    ("Камри 2012, торга нет, 900к", []),
+    ("Камри 2012, требует вложений, 900к", ["invest"]),
+    ("Камри 2012, битая, не на ходу, 900к", ["damaged", "notrun"]),
+    ("Камри 2012, после дтп, требует вложений 900к", ["damaged", "invest"]),
+    ("Камри 2012, документы чистые, в кредите, 900к", ["credit"]),
+    ("Камри 2012 900к, удар в бампер не крашен", ["damaged"]),
+    ("Камри 2012, торг, срочно, 900к", ["haggle", "urgent"]),
+])
+def test_markers_understand_negation(text, expected):
+    assert sorted(parse_post(text, D).markers) == sorted(expected)
