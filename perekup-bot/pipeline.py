@@ -26,7 +26,7 @@ from ctx import Ctx
 import plans
 from db import DAY, DEDUP_DAYS
 import ai
-from parse import Listing, car_key, fingerprint, looks_like_ad, parse_post
+from parse import SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, sale_verdict
 from query import Filter, matches
 
 log = logging.getLogger(__name__)
@@ -60,6 +60,7 @@ class Result:
     delayed: list[int] = field(default_factory=list)   # «Простой»: уйдёт позже, через задержку тарифа
     latency_ms: int | None = None
     teaser: bool = False         # анонс «скоро в продаже» — не шлём
+    verdict: str = ""            # что решили правила: sale / not_sale / check_sale / check_not_sale
 
 
 class RateLimiter:
@@ -159,13 +160,13 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
 
 
 # слова, при которых правила могут ошибиться — тогда пост перепроверяет ИИ
-TRICKY = re.compile(r"скоро|через|анонс|выстав|куплю|обмен|не\s|нет\b|без\b|никак|по цене|дешевле|вместо|как у|"
+TRICKY = re.compile(r"скоро|через|анонс|выстав|куплю|обмен|обучен|курс|наставн|розыгрыш|не\s|нет\b|без\b|никак|по цене|дешевле|вместо|как у|"
                     r"дтп|авари|бит|залог|кредит|вложен|ремонт|такси|дубликат|запчаст|ход", re.I)
 
 
-def worth_ai(L: Listing, text: str, filters: list[Filter], d) -> bool:
-    """ИИ зовём, только если пост может кому-то подойти И правила могли ошибиться. Простой пост
-    («Камри 2012, 900 000 ₽, Москва») правила разбирают сами — не ждём ИИ лишние 1–3 секунды."""
+def worth_ai(L: Listing, text: str, filters: list[Filter], d, doubt: bool = False) -> bool:
+    """ИИ зовём, только если пост может кому-то подойти И правила могли ошибиться (doubt — правила сами
+    не уверены, продажа ли это). Простой пост («Камри 2012, 900 000 ₽, Москва») правила разбирают сами."""
     if not filters:
         return False
     if not (L.is_car and L.price):
@@ -174,7 +175,7 @@ def worth_ai(L: Listing, text: str, filters: list[Filter], d) -> bool:
     several = len({mk for mk, _ in d.find_cars(L.tokens)}) > 1     # в посте несколько марок — правила могли выбрать не ту
     if not (wanted or several):
         return False                        # эту марку никто не ищет — лимит не тратим
-    return several or bool(TRICKY.search(text))
+    return doubt or several or bool(TRICKY.search(text))
 
 
 async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None,
@@ -185,13 +186,21 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] |
     if L.teaser:                            # «скоро в продаже» — купить ещё нельзя, не отвлекаем людей
         r.teaser = True
         return r
-    if ctx.cfg.ai_on and worth_ai(L, raw.text, filters if ai_filters is None else ai_filters, ctx.dict):
+    # продажа ли это вообще — как решил бы человек: «ПРОДАНО», новость, курс, «куплю» не шлём
+    r.verdict = sale_verdict(raw.text, L)
+    if r.verdict == "not_sale" and (L.is_car and L.price or SOLD.search(raw.text.lower().replace("ё", "е"))):
+        return r                            # правила уверены — ИИ не нужен
+    flt = filters if ai_filters is None else ai_filters
+    checked = None
+    if ctx.cfg.ai_on and flt and worth_ai(L, raw.text, flt, ctx.dict, r.verdict.startswith("check_")):
         checked = await ai.ask(ctx.dict, raw.text, ctx.cfg.ai_key, ctx.cfg.ai_model)
         if checked:
             L = r.listing = ai.apply(L, checked, ctx.dict)
             if L.teaser:
                 r.teaser = True
                 return r
+    if not checked and r.verdict == "check_not_sale":
+        return r                            # ИИ не ответил, а правила склонялись к «не продажа»
     if not L.is_car or not L.price:
         return r
     now = time.time()
@@ -221,7 +230,7 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     photo_task = None
     if raw.photo and ctx.buffer_chat and rows:
         quick = parse_post(raw.text, ctx.dict)
-        if (quick.is_car or looks_like_ad(raw.text)) and not quick.teaser:
+        if (quick.is_car or looks_like_ad(raw.text)) and not quick.teaser and sale_verdict(raw.text, quick) != "not_sale":
             photo_task = asyncio.create_task(raw.photo())
             photo_task.add_done_callback(lambda t: t.cancelled() or t.exception())   # ошибку разберём ниже
     # ИИ-проверку зовём, только если машина может подойти тем, у кого она есть в тарифе (PRO, пробный день)

@@ -653,3 +653,20 @@ async def test_admin_shows_sources_with_payments(env):
     await dp.feed_update(bot, msg("/admin", ADMIN))
     text = s.texts(ADMIN)[-1]
     assert "reels: 1 чел., оплатили 1" in text and "avito: 1 чел., оплатили 0" in text
+
+
+async def test_only_real_sales_reach_people(env):
+    """Курс, проданная машина, новость, анонс — не шлём; обычное объявление — шлём. ИИ выключен — решают правила."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "любая машина до 1,5 млн")
+    junk = [
+        "Друзья, наше обучение будет стоить всего 35.000₽🔥\nЗа 2 месяца выйдешь на доход х3. Старт требует вложений.",
+        "⛔️ПРОДАН⛔️\n\n🚘 KIA CERATO, 2009, пробег 180 000 км, за 301 777 ₽",
+        "Китайцы выпустили «убийцу Camry» дешевле Lada Granta. Сядьте, джентльмены: BAIC Arcfox S3 представили "
+        "в Китае, стоит от 79 900 юаней (около 964 000 ₽)",
+        "Завтра ожидайте гранту 2012 года, эур, газ. По цене будет до 165.000₽!!!",
+    ]
+    for text in junk:
+        assert not (await process(bot, ctx, post(CH1, text))).sent, text
+    r = await process(bot, ctx, post(CH1, "Продам Гранту 2018 года, один владелец, пробег 90 000 км. Цена 695 000 ₽. 89001234567"))
+    assert r.sent == [USER] and r.verdict == "sale"

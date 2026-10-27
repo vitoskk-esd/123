@@ -56,7 +56,7 @@ def _to_int(num: str, unit: str = "") -> int | None:
     u = unit.lower()
     if re.match(MLN, u):
         value *= 1_000_000
-    elif u and re.match(THS, u):
+    elif u and re.match(THS, u) and value < 10_000:     # «55.000т» — уже полные рубли, не 55 млн
         value *= 1_000
     return round(value)
 
@@ -111,10 +111,18 @@ def parse_year(text: str) -> int | None:
     return None
 
 
+NOT_MILEAGE_BEFORE = re.compile(r"(?:\bдо|запас\w*\s+хода|через|кажды\w*|\bв|\bна|\bза|\bот)\s*$")
+NOT_MILEAGE_AFTER = re.compile(r"^\s*(?:назад|от\b|в\s+час|/ч|на\s+(?:чистом|одной|электр|заряд)|без\s+подзаряд|до\s+)")
+
+
 def parse_mileage(text: str) -> int | None:
     t = clean(text).lower()
-    m = re.search(r"пробег\w*\s*[:\-–—]?\s*(\d[\d\s.\-]*\d|\d)\s*(тыс\w*|т\.?(?=\s?км)|т\b|к\b)?", t) or \
-        re.search(r"(\d[\d\s.]*\d|\d)\s*(тыс\w*\.?|т\.?)?\s*(?:км|km)\b", t)
+    m = re.search(r"пробег\w*\s*[:\-–—]?\s*(\d[\d\s.\-]*\d|\d)\s*(тыс\w*|т\.?(?=\s?км)|т\b|к\b)?", t)
+    if not m:
+        # «150 тыс км» — да; «до 300 км на чистом электричестве», «2000 км назад было ТО», «в 20 км от города» — нет
+        m = next((x for x in re.finditer(r"(\d[\d\s.]*\d|\d)\s*(тыс\w*\.?|т\.?)?\s*(?:км|km)\b", t)
+                  if not NOT_MILEAGE_BEFORE.search(t[max(0, x.start() - 25):x.start()])
+                  and not NOT_MILEAGE_AFTER.match(t[x.end():x.end() + 25])), None)
     if not m:
         return None
     digits = re.sub(r"[\s.\-]", "", m.group(1))
@@ -131,18 +139,27 @@ COMPARE = {"цене", "цена", "дешевле", "дороже", "чем", "
            "обмен", "обменяю", "меняю", "поменяю", "рассмотрю", "против", "конкурент"}
 
 
+def named_makes(lines: list[list[str]], d: Dictionary) -> set[str]:
+    """Марки, названные словом: «бмв», «BMW X3» — а не угаданные по одной модели («х3»)."""
+    return {h.payload[1] for toks in lines for h in d.cars.find(toks) if h.payload[0] == "make" or h.end - h.start > 1}
+
+
 def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
     """Какая машина продаётся, если в посте их несколько. Каждое упоминание получает очки:
     + модель (а не только марка), + названа вместе с маркой («Citroen C4»), + стоит в начале строки (заголовок),
     + рядом год; − перед ним «по цене», «дешевле», «как», «вместо», «обмен» — значит, это сравнение."""
     lines = [norm(line).split() for line in clean(text).splitlines()]
     years = [bool(re.search(YEAR, " ".join(t))) for t in lines]
+    named = named_makes(lines, d)
     best, best_score = (None, None), -99.0
     for li, toks in enumerate(lines):
         hits = d.cars.find(toks)
         make_before = {h.end: h.payload[1] for h in hits if h.payload[0] == "make"}   # где кончается название марки
         for h in hits:
             make, model = h.payload[1], (h.payload[2] if h.payload[0] == "model" else None)
+            short = model and h.end - h.start == 1 and len(toks[h.start]) <= 3
+            if short and make not in named and not any(years[max(0, li - 1):li + 3]):
+                continue                                     # «доход х3», «rx» без марки и года — не машина
             score = 2.0 if model else 1.0
             if model and (h.end - h.start > 1 or make_before.get(h.start) == make):
                 score += 3                                   # «Citroen C4», «Тойота Королла» — марка прямо перед моделью
@@ -185,7 +202,22 @@ TEASER = re.compile(
     rf"|(?:через|в\s+течени\w+)\s+{WHEN}\s*(?:минут\w*|мин\.?|час\w*|ч\.?)?\s+(?:будет\s+)?(?:в\s+)?продаж"   # «через 5 минут в продаже»
     rf"|в\s+продаж\w*\s+(?:будет\s+)?через\s+{WHEN}"                       # «в продаже через 10 минут»
     r"|скоро\s+(?:выставим|выставлю|выложим|выложу|опубликуем|появится)"
-    r"|готовим\s+к\s+продаже|анонс\b|продажа\s+начн\w*|старт\s+продаж")
+    r"|готовим\s+к\s+продаже|анонс\b|продажа\s+начн\w*|старт\s+продаж"
+    r"|(?:продажа|в\s+продаже|публикаци\w*|выставим|выложим|опубликуем)\s+(?:будет\s+)?(?:на|в|с|после)\s+\d{1,2}[:.]\d{2}"  # «Продажа на 18:30»
+    r"|(?:скоро|завтра|позже|через\s+\S+\s+\S+)\s+(?:поступ\w+|появ\w+|выйд\w+)\s+(?:в\s+)?продаж"          # «скоро поступит в продажу»
+    r"|(?:в\s+течени\w+|через)\s+(?:часа|часик\w*|\S+\s+(?:минут\w*|час\w*))\s+(?:закину|будет|выложу|скину|выставлю)"
+    r"|\bожидайте\b|завтра\s+(?:будет|выставлю|выставим|выложу|выложим|покажу|покажем)"
+    r"|сейчас\s+(?:помоем|отмоем|сфоткаем|отснимем)\w*\s+и\s+(?:опубликуем|выложим|выставим)")
+
+
+PROMO = re.compile(
+    r"обучени|наставни|менторств|вебинар|интенсив|мастер-?класс|\bученик|\bуроки?\b|\bкурс(?:а|ы|ов|ом)?\b(?!\s+(?:валют|доллар|евро|юан|цб))"
+    r"|розыгрыш|разыгрыва|конкурс|франшиз|инфопродукт|закрыт\w*\s+(?:клуб|чат|канал)\w*\s+(?:для|перекуп)")
+
+
+def is_promo(text: str) -> bool:
+    """Реклама курса, наставничества, розыгрыша — не объявление о продаже машины."""
+    return bool(PROMO.search(text.lower().replace("ё", "е")))
 
 
 def is_teaser(text: str) -> bool:
@@ -208,12 +240,80 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
     L.mileage = parse_mileage(text)
     L.accidents = parse_accidents(text)
     L.teaser = is_teaser(text)
+    if L.make and is_promo(text):
+        # «обучение всего 35 000 ₽» — не машина. Но объявление с подписью «наше обучение — @…» оставляем:
+        # там названа марка и есть год с ценой или пробегом
+        if not (L.make in named_makes([norm(line).split() for line in clean(text).splitlines()], d)
+                and L.year and (L.price or L.mileage)):
+            L.make = L.model = None
     regions = d.find_regions(tokens)
     L.region = regions[0] if regions else channel_region
     # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)
     for clause in re.split(r"[.,;!?\n]+", clean(text)):
         L.markers += [m for m in d.find_markers(norm(clause).split()) if m not in L.markers]
     return L
+
+
+SOLD = re.compile(
+    r"(?:^|\n)[^\w\n]{0,8}(?:продан[аоы]?|продано|снят[аоы]?\s+с\s+продажи|в\s+брони|забронирован\w*)(?![\w])"   # «⛔️ПРОДАН⛔️», «ПРОДАНО!»
+    r"|(?:авто(?:мобиль)?|машин[аы]|тачк[аи])\s+(?:уже\s+)?продан"                                   # «автомобиль продан»
+    r"|[❌⛔🔴🚫]\ufe0f?\s*продан|продан[аоы]?\s*[❌⛔🔴🚫]|продано\s+за\b")
+BUY = re.compile(
+    r"(?:^|\n)[^\w\n]{0,8}куплю\b|(?:выкупим|выкуплю|купим|куплю)\s+(?:ваш|твой|твою|вашу|любой|любую|ваше)"
+    r"|ищу\s+(?:авто|машин|вариант|тачк)|нужн[аыо]\s+(?:машин|авто|тачк)|присыла\w*\s+(?:ваш|свои|свой)")
+NEWS = re.compile(
+    r"представил|презентаци|дебют|премьер[аы]\b|выпустил[аи]?\b|начал[аи]?\s+(?:производств|выпуск)|запуска\w*\s+производств"
+    r"|росстат|автостат|статистик|по\s+данным|утильсбор|госдум|минпромторг|законопроект|мошенни"
+    r"|\bюан\w*|в\s+китае\s+стоит|за\s+рубежом|подорожа|подешеве|продажи\s+(?:новых|автомобил)|показал[аи]?\b|выкатил"
+    r"|анонсировал|конвейер|концерн|автоваз|классифайд|€|\$\s?\d|\d\s?\$|джентльмен|давайте|итак,|вы\s+получаете|сядьте"
+    r"|аукцион\w*\s+века|ушл\w*\s+с\s+молотка|cars\s*&\s*bids|фильм|знаменит|кто\s+следит|смог\s+удивить|что\s+такое\b"
+    r"|россиян|по\s+итогам|квартал|в\s+сравнении|лидерств|сертификац|прототип|средн\w+\s+(?:размер|цен|стоимост)"
+    r"|интерес\s+к\b|рынок\s+(?:легков|подержан|автомобил|новых)|на\s+(?:вторичн|авторынк)\w*\s+(?:рынк|росси)"
+    r"|(?:на|до|в|к)\s+\d+(?:[.,]\d+)?\s?%|\d+[.,]\d+\s?%|тысяч\w*\s+(?:новых|подержан)|в\s+сша|в\s+германии|в\s+европе|в\s+япони"
+    r"|обзор\s+на\b|отсняли|сняли\s+(?:обзор|видео|ролик)|в\s+комментари|делаем\?|как\s+вам\b|ваше\s+мнение|голосуем|опрос")
+OWNERS = re.compile(r"владел|хозя|собственник|птс|vin\b|вин\b|регистрац")
+PHONE_OR_NICK = re.compile(r"звони|звонит|позвон|пиш\w*\s+(?!в\s+коммент)|в\s+лс|в\s+личк|whatsapp|ватсап|вотс|телеф|тел[.:]|контакт|\bтг\b|@\w{4,}|\+7|(?<!\d)8\s?9\d{2}")
+SERVICE = re.compile(
+    r"автоподбор|подбор\w*\s+(?:авто|машин)|выездн\w+\s+(?:проверк|диагност)|толщиномер|эвакуатор|шиномонтаж|детейлинг"
+    r"|химчистк|тонировк|оформим\s+страхов|осаго|каско|растаможк|пригон\w*\s+(?:авто|под)")
+SALE_WORDS = re.compile(r"продам|продаю|прода[её]тся|в\s+продаже|в\s+наличии|продажа\b|реализу\w+|на\s+торгах|торг\b|"
+                        r"(?:^|\n)\W*(?:моя\s+|наша\s+)?цена|цена\s*[:\-—]|цена\s+для|отдам\s+за|стоимость\s*[:\-—]|#продаж|#купитьавто|#продам")
+SPECS = re.compile(r"владел|хозя|собственник|птс|vin|акпп|мкпп|механик|автомат|л\.?\s?с\b|двигател|мотор|коробк|кузов|окрас"
+                   r"|комплектац|пробег|на\s+ходу|полном\s+ходу|дтп|вложени|салон|ходов|ключ")
+
+
+def sale_score(text: str, L: Listing) -> int:
+    """Насколько пост похож на объявление о продаже: машина, модель, год, цена, пробег, слова продажи, характеристики."""
+    t = text.lower().replace("ё", "е")
+    return (bool(L.make) + bool(L.model) + bool(L.year) + bool(L.price) + bool(L.mileage)
+            + bool(SALE_WORDS.search(t)) + (len(set(m.group(0)[:5] for m in SPECS.finditer(t))) >= 2))
+
+
+def sale_verdict(text: str, L: Listing) -> str:
+    """Продажа машины или нет — как решил бы человек, пролистывая канал.
+    sale / not_sale — правила уверены; check_sale / check_not_sale — пусть посмотрит ИИ (если он недоступен —
+    решение после «check_»). Анонсы, проданные машины, «куплю», реклама курсов, новости, услуги — не продажа."""
+    t = text.lower().replace("ё", "е")
+    if L.teaser or SOLD.search(t):
+        return "not_sale"
+    if not (L.make and L.price):
+        return "not_sale"
+    score = sale_score(text, L)
+    owners, contact = bool(OWNERS.search(t)), bool(PHONE_OR_NICK.search(t))
+    # признаки живого объявления: пробег, владельцы, контакт продавца, «продам / в продаже / цена для подписчиков»
+    evidence = bool(L.mileage) + owners + contact + bool(SALE_WORDS.search(t))
+    against = {name for name, rx in (("promo", PROMO), ("buy", BUY), ("news", NEWS), ("service", SERVICE)) if rx.search(t)}
+    news = len({m.group(0) for m in NEWS.finditer(t)})          # разных «новостных» слов в посте
+    if news and not (owners or contact) and (news >= 2 or not (L.mileage and SALE_WORDS.search(t))):
+        return "not_sale"            # новость или обзор: машина и цена есть, а продавца нет
+    if not against:                  # «Toyota Camry 2014, 980 000 ₽, Москва» — короткое, но объявление
+        if score >= 4:
+            return "sale"
+        return "check_sale" if score >= 3 or evidence >= 2 else "check_not_sale"
+    if "promo" in against:           # «обучение всего 35 000 ₽»; объявление с подписью «наше обучение» — пусть решит ИИ
+        return "check_sale" if score >= 5 and evidence >= 2 else "not_sale"
+    # «выкупим ваш авто», «автоподбор» часто стоят подписью под объявлением
+    return "check_sale" if score >= 4 and evidence else "check_not_sale"
 
 
 def fingerprint(text: str) -> str:

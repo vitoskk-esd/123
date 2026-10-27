@@ -10,21 +10,28 @@ makes:
     name: Lada
     aliases: [lada, лада, ваз, vaz, жигули, автоваз]
     models:
-      Granta: [granta, гранта]
+      Granta: [granta, гранта, гранат]
       Vesta: [vesta, веста]
-      Priora: [priora, приора, 2170, 2171, 2172]
-      Kalina: [kalina, калина, 1118, 1119]
+      Priora: [priora, приора, "2170", "2171", "2172"]
+      Kalina: [kalina, калина, "1118", "1119"]
       Largus: [largus, ларгус]
       XRAY: [xray, иксрей, x-ray, хрей]
-      Niva: [niva legend, нива легенд, нива 4х4, нива 4x4, lada 4x4, 21214, 2121, нива, niva]
+      Niva: [niva legend, нива легенд, нива 4х4, нива 4x4, lada 4x4, "21214", "2121", нива, niva]
       Niva Travel: [niva travel, нива тревел, нива шевроле, шнива]
-      "2107": [2107, семерка, семёрка]
-      "2106": [2106, шестерка, шестёрка]
-      "2109": [2109, девятка]
-      "2110": [2110, десятка]
-      "2112": [2112, двенашка]
-      "2114": [2114, четырка, четырнашка]
-      "2115": [2115, пятнашка]
+      "2107": ["2107", семерка, семёрка]
+      "2106": ["2106", шестерка, шестёрка]
+      "2109": ["2109", девятка, "21099", "21093", девяносто девятая]
+      "2110": ["2110", десятка]
+      "2112": ["2112", двенашка]
+      "2114": ["2114", четырка, четырнашка]
+      "2115": ["2115", пятнашка]
+      "2108": ["2108", восьмерка, восьмёрка]
+      "2111": ["2111"]
+      "2113": ["2113"]
+      "2105": ["2105"]
+      "2104": ["2104"]
+      "2101": ["2101", копейка]
+      Oka: [oka, ока 1111, "1111"]
   toyota:
     name: Toyota
     aliases: [toyota, тойота, тоета, тоёта, тайота]
@@ -33,22 +40,50 @@ makes:
       Corolla: [corolla, королла, каролла]
       RAV4: [rav4, rav 4, рав4, рав 4, рафик]
       Land Cruiser Prado: [prado, прадо, land cruiser prado, ленд крузер прадо]
-      Land Cruiser: [land cruiser, ленд крузер, лэнд крузер, крузак, lc200, lc300, lc 200, lc 300]
+      Land Cruiser: [land cruiser, ленд крузер, лэнд крузер, крузак, lc200, lc300, lc 200, lc 300, лк 200, лк200, лк 300, лк300, лк 100, лк100, lc100, lc 100, lc80, крузак 100, крузак 200]
       Highlander: [highlander, хайлендер, хайландер]
       Avensis: [avensis, авенсис]
       Auris: [auris, аурис]
       Mark II: [mark ii, mark 2, марк 2, марк ii, марк]
       Crown: [crown, краун]
       Prius: [prius, приус]
+      Aqua: [toyota aqua, тойота аква, aqua, аква]
       Vitz: [vitz, витц]
       C-HR: [c-hr, chr, си-эйч-ар]
       Hilux: [hilux, хайлюкс, хайлакс]
+      Alphard: [alphard, альфард]
+      Harrier: [harrier, харриер]
+      Venza: [venza, венза]
+      Yaris: [yaris, ярис]
+      Allion: [allion, аллион]
+      Premio: [premio, премио]
+      Corona: [corona, корона]
+      Ipsum: [ipsum, ипсум]
+      Estima: [estima, эстима]
+      Wish: [toyota wish, тойота виш]
+      Fortuner: [fortuner, фортунер]
+      "4Runner": ["4runner", "4раннер", форанер]
+      Tundra: [tundra, тундра]
+      Sequoia: [sequoia, секвойя]
+      Supra: [supra, супра]
+      Celica: [celica, селика]
+      Chaser: [chaser, чайзер]
+      Cresta: [cresta, креста]
+      Mark X: [mark x, марк х]
+      Noah: [toyota noah, тойота ноах]
+      Voxy: [voxy, вокси]
+      Sienta: [sienta, сиента]
+      Caldina: [caldina, калдина]
+      Carina: [carina, карина]
+      Funcargo: [funcargo, функарго]
+      bB: [toyota bb]
+      Rush: [toyota rush, тойота раш]
   kia:
     name: Kia
     aliases: [kia, киа, кия]
     models:
       Rio: [rio, рио, x-line, икслайн]
-      Ceed: [ceed, сид, сиид, cee'd]
+      Ceed: [ceed, сид, сиид, "cee'd", proceed, pro ceed]
       Sportage: [sportage, спортейдж, спортэйдж]
       Sorento: [sorento, соренто]
       Optima: [optima, оптима]
@@ -58,27 +93,45 @@ makes:
       Picanto: [picanto, пиканто]
       Seltos: [seltos, селтос]
       Spectra: [spectra, спектра]
+      Carnival: [carnival, карнивал]
+      Mohave: [mohave, мохаве, мохав]
+      Stinger: [stinger, стингер]
+      Venga: [venga, венга]
+      Carens: [carens, каренс]
+      Magentis: [magentis, маджентис]
+      Opirus: [opirus, опирус]
+      Sephia: [sephia, сефия]
   hyundai:
     name: Hyundai
-    aliases: [hyundai, хендай, хендэ, хундай, хёндай, хюндай, хендей]
+    aliases: [hyundai, хендай, хендэ, хундай, хёндай, хюндай, хендей, хёндэ, хенде, хюндэ]
     models:
       Solaris: [solaris, солярис]
       Creta: [creta, крета]
       Elantra: [elantra, элантра]
       Tucson: [tucson, туссан, тусан]
-      Santa Fe: [santa fe, санта фе, сантафе]
+      Santa Fe: [santa fe, санта фе, сантафе, санта-фе, santa-fe]
       Sonata: [sonata, соната]
       i30: [i30, ай30]
       i40: [i40, ай40]
       ix35: [ix35, их35]
       Accent: [accent, акцент]
       Getz: [getz, гетц]
-      Starex: [starex, старекс, h1, h-1]
+      Starex: [starex, старекс, h1, h-1, grand starex, гранд старекс]
+      Palisade: [palisade, палисад]
+      Matrix: [matrix, матрикс]
+      Porter: [porter, портер]
+      Verna: [verna, верна]
+      i20: [i20, ай20]
+      ix55: [ix55]
+      Terracan: [terracan, терракан]
+      Tiburon: [tiburon, тибурон]
+      Genesis: [hyundai genesis, хендай генезис]
+      Grandeur: [grandeur, грандер]
   volkswagen:
     name: Volkswagen
-    aliases: [volkswagen, фольксваген, фольц, vw]
+    aliases: [volkswagen, фольксваген, фольц, vw, фольксвоген, фолькс, вольксваген, фольк]
     models:
-      Polo: [polo, поло]
+      Polo: [polo, поло, поло седан]
       Golf: [golf, гольф]
       Passat: [passat, пассат]
       Tiguan: [tiguan, тигуан]
@@ -87,6 +140,20 @@ makes:
       Touran: [touran, туран]
       Caddy: [caddy, кадди]
       Transporter: [transporter, транспортер, транспортёр, t5, t6]
+      Amarok: [amarok, амарок]
+      Multivan: [multivan, мультивен, мультиван]
+      Caravelle: [caravelle, каравелла]
+      Bora: [bora, бора]
+      Sharan: [sharan, шаран]
+      Teramont: [teramont, терамонт]
+      Scirocco: [scirocco, сирокко]
+      Crafter: [crafter, крафтер]
+      Taos: [taos, таос]
+      Arteon: [arteon, артеон]
+      ID.4: [id.4, id4]
+      ID.6: [id.6, id6]
+      Passat CC: [passat cc, пассат сс]
+      Beetle: [beetle, битл]
   skoda:
     name: Skoda
     aliases: [skoda, шкода]
@@ -98,6 +165,9 @@ makes:
       Kodiaq: [kodiaq, кодиак]
       Yeti: [yeti, йети]
       Karoq: [karoq, карок]
+      Roomster: [roomster, румстер]
+      Felicia: [felicia, фелиция]
+      Kamiq: [kamiq, камик]
   renault:
     name: Renault
     aliases: [renault, рено]
@@ -110,6 +180,16 @@ makes:
       Fluence: [fluence, флюенс]
       Arkana: [arkana, аркана]
       Symbol: [symbol, симбол]
+      Clio: [clio, клио]
+      Scenic: [scenic, сценик]
+      Koleos: [koleos, колеос]
+      Laguna: [laguna, лагуна]
+      Trafic: [trafic, трафик]
+      Kangoo: [kangoo, кангу]
+      Dokker: [dokker, доккер]
+      Master: [renault master, рено мастер]
+      Latitude: [latitude, латитьюд]
+      Twingo: [twingo, твинго]
   nissan:
     name: Nissan
     aliases: [nissan, ниссан, нисан]
@@ -126,17 +206,45 @@ makes:
       Patrol: [patrol, патрол]
       Primera: [primera, примера]
       Terrano: [terrano, террано]
+      Sunny: [sunny, санни]
+      Bluebird: [bluebird, блюберд, блюбёрд]
+      Cefiro: [cefiro, цефиро]
+      Maxima: [maxima, максима]
+      Wingroad: [wingroad, вингроуд]
+      Serena: [serena, серена]
+      Leaf: [leaf, лиф]
+      March: [nissan march, ниссан марч]
+      Micra: [micra, микра]
+      Navara: [navara, навара]
+      Skyline: [skyline, скайлайн]
+      Fuga: [fuga, фуга]
+      Elgrand: [elgrand, эльгранд]
+      Presage: [presage, пресаж]
+      Avenir: [avenir, авенир]
+      Laurel: [laurel, лаурель]
+      Sentra: [sentra, сентра]
+      AD: [nissan ad, ниссан ад]
+      Cube: [nissan cube, ниссан куб]
+      Liberty: [nissan liberty]
   mitsubishi:
     name: Mitsubishi
-    aliases: [mitsubishi, митсубиси, мицубиси, митсубиши, мицубиши, митсу]
+    aliases: [mitsubishi, митсубиси, мицубиси, митсубиши, мицубиши, митсу, мицубиcи]
     models:
-      Lancer: [lancer, лансер]
+      Lancer: [lancer, лансер, evolution, эволюшн, эво]
       Outlander: [outlander, аутлендер, аутлэндер]
       Pajero Sport: [pajero sport, паджеро спорт]
       Pajero: [pajero, паджеро]
       ASX: [asx, асх]
       L200: [l200, л200]
       Galant: [galant, галант]
+      Colt: [colt, кольт]
+      Carisma: [carisma, каризма]
+      Space Star: [space star, спейс стар]
+      Montero: [montero, монтеро]
+      Delica: [delica, делика]
+      Eclipse Cross: [eclipse cross, эклипс кросс]
+      Grandis: [grandis, грандис]
+      i-MiEV: [i-miev, imiev]
   mazda:
     name: Mazda
     aliases: [mazda, мазда]
@@ -146,6 +254,21 @@ makes:
       CX-5: [cx-5, cx5, сх-5, сх5]
       CX-7: [cx-7, cx7, сх-7, сх7]
       Demio: [demio, демио]
+      Biante: [biante, бианте]
+      "323": [mazda 323, мазда 323]
+      "626": [mazda 626, мазда 626]
+      CX-9: [cx-9, cx9, сх-9]
+      CX-30: [cx-30, cx30]
+      MPV: [mazda mpv]
+      Tribute: [tribute, трибьют]
+      Premacy: [premacy, премаси]
+      Bongo: [mazda bongo, мазда бонго]
+      Familia: [familia, фамилия мазда]
+      Atenza: [atenza, атенза]
+      Axela: [axela, аксела]
+      RX-8: [rx-8, rx8]
+      "2": [mazda 2, мазда 2]
+      "5": [mazda 5, мазда 5]
   honda:
     name: Honda
     aliases: [honda, хонда]
@@ -153,7 +276,22 @@ makes:
       Civic: [civic, цивик, сивик]
       Accord: [accord, аккорд]
       CR-V: [cr-v, crv, срв]
-      Fit: [honda fit, хонда фит, фит]
+      Fit: [honda fit, хонда фит, фит, fit shuttle]
+      City: [honda city, хонда сити]
+      Jazz: [jazz, джаз]
+      Stepwgn: [stepwgn, степвагон, step wgn]
+      Odyssey: [odyssey, одиссей]
+      Pilot: [honda pilot, хонда пилот]
+      HR-V: [hr-v, hrv]
+      Stream: [honda stream, хонда стрим]
+      Freed: [freed, фрид]
+      Insight: [insight, инсайт]
+      Vezel: [vezel, везел]
+      Element: [honda element]
+      Prelude: [prelude, прелюд]
+      Legend: [honda legend]
+      Shuttle: [honda shuttle]
+      Airwave: [airwave, эйрвейв]
   ford:
     name: Ford
     aliases: [ford, форд]
@@ -166,9 +304,23 @@ makes:
       Explorer: [explorer, эксплорер]
       Transit: [transit, транзит]
       Fusion: [fusion, фьюжн, фьюжен]
+      Escape: [escape, эскейп]
+      Edge: [ford edge, форд эдж]
+      Ranger: [ranger, рейнджер]
+      Galaxy: [ford galaxy, форд галакси]
+      S-Max: [s-max, smax, с-макс]
+      C-Max: [c-max, cmax, с-макс]
+      Maverick: [maverick, маверик]
+      Mustang: [mustang, мустанг]
+      F-150: [f-150, f150]
+      Expedition: [expedition, экспедишн]
+      Tourneo: [tourneo, турнео]
+      Scorpio: [scorpio, скорпио]
+      Sierra: [ford sierra, форд сиерра]
+      Puma: [ford puma]
   chevrolet:
     name: Chevrolet
-    aliases: [chevrolet, шевроле, шевролет, шеви]
+    aliases: [chevrolet, шевроле, шевролет, шеви, шеврале]
     models:
       Cruze: [cruze, круз]
       Aveo: [aveo, авео]
@@ -177,6 +329,19 @@ makes:
       Spark: [spark, спарк]
       Captiva: [captiva, каптива]
       Lanos: [chevrolet lanos, шевроле ланос]
+      Tahoe: [tahoe, тахо]
+      Trailblazer: [trailblazer, трейлблейзер]
+      Camaro: [camaro, камаро]
+      Malibu: [malibu, малибу]
+      Epica: [epica, эпика]
+      Orlando: [orlando, орландо]
+      Tracker: [tracker, трекер]
+      Rezzo: [rezzo, реззо]
+      Evanda: [evanda, эванда]
+      Viva: [chevrolet viva, шевроле вива]
+      Silverado: [silverado, сильверадо]
+      Suburban: [suburban, субурбан]
+      Niva: [chevrolet niva, шевроле нива]
   daewoo:
     name: Daewoo
     aliases: [daewoo, дэу, деу]
@@ -185,6 +350,8 @@ makes:
       Matiz: [matiz, матиз]
       Gentra: [gentra, джентра]
       Lanos: [lanos, ланос]
+      Espero: [espero, эсперо]
+      Leganza: [leganza, леганза]
   opel:
     name: Opel
     aliases: [opel, опель]
@@ -195,57 +362,94 @@ makes:
       Insignia: [insignia, инсигния]
       Zafira: [zafira, зафира]
       Mokka: [mokka, мокка]
+      Meriva: [meriva, мерива]
+      Antara: [antara, антара]
+      Omega: [opel omega, опель омега]
+      Frontera: [frontera, фронтера]
+      Vivaro: [vivaro, виваро]
+      Movano: [movano, мовано]
+      Combo: [opel combo, опель комбо]
+      Kadett: [kadett, кадет]
+      Signum: [signum, сигнум]
   bmw:
     name: BMW
     aliases: [bmw, бмв, бэха, бэху, бумер]
     models:
-      1 серии: [bmw 1, бмв 1, 1 серии, 1-series, 116i, 118i, 120i]
-      3 серии: [bmw 3, бмв 3, 3 серии, 3-series, 316i, 318i, 320i, 320d, 325i, 328i, 330i, e46, e90, f30, g20]
-      5 серии: [bmw 5, бмв 5, 5 серии, 5-series, 520i, 520d, 523i, 525i, 528i, 530i, 530d, 535i, e39, e60, f10, g30]
-      7 серии: [bmw 7, бмв 7, 7 серии, 7-series, 730d, 740i, 750i, e65, f01, g11]
+      "1 серии": [bmw 1, бмв 1, "1 серии", "1-series", "116i", "118i", "120i"]
+      "3 серии": [bmw 3, бмв 3, "3 серии", "3-series", "316i", "318i", "320i", "320d", "325i", "328i", "330i", e46, e90, f30, g20, "323i", "330d", "335i", e36, e30, e92, e93, f31, f34, "325xi", трешка бмв]
+      "5 серии": [bmw 5, бмв 5, "5 серии", "5-series", "520i", "520d", "523i", "525i", "528i", "530i", "530d", "535i", e39, e60, f10, g30, e34, f11, g31, "540i", "550i", "520", "525", "528", "530", "535"]
+      "7 серии": [bmw 7, бмв 7, "7 серии", "7-series", "730d", "740i", "750i", e65, f01, g11, e38, g12, f02, "745li", "750li", "760li"]
       X1: [x1, х1]
-      X3: [x3, х3]
-      X5: [x5, х5]
-      X6: [x6, х6]
+      X3: [x3, х3, e83, f25, g01]
+      X5: [x5, х5, e53, e70, f15, g05]
+      X6: [x6, х6, e71, f16, g06]
+      X4: [x4, х4]
+      X7: [x7, х7]
+      "2 серии": ["2 серии", "218i", "220i", "220d"]
+      "4 серии": ["4 серии", "420i", "420d", "428i", "430i", "440i"]
+      "6 серии": ["6 серии", "630i", "640i", "640d", "650i"]
+      M3: [bmw m3, бмв м3]
+      M5: [bmw m5, бмв м5, м5]
+      Z4: [z4]
   mercedes:
     name: Mercedes-Benz
-    aliases: [mercedes, mercedes-benz, мерседес, мерс, мерина, benz]
+    aliases: [mercedes, mercedes-benz, мерседес, мерс, мерина, benz, мерседесс, мерсед, мерен]
     models:
-      A-класс: [a-class, a-класс, а-класс, a180, a200]
-      C-класс: [c-class, c-класс, с-класс, c180, c200, c250, w203, w204, w205]
-      E-класс: [e-class, e-класс, е-класс, e200, e220, e300, w211, w212, w213, w210, w124]
-      S-класс: [s-class, s-класс, s500, s350, w221, w222, w220]
+      A-класс: [a-class, a-класс, а-класс, a180, a200, w169, w176, w177]
+      C-класс: [c-class, c-класс, с-класс, c180, c200, c250, w203, w204, w205, w202, c240, c230, c320, c300]
+      E-класс: [e-class, e-класс, е-класс, e200, e220, e300, w211, w212, w213, w210, w124, e350, e500, e230, e240, e280, e63, w214]
+      S-класс: [s-class, s-класс, s500, s350, w221, w222, w220, w140, s600, w223, s400, s450, s550]
       GLA: [gla]
       GLC: [glc]
-      GLE: [gle]
-      ML: [ml, ml350, w164, w166]
+      GLE: [gle, gle350, gle400, gle 350]
+      ML: [ml, ml350, w164, w166, ml320, ml500, ml300, ml63]
       GL: [gl, gl350, gl500]
-      G-класс: [g-class, гелик, гелендваген, g500, g63]
+      G-класс: [g-class, гелик, гелендваген, g500, g63, w463, гелендеваген, гелен, g55, g350]
       Vito: [vito, вито]
       Sprinter: [sprinter, спринтер]
+      CLS: [cls, цлс, cls350, cls500, cls 350, cls 500]
+      CLA: [cla, цла, cla200]
+      GLS: [gls]
+      GLK: [glk, глк]
+      B-класс: [b-class, b-класс, b170, b180, b200]
+      CLK: [clk, цлк]
+      SLK: [slk]
+      V-класс: [v-class, viano, виано, v250, v-класс]
   audi:
     name: Audi
     aliases: [audi, ауди]
     models:
       A3: [audi a3, ауди а3, a3]
       A4: [audi a4, ауди а4, a4]
-      A6: [audi a6, ауди а6, a6, c6, c7]
+      A6: [audi a6, ауди а6, a6, c6, c7, c5, c4, c8]
       A8: [audi a8, ауди а8, a8]
       Q3: [q3, ку3]
       Q5: [q5, ку5]
       Q7: [q7, ку7]
       "100": [audi 100, ауди 100, бочка]
       "80": [audi 80, ауди 80]
+      A1: [audi a1, ауди а1]
+      A5: [audi a5, ауди а5, a5]
+      A7: [audi a7, ауди а7, a7]
+      Q8: [q8, ку8]
+      TT: [audi tt, ауди тт]
+      Allroad: [allroad, олроуд, оллроуд]
+      e-tron: [e-tron, етрон, этрон]
+      RS6: [rs6, рс6]
+      S8: [audi s8]
   lexus:
     name: Lexus
     aliases: [lexus, лексус]
     models:
-      RX: [rx, rx350, rx300, rx330, rx270]
+      RX: [rx, rx350, rx300, rx330, rx270, rx450h, rx200t, rx400h]
       ES: [es, es250, es350]
-      NX: [nx, nx200]
-      LX: [lx, lx570, lx470]
+      NX: [nx, nx200, nx300, nx200t]
+      LX: [lx, lx570, lx470, lx450, lx600]
       GX: [gx, gx460, gx470]
-      IS: [is250, is300]
+      IS: [is250, is300, is200, is350, lexus is]
+      LS: [ls460, ls600, ls500, lexus ls]
+      CT: [ct200h, lexus ct]
+      GS: [gs300, gs350, gs250, lexus gs]
   subaru:
     name: Subaru
     aliases: [subaru, субару]
@@ -255,6 +459,10 @@ makes:
       Impreza: [impreza, импреза]
       XV: [subaru xv, субару xv]
       Legacy: [legacy, легаси]
+      Tribeca: [tribeca, трибека]
+      Levorg: [levorg, леворг]
+      BRZ: [brz]
+      WRX: [wrx]
   suzuki:
     name: Suzuki
     aliases: [suzuki, сузуки]
@@ -264,6 +472,11 @@ makes:
       Vitara: [vitara, витара]
       Swift: [swift, свифт]
       Jimny: [jimny, джимни]
+      Escudo: [escudo, эскудо]
+      Liana: [liana, лиана]
+      Splash: [splash, сплеш]
+      Ignis: [ignis, игнис]
+      Kizashi: [kizashi, кизаши]
   volvo:
     name: Volvo
     aliases: [volvo, вольво]
@@ -273,6 +486,12 @@ makes:
       XC70: [xc70, хс70]
       S60: [s60]
       S80: [s80]
+      S40: [s40]
+      V40: [v40]
+      V50: [v50]
+      V70: [v70]
+      XC40: [xc40, хс40]
+      S90: [s90]
   peugeot:
     name: Peugeot
     aliases: [peugeot, пежо]
@@ -282,23 +501,42 @@ makes:
       "308": [peugeot 308, пежо 308]
       "408": [peugeot 408, пежо 408]
       "3008": [peugeot 3008, пежо 3008]
+      "301": [peugeot 301, пежо 301]
+      "406": [peugeot 406, пежо 406]
+      "407": [peugeot 407, пежо 407]
+      "508": [peugeot 508, пежо 508]
+      "2008": [peugeot 2008, пежо 2008]
+      "4008": [peugeot 4008, пежо 4008]
+      "5008": [peugeot 5008, пежо 5008]
+      Partner: [peugeot partner, пежо партнер]
+      Boxer: [peugeot boxer, пежо боксер]
+      Expert: [peugeot expert, пежо эксперт]
   citroen:
     name: Citroen
     aliases: [citroen, ситроен, ситроэн]
     models:
-      C4: [citroen c4, ситроен с4, c4 picasso]
+      C4: [citroen c4, ситроен с4, c4 picasso, c4 aircross]
       C3: [citroen c3, ситроен с3]
-      C5: [citroen c5, ситроен с5]
+      C5: [citroen c5, ситроен с5, c5 aircross]
       Berlingo: [berlingo, берлинго]
+      C1: [citroen c1, ситроен с1]
+      C-Elysee: [c-elysee, c-элизе, элизе]
+      Picasso: [picasso, пикассо]
+      Jumpy: [jumpy, джампи]
+      Jumper: [jumper, джампер]
+      C-Crosser: [c-crosser]
   haval:
     name: Haval
     aliases: [haval, хавал, хавейл]
     models:
-      Jolion: [jolion, джолион]
-      F7: [haval f7, хавал ф7, f7x]
-      H6: [haval h6, хавал н6]
+      Jolion: [jolion, джолион, джулион, жолион]
+      F7: [haval f7, хавал ф7, f7x, f7]
+      H6: [haval h6, хавал н6, h6, н6]
       Dargo: [dargo, дарго]
       H9: [haval h9, хавал н9]
+      M6: [haval m6, хавал м6]
+      H5: [haval h5]
+      H2: [haval h2]
   chery:
     name: Chery
     aliases: [chery, чери, черри]
@@ -308,6 +546,16 @@ makes:
       Tiggo 4: [tiggo 4, тигго 4]
       Tiggo 2: [tiggo 2, тигго 2]
       Tiggo: [tiggo, тигго]
+      Tiggo 7: [tiggo 7, тигго 7]
+      Tiggo 5: [tiggo 5, тигго 5]
+      Tiggo 9: [tiggo 9, тигго 9]
+      Arrizo: [arrizo, аризо, арризо]
+      Bonus: [chery bonus, чери бонус]
+      Very: [chery very, чери вери]
+      Amulet: [amulet, амулет]
+      Fora: [chery fora, чери фора]
+      Kimo: [chery kimo, чери кимо]
+      IndiS: [indis, индис]
   geely:
     name: Geely
     aliases: [geely, джили, джилли]
@@ -317,15 +565,25 @@ makes:
       Monjaro: [monjaro, монжаро]
       Tugella: [tugella, тугела, тугелла]
       Emgrand: [emgrand, эмгранд]
+      MK: [geely mk, джили мк]
+      Okavango: [okavango, окаванго]
+      Preface: [preface, префейс]
+      Cityray: [cityray, ситирей]
+      Otaka: [otaka, отака]
   changan:
     name: Changan
     aliases: [changan, чанган, чанъань]
     models:
-      CS35: [cs35]
-      CS55: [cs55]
+      CS35: [cs35, cs35 plus, cs35plus]
+      CS55: [cs55, cs55 plus, cs55plus]
       CS75: [cs75]
       UNI-K: [uni-k, unik, юни-к]
       UNI-V: [uni-v, univ, юни-в]
+      Alsvin: [alsvin, алсвин]
+      Eado: [eado, эадо]
+      Lamore: [lamore, ламор]
+      CS85: [cs85]
+      CS95: [cs95]
   exeed:
     name: Exeed
     aliases: [exeed, эксид]
@@ -339,20 +597,26 @@ makes:
     models:
       "300": [tank 300, танк 300]
       "500": [tank 500, танк 500]
+      "400": [tank 400, танк 400]
+      "700": [tank 700, танк 700]
   uaz:
     name: УАЗ
-    aliases: [uaz, уаз]
+    aliases: [uaz, уаз, уазик]
     models:
       Patriot: [patriot, патриот]
       Hunter: [hunter, хантер]
-      Буханка: [буханка, 452, буханку]
+      Буханка: [буханка, "452", буханку]
+      "469": [uaz 469, уаз 469, "469"]
+      Pickup: [уаз пикап, uaz pickup]
+      Profi: [уаз профи, uaz profi]
   gaz:
     name: ГАЗ
     aliases: [газ 31105, газ 3110, гaz]
     models:
       Газель: [газель, gazelle, газели]
       Соболь: [соболь]
-      Волга: [волга, 31105, 3110]
+      Волга: [волга, "31105", "3110", волга 24, "2410", "3102", "31029"]
+      Газон: [газон некст]
   datsun:
     name: Datsun
     aliases: [datsun, датсун]
@@ -361,13 +625,19 @@ makes:
       mi-DO: [mi-do, мидо, ми-до]
   infiniti:
     name: Infiniti
-    aliases: [infiniti, инфинити]
+    aliases: [infiniti, инфинити, infinity, инфинитти]
     models:
-      FX: [fx35, fx37, fx45, fx50]
+      FX: [fx35, fx37, fx45, fx50, фх35, fx 35]
       QX50: [qx50]
       QX60: [qx60]
       QX70: [qx70]
       QX80: [qx80, qx56]
+      G: [g35, g37, g25]
+      Q50: [q50]
+      Q70: [q70]
+      M: [m35, m37, m25]
+      EX: [ex35, ex37]
+      JX: [jx35]
   landrover:
     name: Land Rover
     aliases: [land rover, ленд ровер, лэнд ровер, landrover]
@@ -378,6 +648,8 @@ makes:
       Discovery: [discovery, дискавери]
       Freelander: [freelander, фрилендер]
       Defender: [defender, дефендер]
+      Range Rover Velar: [velar, велар]
+      Discovery Sport: [discovery sport, дискавери спорт]
   porsche:
     name: Porsche
     aliases: [porsche, порше]
@@ -385,13 +657,356 @@ makes:
       Cayenne: [cayenne, кайен]
       Macan: [macan, макан]
       Panamera: [panamera, панамера]
+      "911": [porsche 911, порше 911]
+      Cayman: [cayman, кайман]
+      Boxster: [boxster, бокстер]
+      Taycan: [taycan, тайкан]
   jeep:
     name: Jeep
-    aliases: [jeep]
+    aliases: [jeep, джип чероки]
     models:
       Grand Cherokee: [grand cherokee, гранд чероки]
       Cherokee: [cherokee, чероки]
       Compass: [compass, компас]
+      Wrangler: [wrangler, вранглер, рэнглер, ранглер]
+      Liberty: [jeep liberty]
+      Renegade: [renegade, ренегат]
+  dodge:
+    name: Dodge
+    aliases: [dodge, додж]
+    models:
+      Caliber: [caliber, калибер]
+      Journey: [journey, джорни]
+      Challenger: [challenger, челленджер]
+      Charger: [charger, чарджер]
+      RAM: [ram, dodge ram, додж рам]
+      Durango: [durango, дуранго]
+      Stratus: [stratus, стратус]
+      Nitro: [dodge nitro, додж нитро]
+      Caravan: [dodge caravan, додж караван]
+  chrysler:
+    name: Chrysler
+    aliases: [chrysler, крайслер]
+    models:
+      "300C": ["300c", "300с"]
+      Voyager: [voyager, вояджер]
+      Pacifica: [pacifica, пацифика]
+      Sebring: [sebring, себринг]
+      PT Cruiser: [pt cruiser]
+  cadillac:
+    name: Cadillac
+    aliases: [cadillac, кадиллак, кадилак]
+    models:
+      Escalade: [escalade, эскалейд, эскалада]
+      SRX: [srx]
+      CTS: [cts]
+      XT5: [xt5]
+      ATS: [cadillac ats]
+  lincoln:
+    name: Lincoln
+    aliases: [lincoln, линкольн]
+    models:
+      Navigator: [navigator, навигатор]
+      MKX: [mkx]
+      MKZ: [mkz]
+      Town Car: [town car, таун кар]
+  jaguar:
+    name: Jaguar
+    aliases: [jaguar, ягуар]
+    models:
+      XF: [xf]
+      XE: [jaguar xe, ягуар хе]
+      XJ: [xj]
+      F-Pace: [f-pace, f pace, фпейс, ф-пейс, fpace]
+      E-Pace: [e-pace, e pace]
+      F-Type: [f-type]
+      S-Type: [s-type]
+  mini:
+    name: MINI
+    aliases: [mini cooper, мини купер, mini countryman, мини кантримен]
+    models:
+      Cooper: [cooper, купер]
+      Countryman: [countryman, кантримен]
+  fiat:
+    name: Fiat
+    aliases: [fiat, фиат]
+    models:
+      Albea: [albea, альбеа]
+      Doblo: [doblo, добло]
+      Ducato: [ducato, дукато]
+      Punto: [punto, пунто]
+      "500": [fiat 500, фиат 500]
+      Bravo: [fiat bravo]
+      Linea: [linea, линеа]
+  alfaromeo:
+    name: Alfa Romeo
+    aliases: [alfa romeo, альфа ромео]
+    models:
+      "159": [alfa 159]
+      Giulietta: [giulietta, джульетта]
+      Giulia: [giulia, джулия]
+      Stelvio: [stelvio, стельвио]
+  seat:
+    name: SEAT
+    aliases: [seat, сеат]
+    models:
+      Leon: [leon, леон]
+      Ibiza: [ibiza, ибица]
+      Toledo: [toledo, толедо]
+      Altea: [altea, алтеа]
+  ssangyong:
+    name: SsangYong
+    aliases: [ssangyong, ssang yong, ссангйонг, саньенг, санг енг, санъенг, ссанъенг, ссангенг, санг йонг, ссанг йонг]
+    models:
+      Kyron: [kyron, кайрон]
+      Actyon: [actyon, актион, актеон]
+      Rexton: [rexton, рекстон]
+      Musso: [musso, муссо]
+      Tivoli: [tivoli, тиволи]
+      Stavic: [stavic, ставик]
+  greatwall:
+    name: Great Wall
+    aliases: [great wall, грейт волл, грейт вол, greatwall, грейтвол]
+    models:
+      Hover: [hover, ховер]
+      Safe: [great wall safe, грейт волл сейф]
+      Wingle: [wingle, вингл]
+      Poer: [poer, поер]
+      Deer: [great wall deer]
+  byd:
+    name: BYD
+    aliases: [byd, бид]
+    models:
+      Han: [byd han, бид хан]
+      Song: [byd song, song plus, сонг плюс]
+      Qin: [byd qin, qin plus, цинь]
+      Tang: [byd tang]
+      Seal: [byd seal]
+      Atto 3: [atto 3, атто 3]
+      Dolphin: [byd dolphin]
+      Yuan: [byd yuan, yuan plus]
+  zeekr:
+    name: Zeekr
+    aliases: [zeekr, зикр, зикер, зекр]
+    models:
+      "001": [zeekr 001, зикр 001]
+      "007": [zeekr 007, зикр 007]
+      "009": [zeekr 009]
+      "7X": ["7x"]
+      "9X": ["9x"]
+      X: [zeekr x]
+  liauto:
+    name: Li Auto
+    aliases: [li auto, lixiang, li xiang, лисян, лисиан, ли авто, лисян авто, lxiang]
+    models:
+      L6: [l6]
+      L7: [l7]
+      L8: [l8]
+      L9: [l9]
+      One: [li one]
+      MEGA: [li mega]
+  voyah:
+    name: Voyah
+    aliases: [voyah, воях]
+    models:
+      Free: [voyah free, воях фри]
+      Dream: [voyah dream, воях дрим]
+      Passion: [voyah passion]
+  hongqi:
+    name: Hongqi
+    aliases: [hongqi, хончи, хунцы, хонгчи, хонгки]
+    models:
+      H5: [hongqi h5]
+      H9: [hongqi h9]
+      HS5: [hs5]
+      E-HS9: [e-hs9, ehs9]
+  jetour:
+    name: Jetour
+    aliases: [jetour, джетур, жетур]
+    models:
+      X70: [jetour x70, джетур x70]
+      X90: [x90, jetour x90]
+      Dashing: [dashing, дашинг]
+      T2: [jetour t2, traveller]
+  omoda:
+    name: Omoda
+    aliases: [omoda, омода]
+    models:
+      C5: [omoda c5, омода с5]
+      S5: [omoda s5]
+      C7: [omoda c7]
+  jaecoo:
+    name: Jaecoo
+    aliases: [jaecoo, джейку, джаеку, джейкоо]
+    models:
+      J7: [j7]
+      J8: [j8]
+  gac:
+    name: GAC
+    aliases: [gac, гак мотор]
+    models:
+      GS8: [gs8]
+      GS3: [gs3]
+      GN8: [gn8]
+      M8: [gac m8]
+  faw:
+    name: FAW
+    aliases: [faw, фав]
+    models:
+      Bestune: [bestune, бестун, besturn, бестурн, t77]
+      V5: [faw v5]
+  dongfeng:
+    name: Dongfeng
+    aliases: [dongfeng, донгфенг, донг фенг, dong feng, донфенг]
+    models:
+      AX7: [ax7]
+      "580": [dongfeng 580]
+      Shine: [dongfeng shine]
+  baic:
+    name: BAIC
+    aliases: [baic, баик]
+    models:
+      X35: [x35]
+      X55: [x55]
+      BJ40: [bj40]
+  jac:
+    name: JAC
+    aliases: [jac, джак]
+    models:
+      JS4: [js4]
+      JS6: [js6]
+      J7: [jac j7]
+      T6: [jac t6]
+      S3: [jac s3]
+      S5: [jac s5]
+  lifan:
+    name: Lifan
+    aliases: [lifan, лифан]
+    models:
+      X60: [x60, х60]
+      X50: [lifan x50, лифан х50]
+      Solano: [solano, солано]
+      Smily: [smily, смайли]
+      Cebrium: [cebrium, цебриум]
+      Breez: [breez, бриз]
+      Myway: [myway, майвей]
+      X70: [lifan x70]
+  kaiyi:
+    name: Kaiyi
+    aliases: [kaiyi, кайи]
+    models:
+      E5: [kaiyi e5, кайи е5]
+      X3: [kaiyi x3]
+      X7: [kaiyi x7, kunlun]
+  livan:
+    name: Livan
+    aliases: [livan, ливан]
+    models:
+      X3 Pro: [livan x3]
+      S6 Pro: [livan s6]
+      X6 Pro: [livan x6]
+  moskvich:
+    name: Москвич
+    aliases: [москвич, moskvich]
+    models:
+      "3": [москвич 3, moskvich 3]
+      "412": ["412", москвич 412]
+      "2141": ["2141", москвич 2141]
+      "2140": ["2140"]
+  ravon:
+    name: Ravon
+    aliases: [ravon, равон]
+    models:
+      R2: [ravon r2]
+      Nexia R3: [ravon nexia, равон нексия, ravon r3]
+      R4: [ravon r4]
+      Gentra: [ravon gentra]
+  zaz:
+    name: ЗАЗ
+    aliases: [zaz, заз]
+    models:
+      Chance: [zaz chance, заз шанс]
+      Sens: [zaz sens, заз сенс]
+      Vida: [zaz vida]
+      Таврия: [таврия, таврию]
+      Запорожец: [запорожец, запор]
+  vortex:
+    name: Vortex
+    aliases: [vortex, вортекс]
+    models:
+      Tingo: [tingo, тинго]
+      Estina: [estina, эстина]
+  tesla:
+    name: Tesla
+    aliases: [tesla, тесла]
+    models:
+      Model 3: [model 3, модел 3, модель 3]
+      Model S: [model s, модель s]
+      Model X: [model x, модель x]
+      Model Y: [model y, модель y]
+  genesis:
+    name: Genesis
+    aliases: [genesis, дженезис]
+    models:
+      G70: [g70]
+      G80: [g80]
+      G90: [g90]
+      GV70: [gv70]
+      GV80: [gv80]
+  acura:
+    name: Acura
+    aliases: [acura, акура]
+    models:
+      MDX: [mdx]
+      RDX: [rdx]
+      TLX: [tlx]
+      TL: [acura tl]
+  saab:
+    name: Saab
+    aliases: [saab, сааб]
+    models:
+      "9-3": [saab 9-3, "9-3"]
+      "9-5": [saab 9-5, "9-5"]
+  hummer:
+    name: Hummer
+    aliases: [hummer, хаммер, хамер]
+    models:
+      H2: [hummer h2, хаммер н2]
+      H3: [hummer h3, хаммер н3]
+  belgee:
+    name: Belgee
+    aliases: [belgee, белджи]
+    models:
+      X50: [belgee x50]
+      X70: [belgee x70]
+  tenet:
+    name: Tenet
+    aliases: [tenet, тенет]
+    models:
+      T4: [tenet t4]
+      T7: [tenet t7]
+      T8: [tenet t8]
+  avatr:
+    name: Avatr
+    aliases: [avatr, аватр]
+    models:
+      "11": [avatr 11]
+      "12": [avatr 12]
+      "07": [avatr 07]
+  aito:
+    name: AITO
+    aliases: [aito, айто]
+    models:
+      M5: [aito m5]
+      M7: [aito m7]
+      M9: [aito m9]
+  xpeng:
+    name: XPeng
+    aliases: [xpeng, икспенг, xpeng motors]
+    models:
+      G9: [xpeng g9]
+      P7: [xpeng p7]
+      G6: [xpeng g6]
 
 # Регионы. Фильтр «Москва» берёт и Подмосковье: города области записаны в тот же регион.
 regions:
