@@ -61,7 +61,7 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"  из неё: пост шёл от Telegram до бота {seconds(p['recv'] and int(p['recv']))}, "
         f"остальное — проверка, фото и отправка\n\n"
         f"📢 Каналы базы: {ch.get(('joined', 1), 0)} подключено, {ch.get(('queued', 1), 0)} в очереди, "
-        f"{ch.get(('failed', 1), 0)} с ошибкой · свои у людей: {ch.get(('joined', 0), 0)}\n\n"
+        f"{ch.get(('awaiting', 1), 0)} ждут одобрения админа, {ch.get(('failed', 1), 0)} с ошибкой · свои у людей: {ch.get(('joined', 0), 0)}\n\n"
         f"🔗 Откуда пришли:\n{src or '—'}\n\n"
         "Команды:\n/add @канал1 @канал2 — добавить каналы в общую базу\n/list — список каналов\n"
         "/del @канал — убрать канал\n/broadcast текст — написать всем")
@@ -81,7 +81,10 @@ async def addbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
             bad.append(p)
             continue
         cid, new = await ctx.db.add_channel(**{link[0]: link[1]}, region=region, base=True, added_by=msg.from_user.id)
-        if (await ctx.db.channel(cid))["status"] != "joined":   # уже подключён — ждать нечего
+        status = (await ctx.db.channel(cid))["status"]
+        if status == "awaiting":                               # заявка у админа канала — напишу, когда одобрит
+            await ctx.db.add_approval_waiter(cid, msg.from_user.id)
+        elif status != "joined":                               # уже подключён — ждать нечего
             await ctx.db.add_waiter(cid, msg.from_user.id)
             queued.append(cid)
         added.append(label(*link) + ("" if new else " (уже был)"))
@@ -109,7 +112,7 @@ async def base(msg: Message, ctx: Ctx) -> None:
     if not await is_admin(msg, ctx):
         return
     rows = await ctx.db.base_channels()
-    icon = {"joined": "✅", "queued": "⏳", "failed": "❌"}
+    icon = {"joined": "✅", "queued": "⏳", "awaiting": "🕓", "failed": "❌"}
     lines = [f"{icon.get(r['status'], '?')} {r['title'] or ('@' + r['username'] if r['username'] else 'закрытый')} "
              f"· {r['region'] or '—'} · постов {r['posts']}" + (f" · {r['error']}" if r["error"] else "") for r in rows]
     text = "\n".join(lines) or "База пуста. Добавь каналы: /add @канал1 @канал2"

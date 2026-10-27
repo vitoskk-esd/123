@@ -29,6 +29,8 @@ from pipeline import RawPost, process
 
 log = logging.getLogger(__name__)
 CONNECT_TIMEOUT = 60
+APPROVAL_CHECK = 300           # раз в 5 минут смотрим, одобрил ли админ заявку в канал
+APPROVAL_WAIT = 7 * 86400      # неделю без одобрения — сдаёмся
 FATAL = (errors.InviteHashExpiredError, errors.InviteHashInvalidError, errors.UsernameNotOccupiedError,
          errors.UsernameInvalidError, errors.ChannelPrivateError, errors.ChannelInvalidError,
          errors.ChannelsTooMuchError, ValueError)
@@ -225,7 +227,7 @@ class Reader:
             await asyncio.sleep(e.seconds)
             return
         except errors.InviteRequestSentError:
-            return await self._failed(row, "в канал нужно одобрение админа — заявка отправлена")
+            return await self._awaiting(row)
         except FATAL as e:
             return await self._failed(row, type(e).__name__.replace("Error", ""))
         tg_id = utils.get_peer_id(entity)
@@ -237,23 +239,68 @@ class Reader:
         waiters = await self.ctx.db.pop_waiters(row["id"]) + (await self.ctx.db.pop_waiters(ch["id"]) if ch["id"] != row["id"] else [])
         for uid in waiters:
             await self._notify(uid, T.CHANNEL_JOINED.format(name=title))
-            await self._batch_done(uid, ch["id"], True)
+            await self._batch_done(uid, ch["id"], 1)
+
+    async def _awaiting(self, row) -> None:
+        """Канал с одобрением заявок: ждём админа, а не пишем «не получилось». Одобрит — check_approvals подключит."""
+        title = None
+        if row["invite"]:
+            try:
+                title = getattr(await self.client(CheckChatInviteRequest(row["invite"])), "title", None)
+            except Exception:
+                pass
+        name = title or (row["username"] and f"@{row['username']}") or "закрытый канал"
+        for uid in await self.ctx.db.channel_awaiting(row["id"], title):
+            await self._notify(uid, T.CHANNEL_AWAITING.format(name=name))
+            await self._batch_done(uid, row["id"], 2)
+
+    async def check_approvals(self) -> None:
+        """Одобрил ли админ заявку: по приглашению Telegram отвечает «вы уже участник», по @нику — канал без пометки «вышел».
+        Неделю без ответа — сдаёмся и честно говорим об этом."""
+        for row in await self.ctx.db.awaiting_channels():
+            name = row["title"] or (row["username"] and f"@{row['username']}") or "закрытый канал"
+            try:
+                if row["invite"]:
+                    res = await self.client(CheckChatInviteRequest(row["invite"]))
+                    entity = getattr(res, "chat", None) if type(res).__name__ == "ChatInviteAlready" else None
+                else:
+                    entity = await self.client.get_entity(row["username"])
+                    entity = None if getattr(entity, "left", True) else entity
+            except errors.FloodWaitError as e:
+                await asyncio.sleep(e.seconds)
+                return
+            except Exception as e:
+                log.info("заявка в %s: %s", name, e)
+                entity = None
+            if entity:
+                tg_id = utils.get_peer_id(entity)
+                await self.ctx.db.channel_joined(row["id"], tg_id, getattr(entity, "title", "") or "",
+                                                 getattr(entity, "username", None), "main")
+                await self.ctx.refresh_channels()
+                ch = await self.ctx.db.channel_by_tg(tg_id)
+                for uid in await self.ctx.db.pop_approval_waiters(row["id"]) + (
+                        await self.ctx.db.pop_approval_waiters(ch["id"]) if ch["id"] != row["id"] else []):
+                    await self._notify(uid, T.CHANNEL_APPROVED.format(name=ch["title"] or name))
+            elif time.time() - (row["awaiting_at"] or time.time()) > APPROVAL_WAIT:
+                await self.ctx.db.channel_failed(row["id"], "админ не одобрил заявку")
+                for uid in await self.ctx.db.pop_approval_waiters(row["id"]):
+                    await self._notify(uid, T.CHANNEL_NOT_APPROVED.format(name=name))
 
     async def _failed(self, row, error: str) -> None:
         await self.ctx.db.channel_failed(row["id"], error)
         name = row["username"] and f"@{row['username']}" or "закрытый канал"
         for uid in await self.ctx.db.pop_waiters(row["id"]):
             await self._notify(uid, T.CHANNEL_FAILED.format(name=name, error=error))
-            await self._batch_done(uid, row["id"], False)
+            await self._batch_done(uid, row["id"], 0)
 
-    async def _batch_done(self, uid: int, cid: int, ok: bool) -> None:
+    async def _batch_done(self, uid: int, cid: int, ok: int) -> None:
         """Когда подключился последний из присланных каналов — одно итоговое сообщение «всё готово, можно искать»."""
         result = await self.ctx.db.batch_done(uid, cid, ok)
         if not result or not result[0]:
             return
-        good, bad = result
+        good, bad, wait = result
         total = await self.ctx.db.channel_count_for(uid)
-        failed = T.ALL_CHANNELS_FAILED_PART.format(n=bad) if bad else ""
+        failed = (T.ALL_CHANNELS_FAILED_PART.format(n=bad) if bad else "") + (T.ALL_CHANNELS_AWAITING_PART.format(n=wait) if wait else "")
         has_filters = bool(await self.ctx.db.filters(uid))
         text = T.ALL_CHANNELS_READY.format(n=good, total=total, failed=failed,
                                            next=T.ALL_READY_WATCHING if has_filters else T.ALL_READY_NEED_FILTER)
@@ -269,12 +316,16 @@ class Reader:
             log.info("не смог уведомить %s: %s", uid, e)
 
     async def join_loop(self) -> None:
+        checked = 0.0
         while True:
             started, queued = time.time(), []
             try:
                 queued = await self.ctx.db.queued_channels()
                 if queued:
                     await self.join_one(queued[0])
+                if started - checked > APPROVAL_CHECK:
+                    checked = started
+                    await self.check_approvals()
             except Exception:
                 log.exception("ошибка при вступлении в канал")
             await asyncio.sleep(max(5, self.ctx.cfg.join_interval - (time.time() - started)) if queued else 15)

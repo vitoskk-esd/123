@@ -225,6 +225,9 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
         await ctx.db.set_channel_state(uid, cid, "own")
         if ch["status"] == "joined":
             replies.append(T.CHANNEL_JOINED.format(name=name))
+        elif ch["status"] == "awaiting":           # заявку уже отправили — ждём админа вместе со всеми
+            await ctx.db.add_approval_waiter(cid, uid)
+            replies.append(T.CHANNEL_AWAITING.format(name=name))
         else:
             if ch["status"] == "failed":
                 await ctx.db._run("UPDATE channels SET status='queued', error=NULL WHERE id=?", cid)

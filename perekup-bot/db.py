@@ -2,7 +2,7 @@
 (для статистики и «уже присылал»), платежи, события, отметки «уже отправлено».
 
 Каналы: base=1 — общая база (видят все, каждый может отключить у себя: user_channels.state='off');
-base=0 — свой канал человека (видит только тот, кто добавил: state='own'). status: queued → joined | failed.
+base=0 — свой канал человека (видит только тот, кто добавил: state='own'). status: queued → joined | failed | awaiting (ждём одобрения админа канала).
 """
 import time
 from pathlib import Path
@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS user_channels (
 );
 CREATE TABLE IF NOT EXISTS join_waiters (channel_id INTEGER, user_id INTEGER, PRIMARY KEY (channel_id, user_id));
 CREATE TABLE IF NOT EXISTS join_results (user_id INTEGER, channel_id INTEGER, ok INTEGER, PRIMARY KEY (user_id, channel_id));
+CREATE TABLE IF NOT EXISTS approval_waiters (channel_id INTEGER, user_id INTEGER, PRIMARY KEY (channel_id, user_id));
 CREATE TABLE IF NOT EXISTS posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT, channel_id INTEGER, msg_id INTEGER, at REAL, fp TEXT, ckey TEXT,
   make TEXT, model TEXT, year INTEGER, price INTEGER, mileage INTEGER, region TEXT,
@@ -79,7 +80,8 @@ class DB:
         for sql in ("ALTER TABLE posts ADD COLUMN recv_ms INTEGER",       # новые столбцы в уже созданной базе
                     "ALTER TABLE users ADD COLUMN plan TEXT DEFAULT ''",
                     "ALTER TABLE users ADD COLUMN trial_used INTEGER DEFAULT 0",
-                    "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'"):
+                    "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'",
+                    "ALTER TABLE channels ADD COLUMN awaiting_at REAL"):
             try:
                 await self.conn.execute(sql)
             except aiosqlite.OperationalError:
@@ -208,6 +210,26 @@ class DB:
         """Убрать канал совсем (попросил владелец): посты из него больше никому не идут."""
         return await self._count("UPDATE channels SET base=0, status='removed' WHERE username=? OR invite=?", username, invite) > 0
 
+    async def channel_awaiting(self, cid: int, title: str | None) -> list[int]:
+        """Заявка на вступление ушла админу канала. Кто ждал этот канал — ждёт теперь одобрения (их и уведомим потом)."""
+        await self._run("UPDATE channels SET status='awaiting', awaiting_at=COALESCE(awaiting_at, ?), "
+                        "title=COALESCE(title, ?) WHERE id=?", time.time(), title, cid)
+        uids = await self.pop_waiters(cid)
+        for uid in uids:
+            await self._run("INSERT OR IGNORE INTO approval_waiters (channel_id, user_id) VALUES (?,?)", cid, uid)
+        return uids
+
+    async def add_approval_waiter(self, cid: int, uid: int) -> None:
+        await self._run("INSERT OR IGNORE INTO approval_waiters (channel_id, user_id) VALUES (?,?)", cid, uid)
+
+    async def awaiting_channels(self) -> list:
+        return await self._all("SELECT * FROM channels WHERE status='awaiting' ORDER BY id")
+
+    async def pop_approval_waiters(self, cid: int) -> list[int]:
+        rows = await self._all("SELECT user_id FROM approval_waiters WHERE channel_id=?", cid)
+        await self._run("DELETE FROM approval_waiters WHERE channel_id=?", cid)
+        return [r["user_id"] for r in rows]
+
     async def channel_failed(self, cid: int, error: str) -> None:
         await self._run("UPDATE channels SET status='failed', error=? WHERE id=?", error[:200], cid)
 
@@ -230,15 +252,16 @@ class DB:
     async def add_waiter(self, cid: int, uid: int) -> None:
         await self._run("INSERT OR IGNORE INTO join_waiters (channel_id, user_id) VALUES (?,?)", cid, uid)
 
-    async def batch_done(self, uid: int, cid: int, ok: bool) -> tuple[int, int] | None:
-        """Канал из присланных человеком подключился (или нет). Если это был последний из его очереди —
-        (сколько подключилось, сколько нет) за всю партию, и партия закрывается; иначе None."""
+    async def batch_done(self, uid: int, cid: int, ok: int) -> tuple[int, int, int] | None:
+        """Канал из присланных человеком подключился (1), нет (0) или ждёт одобрения админа (2). Если это был последний
+        из его очереди — (подключилось, не получилось, ждут одобрения) за всю партию, и партия закрывается; иначе None."""
         await self._run("INSERT OR REPLACE INTO join_results (user_id, channel_id, ok) VALUES (?,?,?)", uid, cid, int(ok))
         if await self._one("SELECT 1 FROM join_waiters WHERE user_id=? LIMIT 1", uid):
             return None
-        r = await self._one("SELECT COALESCE(SUM(ok),0) good, COALESCE(SUM(1-ok),0) bad FROM join_results WHERE user_id=?", uid)
+        r = await self._one("SELECT COALESCE(SUM(ok=1),0) good, COALESCE(SUM(ok=0),0) bad, COALESCE(SUM(ok=2),0) wait "
+                            "FROM join_results WHERE user_id=?", uid)
         await self._run("DELETE FROM join_results WHERE user_id=?", uid)
-        return r["good"], r["bad"]
+        return r["good"], r["bad"], r["wait"]
 
     async def pop_waiters(self, cid: int) -> list[int]:
         rows = await self._all("SELECT user_id FROM join_waiters WHERE channel_id=?", cid)

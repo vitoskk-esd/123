@@ -670,3 +670,53 @@ async def test_only_real_sales_reach_people(env):
         assert not (await process(bot, ctx, post(CH1, text))).sent, text
     r = await process(bot, ctx, post(CH1, "Продам Гранту 2018 года, один владелец, пробег 90 000 км. Цена 695 000 ₽. 89001234567"))
     assert r.sent == [USER] and r.verdict == "sale"
+
+
+class ApprovalTelethon(FakeTelethon):
+    """Канал по приглашению с одобрением заявок: сначала «заявка отправлена», после одобрения — «вы уже участник»."""
+    def __init__(self):
+        super().__init__()
+        self.approved = False
+
+    async def __call__(self, request):
+        self.calls.append(type(request).__name__)
+        from telethon import errors
+        from telethon.tl.types import ChatInvite, ChatInviteAlready, PhotoEmpty
+        name = type(request).__name__
+        if name == "ImportChatInviteRequest":
+            raise errors.InviteRequestSentError(request=None)
+        if name == "CheckChatInviteRequest":
+            if self.approved:
+                return ChatInviteAlready(chat=Channel(id=901, title="Тачки ниже рынка", photo=ChatPhotoEmpty(), date=None,
+                                                      access_hash=1, left=False))
+            return ChatInvite(title="Тачки ниже рынка", photo=PhotoEmpty(id=0), participants_count=100, color=0,
+                              request_needed=True)
+        return await super().__call__(request)
+
+
+async def test_channel_waits_for_admin_approval(env):
+    """Канал с одобрением заявок: не «не получилось», а «ждём админа»; одобрил — подключаем и пишем человеку."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн")
+    await dp.feed_update(bot, cb("c:add"))
+    await dp.feed_update(bot, msg("@avto_kzn\nhttps://t.me/+AbCdEf123456"))
+    reader = Reader(bot, ctx, ApprovalTelethon())
+    for _ in range(2):
+        await reader.join_one((await ctx.db.queued_channels())[0])
+    texts = s.texts(USER)
+    assert "пока не добавлен" in texts[-2] and "Тачки ниже рынка" in texts[-2] and "Не получилось" not in texts[-2]
+    assert "Подключено: <b>1</b>, ждут одобрения админа: 1" in texts[-1]
+    ch = (await ctx.db.awaiting_channels())[0]
+    assert ch["status"] == "awaiting" and not await ctx.db.queued_channels()
+    await make_filter(dp, bot, "солярис до 1 млн", uid=OTHER)
+    await dp.feed_update(bot, cb("c:add", OTHER))
+    await dp.feed_update(bot, msg("https://t.me/+AbCdEf123456", OTHER))       # второй человек — тоже ждёт
+    assert "пока не добавлен" in s.texts(OTHER)[-1]
+    await reader.check_approvals()                                             # админ ещё не одобрил
+    assert (await ctx.db.channel(ch["id"]))["status"] == "awaiting"
+    reader.client.approved = True
+    await reader.check_approvals()
+    assert -1000000000901 in ctx.channels
+    assert "одобрил заявку" in s.texts(USER)[-1] and "одобрил заявку" in s.texts(OTHER)[-1]
+    await reader.check_approvals()                                             # повторно не пишем
+    assert sum("одобрил заявку" in t for t in s.texts(USER)) == 1
