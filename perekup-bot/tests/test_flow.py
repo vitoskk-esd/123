@@ -465,6 +465,8 @@ async def test_ai_check_fixes_rules(env, monkeypatch):
     n = len(calls)
     await process(bot, ctx, post(CH1, "BMW X5 2010, 900 000 ₽"))                 # BMW никто не ищет — ИИ не зовём
     assert len(calls) == n
+    r = await process(bot, ctx, post(CH1, "Toyota Camry 2014, 980 000 ₽, Москва"))   # простой пост — без ИИ, без ожидания
+    assert len(calls) == n and r.sent == [USER] and r.listing.parsed_by == "rules"
     r = await process(bot, ctx, post(CH1, "Toyota Camry 2011 молчит, 850 000 ₽, требует вложений"))
     assert r.sent == [USER] and r.listing.parsed_by == "rules" and "требует вложений" in s.texts(USER)[-1]
 
@@ -480,3 +482,43 @@ async def test_teaser_not_sent_until_edited_into_sale(env):
     sale = "✅ В ПРОДАЖЕ!\nToyota Camry 2012\nЦена 900 000 ₽\nМосква"
     r = await process(bot, ctx, RawPost(CH1, msg_id, sale, time.time()))       # то же сообщение после правки
     assert r.sent == [USER] and not await ctx.db.is_teaser(CH1, msg_id)
+
+
+class FakePollClient:
+    """Канал, в котором можно «публиковать» посты; get_messages отдаёт новые после min_id."""
+    def __init__(self):
+        from types import SimpleNamespace
+        self.ns = SimpleNamespace
+        self.posts = [self.ns(id=1, message="старый пост Toyota Camry 2010, 500 000 ₽", photo=None, date=datetime.now())]
+        self.calls = 0
+
+    def publish(self, text):
+        m = self.ns(id=self.posts[-1].id + 1, message=text, photo=None, date=datetime.now())
+        self.posts.append(m)
+        return m
+
+    async def get_input_entity(self, chat_id):
+        return f"peer{chat_id}"
+
+    async def get_messages(self, peer, limit=10, min_id=0):
+        self.calls += 1
+        return sorted([m for m in self.posts if m.id > min_id], key=lambda m: -m.id)[:limit]
+
+
+async def test_polling_catches_posts_and_never_duplicates(env):
+    """Бот сам опрашивает канал: старое не шлёт, новое шлёт; тот же пост от Telegram второй раз не уходит."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1 млн")
+    reader = Reader(bot, ctx, FakePollClient())
+    await reader.poll_once(CH1)                                   # первый опрос — только запоминаем, где мы
+    await asyncio.gather(*reader.tasks)
+    assert not any("Toyota Camry 2010" in t for t in s.texts(USER))
+    m = reader.client.publish("Toyota Camry 2013, 950 000 ₽, Москва")
+    await reader.poll_once(CH1)
+    await asyncio.gather(*reader.tasks)
+    assert sum("Toyota Camry 2013" in t for t in s.texts(USER)) == 1
+    reader._take(CH1, m, None)                                     # тот же пост пришёл push-ем от Telegram
+    await asyncio.gather(*reader.tasks)
+    assert sum("Toyota Camry 2013" in t for t in s.texts(USER)) == 1
+    row = await ctx.db._one("SELECT recv_ms FROM posts ORDER BY id DESC LIMIT 1")
+    assert row["recv_ms"] is not None                               # задержка Telegram записана для /admin

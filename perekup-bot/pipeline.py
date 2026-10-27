@@ -44,6 +44,7 @@ class RawPost:
     text: str
     date: float                  # время публикации (unix)
     photo: Callable[[], Awaitable[int | None]] | None = None   # переслать фото в буфер → id сообщения там
+    recv: float | None = None    # когда пост дошёл до бота — разница с date = задержка Telegram
 
 
 @dataclass
@@ -146,17 +147,23 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
     return head + ("\n\n<blockquote expandable>" + html.escape(post) + "</blockquote>" if room > 20 else "")
 
 
+# слова, при которых правила могут ошибиться — тогда пост перепроверяет ИИ
+TRICKY = re.compile(r"скоро|через|анонс|выстав|куплю|обмен|не\s|нет\b|без\b|никак|по цене|дешевле|вместо|как у|"
+                    r"дтп|авари|бит|залог|кредит|вложен|ремонт|такси|дубликат|запчаст|ход", re.I)
+
+
 def worth_ai(L: Listing, text: str, filters: list[Filter], d) -> bool:
-    """ИИ зовём, только если пост может кому-то подойти — бесплатный лимит не тратим на чужие машины."""
+    """ИИ зовём, только если пост может кому-то подойти И правила могли ошибиться. Простой пост
+    («Камри 2012, 900 000 ₽, Москва») правила разбирают сами — не ждём ИИ лишние 1–3 секунды."""
     if not filters:
         return False
     if not (L.is_car and L.price):
         return looks_like_ad(text)          # правила не поняли пост — пусть посмотрит ИИ
-    if any(not f.cars for f in filters):
-        return True                         # кто-то ищет любые машины
-    if any(mk == L.make for f in filters for mk, _ in f.cars):
-        return True                         # марка кому-то нужна — проверяем модель, метки, ДТП
-    return len({mk for mk, _ in d.find_cars(L.tokens)}) > 1   # в посте несколько марок — правила могли выбрать не ту
+    wanted = any(not f.cars for f in filters) or any(mk == L.make for f in filters for mk, _ in f.cars)
+    several = len({mk for mk, _ in d.find_cars(L.tokens)}) > 1     # в посте несколько марок — правила могли выбрать не ту
+    if not (wanted or several):
+        return False                        # эту марку никто не ищет — лимит не тратим
+    return several or bool(TRICKY.search(text))
 
 
 async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None) -> Result:
@@ -195,6 +202,13 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     if not channel:
         return Result()
     rows = await ctx.db.subscribers(channel)
+    # фото пересылаем сразу, параллельно с ИИ-проверкой, — а не после неё
+    photo_task = None
+    if raw.photo and ctx.buffer_chat and rows:
+        quick = parse_post(raw.text, ctx.dict)
+        if (quick.is_car or looks_like_ad(raw.text)) and not quick.teaser:
+            photo_task = asyncio.create_task(raw.photo())
+            photo_task.add_done_callback(lambda t: t.cancelled() or t.exception())   # ошибку разберём ниже
     r = await analyse(ctx, raw, channel, [Filter.loads(row["data"]) for row in rows])
     L = r.listing
     if r.teaser:
@@ -217,16 +231,17 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
             continue
         if matches(Filter.loads(row["data"]), L, r.discount):
             targets[uid] = (row["fid"], row["text"])
+    recv_ms = int((raw.recv - raw.date) * 1000) if raw.recv else None
     if not targets:
-        await ctx.db.finish_post(r.post_id, 0, 0)
+        await ctx.db.finish_post(r.post_id, 0, 0, recv_ms)
         return r
 
     url = post_url(channel, raw.msg_id)
     preview = LinkPreviewOptions(url=url, prefer_small_media=True) if url else LinkPreviewOptions(is_disabled=True)
     photo_id = None
-    if raw.photo and ctx.buffer_chat:
+    if photo_task:
         try:
-            photo_id = await asyncio.wait_for(raw.photo(), PHOTO_TIMEOUT)
+            photo_id = await asyncio.wait_for(photo_task, PHOTO_TIMEOUT)
         except Exception as e:     # канал запретил пересылку, сеть — шлём без фото
             log.info("фото не переслано: %s", e)
     done: list[tuple] = []
@@ -251,5 +266,5 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     if done:   # в базу — после рассылки, одной транзакцией: запись не тормозит отправку
         await ctx.db.add_deliveries(done)
     r.latency_ms = min(d[-1] for d in done) if done else None
-    await ctx.db.finish_post(r.post_id, r.latency_ms or 0, len(r.sent))
+    await ctx.db.finish_post(r.post_id, r.latency_ms or 0, len(r.sent), recv_ms)
     return r

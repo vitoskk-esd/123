@@ -76,6 +76,11 @@ class DB:
         self.conn = await aiosqlite.connect(self.path)
         self.conn.row_factory = aiosqlite.Row
         await self.conn.executescript(SCHEMA)
+        for sql in ("ALTER TABLE posts ADD COLUMN recv_ms INTEGER",):   # новые столбцы в уже созданной базе
+            try:
+                await self.conn.execute(sql)
+            except aiosqlite.OperationalError:
+                pass
         await self.conn.commit()
         return self
 
@@ -270,8 +275,8 @@ class DB:
             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", channel_id, msg_id, time.time(), fp, ckey, L.make, L.model, L.year,
             L.price, L.mileage, L.region, int(dup), int(clean), L.parsed_by)
 
-    async def finish_post(self, post_id: int, latency_ms: int, matched: int) -> None:
-        await self._run("UPDATE posts SET latency_ms=?, matched=? WHERE id=?", latency_ms, matched, post_id)
+    async def finish_post(self, post_id: int, latency_ms: int, matched: int, recv_ms: int | None = None) -> None:
+        await self._run("UPDATE posts SET latency_ms=?, matched=?, recv_ms=? WHERE id=?", latency_ms, matched, recv_ms, post_id)
 
     async def market_prices(self, make: str, model: str, year: int | None, since: float, exclude_id: int) -> list[int]:
         """Цены той же модели (±1 год) без дублей и без битых/«на запчасти»/подозрительных."""
@@ -378,7 +383,7 @@ class DB:
             "churned": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>0 AND paid_until<=?", now))["n"],
             "blocked": (await one("SELECT COUNT(*) n FROM users WHERE blocked=1"))["n"],
             "posts24": (await one("SELECT COUNT(*) n, SUM(make IS NOT NULL AND price IS NOT NULL) cars, SUM(dup) dups, SUM(parsed_by='ai') ai, "
-                                  "AVG(CASE WHEN matched>0 THEN latency_ms END) lat FROM posts WHERE at>?", now - DAY)),
+                                  "AVG(CASE WHEN matched>0 THEN latency_ms END) lat, AVG(recv_ms) recv FROM posts WHERE at>?", now - DAY)),
             "deliveries24": (await one("SELECT COUNT(*) n FROM deliveries WHERE at>?", now - DAY))["n"],
             "channels": await self._all("SELECT status, base, COUNT(*) n FROM channels GROUP BY status, base"),
             "sources": await self._all(

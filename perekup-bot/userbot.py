@@ -3,16 +3,21 @@
 
 Подключается из чата с ботом: админ пишет /connect (см. connect.py). Ключ входа (сессия) хранится в базе,
 поэтому после перезапуска в облаке входить заново не нужно.
+Посты приходят двумя путями, что раньше — то и уходит (второй раз тот же пост не обрабатывается):
+• Telegram сам присылает новые посты — но у больших каналов с опозданием до минуты;
+• бот сам опрашивает каналы по кругу (POLL_RPS каналов в секунду) — каждый канал раз в несколько секунд.
 Вступление в каналы — по одному с паузой JOIN_INTERVAL: массовые вступления Telegram наказывает блокировкой.
 Один аккаунт — до 500 каналов (лимит Telegram).
 """
 import asyncio
 import logging
 import time
+from collections import deque
 
 from aiogram import Bot
 from telethon import TelegramClient, errors, events, utils
 from telethon.sessions import StringSession
+from telethon.tl.functions.account import UpdateStatusRequest
 from telethon.tl.functions.channels import CreateChannelRequest, EditAdminRequest, JoinChannelRequest
 from telethon.tl.types import ChatAdminRights, InputPeerChannel
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
@@ -50,6 +55,10 @@ class Reader:
         self.tasks: set[asyncio.Task] = set()
         self.runner: asyncio.Task | None = None
         self.buffer = None                                     # InputPeerChannel канала с фото
+        self.done: set[tuple[int, int]] = set()                # (канал, пост), уже взятые в работу
+        self.done_order: deque = deque()
+        self.peers: dict[int, object] = {}                     # канал → InputPeer для опроса
+        self.last: dict[int, int] = {}                         # канал → id последнего поста, который видели
 
     @property
     def online(self) -> bool:
@@ -81,6 +90,10 @@ class Reader:
         client.add_event_handler(self._on_edit, events.MessageEdited())
         await self.ensure_buffer()
         await self.ctx.refresh_channels()
+        try:
+            await client.get_dialogs()          # кэш каналов — чтобы опрашивать их без лишних запросов
+        except Exception as e:
+            log.warning("не загрузил список каналов: %s", e)
         self.runner = asyncio.create_task(self.run())
         log.info("служебный аккаунт читает каналы: %d", len(self.ctx.channels))
 
@@ -106,31 +119,86 @@ class Reader:
         self.buffer = InputPeerChannel(int(cid), int(access))
         self.ctx.buffer_chat = int(f"-100{cid}")
 
-    def _photo(self, e: events.NewMessage.Event, msg_id: int):
+    def _photo(self, peer_of, msg_id: int):
         async def forward() -> int | None:
             if self.buffer is None:
                 return None
-            sent = await self.client.forward_messages(self.buffer, msg_id, from_peer=await e.get_input_chat())
+            sent = await self.client.forward_messages(self.buffer, msg_id, from_peer=await peer_of())
             sent = sent[0] if isinstance(sent, list) else sent
             return sent.id if sent else None
         return forward
 
-    async def _on_message(self, e: events.NewMessage.Event) -> None:
-        m = e.message
-        if not m.message or e.chat_id not in self.ctx.channels:   # фото альбома без подписи — пропускаем
+    def _take(self, chat_id: int, m, peer_of) -> None:
+        """Взять пост в работу — один раз, каким бы путём он ни пришёл первым."""
+        key = (chat_id, m.id)
+        if key in self.done:
             return
-        photo = self._photo(e, m.id) if m.photo else None
-        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, m.date.timestamp(), photo)))
+        self.done.add(key)
+        self.done_order.append(key)
+        if len(self.done_order) > 20000:
+            self.done.discard(self.done_order.popleft())
+        self.last[chat_id] = max(self.last.get(chat_id, 0), m.id)
+        if not m.message:                                       # фото альбома без подписи — пропускаем
+            return
+        photo = self._photo(peer_of, m.id) if m.photo else None
+        raw = RawPost(chat_id, m.id, m.message, m.date.timestamp(), photo, recv=time.time())
+        task = asyncio.create_task(self._process(raw))
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
+
+    async def _on_message(self, e: events.NewMessage.Event) -> None:
+        if e.chat_id in self.ctx.channels:
+            self._take(e.chat_id, e.message, e.get_input_chat)
+
+    async def _peer(self, chat_id: int):
+        if chat_id not in self.peers:
+            self.peers[chat_id] = await self.client.get_input_entity(chat_id)
+        return self.peers[chat_id]
+
+    async def poll_once(self, chat_id: int) -> None:
+        """Новые посты канала, которых ещё не видели. Первый опрос только запоминает, где мы, — старое не шлём."""
+        peer = await self._peer(chat_id)
+        if chat_id not in self.last:
+            msgs = await self.client.get_messages(peer, limit=1)
+            self.last[chat_id] = msgs[0].id if msgs else 0
+            return
+        msgs = await self.client.get_messages(peer, limit=10, min_id=self.last[chat_id])
+        for m in sorted(msgs, key=lambda x: x.id):
+            self._take(chat_id, m, lambda p=peer: _same(p))
+
+    async def poll_loop(self) -> None:
+        """Сами опрашиваем каналы по кругу, не дожидаясь, пока Telegram пришлёт пост."""
+        online_at = 0.0
+        while True:
+            chans = list(self.ctx.channels)
+            if not chans or self.ctx.cfg.poll_rps <= 0:
+                await asyncio.sleep(5)
+                continue
+            for chat_id in chans:
+                started = time.time()
+                if started - online_at > 60:       # «в сети» — Telegram охотнее присылает обновления
+                    online_at = started
+                    try:
+                        await self.client(UpdateStatusRequest(offline=False))
+                    except Exception:
+                        pass
+                try:
+                    if chat_id in self.ctx.channels:
+                        await self.poll_once(chat_id)
+                except errors.FloodWaitError as e:
+                    log.warning("опрос каналов: Telegram просит подождать %s с", e.seconds)
+                    await asyncio.sleep(e.seconds)
+                except Exception as e:
+                    log.info("опрос канала %s: %s", chat_id, e)
+                await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.poll_rps - (time.time() - started)))
 
     async def _on_edit(self, e: events.MessageEdited.Event) -> None:
         """Анонс «скоро в продаже» отредактировали в «в продаже» — теперь это продажа, присылаем."""
         m = e.message
         if not m.message or e.chat_id not in self.ctx.channels or not await self.ctx.db.is_teaser(e.chat_id, m.id):
             return
-        photo = self._photo(e, m.id) if m.photo else None
-        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, time.time(), photo)))
+        photo = self._photo(e.get_input_chat, m.id) if m.photo else None
+        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, time.time(), photo, recv=time.time())))
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
 
@@ -212,4 +280,8 @@ class Reader:
             await asyncio.sleep(max(5, self.ctx.cfg.join_interval - (time.time() - started)) if queued else 15)
 
     async def run(self) -> None:
-        await asyncio.gather(self.join_loop(), self.client.run_until_disconnected())
+        await asyncio.gather(self.join_loop(), self.poll_loop(), self.client.run_until_disconnected())
+
+
+async def _same(peer):
+    return peer
