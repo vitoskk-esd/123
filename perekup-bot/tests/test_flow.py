@@ -639,3 +639,17 @@ async def test_offer_with_requisites(env):
     assert "PRO — 2490 ₽" in text and len(text) < 4096
     await dp.feed_update(bot, cb("s:pay:pro"))
     assert "условия оферты — /offer" in s.texts(USER)[-1]
+
+
+async def test_admin_shows_sources_with_payments(env):
+    """Ссылки t.me/<бот>?start=<метка> — в /admin видно, сколько людей пришло по каждой и сколько оплатили."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "приора до 300к", plan=None)                 # пришёл по ?start=reels
+    await dp.feed_update(bot, cb("s:pay:basic"))
+    pay = await ctx.db.last_pending(USER)
+    ctx.pay.statuses[pay["yk_id"]] = "succeeded"
+    await dp.feed_update(bot, cb("s:check"))
+    await dp.feed_update(bot, msg("/start avito", OTHER))
+    await dp.feed_update(bot, msg("/admin", ADMIN))
+    text = s.texts(ADMIN)[-1]
+    assert "reels: 1 чел., оплатили 1" in text and "avito: 1 чел., оплатили 0" in text
