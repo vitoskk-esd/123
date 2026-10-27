@@ -13,7 +13,8 @@ def kb(*rows: list[B]) -> InlineKeyboardMarkup:
 def menu() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text=T.MENU_FILTERS), KeyboardButton(text=T.MENU_CHANNELS)],
-        [KeyboardButton(text=T.MENU_STATS), KeyboardButton(text=T.MENU_SUB), KeyboardButton(text=T.MENU_HELP)],
+        [KeyboardButton(text=T.MENU_STATS), KeyboardButton(text=T.MENU_SUB)],   # по две в ряд — иначе подписи переносятся
+        [KeyboardButton(text=T.MENU_HELP)],
     ], resize_keyboard=True)
 
 

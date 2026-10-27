@@ -316,7 +316,7 @@ async def show_help(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     await msg.answer(T.HELP, reply_markup=K.menu())
 
 
-MENU = {T.MENU_FILTERS: show_filters, T.MENU_CHANNELS: show_channels, T.MENU_STATS: show_stats,
+MENU = {T.MENU_FILTERS: show_filters, T.OLD_MENU_FILTERS: show_filters, T.MENU_CHANNELS: show_channels, T.MENU_STATS: show_stats,
         T.MENU_SUB: show_sub, T.MENU_HELP: show_help}
 
 
