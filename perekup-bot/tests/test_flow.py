@@ -330,3 +330,25 @@ async def test_connect_service_account_in_chat(env, monkeypatch):
     await dp.feed_update(bot, msg("/connect", USER))                        # не админ — ничего
     assert not any("api_id" in t for t in s.texts(USER))
     ctx.reader.runner.cancel()
+
+
+async def test_edit_filter(env):
+    """✏️ меняет тот же фильтр, а не создаёт новый; после правки машины идут по новым условиям."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1 млн")
+    fid = (await ctx.db.filters(USER))[0]["id"]
+    saved = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Изменить фильтр" in str(saved.reply_markup)                       # кнопка сразу после сохранения
+    await dp.feed_update(bot, cb(f"f:e:{fid}"))
+    assert "Меняем фильтр #1" in s.texts(USER)[-1] and "<code>камри до 1 млн</code>" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("солярис до 900к, Москва"))
+    await dp.feed_update(bot, cb("f:save"))
+    rows = await ctx.db.filters(USER)
+    assert len(rows) == 1 and rows[0]["id"] == fid and rows[0]["text"] == "солярис до 900к, Москва"
+    assert "Фильтр #1 изменён" in s.texts(USER)[-1]
+    assert not (await process(bot, ctx, post(CH1, "Toyota Camry 2012, 950 000 ₽"))).sent      # старый фильтр больше не работает
+    assert (await process(bot, ctx, post(CH1, "Hyundai Solaris 2016, 750 000 ₽, Москва"))).sent == [USER]
+    await dp.feed_update(bot, cb("f:new"))                                     # новый фильтр после правки — именно новый
+    await dp.feed_update(bot, msg("приора до 300к"))
+    await dp.feed_update(bot, cb("f:save"))
+    assert len(await ctx.db.filters(USER)) == 2

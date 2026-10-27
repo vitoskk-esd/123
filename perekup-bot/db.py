@@ -146,6 +146,9 @@ class DB:
     async def filter(self, uid: int, fid: int):
         return await self._one("SELECT * FROM filters WHERE id=? AND user_id=?", fid, uid)
 
+    async def update_filter(self, uid: int, fid: int, text: str, data: str) -> bool:
+        return await self._count("UPDATE filters SET text=?, data=?, active=1 WHERE id=? AND user_id=?", text, data, fid, uid) == 1
+
     async def toggle_filter(self, uid: int, fid: int) -> None:
         await self._run("UPDATE filters SET active=1-active WHERE id=? AND user_id=?", fid, uid)
 

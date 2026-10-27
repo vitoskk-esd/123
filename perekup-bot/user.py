@@ -1,4 +1,5 @@
 """Экраны человека: старт → фильтр обычными словами → каналы (база и свои) → статистика → подписка."""
+import html
 import re
 import time
 from datetime import datetime
@@ -16,7 +17,7 @@ from ctx import Ctx
 from db import DAY
 from links import label, parse_link
 from pipeline import seconds
-from query import describe, parse_filter
+from query import Filter, describe, parse_filter
 
 router = Router(name="user")
 
@@ -56,6 +57,7 @@ async def ask_filter(ev, ctx: Ctx, state: FSMContext) -> None:
     if len(await ctx.db.filters(ev.from_user.id)) >= ctx.cfg.max_filters:
         await msg.answer(T.FILTER_LIMIT.format(n=ctx.cfg.max_filters))
     else:
+        await state.set_data({})          # новый фильтр, а не правка старого
         await state.set_state(S.filter)
         await msg.answer(T.ASK_FILTER)
     if isinstance(ev, CallbackQuery):
@@ -87,13 +89,34 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         return await cb.answer()
     await state.clear()
     await cb.message.edit_reply_markup(reply_markup=None)
-    if len(await ctx.db.filters(cb.from_user.id)) >= ctx.cfg.max_filters:
+    uid = cb.from_user.id
+    if data.get("edit_id") and await ctx.db.update_filter(uid, data["edit_id"], data["pending_text"], data["pending"]):
+        n = [r["id"] for r in await ctx.db.filters(uid)].index(data["edit_id"]) + 1
+        await cb.message.answer(T.FILTER_UPDATED.format(n=n), reply_markup=K.filter_saved(data["edit_id"]))
+        return await cb.answer()
+    if len(await ctx.db.filters(uid)) >= ctx.cfg.max_filters:
         await cb.message.answer(T.FILTER_LIMIT.format(n=ctx.cfg.max_filters))
         return await cb.answer()
-    await ctx.db.add_filter(cb.from_user.id, data["pending_text"], data["pending"])
-    await ctx.db.event(cb.from_user.id, "filter")
-    channels = await ctx.db.channel_count_for(cb.from_user.id)
-    await cb.message.answer(T.FILTER_SAVED.format(channels=channels), reply_markup=K.menu())
+    fid = await ctx.db.add_filter(uid, data["pending_text"], data["pending"])
+    await ctx.db.event(uid, "filter")
+    channels = await ctx.db.channel_count_for(uid)
+    await cb.message.answer(T.FILTER_SAVED.format(channels=channels), reply_markup=K.filter_saved(fid))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("f:e:"))
+async def edit_filter_ask(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
+    """✏️ — показать, что ищем сейчас, и принять фильтр заново; сохранится в тот же фильтр."""
+    fid = int(cb.data.split(":")[2])
+    rows = await ctx.db.filters(cb.from_user.id)
+    row = next((r for r in rows if r["id"] == fid), None)
+    if not row:
+        return await cb.answer()
+    await state.set_state(S.filter)
+    await state.set_data({"edit_id": fid})
+    n = rows.index(row) + 1
+    await cb.message.answer(T.EDIT_FILTER.format(n=n, card=describe(Filter.loads(row["data"]), ctx.dict),
+                                                 text=html.escape(row["text"])))
     await cb.answer()
 
 

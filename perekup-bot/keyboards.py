@@ -26,10 +26,15 @@ def confirm_filter() -> InlineKeyboardMarkup:
 
 
 def filters(rows) -> InlineKeyboardMarkup:
-    out = [[B(text=("⏸ " if r["active"] else "▶️ ") + f"#{i}", callback_data=f"f:t:{r['id']}"),
+    out = [[B(text=f"✏️ #{i}", callback_data=f"f:e:{r['id']}"),
+            B(text=("⏸ " if r["active"] else "▶️ ") + f"#{i}", callback_data=f"f:t:{r['id']}"),
             B(text=f"🗑 #{i}", callback_data=f"f:d:{r['id']}")] for i, r in enumerate(rows, 1)]
     out.append([B(text=T.BTN_NEW_FILTER, callback_data="f:new")])
     return kb(*out)
+
+
+def filter_saved(fid: int) -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_EDIT_FILTER, callback_data=f"f:e:{fid}")])
 
 
 def channels() -> InlineKeyboardMarkup:
