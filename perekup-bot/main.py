@@ -11,6 +11,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 import admin
 import connect
 import jobs
+import support
 import user
 from config import get_config
 from ctx import Ctx
@@ -25,6 +26,7 @@ def build_dispatcher(ctx: Ctx) -> Dispatcher:
     dp = Dispatcher(storage=MemoryStorage(), ctx=ctx)
     dp.include_router(admin.router)   # админские команды раньше пользовательских
     dp.include_router(connect.router)
+    dp.include_router(support.router)  # ответ админа на обращение — раньше, чем «свободный текст» пользователя
     dp.include_router(user.router)
     return dp
 

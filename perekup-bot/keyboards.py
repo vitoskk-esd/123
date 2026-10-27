@@ -38,6 +38,18 @@ def filter_saved(fid: int) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_EDIT_FILTER, callback_data=f"f:e:{fid}")])
 
 
+def help_menu() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_SUPPORT, callback_data="sup")])
+
+
+def support_cancel() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_CANCEL, callback_data="sup:x")])
+
+
+def support_more() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_SUPPORT_MORE, callback_data="sup")])
+
+
 def channels() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_ADD_CHANNEL, callback_data="c:add")],
               [B(text=T.BTN_BASE_LIST, callback_data="c:base:0")],

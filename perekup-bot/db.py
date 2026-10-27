@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id
 CREATE INDEX IF NOT EXISTS events_kind ON events(kind, at);
 CREATE TABLE IF NOT EXISTS marks (key TEXT PRIMARY KEY, at REAL);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS support (admin_id INTEGER, msg_id INTEGER, user_id INTEGER, at REAL, PRIMARY KEY (admin_id, msg_id));
 """
 
 DAY = 86400
@@ -330,6 +331,14 @@ class DB:
     # ---------- события и отметки ----------
     async def event(self, uid: int, kind: str, meta: str | None = None) -> None:
         await self._run("INSERT INTO events (user_id, kind, meta, at) VALUES (?,?,?,?)", uid, kind, meta, time.time())
+
+    async def add_support_link(self, admin_id: int, msg_id: int, user_id: int) -> None:
+        await self._run("INSERT OR REPLACE INTO support (admin_id, msg_id, user_id, at) VALUES (?,?,?,?)",
+                        admin_id, msg_id, user_id, time.time())
+
+    async def support_user(self, admin_id: int, msg_id: int) -> int | None:
+        row = await self._one("SELECT user_id FROM support WHERE admin_id=? AND msg_id=?", admin_id, msg_id)
+        return row["user_id"] if row else None
 
     async def get_setting(self, key: str) -> str:
         row = await self._one("SELECT value FROM settings WHERE key=?", key)

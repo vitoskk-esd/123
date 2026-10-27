@@ -313,7 +313,7 @@ async def check(cb: CallbackQuery, ctx: Ctx) -> None:
 
 # ---------- помощь и меню ----------
 async def show_help(msg: Message, ctx: Ctx, state: FSMContext) -> None:
-    await msg.answer(T.HELP, reply_markup=K.menu())
+    await msg.answer(T.HELP, reply_markup=K.help_menu())
 
 
 MENU = {T.MENU_FILTERS: show_filters, T.OLD_MENU_FILTERS: show_filters, T.MENU_CHANNELS: show_channels, T.MENU_STATS: show_stats,

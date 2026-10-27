@@ -397,3 +397,32 @@ async def test_reader_creates_photo_channel_once(env):
     assert ctx.buffer_chat == -1004242 and await ctx.db.get_setting("buffer_hash") == "99"
     await reader.ensure_buffer()                                                          # после перезапуска — тот же канал
     assert reader.client.calls == ["CreateChannelRequest", "EditAdminRequest"]
+
+
+async def test_support_chat_in_bot(env):
+    """«❓ Помощь» → «Написать в поддержку» → сообщение уходит админу; ответ админа (Reply) приходит человеку."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, msg("❓ Помощь"))
+    help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Написать в поддержку" in str(help_msg.reply_markup)
+    await dp.feed_update(bot, cb("sup"))
+    await dp.feed_update(bot, msg("Не приходят машины по фильтру"))
+    assert "отправлено менеджеру" in s.texts(USER)[-1]
+    head = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == ADMIN][-1]
+    assert "Обращение в поддержку" in head.text and "id 111" in head.text
+    copies = [m for m in s.sent if isinstance(m, CopyMessage) and m.chat_id == ADMIN]
+    assert copies and copies[-1].from_chat_id == USER                          # само сообщение человека — копией
+    # админ отвечает на шапку обращения
+    head_id = (await ctx.db._one("SELECT msg_id FROM support WHERE admin_id=? ORDER BY msg_id LIMIT 1", ADMIN))["msg_id"]
+    original = Message(message_id=head_id, date=datetime.now(), chat=Chat(id=ADMIN, type="private"), text="x")
+    reply = Update(update_id=next(ids), message=Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=ADMIN, type="private"),
+                                                        from_user=user(ADMIN), text="Проверь, что фильтр не на паузе", reply_to_message=original))
+    await dp.feed_update(bot, reply)
+    assert "Ответ поддержки" in s.texts(USER)[-1]
+    to_user = [m for m in s.sent if isinstance(m, CopyMessage) and m.chat_id == USER][-1]
+    assert to_user.from_chat_id == ADMIN
+    assert any("Ответ отправлен" in t for t in s.texts(ADMIN))
+    # обычное сообщение после этого — не в поддержку, а как всегда (похоже на фильтр → карточка)
+    await dp.feed_update(bot, msg("камри до 1 млн"))
+    assert "Похоже на фильтр" in s.texts(USER)[-1]

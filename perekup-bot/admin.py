@@ -14,6 +14,14 @@ from pipeline import seconds
 router = Router(name="admin")
 
 
+async def admin_ids(ctx: Ctx) -> list[int]:
+    """Кому приходят обращения в поддержку: ADMIN_IDS или первый, кто написал боту /start."""
+    if ctx.cfg.admins:
+        return sorted(ctx.cfg.admins)
+    first = await ctx.db.first_user()
+    return [first] if first else []
+
+
 async def is_admin(msg: Message, ctx: Ctx) -> bool:
     """ADMIN_IDS из .env, а если там пусто — тот, кто первым написал боту /start (то есть ты)."""
     if ctx.cfg.admins:
