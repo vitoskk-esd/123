@@ -16,6 +16,7 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 
+import keyboards as K
 import texts as T
 from ctx import Ctx
 from pipeline import RawPost, process
@@ -122,12 +123,30 @@ class Reader:
         waiters = await self.ctx.db.pop_waiters(row["id"]) + (await self.ctx.db.pop_waiters(ch["id"]) if ch["id"] != row["id"] else [])
         for uid in waiters:
             await self._notify(uid, T.CHANNEL_JOINED.format(name=title))
+            await self._batch_done(uid, ch["id"], True)
 
     async def _failed(self, row, error: str) -> None:
         await self.ctx.db.channel_failed(row["id"], error)
         name = row["username"] and f"@{row['username']}" or "закрытый канал"
         for uid in await self.ctx.db.pop_waiters(row["id"]):
             await self._notify(uid, T.CHANNEL_FAILED.format(name=name, error=error))
+            await self._batch_done(uid, row["id"], False)
+
+    async def _batch_done(self, uid: int, cid: int, ok: bool) -> None:
+        """Когда подключился последний из присланных каналов — одно итоговое сообщение «всё готово, можно искать»."""
+        result = await self.ctx.db.batch_done(uid, cid, ok)
+        if not result or not result[0]:
+            return
+        good, bad = result
+        total = await self.ctx.db.channel_count_for(uid)
+        failed = T.ALL_CHANNELS_FAILED_PART.format(n=bad) if bad else ""
+        has_filters = bool(await self.ctx.db.filters(uid))
+        text = T.ALL_CHANNELS_READY.format(n=good, total=total, failed=failed,
+                                           next=T.ALL_READY_WATCHING if has_filters else T.ALL_READY_NEED_FILTER)
+        try:
+            await self.bot.send_message(uid, text, reply_markup=None if has_filters else K.new_filter())
+        except Exception as e:
+            log.info("не смог уведомить %s: %s", uid, e)
 
     async def _notify(self, uid: int, text: str) -> None:
         try:

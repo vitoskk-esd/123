@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS user_channels (
   user_id INTEGER, channel_id INTEGER, state TEXT, PRIMARY KEY (user_id, channel_id)
 );
 CREATE TABLE IF NOT EXISTS join_waiters (channel_id INTEGER, user_id INTEGER, PRIMARY KEY (channel_id, user_id));
+CREATE TABLE IF NOT EXISTS join_results (user_id INTEGER, channel_id INTEGER, ok INTEGER, PRIMARY KEY (user_id, channel_id));
 CREATE TABLE IF NOT EXISTS posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT, channel_id INTEGER, msg_id INTEGER, at REAL, fp TEXT, ckey TEXT,
   make TEXT, model TEXT, year INTEGER, price INTEGER, mileage INTEGER, region TEXT,
@@ -215,6 +216,16 @@ class DB:
 
     async def add_waiter(self, cid: int, uid: int) -> None:
         await self._run("INSERT OR IGNORE INTO join_waiters (channel_id, user_id) VALUES (?,?)", cid, uid)
+
+    async def batch_done(self, uid: int, cid: int, ok: bool) -> tuple[int, int] | None:
+        """Канал из присланных человеком подключился (или нет). Если это был последний из его очереди —
+        (сколько подключилось, сколько нет) за всю партию, и партия закрывается; иначе None."""
+        await self._run("INSERT OR REPLACE INTO join_results (user_id, channel_id, ok) VALUES (?,?,?)", uid, cid, int(ok))
+        if await self._one("SELECT 1 FROM join_waiters WHERE user_id=? LIMIT 1", uid):
+            return None
+        r = await self._one("SELECT COALESCE(SUM(ok),0) good, COALESCE(SUM(1-ok),0) bad FROM join_results WHERE user_id=?", uid)
+        await self._run("DELETE FROM join_results WHERE user_id=?", uid)
+        return r["good"], r["bad"]
 
     async def pop_waiters(self, cid: int) -> list[int]:
         rows = await self._all("SELECT user_id FROM join_waiters WHERE channel_id=?", cid)

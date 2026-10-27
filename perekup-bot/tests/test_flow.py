@@ -222,7 +222,12 @@ class FakeTelethon:
         self.calls = []
 
     async def get_entity(self, username):
-        return Channel(id=777, title="Авто Казань", photo=ChatPhotoEmpty(), date=None, access_hash=1, username=username)
+        if username == "broken_link":
+            from telethon.errors import UsernameNotOccupiedError
+            raise UsernameNotOccupiedError(request=None)
+        ids = {"avto_kzn": 777, "avto_ufa": 778}
+        titles = {"avto_kzn": "Авто Казань", "avto_ufa": "Авто Уфа"}
+        return Channel(id=ids[username], title=titles[username], photo=ChatPhotoEmpty(), date=None, access_hash=1, username=username)
 
     async def __call__(self, request):
         self.calls.append(type(request).__name__)
@@ -239,7 +244,24 @@ async def test_reader_joins_queue_and_notifies(env):
     ch = await ctx.db.channel(cid)
     assert ch["status"] == "joined" and ch["tg_id"] == -1000000000777 and ch["account"] == "main"
     assert reader.client.calls == ["JoinChannelRequest"] and -1000000000777 in ctx.channels
-    assert "Канал «Авто Казань» подключён" in s.texts(USER)[-1]
+    assert "Канал «Авто Казань» подключён" in s.texts(USER)[-2]
+    assert "Всё готово — каналы загружены" in s.texts(USER)[-1]                 # единственный канал партии
+
+
+async def test_all_channels_ready_message_after_last(env):
+    """Человек прислал три ссылки: про каждую — своё сообщение, а «всё готово» — один раз, после последней."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн")
+    await dp.feed_update(bot, cb("c:add"))
+    await dp.feed_update(bot, msg("@avto_kzn\n@broken_link\n@avto_ufa"))
+    reader = Reader(bot, ctx, FakeTelethon())
+    for _ in range(3):
+        await reader.join_one((await ctx.db.queued_channels())[0])
+        if len(await ctx.db.queued_channels()) > 0:
+            assert not any("Всё готово" in t for t in s.texts(USER))         # пока не все — итога нет
+    final = s.texts(USER)[-1]
+    assert sum("Всё готово" in t for t in s.texts(USER)) == 1
+    assert "Подключено: <b>2</b>, не получилось: 1" in final and "пришлю сразу" in final
 
 
 async def test_free_mode_without_yookassa(env):
