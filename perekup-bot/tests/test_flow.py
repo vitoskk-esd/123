@@ -752,3 +752,42 @@ async def test_admin_adds_channels_straight_to_base(env):
     assert (await ctx.db.queued_channels())[0]["base"] == 1
     await dp.feed_update(bot, cb("c:add"))                                          # обычный человек — как раньше, себе
     assert "общую базу" not in s.texts(USER)[-1]
+
+
+class SimilarTelethon(FakeTelethon):
+    """«Похожие каналы»: автоканал, который постит каждый день, автоканал-молчун, нерелевантный и уже известный."""
+    async def get_input_entity(self, chat_id):
+        return chat_id
+
+    async def __call__(self, request):
+        self.calls.append(type(request).__name__)
+        from telethon.tl.types.messages import Chats
+        ch = lambda i, u, t, n: Channel(id=i, title=t, photo=ChatPhotoEmpty(), date=None, access_hash=1, username=u,
+                                        participants_count=n)
+        return Chats(chats=[ch(501, "avto_daily", "Авторынок Тест", 12000), ch(502, "avto_sleepy", "Авто ниже рынка", 9000),
+                            ch(503, "cooking", "Рецепты", 50000), ch(504, "avto_msk", "Уже в базе", 7000)])
+
+    async def get_messages(self, username, limit=60):
+        from types import SimpleNamespace
+        from datetime import timedelta, timezone
+        now = datetime.now(timezone.utc)
+        days = range(1, 9) if username == "avto_daily" else [20]
+        return [SimpleNamespace(date=now - timedelta(days=d)) for d in days]
+
+
+async def test_admin_finds_similar_channels(env):
+    """/similar: похожие каналы от Telegram → только автомобильные и новые, активные отмечены и попадают в /add."""
+    import asyncio
+    dp, bot, s, ctx = env
+    reader = Reader(bot, ctx, SimilarTelethon())
+    reader.runner = asyncio.get_running_loop().create_future()                 # «онлайн»
+    ctx.reader = reader
+    rows = await reader.similar({"avto_msk"})
+    names = {r["username"]: r for r in rows}
+    assert set(names) == {"avto_daily", "avto_sleepy"} and names["avto_daily"]["hits"] == 2      # два канала базы
+    assert names["avto_daily"]["weekdays"] >= 4 and names["avto_sleepy"]["weekdays"] == 0
+    await dp.feed_update(bot, msg("/similar", ADMIN))
+    await asyncio.gather(*ctx.background)
+    text = s.texts(ADMIN)[-1]
+    assert "✅ @avto_daily" in text and "/add @avto_daily" in text and "@avto_sleepy" in text.split("/add")[0]
+    assert "cooking" not in text and "/add @avto_daily @avto_sleepy" not in text

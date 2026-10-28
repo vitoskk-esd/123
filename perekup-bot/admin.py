@@ -65,6 +65,7 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"🔗 Откуда пришли:\n{src or '—'}\n\n"
         "Команды:\n/add @канал1 @канал2 — добавить каналы в общую базу\n/list — список каналов\n"
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
+        "/similar — найти новые каналы через «похожие каналы» Telegram\n"
         "/del @канал — убрать канал\n/broadcast текст — написать всем")
 
 
@@ -94,6 +95,38 @@ async def addbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
         (f"В очередь на подключение: {len(added)}\n" + "\n".join(added) if added else "Пришли ссылки: /add @канал1 t.me/канал2") +
         (f"\n\nНе понял: {', '.join(bad)}" if bad else "") +
         (await queue_wait(ctx, queued) + "\nХод подключения — в /list." if queued else ""))
+
+
+@router.message(Command("similar"))
+async def similar(msg: Message, ctx: Ctx) -> None:
+    """/similar — «похожие каналы» от Telegram для каналов базы: новые автомобильные каналы с их активностью."""
+    if not await is_admin(msg, ctx):
+        return
+    if not (ctx.reader and ctx.reader.online):
+        return await msg.answer("Служебный аккаунт не подключён — /connect")
+    await msg.answer("🔎 Спрашиваю у Telegram похожие каналы для каждого канала базы и смотрю, как часто они постят. "
+                     "Это займёт несколько минут — пришлю список сюда.")
+
+    async def run():
+        known = {(r["username"] or "").lower() for r in await ctx.db.base_channels()} | \
+                {(r["username"] or "").lower() for r in await ctx.db._all("SELECT username FROM channels")}
+        try:
+            rows = await ctx.reader.similar(known)
+        except Exception as e:
+            return await msg.answer(f"Не получилось: {e}")
+        if not rows:
+            return await msg.answer("Новых автомобильных каналов в «похожих» не нашлось.")
+        active = [r for r in rows if r.get("weekdays", 0) >= 4]
+        lines = [f"{'✅' if r.get('weekdays', 0) >= 4 else '▫️'} @{r['username']} — {r['title'][:40]} · "
+                 f"{r['subs']:,} подп. · {r.get('week', '?')} постов/нед".replace(",", " ") for r in rows]
+        text = ("Похожие каналы (✅ — посты почти каждый будний день):\n\n" + "\n".join(lines) +
+                (f"\n\nДобавить активные ({len(active)}):\n/add " + " ".join("@" + r["username"] for r in active) if active else ""))
+        for i in range(0, len(text), 3800):
+            await msg.answer(text[i:i + 3800])
+
+    task = asyncio.create_task(run())
+    ctx.background.add(task)
+    task.add_done_callback(ctx.background.discard)
 
 
 @router.message(Command("tobase"))

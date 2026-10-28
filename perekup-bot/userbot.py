@@ -11,14 +11,17 @@
 """
 import asyncio
 import logging
+import re
 import time
+from datetime import datetime, timedelta, timezone
 from collections import deque
 
 from aiogram import Bot
 from telethon import TelegramClient, errors, events, utils
 from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateStatusRequest
-from telethon.tl.functions.channels import CreateChannelRequest, EditAdminRequest, JoinChannelRequest
+from telethon.tl.functions.channels import (CreateChannelRequest, EditAdminRequest, GetChannelRecommendationsRequest,
+                                            JoinChannelRequest)
 from telethon.tl.types import ChatAdminRights, InputPeerChannel
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 
@@ -31,6 +34,7 @@ log = logging.getLogger(__name__)
 CONNECT_TIMEOUT = 60
 APPROVAL_CHECK = 300           # раз в 5 минут смотрим, одобрил ли админ заявку в канал
 APPROVAL_WAIT = 7 * 86400      # неделю без одобрения — сдаёмся
+CAR_TITLE = re.compile(r"авто|машин|перекуп|рынок|рынк|тачк|выкуп|car|auto|avto|продаж|ниже\s+рынка|по\s+низу", re.I)
 FATAL = (errors.InviteHashExpiredError, errors.InviteHashInvalidError, errors.UsernameNotOccupiedError,
          errors.UsernameInvalidError, errors.ChannelPrivateError, errors.ChannelInvalidError,
          errors.ChannelsTooMuchError, ValueError)
@@ -253,6 +257,42 @@ class Reader:
         for uid in await self.ctx.db.channel_awaiting(row["id"], title):
             await self._notify(uid, T.CHANNEL_AWAITING.format(name=name))
             await self._batch_done(uid, row["id"], 2)
+
+    async def similar(self, known: set[str], limit: int = 60) -> list[dict]:
+        """Похожие каналы от Telegram для каждого канала базы → автомобильные, которых ещё нет в базе, с активностью:
+        сколько постов за неделю и в сколько из 5 последних будних дней были посты."""
+        found: dict[str, dict] = {}
+        for ch in [c for c in self.ctx.channels.values() if c["base"]]:
+            try:
+                res = await self.client(GetChannelRecommendationsRequest(channel=await self._peer(ch["tg_id"])))
+            except errors.FloodWaitError as e:
+                await asyncio.sleep(e.seconds)
+                continue
+            except Exception as e:
+                log.info("похожие для %s: %s", ch["title"], e)
+                continue
+            for c in getattr(res, "chats", []):
+                name = (getattr(c, "username", None) or "").lower()
+                if not name or name in known or not CAR_TITLE.search(c.title or ""):
+                    continue
+                f = found.setdefault(name, {"username": c.username, "title": c.title, "subs": c.participants_count or 0, "hits": 0})
+                f["hits"] += 1                                 # у скольких каналов базы он в «похожих»
+            await asyncio.sleep(1)
+        top = sorted(found.values(), key=lambda f: (-f["hits"], -f["subs"]))[:limit]
+        now = datetime.now(timezone(timedelta(hours=3)))
+        weekdays = [d for d in ((now - timedelta(days=i)).date() for i in range(1, 9)) if d.weekday() < 5][:5]
+        for f in top:
+            try:
+                msgs = await self.client.get_messages(f["username"], limit=60)
+                dates = [m.date.astimezone(now.tzinfo) for m in msgs if m.date]
+                f["week"] = sum(d >= now - timedelta(days=7) for d in dates)
+                f["weekdays"] = len({d.date() for d in dates} & set(weekdays))
+            except errors.FloodWaitError as e:
+                await asyncio.sleep(e.seconds)
+            except Exception as e:
+                log.info("активность %s: %s", f["username"], e)
+            await asyncio.sleep(1)
+        return top
 
     async def check_approvals(self) -> None:
         """Одобрил ли админ заявку: по приглашению Telegram отвечает «вы уже участник», по @нику — канал без пометки «вышел».
