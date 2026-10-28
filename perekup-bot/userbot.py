@@ -19,10 +19,10 @@ from collections import deque
 from aiogram import Bot
 from telethon import TelegramClient, errors, events, utils
 from telethon.sessions import StringSession
-from telethon.tl.functions.account import UpdateStatusRequest
+from telethon.tl.functions.account import UpdateNotifySettingsRequest, UpdateStatusRequest
 from telethon.tl.functions.channels import (CreateChannelRequest, EditAdminRequest, GetChannelRecommendationsRequest,
                                             JoinChannelRequest)
-from telethon.tl.types import ChatAdminRights, InputPeerChannel
+from telethon.tl.types import ChatAdminRights, InputNotifyPeer, InputPeerChannel, InputPeerNotifySettings
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 
 import keyboards as K
@@ -239,6 +239,7 @@ class Reader:
                                          getattr(entity, "username", None), "main")
         await self.ctx.refresh_channels()
         ch = await self.ctx.db.channel_by_tg(tg_id)
+        await self.mute(ch, entity)
         title = ch["title"] or row["username"] or "канал"
         waiters = await self.ctx.db.pop_waiters(row["id"]) + (await self.ctx.db.pop_waiters(ch["id"]) if ch["id"] != row["id"] else [])
         for uid in waiters:
@@ -257,6 +258,24 @@ class Reader:
         for uid in await self.ctx.db.channel_awaiting(row["id"], title):
             await self._notify(uid, T.CHANNEL_AWAITING.format(name=name))
             await self._batch_done(uid, row["id"], 2)
+
+    async def mute(self, ch, entity=None) -> None:
+        """Каналы читает бот, а не человек: у служебного аккаунта уведомления из них выключаем навсегда."""
+        try:
+            peer = entity if entity is not None else await self._peer(ch["tg_id"])
+            await self.client(UpdateNotifySettingsRequest(peer=InputNotifyPeer(peer),
+                                                          settings=InputPeerNotifySettings(mute_until=2 ** 31 - 1)))
+            await self.ctx.db.set_muted(ch["id"])
+        except errors.FloodWaitError as e:
+            await asyncio.sleep(e.seconds)
+        except Exception as e:
+            log.info("не выключил уведомления в %s: %s", ch["title"], e)
+
+    async def mute_all(self) -> None:
+        """Каналы, в которые вступили раньше, — тоже без уведомлений (по одному в 2 секунды, чтобы не злить Telegram)."""
+        for ch in await self.ctx.db.unmuted_channels():
+            await self.mute(ch)
+            await asyncio.sleep(2)
 
     async def similar(self, known: set[str], limit: int = 60) -> list[dict]:
         """Похожие каналы от Telegram для каждого канала базы → автомобильные, которых ещё нет в базе, с активностью:
@@ -318,6 +337,7 @@ class Reader:
                                                  getattr(entity, "username", None), "main")
                 await self.ctx.refresh_channels()
                 ch = await self.ctx.db.channel_by_tg(tg_id)
+                await self.mute(ch, entity)
                 for uid in await self.ctx.db.pop_approval_waiters(row["id"]) + (
                         await self.ctx.db.pop_approval_waiters(ch["id"]) if ch["id"] != row["id"] else []):
                     await self._notify(uid, T.CHANNEL_APPROVED.format(name=ch["title"] or name))
@@ -371,7 +391,7 @@ class Reader:
             await asyncio.sleep(max(5, self.ctx.cfg.join_interval - (time.time() - started)) if queued else 15)
 
     async def run(self) -> None:
-        await asyncio.gather(self.join_loop(), self.poll_loop(), self.client.run_until_disconnected())
+        await asyncio.gather(self.join_loop(), self.poll_loop(), self.mute_all(), self.client.run_until_disconnected())
 
 
 async def _same(peer):

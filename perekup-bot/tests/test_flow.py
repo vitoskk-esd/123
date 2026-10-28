@@ -346,7 +346,8 @@ async def test_reader_joins_queue_and_notifies(env):
     await reader.join_one(await ctx.db.channel(cid))
     ch = await ctx.db.channel(cid)
     assert ch["status"] == "joined" and ch["tg_id"] == -1000000000777 and ch["account"] == "main"
-    assert reader.client.calls == ["JoinChannelRequest"] and -1000000000777 in ctx.channels
+    assert reader.client.calls == ["JoinChannelRequest", "UpdateNotifySettingsRequest"] and -1000000000777 in ctx.channels
+    assert ch["status"] == "joined" and (await ctx.db.channel(cid))["muted"] == 1           # уведомления выключены
     assert "Канал «Авто Казань» подключён" in s.texts(USER)[-2]
     assert "Всё готово — каналы загружены" in s.texts(USER)[-1]                 # единственный канал партии
 
@@ -791,3 +792,26 @@ async def test_admin_finds_similar_channels(env):
     text = s.texts(ADMIN)[-1]
     assert "✅ @avto_daily" in text and "/add @avto_daily" in text and "@avto_sleepy" in text.split("/add")[0]
     assert "cooking" not in text and "/add @avto_daily @avto_sleepy" not in text
+
+
+async def test_already_joined_channels_get_muted(env):
+    """Каналы, в которые служебный аккаунт вступил раньше, при запуске тоже глушатся — один раз."""
+    import userbot
+    dp, bot, s, ctx = env
+    reader = Reader(bot, ctx, FakeTelethon())
+
+    async def no_sleep(_):
+        pass
+    orig, userbot.asyncio.sleep = userbot.asyncio.sleep, no_sleep
+    try:
+        reader.client.get_input_entity = lambda chat_id: _same(chat_id)
+        await reader.mute_all()
+        assert reader.client.calls.count("UpdateNotifySettingsRequest") == 3            # три канала из базы теста
+        await reader.mute_all()
+        assert reader.client.calls.count("UpdateNotifySettingsRequest") == 3            # второй раз — не трогаем
+    finally:
+        userbot.asyncio.sleep = orig
+
+
+async def _same(x):
+    return x
