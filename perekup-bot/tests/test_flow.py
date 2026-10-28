@@ -346,8 +346,10 @@ async def test_reader_joins_queue_and_notifies(env):
     await reader.join_one(await ctx.db.channel(cid))
     ch = await ctx.db.channel(cid)
     assert ch["status"] == "joined" and ch["tg_id"] == -1000000000777 and ch["account"] == "main"
-    assert reader.client.calls == ["JoinChannelRequest", "UpdateNotifySettingsRequest"] and -1000000000777 in ctx.channels
-    assert ch["status"] == "joined" and (await ctx.db.channel(cid))["muted"] == 1           # уведомления выключены
+    assert reader.client.calls == ["JoinChannelRequest", "UpdateNotifySettingsRequest", "EditPeerFoldersRequest"]
+    assert -1000000000777 in ctx.channels
+    row = await ctx.db.channel(cid)
+    assert row["muted"] == 1 and row["archived"] == 1                                      # без уведомлений, в архиве
     assert "Канал «Авто Казань» подключён" in s.texts(USER)[-2]
     assert "Всё готово — каналы загружены" in s.texts(USER)[-1]                 # единственный канал партии
 
@@ -795,7 +797,7 @@ async def test_admin_finds_similar_channels(env):
 
 
 async def test_already_joined_channels_get_muted(env):
-    """Каналы, в которые служебный аккаунт вступил раньше, при запуске тоже глушатся — один раз."""
+    """Каналы, в которые служебный аккаунт вступил раньше, при запуске тоже глушатся и уходят в архив — один раз."""
     import userbot
     dp, bot, s, ctx = env
     reader = Reader(bot, ctx, FakeTelethon())
@@ -805,10 +807,15 @@ async def test_already_joined_channels_get_muted(env):
     orig, userbot.asyncio.sleep = userbot.asyncio.sleep, no_sleep
     try:
         reader.client.get_input_entity = lambda chat_id: _same(chat_id)
+        await ctx.db._run("UPDATE channels SET muted=1, archived=0")                   # заглушены прошлой версией, не в архиве
         await reader.mute_all()
-        assert reader.client.calls.count("UpdateNotifySettingsRequest") == 3            # три канала из базы теста
+        assert reader.client.calls == ["EditPeerFoldersRequest"]                        # все три — одной пачкой в архив
+        await ctx.db._run("UPDATE channels SET muted=0, archived=0")
+        reader.client.calls.clear()
         await reader.mute_all()
-        assert reader.client.calls.count("UpdateNotifySettingsRequest") == 3            # второй раз — не трогаем
+        assert reader.client.calls.count("UpdateNotifySettingsRequest") == 3 and reader.client.calls.count("EditPeerFoldersRequest") == 3
+        await reader.mute_all()
+        assert len(reader.client.calls) == 6                                            # второй раз — не трогаем
     finally:
         userbot.asyncio.sleep = orig
 

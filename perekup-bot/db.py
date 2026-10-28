@@ -82,7 +82,8 @@ class DB:
                     "ALTER TABLE users ADD COLUMN trial_used INTEGER DEFAULT 0",
                     "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'",
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
-                    "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0"):
+                    "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
+                    "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0"):
             try:
                 await self.conn.execute(sql)
             except aiosqlite.OperationalError:
@@ -195,6 +196,12 @@ class DB:
 
     async def set_muted(self, cid: int) -> None:
         await self._run("UPDATE channels SET muted=1 WHERE id=?", cid)
+
+    async def unarchived_channels(self) -> list:
+        return await self._all("SELECT * FROM channels WHERE status='joined' AND COALESCE(archived, 0)=0 AND tg_id IS NOT NULL")
+
+    async def set_archived(self, ids: list[int]) -> None:
+        await self._run(f"UPDATE channels SET archived=1 WHERE id IN ({','.join('?' * len(ids))})", *ids)
 
     async def joined_channels(self) -> list:
         return await self._all("SELECT * FROM channels WHERE status='joined'")

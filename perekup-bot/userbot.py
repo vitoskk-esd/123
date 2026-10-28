@@ -20,9 +20,11 @@ from aiogram import Bot
 from telethon import TelegramClient, errors, events, utils
 from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateNotifySettingsRequest, UpdateStatusRequest
+from telethon.tl.functions.folders import EditPeerFoldersRequest
 from telethon.tl.functions.channels import (CreateChannelRequest, EditAdminRequest, GetChannelRecommendationsRequest,
                                             JoinChannelRequest)
-from telethon.tl.types import ChatAdminRights, InputNotifyPeer, InputPeerChannel, InputPeerNotifySettings
+from telethon.tl.types import (ChatAdminRights, InputFolderPeer, InputNotifyPeer, InputPeerChannel,
+                               InputPeerNotifySettings)
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 
 import keyboards as K
@@ -260,21 +262,37 @@ class Reader:
             await self._batch_done(uid, row["id"], 2)
 
     async def mute(self, ch, entity=None) -> None:
-        """Каналы читает бот, а не человек: у служебного аккаунта уведомления из них выключаем навсегда."""
+        """Каналы читает бот, а не человек: у служебного аккаунта уведомления из них выключаем навсегда,
+        а сам канал убираем в архив — в списке чатов аккаунта чисто."""
         try:
-            peer = entity if entity is not None else await self._peer(ch["tg_id"])
+            peer = utils.get_input_peer(entity) if entity is not None else await self._peer(ch["tg_id"])
             await self.client(UpdateNotifySettingsRequest(peer=InputNotifyPeer(peer),
                                                           settings=InputPeerNotifySettings(mute_until=2 ** 31 - 1)))
             await self.ctx.db.set_muted(ch["id"])
+            await self.client(EditPeerFoldersRequest([InputFolderPeer(peer, folder_id=1)]))    # 1 — архив
+            await self.ctx.db.set_archived([ch["id"]])
         except errors.FloodWaitError as e:
             await asyncio.sleep(e.seconds)
         except Exception as e:
-            log.info("не выключил уведомления в %s: %s", ch["title"], e)
+            log.info("не выключил уведомления / не убрал в архив %s: %s", ch["title"], e)
 
     async def mute_all(self) -> None:
-        """Каналы, в которые вступили раньше, — тоже без уведомлений (по одному в 2 секунды, чтобы не злить Telegram)."""
+        """Каналы, в которые вступили раньше: выключаем уведомления (по одному в 2 секунды, чтобы не злить Telegram)
+        и убираем в архив пачками по 50."""
         for ch in await self.ctx.db.unmuted_channels():
             await self.mute(ch)
+            await asyncio.sleep(2)
+        rows = await self.ctx.db.unarchived_channels()
+        for i in range(0, len(rows), 50):
+            part = rows[i:i + 50]
+            try:
+                peers = [InputFolderPeer(await self._peer(ch["tg_id"]), folder_id=1) for ch in part]
+                await self.client(EditPeerFoldersRequest(peers))
+                await self.ctx.db.set_archived([ch["id"] for ch in part])
+            except errors.FloodWaitError as e:
+                await asyncio.sleep(e.seconds)
+            except Exception as e:
+                log.info("не убрал каналы в архив: %s", e)
             await asyncio.sleep(2)
 
     async def similar(self, known: set[str], limit: int = 60) -> list[dict]:
