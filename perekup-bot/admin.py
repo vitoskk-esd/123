@@ -260,7 +260,8 @@ def vk_online(ctx: Ctx) -> bool:
 
 def vk_status(ctx: Ctx) -> str:
     if not vk_online(ctx):
-        return "❌ не подключён — /vk"
+        why = f" ({ctx.vk.error})" if ctx.vk and ctx.vk.error else ""
+        return f"❌ не подключён{why} — /vk"
     return f"✅ «{ctx.vk.name}»" + (f" · ⚠️ {ctx.vk.error}" if ctx.vk.error else "")
 
 

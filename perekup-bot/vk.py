@@ -119,11 +119,14 @@ class VKReader:
     async def resume(self) -> bool:
         env = token_from(self.ctx.cfg.vk_token) if self.ctx.cfg.vk_token else None    # в VK_TOKEN можно вставить и адрес целиком
         token = env or await self.ctx.db.get_setting("vk_token")
+        if self.ctx.cfg.vk_token and not env:
+            self.error = "в переменной VK_TOKEN нет ключа — вставь адрес со словом access_token целиком"
         if not token:
             return False
         try:
             await self.attach(token)
         except Exception as e:
+            self.error = f"ВК не принял ключ: {e}"
             log.warning("служебная страница ВК не подключилась: %s", e)
             return False
         return True

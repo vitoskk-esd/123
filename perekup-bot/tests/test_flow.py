@@ -1024,3 +1024,17 @@ async def test_vk_token_variable_accepts_whole_address(env, monkeypatch):
         assert await reader.resume() and got == [token]
     finally:
         reader.runner.cancel()
+
+
+async def test_vk_bad_variable_reason_in_admin(env):
+    dp, bot, s, ctx = env
+    import dataclasses
+    ctx.cfg = dataclasses.replace(ctx.cfg, vk_token="https://oauth.vk.com/blank.html#error=access_denied")
+    ctx.vk = VKReader(bot, ctx, make_api=lambda t: FakeVK())
+    try:
+        assert not await ctx.vk.resume()
+        await dp.feed_update(bot, msg("/start", ADMIN))
+        await dp.feed_update(bot, msg("/admin", ADMIN))
+        assert "ВКонтакте: ❌ не подключён (в переменной VK_TOKEN нет ключа" in s.texts(ADMIN)[-1]
+    finally:
+        ctx.vk = None
