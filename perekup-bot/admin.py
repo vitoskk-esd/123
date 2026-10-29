@@ -165,19 +165,26 @@ async def vkfind(msg: Message, ctx: Ctx) -> None:
     if not vk_online(ctx):
         return await msg.answer("ВКонтакте не подключён — /vk")
     await msg.answer("🔎 Ищу в ВК барахолки с авто по России: 5000+ подписчиков, 3+ поста в день минимум 5 дней из 7, "
-                     "в постах — продажа машин. Это займёт 10–20 минут — пришлю 50 ссылок сюда.")
+                     "в постах — продажа машин. Это займёт 1–3 минуты — пришлю до 50 ссылок сюда.")
 
     async def run():
         known = {r["vk_id"] for r in await ctx.db._all("SELECT vk_id FROM channels WHERE vk_id IS NOT NULL")}
         try:
-            rows = await ctx.vk.find(known, 50, progress=lambda t: msg.answer("⏳ " + t))
+            rows, n = await ctx.vk.find(known, 50, progress=lambda t: msg.answer("⏳ " + t))
+        except vk.VKError as e:
+            why = ("ВК ограничил частые запросы служебной странице — попробуй через час-другой. Новым страницам ВК "
+                   "доверяет меньше; помогает, если зайти в неё с телефона и немного ей попользоваться.") if e.code in (6, 9) else ""
+            return await msg.answer(f"❌ ВК не дал искать: {e}. {why}")
         except Exception as e:
             return await msg.answer(f"Не получилось: {e}")
+        funnel = (f"Запросов к поиску: {n['queries']} (ответил ВК на {n['answered']}) → автомобильных открытых групп: {n['found']} → "
+                  f"с 5000+ подписчиков: {n['big']} → постят 3+ раза в день минимум 5 дней из 7: {n['active']} → "
+                  f"в постах машины с ценой: {n['fit']}")
         if not rows:
-            return await msg.answer("Подходящих групп не нашлось.")
+            return await msg.answer("Подходящих групп не нашлось.\n\n" + funnel)
         lines = [f"{i}. vk.com/{r['screen']} — {html.escape(r['name'][:40])} · {r['members']:,} подп. · "
                  f"{r['week']} постов/нед · машины {r['cars']}%".replace(",", " ") for i, r in enumerate(rows, 1)]
-        text = f"Нашёл {len(rows)} (по числу постов за неделю):\n\n" + "\n".join(lines)
+        text = f"Нашёл {len(rows)} (по числу постов за неделю):\n\n" + "\n".join(lines) + "\n\n" + funnel
         while text:
             cut = text.rfind("\n", 0, 3800) if len(text) > 3800 else len(text)
             await msg.answer(text[:cut], link_preview_options=LinkPreviewOptions(is_disabled=True))

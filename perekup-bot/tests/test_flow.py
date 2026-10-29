@@ -1094,6 +1094,7 @@ async def test_admin_finds_vk_groups(env):
         assert "vk.com/g3" not in found and "vk.com/g4" not in found and "vk.com/g5" not in found
         assert found.index("vk.com/g1") < found.index("vk.com/g2") and "35 постов/нед" in found
         assert "/add vk.com/g1 vk.com/g2" in s.texts(ADMIN)[-1]
+        assert "автомобильных открытых групп: 4" in found and "в постах машины с ценой: 2" in found
     finally:
         ctx.vk.runner.cancel()
         ctx.vk = None
@@ -1121,3 +1122,41 @@ async def test_admin_commands_hidden_from_users(env):
     finally:
         ctx.vk.runner.cancel()
         ctx.vk = None
+
+
+async def test_vkfind_reports_flood_control(env, monkeypatch):
+    """ВК отвечает «Flood control» на поиск — бот после повторов честно пишет админу, что случилось."""
+    dp, bot, s, ctx = env
+    import vk as vkmod
+    monkeypatch.setattr(vkmod, "FLOOD_PAUSE", 0)
+
+    class FloodFind(FakeVK):
+        async def call(self, method, **p):
+            if method == "groups.search":
+                raise VKError(9, "Flood control")
+            return await super().call(method, **p)
+    ctx.vk = VKReader(bot, ctx, make_api=lambda t: FloodFind())
+    ctx.vk.api = FloodFind()
+    ctx.vk.runner = asyncio.create_task(asyncio.sleep(3600))
+    try:
+        await dp.feed_update(bot, msg("/start", ADMIN))
+        await dp.feed_update(bot, msg("/vkfind", ADMIN))
+        await asyncio.gather(*ctx.background)
+        assert "ВК не дал искать: Flood control (код 9)" in s.texts(ADMIN)[-1] and "через час" in s.texts(ADMIN)[-1]
+    finally:
+        ctx.vk.runner.cancel()
+        ctx.vk = None
+
+
+async def test_vk_execute_batches():
+    """Пачка запросов собирается в один execute с JSON-параметрами; неудачный вызов внутри → None."""
+    from vk import VK
+    api = VK("t")
+    sent = []
+    async def fake_call(method, **p):
+        sent.append((method, p["code"]))
+        return [{"items": [1]}, False]
+    api.call = fake_call
+    res = await api.many("groups.search", [{"q": "авто казань", "count": 100}, {"q": "x"}])
+    assert res == [{"items": [1]}, None] and sent[0][0] == "execute"
+    assert sent[0][1] == 'return [API.groups.search({"q": "авто казань", "count": 100}),API.groups.search({"q": "x"})];'
