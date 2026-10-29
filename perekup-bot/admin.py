@@ -1,6 +1,7 @@
 """Админка (только ADMIN_IDS): цифры бизнеса и скорости, общая база каналов, рассылка, ручной доступ."""
 import asyncio
 import html
+import time
 from datetime import datetime
 
 from aiogram import Bot, F, Router
@@ -24,6 +25,15 @@ async def admin_ids(ctx: Ctx) -> list[int]:
         return sorted(ctx.cfg.admins)
     first = await ctx.db.first_user()
     return [first] if first else []
+
+
+async def make_admins_pro(ctx: Ctx) -> None:
+    """У админа всегда PRO: при запуске бота и на каждый /start — доступ на 10 лет вперёд, тариф «admin» (= PRO,
+    но в выручку и число платящих не попадает)."""
+    for uid in await admin_ids(ctx):
+        u = await ctx.db.user(uid)
+        if u and (u["plan"] != "admin" or u["paid_until"] < time.time() + 365 * 86400):
+            await ctx.db.set_user(uid, plan="admin", paid_until=time.time() + 3650 * 86400)
 
 
 async def is_admin(msg: Message, ctx: Ctx) -> bool:
@@ -71,6 +81,8 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"🧠 ИИ-проверка постов: {ai_state}, проверено за сутки: {p['ai'] or 0}\n"
         f"👥 Людей: <b>{s['users']}</b>, с фильтрами: {s['with_filters']}\n{pay}\n\n"
         f"⚡ За сутки: постов {p['n']}, машин с ценой {p['cars'] or 0}, дублей {p['dups'] or 0}\n"
+        f"📊 Для оценки «ниже рынка»: {s['market90']} объявлений с ценой за 90 дней "
+        f"(оценка появляется, когда той же модели ±1 год набралось 5+)\n"
         f"Отправлено людям: {s['deliveries24']} · средняя задержка: <b>{seconds(p['lat'] and int(p['lat']))}</b>\n"
         f"  из неё: пост шёл от Telegram до бота {seconds(p['recv'] and int(p['recv']))}, "
         f"остальное — проверка, фото и отправка\n\n"

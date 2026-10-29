@@ -21,7 +21,7 @@ from aiogram import Bot
 import texts as T
 from ctx import VK_KEY, Ctx
 from links import channel_name
-from pipeline import RawPost, process
+from pipeline import HISTORY, RawPost, learn_history, process
 from userbot import APPROVAL_CHECK, APPROVAL_WAIT, batch_done, notify
 
 log = logging.getLogger(__name__)
@@ -315,5 +315,22 @@ class VKReader:
             wait = (pause or self.ctx.cfg.vk_join_interval) if queued else 15
             await asyncio.sleep(max(5, wait - (time.time() - started)))
 
+    async def history_loop(self) -> None:
+        """Один раз на сообщество: последние HISTORY постов со стены — в оценку рынка."""
+        await asyncio.sleep(20)
+        while True:
+            for ch in await self.ctx.db.history_todo("vk"):
+                try:
+                    items = []
+                    for offset in range(0, HISTORY, 100):
+                        items += (await self.api.call("wall.get", owner_id=-ch["vk_id"], count=100, offset=offset)).get("items", [])
+                    n = await learn_history(self.ctx, dict(ch), [(it["id"], post_text(it), float(it.get("date", 0))) for it in items])
+                    log.info("история ВК %s: %d машин с ценой — в оценку рынка", ch["title"], n)
+                except Exception as e:
+                    log.info("история ВК %s: %s", ch["title"], e)
+                    await self.ctx.db.set_history(ch["id"])
+                await asyncio.sleep(3)
+            await asyncio.sleep(60)
+
     async def run(self) -> None:
-        await asyncio.gather(self.join_loop(), self.poll_loop(), self.wall_loop())
+        await asyncio.gather(self.join_loop(), self.poll_loop(), self.wall_loop(), self.history_loop())

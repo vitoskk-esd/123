@@ -30,7 +30,7 @@ from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInv
 import keyboards as K
 import texts as T
 from ctx import Ctx
-from pipeline import RawPost, process
+from pipeline import HISTORY, RawPost, learn_history, process
 
 log = logging.getLogger(__name__)
 CONNECT_TIMEOUT = 60
@@ -392,8 +392,28 @@ class Reader:
                 log.exception("ошибка при вступлении в канал")
             await asyncio.sleep(max(5, self.ctx.cfg.join_interval - (time.time() - started)) if queued else 15)
 
+    async def history_loop(self) -> None:
+        """Один раз на канал: последние HISTORY постов — в оценку рынка (новые каналы — через минуту после вступления)."""
+        await asyncio.sleep(20)
+        while True:
+            for ch in await self.ctx.db.history_todo("tg"):
+                try:
+                    msgs = await self.client.get_messages(await self._peer(ch["tg_id"]), limit=HISTORY)
+                    n = await learn_history(self.ctx, dict(ch), [(m.id, m.message or "", m.date.timestamp())
+                                                                 for m in msgs if m.date and m.message])
+                    log.info("история %s: %d машин с ценой — в оценку рынка", ch["title"], n)
+                except errors.FloodWaitError as e:
+                    await asyncio.sleep(e.seconds)
+                    continue
+                except Exception as e:
+                    log.info("история %s: %s", ch["title"], e)
+                    await self.ctx.db.set_history(ch["id"])          # не застреваем на одном канале
+                await asyncio.sleep(3)
+            await asyncio.sleep(60)
+
     async def run(self) -> None:
-        await asyncio.gather(self.join_loop(), self.poll_loop(), self.mute_all(), self.client.run_until_disconnected())
+        await asyncio.gather(self.join_loop(), self.poll_loop(), self.mute_all(), self.history_loop(),
+                             self.client.run_until_disconnected())
 
 
 async def batch_done(bot: Bot, ctx: Ctx, uid: int, cid: int, ok: int) -> None:

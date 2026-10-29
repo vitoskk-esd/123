@@ -14,7 +14,7 @@ from aiogram.types import CallbackQuery, Message
 import keyboards as K
 import plans
 import texts as T
-from admin import is_admin, is_admin_id, queue_wait
+from admin import is_admin, is_admin_id, make_admins_pro, queue_wait
 from ctx import Ctx
 from db import DAY
 from links import label, parse_link
@@ -41,6 +41,7 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     source = re.sub(r"[^\w-]", "", command.args or "")[:32] or None   # t.me/<бот>?start=reels — откуда пришёл
     new = await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, source, None,
                                 ctx.cfg.trial_days)
+    await make_admins_pro(ctx)
     channels = await ctx.db.channel_count_for(msg.from_user.id)
     trial = T.WELCOME_TRIAL.format(price=ctx.cfg.price_trial) if ctx.cfg.payments_on else ""
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu())

@@ -212,13 +212,40 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] |
     clean = not (set(L.markers) & NOT_CLEAN)
     r.post_id = await ctx.db.add_post(channel["id"], raw.msg_id, L, fp, ckey, r.duplicate, clean)
     if L.model:
-        # рынок — медиана той же модели ±1 год, без дублей и без битых: медиана не боится единичных выбросов
+        # рынок — медиана той же модели ±1 год, без дублей и без битых: медиана не боится единичных выбросов.
+        # Мало объявлений — берём ±2 года, но тогда нужно больше объявлений
         prices = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, r.post_id)
+        if len(prices) < MARKET_MIN:
+            wide = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, r.post_id, span=2)
+            prices = wide if len(wide) >= MARKET_MIN + 2 else prices
         r.samples = len(prices)
         if r.samples >= MARKET_MIN:
             r.market = round(median(prices))
             r.discount = round((r.market - L.price) / r.market * 100)
     return r
+
+
+HISTORY = 300            # сколько последних постов канала загружаем в оценку рынка при подключении
+
+
+async def learn_history(ctx: Ctx, channel: dict, msgs: list[tuple[int, str, float]]) -> int:
+    """Старые посты канала (номер, текст, время) → в оценку рынка, никому не шлём. Так «ниже рынка» работает сразу
+    после подключения канала, а не через месяц. Возвращает, сколько машин с ценой взяли."""
+    known, seen, n = await ctx.db.known_msgs(channel["id"]), set(), 0
+    for msg_id, text, at in msgs:
+        if msg_id in known or not text or time.time() - at > MARKET_DAYS * DAY:
+            continue
+        L = parse_post(text, ctx.dict, channel.get("region"))
+        if L.teaser or not (L.make and L.model and L.price) or sale_verdict(text, L) != "sale":
+            continue
+        fp, ckey = fingerprint(text), car_key(L)
+        dup = fp in seen or (ckey and ckey in seen) or await ctx.db.seen_before(fp, ckey, at - DEDUP_DAYS * DAY)
+        seen |= {fp, ckey}
+        await ctx.db.add_history_post(channel["id"], msg_id, at, L, fp, ckey, bool(dup), not (set(L.markers) & NOT_CLEAN))
+        n += 1
+    await ctx.db.commit()
+    await ctx.db.set_history(channel["id"])
+    return n
 
 
 async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:

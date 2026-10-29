@@ -45,6 +45,8 @@ def current(cfg: Config, user, now: float | None = None) -> Plan | None:
         return FREE
     now = now or time.time()
     if user and user["paid_until"] > now:
+        if user["plan"] == "admin":             # админ — всегда PRO
+            return plans(cfg)["pro"]
         return plans(cfg).get(user["plan"] or "basic", plans(cfg)["basic"])
     if user and user["trial_until"] > now:      # бесплатные дни из прошлых версий бота
         return plans(cfg)["pro"]

@@ -85,6 +85,7 @@ class DB:
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
                     "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
                     "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0",
+                    "ALTER TABLE channels ADD COLUMN history INTEGER DEFAULT 0",
                     "ALTER TABLE channels ADD COLUMN vk TEXT",
                     "ALTER TABLE channels ADD COLUMN vk_id INTEGER",
                     "CREATE UNIQUE INDEX IF NOT EXISTS channels_vk ON channels(vk) WHERE vk IS NOT NULL",
@@ -346,14 +347,38 @@ class DB:
             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", channel_id, msg_id, time.time(), fp, ckey, L.make, L.model, L.year,
             L.price, L.mileage, L.region, int(dup), int(clean), L.parsed_by)
 
+    async def history_todo(self, kind: str = "tg") -> list:
+        """Подключённые каналы, чью историю ещё не загрузили в оценку рынка."""
+        col = "vk_id" if kind == "vk" else "tg_id"
+        return await self._all(f"SELECT * FROM channels WHERE status='joined' AND COALESCE(history, 0)=0 AND {col} IS NOT NULL")
+
+    async def set_history(self, cid: int) -> None:
+        await self._run("UPDATE channels SET history=1 WHERE id=?", cid)
+
+    async def known_msgs(self, cid: int) -> set[int]:
+        return {r["msg_id"] for r in await self._all("SELECT msg_id FROM posts WHERE channel_id=?", cid)}
+
+    async def add_history_post(self, channel_id: int, msg_id: int, at: float, L, fp: str, ckey: str | None, dup: bool,
+                               clean: bool) -> None:
+        """Старый пост канала — только для оценки рынка: никому не уходил, в счётчик постов канала не идёт."""
+        await self.conn.execute(
+            "INSERT INTO posts (channel_id, msg_id, at, fp, ckey, make, model, year, price, mileage, region, dup, clean, parsed_by) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'history')", (channel_id, msg_id, at, fp, ckey, L.make, L.model, L.year,
+                                                             L.price, L.mileage, L.region, int(dup), int(clean)))
+
+    async def commit(self) -> None:
+        await self.conn.commit()
+
     async def finish_post(self, post_id: int, latency_ms: int, matched: int, recv_ms: int | None = None) -> None:
         await self._run("UPDATE posts SET latency_ms=?, matched=?, recv_ms=? WHERE id=?", latency_ms, matched, recv_ms, post_id)
 
-    async def market_prices(self, make: str, model: str, year: int | None, since: float, exclude_id: int) -> list[int]:
-        """Цены той же модели (±1 год) без дублей и без битых/«на запчасти»/подозрительных."""
+    async def market_prices(self, make: str, model: str, year: int | None, since: float, exclude_id: int,
+                            span: int = 1) -> list[int]:
+        """Цены той же модели (±span лет) без дублей и без битых/«на запчасти»/подозрительных."""
         if year:
             rows = await self._all("SELECT price FROM posts WHERE make=? AND model=? AND year BETWEEN ? AND ? AND at>? "
-                                   "AND dup=0 AND clean=1 AND price IS NOT NULL AND id!=?", make, model, year - 1, year + 1, since, exclude_id)
+                                   "AND dup=0 AND clean=1 AND price IS NOT NULL AND id!=?", make, model, year - span, year + span,
+                                   since, exclude_id)
         else:
             return []
         return [r["price"] for r in rows]
@@ -448,7 +473,7 @@ class DB:
             "users": (await one("SELECT COUNT(*) n FROM users"))["n"],
             "with_filters": (await one("SELECT COUNT(DISTINCT user_id) n FROM filters WHERE active=1"))["n"],
             "trial": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan='trial'", now))["n"],
-            "paying": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan!='trial'", now))["n"],
+            "paying": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan NOT IN ('trial','admin')", now))["n"],
             "basic": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan IN ('basic','')", now))["n"],
             "pro": (await one("SELECT COUNT(*) n FROM users WHERE paid_until>? AND plan='pro'", now))["n"],
             "ever_paid": (await one("SELECT COUNT(DISTINCT user_id) n FROM payments WHERE status='succeeded'"))["n"],
@@ -457,6 +482,8 @@ class DB:
             "blocked": (await one("SELECT COUNT(*) n FROM users WHERE blocked=1"))["n"],
             "posts24": (await one("SELECT COUNT(*) n, SUM(make IS NOT NULL AND price IS NOT NULL) cars, SUM(dup) dups, SUM(parsed_by='ai') ai, "
                                   "AVG(CASE WHEN matched>0 THEN latency_ms END) lat, AVG(recv_ms) recv FROM posts WHERE at>?", now - DAY)),
+            "market90": (await one("SELECT COUNT(*) n FROM posts WHERE at>? AND dup=0 AND clean=1 AND price IS NOT NULL "
+                                   "AND model IS NOT NULL", now - 90 * DAY))["n"],
             "deliveries24": (await one("SELECT COUNT(*) n FROM deliveries WHERE at>?", now - DAY))["n"],
             "channels": await self._all("SELECT status, base, COUNT(*) n FROM channels GROUP BY status, base"),
             "sources": await self._all(

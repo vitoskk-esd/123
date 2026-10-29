@@ -51,6 +51,7 @@ async def main() -> None:
     ctx.vk = VKReader(bot, ctx)
     if not await ctx.vk.resume():
         log.warning("ВКонтакте не подключён — сообщества ВК не читаются; подключить: /vk")
+    await admin.make_admins_pro(ctx)
     jobs_task = asyncio.create_task(jobs.loop(bot, ctx))
     log.info("бот запущен — напиши ему /start в Telegram")
     try:

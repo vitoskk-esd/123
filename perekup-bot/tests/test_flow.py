@@ -752,7 +752,7 @@ async def test_admin_adds_channels_straight_to_base(env):
     reply = s.texts(ADMIN)[-1]
     assert "«My Secret Cars» — в общей базе" in reply and "@avto_kzn» — в очереди" in reply and "PRO" not in reply
     r = await process(bot, ctx, post(OWN, "Toyota Camry 2013, 1 200 000 ₽"))
-    assert r.sent == [USER] and r.delayed == [ADMIN]                               # у админа «Простой» — с задержкой
+    assert sorted(r.sent) == [USER, ADMIN] and not r.delayed                       # админ всегда PRO — сразу
     assert (await ctx.db.queued_channels())[0]["base"] == 1
     await dp.feed_update(bot, cb("c:add"))                                          # обычный человек — как раньше, себе
     assert "общую базу" not in s.texts(USER)[-1]
@@ -984,3 +984,29 @@ async def test_admin_views_and_deletes_base_channels(env):
 
     await dp.feed_update(bot, cb("a:base:0"))                                     # не админ — ничего
     assert "Общая база" not in (s.texts(USER) or [""])[-1]
+
+
+async def test_admin_always_pro_and_market_from_history(env):
+    """Админ всегда на PRO. История канала при подключении попадает в оценку рынка — «ниже рынка» работает сразу."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=ADMIN, plan=None)
+    u = await ctx.db.user(ADMIN)
+    assert u["plan"] == "admin" and u["paid_until"] > time.time() + 3000 * 86400
+    import plans
+    assert plans.current(ctx.cfg, u).id == "pro"
+    assert (await ctx.db.admin_stats())["paying"] == 0                              # админ — не платящий клиент
+
+    from pipeline import learn_history
+    ch = ctx.channels[CH2]
+    old = [(1000 + i, f"Продам Toyota Camry 2012, пробег {150 + i * 10} тыс км, цена {p:,} ₽, Казань".replace(",", " "),
+            time.time() - (i + 1) * 86400) for i, p in enumerate((1_450_000, 1_480_000, 1_500_000, 1_520_000, 1_550_000, 1_600_000))]
+    old.append((2000, "Toyota Camry 2012, цена 1 500 000 ₽ — ПРОДАНО", time.time() - 3600))             # продана — не берём
+    old.append((2001, "Toyota Camry 2012, цена 900 000 ₽", time.time() - 200 * 86400))                 # старше 90 дней
+    assert await learn_history(ctx, ch, old) == 6
+    assert (await ctx.db.channel(ch["id"]))["history"] == 1 and (await ctx.db.channel(ch["id"]))["posts"] == 0
+    assert await learn_history(ctx, ch, old) == 0                                    # второй раз те же посты не берём
+
+    r = await process(bot, ctx, post(CH1, "Toyota Camry 2012, 1 200 000 ₽, пробег 180 тыс"))
+    assert r.market == 1_510_000 and r.discount == 21 and r.sent == [ADMIN]
+    card = s.texts(ADMIN)[-1]
+    assert "−21% к рынку" in card and "рынок ≈ 1 510 000 ₽ (6 объявл.)" in card
