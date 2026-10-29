@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../kit/base.css">
+<style>
+body { background: #05070f; }
+.c { position: absolute; width: 420px; height: 800px; }
+.c svg, .carbox svg { width: 100%; height: 100%; overflow: visible; }
+.carbox { position: absolute; left: -40px; top: 1005px; width: 1157px; height: 463px; }
+.bub { position: absolute; background: #0d0e12; border: 6px solid #fff; border-radius: 40px; padding: 28px 38px 32px; font-family: Unbounded; font-weight: 800; font-size: 50px;
+  line-height: 1.12; color: #fff; opacity: 0; box-shadow: 0 0 0 7px #0d0e12, 0 18px 40px rgba(0,0,0,.6); z-index: 45; }
+.bub::after { content: ""; position: absolute; bottom: -46px; width: 60px; height: 50px; background: #0d0e12; border: 6px solid #fff; border-top: none; border-left: none;
+  transform: skewX(var(--sk, 30deg)); left: var(--tx, 80px); clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.bub em { font-style: normal; color: #ff3b30; }
+#tag { position: absolute; left: 60px; top: 200px; display: flex; align-items: center; gap: 16px; z-index: 50; }
+#tag b { font-family: Unbounded; font-weight: 900; font-size: 34px; color: #151515; background: #ffd23f; border: 5px solid #151515; border-radius: 14px; padding: 6px 16px; }
+#tag span { font-family: Unbounded; font-weight: 800; font-size: 28px; color: #fff; }
+/* заголовок формата */
+#title { position: absolute; left: 0; right: 0; top: 300px; text-align: center; font-family: Unbounded; font-weight: 900; line-height: 1; letter-spacing: -3px; z-index: 50; }
+#title .a, #title .b { display: inline-block; padding: 10px 28px 18px; border: 8px solid #151515; border-radius: 22px; box-shadow: 0 12px 0 #151515; }
+#title .a { font-size: 82px; background: #4cd964; color: #151515; transform: rotate(-3deg); }
+#title .b { font-size: 112px; background: #ff3b30; color: #fff; margin-top: 26px; transform: rotate(2deg); }
+/* плашки «В объявлении / На деле» */
+.pill { position: absolute; left: 50%; top: 330px; font-family: Unbounded; font-weight: 900; font-size: 64px; padding: 10px 34px 16px; border: 8px solid #151515; border-radius: 22px;
+  box-shadow: 0 12px 0 #151515; opacity: 0; z-index: 48; white-space: nowrap; }
+#pAd { background: #4cd964; color: #151515; }
+#pReal { background: #ff3b30; color: #fff; }
+/* объявление Толяна */
+#ad { position: absolute; left: 90px; right: 90px; top: 470px; background: #182533; border: 8px solid #151515; border-radius: 40px; padding: 34px 40px 30px; color: #fff;
+  font-family: Onest; font-size: 52px; font-weight: 700; line-height: 1.45; opacity: 0; z-index: 46; box-shadow: 0 16px 0 rgba(0,0,0,.25); }
+#ad .ch { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; font-size: 32px; color: #8fb3d9; }
+#ad .ch i { width: 62px; height: 62px; border-radius: 50%; background: #e8b48c; border: 4px solid #151515; }
+#ad .ln { position: relative; display: inline-block; padding: 0 12px; margin-left: -12px; border-radius: 12px; }
+#ad .hl { position: absolute; inset: 0; background: #4cd964; border-radius: 12px; opacity: 0; z-index: -1; }
+#ad .pr { color: #ffd23f; font-family: "JetBrains Mono"; font-weight: 800; }
+/* ПРОВЕРЬ */
+.chk { position: absolute; left: 60px; right: 60px; top: 1500px; display: flex; gap: 18px; align-items: center; background: #0d0e12; border: 6px solid #ffd23f; border-radius: 28px;
+  padding: 18px 26px; font-size: 44px; font-weight: 800; color: #fff; opacity: 0; z-index: 47; box-shadow: 0 14px 40px rgba(0,0,0,.6); }
+.chk b { flex: none; background: #ffd23f; color: #111; font-family: Unbounded; font-size: 30px; padding: 8px 16px; border-radius: 12px; }
+/* сводка */
+#sum { position: absolute; left: 50px; right: 50px; top: 470px; background: #0d0e12; border: 6px solid #fff; border-radius: 34px; overflow: hidden; opacity: 0; z-index: 46; box-shadow: 0 16px 0 #151515; }
+#sum .row { display: grid; grid-template-columns: 1fr 1fr; font-size: 40px; font-weight: 800; border-top: 4px solid #2b2e36; color: #fff; }
+#sum .row div { padding: 22px 24px; }
+#sum .row div:first-child { background: #0f2418; color: #7dff9a; border-right: 4px solid #2b2e36; }
+#sum .row div:last-child { background: #2a0f0f; color: #ff6b5e; }
+#sum .hd div { font-family: Unbounded; font-size: 30px; color: #fff !important; background: #17191f !important; }
+#sum .row.hd { border-top: none; }
+#sum .ft { padding: 24px; font-size: 38px; font-weight: 800; text-align: center; border-top: 4px solid #2b2e36; background: #ffd23f; color: #111; }
+/* финал */
+#end { position: absolute; inset: 0; opacity: 0; z-index: 60; background: radial-gradient(ellipse at 50% 35%, #2a1530 0%, #07080c 70%); }
+#end .fox { position: absolute; left: 340px; top: 420px; width: 400px; height: 400px; border-radius: 50%; overflow: hidden; border: 10px solid #ff7a1a; box-shadow: 0 0 120px rgba(255,122,26,.5); }
+#end .fox img { width: 100%; height: 100%; }
+#end h2 { position: absolute; left: 60px; right: 60px; top: 880px; text-align: center; font-family: Unbounded; font-weight: 900; font-size: 72px; line-height: 1.05; color: #fff; }
+#end p { position: absolute; left: 60px; right: 60px; top: 1140px; text-align: center; font-size: 40px; font-weight: 600; color: #b9bfca; }
+#end .logo { position: absolute; left: 0; right: 0; top: 1330px; text-align: center; font-family: Unbounded; font-weight: 900; font-size: 64px; color: #ffd23f; -webkit-text-stroke: 8px #000; paint-order: stroke fill; }
+#bleep { position: absolute; font-family: Unbounded; font-weight: 900; font-size: 92px; color: #fff; background: #ff1f3d; border: 8px solid #000; border-radius: 22px; padding: 4px 26px 12px; opacity: 0; z-index: 55; box-shadow: 0 10px 0 #000; }
+
+/* блоки «НА ДЕЛЕ» */
+.rv { position: absolute; left: 60px; right: 60px; top: 450px; background: #0d0e12; border: 6px solid #fff; border-radius: 34px; padding: 30px 34px 70px; opacity: 0; z-index: 46;
+  box-shadow: 0 16px 0 #151515; color: #fff; }
+.rv h3 { font-family: Unbounded; font-weight: 900; font-size: 36px; letter-spacing: 1px; margin-bottom: 8px; }
+.rv .sub { font-family: "JetBrains Mono"; font-size: 26px; color: #8b93a3; margin-bottom: 18px; }
+.rv .stamp { position: absolute; right: 26px; bottom: -48px; background: #ff3b30; color: #fff; font-family: Unbounded; font-weight: 900; font-size: 44px; padding: 8px 22px;
+  border: 6px solid #151515; border-radius: 18px; transform: rotate(6deg); opacity: 0; white-space: nowrap; box-shadow: 0 8px 0 #151515; }
+.rv.paper { background: #f3ead2; border-color: #151515; color: #2b2418; }
+.rv.paper .sub { color: #7a6a4a; }
+.rv .row { display: flex; justify-content: space-between; align-items: center; gap: 20px; border-top: 3px dashed #b9a77d; padding: 16px 6px; font-family: "JetBrains Mono"; font-weight: 700;
+  font-size: 34px; opacity: 0; border-radius: 10px; }
+.rv .row.bad { background: #ffd6d2; color: #b3140b; }
+.rv .row b { font-family: "JetBrains Mono"; }
+.rv .big { font-family: Unbounded; font-weight: 900; font-size: 150px; line-height: 1; color: #ff3b30; text-align: center; margin: 14px 0 6px; font-variant-numeric: tabular-nums; }
+.rv .big small { font-size: 56px; color: #fff; margin-left: 10px; }
+.rv .note { text-align: center; font-size: 34px; font-weight: 700; color: #b9bfca; }
+.rv .ln { font-size: 38px; font-weight: 700; color: #d7dbe3; margin-top: 10px; text-align: center; opacity: 0; }
+.rv .carw { position: relative; width: 900px; height: 360px; margin: 0 auto 0 -12px; transform: scale(.98); transform-origin: 0 0; }
+.rv .carw svg { width: 100%; height: 100%; }
+.pt { position: absolute; transform: translate(-50%, -50%); font-family: "JetBrains Mono"; font-weight: 800; font-size: 34px; padding: 4px 12px; border-radius: 12px; border: 4px solid #151515;
+  background: #4cd964; color: #151515; opacity: 0; }
+.pt.bad { background: #ff3b30; color: #fff; }
+.bars { position: relative; height: 470px; margin-top: 10px; display: flex; align-items: flex-end; gap: 22px; padding: 0 10px; border-bottom: 5px solid #3a3f4a; }
+.bar { flex: 1; background: #4a5568; border: 4px solid #151515; border-radius: 12px 12px 0 0; position: relative; transform-origin: 50% 100%; }
+.bar span { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); font-family: "JetBrains Mono"; font-weight: 800; font-size: 26px; color: #e9edf5; white-space: nowrap; }
+.bar.mine { background: #ff3b30; }
+.bar.mine span { top: -50px; color: #ff6b5e; font-size: 32px; }
+.mkt { position: absolute; left: 0; right: 0; border-top: 6px dashed #ffd23f; opacity: 0; }
+.mkt i { position: absolute; left: 6px; top: -50px; font-style: normal; font-family: "JetBrains Mono"; font-weight: 800; font-size: 30px; color: #ffd23f; background: #0d0e12; padding: 0 8px; }
+.barlbl { display: flex; gap: 22px; padding: 10px 10px 0; font-family: "JetBrains Mono"; font-size: 24px; color: #8b93a3; }
+.barlbl div { flex: 1; text-align: center; }
+#dash { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; opacity: 0; z-index: 30; }
+.lamp { opacity: .12; }
+</style></head>
+<body>
+<div class="stage"><div class="cam" id="cam">
+@@BG@@
+  <div id="scene">
+    <div class="c" id="S" style="left:650px;top:860px;z-index:3"></div>
+    <div class="carbox" id="carbox" style="z-index:2"></div>
+    <div class="c" id="T" style="left:10px;top:850px;z-index:4"></div>
+  </div>
+  <svg id="dash" viewBox="0 0 1080 1920">
+    <rect width="1080" height="1920" fill="#07080c"/>
+    <path d="M-20 560 q560 -170 1120 0 v760 q-560 120 -1120 0 z" fill="#15171d" stroke="#000" stroke-width="12"/>
+    <g fill="none" stroke="#2f3440" stroke-width="16"><circle cx="300" cy="900" r="220"/><circle cx="780" cy="900" r="220"/></g>
+    <g stroke="#e9edf5" stroke-width="8" stroke-linecap="round">
+      <path d="M300 900 l-150 -90" id="needleL"/><path d="M780 900 l120 -120" id="needleR"/></g>
+    <g fill="#9aa3b5" font-family="JetBrains Mono" font-size="34" font-weight="800" text-anchor="middle">
+      <text x="300" y="1030">км/ч</text><text x="780" y="1030">об/мин</text><text x="540" y="1010">ОДО 090 000</text></g>
+    <g class="lamp" id="L-check"><path d="M430 1080 h40 v-24 h60 l20 20 h30 v-16 h24 v60 h-24 v-16 h-20 l-20 24 h-90 z" fill="#ff9f0a" stroke="#000" stroke-width="4"/></g>
+    <g class="lamp" id="L-abs"><circle cx="420" cy="1170" r="40" fill="none" stroke="#ff9f0a" stroke-width="8"/><text x="420" y="1182" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="28" fill="#ff9f0a">ABS</text></g>
+    <g class="lamp" id="L-bag"><circle cx="540" cy="1170" r="40" fill="none" stroke="#ff3b30" stroke-width="8"/><text x="540" y="1182" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="28" fill="#ff3b30">SRS</text></g>
+    <g class="lamp" id="L-oil"><circle cx="660" cy="1170" r="40" fill="none" stroke="#ff3b30" stroke-width="8"/><text x="660" y="1182" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="28" fill="#ff3b30">OIL</text></g>
+  </svg>
+</div>
+  <div id="title"><span class="a">В ОБЪЯВЛЕНИИ</span><br><span class="b">НА ДЕЛЕ</span></div>
+  <div id="tag"><b>ПЕРЕКУПЫ</b><span>в объявлении / на деле</span></div>
+  <div class="pill" id="pAd">В ОБЪЯВЛЕНИИ</div>
+  <div class="pill" id="pReal">НА ДЕЛЕ</div>
+  <div id="ad"></div>
+  <div id="rvs"></div>
+  <div id="dashStamp" class="rv" style="left:auto;right:60px;top:440px;padding:0;border:none;background:none;box-shadow:none"><div class="stamp" style="position:static;opacity:1;transform:rotate(-4deg)"></div></div>
+  <div id="sum"></div>
+  <div class="chk" id="k1"><b>ПРОВЕРЬ</b><span></span></div>
+  <div class="chk" id="k2"><b>ПРОВЕРЬ</b><span></span></div>
+  <div class="chk" id="k3"><b>ПРОВЕРЬ</b><span></span></div>
+  <div class="bub" id="b0" style="left:60px;top:640px;--tx:110px"></div>
+  <div class="bub" id="b1" style="left:60px;top:1240px;--tx:120px"></div>
+  <div class="bub" id="b2" style="left:60px;top:1240px;--tx:120px"></div>
+  <div class="bub" id="b3" style="left:60px;top:1240px;--tx:120px"></div>
+  <div id="bleep">#@%!</div>
+  <div id="end"><div class="fox"><img src="../../kit/img/fox.png"></div><h2>Сохрани —<br>и не будь <span style="color:#ff7a1a">Серёгой</span></h2>
+    <p>фразы — из настоящих объявлений в каналах · их ловит бот «Перехват», ссылка в шапке</p><div class="logo">ПЕРЕКУПЫ</div></div>
+</div>
+<canvas id="fx-grain"></canvas><div id="fx-flash"></div>
+<script>window.EP = @@EP@@;</script>
+<script src="../chars.js"></script>
+<script src="vo/@@ID@@/timeline.js"></script>
+<script src="../../kit/node_modules/gsap/dist/gsap.min.js"></script>
+<script src="ep.js"></script>
+<script src="../../kit/engine.js"></script>
+</body></html>

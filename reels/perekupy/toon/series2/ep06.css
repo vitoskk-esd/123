@@ -1,0 +1,12 @@
+.phone { position: absolute; left: 140px; top: 360px; width: 800px; height: 960px; background: #0b0c10; border: 14px solid #151515; border-radius: 72px; z-index: 46;
+  box-shadow: 0 0 0 6px #3a3f4a, 0 30px 80px rgba(0,0,0,.6); overflow: hidden; opacity: 0; }
+.phone .hd { display: flex; align-items: center; gap: 22px; padding: 46px 34px 22px; background: #17212b; border-bottom: 3px solid #0b0c10; }
+.phone .av { width: 92px; height: 92px; border-radius: 50%; background: #5b6474; display: grid; place-items: center; font-family: Unbounded; font-weight: 900; font-size: 40px; color: #fff; }
+.phone .nm { font-family: Onest; font-weight: 800; font-size: 38px; color: #fff; line-height: 1.15; }
+.phone .nm small { display: block; font-size: 30px; color: #7fa7d1; font-weight: 600; }
+.phone .msgs { position: absolute; left: 0; right: 0; top: 190px; bottom: 30px; padding: 0 28px; display: flex; flex-direction: column; justify-content: flex-end; gap: 18px; overflow: hidden; }
+.msg { max-width: 82%; font-family: Onest; font-size: 42px; font-weight: 600; line-height: 1.25; padding: 20px 26px; border-radius: 30px; color: #fff; display: none; }
+.msg.in { align-self: flex-start; background: #232a35; border-bottom-left-radius: 8px; }
+.msg.out { align-self: flex-end; background: #2b5278; border-bottom-right-radius: 8px; }
+.msg.sys { align-self: center; background: #3a1418; color: #ff8a80; font-size: 34px; border-radius: 20px; text-align: center; }
+.msg.typing { width: 130px; font-size: 54px; letter-spacing: 6px; color: #8b93a3; }

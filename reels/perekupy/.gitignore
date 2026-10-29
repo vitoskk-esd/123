@@ -1,0 +1,12 @@
+# всё, что конвейер генерирует сам
+node_modules/
+vo/
+final/
+out_*
+qa*/
+fq_*/
+*.mp4
+*.wav
+*.log
+*.events.json
+toon/series*/ep[0-9]*.html

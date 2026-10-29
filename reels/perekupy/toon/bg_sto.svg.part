@@ -1,0 +1,26 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs>
+      <linearGradient id="swall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3138"/><stop offset="1" stop-color="#3b434c"/></linearGradient>
+      <linearGradient id="sfloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b525b"/><stop offset="1" stop-color="#2a2f35"/></linearGradient>
+      <radialGradient id="slamp" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#e8f4ff" stop-opacity=".5"/><stop offset="1" stop-color="#e8f4ff" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1080" height="1100" fill="url(#swall)"/>
+    <!-- плитка по низу стены -->
+    <rect x="0" y="820" width="1080" height="280" fill="#d9dde2" stroke="#000" stroke-width="6"/>
+    <g stroke="#aab1ba" stroke-width="4"><path d="M0 820 v280"/><path d="M90 820 v280"/><path d="M180 820 v280"/><path d="M270 820 v280"/><path d="M360 820 v280"/><path d="M450 820 v280"/><path d="M540 820 v280"/><path d="M630 820 v280"/><path d="M720 820 v280"/><path d="M810 820 v280"/><path d="M900 820 v280"/><path d="M990 820 v280"/><path d="M1080 820 v280"/><path d="M0 880 h1080"/><path d="M0 940 h1080"/><path d="M0 1000 h1080"/><path d="M0 1060 h1080"/></g>
+    <!-- лампы дневного света -->
+    <g><rect x="140" y="300" width="300" height="26" rx="10" fill="#f4fbff" stroke="#000" stroke-width="5"/><rect x="640" y="300" width="300" height="26" rx="10" fill="#f4fbff" stroke="#000" stroke-width="5"/>
+       <path d="M290 326 L40 1300 L540 1300 Z M790 326 L540 1300 L1040 1300 Z" fill="url(#slamp)"/></g>
+    <!-- вывеска -->
+    <g><rect x="300" y="420" width="480" height="96" rx="14" fill="#151515" stroke="#000" stroke-width="6"/>
+       <text x="540" y="484" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="40" fill="#ffd23f">СТО «У МИХАЛЫЧА»</text></g>
+    <!-- щит с инструментами -->
+    <rect x="60" y="540" width="400" height="200" rx="10" fill="#5a4632" stroke="#000" stroke-width="6"/><rect x="80" y="560" width="14" height="90" rx="5" fill="#c0392b" stroke="#000" stroke-width="4"/><rect x="126" y="568" width="14" height="107" rx="5" fill="#7f8c8d" stroke="#000" stroke-width="4"/><rect x="172" y="576" width="14" height="124" rx="5" fill="#2c3e50" stroke="#000" stroke-width="4"/><rect x="218" y="560" width="14" height="141" rx="5" fill="#d35400" stroke="#000" stroke-width="4"/><rect x="264" y="568" width="14" height="98" rx="5" fill="#c0392b" stroke="#000" stroke-width="4"/><rect x="310" y="576" width="14" height="115" rx="5" fill="#7f8c8d" stroke="#000" stroke-width="4"/><rect x="356" y="560" width="14" height="132" rx="5" fill="#2c3e50" stroke="#000" stroke-width="4"/><rect x="402" y="568" width="14" height="149" rx="5" fill="#d35400" stroke="#000" stroke-width="4"/>
+    <!-- стопка шин -->
+    <g><ellipse cx="900" cy="1040" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="1040" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="994" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="994" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="948" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="948" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="902" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="902" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="856" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="856" rx="50" ry="13" fill="#3a3f46"/></g>
+    <!-- пол с маслом -->
+    <rect x="0" y="1060" width="1080" height="860" fill="url(#sfloor)"/>
+    <path d="M0 1060 h1080" stroke="#000" stroke-width="8"/>
+    <g fill="#16181c" opacity=".7"><ellipse cx="420" cy="1420" rx="120" ry="26"/><ellipse cx="760" cy="1620" rx="80" ry="18"/></g>
+    <path d="M140 1880 L380 1100 M940 1880 L700 1100" stroke="#ffd23f" stroke-width="14" stroke-dasharray="40 30" opacity=".8"/>
+  </svg>

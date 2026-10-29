@@ -1,0 +1,15 @@
+#price { position: absolute; left: 140px; right: 140px; top: 300px; background: #0d0e12; border: 6px solid #fff; border-radius: 30px; padding: 16px 26px 20px; text-align: center; z-index: 47;
+  box-shadow: 0 14px 0 #151515; opacity: 0; }
+#price small { display: block; font-family: "JetBrains Mono"; font-size: 28px; color: #8b93a3; }
+#price .num { font-family: Unbounded; font-weight: 900; font-size: 96px; color: #fff; font-variant-numeric: tabular-nums; line-height: 1.05; }
+#price .stampd { position: absolute; right: -30px; bottom: -40px; background: #4cd964; color: #151515; font-family: Unbounded; font-weight: 900; font-size: 40px; padding: 6px 18px;
+  border: 6px solid #151515; border-radius: 16px; transform: rotate(6deg); opacity: 0; }
+.find { position: absolute; left: 60px; right: 60px; top: 540px; display: flex; gap: 26px; align-items: center; background: #f3ead2; color: #2b2418; border: 8px solid #151515; border-radius: 30px;
+  padding: 24px 28px; z-index: 48; box-shadow: 0 14px 0 #151515; opacity: 0; }
+.find svg { flex: none; width: 170px; height: 170px; }
+.find .tx { font-family: Unbounded; font-weight: 900; font-size: 46px; line-height: 1.1; }
+.find .tx small { display: block; font-family: "JetBrains Mono"; font-size: 28px; color: #7a6a4a; margin-bottom: 8px; }
+.find .mn { position: absolute; right: 24px; bottom: -42px; background: #ff3b30; color: #fff; font-family: Unbounded; font-weight: 900; font-size: 44px; padding: 6px 20px; border: 6px solid #151515;
+  border-radius: 16px; transform: rotate(-4deg); }
+.fly { position: absolute; font-family: Unbounded; font-weight: 900; font-size: 64px; color: #ff3b30; -webkit-text-stroke: 3px #151515; paint-order: stroke fill; opacity: 0; z-index: 49; }
+#lift { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 1; }
