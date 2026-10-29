@@ -204,15 +204,15 @@ async def test_no_plan_then_buy_basic(env):
     """Без тарифа машины не приходят; оплатил «Простой» — приходят 30 дней; повторный «Я оплатил» не продлевает дважды."""
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "приора до 300к", plan=None)
-    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — 250 ₽" in s.texts(USER)[-1]
+    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — 490 ₽" in s.texts(USER)[-1]
     assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == []
     await dp.feed_update(bot, msg("💳 Подписка"))
-    assert "Подписки нет" in s.texts(USER)[-1] and "Простой — 990 ₽" in s.texts(USER)[-1] and "PRO — 2490 ₽" in s.texts(USER)[-1]
+    assert "Подписки нет" in s.texts(USER)[-1] and "Простой — 1390 ₽" in s.texts(USER)[-1] and "PRO — 2490 ₽" in s.texts(USER)[-1]
     assert isinstance(s.sent[-1], SendPhoto)                              # тарифы — картинкой-сравнением
 
     await dp.feed_update(bot, cb("s:pay:basic"))
     pay = await ctx.db.last_pending(USER)
-    assert (pay["amount"], pay["plan"]) == (990, "basic")
+    assert (pay["amount"], pay["plan"]) == (1390, "basic")
     await dp.feed_update(bot, cb("s:check"))                              # ещё не оплатил
     assert (await ctx.db.user(USER))["paid_until"] == 0
     ctx.pay.statuses[pay["yk_id"]] = "succeeded"
@@ -226,13 +226,13 @@ async def test_no_plan_then_buy_basic(env):
 
 
 async def test_trial_day_once_and_basic_limits_and_upgrade(env):
-    """Пробный день — 250 ₽ на 24 часа и только один раз; «Простой» — до 3 фильтров; переход на PRO не сжигает дни."""
+    """Пробный день — 490 ₽ на 24 часа и только один раз; «Простой» — до 3 фильтров; переход на PRO не сжигает дни."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
-    assert any("1 день за 250 ₽" in t for t in s.texts(USER))
+    assert any("1 день за 490 ₽" in t for t in s.texts(USER))
     await dp.feed_update(bot, cb("s:pay:trial"))
     pay = await ctx.db.last_pending(USER)
-    assert (pay["amount"], pay["plan"]) == (250, "trial")
+    assert (pay["amount"], pay["plan"]) == (490, "trial")
     ctx.pay.statuses[pay["yk_id"]] = "succeeded"
     await dp.feed_update(bot, cb("s:check"))
     u = await ctx.db.user(USER)
@@ -254,7 +254,7 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     await dp.feed_update(bot, cb("s:check"))
     u = await ctx.db.user(USER)
     days = (u["paid_until"] - time.time()) / 86400
-    assert u["plan"] == "pro" and 33.8 < days < 34.1                        # 30 дней PRO + 10 дней «Простого» ≈ 3,98 дня PRO
+    assert u["plan"] == "pro" and 35.4 < days < 35.7                        # 30 дней PRO + 10 дней «Простого» ≈ 5,58 дня PRO
     await dp.feed_update(bot, msg("веста до 1 млн")); await dp.feed_update(bot, cb("f:save"))
     assert len(await ctx.db.filters(USER)) == 3                             # в PRO лимита нет
 
@@ -639,7 +639,7 @@ async def test_offer_with_requisites(env):
         object.__setattr__(ctx.cfg, k, v)
     await dp.feed_update(bot, cb("offer"))
     text = s.texts(USER)[-1]
-    assert "Иванов Иван Иванович, ИНН 123456789012" in text and "ivan@mail.ru" in text and "Пробный день — 250 ₽" in text
+    assert "Иванов Иван Иванович, ИНН 123456789012" in text and "ivan@mail.ru" in text and "Пробный день — 490 ₽" in text
     assert "PRO — 2490 ₽" in text and len(text) < 4096
     await dp.feed_update(bot, cb("s:pay:pro"))
     assert "условия оферты — /offer" in s.texts(USER)[-1]
