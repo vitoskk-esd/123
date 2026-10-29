@@ -26,6 +26,8 @@ from userbot import APPROVAL_CHECK, APPROVAL_WAIT, batch_done, notify
 
 log = logging.getLogger(__name__)
 API, V = "https://api.vk.com/method/", "5.199"
+FLOOD = (6, 9)                 # «слишком часто» / «flood control» — ключ рабочий, ВК просит притормозить
+FLOOD_PAUSE = 60               # на сколько притормаживаем опрос после такого ответа
 PAUSE_CAPTCHA = 900            # ВК попросил капчу или «слишком часто» — следующее вступление через 15 минут
 MENTION = re.compile(r"\[(?:id|club|public)\d+\|([^\]]*)\]")
 ERRORS = {100: "сообщество не найдено", 15: "нет доступа к сообществу", 203: "нет доступа к сообществу",
@@ -125,22 +127,41 @@ class VKReader:
             return False
         try:
             await self.attach(token)
-        except Exception as e:
+        except VKError as e:
             self.error = f"ВК не принял ключ: {e}"
             log.warning("служебная страница ВК не подключилась: %s", e)
             return False
+        except Exception as e:                  # сеть — пробуем снова, пока не подключимся
+            self.error = f"нет связи с ВК: {e} — пробую снова каждые 5 минут"
+            log.warning("служебная страница ВК не подключилась: %s", e)
+            self.retry_task = asyncio.create_task(self._retry(token))
+            return False
         return True
+
+    async def _retry(self, token: str) -> None:
+        while True:
+            await asyncio.sleep(300)
+            try:
+                await self.attach(token)
+                return
+            except Exception as e:
+                self.error = f"нет связи с ВК: {e} — пробую снова каждые 5 минут"
 
     async def attach(self, token: str) -> str:
         """Проверить ключ и начать читать сообщества. Возвращает имя служебной страницы; плохой ключ — VKError."""
         api = self.make_api(token)
-        me = (await api.call("users.get"))[0]
+        try:
+            me = (await api.call("users.get"))[0]
+        except VKError as e:
+            if e.code not in FLOOD:
+                raise
+            me = {}                             # ключ рабочий (иначе был бы код 5), просто ВК притормаживает — читаем дальше
         if self.online:
             self.runner.cancel()
         if self.api is not None and self.api is not api and hasattr(self.api, "close"):
             await self.api.close()
         self.api, self.error = api, ""
-        self.name = f"{me.get('first_name', '')} {me.get('last_name', '')}".strip()
+        self.name = f"{me.get('first_name', '')} {me.get('last_name', '')}".strip() or "служебная страница"
         if self.ctx.cfg.vk_token != token and token_from(self.ctx.cfg.vk_token or "") != token:
             await self.ctx.db.set_setting("vk_token", token)
         self.since = int(time.time())
@@ -209,9 +230,12 @@ class VKReader:
             try:
                 if self.groups():
                     await self.poll_feed()
+                    self.error = ""
             except VKError as e:
                 self.error = str(e)
                 log.warning("лента ВК: %s", e)
+                if e.code in FLOOD:
+                    await asyncio.sleep(FLOOD_PAUSE)
             except Exception as e:
                 log.info("лента ВК: %s", e)
             await asyncio.sleep(max(1.0, self.ctx.cfg.vk_poll - (time.time() - started)))
@@ -226,6 +250,10 @@ class VKReader:
                 started = time.time()
                 try:
                     await self.poll_wall(gid)
+                except VKError as e:
+                    log.info("стена ВК %s: %s", gid, e)
+                    if e.code in FLOOD:
+                        await asyncio.sleep(FLOOD_PAUSE)
                 except Exception as e:
                     log.info("стена ВК %s: %s", gid, e)
                 await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.vk_wall_rps - (time.time() - started)))

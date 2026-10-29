@@ -1038,3 +1038,22 @@ async def test_vk_bad_variable_reason_in_admin(env):
         assert "ВКонтакте: ❌ не подключён (в переменной VK_TOKEN нет ключа" in s.texts(ADMIN)[-1]
     finally:
         ctx.vk = None
+
+
+async def test_vk_flood_control_on_start_does_not_block(env):
+    """ВК ответил «Flood control (код 9)» на первый запрос — ключ рабочий, страница всё равно подключается."""
+    dp, bot, s, ctx = env
+
+    class FloodVK(FakeVK):
+        async def call(self, method, **p):
+            if method == "users.get":
+                raise VKError(9, "Flood control")
+            return await super().call(method, **p)
+    ctx.vk = VKReader(bot, ctx, make_api=lambda t: FloodVK())
+    try:
+        await dp.feed_update(bot, msg("/start", ADMIN))
+        await dp.feed_update(bot, msg("/vk vk1.a." + "z" * 60, ADMIN))
+        assert ctx.vk.online and "ВКонтакте подключён" in s.texts(ADMIN)[-1]
+    finally:
+        ctx.vk.runner.cancel()
+        ctx.vk = None
