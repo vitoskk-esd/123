@@ -117,7 +117,8 @@ class VKReader:
         return bool(self.runner and not self.runner.done())
 
     async def resume(self) -> bool:
-        token = self.ctx.cfg.vk_token or await self.ctx.db.get_setting("vk_token")
+        env = token_from(self.ctx.cfg.vk_token) if self.ctx.cfg.vk_token else None    # в VK_TOKEN можно вставить и адрес целиком
+        token = env or await self.ctx.db.get_setting("vk_token")
         if not token:
             return False
         try:
@@ -137,7 +138,7 @@ class VKReader:
             await self.api.close()
         self.api, self.error = api, ""
         self.name = f"{me.get('first_name', '')} {me.get('last_name', '')}".strip()
-        if token != self.ctx.cfg.vk_token:
+        if self.ctx.cfg.vk_token != token and token_from(self.ctx.cfg.vk_token or "") != token:
             await self.ctx.db.set_setting("vk_token", token)
         self.since = int(time.time())
         await self.ctx.refresh_channels()

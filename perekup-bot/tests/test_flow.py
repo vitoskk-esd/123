@@ -1010,3 +1010,17 @@ async def test_admin_always_pro_and_market_from_history(env):
     assert r.market == 1_510_000 and r.discount == 21 and r.sent == [ADMIN]
     card = s.texts(ADMIN)[-1]
     assert "−21% к рынку" in card and "рынок ≈ 1 510 000 ₽ (6 объявл.)" in card
+
+
+async def test_vk_token_variable_accepts_whole_address(env, monkeypatch):
+    """В переменную VK_TOKEN вставили весь адрес из браузера — бот сам берёт из него ключ."""
+    dp, bot, s, ctx = env
+    import dataclasses
+    token = "vk1.a." + "y" * 60
+    ctx.cfg = dataclasses.replace(ctx.cfg, vk_token=f"https://oauth.vk.com/blank.html#access_token={token}&user_id=5")
+    got = []
+    reader = VKReader(bot, ctx, make_api=lambda t: got.append(t) or FakeVK())
+    try:
+        assert await reader.resume() and got == [token]
+    finally:
+        reader.runner.cancel()
