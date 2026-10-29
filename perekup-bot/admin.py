@@ -1,11 +1,14 @@
 """Админка (только ADMIN_IDS): цифры бизнеса и скорости, общая база каналов, рассылка, ручной доступ."""
 import asyncio
+import html
+from datetime import datetime
 
-from aiogram import Bot, Router
+from aiogram import Bot, F, Router
 from aiogram.exceptions import TelegramForbiddenError
 from aiogram.filters import Command, CommandObject
-from aiogram.types import LinkPreviewOptions, Message
+from aiogram.types import CallbackQuery, LinkPreviewOptions, Message
 
+import keyboards as K
 from ctx import Ctx
 from links import channel_name, label, parse_link
 import texts as T
@@ -25,9 +28,13 @@ async def admin_ids(ctx: Ctx) -> list[int]:
 
 async def is_admin(msg: Message, ctx: Ctx) -> bool:
     """ADMIN_IDS из .env, а если там пусто — тот, кто первым написал боту /start (то есть ты)."""
+    return await is_admin_id(ctx, msg.from_user.id)
+
+
+async def is_admin_id(ctx: Ctx, uid: int) -> bool:
     if ctx.cfg.admins:
-        return msg.from_user.id in ctx.cfg.admins
-    return msg.from_user.id == await ctx.db.first_user()
+        return uid in ctx.cfg.admins
+    return uid == await ctx.db.first_user()
 
 
 async def queue_wait(ctx: Ctx, channel_ids: list[int]) -> str:
@@ -70,7 +77,7 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"📢 Каналы базы: {ch.get(('joined', 1), 0)} подключено, {ch.get(('queued', 1), 0)} в очереди, "
         f"{ch.get(('awaiting', 1), 0)} ждут одобрения админа, {ch.get(('failed', 1), 0)} с ошибкой · свои у людей: {ch.get(('joined', 0), 0)}\n\n"
         f"🔗 Откуда пришли:\n{src or '—'}\n\n"
-        "Команды:\n/add @канал1 vk.com/группа — добавить каналы и группы ВК в общую базу\n/list — список каналов\n"
+        "Команды:\n/add @канал1 vk.com/группа — добавить каналы и группы ВК в общую базу\n/list — общая база: смотреть и удалять каналы\n"
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
         "/similar — найти новые каналы через «похожие каналы» Telegram\n"
         "/del @канал — убрать канал\n/vk — подключить служебную страницу ВКонтакте\n/broadcast текст — написать всем")
@@ -167,17 +174,72 @@ async def delbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
     await msg.answer("Канал убран — посты из него больше не приходят." if ok else "Такого канала нет в базе.")
 
 
+def channel_url(ch) -> str | None:
+    if ch["vk"]:
+        return f"https://vk.com/{ch['vk']}"
+    if ch["username"]:
+        return f"https://t.me/{ch['username']}"
+    return f"https://t.me/+{ch['invite']}" if ch["invite"] else None
+
+
+async def base_page(ctx: Ctx, page: int) -> tuple[str, object]:
+    rows = await ctx.db.base_channels()
+    if not rows:
+        return T.ADMIN_BASE_EMPTY, None
+    page = min(page, (len(rows) - 1) // K.PAGE)
+    n = lambda st: sum(r["status"] == st for r in rows)
+    text = T.ADMIN_BASE.format(n=len(rows), joined=n("joined"), queued=n("queued"), awaiting=n("awaiting"), failed=n("failed"))
+    return text, K.admin_base(rows, page)
+
+
 @router.message(Command("list"))
 async def base(msg: Message, ctx: Ctx) -> None:
+    """/list — общая база кнопками: нажал на канал — карточка, оттуда можно удалить."""
     if not await is_admin(msg, ctx):
         return
-    rows = await ctx.db.base_channels()
-    icon = {"joined": "✅", "queued": "⏳", "awaiting": "🕓", "failed": "❌"}
-    lines = [f"{icon.get(r['status'], '?')} {channel_name(r)} "
-             f"· {r['region'] or '—'} · постов {r['posts']}" + (f" · {r['error']}" if r["error"] else "") for r in rows]
-    text = "\n".join(lines) or "База пуста. Добавь каналы: /add @канал1 @канал2"
-    for i in range(0, len(text), 3800):
-        await msg.answer(text[i:i + 3800])
+    text, markup = await base_page(ctx, 0)
+    await msg.answer(text, reply_markup=markup)
+
+
+@router.callback_query(F.data.startswith("a:"))
+async def base_buttons(cb: CallbackQuery, ctx: Ctx) -> None:
+    if not await is_admin(cb, ctx):
+        return await cb.answer()
+    parts = cb.data.split(":")
+    action, page = parts[1], int(parts[-1])
+    if action == "base":
+        text, markup = await base_page(ctx, page)
+        if cb.message.text and cb.message.text.startswith("🗂"):
+            await cb.message.edit_text(text, reply_markup=markup)
+        else:
+            await cb.message.answer(text, reply_markup=markup)
+        return await cb.answer()
+    ch = await ctx.db.channel(int(parts[2]))
+    if not ch or not ch["base"]:
+        await cb.answer("Этого канала уже нет в общей базе.", show_alert=True)
+        text, markup = await base_page(ctx, page)
+        return await cb.message.edit_text(text, reply_markup=markup)
+    name = channel_name(ch)
+    if action == "ch":
+        when = lambda ts: datetime.fromtimestamp(ts).strftime("%d.%m.%Y %H:%M") if ts else "—"
+        status = {"joined": "читаю", "queued": "в очереди на вступление", "awaiting": "ждём одобрения админа",
+                  "failed": "не подключился"}.get(ch["status"], ch["status"])
+        url = channel_url(ch)
+        text = T.ADMIN_CHANNEL.format(
+            icon=K.STATUS_ICON.get(ch["status"], "?"), name=html.escape(name),
+            kind="ВКонтакте" if ch["vk"] else "Telegram", link=f" · {url}" if url else "", status=status,
+            error=f" ({html.escape(ch['error'])})" if ch["error"] else "", region=ch["region"] or "—", posts=ch["posts"],
+            last=when(ch["last_post_at"]), added=when(ch["created_at"]))
+        await cb.message.edit_text(text, reply_markup=K.admin_channel(ch["id"], page, url),
+                                   link_preview_options=LinkPreviewOptions(is_disabled=True))
+    elif action == "del":
+        await cb.message.edit_text(T.ADMIN_DEL_ASK.format(name=html.escape(name)), reply_markup=K.admin_del_confirm(ch["id"], page))
+    elif action == "delok":
+        await ctx.db.remove_from_base(ch["id"])
+        await ctx.refresh_channels()
+        text, markup = await base_page(ctx, page)
+        await cb.message.edit_text(T.ADMIN_DELETED.format(name=html.escape(name)) + "\n\n" + text, reply_markup=markup)
+    await cb.answer()
 
 
 def vk_online(ctx: Ctx) -> bool:

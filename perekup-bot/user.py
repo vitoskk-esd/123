@@ -14,7 +14,7 @@ from aiogram.types import CallbackQuery, Message
 import keyboards as K
 import plans
 import texts as T
-from admin import is_admin, queue_wait
+from admin import is_admin, is_admin_id, queue_wait
 from ctx import Ctx
 from db import DAY
 from links import label, parse_link
@@ -184,7 +184,8 @@ async def show_channels(msg: Message, ctx: Ctx, state: FSMContext, uid: int | No
     ready = [r for r in own if r["status"] == "joined"]
     queued = len([r for r in own if r["status"] == "queued"])
     await msg.answer(T.CHANNELS.format(total=len(base) - len(off) + len(ready), base=len(base), off=len(off), own=len(ready),
-                                       pending=f" (+{queued} подключаю)" if queued else ""), reply_markup=K.channels())
+                                       pending=f" (+{queued} подключаю)" if queued else ""),
+                     reply_markup=K.channels(admin=await is_admin_id(ctx, uid)))
 
 
 @router.callback_query(F.data == "c:add")

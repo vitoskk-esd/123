@@ -15,6 +15,7 @@ from aiogram.types import CallbackQuery, Chat, Message, MessageId, PhotoSize, Up
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
 import jobs
+import texts as T
 from main import build_dispatcher
 from config import Config
 from ctx import Ctx
@@ -951,3 +952,35 @@ async def test_admin_connects_vk_in_chat(env):
     finally:
         ctx.vk.runner.cancel()
         ctx.vk = None
+
+
+def last_markup(s):
+    return [m for m in s.sent if isinstance(m, (SendMessage, EditMessageText))][-1].reply_markup
+
+
+async def test_admin_views_and_deletes_base_channels(env):
+    """Админ: «📢 Каналы» → «🗂 Общая база» → карточка канала → удалить. Обычный человек этой кнопки не видит."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg(T.MENU_CHANNELS, ADMIN))
+    buttons = [b.callback_data for row in last_markup(s).inline_keyboard for b in row]
+    assert "a:base:0" in buttons
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, msg(T.MENU_CHANNELS))
+    assert "a:base:0" not in [b.callback_data for row in last_markup(s).inline_keyboard for b in row]
+
+    await dp.feed_update(bot, cb("a:base:0", ADMIN))
+    assert "Общая база</b>: 2" in s.texts(ADMIN)[-1]
+    names = [b.text for row in last_markup(s).inline_keyboard for b in row]
+    assert any("Avto Msk" in n for n in names) and any("Perekup Rf" in n for n in names)
+    cid = (await ctx.db.channel_by_tg(CH1))["id"]
+    await dp.feed_update(bot, cb(f"a:ch:{cid}:0", ADMIN))
+    assert "Avto Msk" in s.texts(ADMIN)[-1] and "https://t.me/avto_msk" in s.texts(ADMIN)[-1] and "читаю" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, cb(f"a:del:{cid}:0", ADMIN))
+    assert "Удалить «Avto Msk»" in s.texts(ADMIN)[-1] and CH1 in ctx.channels      # без подтверждения не удаляем
+    await dp.feed_update(bot, cb(f"a:delok:{cid}:0", ADMIN))
+    assert "удалён из общей базы" in s.texts(ADMIN)[-1] and "Общая база</b>: 1" in s.texts(ADMIN)[-1]
+    assert CH1 not in ctx.channels and (await ctx.db.channel(cid))["status"] == "removed"
+
+    await dp.feed_update(bot, cb("a:base:0"))                                     # не админ — ничего
+    assert "Общая база" not in (s.texts(USER) or [""])[-1]

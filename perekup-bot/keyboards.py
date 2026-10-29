@@ -51,10 +51,39 @@ def support_more() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_SUPPORT_MORE, callback_data="sup")])
 
 
-def channels() -> InlineKeyboardMarkup:
+def channels(admin: bool = False) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_ADD_CHANNEL, callback_data="c:add")],
+              [B(text=T.BTN_ADMIN_BASE, callback_data="a:base:0")] if admin else [],
               [B(text=T.BTN_BASE_LIST, callback_data="c:base:0")],
               [B(text=T.BTN_OWN_LIST, callback_data="c:own")])
+
+
+STATUS_ICON = {"joined": "✅", "queued": "⏳", "awaiting": "🕓", "failed": "❌"}
+
+
+def admin_base(rows, page: int) -> InlineKeyboardMarkup:
+    """Общая база для админа: каждый канал — кнопка, по нажатию карточка канала с «удалить»."""
+    chunk = rows[page * PAGE:(page + 1) * PAGE]
+    out = [[B(text=f"{STATUS_ICON.get(r['status'], '?')} {channel_name(r)[:36]} · {r['posts']}",
+              callback_data=f"a:ch:{r['id']}:{page}")] for r in chunk]
+    nav = []
+    if page:
+        nav.append(B(text="←", callback_data=f"a:base:{page - 1}"))
+    if (page + 1) * PAGE < len(rows):
+        nav.append(B(text="→", callback_data=f"a:base:{page + 1}"))
+    out.append(nav)
+    return kb(*out)
+
+
+def admin_channel(cid: int, page: int, url: str | None) -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_OPEN_CHANNEL, url=url)] if url else [],
+              [B(text=T.BTN_DEL_CHANNEL, callback_data=f"a:del:{cid}:{page}")],
+              [B(text=T.BTN_BACK_LIST, callback_data=f"a:base:{page}")])
+
+
+def admin_del_confirm(cid: int, page: int) -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_DEL_YES, callback_data=f"a:delok:{cid}:{page}"),
+               B(text=T.BTN_DEL_NO, callback_data=f"a:ch:{cid}:{page}")])
 
 
 def base_list(rows, off: set[int], page: int) -> InlineKeyboardMarkup:

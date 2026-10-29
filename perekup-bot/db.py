@@ -238,6 +238,12 @@ class DB:
             await self._run("UPDATE channels SET base=1 WHERE id=?", other)
         await self._run("DELETE FROM channels WHERE id=?", cid)
 
+    async def remove_from_base(self, cid: int) -> None:
+        """Админ убрал канал из общей базы. У кого он добавлен своим — у тех остаётся, иначе больше не читаем."""
+        await self._run("UPDATE channels SET base=0 WHERE id=?", cid)
+        if not await self._one("SELECT 1 FROM user_channels WHERE channel_id=? AND state='own'", cid):
+            await self._run("UPDATE channels SET status='removed' WHERE id=?", cid)
+
     async def remove_channel(self, username: str | None = None, invite: str | None = None, vk: str | None = None) -> bool:
         """Убрать канал совсем (попросил владелец): посты из него больше никому не идут."""
         return await self._count("UPDATE channels SET base=0, status='removed' WHERE username=? OR invite=? OR vk=?",
