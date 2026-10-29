@@ -1057,3 +1057,43 @@ async def test_vk_flood_control_on_start_does_not_block(env):
     finally:
         ctx.vk.runner.cancel()
         ctx.vk = None
+
+
+async def test_admin_finds_vk_groups(env):
+    """/vkfind: открытые автобарахолки 5000+ подписчиков, где 3+ поста в день минимум 5 дней из 7 и в постах машины."""
+    dp, bot, s, ctx = env
+    day = 86400
+    base = (int(time.time() + 3 * 3600) // day) * day - 3 * 3600      # полночь по Москве сегодня
+    def wall(per_day, text="Продам Toyota Camry 2012, цена 1 200 000 ₽"):
+        return [{"id": i, "date": base - d * day + 3600 + i, "text": text} for d in range(1, 8) for i in range(per_day)]
+
+    class FindVK(FakeVK):
+        async def call(self, method, **p):
+            if method == "groups.search":
+                return {"items": [{"id": 1, "name": "Авто барахолка России", "is_closed": 0},
+                                  {"id": 2, "name": "Авторынок Казань", "is_closed": 0},
+                                  {"id": 3, "name": "Авто малышка", "is_closed": 0},
+                                  {"id": 4, "name": "Новости авто", "is_closed": 0},
+                                  {"id": 5, "name": "Котики", "is_closed": 0}]}
+            if method == "groups.getById" and "group_ids" in p:
+                m = {1: 120000, 2: 9000, 3: 3000, 4: 50000, 5: 90000}
+                return {"groups": [{"id": int(i), "name": f"g{i}", "screen_name": f"g{i}", "members_count": m[int(i)]}
+                                   for i in p["group_ids"].split(",")]}
+            if method == "wall.get":
+                return {"items": {1: wall(5), 2: wall(3), 3: wall(9), 4: wall(6, "Росстат: продажи новых авто выросли")}[-p["owner_id"]]}
+            return await super().call(method, **p)
+    ctx.vk = VKReader(bot, ctx, make_api=lambda t: FindVK())
+    ctx.vk.api = FindVK()
+    ctx.vk.runner = asyncio.create_task(asyncio.sleep(3600))           # «подключён»
+    try:
+        await dp.feed_update(bot, msg("/start", ADMIN))
+        await dp.feed_update(bot, msg("/vkfind", ADMIN))
+        await asyncio.gather(*ctx.background)
+        found = s.texts(ADMIN)[-2]
+        assert "vk.com/g1" in found and "vk.com/g2" in found                     # 3 — мало подписчиков, 4 — не продажа, 5 — не авто
+        assert "vk.com/g3" not in found and "vk.com/g4" not in found and "vk.com/g5" not in found
+        assert found.index("vk.com/g1") < found.index("vk.com/g2") and "35 постов/нед" in found
+        assert "/add vk.com/g1 vk.com/g2" in s.texts(ADMIN)[-1]
+    finally:
+        ctx.vk.runner.cancel()
+        ctx.vk = None

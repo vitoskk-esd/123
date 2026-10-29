@@ -92,6 +92,7 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         "Команды:\n/add @канал1 vk.com/группа — добавить каналы и группы ВК в общую базу\n/list — общая база: смотреть и удалять каналы\n"
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
         "/similar — найти новые каналы через «похожие каналы» Telegram\n"
+        "/vkfind — найти 50 барахолок с авто в ВК (5000+ подписчиков, 3+ поста почти каждый день)\n"
         "/del @канал — убрать канал\n/vk — подключить служебную страницу ВКонтакте\n/broadcast текст — написать всем")
 
 
@@ -150,6 +151,39 @@ async def similar(msg: Message, ctx: Ctx) -> None:
                 (f"\n\nДобавить активные ({len(active)}):\n/add " + " ".join("@" + r["username"] for r in active) if active else ""))
         for i in range(0, len(text), 3800):
             await msg.answer(text[i:i + 3800])
+
+    task = asyncio.create_task(run())
+    ctx.background.add(task)
+    task.add_done_callback(ctx.background.discard)
+
+
+@router.message(Command("vkfind"))
+async def vkfind(msg: Message, ctx: Ctx) -> None:
+    """/vkfind — служебная страница ВК ищет барахолки с авто по России и проверяет их активность."""
+    if not await is_admin(msg, ctx):
+        return
+    if not vk_online(ctx):
+        return await msg.answer("ВКонтакте не подключён — /vk")
+    await msg.answer("🔎 Ищу в ВК барахолки с авто по России: 5000+ подписчиков, 3+ поста в день минимум 5 дней из 7, "
+                     "в постах — продажа машин. Это займёт 10–20 минут — пришлю 50 ссылок сюда.")
+
+    async def run():
+        known = {r["vk_id"] for r in await ctx.db._all("SELECT vk_id FROM channels WHERE vk_id IS NOT NULL")}
+        try:
+            rows = await ctx.vk.find(known, 50, progress=lambda t: msg.answer("⏳ " + t))
+        except Exception as e:
+            return await msg.answer(f"Не получилось: {e}")
+        if not rows:
+            return await msg.answer("Подходящих групп не нашлось.")
+        lines = [f"{i}. vk.com/{r['screen']} — {html.escape(r['name'][:40])} · {r['members']:,} подп. · "
+                 f"{r['week']} постов/нед · машины {r['cars']}%".replace(",", " ") for i, r in enumerate(rows, 1)]
+        text = f"Нашёл {len(rows)} (по числу постов за неделю):\n\n" + "\n".join(lines)
+        while text:
+            cut = text.rfind("\n", 0, 3800) if len(text) > 3800 else len(text)
+            await msg.answer(text[:cut], link_preview_options=LinkPreviewOptions(is_disabled=True))
+            text = text[cut:].lstrip("\n")
+        await msg.answer("Добавить все в общую базу — скопируй и отправь:\n\n<code>/add " +
+                         " ".join(f"vk.com/{r['screen']}" for r in rows) + "</code>")
 
     task = asyncio.create_task(run())
     ctx.background.add(task)

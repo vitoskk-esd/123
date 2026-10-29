@@ -34,6 +34,21 @@ ERRORS = {100: "сообщество не найдено", 15: "нет дост�
           103: "служебная страница уже в 5000 сообществ — это лимит ВК"}
 
 
+FIND_MEMBERS = 5000
+CAR_NAME = re.compile(r"авто|машин|тачк|рынок|рынк|барахол|перекуп|продаж|купл|бу\b|б/у|cars?\b|auto|avto|drive|колес|тачек|ваз|лада|"
+                      r"toyota|тойот|ниже\s+рынка|подбор|пробег", re.I)
+FIND_QUERIES = ["авто барахолка", "автобарахолка", "барахолка авто", "авторынок", "продажа авто", "продам авто", "купить авто",
+                "авто с пробегом", "авто бу", "перекуп авто", "авто ниже рынка", "срочный выкуп авто", "авто объявления",
+                "продажа автомобилей", "продажа машин", "машины с пробегом", "тачки ниже рынка", "авто россия", "продажа авто россия",
+                "авто дешево", "автомобили бу", "барахолка машин", "авторынок россии", "авто срочно продажа", "лада продажа"]
+FIND_CITIES = ["москва", "санкт-петербург", "новосибирск", "екатеринбург", "казань", "нижний новгород", "челябинск", "самара",
+               "омск", "ростов", "уфа", "красноярск", "воронеж", "пермь", "волгоград", "краснодар", "саратов", "тюмень",
+               "тольятти", "ижевск", "барнаул", "ульяновск", "иркутск", "хабаровск", "ярославль", "владивосток", "махачкала",
+               "томск", "оренбург", "кемерово", "новокузнецк", "рязань", "астрахань", "пенза", "липецк", "киров", "чебоксары",
+               "тула", "калининград", "курск", "ставрополь", "сочи", "белгород", "владимир", "брянск", "чита", "сургут",
+               "архангельск", "смоленск", "кострома", "тверь", "иваново", "набережные челны", "грозный", "якутск"]
+
+
 class VKError(Exception):
     def __init__(self, code: int, text: str):
         super().__init__(f"{text} (код {code})")
@@ -257,6 +272,62 @@ class VKReader:
                 except Exception as e:
                     log.info("стена ВК %s: %s", gid, e)
                 await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.vk_wall_rps - (time.time() - started)))
+
+    # ---------- поиск новых сообществ ----------
+    async def find(self, known: set[int], want: int = 50, progress=None) -> list[dict]:
+        """Барахолки с авто по всей России: поиск ВК по фразам и городам → открытые, 5000+ подписчиков →
+        стена за 7 дней: в какие дни было 3+ поста и какая доля постов — продажа машины с ценой."""
+        ids: dict[int, int] = {}                                    # группа → сколько раз нашлась
+        queries = [q for q in FIND_QUERIES] + [f"{w} {c}" for c in FIND_CITIES for w in ("авто", "авторынок")]
+        for i, q in enumerate(queries):
+            try:
+                res = await self.api.call("groups.search", q=q, country_id=1, count=100)
+            except VKError as e:
+                log.info("поиск ВК «%s»: %s", q, e)
+                if e.code in FLOOD:
+                    await asyncio.sleep(FLOOD_PAUSE)
+                continue
+            for g in res.get("items", []):
+                if g["id"] not in known and not g.get("is_closed") and CAR_NAME.search(g.get("name", "")):
+                    ids[g["id"]] = ids.get(g["id"], 0) + 1
+            if progress and i % 20 == 19:
+                await progress(f"поиск: {i + 1}/{len(queries)} запросов, кандидатов {len(ids)}")
+        groups: list[dict] = []
+        idl = list(ids)
+        for i in range(0, len(idl), 400):
+            res = await self.api.call("groups.getById", group_ids=",".join(map(str, idl[i:i + 400])), fields="members_count")
+            groups += res.get("groups", []) if isinstance(res, dict) else res
+        groups = sorted((g for g in groups if (g.get("members_count") or 0) >= FIND_MEMBERS and not g.get("deactivated")),
+                        key=lambda g: -g["members_count"])
+        if progress:
+            await progress(f"с 5000+ подписчиков: {len(groups)} — смотрю, как часто постят")
+        from parse import parse_post
+        msk = 3 * 3600
+        today = int((time.time() + msk) // 86400)
+        out: list[dict] = []
+        for n, g in enumerate(groups):
+            try:
+                items = (await self.api.call("wall.get", owner_id=-g["id"], count=100)).get("items", [])
+            except VKError as e:
+                if e.code in FLOOD:
+                    await asyncio.sleep(FLOOD_PAUSE)
+                continue
+            posts = [it for it in items if not it.get("is_pinned")]
+            per_day: dict[int, int] = {}
+            for it in posts:
+                day = int((it.get("date", 0) + msk) // 86400)
+                if today - 7 <= day < today:                              # 7 полных прошлых дней
+                    per_day[day] = per_day.get(day, 0) + 1
+            busy = sum(c >= 3 for c in per_day.values())
+            texts = [post_text(it) for it in posts[:50]]
+            cars = sum(bool((L := parse_post(t, self.ctx.dict)).make and L.price) for t in texts if t)
+            share = cars / max(1, len([t for t in texts if t]))
+            if busy >= 5 and share >= 0.3:
+                out.append({"id": g["id"], "name": g.get("name", ""), "screen": g.get("screen_name") or f"club{g['id']}",
+                            "members": g["members_count"], "week": sum(per_day.values()), "busy": busy, "cars": round(share * 100)})
+            if progress and n % 50 == 49:
+                await progress(f"проверено {n + 1}/{len(groups)}, подходят {len(out)}")
+        return sorted(out, key=lambda g: (-g["week"], -g["members"]))[:want]
 
     # ---------- вступление в сообщества ----------
     async def group(self, vk: str) -> dict:
