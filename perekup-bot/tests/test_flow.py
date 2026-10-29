@@ -1097,3 +1097,27 @@ async def test_admin_finds_vk_groups(env):
     finally:
         ctx.vk.runner.cancel()
         ctx.vk = None
+
+
+async def test_admin_commands_hidden_from_users(env):
+    """Обычный человек шлёт админские команды — бот молчит и ничего не делает: ни поиска, ни добавления, ни рассылки."""
+    dp, bot, s, ctx = env
+    ctx.vk = VKReader(bot, ctx, make_api=lambda t: FakeVK())
+    ctx.vk.api = api = FakeVK()
+    ctx.vk.runner = asyncio.create_task(asyncio.sleep(3600))
+    try:
+        await dp.feed_update(bot, msg("/start"))
+        before = len(s.sent)
+        for c in ("/vkfind", "/admin", "/add @new_cars vk.com/avto_kzn", "/del @avto_msk", "/list", "/similar", "/tobase",
+                  "/vk vk1.a." + "q" * 60, "/broadcast привет", "/connect"):
+            await dp.feed_update(bot, msg(c))
+        assert all(m.chat_id == USER for m in s.sent[before:] if hasattr(m, "chat_id"))
+        assert not any("барахолк" in (t or "") or "Служебный аккаунт" in (t or "") or "очередь" in (t or "")
+                       for t in s.texts(USER)[1:])
+        assert not ctx.background and api.calls == [] and CH1 in ctx.channels
+        assert not await ctx.db.queued_channels() and not await ctx.db.queued_channels("vk")
+        await dp.feed_update(bot, cb("a:base:0"))
+        assert not any("Общая база</b>" in (t or "") for t in s.texts(USER))
+    finally:
+        ctx.vk.runner.cancel()
+        ctx.vk = None
