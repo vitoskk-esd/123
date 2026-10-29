@@ -34,6 +34,7 @@ class Listing:
     teaser: bool = False            # анонс «скоро в продаже» — не шлём, ждём, когда выставят
     tokens: list[str] = field(default_factory=list)
     parsed_by: str = "rules"
+    price_unsure: bool = False      # в посте несколько сумм, похожих на цену, — ИИ перепроверит
 
     @property
     def is_car(self) -> bool:
@@ -66,9 +67,19 @@ def clean(text: str) -> str:
     return PHONE.sub(" ", URL.sub(" ", text))
 
 
-def parse_price(text: str) -> int | None:
+# сумма сразу после этих слов (в той же фразе) — не цена машины: «замена цепи на 250к» (это пробег), «вложено 150к»,
+# «торг 20к», «ниже рынка на 100к», «налог 5к». Такие суммы берём, только если других нет совсем.
+NOT_PRICE_BEFORE = re.compile(
+    r"(?:\bна|\bпри|\bпосле|кажды\w*|через)\s*$"
+    r"|вложен|вложил|влож\w*\s+\w*$|потрачен|чек\w*|торг|налог|страхов|осаго|каско|рын\w*|дешевле|дороже|скидк|доплат"
+    r"|кредит|залог|остат|платеж|взнос|ремонт|замен|поменя|обслуж|\bто\b|диагност|покраск|запчаст|комплект\s+резин")
+
+
+def price_candidates(text: str) -> list[tuple[int, int]]:
+    """Все суммы, похожие на цену машины, с приоритетом: 4 — «цена: …», 3 — с рублями / «т.р.» / «млн»,
+    2 — с «к» / «тыс» (так пишут и пробег), 1 — просто «850 000», 0 — сумма после «замена на», «вложено», «торг»…"""
     t = clean(text).lower().replace("ё", "е")
-    found: list[tuple[int, int]] = []    # (приоритет, цена)
+    found: list[tuple[int, int]] = []
     pattern = re.compile(rf"(?P<label>цена|стоимость|продам за|отдам за|прошу|price)?\s*[:\-–—=]?\s*(?P<num>{NUM})\s*(?P<unit>{MLN}|{THS}|{CUR})?\s*(?P<cur>{CUR})?")
     for m in pattern.finditer(t):
         num, unit, label = m.group("num"), m.group("unit") or "", m.group("label")
@@ -81,8 +92,8 @@ def parse_price(text: str) -> int | None:
         value = _to_int(num, unit)
         if value is None:
             continue
-        has_cur = bool(m.group("cur") or re.match(CUR, unit))
-        grouped = bool(re.fullmatch(r"\d{1,3}(?:[ .  ]\d{3})+", num))
+        has_cur = bool(m.group("cur") or re.match(CUR, unit) or re.match(r"т\.?\s?р|тр\b", unit))
+        grouped = bool(re.fullmatch(r"\d{1,3}(?:[ .  ]\d{3})+", num))
         if not (label or unit or grouped):
             continue
         if re.fullmatch(YEAR, num) and not (label or unit):
@@ -91,12 +102,29 @@ def parse_price(text: str) -> int | None:
         if label and not unit and value < 10_000:
             value *= 1000
         if PRICE_MIN <= value <= PRICE_MAX:
-            prio = 3 if label else 2 if (has_cur or re.match(MLN, unit) or re.match(THS, unit)) else 1
+            clause = re.split(r"[.,;!?\n(]", t[max(0, m.start("num") - 40):m.start("num")])[-1]
+            if label:
+                prio = 4
+            elif NOT_PRICE_BEFORE.search(clause):
+                prio = 0
+            else:
+                prio = 3 if (has_cur or re.match(MLN, unit)) else 2 if unit else 1
             found.append((prio, value))
+    return found
+
+
+def parse_price(text: str) -> int | None:
+    found = price_candidates(text)
     if not found:
         return None
     best = max(p for p, _ in found)
     return next(v for p, v in found if p == best)
+
+
+def price_unsure(text: str) -> bool:
+    """Правила не уверены в цене: нет «цена: …», а сумм, похожих на цену, несколько разных — пусть проверит ИИ."""
+    found = price_candidates(text)
+    return bool(found) and max(p for p, _ in found) < 4 and len({v for p, v in found if p >= 1}) > 1
 
 
 def parse_year(text: str) -> int | None:
@@ -236,6 +264,7 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
     L = Listing(text=text, tokens=tokens)
     L.make, L.model = pick_car(text, d)
     L.price = parse_price(text)
+    L.price_unsure = price_unsure(text)
     L.year = parse_year(text)
     L.mileage = parse_mileage(text)
     L.accidents = parse_accidents(text)

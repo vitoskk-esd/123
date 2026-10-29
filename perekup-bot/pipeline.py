@@ -178,7 +178,7 @@ def worth_ai(L: Listing, text: str, filters: list[Filter], d, doubt: bool = Fals
     several = len({mk for mk, _ in d.find_cars(L.tokens)}) > 1     # в посте несколько марок — правила могли выбрать не ту
     if not (wanted or several):
         return False                        # эту марку никто не ищет — лимит не тратим
-    return doubt or several or bool(TRICKY.search(text))
+    return doubt or several or L.price_unsure or bool(TRICKY.search(text))
 
 
 async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None,
