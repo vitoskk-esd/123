@@ -178,7 +178,7 @@ class Reader:
         """Сами опрашиваем каналы по кругу, не дожидаясь, пока Telegram пришлёт пост."""
         online_at = 0.0
         while True:
-            chans = list(self.ctx.channels)
+            chans = [c for c in self.ctx.channels if c < 0]       # только Telegram; сообщества ВК читает vk.py
             if not chans or self.ctx.cfg.poll_rps <= 0:
                 await asyncio.sleep(5)
                 continue
@@ -299,7 +299,7 @@ class Reader:
         """Похожие каналы от Telegram для каждого канала базы → автомобильные, которых ещё нет в базе, с активностью:
         сколько постов за неделю и в сколько из 5 последних будних дней были посты."""
         found: dict[str, dict] = {}
-        for ch in [c for c in self.ctx.channels.values() if c["base"]]:
+        for ch in [c for c in self.ctx.channels.values() if c["base"] and c["tg_id"]]:
             try:
                 res = await self.client(GetChannelRecommendationsRequest(channel=await self._peer(ch["tg_id"])))
             except errors.FloodWaitError as e:
@@ -372,26 +372,10 @@ class Reader:
             await self._batch_done(uid, row["id"], 0)
 
     async def _batch_done(self, uid: int, cid: int, ok: int) -> None:
-        """Когда подключился последний из присланных каналов — одно итоговое сообщение «всё готово, можно искать»."""
-        result = await self.ctx.db.batch_done(uid, cid, ok)
-        if not result or not result[0]:
-            return
-        good, bad, wait = result
-        total = await self.ctx.db.channel_count_for(uid)
-        failed = (T.ALL_CHANNELS_FAILED_PART.format(n=bad) if bad else "") + (T.ALL_CHANNELS_AWAITING_PART.format(n=wait) if wait else "")
-        has_filters = bool(await self.ctx.db.filters(uid))
-        text = T.ALL_CHANNELS_READY.format(n=good, total=total, failed=failed,
-                                           next=T.ALL_READY_WATCHING if has_filters else T.ALL_READY_NEED_FILTER)
-        try:
-            await self.bot.send_message(uid, text, reply_markup=None if has_filters else K.new_filter())
-        except Exception as e:
-            log.info("не смог уведомить %s: %s", uid, e)
+        await batch_done(self.bot, self.ctx, uid, cid, ok)
 
     async def _notify(self, uid: int, text: str) -> None:
-        try:
-            await self.bot.send_message(uid, text)
-        except Exception as e:
-            log.info("не смог уведомить %s: %s", uid, e)
+        await notify(self.bot, uid, text)
 
     async def join_loop(self) -> None:
         checked = 0.0
@@ -410,6 +394,30 @@ class Reader:
 
     async def run(self) -> None:
         await asyncio.gather(self.join_loop(), self.poll_loop(), self.mute_all(), self.client.run_until_disconnected())
+
+
+async def batch_done(bot: Bot, ctx: Ctx, uid: int, cid: int, ok: int) -> None:
+    """Когда подключился последний из присланных каналов — одно итоговое сообщение «всё готово, можно искать»."""
+    result = await ctx.db.batch_done(uid, cid, ok)
+    if not result or not result[0]:
+        return
+    good, bad, wait = result
+    total = await ctx.db.channel_count_for(uid)
+    failed = (T.ALL_CHANNELS_FAILED_PART.format(n=bad) if bad else "") + (T.ALL_CHANNELS_AWAITING_PART.format(n=wait) if wait else "")
+    has_filters = bool(await ctx.db.filters(uid))
+    text = T.ALL_CHANNELS_READY.format(n=good, total=total, failed=failed,
+                                       next=T.ALL_READY_WATCHING if has_filters else T.ALL_READY_NEED_FILTER)
+    try:
+        await bot.send_message(uid, text, reply_markup=None if has_filters else K.new_filter())
+    except Exception as e:
+        log.info("не смог уведомить %s: %s", uid, e)
+
+
+async def notify(bot: Bot, uid: int, text: str) -> None:
+    try:
+        await bot.send_message(uid, text)
+    except Exception as e:
+        log.info("не смог уведомить %s: %s", uid, e)
 
 
 async def _same(peer):

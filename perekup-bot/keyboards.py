@@ -2,6 +2,7 @@
 from aiogram.types import InlineKeyboardButton as B, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 
 import texts as T
+from links import channel_name
 
 PAGE = 8
 
@@ -58,7 +59,7 @@ def channels() -> InlineKeyboardMarkup:
 
 def base_list(rows, off: set[int], page: int) -> InlineKeyboardMarkup:
     chunk = rows[page * PAGE:(page + 1) * PAGE]
-    out = [[B(text=("🚫 " if r["id"] in off else "✅ ") + (r["title"] or r["username"] or f"канал {r['id']}")[:40],
+    out = [[B(text=("🚫 " if r["id"] in off else "✅ ") + channel_name(r)[:40],
               callback_data=f"c:tg:{r['id']}:{page}")] for r in chunk]
     nav = []
     if page:
@@ -70,7 +71,7 @@ def base_list(rows, off: set[int], page: int) -> InlineKeyboardMarkup:
 
 
 def own_list(rows) -> InlineKeyboardMarkup:
-    return kb(*[[B(text="🗑 " + (r["title"] or r["username"] or "закрытый канал")[:40], callback_data=f"c:rm:{r['id']}")] for r in rows])
+    return kb(*[[B(text="🗑 " + channel_name(r)[:40], callback_data=f"c:rm:{r['id']}")] for r in rows])
 
 
 def card(url: str | None, fid: int) -> InlineKeyboardMarkup:

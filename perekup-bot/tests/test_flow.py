@@ -168,7 +168,7 @@ async def test_no_scam_warning_and_disclaimer(env):
     """Предупреждений о мошенниках нет; в приветствии — отказ от ответственности."""
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "любые до 1 млн")
-    welcome = next(t for t in s.texts(USER) if "Это <b>Перехват</b>" in t)
+    welcome = next(t for t in s.texts(USER) if "<b>Перехват</b> — бот" in t)
     assert "не несём никакой ответственности" in welcome and "мошенник" not in welcome
     r = await process(bot, ctx, post(CH1, "Toyota RAV4 2019 всего 900 000 ₽! Дистанционное оформление, доставка в любой регион"))
     assert r.sent == [USER] and "мошенник" not in s.texts(USER)[-1]
@@ -822,3 +822,132 @@ async def test_already_joined_channels_get_muted(env):
 
 async def _same(x):
     return x
+
+
+# ---------- ВКонтакте ----------
+from aiogram.methods import DeleteMessage
+from ctx import VK_KEY
+from links import parse_link
+from vk import VKError, VKReader
+
+
+class FakeVK:
+    """API ВК: открытое сообщество avto_kzn (777) и закрытое club888 — вступление по одобрению."""
+    def __init__(self):
+        self.calls: list = []
+        self.groups = [{"id": 777, "name": "Авто Казань", "screen_name": "avto_kzn", "is_closed": 0, "is_member": 0},
+                       {"id": 888, "name": "Тачки ВК", "screen_name": "club888", "is_closed": 1, "is_member": 0}]
+        self.feed: list = []
+        self.wall: dict = {}
+
+    def find(self, ref):
+        return next((g for g in self.groups if str(ref) in (g["screen_name"], str(g["id"]))), None)
+
+    async def call(self, method, **p):
+        self.calls.append(method)
+        if method == "users.get":
+            return [{"first_name": "Служебная", "last_name": "Страница"}]
+        if method == "groups.getById":
+            g = self.find(p["group_id"])
+            if not g:
+                raise VKError(100, "invalid group id")
+            return {"groups": [dict(g)]}
+        if method == "groups.join":
+            g = self.find(p["group_id"])
+            g["is_member"] = int(not g["is_closed"])
+            return 1
+        if method == "newsfeed.get":
+            return {"items": [i for i in self.feed if i["date"] >= p["start_time"]]}
+        if method == "wall.get":
+            return {"items": self.wall.get(-p["owner_id"], [])}
+
+
+def vk_post(gid, pid, text, photo=False):
+    item = {"source_id": -gid, "post_id": pid, "id": pid, "date": int(time.time()) - 2, "text": text}
+    if photo:
+        item["attachments"] = [{"type": "photo", "photo": {"sizes": [
+            {"width": 130, "url": "https://sun.userapi.com/s.jpg"}, {"width": 1080, "url": "https://sun.userapi.com/m.jpg"},
+            {"width": 2560, "url": "https://sun.userapi.com/w.jpg"}]}}]
+    return item
+
+
+def test_vk_links():
+    assert parse_link("https://vk.com/Avto_Kzn") == ("vk", "avto_kzn")
+    assert parse_link("m.vk.com/public123/") == ("vk", "club123")
+    assert parse_link("https://vk.com/wall-123_45") == ("vk", "club123")
+    assert parse_link("vk.com/id5") is None and parse_link("https://vk.com/feed") is None
+    assert parse_link("@avto_kzn") == ("username", "avto_kzn")
+
+
+async def test_vk_group_joins_and_posts_reach_people(env):
+    """Человек прислал группу ВК → служебная страница вступила → новый пост из ленты пришёл карточкой с фото
+    и ссылкой на пост ВК; тот же пост со стены второй раз не приходит."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн")
+    await dp.feed_update(bot, cb("c:add"))
+    await dp.feed_update(bot, msg("https://vk.com/avto_kzn"))
+    assert "в очереди" in s.texts(USER)[-1] and "подключение ВК ещё настраивается" in s.texts(USER)[-1]
+    assert not await ctx.db.queued_channels() and len(await ctx.db.queued_channels("vk")) == 1
+
+    reader = VKReader(bot, ctx)
+    reader.api = api = FakeVK()
+    await reader.join_one((await ctx.db.queued_channels("vk"))[0])
+    assert api.calls == ["groups.getById", "groups.join"]
+    assert VK_KEY + 777 in ctx.channels
+    assert "«ВК · Авто Казань» подключён" in s.texts(USER)[-2] and "Всё готово" in s.texts(USER)[-1]
+
+    ctx.buffer_chat = -1009999999999
+    reader.since = int(time.time()) - 60
+    await reader.poll_wall(777)                                    # первый опрос стены только запоминает место
+    api.feed.append(vk_post(777, 51, "Toyota Camry 2013, 1 200 000 ₽, Казань", photo=True))
+    api.wall[777] = [vk_post(777, 51, "Toyota Camry 2013, 1 200 000 ₽, Казань", photo=True)]
+    await reader.poll_feed()
+    await asyncio.gather(*reader.tasks)
+    photo = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == ctx.buffer_chat][-1]
+    assert photo.photo == "https://sun.userapi.com/m.jpg"                       # не больше 1280 px
+    copy = [m for m in s.sent if isinstance(m, CopyMessage)][-1]
+    assert copy.chat_id == USER and "ВК · Авто Казань" in copy.caption
+    assert copy.reply_markup.inline_keyboard[0][0].url == "https://vk.com/wall-777_51"
+    await reader.poll_wall(777)
+    await reader.poll_feed()
+    assert not reader.tasks and len([m for m in s.sent if isinstance(m, CopyMessage)]) == 1
+
+
+async def test_vk_closed_group_waits_for_approval(env):
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн")
+    await dp.feed_update(bot, cb("c:add"))
+    await dp.feed_update(bot, msg("vk.com/club888\nvk.com/nobody_here"))
+    reader = VKReader(bot, ctx)
+    reader.api = api = FakeVK()
+    for _ in range(2):
+        await reader.join_one((await ctx.db.queued_channels("vk"))[0])
+    texts = s.texts(USER)
+    assert "Не получилось подключить «ВК · vk.com/nobody_here»: сообщество не найдено" in texts[-1]
+    assert "пока не добавлен" in texts[-2] and "Тачки ВК" in texts[-2]
+    await reader.check_approvals()
+    assert (await ctx.db.awaiting_channels("vk"))[0]["status"] == "awaiting" and not await ctx.db.awaiting_channels()
+    api.groups[1]["is_member"] = 1
+    await reader.check_approvals()
+    assert VK_KEY + 888 in ctx.channels and "одобрил заявку" in s.texts(USER)[-1]
+
+
+async def test_admin_connects_vk_in_chat(env):
+    """/vk — инструкция со ссылкой; /vk <адрес из браузера> — ключ проверен и сохранён, сообщение с ключом удалено."""
+    dp, bot, s, ctx = env
+    api = FakeVK()
+    ctx.vk = VKReader(bot, ctx, make_api=lambda token: api)
+    try:
+        await dp.feed_update(bot, msg("/start", ADMIN))
+        await dp.feed_update(bot, msg("/vk", ADMIN))
+        assert "oauth.vk.com/authorize" in s.texts(ADMIN)[-1] and "не подключён" in s.texts(ADMIN)[-1]
+        token = "vk1.a." + "x" * 60
+        await dp.feed_update(bot, msg(f"/vk https://oauth.vk.com/blank.html#access_token={token}&expires_in=0&user_id=1", ADMIN))
+        assert any(isinstance(m, DeleteMessage) for m in s.sent)
+        assert "ВКонтакте подключён: страница «Служебная Страница»" in s.texts(ADMIN)[-1]
+        assert await ctx.db.get_setting("vk_token") == token and ctx.vk.online
+        await dp.feed_update(bot, msg("/admin", ADMIN))
+        assert "ВКонтакте: ✅ «Служебная Страница»" in s.texts(ADMIN)[-1]
+    finally:
+        ctx.vk.runner.cancel()
+        ctx.vk = None

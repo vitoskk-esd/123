@@ -25,6 +25,7 @@ import texts as T
 from ctx import Ctx
 import plans
 from db import DAY, DEDUP_DAYS
+from links import channel_name
 import ai
 from parse import SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, sale_verdict
 from query import Filter, matches
@@ -40,7 +41,7 @@ PHOTO_TIMEOUT = 3        # сколько ждём пересылку фото; 
 
 @dataclass
 class RawPost:
-    chat_id: int                 # id канала в формате -100…
+    chat_id: int                 # id канала в формате -100… (сообщество ВК: VK_KEY + номер)
     msg_id: int
     text: str
     date: float                  # время публикации (unix)
@@ -99,6 +100,8 @@ async def _send(coro_factory, uid: int, ctx: Ctx):
 
 
 def post_url(channel: dict, msg_id: int) -> str | None:
+    if channel.get("vk_id"):
+        return f"https://vk.com/wall-{channel['vk_id']}_{msg_id}"
     if channel.get("username"):
         return f"https://t.me/{channel['username']}/{msg_id}"
     tg = abs(channel["tg_id"])
@@ -148,7 +151,7 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
         lines.append("⚡ " + " · ".join(good))
     if bad:
         lines.append("❗ " + " · ".join(bad))
-    name = channel.get("title") or (f"@{channel['username']}" if channel.get("username") else "канал")
+    name = channel_name(channel)
     lines.append(T.CARD_SOURCE.format(channel=html.escape(name), latency=seconds(latency_ms)))
     lines.append(T.CARD_FILTER.format(filter=html.escape(filter_text[:80])))
     if plan.delay:

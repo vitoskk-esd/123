@@ -47,6 +47,10 @@ async def main() -> None:
         log.warning("в оферте нет реквизитов — добавь переменные SELLER_NAME и SELLER_INN")
     if not await ctx.reader.resume():
         log.warning("служебный аккаунт не подключён — напиши боту /start, потом /connect")
+    from vk import VKReader
+    ctx.vk = VKReader(bot, ctx)
+    if not await ctx.vk.resume():
+        log.warning("ВКонтакте не подключён — сообщества ВК не читаются; подключить: /vk")
     jobs_task = asyncio.create_task(jobs.loop(bot, ctx))
     log.info("бот запущен — напиши ему /start в Telegram")
     try:

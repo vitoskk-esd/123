@@ -46,6 +46,11 @@ class Config:
     poll_rps: float = 3.0            # сколько каналов в секунду опрашиваем сами (Telegram присылает посты больших каналов с опозданием)
     ai_key: str = ""                 # ключ Gemini (aistudio.google.com) — ИИ перепроверяет каждый подходящий пост
     ai_model: str = "gemini-3.1-flash-lite"
+    vk_token: str = ""               # ключ служебной страницы ВК; можно не задавать — админ пришлёт его боту в /vk
+    vk_poll: int = 8                 # раз во сколько секунд смотрим ленту служебной страницы ВК (новые посты сообществ)
+    vk_wall_rps: float = 0.5         # запасной опрос стен сообществ по кругу, сообществ в секунду (0 — выключить)
+    vk_join_interval: int = 120      # пауза между вступлениями в сообщества ВК, сек — чтобы ВК не просил капчу
+    vk_app_id: int = 2685278         # приложение, через которое служебная страница выдаёт ключ (/vk)
     ai_proxy: bool = False           # ключ подставляет прокси (облачная среда разработки) — для проверок без своего ключа
 
     @property
@@ -85,4 +90,9 @@ def get_config() -> Config:
         ai_key=e("GEMINI_API_KEY", ""),
         ai_model=e("GEMINI_MODEL", "gemini-3.1-flash-lite"),
         ai_proxy=e("AI_PROXY", "0") == "1",
+        vk_token=e("VK_TOKEN", ""),
+        vk_poll=int(e("VK_POLL", "8")),
+        vk_wall_rps=float(e("VK_WALL_RPS", "0.5")),
+        vk_join_interval=int(e("VK_JOIN_INTERVAL", "120")),
+        vk_app_id=int(e("VK_APP_ID", "2685278")),
     )

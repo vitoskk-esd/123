@@ -55,8 +55,8 @@ def render(basic: Plan, pro: Plan, trial: Plan) -> bytes:
     rows = [
         ("Машины приходят", _wait(basic.delay) if basic.delay else "сразу", "мгновенно"),
         ("Фильтров", filters, "без лимита"),
-        ("Общая база каналов", True, True),
-        ("Свои каналы, закрытые", own or False, True),
+        ("Общая база: Telegram + ВК", True, True),
+        ("Свои каналы и группы ВК", own or False, True),
         ("Насколько ниже рынка", basic.market, True),
         ("Фильтр «ниже рынка»", basic.market, True),
         ("ИИ-проверка поста", basic.ai, True),

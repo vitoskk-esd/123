@@ -4,11 +4,12 @@ import asyncio
 from aiogram import Bot, Router
 from aiogram.exceptions import TelegramForbiddenError
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message
+from aiogram.types import LinkPreviewOptions, Message
 
 from ctx import Ctx
-from links import label, parse_link
+from links import channel_name, label, parse_link
 import texts as T
+import vk
 from pipeline import seconds
 
 router = Router(name="admin")
@@ -30,11 +31,15 @@ async def is_admin(msg: Message, ctx: Ctx) -> bool:
 
 
 async def queue_wait(ctx: Ctx, channel_ids: list[int]) -> str:
-    """Сколько ждать, пока подключится последний из этих каналов: каналы впереди в очереди + свои, по одному за паузу."""
-    queue = [r["id"] for r in await ctx.db.queued_channels()]
-    last = max((queue.index(c) for c in channel_ids if c in queue), default=-1)
-    interval = ctx.cfg.join_interval
-    minutes = max(1, round((last + 1) * interval / 60))
+    """Сколько ждать, пока подключится последний из этих каналов: каналы впереди в очереди + свои, по одному за паузу.
+    У Telegram и ВК очереди свои и идут параллельно — ждать дольше там, где дольше."""
+    wait, interval = 0, ctx.cfg.join_interval
+    for kind, every in (("tg", ctx.cfg.join_interval), ("vk", ctx.cfg.vk_join_interval)):
+        queue = [r["id"] for r in await ctx.db.queued_channels(kind)]
+        last = max((queue.index(c) for c in channel_ids if c in queue), default=-1)
+        if last >= 0 and (last + 1) * every > wait:
+            wait, interval = (last + 1) * every, every
+    minutes = max(1, round(wait / 60))
     every = f"{interval} с" if interval < 60 else f"{interval / 60:g} мин".replace(".", ",")
     return T.CHANNELS_WAIT.format(minutes=minutes, interval=every)
 
@@ -51,9 +56,11 @@ async def admin(msg: Message, ctx: Ctx) -> None:
            ) if ctx.cfg.payments_on else "Оплата не подключена — бот бесплатный для всех."
     src = "\n".join(f"• {r['source']}: {r['users']} чел., оплатили {r['paid'] or 0}" for r in s["sources"])
     reader = "✅ подключён" if ctx.reader and ctx.reader.online else "❌ не подключён — /connect"
+    vk_state = vk_status(ctx)
     ai_state = "✅ включена" if ctx.cfg.ai_on else "❌ выключена — добавь GEMINI_API_KEY в «Переменные»"
     await msg.answer(
         f"🤖 Служебный аккаунт: {reader}\n"
+        f"🟦 ВКонтакте: {vk_state}\n"
         f"🧠 ИИ-проверка постов: {ai_state}, проверено за сутки: {p['ai'] or 0}\n"
         f"👥 Людей: <b>{s['users']}</b>, с фильтрами: {s['with_filters']}\n{pay}\n\n"
         f"⚡ За сутки: постов {p['n']}, машин с ценой {p['cars'] or 0}, дублей {p['dups'] or 0}\n"
@@ -63,10 +70,10 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"📢 Каналы базы: {ch.get(('joined', 1), 0)} подключено, {ch.get(('queued', 1), 0)} в очереди, "
         f"{ch.get(('awaiting', 1), 0)} ждут одобрения админа, {ch.get(('failed', 1), 0)} с ошибкой · свои у людей: {ch.get(('joined', 0), 0)}\n\n"
         f"🔗 Откуда пришли:\n{src or '—'}\n\n"
-        "Команды:\n/add @канал1 @канал2 — добавить каналы в общую базу\n/list — список каналов\n"
+        "Команды:\n/add @канал1 vk.com/группа — добавить каналы и группы ВК в общую базу\n/list — список каналов\n"
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
         "/similar — найти новые каналы через «похожие каналы» Telegram\n"
-        "/del @канал — убрать канал\n/broadcast текст — написать всем")
+        "/del @канал — убрать канал\n/vk — подключить служебную страницу ВКонтакте\n/broadcast текст — написать всем")
 
 
 @router.message(Command("add"))
@@ -94,7 +101,8 @@ async def addbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
     await msg.answer(
         (f"В очередь на подключение: {len(added)}\n" + "\n".join(added) if added else "Пришли ссылки: /add @канал1 t.me/канал2") +
         (f"\n\nНе понял: {', '.join(bad)}" if bad else "") +
-        (await queue_wait(ctx, queued) + "\nХод подключения — в /list." if queued else ""))
+        (await queue_wait(ctx, queued) + "\nХод подключения — в /list." if queued else "") +
+        (T.VK_OFFLINE if any(parse_link(p) and parse_link(p)[0] == "vk" for p in parts) and not vk_online(ctx) else ""))
 
 
 @router.message(Command("similar"))
@@ -154,7 +162,7 @@ async def delbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
     link = parse_link(command.args or "")
     if not link:
         return await msg.answer("Формат: /del @канал или ссылка.")
-    ok = await ctx.db.remove_channel(*(link[1], None) if link[0] == "username" else (None, link[1]))
+    ok = await ctx.db.remove_channel(**{link[0]: link[1]})
     await ctx.refresh_channels()
     await msg.answer("Канал убран — посты из него больше не приходят." if ok else "Такого канала нет в базе.")
 
@@ -165,11 +173,44 @@ async def base(msg: Message, ctx: Ctx) -> None:
         return
     rows = await ctx.db.base_channels()
     icon = {"joined": "✅", "queued": "⏳", "awaiting": "🕓", "failed": "❌"}
-    lines = [f"{icon.get(r['status'], '?')} {r['title'] or ('@' + r['username'] if r['username'] else 'закрытый')} "
+    lines = [f"{icon.get(r['status'], '?')} {channel_name(r)} "
              f"· {r['region'] or '—'} · постов {r['posts']}" + (f" · {r['error']}" if r["error"] else "") for r in rows]
     text = "\n".join(lines) or "База пуста. Добавь каналы: /add @канал1 @канал2"
     for i in range(0, len(text), 3800):
         await msg.answer(text[i:i + 3800])
+
+
+def vk_online(ctx: Ctx) -> bool:
+    return bool(ctx.vk and ctx.vk.online)
+
+
+def vk_status(ctx: Ctx) -> str:
+    if not vk_online(ctx):
+        return "❌ не подключён — /vk"
+    return f"✅ «{ctx.vk.name}»" + (f" · ⚠️ {ctx.vk.error}" if ctx.vk.error else "")
+
+
+@router.message(Command("vk"))
+async def vk_connect(msg: Message, command: CommandObject, ctx: Ctx) -> None:
+    """/vk — как подключить служебную страницу ВК; /vk <адрес из браузера или ключ> — подключить."""
+    if not await is_admin(msg, ctx):
+        return
+    if not command.args:
+        return await msg.answer(T.VK_HOW.format(status=vk_status(ctx), url=vk.auth_url(ctx.cfg.vk_app_id)),
+                                link_preview_options=LinkPreviewOptions(is_disabled=True))
+    try:
+        await msg.delete()                       # ключ даёт доступ к странице — в переписке его не оставляем
+    except Exception:
+        pass
+    token = vk.token_from(command.args)
+    if not token:
+        return await msg.answer(T.VK_TOKEN_BAD)
+    try:
+        name = await ctx.vk.attach(token)
+    except Exception as e:
+        return await msg.answer(T.VK_TOKEN_FAIL.format(error=e))
+    queued = len(await ctx.db.queued_channels("vk"))
+    await msg.answer(T.VK_CONNECTED.format(name=name, queued=queued))
 
 
 @router.message(Command("broadcast"))

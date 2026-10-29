@@ -3,6 +3,7 @@
 
 Каналы: base=1 — общая база (видят все, каждый может отключить у себя: user_channels.state='off');
 base=0 — свой канал человека (видит только тот, кто добавил: state='own'). status: queued → joined | failed | awaiting (ждём одобрения админа канала).
+Сообщества ВКонтакте лежат там же: vk — как прислали (короткое имя или club123), vk_id — номер сообщества после вступления.
 """
 import time
 from pathlib import Path
@@ -83,7 +84,11 @@ class DB:
                     "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'",
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
                     "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
-                    "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0"):
+                    "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0",
+                    "ALTER TABLE channels ADD COLUMN vk TEXT",
+                    "ALTER TABLE channels ADD COLUMN vk_id INTEGER",
+                    "CREATE UNIQUE INDEX IF NOT EXISTS channels_vk ON channels(vk) WHERE vk IS NOT NULL",
+                    "CREATE UNIQUE INDEX IF NOT EXISTS channels_vk_id ON channels(vk_id) WHERE vk_id IS NOT NULL"):
             try:
                 await self.conn.execute(sql)
             except aiosqlite.OperationalError:
@@ -170,16 +175,16 @@ class DB:
         await self._run("DELETE FROM filters WHERE id=? AND user_id=?", fid, uid)
 
     # ---------- каналы ----------
-    async def add_channel(self, *, username: str | None = None, invite: str | None = None, region: str | None = None,
-                          base: bool = True, added_by: int | None = None) -> tuple[int, bool]:
-        """(id, новый ли). Тот же @канал или ссылка-приглашение второй раз не добавляется."""
-        row = await self._one("SELECT id FROM channels WHERE username=? OR invite=?", username, invite)
+    async def add_channel(self, *, username: str | None = None, invite: str | None = None, vk: str | None = None,
+                          region: str | None = None, base: bool = True, added_by: int | None = None) -> tuple[int, bool]:
+        """(id, новый ли). Тот же @канал, ссылка-приглашение или сообщество ВК второй раз не добавляется."""
+        row = await self._one("SELECT id FROM channels WHERE username=? OR invite=? OR vk=?", username, invite, vk)
         if row:
             if base:
                 await self._run("UPDATE channels SET base=1, region=COALESCE(?, region) WHERE id=?", region, row["id"])
             return row["id"], False
-        cid = await self._run("INSERT INTO channels (username, invite, region, base, added_by, created_at) VALUES (?,?,?,?,?,?)",
-                              username, invite, region, int(base), added_by, time.time())
+        cid = await self._run("INSERT INTO channels (username, invite, vk, region, base, added_by, created_at) VALUES (?,?,?,?,?,?,?)",
+                              username, invite, vk, region, int(base), added_by, time.time())
         return cid, True
 
     async def channel(self, cid: int):
@@ -188,8 +193,12 @@ class DB:
     async def channel_by_tg(self, tg_id: int):
         return await self._one("SELECT * FROM channels WHERE tg_id=?", tg_id)
 
-    async def queued_channels(self) -> list:
-        return await self._all("SELECT * FROM channels WHERE status='queued' ORDER BY id")
+    async def channel_by_vk(self, vk_id: int):
+        return await self._one("SELECT * FROM channels WHERE vk_id=?", vk_id)
+
+    async def queued_channels(self, kind: str = "tg") -> list:
+        """Очередь на вступление: kind='tg' — каналы Telegram, 'vk' — сообщества ВКонтакте."""
+        return await self._all(f"SELECT * FROM channels WHERE status='queued' AND vk IS {'NOT ' if kind == 'vk' else ''}NULL ORDER BY id")
 
     async def unmuted_channels(self) -> list:
         return await self._all("SELECT * FROM channels WHERE status='joined' AND COALESCE(muted, 0)=0 AND tg_id IS NOT NULL")
@@ -210,19 +219,29 @@ class DB:
         """Вступили. Если этот же канал уже есть под другой записью (добавили и по @нику, и по приглашению) — склеиваем."""
         other = await self.channel_by_tg(tg_id)
         if other and other["id"] != cid:
-            await self._run("UPDATE user_channels SET channel_id=? WHERE channel_id=?", other["id"], cid)
-            await self._run("UPDATE OR IGNORE join_waiters SET channel_id=? WHERE channel_id=?", other["id"], cid)
-            row = await self.channel(cid)
-            if row["base"]:
-                await self._run("UPDATE channels SET base=1 WHERE id=?", other["id"])
-            await self._run("DELETE FROM channels WHERE id=?", cid)
-            return
+            return await self._merge(cid, other["id"])
         await self._run("UPDATE channels SET tg_id=?, title=?, username=COALESCE(username, ?), account=?, status='joined', error=NULL "
                         "WHERE id=?", tg_id, title, username, account, cid)
 
-    async def remove_channel(self, username: str | None, invite: str | None) -> bool:
+    async def vk_joined(self, cid: int, vk_id: int, title: str) -> None:
+        """Вступили в сообщество ВК. Его уже прислали по другой ссылке (club123 и короткое имя) — склеиваем."""
+        other = await self.channel_by_vk(vk_id)
+        if other and other["id"] != cid:
+            return await self._merge(cid, other["id"])
+        await self._run("UPDATE channels SET vk_id=?, title=?, account='vk', status='joined', error=NULL WHERE id=?", vk_id, title, cid)
+
+    async def _merge(self, cid: int, other: int) -> None:
+        await self._run("UPDATE OR IGNORE user_channels SET channel_id=? WHERE channel_id=?", other, cid)
+        await self._run("UPDATE OR IGNORE join_waiters SET channel_id=? WHERE channel_id=?", other, cid)
+        row = await self.channel(cid)
+        if row["base"]:
+            await self._run("UPDATE channels SET base=1 WHERE id=?", other)
+        await self._run("DELETE FROM channels WHERE id=?", cid)
+
+    async def remove_channel(self, username: str | None = None, invite: str | None = None, vk: str | None = None) -> bool:
         """Убрать канал совсем (попросил владелец): посты из него больше никому не идут."""
-        return await self._count("UPDATE channels SET base=0, status='removed' WHERE username=? OR invite=?", username, invite) > 0
+        return await self._count("UPDATE channels SET base=0, status='removed' WHERE username=? OR invite=? OR vk=?",
+                                 username, invite, vk) > 0
 
     async def channel_awaiting(self, cid: int, title: str | None) -> list[int]:
         """Заявка на вступление ушла админу канала. Кто ждал этот канал — ждёт теперь одобрения (их и уведомим потом)."""
@@ -236,8 +255,8 @@ class DB:
     async def add_approval_waiter(self, cid: int, uid: int) -> None:
         await self._run("INSERT OR IGNORE INTO approval_waiters (channel_id, user_id) VALUES (?,?)", cid, uid)
 
-    async def awaiting_channels(self) -> list:
-        return await self._all("SELECT * FROM channels WHERE status='awaiting' ORDER BY id")
+    async def awaiting_channels(self, kind: str = "tg") -> list:
+        return await self._all(f"SELECT * FROM channels WHERE status='awaiting' AND vk IS {'NOT ' if kind == 'vk' else ''}NULL ORDER BY id")
 
     async def pop_approval_waiters(self, cid: int) -> list[int]:
         rows = await self._all("SELECT user_id FROM approval_waiters WHERE channel_id=?", cid)

@@ -236,10 +236,16 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
             await ctx.db.add_waiter(cid, uid)
             replies.append(T.CHANNEL_QUEUED.format(name=name))
             mine.append(cid)
-    wait = await queue_wait(ctx, mine) if mine else ""
+    wait = (await queue_wait(ctx, mine) if mine else "") + vk_note(ctx, msg.text)
     markup = K.plans(plans.plans(ctx.cfg), False, only="pro") if upsell else K.menu()
     await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL, reply_markup=markup)
 
+
+
+def vk_note(ctx: Ctx, text: str) -> str:
+    """Прислали группу ВК, а служебная страница ВК не подключена — честно говорим, что подключим позже."""
+    vk_sent = any((parse_link(x) or ("",))[0] == "vk" for x in re.split(r"[\s,]+", text) if x)
+    return T.VK_OFFLINE if vk_sent and not (ctx.vk and ctx.vk.online) else ""
 
 
 async def add_to_base(msg: Message, ctx: Ctx) -> None:
@@ -268,7 +274,7 @@ async def add_to_base(msg: Message, ctx: Ctx) -> None:
             replies.append(T.CHANNEL_BASE_QUEUED.format(name=name))
             queued.append(cid)
     await ctx.refresh_channels()
-    wait = await queue_wait(ctx, queued) if queued else ""
+    wait = (await queue_wait(ctx, queued) if queued else "") + vk_note(ctx, msg.text)
     await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL_ADMIN, reply_markup=K.menu())
 
 
@@ -328,7 +334,7 @@ def plans_text(ctx: Ctx, u) -> str:
     b = p["basic"]
     return T.PLANS.format(trial=trial, basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
                           basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}",
-                          basic_own=f"до {b.max_own} своих каналов" if b.max_own else "только общая база каналов")
+                          basic_own=f"до {b.max_own} своих каналов" if b.max_own else "без своих каналов и групп")
 
 
 _plans_photo: dict[tuple, str] = {}     # картинка сравнения тарифов → file_id в Telegram (рисуем один раз)
