@@ -111,4 +111,52 @@
   <g class="mouth" id="${p}-mouth-meh" style="display:none"><path d="M190 310 h40" stroke="${K}" stroke-width="7" stroke-linecap="round"/></g>
  </g>
 </svg>`;
+  // ---------- БАБА ГАЛЯ: «первая хозяйка». Платок, кофта, юбка, сумка, хитрые глаза за очками ----------
+  CHARS.galya = p => `
+<svg viewBox="0 0 420 800" class="char" id="${p}">
+ <g id="${p}-body">
+  <path d="M180 640 v94 M240 640 v94" stroke="#c9a68a" stroke-width="22" stroke-linecap="round"/>
+  <path d="M150 744 q0 -22 22 -22 h36 q8 0 8 22 z M206 744 q0 -22 8 -22 h36 q24 0 24 22 z" fill="#3a2a20" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <!-- юбка в клетку -->
+  <path d="M140 520 q-14 70 -20 140 h180 q-6 -70 -20 -140 z" fill="#6b4c8a" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <path d="M150 560 h120 M140 610 h140 M175 520 v140 M245 520 v140" stroke="#4e3570" stroke-width="5"/>
+  <!-- кофта вязаная -->
+  <path d="M134 420 q-6 70 6 112 h140 q12 -42 6 -112 q-26 -40 -76 -40 q-50 0 -76 40 z" fill="#c4553f" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <path d="M210 392 v138" stroke="${K}" stroke-width="5"/>
+  <g fill="#f3e3c3" stroke="${K}" stroke-width="3">${[430, 466, 502].map(y => `<circle cx="210" cy="${y}" r="7"/>`).join("")}</g>
+  <path d="M150 450 q8 4 16 0 M150 480 q8 4 16 0 M254 450 q8 4 16 0 M254 480 q8 4 16 0" stroke="#9b3a28" stroke-width="4" fill="none"/>
+ </g>
+ <g id="${p}-armL" style="transform-origin:142px 420px">
+  <path d="M142 416 q-30 40 -28 104 q4 16 22 12 q10 -52 30 -84" fill="#c4553f" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <!-- сумка -->
+  <path d="M96 500 q22 -40 44 0" fill="none" stroke="#3a2a20" stroke-width="7"/>
+  <rect x="84" y="500" width="68" height="58" rx="12" fill="#5b3a26" stroke="${K}" stroke-width="${W}"/><circle cx="118" cy="520" r="5" fill="#f5c542"/>
+  <circle cx="126" cy="532" r="15" fill="#e7b896" stroke="${K}" stroke-width="${W}"/>
+ </g>
+ <g id="${p}-armR" style="transform-origin:278px 420px">
+  <path d="M278 416 q30 40 30 104 q-4 16 -22 12 q-10 -52 -30 -84" fill="#c4553f" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <circle cx="294" cy="532" r="15" fill="#e7b896" stroke="${K}" stroke-width="${W}"/>
+ </g>
+ <g id="${p}-head" style="transform-origin:210px 392px">
+  <!-- платок -->
+  <path d="M118 250 q-8 -150 92 -156 q100 6 92 156 q-6 70 -40 104 l-52 4 l-52 -4 q-34 -34 -40 -104 z" fill="#e8c547" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <g fill="#c2402f">${[[150, 140], [210, 120], [270, 140], [140, 200], [280, 200], [160, 300], [260, 300]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9"/>`).join("")}</g>
+  <path d="M170 360 l40 30 l40 -30 l-14 -10 h-52 z" fill="#e8c547" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M146 220 q0 -80 64 -80 q64 0 64 80 q0 56 -20 84 q-18 24 -44 24 q-26 0 -44 -24 q-20 -28 -20 -84 z" fill="#ecc0a0" stroke="${K}" stroke-width="${W}"/>
+  <path d="M150 196 q30 -30 60 -26 q30 -4 60 26 q-30 -14 -60 -12 q-30 -2 -60 12 z" fill="#d9d9d9" stroke="${K}" stroke-width="4"/>
+  <path d="M168 270 q-6 10 0 18 M252 270 q6 10 0 18 M178 206 q10 -6 20 0" stroke="#c99878" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <g id="${p}-brows"><path d="M168 200 q14 -8 28 0" stroke="#9a9a9a" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M224 200 q14 -8 28 0" stroke="#9a9a9a" stroke-width="7" stroke-linecap="round" fill="none"/></g>
+  <g id="${p}-eyes"><path d="M172 226 q12 -10 24 0" stroke="${K}" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M224 226 q12 -10 24 0" stroke="${K}" stroke-width="6" fill="none" stroke-linecap="round"/>
+   <circle cx="184" cy="226" r="5" fill="${K}"/><circle cx="236" cy="226" r="5" fill="${K}"/></g>
+  <g id="${p}-lids" style="transform-origin:210px 224px;transform:scaleY(0)"><path d="M170 230 v-14 h28 v14 z M222 230 v-14 h28 v14 z" fill="#ecc0a0"/></g>
+  <g fill="none" stroke="#7a5230" stroke-width="5"><circle cx="184" cy="226" r="20"/><circle cx="236" cy="226" r="20"/><path d="M204 226 h12"/></g>
+  <path d="M208 236 q-12 22 0 28 q8 3 14 -2" fill="#e2ab88" stroke="${K}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="168" cy="262" rx="13" ry="8" fill="#ff8a8a" opacity=".55"/><ellipse cx="252" cy="262" rx="13" ry="8" fill="#ff8a8a" opacity=".55"/>
+  <g class="mouth" id="${p}-mouth-flat"><path d="M192 288 q18 10 36 0" fill="none" stroke="${K}" stroke-width="6" stroke-linecap="round"/></g>
+  <g class="mouth" id="${p}-mouth-grin" style="display:none"><path d="M188 284 q22 20 44 0" fill="none" stroke="${K}" stroke-width="6" stroke-linecap="round"/><rect x="214" y="288" width="10" height="8" fill="#f5c542"/></g>
+  <g class="mouth" id="${p}-mouth-talk" style="display:none"><path d="M190 282 q20 32 40 0 z" fill="#5a1e1e" stroke="${K}" stroke-width="6" stroke-linejoin="round"/></g>
+  <g class="mouth" id="${p}-mouth-o" style="display:none"><ellipse cx="210" cy="292" rx="10" ry="14" fill="#5a1e1e" stroke="${K}" stroke-width="6"/></g>
+  <g class="mouth" id="${p}-mouth-meh" style="display:none"><path d="M194 292 h32" stroke="${K}" stroke-width="7" stroke-linecap="round"/></g>
+ </g>
+</svg>`;
 })();

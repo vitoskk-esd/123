@@ -1,0 +1,20 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs>
+      <linearGradient id="msky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06071a"/><stop offset="1" stop-color="#2a1250"/></linearGradient>
+      <linearGradient id="mlot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e3142"/><stop offset="1" stop-color="#15161f"/></linearGradient>
+      <filter id="mglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+    </defs>
+    <rect width="1080" height="1100" fill="url(#msky)"/>
+    <!-- здание ТЦ -->
+    <rect x="-20" y="560" width="1120" height="500" fill="#1d2033" stroke="#000" stroke-width="6"/>
+    <g fill="#5ad1ff" opacity=".35"><rect x="30" y="700" width="70" height="260"/><rect x="140" y="700" width="70" height="260"/><rect x="250" y="700" width="70" height="260"/><rect x="360" y="700" width="70" height="260"/><rect x="470" y="700" width="70" height="260"/><rect x="580" y="700" width="70" height="260"/><rect x="690" y="700" width="70" height="260"/><rect x="800" y="700" width="70" height="260"/><rect x="910" y="700" width="70" height="260"/><rect x="1020" y="700" width="70" height="260"/></g>
+    <rect x="300" y="590" width="480" height="90" rx="16" fill="#0b0c16" stroke="#000" stroke-width="6"/>
+    <text x="540" y="655" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="52" fill="#ff2ea6" filter="url(#mglow)">ТЦ «ГАЛАКТИКА»</text>
+    <text x="540" y="655" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="52" fill="#ffb3e0">ТЦ «ГАЛАКТИКА»</text>
+    <g><rect x="80" y="380" width="22" height="680" fill="#0a0b0f"/><rect x="978" y="380" width="22" height="680" fill="#0a0b0f"/>
+      <rect x="60" y="370" width="62" height="20" rx="6" fill="#e9f6ff"/><rect x="958" y="370" width="62" height="20" rx="6" fill="#e9f6ff"/></g>
+    <rect x="0" y="1060" width="1080" height="860" fill="url(#mlot)"/>
+    <path d="M0 1060 h1080" stroke="#000" stroke-width="8"/>
+    <g stroke="#e8e8e8" stroke-width="10" opacity=".7"><path d="M0 1100 L-135.0 1920"/><path d="M270 1100 L202.5 1920"/><path d="M540 1100 L540.0 1920"/><path d="M810 1100 L877.5 1920"/><path d="M1080 1100 L1215.0 1920"/></g>
+    <g fill="#ff2ea6" opacity=".18"><ellipse cx="540" cy="1200" rx="420" ry="60"/></g>
+  </svg>

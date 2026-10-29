@@ -1,0 +1,38 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.2,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. Hook lines: punchy, intriguing, like a TV show host. Countdown: slow and dramatic. Reveal lines: weighty. Rule lines: firm, useful advice. Last lines: dry, cocky call to action."
+ },
+ "seryoga": {
+  "voice": "Puck",
+  "tempo": 1.15,
+  "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Curious, polite, then catching the seller in a lie, calm and smart. In the guessing game: confident and excited, then surprised. Wherever the word \"блин\" appears, say it clearly as a curse (it will be bleeped)."
+ },
+ "vika": {
+  "voice": "Kore",
+  "tempo": 1.15,
+  "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Short, confident, slightly sarcastic, with a smirk."
+ },
+ "mihalych": {
+  "voice": "Gacrux",
+  "tempo": 1.12,
+  "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Unhurried, matter-of-fact verdicts, like reading a diagnosis."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.2,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Annoyed, rushing out of a garage, swearing at his accomplice. Wherever the word \"блин\" appears, say it sharply and clearly as a curse (it will be bleeped)."
+ },
+ "galya": {
+  "voice": "Sulafat",
+  "tempo": 1.12,
+  "profile": "Baba Galya — a sly Russian grandmother in her 70s selling a car from a garage; sweet, folksy voice, calls everyone «сынок» and «милок», but she is in on a scam. Warm, slightly cracked old voice.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: sweet, convincing, folksy. Line 2: innocent, a bit caught. Line 3: panicked, calling loudly for help."
+ }
+}
