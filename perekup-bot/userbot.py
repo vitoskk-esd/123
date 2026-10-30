@@ -25,7 +25,7 @@ from telethon.tl.functions.channels import (CreateChannelRequest, EditAdminReque
                                             JoinChannelRequest)
 from telethon.tl.types import (ChatAdminRights, InputFolderPeer, InputNotifyPeer, InputPeerChannel,
                                InputPeerNotifySettings)
-from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
+from telethon.tl.functions.messages import CheckChatInviteRequest, ExportChatInviteRequest, ImportChatInviteRequest
 
 import keyboards as K
 import texts as T
@@ -97,6 +97,7 @@ class Reader:
         client.add_event_handler(self._on_message, events.NewMessage())
         client.add_event_handler(self._on_edit, events.MessageEdited())
         await self.ensure_buffer()
+        await self.ensure_paylog()
         await self.ctx.refresh_channels()
         try:
             await client.get_dialogs()          # кэш каналов — чтобы опрашивать их без лишних запросов
@@ -126,6 +127,27 @@ class Reader:
             await self.ctx.db.set_setting("buffer_hash", access)
         self.buffer = InputPeerChannel(int(cid), int(access))
         self.ctx.buffer_chat = int(f"-100{cid}")
+
+    async def ensure_paylog(self) -> None:
+        """Закрытый канал «оплаты» для админа: служебный аккаунт создаёт его один раз, делает бота админом и сохраняет
+        ссылку-приглашение (её видно в админ-панели). Сюда бот пишет каждую оплату сразу. Не получилось — оплаты идут админу в личку."""
+        cid = await self.ctx.db.get_setting("paylog_id")
+        if not cid:
+            try:
+                ch = (await self.client(CreateChannelRequest(
+                    title="Перехват — оплаты", about="Каждая оплата подписки в боте — сразу сюда. Закрытый канал для админа.",
+                    broadcast=True))).chats[0]
+                me = await self.bot.me()
+                await self.client(EditAdminRequest(ch, me.username, ChatAdminRights(post_messages=True, edit_messages=True,
+                                                                                     delete_messages=True), rank="bot"))
+                link = (await self.client(ExportChatInviteRequest(ch))).link
+            except Exception as e:
+                log.warning("канал оплат не создан (%s) — оплаты будут приходить админу в личку", e)
+                return
+            cid = str(ch.id)
+            await self.ctx.db.set_setting("paylog_id", cid)
+            await self.ctx.db.set_setting("paylog_link", link)
+        self.ctx.paylog_chat = int(f"-100{cid}")
 
     def _photo(self, peer_of, msg_id: int):
         async def forward() -> int | None:

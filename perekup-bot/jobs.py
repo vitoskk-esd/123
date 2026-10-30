@@ -34,7 +34,7 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
     # оплатил, но не нажал «Я оплатил» — продлеваем сами
     for p in await ctx.db.pending_payments():
         try:
-            until = await apply_payment(ctx, p["user_id"], p["yk_id"], await ctx.pay.status(p["yk_id"]))
+            until = await apply_payment(ctx, p["user_id"], p["yk_id"], await ctx.pay.status(p["yk_id"]), bot)
         except Exception as e:
             log.info("статус платежа %s: %s", p["yk_id"], e)
             continue

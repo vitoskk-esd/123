@@ -1306,3 +1306,44 @@ async def test_admin_can_turn_off_new_user_notifications(env):
     assert "Пришёл из: <b>Threads</b>" in s.texts(ADMIN)[-1]
     await dp.feed_update(bot, cb("adm:notify", USER))                                # не админ — ничего не меняет
     assert await ctx.db.get_setting("notify_new") == "1"
+
+
+class FakePaylogCreator(FakeCreator):
+    async def __call__(self, request):
+        r = await super().__call__(request)
+        if type(request).__name__ == "ExportChatInviteRequest":
+            return type("I", (), {"link": "https://t.me/+PayLogInvite"})()
+        return r
+
+
+async def test_payments_go_live_to_paylog_channel(env):
+    """Служебный аккаунт один раз создаёт закрытый канал «оплаты»; каждая оплата — сразу туда: сумма, тариф, кто,
+    до какого числа, откуда пришёл, первая или повторная, итог за сегодня. Ссылка на канал — в админ-панели."""
+    dp, bot, s, ctx = env
+    reader = Reader(bot, ctx, FakePaylogCreator())
+    await reader.ensure_paylog(); await reader.ensure_paylog()
+    assert reader.client.calls == ["CreateChannelRequest", "EditAdminRequest", "ExportChatInviteRequest"]
+    assert ctx.paylog_chat == -1004242 and await ctx.db.get_setting("paylog_link") == "https://t.me/+PayLogInvite"
+    await dp.feed_update(bot, msg("/start inst"))
+    for plan in ("trial", "pro"):
+        await dp.feed_update(bot, cb(f"s:pay:{plan}"))
+        pay = await ctx.db.last_pending(USER)
+        ctx.pay.statuses[pay["yk_id"]] = "succeeded"
+        await dp.feed_update(bot, cb("s:check"))
+    log1, log2 = s.texts(ctx.paylog_chat)
+    assert "Оплата +490 ₽</b> · Пробный день" in log1 and "первая оплата" in log1 and "Instagram" in log1 and "@u111" in log1
+    assert "Оплата +2 490 ₽</b> · PRO" in log2 and "2-я оплата" in log2 and "Сегодня: 2 оплаты на 2 980 ₽" in log2
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
+    assert "Канал оплат (каждая оплата — сразу): https://t.me/+PayLogInvite" in s.texts(ADMIN)[-1]
+
+
+async def test_payment_goes_to_admin_without_paylog_channel(env):
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg("/start threads"))
+    await dp.feed_update(bot, cb("s:pay:basic"))
+    pay = await ctx.db.last_pending(USER)
+    ctx.pay.statuses[pay["yk_id"]] = "succeeded"
+    await jobs.tick(bot, ctx)                                             # оплатил, но не нажал «Я оплатил» — фон засчитал
+    assert "Оплата +1 390 ₽</b> · Простой" in s.texts(ADMIN)[-1] and "Threads" in s.texts(ADMIN)[-1]

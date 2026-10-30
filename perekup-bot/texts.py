@@ -316,9 +316,17 @@ PANEL = (
     "   🚀 PRO — <b>{pro}</b>\n"
     "   🚘 Простой — <b>{basic}</b>\n"
     "   🔥 Пробный день — <b>{trial}</b>\n"
-    "💰 Оплат за всё время: {paid_n} на {paid_sum} ₽ · за 30 дней: {paid30_n} на {paid30_sum} ₽{free}\n\n"
+    "💰 Оплат за всё время: {paid_n} на {paid_sum} ₽ · за 30 дней: {paid30_n} на {paid30_sum} ₽{paylog}{free}\n\n"
     "Ссылки для шапки профиля:\nInstagram — <code>{link}?start=inst</code>\nThreads — <code>{link}?start=threads</code>"
 )
 PANEL_FREE = "\n\n⚠️ Оплата не подключена — сейчас бот бесплатный для всех, подписок нет."
 BTN_NOTIFY_ON = "🔔 Уведомления о новых: вкл — выключить"
 BTN_NOTIFY_OFF = "🔕 Уведомления о новых: выкл — включить"
+PAYLOG = ("💰 <b>Оплата +{amount} ₽</b> · {plan}\n"
+          "👤 {who}\n"
+          "📅 доступ до {until} · {kind}\n"
+          "🔗 пришёл из: {src}\n\n"
+          "Сегодня: {n} {word} на {sum} ₽")
+PAYLOG_FIRST, PAYLOG_AGAIN = "🆕 первая оплата", "🔁 {k}-я оплата"
+PANEL_PAYLOG = "\n📣 Канал оплат (каждая оплата — сразу): {link}"
+PANEL_NO_PAYLOG = "\n📣 Канал оплат появится, когда подключён служебный аккаунт (/connect); пока оплаты приходят тебе сюда"

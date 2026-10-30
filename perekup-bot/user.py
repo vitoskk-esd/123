@@ -410,7 +410,7 @@ async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
     await cb.answer()
 
 
-async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str) -> float | None:
+async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str, bot: Bot | None = None) -> float | None:
     """Итог платежа → тариф и срок. Возвращает новую дату доступа, если продлили именно сейчас."""
     if status not in ("succeeded", "canceled") or not await ctx.db.finish_payment(yk_id, status):
         return None
@@ -422,16 +422,19 @@ async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str) -> float | 
     until = plans.new_period(ctx.cfg, u, plan_id)
     await ctx.db.set_user(uid, paid_until=until, plan=plan_id, **({"trial_used": 1} if plan_id == "trial" else {}))
     await ctx.db.event(uid, "paid", plan_id)
+    if bot:
+        from admin import paylog
+        await paylog(bot, ctx, await ctx.db.user(uid), p, until)
     return until
 
 
 @router.callback_query(F.data == "s:check")
-async def check(cb: CallbackQuery, ctx: Ctx) -> None:
+async def check(cb: CallbackQuery, ctx: Ctx, bot: Bot) -> None:
     p = await ctx.db.last_pending(cb.from_user.id)
     if not p:
         return await cb.answer(T.PAY_WAIT, show_alert=True)
     status = await ctx.pay.status(p["yk_id"])
-    until = await apply_payment(ctx, cb.from_user.id, p["yk_id"], status)
+    until = await apply_payment(ctx, cb.from_user.id, p["yk_id"], status, bot)
     if until:
         plan = plans.plans(ctx.cfg)[p["plan"] or "basic"]
         await cb.message.edit_reply_markup(reply_markup=None)

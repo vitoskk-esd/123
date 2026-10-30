@@ -466,6 +466,10 @@ class DB:
         await self.conn.commit()
         return cur.rowcount == 1
 
+    async def paid_since(self, since: float) -> tuple[int, int]:
+        r = await self._one("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>=?", since)
+        return r["n"], r["s"]
+
     async def panel(self, day_start: float) -> dict:
         """Цифры для админ-панели: люди и откуда пришли (сегодня, 7 дней, всего), действующие подписки по тарифам, оплаты."""
         now = time.time()

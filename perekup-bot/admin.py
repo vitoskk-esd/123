@@ -1,5 +1,6 @@
 """Админка (только ADMIN_IDS): цифры бизнеса и скорости, общая база каналов, рассылка, ручной доступ."""
 import asyncio
+import logging
 import html
 import time
 from datetime import datetime
@@ -17,6 +18,7 @@ import vk
 from pipeline import seconds
 
 router = Router(name="admin")
+log = logging.getLogger(__name__)
 
 
 async def admin_ids(ctx: Ctx) -> list[int]:
@@ -135,6 +137,31 @@ async def notify_new_user(bot: Bot, ctx: Ctx, user, source: str | None) -> None:
                 pass
 
 
+async def paylog(bot: Bot, ctx: Ctx, u, pay, until: float) -> None:
+    """Оплата прошла — сразу в канал «оплаты» (или админу в личку, если канала нет)."""
+    import plans
+    plan = plans.plans(ctx.cfg).get(pay["plan"] or "basic")
+    k = await ctx.db.paid_count(u["id"])
+    n, total = await ctx.db.paid_since(msk_day_start(time.time()))
+    who = html.escape(u["first_name"] or "без имени") + (f" (@{u['username']})" if u["username"] else "") + f" · id {u['id']}"
+    word = "оплата" if n % 10 == 1 and n % 100 != 11 else "оплаты" if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14) else "оплат"
+    text = T.PAYLOG.format(amount=f"{pay['amount']:,}".replace(",", " "), plan=plan.title if plan else pay["plan"], who=who,
+                           until=datetime.fromtimestamp(until).strftime("%d.%m.%Y"), src=source_name(u["source"]),
+                           kind=T.PAYLOG_FIRST if k <= 1 else T.PAYLOG_AGAIN.format(k=k), n=n, word=word, sum=f"{total:,}".replace(",", " "))
+    targets = [ctx.paylog_chat] if ctx.paylog_chat else await admin_ids(ctx)
+    for chat in targets:
+        try:
+            await bot.send_message(chat, text)
+        except Exception as e:
+            log.warning("оплата не записана в канал %s: %s", chat, e)
+            if chat == ctx.paylog_chat:                   # канал недоступен — хотя бы админу в личку
+                for uid in await admin_ids(ctx):
+                    try:
+                        await bot.send_message(uid, text)
+                    except Exception:
+                        pass
+
+
 async def notify_on(ctx: Ctx) -> bool:
     return await ctx.db.get_setting("notify_new") != "0"
 
@@ -155,7 +182,8 @@ async def panel_text(bot: Bot, ctx: Ctx) -> str:
         all_src=" · ".join(f"{k} {v}" for k, v in by_source(p["all"]).items()) or "—",
         subs=sum(subs.values()), pro=subs.get("PRO", 0), basic=subs.get("Простой", 0), trial=subs.get("Пробный день", 0),
         paid_n=p["paid"]["n"], paid_sum=rub(p["paid"]["s"]), paid30_n=p["paid30"]["n"], paid30_sum=rub(p["paid30"]["s"]),
-        free="" if ctx.cfg.payments_on else T.PANEL_FREE, link=f"https://t.me/{me.username}")
+        free="" if ctx.cfg.payments_on else T.PANEL_FREE, link=f"https://t.me/{me.username}",
+        paylog=T.PANEL_PAYLOG.format(link=await ctx.db.get_setting("paylog_link")) if ctx.paylog_chat else T.PANEL_NO_PAYLOG)
 
 
 @router.message(F.text == T.MENU_ADMIN)
