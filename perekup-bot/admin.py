@@ -93,7 +93,7 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
         "/similar — найти новые каналы через «похожие каналы» Telegram\n"
         "/vkfind — найти 50 барахолок с авто в ВК (5000+ подписчиков, 3+ поста почти каждый день)\n"
-        "/del @канал — убрать канал\n/vk — подключить служебную страницу ВКонтакте\n/broadcast текст — написать всем")
+        "/del @канал — убрать канал\n/vk — подключить служебную страницу ВКонтакте · /vkcheck — проверить ВК\n/broadcast текст — написать всем")
 
 
 @router.message(Command("add"))
@@ -304,6 +304,19 @@ def vk_status(ctx: Ctx) -> str:
         why = f" ({ctx.vk.error})" if ctx.vk and ctx.vk.error else ""
         return f"❌ не подключён{why} — /vk"
     return f"✅ «{ctx.vk.name}»" + (f" · ⚠️ {ctx.vk.error}" if ctx.vk.error else "")
+
+
+@router.message(Command("vkcheck"))
+async def vkcheck(msg: Message, ctx: Ctx) -> None:
+    """/vkcheck — пошагово проверить ВК: ключи, чтение сообщества и стены, пачки, лента; очередь и её ошибка."""
+    if not await is_admin(msg, ctx):
+        return
+    if not (ctx.vk and (ctx.vk.api or ctx.vk.service)):
+        return await msg.answer("ВКонтакте не подключён — /vk" + (f"\nПричина: {ctx.vk.error}" if ctx.vk and ctx.vk.error else ""))
+    lines = await ctx.vk.check()
+    bad = "\n".join(lines)
+    hint = T.VK_HINT_FLOOD if ("код 9" in bad or "код 6" in bad or "код 29" in bad) else ("" if "❌" in bad else T.VK_HINT_OK)
+    await msg.answer(T.VK_CHECK.format(lines=html.escape(bad), hint=hint), link_preview_options=LinkPreviewOptions(is_disabled=True))
 
 
 @router.message(Command("vk"))

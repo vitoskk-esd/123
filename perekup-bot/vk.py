@@ -131,7 +131,8 @@ def _ref(vk: str) -> str:
 class VKReader:
     def __init__(self, bot: Bot, ctx: Ctx, make_api=VK):
         self.bot, self.ctx, self.make_api = bot, ctx, make_api
-        self.api = None
+        self.api = None                                        # ключ служебной страницы (вступления, лента, поиск)
+        self.service = None                                    # сервисный ключ приложения: чтение открытых стен без аккаунта
         self.name = ""
         self.error = ""                                        # последняя ошибка ключа — видно в /admin
         self.runner: asyncio.Task | None = None
@@ -145,11 +146,21 @@ class VKReader:
     def online(self) -> bool:
         return bool(self.runner and not self.runner.done())
 
+    @property
+    def rd(self):
+        """Чем читать открытые сообщества: сервисный ключ (его не ограничивают за «подозрительный» аккаунт), иначе — страница."""
+        return self.service or self.api
+
     async def resume(self) -> bool:
         env = token_from(self.ctx.cfg.vk_token) if self.ctx.cfg.vk_token else None    # в VK_TOKEN можно вставить и адрес целиком
         token = env or await self.ctx.db.get_setting("vk_token")
         if self.ctx.cfg.vk_token and not env:
             self.error = "в переменной VK_TOKEN нет ключа — вставь адрес со словом access_token целиком"
+        if not token and self.ctx.cfg.vk_service:              # только сервисный ключ: читаем открытые сообщества
+            self.service, self.name = self.make_api(self.ctx.cfg.vk_service), "сервисный ключ"
+            await self.ctx.refresh_channels()
+            self.runner = asyncio.create_task(self.run())
+            return True
         if not token:
             return False
         try:
@@ -188,6 +199,8 @@ class VKReader:
         if self.api is not None and self.api is not api and hasattr(self.api, "close"):
             await self.api.close()
         self.api, self.error = api, ""
+        if self.ctx.cfg.vk_service and self.service is None:
+            self.service = self.make_api(self.ctx.cfg.vk_service)
         self.name = f"{me.get('first_name', '')} {me.get('last_name', '')}".strip() or "служебная страница"
         if self.ctx.cfg.vk_token != token and token_from(self.ctx.cfg.vk_token or "") != token:
             await self.ctx.db.set_setting("vk_token", token)
@@ -236,6 +249,8 @@ class VKReader:
 
     async def poll_feed(self) -> None:
         """Новые посты из ленты служебной страницы (в ней все сообщества, в которые она вступила)."""
+        if self.api is None:
+            return
         res = await self.api.call("newsfeed.get", filters="post", start_time=self.since, count=100)
         for it in sorted(res.get("items", []), key=lambda i: i.get("date", 0)):
             self.since = max(self.since, it.get("date", 0))
@@ -244,7 +259,7 @@ class VKReader:
     async def poll_wall(self, gid: int, items: list | None = None) -> None:
         """Стена одного сообщества (items — уже полученные пачкой). Первый опрос только запоминает, где мы, — старое не шлём."""
         if items is None:
-            items = (await self.api.call("wall.get", owner_id=-gid, count=5)).get("items", [])
+            items = (await self.rd.call("wall.get", owner_id=-gid, count=5)).get("items", [])
         if gid not in self.last:
             self.last[gid] = max((it["id"] for it in items), default=0)
             return
@@ -279,7 +294,7 @@ class VKReader:
             for i in range(0, len(groups), WALL_PACK):
                 part, started = groups[i:i + WALL_PACK], time.time()
                 try:
-                    res = await self._many("wall.get", [{"owner_id": -g, "count": 5} for g in part], WALL_PACK)
+                    res = await self._many("wall.get", [{"owner_id": -g, "count": 5} for g in part], WALL_PACK, self.rd)
                     for g, r in zip(part, res):
                         if r is not None:
                             await self.poll_wall(g, r.get("items", []))
@@ -293,17 +308,64 @@ class VKReader:
                     log.info("стены ВК: %s", e)
                 await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.vk_wall_rps - (time.time() - started)))
 
+    # ---------- диагностика: /vkcheck ----------
+    async def check(self) -> list[str]:
+        """Пошаговая проверка ВК — что работает, а на чём и с какой ошибкой ломается."""
+        out = []
+        async def step(title, coro):
+            try:
+                res = await coro
+                out.append(f"✅ {title}" + (f": {res}" if res else ""))
+                return True
+            except Exception as e:
+                out.append(f"❌ {title}: {e}")
+                return False
+        q = await self.ctx.db.queued_channels("vk")
+        ref = _ref(q[0]["vk"]) if q else "1"
+        if self.api is not None:
+            async def me():
+                u = (await self.api.call("users.get"))[0]
+                return f"{u.get('first_name', '')} {u.get('last_name', '')}"
+            await step("ключ служебной страницы", me())
+        if self.service is not None:
+            await step("сервисный ключ", self.service.call("groups.getById", group_id="1"))
+        async def grp():
+            g = await self.group(ref)
+            return f"{g.get('name')} · {'открытое' if not g.get('is_closed') else 'закрытое'}"
+        if await step(f"сообщество {'из очереди ' if q else ''}vk.com/{q[0]['vk'] if q else 'club1'}", grp()):
+            g = await self.group(ref)
+            async def wall():
+                return f"постов на стене: {(await self.rd.call('wall.get', owner_id=-g['id'], count=3)).get('count', 0)}"
+            await step("чтение стены", wall())
+        if hasattr(self.rd, "many"):
+            async def batch():
+                await self.rd.many("groups.getById", [{"group_id": "1"}, {"group_id": "1"}])
+                return "пачки по 25 работают"
+            await step("пакетные запросы", batch())
+        if self.api is not None:
+            async def feed():
+                await self.api.call("newsfeed.get", filters="post", count=1)
+                return ""
+            await step("лента страницы", feed())
+        out.append(f"\nВ очереди сообществ: {len(q)}" + (f" · последняя ошибка: {q[0]['error']}" if q and q[0]["error"] else ""))
+        return out
+
     # ---------- поиск новых сообществ ----------
-    async def _many(self, method: str, plist: list[dict], per: int) -> list:
+    async def _many(self, method: str, plist: list[dict], per: int, api=None) -> list:
         """execute-пачки; «flood control» — ждём и повторяем (3 раза), дальше честная ошибка админу"""
+        api = api or self.api
         for attempt in range(4):
             try:
-                if hasattr(self.api, "many"):
-                    return await self.api.many(method, plist, per)
+                if hasattr(api, "many"):
+                    try:
+                        return await api.many(method, plist, per)
+                    except VKError as e:                # execute недоступен этому ключу — по одному
+                        if e.code in FLOOD: raise
+                        log.info("пачки ВК недоступны (%s) — читаю по одному", e)
                 out = []
                 for p in plist:
                     try:
-                        out.append(await self.api.call(method, **p))
+                        out.append(await api.call(method, **p))
                     except VKError as e:
                         if e.code in FLOOD: raise
                         out.append(None)
@@ -366,7 +428,7 @@ class VKReader:
 
     # ---------- вступление в сообщества ----------
     async def group(self, vk: str) -> dict:
-        res = await self.api.call("groups.getById", group_id=_ref(vk), fields="is_member")
+        res = await self.rd.call("groups.getById", group_id=_ref(vk), fields="is_member")
         groups = res.get("groups", []) if isinstance(res, dict) else res     # 5.199 отвечает {"groups": [...]}
         if not groups:
             raise VKError(100, "сообщество не найдено")
@@ -381,11 +443,12 @@ class VKReader:
         (на частые вступления ВК отвечает «flood control» и капчей). Возвращает паузу до следующего круга."""
         rows = list(rows)[:200]
         try:
-            res = await self.api.call("groups.getById", group_ids=",".join(_ref(r["vk"]) for r in rows), fields="is_member")
+            res = await self.rd.call("groups.getById", group_ids=",".join(_ref(r["vk"]) for r in rows), fields="is_member")
             found = res.get("groups", []) if isinstance(res, dict) else res
         except VKError as e:
             if e.code in FLOOD or e.code == 14:
                 log.warning("ВК просит подождать: %s", e)
+                await self._stuck(rows, e)
                 return FLOOD_PAUSE
             if e.code == 5:                                     # ключ отозван
                 self.error = str(e)
@@ -404,6 +467,7 @@ class VKReader:
                     g = await self.group(row["vk"])
                 except VKError as e:
                     if e.code in FLOOD or e.code == 14:
+                        await self._stuck(rows, e)
                         return FLOOD_PAUSE
                     await self._failed(row, ERRORS.get(e.code, str(e)))
                     continue
@@ -413,6 +477,8 @@ class VKReader:
                 await self._joined(row, g)
             elif g.get("is_closed") == 2:
                 await self._failed(row, "частное сообщество — вступить можно только по приглашению")
+            elif self.api is None:
+                await self._failed(row, "закрытое сообщество — для заявки нужен ключ служебной страницы (/vk)")
             elif not asked:                                     # закрытое: заявка админу сообщества
                 try:
                     await self.api.call("groups.join", group_id=g["id"])
@@ -425,6 +491,15 @@ class VKReader:
                 await self._awaiting(row, g)
                 asked = True
         return self.ctx.cfg.vk_join_interval if asked else None
+
+    async def _stuck(self, rows, e: VKError) -> None:
+        """ВК не даёт подключить: причина — в /list и /admin, а тем, кто ждёт, — одно честное сообщение."""
+        self.error = str(e)
+        for row in rows:
+            await self.ctx.db._run("UPDATE channels SET error=? WHERE id=?", f"ВК: {e}", row["id"])
+            for uid in await self.ctx.db._all("SELECT user_id FROM join_waiters WHERE channel_id=?", row["id"]):
+                if await self.ctx.db.mark_once(f"vkstuck:{row['id']}:{uid['user_id']}"):
+                    await notify(self.bot, uid["user_id"], T.VK_STUCK.format(name=channel_name(row)))
 
     async def _joined(self, row, g: dict, approved: bool = False) -> None:
         await self.ctx.db.vk_joined(row["id"], g["id"], g.get("name") or "")
@@ -456,6 +531,8 @@ class VKReader:
 
     async def check_approvals(self) -> None:
         """Одобрил ли админ закрытого сообщества заявку. Неделю без ответа — сдаёмся и говорим об этом."""
+        if self.api is None:
+            return
         for row in await self.ctx.db.awaiting_channels("vk"):
             try:
                 g = await self.group(row["vk"])
@@ -492,7 +569,7 @@ class VKReader:
                 try:
                     items = []
                     for offset in range(0, HISTORY, 100):
-                        items += (await self.api.call("wall.get", owner_id=-ch["vk_id"], count=100, offset=offset)).get("items", [])
+                        items += (await self.rd.call("wall.get", owner_id=-ch["vk_id"], count=100, offset=offset)).get("items", [])
                     n = await learn_history(self.ctx, dict(ch), [(it["id"], post_text(it), float(it.get("date", 0))) for it in items])
                     log.info("история ВК %s: %d машин с ценой — в оценку рынка", ch["title"], n)
                 except Exception as e:

@@ -1197,3 +1197,49 @@ async def test_vk_walls_polled_in_packs(env):
         assert any("Toyota Camry 2013" in (t or "") for t in s.texts(USER))
     finally:
         task.cancel()
+
+
+async def test_vkcheck_shows_flood_and_service_token_hint(env):
+    """/vkcheck: пошагово, с точной ошибкой ВК; на «Flood control» — подсказка про сервисный ключ.
+    Застрявшее в очереди сообщество: причина в /list, ждущему — одно сообщение."""
+    dp, bot, s, ctx = env
+
+    class FloodVK(FakeVK):
+        async def call(self, method, **p):
+            if method != "users.get":
+                raise VKError(9, "Flood control")
+            return await super().call(method, **p)
+    ctx.vk = VKReader(bot, ctx); ctx.vk.api = FloodVK()
+    try:
+        await make_filter(dp, bot, "камри до 1,5 млн")
+        await dp.feed_update(bot, cb("c:add"))
+        await dp.feed_update(bot, msg("vk.com/avto_kzn"))
+        for _ in range(2):
+            assert await ctx.vk.join_batch(await ctx.db.queued_channels("vk")) == 60
+        assert sum("ВКонтакте временно ограничил" in t for t in s.texts(USER)) == 1     # одно сообщение, не спам
+        assert "Flood control" in (await ctx.db.queued_channels("vk"))[0]["error"]
+        await dp.feed_update(bot, msg("/start", ADMIN))
+        await dp.feed_update(bot, msg("/vkcheck", ADMIN))
+        t = s.texts(ADMIN)[-1]
+        assert "✅ ключ служебной страницы" in t and "❌ сообщество из очереди vk.com/avto_kzn: Flood control (код 9)" in t
+        assert "VK_SERVICE_TOKEN" in t and "последняя ошибка" in t
+    finally:
+        ctx.vk = None
+
+
+async def test_vk_service_token_only_reads_open_groups(env, monkeypatch):
+    """Только сервисный ключ (без служебной страницы): открытые сообщества подключаются и читаются, закрытые — понятный отказ."""
+    dp, bot, s, ctx = env
+    import dataclasses
+    ctx.cfg = dataclasses.replace(ctx.cfg, vk_service="svc")
+    api = FakeVK()
+    reader = VKReader(bot, ctx, make_api=lambda t: api)
+    try:
+        assert await reader.resume() and reader.online and reader.api is None and reader.rd is api
+        a, _ = await ctx.db.add_channel(vk="avto_kzn", base=True)
+        b, _ = await ctx.db.add_channel(vk="club888", base=True)
+        await reader.join_batch(await ctx.db.queued_channels("vk"))
+        assert VK_KEY + 777 in ctx.channels and "groups.join" not in api.calls
+        assert "нужен ключ служебной страницы" in (await ctx.db.channel(b))["error"]
+    finally:
+        reader.runner.cancel()

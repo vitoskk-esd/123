@@ -47,6 +47,7 @@ class Config:
     ai_key: str = ""                 # ключ Gemini (aistudio.google.com) — ИИ перепроверяет каждый подходящий пост
     ai_model: str = "gemini-3.1-flash-lite"
     vk_token: str = ""               # ключ служебной страницы ВК; можно не задавать — админ пришлёт его боту в /vk
+    vk_service: str = ""             # сервисный ключ приложения ВК: читать открытые сообщества без служебной страницы
     vk_poll: int = 8                 # раз во сколько секунд смотрим ленту служебной страницы ВК (новые посты сообществ)
     vk_wall_rps: float = 1.0         # опрос стен сообществ: запросов в секунду, в каждом — 25 стен (0 — выключить)
     vk_join_interval: int = 120      # пауза между заявками в закрытые сообщества ВК, сек (открытые подключаются сразу)
@@ -91,6 +92,7 @@ def get_config() -> Config:
         ai_model=e("GEMINI_MODEL", "gemini-3.1-flash-lite"),
         ai_proxy=e("AI_PROXY", "0") == "1",
         vk_token=e("VK_TOKEN", ""),
+        vk_service=e("VK_SERVICE_TOKEN", ""),
         vk_poll=int(e("VK_POLL", "8")),
         vk_wall_rps=float(e("VK_WALL_RPS", "1")),
         vk_join_interval=int(e("VK_JOIN_INTERVAL", "120")),
