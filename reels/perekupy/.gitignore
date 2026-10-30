@@ -10,3 +10,6 @@ fq_*/
 *.log
 *.events.json
 toon/series*/ep[0-9]*.html
+board/
+bgs.js
+board_sheet.jpg

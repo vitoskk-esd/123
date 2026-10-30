@@ -1,0 +1,85 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="bgs.js"></script>
+<script>
+const P = (k, o) => CHARS.priora(k, o);
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4) => el(CHARS[kind](p), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+const S = [
+ { h: "ЖИЗНЬ ОДНОЙ ПРИОРЫ", tc: "1/9 · 0:00–0:06", bg: "night", y: 700,
+   els: () => el(P("a", { eye: "sly", mouth: "smile" }), 90, 1010, 900, 360) + `<div class="title" style="top:760px;z-index:9"><span class="lab" style="position:static;display:inline-block;background:#ffd23f;color:#151515;font-size:64px;transform:rotate(-3deg)">ЖИЗНЬ ОДНОЙ</span><br><span class="lab" style="position:static;display:inline-block;margin-top:20px;background:#ff3b30;font-size:96px;transform:rotate(2deg)">ПРИОРЫ</span></div>`,
+   vo: "Эта Приора умирала пять раз. И каждый раз её продавали как новую.", who: "Лис",
+   mv: "<b>Хук:</b> Приора выезжает в кадр с хитрым прищуром фары, ночной авторынок. Титр влетает ударом. Камера медленно наезжает. Звук: мотор, «динь» на слове «пять»." },
+ { h: "ЖИЗНЬ 1 · ТАКСИ", tc: "2/9 · 0:06–0:16", bg: "city", y: 700,
+   els: () => el(P("b", { taxi: true, color: "#ffd23f", eye: "sad", mouth: "sad" }), 90, 1010, 900, 360) + lab("2014", 60, 760, "#151515", "#ffd23f", 56) + lab("ОДО 400 000", 600, 760, "#ff3b30", "#fff", 46, 3)
+     + `<div class="el" style="left:300px;top:900px;z-index:8;font-size:110px">🌲</div>`,
+   vo: "2014-й. Такси. Четыреста тысяч километров, три таксиста и одна ёлочка-вонючка.", who: "Лис",
+   mv: "<b>Движение:</b> город проносится фоном (параллакс), Приора с шашками едет на месте, колёса крутятся. Одометр бешено крутится 0 → 400 000. Ёлочка болтается. Смена фона — <b>свайп вправо</b>." },
+ { h: "ЖИЗНЬ 2 · СТОЛБ", tc: "3/9 · 0:16–0:24", bg: "city", y: 700,
+   els: () => el(P("c", { dent: true, eye: "dead", mouth: "o", color: "#ffd23f", taxi: true }), 20, 1010, 900, 360) + el(CHARS.pole(true), 830, 640, 200, 700, 2)
+     + lab("2019", 60, 760, "#151515", "#ffd23f", 56) + lab("СТОЛБ НЕ ВЫЖИЛ", 420, 740, "#ff3b30", "#fff", 50, 4)
+     + `<div class="el" style="left:740px;top:880px;z-index:9;font-size:80px">💥</div>`,
+   vo: "2019-й. Встреча со столбом. Столб не выжил.", who: "Лис",
+   mv: "<b>Движение:</b> Приора разгоняется, <b>удар</b> — тряска камеры, вспышка, столб гнётся, глаз-фара становится «крестиком». Пауза 0,5 с в тишине перед «Столб не выжил» — чёрный юмор на тайминге." },
+ { h: "ЖИЗНЬ 3 · ГАРАЖ", tc: "4/9 · 0:24–0:34", bg: "garages", y: 700,
+   els: () => el(P("d", { patch: true, eye: "open", mouth: "smile", color: "#e9ecef" }), 90, 1010, 900, 360) + lab("ГСК №7", 60, 760, "#151515", "#fff", 48)
+     + `<div class="el" style="left:480px;top:960px;z-index:9;font-size:90px">✨</div>` + bub("Две из них даже<br><em>были Приорами.</em>", 330, 780),
+   vo: "Её собрали из трёх Приор. Две из них даже были Приорами.", who: "Лис",
+   mv: "<b>Движение:</b> ворота гаража уезжают вверх, внутри три половинки разных цветов съезжаются и «свариваются» — искры, вспышки, звук сварки. Красная дверь и синее крыло остаются как шрамы." },
+ { h: "ЖИЗНЬ 4 · АВТОРЫНОК", tc: "5/9 · 0:34–0:46", bg: "night", y: 700,
+   els: () => el(P("e", { eye: "sly", mouth: "smile", color: "#e9ecef" }), 330, 1060, 750, 300) + ch("tolyan", "t", -10, 860, .95) + bub("Брат, одна хозяйка!<br><em>Бабушка, в церковь.</em>", 40, 720)
+     + lab("ОДО 89 000", 640, 760, "#4cd964", "#151515", 42, 3),
+   vo: "Толян: «Брат, одна хозяйка! Бабушка, в церковь ездила». Лис: «Свежая краска. Свежий пробег. Свежая бабушка».", who: "Толян + Лис",
+   mv: "<b>Движение:</b> камера едет вдоль ряда машин и останавливается на Приоре — она уже свежевыкрашена и «помолодела». Одометр скручивается назад 400 000 → 89 000 со свистом. Толян подмигивает в камеру." },
+ { h: "ЖИЗНЬ 5 · ТРАССА", tc: "6/9 · 0:46–0:58", bg: "highway", y: 700,
+   els: () => el(P("f", { smoke: true, eye: "dead", mouth: "sad" }), 90, 1010, 900, 360) + ch("seryoga", "s", -20, 870, .95) + bub("Ну ты чего,<br><em>родная?!</em>", 60, 720)
+     + lab("ЧИХ… ЧИХ…", 560, 760, "#151515", "#fff", 50, -6),
+   vo: "Серёга купил. Через неделю Приора решила умереть. Посреди трассы. В дождь. Как в драме.", who: "Лис + Серёга",
+   mv: "<b>Движение:</b> дождь стеной, дворники, Приора дёргается, из-под капота дым, глаз гаснет. Камера отъезжает — одинокая машина на обочине. Музыка обрывается, остаётся дождь." },
+ { h: "ЭВАКУАТОР → СТО", tc: "7/9 · 0:58–1:10", bg: "sto", y: 700,
+   els: () => el(P("g", { patch: true, dent: true, eye: "sad", mouth: "sad" }), 90, 1010, 900, 360) + ch("mihalych", "m", 640, 860, .95) + bub("Тут легче перечислить,<br>что родное. <em>Номер.</em>", 120, 720),
+   vo: "Михалыч: «Сынок, тут легче перечислить, что родное… Номер. Номер родной».", who: "Михалыч",
+   mv: "<b>Переход:</b> эвакуатор утаскивает Приору из кадра влево — <b>резкий кат</b> на СТО. Михалыч простукивает кузов: каждая деталь подсвечивается «не родная» (красным). Последним загорается номер — зелёным." },
+ { h: "КРУГ ЗАМКНУЛСЯ", tc: "8/9 · 1:10–1:22", bg: "night", y: 700,
+   els: () => el(P("h", { eye: "sly", mouth: "smile", color: "#e9ecef" }), 330, 1060, 750, 300) + ch("tolyan", "t2", -10, 860, .95)
+     + lab("КУПИЛ ЗА 150 000", 40, 730, "#151515", "#fff", 40, -3) + lab("ПРОДАЮ ЗА 650 000", 440, 830, "#ff3b30", "#fff", 40, 4),
+   vo: "Серёга продал её Толяну за сто пятьдесят. Толян выставил за шестьсот пятьдесят: «Одна хозяйка, не бита, не крашена». Приора не умирает. Она перерождается. Каждый раз — дороже.", who: "Лис",
+   mv: "<b>Движение:</b> «перемотка» — кадры жизней 1–5 мелькают назад за 2 секунды, и мы снова на авторынке, как в начале. Приора подмигивает фарой." },
+ { h: "МОРАЛЬ", tc: "9/9 · 1:22–1:30", bg: "winter", y: 700,
+   els: () => `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:40px;line-height:1.35">ПРОВЕРЬ ИСТОРИЮ:<br><span style="color:#ffd23f">📄 автотека · 📑 ПТС · 📏 толщиномер</span></div>`
+     + el(P("i", { eye: "sly", mouth: "smile" }), 90, 1080, 900, 360),
+   vo: "Проверь историю машины до покупки: автотека, ПТС, толщиномер. Сохрани — пока твоя Приора не переродилась.", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист из трёх пунктов влетает по одному, Приора уезжает в снегопад, в конце — лис-маскот «ПЕРЕКУПЫ» и подпись про бота. Длина всего ролика — <b>~1:30</b>, 9 сцен, 6 разных фонов." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els();
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>«${sc.vo}»`;
+document.getElementById("mv").innerHTML = sc.mv;
+["a","b","c","d","e","f","g","h","i"].forEach(p => { const e = document.getElementById(p); });
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = ""; const sh2 = document.getElementById("t2-shades"); if (sh2) sh2.style.display = "";
+mouth && document.getElementById("t") && mouth("t", "grin");
+window.READY = true;
+</script></body></html>
