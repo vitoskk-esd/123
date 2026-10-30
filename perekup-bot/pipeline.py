@@ -8,7 +8,9 @@
    Нет фото или канал запрещает пересылку — уходит обычная карточка с текстом поста.
 """
 import asyncio
+import heapq
 import html
+import random
 import logging
 import re
 import time
@@ -65,29 +67,45 @@ class Result:
 
 
 class RateLimiter:
-    """Не больше ~30 сообщений в секунду (лимит Telegram на бота) — иначе Telegram начнёт тормозить сам."""
+    """Не больше ~30 сообщений в секунду (лимит Telegram на бота) — иначе Telegram начнёт тормозить сам.
+    Очередь с приоритетом: prio — номер получателя внутри поста. Когда машин много, новый пост сразу уходит первым
+    получателям, а не ждёт хвоста рассылки предыдущего; отложенные сообщения «Простого» — в самом конце очереди."""
 
     def __init__(self, per_second: int = 28):
-        self.per_second = per_second
-        self.sent: list[float] = []
-        self.lock = asyncio.Lock()
+        self.interval = 1 / per_second
+        self.heap: list = []
+        self.seq = 0
+        self.next_at = 0.0
+        self.runner: asyncio.Task | None = None
 
-    async def wait(self) -> None:
-        async with self.lock:
-            now = time.monotonic()
-            self.sent = [t for t in self.sent if now - t < 1]
-            if len(self.sent) >= self.per_second:
-                await asyncio.sleep(1 - (now - self.sent[0]))
-            self.sent.append(time.monotonic())
+    async def wait(self, prio: int = 0) -> None:
+        loop = asyncio.get_running_loop()
+        fut = loop.create_future()
+        heapq.heappush(self.heap, (prio, self.seq, fut)); self.seq += 1
+        if self.runner is None or self.runner.done() or self.runner.get_loop() is not loop:
+            self.runner = loop.create_task(self._run())
+        await fut
+
+    async def _run(self) -> None:
+        while self.heap:
+            delay = self.next_at - time.monotonic()
+            if delay > 0:
+                await asyncio.sleep(delay)
+            _, _, fut = heapq.heappop(self.heap)
+            if fut.done():                               # ожидание отменили — место не тратим
+                continue
+            fut.set_result(None)
+            self.next_at = max(time.monotonic(), self.next_at) + self.interval
 
 
 LIMIT = RateLimiter()
+LATER_PRIO = 10_000              # отложенные «Простого» — после всех мгновенных
 
 
-async def _send(coro_factory, uid: int, ctx: Ctx):
+async def _send(coro_factory, uid: int, ctx: Ctx, prio: int = 0):
     """Отправка с одним повтором при «подожди N секунд» от Telegram."""
     for attempt in (1, 2):
-        await LIMIT.wait()
+        await LIMIT.wait(prio)
         try:
             return await coro_factory()
         except TelegramRetryAfter as e:
@@ -311,8 +329,8 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         text = card_text(ctx, r, channel, ftext, latency, plan=plan)
         return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid), link_preview_options=preview)
 
-    async def send_card(uid: int, fid: int, ftext: str, plan: plans.Plan, out: list):
-        if await _send(message(uid, fid, ftext, plan), uid, ctx):
+    async def send_card(uid: int, fid: int, ftext: str, plan: plans.Plan, out: list, prio: int = 0):
+        if await _send(message(uid, fid, ftext, plan), uid, ctx, prio):
             r.sent.append(uid)
             out.append((uid, r.post_id, fp, ckey, fid, r.discount, int((time.time() - raw.date) * 1000)))
 
@@ -323,7 +341,7 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         try:
             await asyncio.sleep(max(0.0, raw.date + plan.delay - time.time()))
             out: list = []
-            await send_card(uid, fid, ftext, plan, out)
+            await send_card(uid, fid, ftext, plan, out, LATER_PRIO)
             if out:
                 await ctx.db.add_deliveries(out)
         except Exception as e:
@@ -338,7 +356,8 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
             ctx.background.add(task)
             task.add_done_callback(ctx.background.discard)
     now_targets = [(uid, fid, ft, plan) for uid, (fid, ft, plan) in targets.items() if not plan.delay]
-    results = await asyncio.gather(*(send_card(uid, fid, ft, plan, done) for uid, fid, ft, plan in now_targets),
+    random.shuffle(now_targets)          # кто первый в очереди этого поста — случайно: никто не всегда последний
+    results = await asyncio.gather(*(send_card(uid, fid, ft, plan, done, k) for k, (uid, fid, ft, plan) in enumerate(now_targets)),
                                    return_exceptions=True)
     for e in results:
         if isinstance(e, Exception):

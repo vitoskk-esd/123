@@ -21,7 +21,7 @@ def menu(admin: bool = False) -> ReplyKeyboardMarkup:
 
 
 def admin_panel(notify: bool = True) -> InlineKeyboardMarkup:
-    return kb([B(text=T.BTN_PANEL_REFRESH, callback_data="adm:panel")],
+    return kb([B(text=T.BTN_PANEL_REFRESH, callback_data="adm:panel"), B(text=T.BTN_HEALTH, callback_data="adm:health")],
               [B(text=T.BTN_NOTIFY_ON if notify else T.BTN_NOTIFY_OFF, callback_data="adm:notify")])
 
 

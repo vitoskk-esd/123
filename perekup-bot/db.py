@@ -466,6 +466,12 @@ class DB:
         await self.conn.commit()
         return cur.rowcount == 1
 
+    async def last_post_at(self, vk: bool) -> float | None:
+        """Когда последний раз пришёл пост из Telegram (vk=False) или ВК (vk=True)."""
+        r = await self._one(f"SELECT MAX(p.at) t FROM posts p JOIN channels c ON c.id=p.channel_id "
+                            f"WHERE c.vk_id IS {'NOT ' if vk else ''}NULL AND p.parsed_by!='history'")
+        return r["t"] if r else None
+
     async def paid_since(self, since: float) -> tuple[int, int]:
         r = await self._one("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>=?", since)
         return r["n"], r["s"]

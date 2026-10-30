@@ -186,6 +186,73 @@ async def panel_text(bot: Bot, ctx: Ctx) -> str:
         paylog=T.PANEL_PAYLOG.format(link=await ctx.db.get_setting("paylog_link")) if ctx.paylog_chat else T.PANEL_NO_PAYLOG)
 
 
+async def health(bot: Bot, ctx: Ctx) -> str:
+    """Самопроверка всех настроек и связей: что не так и как исправить — по строке на пункт."""
+    import shutil
+    from config import DATA
+    cfg, now, lines, bad = ctx.cfg, time.time(), [], 0
+    def add(ok, text, fix=""):
+        nonlocal bad
+        icon = "✅" if ok is True else "⚠️" if ok is None else "❌"
+        bad += ok is not True
+        lines.append(f"{icon} {text}" + (f" — {fix}" if fix and ok is not True else ""))
+    ago = lambda t: "ещё не было" if not t else f"{int((now - t) // 60)} мин назад" if now - t < 86400 else f"{int((now - t) // 86400)} дн. назад"
+    add(True if cfg.admins else None, f"админ: {'ADMIN_IDS ' + ', '.join(map(str, sorted(cfg.admins))) if cfg.admins else 'первый, кто написал /start'}",
+        "надёжнее указать свой id в переменной ADMIN_IDS")
+    add(str(cfg.db_path).startswith("/data"), f"база: {cfg.db_path}", "база не в постоянной папке /data — пропадёт при пересборке")
+    try:
+        free = shutil.disk_usage(DATA).free / 1e9
+        add(free > 1 or None, f"свободно на диске: {free:.1f} ГБ", "место заканчивается — расширь диск в Amvera")
+    except Exception:
+        pass
+    add(True if cfg.payments_on else None, "оплата (Робокасса): " + ("подключена" if cfg.payments_on else "не подключена — бот бесплатный для всех"),
+        "впиши ROBOKASSA_LOGIN, ROBOKASSA_PASSWORD1, ROBOKASSA_PASSWORD2")
+    add(bool(cfg.seller_name and cfg.seller_inn), f"реквизиты в оферте: {cfg.seller_name or '—'}, ИНН {cfg.seller_inn or '—'}",
+        "впиши SELLER_NAME и SELLER_INN — без них Робокасса не примет магазин")
+    add(True if cfg.seller_contact else None, f"контакт для клиентов: {cfg.seller_contact or '—'}", "впиши SELLER_CONTACT (email или телефон)")
+    add(True, f"цены: пробный день {cfg.price_trial} ₽, Простой {cfg.price_basic} ₽, PRO {cfg.price_pro} ₽")
+    if cfg.ai_on:
+        import ai
+        r = await ai.ask(ctx.dict, "Продам Toyota Camry 2015, пробег 120 000 км, цена 1 450 000 ₽, Казань", cfg.ai_key, cfg.ai_model)
+        add(bool(r), f"ИИ-проверка ({cfg.ai_model}): " + ("отвечает" if r else "не ответила"),
+            "проверь GEMINI_API_KEY; на бесплатном ключе суточный лимит — при большом потоке нужен платный")
+    else:
+        add(None, "ИИ-проверка выключена", "добавь GEMINI_API_KEY — без неё PRO-фильтры чуть менее точные")
+    add(bool(ctx.reader and ctx.reader.online), "служебный аккаунт Telegram: " + ("подключён" if ctx.reader and ctx.reader.online else "не подключён"), "/connect")
+    tg = sum(1 for ch in ctx.channels.values() if ch.get("tg_id")); vkn = sum(1 for ch in ctx.channels.values() if ch.get("vk_id"))
+    add(tg < 480 or None, f"каналов Telegram: {tg} из 500 на аккаунт", "скоро лимит — нужен второй служебный аккаунт")
+    t = await ctx.db.last_post_at(False)
+    add(True if tg == 0 or (t and now - t < 3 * 3600) else None, f"последний пост из Telegram: {ago(t)}", "долго тишина — проверь служебный аккаунт")
+    add(bool(ctx.buffer_chat) or None, "канал для фото машин: " + ("есть" if ctx.buffer_chat else "нет — машины без фото"), "создаётся сам при /connect")
+    add(bool(ctx.paylog_chat) or None, "канал оплат: " + ("есть" if ctx.paylog_chat else "нет — оплаты приходят тебе в личку"), "создаётся сам при /connect")
+    vk_ok = vk_online(ctx)
+    add(True if vk_ok and not ctx.vk.error else None if vk_ok else (None if vkn == 0 else False),
+        "ВКонтакте: " + (f"подключён ({ctx.vk.name})" + (f", ошибка: {ctx.vk.error}" if ctx.vk.error else "") if vk_ok else "не подключён"),
+        "подробно — /vkcheck")
+    if vkn:
+        add(True if ctx.vk and ctx.vk.service else None, "сервисный ключ ВК: " + ("есть" if ctx.vk and ctx.vk.service else "нет"),
+            "добавь VK_SERVICE_TOKEN — его ВК не ограничивает за «подозрительный» аккаунт")
+        t = await ctx.db.last_post_at(True)
+        add(True if t and now - t < 6 * 3600 else None, f"сообществ ВК: {vkn}, последний пост из ВК: {ago(t)}", "долго тишина — /vkcheck")
+    queued = len(await ctx.db.queued_channels()) + len(await ctx.db.queued_channels("vk"))
+    add(queued < 20 or None, f"в очереди на подключение: {queued}", "много в очереди — подключение идёт по одному, подожди")
+    return T.HEALTH.format(lines="\n".join(html.escape(l) for l in lines), summary=T.HEALTH_OK if not bad else T.HEALTH_BAD)
+
+
+@router.message(Command("health"))
+async def health_cmd(msg: Message, bot: Bot, ctx: Ctx) -> None:
+    if await is_admin(msg, ctx):
+        await msg.answer(await health(bot, ctx), link_preview_options=LinkPreviewOptions(is_disabled=True))
+
+
+@router.callback_query(F.data == "adm:health")
+async def health_btn(cb: CallbackQuery, bot: Bot, ctx: Ctx) -> None:
+    if not await is_admin(cb, ctx):
+        return await cb.answer()
+    await cb.answer("Проверяю…")
+    await cb.message.answer(await health(bot, ctx), link_preview_options=LinkPreviewOptions(is_disabled=True))
+
+
 @router.message(F.text == T.MENU_ADMIN)
 @router.message(Command("panel"))
 async def panel(msg: Message, bot: Bot, ctx: Ctx) -> None:

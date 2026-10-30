@@ -1347,3 +1347,16 @@ async def test_payment_goes_to_admin_without_paylog_channel(env):
     ctx.pay.statuses[pay["yk_id"]] = "succeeded"
     await jobs.tick(bot, ctx)                                             # оплатил, но не нажал «Я оплатил» — фон засчитал
     assert "Оплата +1 390 ₽</b> · Простой" in s.texts(ADMIN)[-1] and "Threads" in s.texts(ADMIN)[-1]
+
+
+async def test_health_check_lists_problems(env):
+    """«🩺 Проверка бота»: по строке на настройку, ❌ — мешает работе, с подсказкой, как исправить; не админу — ничего."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, cb("adm:health", ADMIN))
+    t = s.texts(ADMIN)[-1]
+    assert "Проверка бота" in t and "❌ реквизиты в оферте" in t and "SELLER_NAME" in t
+    assert "❌ служебный аккаунт Telegram: не подключён — /connect" in t and "✅ оплата (Робокасса): подключена" in t
+    assert "⚠️ ИИ-проверка выключена" in t and "Есть что поправить" in t
+    n = len(s.texts(USER)); await dp.feed_update(bot, cb("adm:health", USER))
+    assert len(s.texts(USER)) == n

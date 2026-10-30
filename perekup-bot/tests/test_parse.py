@@ -241,5 +241,5 @@ PRICE_TRAPS = [
 
 
 @pytest.mark.parametrize("text,price", PRICE_TRAPS)
-def test_price_traps(text, price):
+def test_price_amount_traps(text, price):
     assert parse_price(text) == price
