@@ -1392,3 +1392,28 @@ async def test_offer_with_inn_only(env):
     await dp.feed_update(bot, msg("/offer"))
     t = s.texts(USER)[-1]
     assert "Самозанятый (плательщик НПД), ИНН 123456789012" in t and "ivan@mail.ru" in t and "Иванов" not in t
+
+
+async def test_vk_sessions_closed(env):
+    """Плохой ключ и остановка бота — соединения с ВК закрываются (в логе нет «Unclosed client session»)."""
+    dp, bot, s, ctx = env
+    closed = []
+
+    class ClosingVK(FakeVK):
+        def __init__(self, bad=False):
+            super().__init__(); self.bad = bad
+        async def call(self, method, **p):
+            if self.bad:
+                raise VKError(5, "User authorization failed")
+            return await super().call(method, **p)
+        async def close(self):
+            closed.append(self)
+    reader = VKReader(bot, ctx, make_api=lambda t: ClosingVK(bad=t == "bad"))
+    try:
+        await reader.attach("bad")
+    except VKError:
+        pass
+    assert len(closed) == 1
+    await reader.attach("good")
+    await reader.close(); await asyncio.sleep(0)
+    assert len(closed) == 2 and reader.runner.done()

@@ -124,6 +124,14 @@ def photo_url(item: dict) -> str | None:
     return None
 
 
+async def _close(api) -> None:
+    if hasattr(api, "close"):
+        try:
+            await api.close()
+        except Exception:
+            pass
+
+
 def _ref(vk: str) -> str:
     return vk[4:] if re.fullmatch(r"club\d+", vk) else vk
 
@@ -192,8 +200,12 @@ class VKReader:
             me = (await api.call("users.get"))[0]
         except VKError as e:
             if e.code not in FLOOD:
+                await _close(api)
                 raise
             me = {}                             # ключ рабочий (иначе был бы код 5), просто ВК притормаживает — читаем дальше
+        except Exception:
+            await _close(api)                   # сеть — соединение закрываем, иначе в логе «Unclosed client session»
+            raise
         if self.online:
             self.runner.cancel()
         if self.api is not None and self.api is not api and hasattr(self.api, "close"):
@@ -560,6 +572,14 @@ class VKReader:
             except Exception:
                 log.exception("ошибка при вступлении в сообщество ВК")
             await asyncio.sleep(max(2, (pause or 2) - (time.time() - started)))
+
+    async def close(self) -> None:
+        """Остановка бота: закрыть соединения с ВК."""
+        for t in (self.runner, getattr(self, "retry_task", None)):
+            if t and not t.done():
+                t.cancel()
+        for api in {id(a): a for a in (self.api, self.service) if a is not None}.values():
+            await _close(api)
 
     async def history_loop(self) -> None:
         """Один раз на сообщество: последние HISTORY постов со стены — в оценку рынка."""

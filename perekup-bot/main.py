@@ -58,6 +58,9 @@ async def main() -> None:
         await build_dispatcher(ctx).start_polling(bot)
     finally:
         jobs_task.cancel()
+        if ctx.vk:
+            await ctx.vk.close()                 # соединения с ВК — закрыть, иначе в логе «Unclosed client session»
+        await bot.session.close()
         await ctx.db.close()
 
 
