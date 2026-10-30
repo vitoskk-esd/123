@@ -30,7 +30,8 @@ const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left
 const ch = (kind, p, l, t, s = 1, z = 4) => el(CHARS[kind](p), l, t, 420 * s, 800 * s, z);
 const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
 const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
-const CAR = (l, t, w = 820, z = 3, extra = "", col = "#c9ced6") => el(CHARS.car("c" + l, 1, col), l, t, w, w * .4, z, extra);
+// ВАЗ-2114 владельца (kit/img/vaz2114/vaz2114_white.png, вырезан из его картинки)
+const CAR = (l, t, w = 820, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2114/vaz2114_white.png" style="left:${l}px;top:${t + w * .04}px;width:${w}px;z-index:${z};${extra}">`;
 let CLK = ""; const clock = (t) => (CLK = t, "");
 const odo = (v, l, t, c = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">ОДО ${v}</div>`;
 const S = [
@@ -43,7 +44,7 @@ const S = [
    els: () => clock("06:40") + CAR(300, 1130, 760) + ch("galya", "g", -20, 860, .95) + ch("tolyan", "t", 700, 870, .9)
      + bub("Дед на ней только<br>на дачу ездил.", 40, 730) + bub("А дед где?", 640, 840) ,
    vo: "Галя: «Сынок, дед на ней только на дачу ездил». Толян: «А дед сейчас где?» Галя: «На даче. Под яблоней». Лис: «Сто восемьдесят тысяч. Яблоня — в подарок».", who: "Галя + Толян + Лис",
-   mv: "<b>Движение:</b> ворота гаража ползут вверх, пыль, из темноты выкатывается серебристый Солярис. Галя ласково гладит капот. На «под яблоней» — пауза, Толян медленно снимает очки. Плашка <b>«180 000 ₽ + ЯБЛОНЯ»</b>." },
+   mv: "<b>Движение:</b> ворота гаража ползут вверх, пыль, из темноты выкатывается белая «четырка». Галя ласково гладит капот. На «под яблоней» — пауза, Толян медленно снимает очки. Плашка <b>«180 000 ₽ + ЯБЛОНЯ»</b>." },
  { h: "СТО", tc: "3/9 · 0:20–0:32", bg: "sto", y: 700,
    els: () => clock("09:00") + CAR(260, 1150, 760) + ch("mihalych", "m", 680, 860, .95) + ch("tolyan", "t", -40, 870, .9)
      + odo("200 000 → 90 000", 150, 860) + bub("Скрутить могу.<br>А совесть у тебя<br><em>уже в ноль.</em>", 380, 960),
@@ -70,9 +71,9 @@ const S = [
    vo: "Эдик: «Машина сложная, рынок падает. Сто двадцать — и то из уважения». Толян: «Брат, ты чё, я сам такой!» Эдик: «Поэтому и сто двадцать». Лис: «Перекупа перекупили. Минус шестьдесят».", who: "Эдик + Толян + Лис",
    mv: "<b>Движение:</b> Эдик обходит машину с планшетом, на каждый шаг цена падает: 180 → 150 → 120. Толян бледнеет. Штамп <b>«−60 000»</b> бьёт по экрану." },
  { h: "ГОРОД", tc: "8/9 · 1:20–1:30", bg: "city", y: 700,
-   els: () => clock("21:00") + ch("tolyan", "t", -20, 880, .9) + `<div class="el" style="left:400px;top:760px;z-index:9;width:600px;background:#fff;border:6px solid #151515;border-radius:28px;padding:24px;font-family:Onest;color:#151515;box-shadow:0 10px 0 #151515"><div style="height:150px;background:#c9ced6;border-radius:16px;margin-bottom:14px"></div><div style="font-family:Unbounded;font-weight:900;font-size:36px">Солярис · 890 000 ₽</div><div style="font-size:28px;margin-top:8px">Один владелец. Дед.<br>Ездил только на дачу.</div><div style="font-size:22px;color:#8b93a3;margin-top:8px">Салон «Эдик Моторс» · сегодня</div></div>`,
-   vo: "Вечером Солярис появился на сайте. Восемьсот девяносто. Один владелец. Дед. Ездил только на дачу. Дед до сих пор на даче.", who: "Лис",
-   mv: "<b>Движение:</b> телефон в руке Толяна крупно, свет экрана на лице. Объявление прокручивается, на «890 000» — зум. Пауза. «Дед до сих пор на даче» — в тишине, ветер." },
+   els: () => clock("21:00") + ch("tolyan", "t", -20, 880, .9) + `<div class="el" style="left:400px;top:760px;z-index:9;width:600px;background:#fff;border:6px solid #151515;border-radius:28px;padding:24px;font-family:Onest;color:#151515;box-shadow:0 10px 0 #151515"><div style="height:150px;background:#c9ced6;border-radius:16px;margin-bottom:14px"></div><div style="font-family:Unbounded;font-weight:900;font-size:36px">ВАЗ-2114 · 390 000 ₽</div><div style="font-size:28px;margin-top:8px">Один владелец. Дед.<br>Ездил только на дачу.</div><div style="font-size:22px;color:#8b93a3;margin-top:8px">Салон «Эдик Моторс» · сегодня</div></div>`,
+   vo: "Вечером четырка появилась на сайте. Триста девяносто. Один владелец. Дед. Ездил только на дачу. Дед до сих пор на даче.", who: "Лис",
+   mv: "<b>Движение:</b> телефон в руке Толяна крупно, свет экрана на лице. Объявление прокручивается, на «390 000» — зум. Пауза. «Дед до сих пор на даче» — в тишине, ветер." },
  { h: "МОРАЛЬ", tc: "9/9 · 1:30–1:40", bg: "night", y: 700,
    els: () => clock("05:30") + `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:40px;line-height:1.35">ПРОБЕГ — ПО ИСТОРИИ,<br>А НЕ ПО ПРИБОРКЕ<br><span style="color:#ffd23f">📄 автотека · 📏 толщиномер · 🔎 диагностика</span></div>`
      + ch("tolyan", "t2", 640, 1000, .7),
