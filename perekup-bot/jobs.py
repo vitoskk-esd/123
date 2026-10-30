@@ -58,10 +58,31 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
             await send(bot, ctx, u["id"], T.ACCESS_ENDED, K.plans(all_plans, not u["trial_used"]))
 
 
+VK_WARN = (800, 1000)        # сообществ ВК: на сколько предупреждаем админа, что пора ускорять опрос
+TG_WARN = (400, 480)         # каналов Telegram: лимит одного служебного аккаунта — 500
+
+
+async def capacity(bot: Bot, ctx: Ctx) -> None:
+    """Источников стало много — один раз на каждый порог пишем админу, пока задержка не выросла."""
+    from admin import admin_ids
+    vk = sum(1 for ch in ctx.channels.values() if ch.get("vk_id"))
+    tg = sum(1 for ch in ctx.channels.values() if ch.get("tg_id"))
+    rps = ctx.cfg.vk_wall_rps or 1
+    for n in VK_WARN:
+        if vk >= n and await ctx.db.mark_once(f"cap:vk:{n}"):
+            for uid in await admin_ids(ctx):
+                await send(bot, ctx, uid, T.CAP_VK.format(n=vk, every=round(vk / 25 / rps), at1000=round(1000 / 25 / rps)))
+    for n in TG_WARN:
+        if tg >= n and await ctx.db.mark_once(f"cap:tg:{n}"):
+            for uid in await admin_ids(ctx):
+                await send(bot, ctx, uid, T.CAP_TG.format(n=tg))
+
+
 async def loop(bot: Bot, ctx: Ctx) -> None:
     while True:
-        try:
-            await tick(bot, ctx)
-        except Exception:
-            log.exception("фоновая задача упала")
+        for job in (tick, capacity):
+            try:
+                await job(bot, ctx)
+            except Exception:
+                log.exception("фоновая задача упала")
         await asyncio.sleep(30)

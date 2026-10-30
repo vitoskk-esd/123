@@ -1243,3 +1243,20 @@ async def test_vk_service_token_only_reads_open_groups(env, monkeypatch):
         assert "нужен ключ служебной страницы" in (await ctx.db.channel(b))["error"]
     finally:
         reader.runner.cancel()
+
+
+async def test_admin_warned_when_vk_sources_grow(env):
+    """Сообществ ВК 800+ — админу одно сообщение (и ещё одно на 1000), без повторов на каждом круге."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    for i in range(810):
+        ctx.channels[VK_KEY + 5000 + i] = {"vk_id": 5000 + i, "tg_id": None, "base": 1}
+    for _ in range(3):
+        await jobs.capacity(bot, ctx)
+    warn = [t for t in s.texts(ADMIN) if "Сообществ ВК уже" in t]
+    assert len(warn) == 1 and "810" in warn[0] and "раз в 32 с" in warn[0]
+    for i in range(810, 1000):
+        ctx.channels[VK_KEY + 5000 + i] = {"vk_id": 5000 + i, "tg_id": None, "base": 1}
+    await jobs.capacity(bot, ctx); await jobs.capacity(bot, ctx)
+    assert len([t for t in s.texts(ADMIN) if "Сообществ ВК уже" in t]) == 2
+    assert not [t for t in s.texts(USER) if "Сообществ ВК" in t]
