@@ -14,6 +14,7 @@ from aiogram.types import CallbackQuery, Message
 import keyboards as K
 import plans
 import texts as T
+from support import ask_idea
 from admin import is_admin, is_admin_id, make_admins_pro, notify_new_user, queue_wait
 from ctx import Ctx
 from db import DAY
@@ -450,7 +451,7 @@ async def show_help(msg: Message, ctx: Ctx, state: FSMContext) -> None:
 
 
 MENU = {T.MENU_FILTERS: show_filters, T.OLD_MENU_FILTERS: show_filters, T.MENU_CHANNELS: show_channels, T.MENU_STATS: show_stats,
-        T.MENU_SUB: show_sub, T.MENU_HELP: show_help}
+        T.MENU_SUB: show_sub, T.MENU_HELP: show_help, T.MENU_IDEA: ask_idea}
 
 
 @router.message(F.text.in_(MENU))

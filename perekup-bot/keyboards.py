@@ -14,9 +14,9 @@ def kb(*rows: list[B]) -> InlineKeyboardMarkup:
 def menu(admin: bool = False) -> ReplyKeyboardMarkup:
     rows = [[KeyboardButton(text=T.MENU_FILTERS), KeyboardButton(text=T.MENU_CHANNELS)],
             [KeyboardButton(text=T.MENU_STATS), KeyboardButton(text=T.MENU_SUB)],   # по две в ряд — иначе подписи переносятся
-            [KeyboardButton(text=T.MENU_HELP)]]
+            [KeyboardButton(text=T.MENU_HELP), KeyboardButton(text=T.MENU_IDEA)]]
     if admin:                                                   # «плашка» админа — только у него
-        rows[2].append(KeyboardButton(text=T.MENU_ADMIN))
+        rows.append([KeyboardButton(text=T.MENU_ADMIN)])
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 

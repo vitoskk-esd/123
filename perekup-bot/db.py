@@ -488,6 +488,8 @@ class DB:
             "subs": await self._all("SELECT CASE WHEN plan IN ('', 'basic') THEN 'basic' ELSE plan END p, COUNT(*) n FROM users "
                                     "WHERE paid_until>? AND plan!='admin' AND blocked=0 GROUP BY p", now),
             "paid": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded'"),
+            "ideas": (await n("SELECT COUNT(*) n FROM events WHERE kind='idea'"))["n"],
+            "ideas7": (await n("SELECT COUNT(*) n FROM events WHERE kind='idea' AND at>?", now - 7 * DAY))["n"],
             "paid30": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY),
         }
 

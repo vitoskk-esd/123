@@ -1360,3 +1360,25 @@ async def test_health_check_lists_problems(env):
     assert "⚠️ ИИ-проверка выключена" in t and "Есть что поправить" in t
     n = len(s.texts(USER)); await dp.feed_update(bot, cb("adm:health", USER))
     assert len(s.texts(USER)) == n
+
+
+async def test_users_suggest_ideas(env):
+    """«💡 Предложить идею» есть у всех: просим мнение, идея уходит админу (ответить можно свайпом), человеку — спасибо;
+    в админ-панели — сколько идей."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg("/start"))
+    kb = [b.text for row in [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][0].reply_markup.keyboard for b in row]
+    assert T.MENU_IDEA in kb
+    await dp.feed_update(bot, msg(T.MENU_IDEA))
+    assert "Мы ценим каждого клиента" in s.texts(USER)[-1] and "что-то не нравится" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("Добавьте фильтр по цвету кузова"))
+    assert "Спасибо! Идея уже у команды" in s.texts(USER)[-1]
+    head = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == ADMIN and "Идея от пользователя" in (m.text or "")]
+    assert head and "@u111" in head[-1].text
+    copy = [m for m in s.sent if isinstance(m, CopyMessage) and m.chat_id == ADMIN][-1]
+    assert copy.from_chat_id == USER
+    await dp.feed_update(bot, msg(T.MENU_IDEA)); await dp.feed_update(bot, msg(T.MENU_FILTERS))   # передумал — меню работает
+    assert "Спасибо!" not in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
+    assert "Идей от пользователей: 1 (за 7 дней: 1)" in s.texts(ADMIN)[-1]

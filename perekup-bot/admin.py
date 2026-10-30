@@ -183,6 +183,7 @@ async def panel_text(bot: Bot, ctx: Ctx) -> str:
         subs=sum(subs.values()), pro=subs.get("PRO", 0), basic=subs.get("Простой", 0), trial=subs.get("Пробный день", 0),
         paid_n=p["paid"]["n"], paid_sum=rub(p["paid"]["s"]), paid30_n=p["paid30"]["n"], paid30_sum=rub(p["paid30"]["s"]),
         free="" if ctx.cfg.payments_on else T.PANEL_FREE, link=f"https://t.me/{me.username}",
+        ideas=T.PANEL_IDEAS.format(n=p["ideas"], week=p["ideas7"]),
         paylog=T.PANEL_PAYLOG.format(link=await ctx.db.get_setting("paylog_link")) if ctx.paylog_chat else T.PANEL_NO_PAYLOG)
 
 

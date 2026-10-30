@@ -20,6 +20,13 @@ router = Router(name="support")
 
 class Sup(StatesGroup):
     message = State()
+    idea = State()
+
+
+async def ask_idea(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = None) -> None:
+    """«💡 Предложить идею»: просим одним сообщением; оно уйдёт админу, ответить можно свайпом — как в поддержке."""
+    await state.set_state(Sup.idea)
+    await msg.answer(T.IDEA_ASK, reply_markup=K.support_cancel())
 
 
 @router.callback_query(F.data == "sup")
@@ -37,26 +44,28 @@ async def cancel(cb: CallbackQuery, state: FSMContext) -> None:
 
 
 @router.message(Sup.message)
+@router.message(Sup.idea)
 async def got_message(msg: Message, bot: Bot, ctx: Ctx, state: FSMContext) -> None:
     from user import MENU                          # нажал кнопку меню вместо сообщения — выходим из поддержки
     if msg.text and (msg.text.startswith("/") or msg.text in MENU):
         await state.clear()
         return await MENU[msg.text](msg, ctx, state) if msg.text in MENU else None
+    idea = await state.get_state() == Sup.idea.state
     await state.clear()
     u = msg.from_user
     who = html.escape(u.full_name) + (f" (@{u.username})" if u.username else "") + f", id {u.id}"
     delivered = False
     for admin in await admin_ids(ctx):
         try:
-            head = await bot.send_message(admin, T.SUPPORT_TO_ADMIN.format(who=who))
+            head = await bot.send_message(admin, (T.IDEA_TO_ADMIN if idea else T.SUPPORT_TO_ADMIN).format(who=who))
             copy = await bot.copy_message(admin, msg.chat.id, msg.message_id, reply_to_message_id=head.message_id)
             await ctx.db.add_support_link(admin, head.message_id, u.id)
             await ctx.db.add_support_link(admin, copy.message_id, u.id)
             delivered = True
         except Exception as e:
             log.warning("обращение не доставлено админу %s: %s", admin, e)
-    await ctx.db.event(u.id, "support")
-    await msg.answer(T.SUPPORT_SENT if delivered else T.SUPPORT_FAILED, reply_markup=K.menu())
+    await ctx.db.event(u.id, "idea" if idea else "support", (msg.text or msg.caption or "")[:500] or None)
+    await msg.answer((T.IDEA_THANKS if idea else T.SUPPORT_SENT) if delivered else T.SUPPORT_FAILED, reply_markup=K.menu())
 
 
 async def is_support_reply(msg: Message, ctx: Ctx) -> dict | bool:
