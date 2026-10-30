@@ -1355,7 +1355,7 @@ async def test_health_check_lists_problems(env):
     await dp.feed_update(bot, msg("/start", ADMIN))
     await dp.feed_update(bot, cb("adm:health", ADMIN))
     t = s.texts(ADMIN)[-1]
-    assert "Проверка бота" in t and "❌ реквизиты в оферте" in t and "SELLER_NAME" in t
+    assert "Проверка бота" in t and "❌ реквизиты в оферте" in t and "SELLER_INN" in t
     assert "❌ служебный аккаунт Telegram: не подключён — /connect" in t and "✅ оплата (Робокасса): подключена" in t
     assert "⚠️ ИИ-проверка выключена" in t and "Есть что поправить" in t
     n = len(s.texts(USER)); await dp.feed_update(bot, cb("adm:health", USER))
@@ -1382,3 +1382,13 @@ async def test_users_suggest_ideas(env):
     assert "Спасибо!" not in s.texts(USER)[-1]
     await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
     assert "Идей от пользователей: 1 (за 7 дней: 1)" in s.texts(ADMIN)[-1]
+
+
+async def test_offer_with_inn_only(env):
+    """ФИО можно не показывать: только ИНН и контакт."""
+    dp, bot, s, ctx = env
+    import dataclasses
+    dp["ctx"].cfg = ctx.cfg = dataclasses.replace(ctx.cfg, seller_inn="123456789012", seller_contact="ivan@mail.ru")
+    await dp.feed_update(bot, msg("/offer"))
+    t = s.texts(USER)[-1]
+    assert "Самозанятый (плательщик НПД), ИНН 123456789012" in t and "ivan@mail.ru" in t and "Иванов" not in t

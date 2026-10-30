@@ -467,9 +467,10 @@ async def help_cmd(msg: Message, ctx: Ctx, state: FSMContext) -> None:
 
 def offer_text(cfg) -> str:
     p = plans.plans(cfg)
-    seller = (T.OFFER_SELLER.format(name=cfg.seller_name, inn=cfg.seller_inn,
+    # ФИО — по желанию (переменная SELLER_NAME), ИНН — обязательно
+    seller = (T.OFFER_SELLER.format(name=f" {cfg.seller_name}" if cfg.seller_name else "", inn=cfg.seller_inn,
                                     contact=cfg.seller_contact + ", " if cfg.seller_contact else "")
-              if cfg.seller_name and cfg.seller_inn else T.OFFER_SELLER_EMPTY)
+              if cfg.seller_inn else T.OFFER_SELLER_EMPTY)
     return T.OFFER.format(seller=seller, trial=p["trial"].price, basic=p["basic"].price, pro=p["pro"].price,
                           contact_tail=f" или {cfg.seller_contact}" if cfg.seller_contact else "")
 

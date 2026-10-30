@@ -208,8 +208,8 @@ async def health(bot: Bot, ctx: Ctx) -> str:
         pass
     add(True if cfg.payments_on else None, "оплата (Робокасса): " + ("подключена" if cfg.payments_on else "не подключена — бот бесплатный для всех"),
         "впиши ROBOKASSA_LOGIN, ROBOKASSA_PASSWORD1, ROBOKASSA_PASSWORD2")
-    add(bool(cfg.seller_name and cfg.seller_inn), f"реквизиты в оферте: {cfg.seller_name or '—'}, ИНН {cfg.seller_inn or '—'}",
-        "впиши SELLER_NAME и SELLER_INN — без них Робокасса не примет магазин")
+    add(bool(cfg.seller_inn), f"реквизиты в оферте: ИНН {cfg.seller_inn or '—'}" + (f", {cfg.seller_name}" if cfg.seller_name else ", без ФИО"),
+        "впиши SELLER_INN — без него Робокасса не примет магазин")
     add(True if cfg.seller_contact else None, f"контакт для клиентов: {cfg.seller_contact or '—'}", "впиши SELLER_CONTACT (email или телефон)")
     add(True, f"цены: пробный день {cfg.price_trial} ₽, Простой {cfg.price_basic} ₽, PRO {cfg.price_pro} ₽")
     if cfg.ai_on:
