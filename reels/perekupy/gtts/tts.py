@@ -4,12 +4,17 @@ model, voice, out, style, text = sys.argv[1:6]
 body = {"contents": [{"parts": [{"text": f"{style}\n\n{text}"}]}],
         "generationConfig": {"responseModalities": ["AUDIO"],
                              "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice}}}}}
-r = subprocess.run(["curl", "-s", "-m", "300", "-X", "POST", "-H", "Content-Type: application/json",
+r = subprocess.run(["curl", "-s", "-m", "600", "-w", "\n%{http_code}", "-X", "POST", "-H", "Content-Type: application/json",
                     f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent" + (f"?key={os.environ['GEMINI_API_KEY']}" if os.environ.get("GEMINI_API_KEY") else ""), "--data-binary", "@-"],
                    input=json.dumps(body, ensure_ascii=False).encode(), capture_output=True).stdout
+r, code = r.rsplit(b"\n", 1) if b"\n" in r else (r, b"?")
+if not r.strip():
+    sys.exit(f"ERR empty answer, http {code.decode()}")
 j = json.loads(r)
 if "error" in j:
     sys.exit(f"ERR {j['error'].get('code')} {j['error'].get('message','')[:300]}")
+if "content" not in j["candidates"][0]:
+    sys.exit(f"ERR no audio: {json.dumps(j, ensure_ascii=False)[:1200]}")
 pcm = base64.b64decode(j["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
 with wave.open(out, "wb") as w:
     w.setnchannels(1); w.setsampwidth(2); w.setframerate(24000); w.writeframes(pcm)

@@ -3,13 +3,13 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor mini-movie about the life of one old Lada Priora. Deadpan, dramatic, like a crime documentary narrator, with perfect comic timing. Punchlines are short and dry, delivered after a tiny pause."
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor mini-movie: one day of a used-car flipper, like a deadpan crime documentary narrator. Punchlines are short and dry, delivered after a tiny pause, with perfect comic timing."
  },
  "seryoga": {
   "voice": "Puck",
   "tempo": 1.15,
   "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
-  "notes": "One line: desperate, pleading with his broken car in the rain, half-crying, half-comic."
+  "notes": "One line: calm and confident now, a bit smug — he has learned his lesson and checks the car with a paint thickness gauge."
  },
  "vika": {
   "voice": "Kore",
@@ -21,24 +21,24 @@
   "voice": "Gacrux",
   "tempo": 1.12,
   "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Old master, tired dry humor, unhurried. Second line: deadpan punchline after a pause."
+  "notes": "One line: old master, tired dry humor, unhurried; the second sentence is a deadpan punchline after a short pause."
  },
  "tolyan": {
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Cocky, loud, swaggering sales pitch, smiling, calls the buyer «брат»."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: suspicious question. Line 2: casual, conspiratorial request to a mechanic. Line 3: cocky, loud sales pitch. Line 4: offended, indignant."
  },
  "galya": {
   "voice": "Sulafat",
   "tempo": 1.12,
   "profile": "Baba Galya — a sly Russian grandmother in her 70s selling a car from a garage; sweet, folksy voice, calls everyone «сынок» and «милок», but she is in on a scam. Warm, slightly cracked old voice.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: sweet, convincing, folksy. Line 2: innocent, a bit caught. Line 3: panicked, calling loudly for help."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: sweet, folksy, selling a car. Line 2: calm, matter-of-fact, almost tender — dark humor, she doesn't notice how creepy it sounds."
  },
  "edik": {
   "voice": "Fenrir",
   "tempo": 1.18,
   "profile": "Edik — a slick, fast-talking Russian car dealership manager in his 30s, overly polite, pushy, fake-friendly smile in the voice, sales script energy.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: cheerful, pushy upsell. Line 2: slightly offended, insisting. Line 3: desperate last attempt, overly sweet."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: slick, fake-sympathetic lowball offer. Line 2: polite, cold, deadpan punchline."
  }
 }

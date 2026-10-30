@@ -1,7 +1,7 @@
 // Общее для серий второго сезона: герои на сцене, губы по голосу, реплики-пузыри, «пииип», бейдж Лиса, финал.
 const $ = s => document.querySelector(s);
 const E = window.EP, TT = window.TT, st = TT.start, en = TT.end;
-const PFX = { tolyan: "t", seryoga: "s", vika: "v", mihalych: "m" };
+const PFX = { tolyan: "t", seryoga: "s", vika: "v", mihalych: "m", galya: "g", edik: "e" };
 const who = id => E.lines.find(l => l.id === id).who;
 function place(id, kind, left, top, scale = 1, z = 3) {
   const d = document.createElement("div"); d.className = "c"; d.id = id.toUpperCase();

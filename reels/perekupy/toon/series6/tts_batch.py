@@ -7,8 +7,10 @@ for e in eps:
     for ln in json.load(open(f"{e}.json"))["lines"]:
         order.setdefault(ln["who"], []).append([e, ln["id"], ln["text"]])
 json.dump(order, open("vo/index.json", "w"), ensure_ascii=False, indent=1)
-models = [os.environ.get("MODEL", "gemini-3.1-flash-tts-preview"), "gemini-2.5-flash-preview-tts"]
+models = os.environ.get("MODELS", "gemini-3.1-flash-tts-preview,gemini-2.5-flash-preview-tts").split(",")
+only = os.environ.get("ONLY", "").split(",") if os.environ.get("ONLY") else None
 for who, lines in order.items():
+    if only and who not in only: continue
     out = f"vo/{who}.wav"
     if os.path.exists(out) and os.path.getsize(out) > 1000: continue
     v = V[who]
