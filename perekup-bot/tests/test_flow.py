@@ -1260,3 +1260,48 @@ async def test_admin_warned_when_vk_sources_grow(env):
     await jobs.capacity(bot, ctx); await jobs.capacity(bot, ctx)
     assert len([t for t in s.texts(ADMIN) if "Сообществ ВК уже" in t]) == 2
     assert not [t for t in s.texts(USER) if "Сообществ ВК" in t]
+
+
+async def test_admin_notified_of_new_users_and_panel(env):
+    """Новые люди — админу сообщение «пришёл из Instagram / Threads / неизвестно»; «👑 Админ-панель» — только у админа:
+    всего людей, сегодня по источникам, подписки по тарифам, оплаты."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    kb = [b.text for row in [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == ADMIN][-2].reply_markup.keyboard for b in row]
+    assert T.MENU_ADMIN in kb
+    await dp.feed_update(bot, msg("/start inst", USER))
+    assert "Новый пользователь" in s.texts(ADMIN)[-1] and "Пришёл из: <b>Instagram</b>" in s.texts(ADMIN)[-1]
+    assert T.MENU_ADMIN not in [b.text for row in [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][0].reply_markup.keyboard for b in row]
+    await dp.feed_update(bot, msg("/start threads", OTHER))
+    assert "Пришёл из: <b>Threads</b>" in s.texts(ADMIN)[-1] and "сегодня новых: 3" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, msg("/start", 333))
+    assert "Пришёл из: <b>неизвестно</b>" in s.texts(ADMIN)[-1]
+    n = len(s.texts(ADMIN)); await dp.feed_update(bot, msg("/start inst", USER))              # повторный старт — без уведомления
+    assert len(s.texts(ADMIN)) == n
+    await ctx.db.set_user(USER, paid_until=time.time() + 86400 * 30, plan="pro")
+    await ctx.db.set_user(OTHER, paid_until=time.time() + 86400, plan="trial")
+    await ctx.db.add_payment(USER, "p1", 2490, "pro"); await ctx.db.finish_payment("p1", "succeeded")
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
+    t = s.texts(ADMIN)[-1]
+    assert "Всего пользователей: <b>4</b>" in t and "Сегодня новых: <b>4</b> — Instagram 1 · Threads 1" in t
+    assert "Подписки сейчас: 2</b> — PRO 1 · Пробный день 1" in t and "Оплат за всё время: 1 на 2 490 ₽" in t
+    assert "?start=inst" in t and "?start=threads" in t
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, USER))                                       # не админ — не видит
+    assert not any("Админ-панель" in (x or "") for x in s.texts(USER))
+
+
+async def test_admin_can_turn_off_new_user_notifications(env):
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
+    assert [b.text for row in last_markup(s).inline_keyboard for b in row][-1] == T.BTN_NOTIFY_ON
+    await dp.feed_update(bot, cb("adm:notify", ADMIN))
+    assert [b.text for row in last_markup(s).inline_keyboard for b in row][-1] == T.BTN_NOTIFY_OFF
+    n = len(s.texts(ADMIN))
+    await dp.feed_update(bot, msg("/start inst", USER))
+    assert not any("Новый пользователь" in t for t in s.texts(ADMIN)[n:])          # выключено — молчим
+    await dp.feed_update(bot, cb("adm:notify", ADMIN))                               # включили обратно
+    await dp.feed_update(bot, msg("/start threads", OTHER))
+    assert "Пришёл из: <b>Threads</b>" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, cb("adm:notify", USER))                                # не админ — ничего не меняет
+    assert await ctx.db.get_setting("notify_new") == "1"

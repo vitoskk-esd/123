@@ -5,7 +5,7 @@ import re
 import time
 from datetime import datetime
 
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -14,7 +14,7 @@ from aiogram.types import CallbackQuery, Message
 import keyboards as K
 import plans
 import texts as T
-from admin import is_admin, is_admin_id, make_admins_pro, queue_wait
+from admin import is_admin, is_admin_id, make_admins_pro, notify_new_user, queue_wait
 from ctx import Ctx
 from db import DAY
 from links import label, parse_link
@@ -36,16 +36,19 @@ def fmt_date(ts: float) -> str:
 
 # ---------- старт ----------
 @router.message(CommandStart())
-async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContext) -> None:
+async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContext, bot: Bot) -> None:
     await state.clear()
     source = re.sub(r"[^\w-]", "", command.args or "")[:32] or None   # t.me/<бот>?start=reels — откуда пришёл
     new = await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, source, None,
                                 ctx.cfg.trial_days)
     await make_admins_pro(ctx)
+    admin = await is_admin(msg, ctx)
+    if new and not admin:
+        await notify_new_user(bot, ctx, msg.from_user, source)
     channels = await ctx.db.channel_count_for(msg.from_user.id)
     trial = T.WELCOME_TRIAL.format(price=ctx.cfg.price_trial) if ctx.cfg.payments_on else ""
-    await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu())
-    if ctx.reader and not ctx.reader.online and await is_admin(msg, ctx):
+    await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu(admin))
+    if ctx.reader and not ctx.reader.online and admin:
         await msg.answer(T.NEED_CONNECT)
         return
     if new or not await ctx.db.filters(msg.from_user.id):
@@ -277,7 +280,7 @@ async def add_to_base(msg: Message, ctx: Ctx) -> None:
             queued.append(cid)
     await ctx.refresh_channels()
     wait = (await queue_wait(ctx, queued) if queued else "") + vk_note(ctx, msg.text)
-    await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL_ADMIN, reply_markup=K.menu())
+    await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL_ADMIN, reply_markup=K.menu(True))
 
 
 @router.callback_query(F.data.startswith("c:base:") | F.data.startswith("c:tg:"))

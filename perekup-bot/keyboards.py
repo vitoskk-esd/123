@@ -11,12 +11,18 @@ def kb(*rows: list[B]) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[r for r in rows if r])
 
 
-def menu() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text=T.MENU_FILTERS), KeyboardButton(text=T.MENU_CHANNELS)],
-        [KeyboardButton(text=T.MENU_STATS), KeyboardButton(text=T.MENU_SUB)],   # по две в ряд — иначе подписи переносятся
-        [KeyboardButton(text=T.MENU_HELP)],
-    ], resize_keyboard=True)
+def menu(admin: bool = False) -> ReplyKeyboardMarkup:
+    rows = [[KeyboardButton(text=T.MENU_FILTERS), KeyboardButton(text=T.MENU_CHANNELS)],
+            [KeyboardButton(text=T.MENU_STATS), KeyboardButton(text=T.MENU_SUB)],   # по две в ряд — иначе подписи переносятся
+            [KeyboardButton(text=T.MENU_HELP)]]
+    if admin:                                                   # «плашка» админа — только у него
+        rows[2].append(KeyboardButton(text=T.MENU_ADMIN))
+    return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
+
+
+def admin_panel(notify: bool = True) -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_PANEL_REFRESH, callback_data="adm:panel")],
+              [B(text=T.BTN_NOTIFY_ON if notify else T.BTN_NOTIFY_OFF, callback_data="adm:notify")])
 
 
 def new_filter() -> InlineKeyboardMarkup:

@@ -89,11 +89,98 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"📢 Каналы базы: {ch.get(('joined', 1), 0)} подключено, {ch.get(('queued', 1), 0)} в очереди, "
         f"{ch.get(('awaiting', 1), 0)} ждут одобрения админа, {ch.get(('failed', 1), 0)} с ошибкой · свои у людей: {ch.get(('joined', 0), 0)}\n\n"
         f"🔗 Откуда пришли:\n{src or '—'}\n\n"
-        "Команды:\n/add @канал1 vk.com/группа — добавить каналы и группы ВК в общую базу\n/list — общая база: смотреть и удалять каналы\n"
+        "👑 Админ-панель — кнопка внизу или /panel\n\nКоманды:\n/add @канал1 vk.com/группа — добавить каналы и группы ВК в общую базу\n/list — общая база: смотреть и удалять каналы\n"
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
         "/similar — найти новые каналы через «похожие каналы» Telegram\n"
         "/vkfind — найти 50 барахолок с авто в ВК (5000+ подписчиков, 3+ поста почти каждый день)\n"
         "/del @канал — убрать канал\n/vk — подключить служебную страницу ВКонтакте · /vkcheck — проверить ВК\n/broadcast текст — написать всем")
+
+
+def source_name(src: str | None) -> str:
+    """Метка из ссылки t.me/<бот>?start=… → понятное название источника."""
+    s = (src or "").lower()
+    if s in ("", "direct"):
+        return "неизвестно"
+    if s.startswith(("inst", "ig", "reels")):
+        return "Instagram"
+    if s.startswith(("threads", "thr")):
+        return "Threads"
+    return src
+
+
+def by_source(rows) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for r in rows:
+        k = source_name(r["source"]); out[k] = out.get(k, 0) + r["n"]
+    order = {"Instagram": 0, "Threads": 1}
+    return dict(sorted(out.items(), key=lambda kv: (order.get(kv[0], 2 if kv[0] != "неизвестно" else 3), -kv[1])))
+
+
+def msk_day_start(now: float) -> float:
+    return now - (now + 3 * 3600) % 86400
+
+
+async def notify_new_user(bot: Bot, ctx: Ctx, user, source: str | None) -> None:
+    """Новый человек нажал «Старт» — админу: кто и откуда пришёл (если админ не выключил это в панели)."""
+    if not await notify_on(ctx):
+        return
+    p = await ctx.db.panel(msk_day_start(time.time()))
+    who = html.escape(user.first_name or "без имени") + (f" (@{user.username})" if user.username else "") + f" · id {user.id}"
+    text = T.NEW_USER.format(who=who, src=source_name(source), total=p["total"], today=sum(r["n"] for r in p["today"]))
+    for uid in await admin_ids(ctx):
+        if uid != user.id:
+            try:
+                await bot.send_message(uid, text)
+            except Exception:
+                pass
+
+
+async def notify_on(ctx: Ctx) -> bool:
+    return await ctx.db.get_setting("notify_new") != "0"
+
+
+async def panel_text(bot: Bot, ctx: Ctx) -> str:
+    now = time.time()
+    p = await ctx.db.panel(msk_day_start(now))
+    fmt = lambda d: " — " + " · ".join(f"{k} {v}" for k, v in d.items()) if d else ""
+    names = {"pro": "PRO", "basic": "Простой", "trial": "Пробный день"}
+    subs = {names.get(r["p"], r["p"]): r["n"] for r in p["subs"]}
+    me = await bot.me()
+    rub = lambda v: f"{v:,}".replace(",", " ")
+    return T.PANEL.format(
+        date=datetime.fromtimestamp(now).strftime("%d.%m.%Y %H:%M"), total=p["total"],
+        blocked=f" (заблокировали бота: {p['blocked']})" if p["blocked"] else "",
+        today=sum(r["n"] for r in p["today"]), today_src=fmt(by_source(p["today"])),
+        week=sum(r["n"] for r in p["week"]), week_src=fmt(by_source(p["week"])),
+        all_src=" · ".join(f"{k} {v}" for k, v in by_source(p["all"]).items()) or "—",
+        subs=sum(subs.values()), subs_by=fmt({k: subs[k] for k in ("PRO", "Простой", "Пробный день") if k in subs}),
+        paid_n=p["paid"]["n"], paid_sum=rub(p["paid"]["s"]), paid30_n=p["paid30"]["n"], paid30_sum=rub(p["paid30"]["s"]),
+        free="" if ctx.cfg.payments_on else T.PANEL_FREE, link=f"https://t.me/{me.username}")
+
+
+@router.message(F.text == T.MENU_ADMIN)
+@router.message(Command("panel"))
+async def panel(msg: Message, bot: Bot, ctx: Ctx) -> None:
+    if not await is_admin(msg, ctx):
+        return
+    await msg.answer(await panel_text(bot, ctx), reply_markup=K.admin_panel(await notify_on(ctx)), link_preview_options=LinkPreviewOptions(is_disabled=True))
+
+
+@router.callback_query((F.data == "adm:panel") | (F.data == "adm:notify"))
+async def panel_refresh(cb: CallbackQuery, bot: Bot, ctx: Ctx) -> None:
+    if not await is_admin(cb, ctx):
+        return await cb.answer()
+    note = "Обновлено"
+    if cb.data == "adm:notify":                  # уведомления о каждом новом человеке — вкл/выкл
+        on = not await notify_on(ctx)
+        await ctx.db.set_setting("notify_new", "1" if on else "0")
+        note = "Уведомления о новых включены" if on else "Уведомления о новых выключены"
+    try:
+        await cb.message.edit_text(await panel_text(bot, ctx), reply_markup=K.admin_panel(await notify_on(ctx)),
+                                   link_preview_options=LinkPreviewOptions(is_disabled=True))
+    except Exception:
+        pass                                     # ничего не изменилось — Telegram не даёт «править» тем же текстом
+    await cb.answer(note)
 
 
 @router.message(Command("add"))

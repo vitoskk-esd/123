@@ -466,6 +466,21 @@ class DB:
         await self.conn.commit()
         return cur.rowcount == 1
 
+    async def panel(self, day_start: float) -> dict:
+        """Цифры для админ-панели: люди и откуда пришли (сегодня, 7 дней, всего), действующие подписки по тарифам, оплаты."""
+        now = time.time()
+        src = lambda since: self._all("SELECT source, COUNT(*) n FROM users WHERE created_at>=? GROUP BY source", since)
+        n = lambda sql, *a: self._one(sql, *a)
+        return {
+            "total": (await n("SELECT COUNT(*) n FROM users"))["n"],
+            "blocked": (await n("SELECT COUNT(*) n FROM users WHERE blocked=1"))["n"],
+            "today": await src(day_start), "week": await src(day_start - 6 * DAY), "all": await src(0),
+            "subs": await self._all("SELECT CASE WHEN plan IN ('', 'basic') THEN 'basic' ELSE plan END p, COUNT(*) n FROM users "
+                                    "WHERE paid_until>? AND plan!='admin' AND blocked=0 GROUP BY p", now),
+            "paid": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded'"),
+            "paid30": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY),
+        }
+
     async def admin_stats(self) -> dict:
         now = time.time()
         one = lambda sql, *a: self._one(sql, *a)
