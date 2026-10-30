@@ -51,7 +51,7 @@ async def queue_wait(ctx: Ctx, channel_ids: list[int]) -> str:
     """Сколько ждать, пока подключится последний из этих каналов: каналы впереди в очереди + свои, по одному за паузу.
     У Telegram и ВК очереди свои и идут параллельно — ждать дольше там, где дольше."""
     wait, interval = 0, ctx.cfg.join_interval
-    for kind, every in (("tg", ctx.cfg.join_interval), ("vk", ctx.cfg.vk_join_interval)):
+    for kind, every in (("tg", ctx.cfg.join_interval), ("vk", 3)):       # открытые сообщества ВК — сразу
         queue = [r["id"] for r in await ctx.db.queued_channels(kind)]
         last = max((queue.index(c) for c in channel_ids if c in queue), default=-1)
         if last >= 0 and (last + 1) * every > wait:

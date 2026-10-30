@@ -849,10 +849,11 @@ class FakeVK:
         if method == "users.get":
             return [{"first_name": "Служебная", "last_name": "Страница"}]
         if method == "groups.getById":
-            g = self.find(p["group_id"])
-            if not g:
+            refs = str(p.get("group_ids") or p.get("group_id")).split(",")
+            gs = [dict(g) for g in map(self.find, refs) if g]
+            if len(gs) < len(refs):                  # как ВК: хоть одно несуществующее — ошибка на всю пачку
                 raise VKError(100, "invalid group id")
-            return {"groups": [dict(g)]}
+            return {"groups": gs}
         if method == "groups.join":
             g = self.find(p["group_id"])
             g["is_member"] = int(not g["is_closed"])
@@ -893,7 +894,7 @@ async def test_vk_group_joins_and_posts_reach_people(env):
     reader = VKReader(bot, ctx)
     reader.api = api = FakeVK()
     await reader.join_one((await ctx.db.queued_channels("vk"))[0])
-    assert api.calls == ["groups.getById", "groups.join"]
+    assert api.calls == ["groups.getById"]                            # открытое — без вступления, сразу
     assert VK_KEY + 777 in ctx.channels
     assert "«ВК · Авто Казань» подключён" in s.texts(USER)[-2] and "Всё готово" in s.texts(USER)[-1]
 
@@ -1160,3 +1161,39 @@ async def test_vk_execute_batches():
     res = await api.many("groups.search", [{"q": "авто казань", "count": 100}, {"q": "x"}])
     assert res == [{"items": [1]}, None] and sent[0][0] == "execute"
     assert sent[0][1] == 'return [API.groups.search({"q": "авто казань", "count": 100}),API.groups.search({"q": "x"})];'
+
+
+async def test_vk_open_groups_connect_at_once(env):
+    """Пять открытых сообществ из очереди подключаются одним запросом — без вступлений и пауз; стены читаются пачкой."""
+    dp, bot, s, ctx = env
+    api = FakeVK()
+    api.groups += [{"id": 900 + i, "name": f"Авто {i}", "screen_name": f"auto{i}", "is_closed": 0, "is_member": 0} for i in range(5)]
+    await make_filter(dp, bot, "камри до 1,5 млн")
+    await dp.feed_update(bot, cb("c:add"))
+    await dp.feed_update(bot, msg("\n".join(f"vk.com/auto{i}" for i in range(5))))
+    assert "примерно 1 мин" in s.texts(USER)[-1]
+    reader = VKReader(bot, ctx); reader.api = api
+    assert await reader.join_batch(await ctx.db.queued_channels("vk")) is None
+    assert api.calls == ["groups.getById"] and all(VK_KEY + 900 + i in ctx.channels for i in range(5))
+    assert not await ctx.db.queued_channels("vk") and "Всё готово" in s.texts(USER)[-1] and "Подключено: <b>5</b>" in s.texts(USER)[-1]
+
+
+async def test_vk_walls_polled_in_packs(env):
+    """Стены всех сообществ читаются пачкой: новый пост открытого сообщества приходит без вступления в него."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1,5 млн")
+    api = FakeVK()
+    reader = VKReader(bot, ctx); reader.api = api
+    cid, _ = await ctx.db.add_channel(vk="avto_kzn", base=True)
+    await reader.join_batch([await ctx.db.channel(cid)])
+    api.wall[777] = []
+    task = asyncio.create_task(reader.wall_loop())
+    try:
+        await asyncio.sleep(.1)
+        assert reader.last.get(777) == 0                                   # первый круг — только запомнили место
+        api.wall[777] = [vk_post(777, 5, "Toyota Camry 2013, 1 200 000 ₽, Казань")]
+        await asyncio.sleep(1.2)
+        await asyncio.gather(*reader.tasks)
+        assert any("Toyota Camry 2013" in (t or "") for t in s.texts(USER))
+    finally:
+        task.cancel()

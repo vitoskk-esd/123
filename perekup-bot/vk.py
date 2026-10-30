@@ -28,6 +28,7 @@ from userbot import APPROVAL_CHECK, APPROVAL_WAIT, batch_done, notify
 log = logging.getLogger(__name__)
 API, V = "https://api.vk.com/method/", "5.199"
 FLOOD = (6, 9)                 # «слишком часто» / «flood control» — ключ рабочий, ВК просит притормозить
+WALL_PACK = 25                 # стен за один запрос (execute)
 FLOOD_PAUSE = 60               # на сколько притормаживаем опрос после такого ответа
 PAUSE_CAPTCHA = 900            # ВК попросил капчу или «слишком часто» — следующее вступление через 15 минут
 MENTION = re.compile(r"\[(?:id|club|public)\d+\|([^\]]*)\]")
@@ -240,9 +241,10 @@ class VKReader:
             self.since = max(self.since, it.get("date", 0))
             self._take(-it.get("source_id", 0), it.get("post_id") or it.get("id"), it)
 
-    async def poll_wall(self, gid: int) -> None:
-        """Стена одного сообщества. Первый опрос только запоминает, где мы, — старое не шлём."""
-        items = (await self.api.call("wall.get", owner_id=-gid, count=5)).get("items", [])
+    async def poll_wall(self, gid: int, items: list | None = None) -> None:
+        """Стена одного сообщества (items — уже полученные пачкой). Первый опрос только запоминает, где мы, — старое не шлём."""
+        if items is None:
+            items = (await self.api.call("wall.get", owner_id=-gid, count=5)).get("items", [])
         if gid not in self.last:
             self.last[gid] = max((it["id"] for it in items), default=0)
             return
@@ -267,21 +269,28 @@ class VKReader:
             await asyncio.sleep(max(1.0, self.ctx.cfg.vk_poll - (time.time() - started)))
 
     async def wall_loop(self) -> None:
+        """Стены всех сообществ по кругу, пачками по WALL_PACK за один запрос (execute). Открытые сообщества так читаются
+        без вступления; при 100 сообществах каждое проверяется раз в ~4 с."""
         while True:
             groups = self.groups()
             if not groups or self.ctx.cfg.vk_wall_rps <= 0:
-                await asyncio.sleep(10)
+                await asyncio.sleep(5)
                 continue
-            for gid in groups:
-                started = time.time()
+            for i in range(0, len(groups), WALL_PACK):
+                part, started = groups[i:i + WALL_PACK], time.time()
                 try:
-                    await self.poll_wall(gid)
+                    res = await self._many("wall.get", [{"owner_id": -g, "count": 5} for g in part], WALL_PACK)
+                    for g, r in zip(part, res):
+                        if r is not None:
+                            await self.poll_wall(g, r.get("items", []))
+                    self.error = ""
                 except VKError as e:
-                    log.info("стена ВК %s: %s", gid, e)
+                    self.error = str(e)
+                    log.warning("стены ВК: %s", e)
                     if e.code in FLOOD:
                         await asyncio.sleep(FLOOD_PAUSE)
                 except Exception as e:
-                    log.info("стена ВК %s: %s", gid, e)
+                    log.info("стены ВК: %s", e)
                 await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.vk_wall_rps - (time.time() - started)))
 
     # ---------- поиск новых сообществ ----------
@@ -364,26 +373,58 @@ class VKReader:
         return groups[0]
 
     async def join_one(self, row) -> int | None:
-        """Вступить в сообщество из очереди. Вернёт паузу до следующего вступления, если ВК просит подождать."""
+        return await self.join_batch([row])
+
+    async def join_batch(self, rows) -> int | None:
+        """Очередь сообществ. Открытые подключаем сразу, без вступления: их стены читаются и так (wall_loop) — вся пачка
+        одним запросом, за секунды. Закрытые — заявка на вступление, по одной за круг с паузой VK_JOIN_INTERVAL
+        (на частые вступления ВК отвечает «flood control» и капчей). Возвращает паузу до следующего круга."""
+        rows = list(rows)[:200]
         try:
-            g = await self.group(row["vk"])
-            if not g.get("is_member"):
-                if g.get("deactivated"):
-                    return await self._failed(row, "сообщество удалено или заблокировано")
-                if g.get("is_closed") == 2:
-                    return await self._failed(row, "частное сообщество — вступить можно только по приглашению")
-                await self.api.call("groups.join", group_id=g["id"])
-                if g.get("is_closed") == 1:                     # закрытое — заявка ушла админу сообщества
-                    return await self._awaiting(row, g)
+            res = await self.api.call("groups.getById", group_ids=",".join(_ref(r["vk"]) for r in rows), fields="is_member")
+            found = res.get("groups", []) if isinstance(res, dict) else res
         except VKError as e:
-            if e.code in (6, 9, 14):                            # слишком часто / капча — оставляем в очереди
-                log.warning("ВК просит подождать перед вступлением: %s", e)
-                return PAUSE_CAPTCHA if e.code != 6 else 5
+            if e.code in FLOOD or e.code == 14:
+                log.warning("ВК просит подождать: %s", e)
+                return FLOOD_PAUSE
             if e.code == 5:                                     # ключ отозван
                 self.error = str(e)
                 return 300
-            return await self._failed(row, ERRORS.get(e.code, str(e)))
-        await self._joined(row, g)
+            found = []                                          # в пачке есть несуществующее — разберём по одному
+        by = {}
+        for g in found:
+            by[str(g["id"])] = g
+            if g.get("screen_name"):
+                by[g["screen_name"].lower()] = g
+        asked = False
+        for row in rows:
+            g = by.get(_ref(row["vk"]).lower())
+            if g is None:
+                try:
+                    g = await self.group(row["vk"])
+                except VKError as e:
+                    if e.code in FLOOD or e.code == 14:
+                        return FLOOD_PAUSE
+                    await self._failed(row, ERRORS.get(e.code, str(e)))
+                    continue
+            if g.get("deactivated"):
+                await self._failed(row, "сообщество удалено или заблокировано")
+            elif g.get("is_member") or not g.get("is_closed"):
+                await self._joined(row, g)
+            elif g.get("is_closed") == 2:
+                await self._failed(row, "частное сообщество — вступить можно только по приглашению")
+            elif not asked:                                     # закрытое: заявка админу сообщества
+                try:
+                    await self.api.call("groups.join", group_id=g["id"])
+                except VKError as e:
+                    if e.code in FLOOD or e.code == 14:
+                        log.warning("ВК просит подождать перед заявкой: %s", e)
+                        return PAUSE_CAPTCHA
+                    await self._failed(row, ERRORS.get(e.code, str(e)))
+                    continue
+                await self._awaiting(row, g)
+                asked = True
+        return self.ctx.cfg.vk_join_interval if asked else None
 
     async def _joined(self, row, g: dict, approved: bool = False) -> None:
         await self.ctx.db.vk_joined(row["id"], g["id"], g.get("name") or "")
@@ -435,14 +476,13 @@ class VKReader:
             try:
                 queued = await self.ctx.db.queued_channels("vk")
                 if queued:
-                    pause = await self.join_one(queued[0])
+                    pause = await self.join_batch(queued)
                 if started - checked > APPROVAL_CHECK:
                     checked = started
                     await self.check_approvals()
             except Exception:
                 log.exception("ошибка при вступлении в сообщество ВК")
-            wait = (pause or self.ctx.cfg.vk_join_interval) if queued else 15
-            await asyncio.sleep(max(5, wait - (time.time() - started)))
+            await asyncio.sleep(max(2, (pause or 2) - (time.time() - started)))
 
     async def history_loop(self) -> None:
         """Один раз на сообщество: последние HISTORY постов со стены — в оценку рынка."""
