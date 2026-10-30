@@ -1,0 +1,21 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs>
+      <linearGradient id="hsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2533"/><stop offset="1" stop-color="#3d4a5c"/></linearGradient>
+      <linearGradient id="hroad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3038"/><stop offset="1" stop-color="#14171c"/></linearGradient>
+      <radialGradient id="hlight" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffe9b0" stop-opacity=".8"/><stop offset="1" stop-color="#ffe9b0" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1080" height="1100" fill="url(#hsky)"/>
+    <path d="M0 860 l120 -60 l140 40 l160 -90 l200 70 l150 -50 l310 80 v210 h-1080 z" fill="#1a222c"/>
+    <g fill="#0f141a"><path d="M60 1000 l40 -170 l40 170 z"/><path d="M180 1000 l50 -210 l50 210 z"/><path d="M860 1000 l46 -190 l46 190 z"/><path d="M960 1000 l40 -150 l40 150 z"/></g>
+    <!-- дальние фары -->
+    <circle cx="520" cy="1000" r="60" fill="url(#hlight)"/><circle cx="560" cy="1000" r="60" fill="url(#hlight)"/>
+    <!-- трасса -->
+    <path d="M440 1000 L640 1000 L1300 1920 L-220 1920 Z" fill="url(#hroad)"/>
+    <path d="M540 1010 L540 1920" stroke="#e8e8e8" stroke-width="14" stroke-dasharray="70 60" opacity=".75"/>
+    <!-- обочина и отбойник -->
+    <rect x="0" y="1000" width="1080" height="70" fill="#3b4048"/>
+    <g stroke="#c9ced6" stroke-width="12"><path d="M0 1040 h1080"/></g>
+    <g fill="#8a9099"><rect x="20" y="1030" width="14" height="60"/><rect x="140" y="1030" width="14" height="60"/><rect x="260" y="1030" width="14" height="60"/><rect x="380" y="1030" width="14" height="60"/><rect x="500" y="1030" width="14" height="60"/><rect x="620" y="1030" width="14" height="60"/><rect x="740" y="1030" width="14" height="60"/><rect x="860" y="1030" width="14" height="60"/><rect x="980" y="1030" width="14" height="60"/></g>
+    <g fill="#9fb3c8" opacity=".25"><ellipse cx="300" cy="1500" rx="200" ry="20"/><ellipse cx="800" cy="1700" rx="160" ry="16"/></g>
+  </svg>
+  <div id="rainfx" style="position:absolute;inset:0;pointer-events:none;z-index:40"></div>

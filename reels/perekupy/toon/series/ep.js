@@ -37,7 +37,15 @@ E.reveals.forEach((r, i) => {
   if (r.type !== "dash") { d.innerHTML += `<div class="stamp" id="st${k}">${r.stamp}</div>`; rvs.appendChild(d); }
 });
 
+// дождь (локация «трасса»): косые капли поверх сцены
+const rainfx = document.getElementById("rainfx"), drops = [];
+if (rainfx) for (let i = 0; i < 70; i++) { const d = document.createElement("div");
+  d.style.cssText = `position:absolute;width:3px;height:${40 + (i * 13) % 40}px;background:rgba(190,215,240,.45);border-radius:2px;transform-origin:0 0`;
+  rainfx.appendChild(d); drops.push([d, (i * 157) % 1180 - 100, (i * 263) % 1920, 900 + (i * 37) % 500]); }
+
 window.build = R => {
+  if (drops.length) R.hooks.push(t => drops.forEach(([d, x, y, v]) => { const yy = (y + t * v) % 2000 - 60;
+    d.style.transform = `translate(${x - yy * .18}px, ${yy}px) rotate(10deg)`; }));
   const tl = R.tl, cam = R.camera($("#cam"), { hand: .5 });
   R.grain(.035);
   gsap.set("#t-armR", { svgOrigin: "292 400" }); gsap.set("#t-armL", { svgOrigin: "128 400" });
@@ -101,7 +109,10 @@ window.build = R => {
       stamp(`#st${k}`, st[L] - .45);
     }
     if (rv.type === "stat") {
-      R.count($(`#big${k}`), r + .35, 0, rv.big, 1.2);
+      if (rv.dec) {                         // дробное число: «1,4 мм»
+        const o = { v: 0 }; tl.fromTo(o, { v: 0 }, { v: rv.big, duration: 1.2, ease: "power2.out", immediateRender: false,
+          onUpdate: () => { $(`#big${k}`).textContent = o.v.toFixed(rv.dec).replace(".", ","); } }, r + .35);
+      } else R.count($(`#big${k}`), r + .35, 0, rv.big, 1.2);
       for (let j = 0; j < 12; j++) R.sfx("tick", r + .35 + 1.2 * (1 - Math.pow(1 - j / 12, 1.8)), .6);
       rv.lines.forEach((l, j) => tl.fromTo(`#ln${k}_${j}`, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .25, ease: "power3.out", immediateRender: false }, r + 1.0 + j * .3));
       stamp(`#st${k}`, st[L] - .45);
@@ -120,6 +131,7 @@ window.build = R => {
         tl.set(`#L-${n}`, { opacity: 1 }, at); R.sfx("ping", at, .5);
         for (let b = 1; b < 9; b++) tl.set(`#L-${n}`, { opacity: b % 2 ? .35 : 1 }, at + b * .4); });
       $("#dashStamp .stamp").textContent = rv.stamp;
+      if (rv.odo !== undefined) $("#odo").textContent = rv.odo;
       tl.fromTo("#dashStamp", { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: .18, ease: "power4.out", immediateRender: false }, st[L] - .45)
         .to("#dashStamp", { opacity: 0, duration: .15 }, next - .1);
       R.sfx("impact", st[L] - .43, .8); R.shake(cam, st[L] - .4, .5, .25);

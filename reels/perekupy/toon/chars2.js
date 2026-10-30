@@ -159,4 +159,54 @@
   <g class="mouth" id="${p}-mouth-meh" style="display:none"><path d="M194 292 h32" stroke="${K}" stroke-width="7" stroke-linecap="round"/></g>
  </g>
 </svg>`;
+  // ---------- ЭДИК: менеджер автосалона. Костюм, галстук, укладка, бейдж, планшет, широкая улыбка ----------
+  CHARS.edik = p => `
+<svg viewBox="0 0 420 800" class="char" id="${p}">
+ <g id="${p}-body">
+  <path d="M156 560 L150 735 L202 735 L210 610 L218 735 L270 735 L264 560 Z" fill="#1f2a44" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <path d="M132 740 q0 -24 26 -24 h44 q12 0 12 24 z M208 740 q0 -24 12 -24 h44 q28 0 28 24 z" fill="#1a1a1a" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <path d="M146 732 h50 M222 732 h50" stroke="#555" stroke-width="4"/>
+  <!-- пиджак, рубашка, галстук -->
+  <path d="M126 394 q-8 92 22 168 h124 q30 -76 22 -168 q-30 -38 -84 -38 q-54 0 -84 38 z" fill="#24314f" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <path d="M182 362 h56 l-8 110 h-40 z" fill="#f4f6fa" stroke="${K}" stroke-width="5"/>
+  <path d="M202 372 h16 l6 14 l-10 80 h-8 l-10 -80 z" fill="#e63946" stroke="${K}" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M158 372 l40 84 M262 372 l-40 84" stroke="${K}" stroke-width="6"/>
+  <path d="M150 380 l34 -14 l12 92 z M270 380 l-34 -14 l-12 92 z" fill="#2c3b5e" stroke="${K}" stroke-width="5" stroke-linejoin="round"/>
+  <rect x="236" y="440" width="58" height="34" rx="6" fill="#fff" stroke="${K}" stroke-width="4"/>
+  <path d="M244 452 h40 M244 462 h26" stroke="#2f5fb0" stroke-width="4"/>
+  <circle cx="210" cy="500" r="6" fill="#d9b37a" stroke="${K}" stroke-width="3"/><circle cx="210" cy="530" r="6" fill="#d9b37a" stroke="${K}" stroke-width="3"/>
+ </g>
+ <g id="${p}-armL" style="transform-origin:134px 404px">
+  <path d="M134 398 q-34 46 -32 120 q4 16 22 12 q12 -60 36 -96" fill="#24314f" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <!-- планшет -->
+  <rect x="62" y="470" width="80" height="110" rx="10" fill="#151515" stroke="${K}" stroke-width="5" transform="rotate(-12 102 525)"/>
+  <rect x="70" y="480" width="64" height="88" rx="6" fill="#4cc3ff" transform="rotate(-12 102 525)"/>
+  <circle cx="116" cy="530" r="16" fill="#efc4a2" stroke="${K}" stroke-width="${W}"/>
+ </g>
+ <g id="${p}-armR" style="transform-origin:286px 404px">
+  <path d="M286 398 q34 46 34 120 q-4 16 -22 12 q-12 -60 -36 -96" fill="#24314f" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  <circle cx="308" cy="530" r="16" fill="#efc4a2" stroke="${K}" stroke-width="${W}"/>
+  <path d="M300 520 l-4 -26 q4 -6 10 0 l2 22" fill="#efc4a2" stroke="${K}" stroke-width="5" stroke-linejoin="round"/>
+ </g>
+ <g id="${p}-head" style="transform-origin:210px 368px">
+  <path d="M192 330 h36 v42 h-36 z" fill="#e0ad8c" stroke="${K}" stroke-width="${W}"/>
+  <ellipse cx="126" cy="234" rx="18" ry="26" fill="#efc4a2" stroke="${K}" stroke-width="${W}"/>
+  <ellipse cx="294" cy="234" rx="18" ry="26" fill="#efc4a2" stroke="${K}" stroke-width="${W}"/>
+  <path d="M124 208 q0 -118 86 -118 q86 0 86 118 q0 66 -26 100 q-24 30 -60 30 q-36 0 -60 -30 q-26 -34 -26 -100 z" fill="#efc4a2" stroke="${K}" stroke-width="${W}"/>
+  <!-- укладка с чубом -->
+  <path d="M120 196 q-8 -116 92 -118 q60 0 82 48 q-40 -18 -78 -6 q34 4 48 22 q-60 -20 -110 24 q-20 14 -34 30 z" fill="#2b1d14" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M186 96 q30 -20 70 -8" stroke="#5b4030" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <g id="${p}-brows"><path d="M154 184 q24 -14 46 -2" stroke="${K}" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M220 182 q24 -12 46 2" stroke="${K}" stroke-width="9" stroke-linecap="round" fill="none"/></g>
+  <g id="${p}-eyes"><ellipse cx="178" cy="218" rx="18" ry="14" fill="#fff" stroke="${K}" stroke-width="5"/><circle cx="182" cy="218" r="8" fill="${K}"/>
+   <ellipse cx="242" cy="218" rx="18" ry="14" fill="#fff" stroke="${K}" stroke-width="5"/><circle cx="246" cy="218" r="8" fill="${K}"/></g>
+  <g id="${p}-lids" style="transform-origin:210px 216px;transform:scaleY(0)"><path d="M158 222 v-18 h40 v18 z M222 222 v-18 h40 v18 z" fill="#efc4a2" stroke="${K}" stroke-width="5"/></g>
+  <path d="M208 228 q-12 24 2 30 q10 4 18 -2" fill="#e0ad8c" stroke="${K}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g class="mouth" id="${p}-mouth-grin"><path d="M164 278 q46 46 92 0 q-46 16 -92 0 z" fill="#fff" stroke="${K}" stroke-width="6" stroke-linejoin="round"/><path d="M178 286 v12 M196 290 v12 M214 290 v12 M232 288 v12" stroke="#ccc" stroke-width="3"/></g>
+  <g class="mouth" id="${p}-mouth-flat" style="display:none"><path d="M182 288 q28 14 56 0" fill="none" stroke="${K}" stroke-width="6" stroke-linecap="round"/></g>
+  <g class="mouth" id="${p}-mouth-talk" style="display:none"><path d="M170 280 q40 52 80 0 z" fill="#5a1e1e" stroke="${K}" stroke-width="6" stroke-linejoin="round"/><path d="M174 282 h72 v10 h-72 z" fill="#fff"/></g>
+  <g class="mouth" id="${p}-mouth-o" style="display:none"><ellipse cx="210" cy="292" rx="14" ry="18" fill="#5a1e1e" stroke="${K}" stroke-width="6"/></g>
+  <g class="mouth" id="${p}-mouth-meh" style="display:none"><path d="M186 294 q24 -10 48 0" fill="none" stroke="${K}" stroke-width="6" stroke-linecap="round"/></g>
+  <path id="${p}-sweat" d="M298 150 q14 24 0 34 q-14 -10 0 -34 z" fill="#7cc8ff" stroke="${K}" stroke-width="4" opacity="0"/>
+ </g>
+</svg>`;
 })();

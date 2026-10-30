@@ -56,6 +56,9 @@ def split_words(x, words, texts):
         for d in range(blk.size):
             k, j = owner[blk.a + d], blk.b + d
             first.setdefault(k, j); last[k] = j
+    for k in range(len(texts)):                     # реплика не совпала ни словом («три, два, один» → «3, 2, 1») —
+        if k not in first and k - 1 in last and k + 1 in first and last[k - 1] + 1 < first[k + 1]:   # всё, что между соседями
+            first[k], last[k] = last[k - 1] + 1, first[k + 1] - 1
     assert len(first) == len(texts), f"не нашёл реплики {sorted(set(range(len(texts))) - set(first))}"
     cuts = []
     for k in range(1, len(texts)):

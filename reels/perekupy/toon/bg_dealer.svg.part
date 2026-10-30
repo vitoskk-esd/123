@@ -1,0 +1,21 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs>
+      <linearGradient id="dwall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9eef5"/><stop offset="1" stop-color="#cfd8e3"/></linearGradient>
+      <linearGradient id="dfloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8c2cf"/><stop offset="1" stop-color="#8d98a8"/></linearGradient>
+    </defs>
+    <rect width="1080" height="1100" fill="url(#dwall)"/>
+    <!-- витражи -->
+    <g fill="#9fd0f5" opacity=".55" stroke="#7a8796" stroke-width="8"><rect x="20" y="420" width="190" height="560"/><rect x="235" y="420" width="190" height="560"/><rect x="450" y="420" width="190" height="560"/><rect x="665" y="420" width="190" height="560"/><rect x="880" y="420" width="190" height="560"/></g>
+    <rect x="270" y="300" width="540" height="90" rx="14" fill="#1f2a44"/>
+    <text x="540" y="362" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="46" fill="#fff">АВТОСАЛОН</text>
+    <!-- машина на подиуме с ценником -->
+    <ellipse cx="860" cy="985" rx="230" ry="26" fill="#8d98a8"/>
+    <g><rect x="700" y="860" width="140" height="70" rx="10" fill="#fff" stroke="#151515" stroke-width="5"/>
+      <text x="770" y="905" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="26" fill="#151515">1 290 000</text></g>
+    <!-- гирлянда флажков -->
+    <path d="M0 260 q270 60 540 0 q270 -60 540 0" stroke="#7a8796" stroke-width="4" fill="none"/>
+    <g><path d="M30 262 l26 0 l-13 34 z" fill="#e63946"/><path d="M120 282 l26 0 l-13 34 z" fill="#ffd23f"/><path d="M210 262 l26 0 l-13 34 z" fill="#2f5fb0"/><path d="M300 282 l26 0 l-13 34 z" fill="#e63946"/><path d="M390 262 l26 0 l-13 34 z" fill="#ffd23f"/><path d="M480 282 l26 0 l-13 34 z" fill="#2f5fb0"/><path d="M570 262 l26 0 l-13 34 z" fill="#e63946"/><path d="M660 282 l26 0 l-13 34 z" fill="#ffd23f"/><path d="M750 262 l26 0 l-13 34 z" fill="#2f5fb0"/><path d="M840 282 l26 0 l-13 34 z" fill="#e63946"/><path d="M930 262 l26 0 l-13 34 z" fill="#ffd23f"/><path d="M1020 282 l26 0 l-13 34 z" fill="#2f5fb0"/></g>
+    <rect x="0" y="1060" width="1080" height="860" fill="url(#dfloor)"/>
+    <path d="M0 1060 h1080" stroke="#6b7685" stroke-width="8"/>
+    <g stroke="#a7b1be" stroke-width="4"><path d="M0 1060 L-324.0 1920"/><path d="M180 1060 L-36.0 1920"/><path d="M360 1060 L252.0 1920"/><path d="M540 1060 L540.0 1920"/><path d="M720 1060 L828.0 1920"/><path d="M900 1060 L1116.0 1920"/><path d="M1080 1060 L1404.0 1920"/></g>
+  </svg>
