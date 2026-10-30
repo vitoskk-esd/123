@@ -312,7 +312,10 @@ PANEL = (
     "🆕 Сегодня новых: <b>{today}</b>{today_src}\n"
     "📅 За 7 дней: {week}{week_src}\n"
     "🔗 За всё время: {all_src}\n\n"
-    "💳 <b>Подписки сейчас: {subs}</b>{subs_by}\n"
+    "💳 <b>Активные подписки сейчас: {subs}</b>\n"
+    "   🚀 PRO — <b>{pro}</b>\n"
+    "   🚘 Простой — <b>{basic}</b>\n"
+    "   🔥 Пробный день — <b>{trial}</b>\n"
     "💰 Оплат за всё время: {paid_n} на {paid_sum} ₽ · за 30 дней: {paid30_n} на {paid30_sum} ₽{free}\n\n"
     "Ссылки для шапки профиля:\nInstagram — <code>{link}?start=inst</code>\nThreads — <code>{link}?start=threads</code>"
 )

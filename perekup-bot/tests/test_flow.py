@@ -1284,7 +1284,8 @@ async def test_admin_notified_of_new_users_and_panel(env):
     await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
     t = s.texts(ADMIN)[-1]
     assert "Всего пользователей: <b>4</b>" in t and "Сегодня новых: <b>4</b> — Instagram 1 · Threads 1" in t
-    assert "Подписки сейчас: 2</b> — PRO 1 · Пробный день 1" in t and "Оплат за всё время: 1 на 2 490 ₽" in t
+    assert "Активные подписки сейчас: 2</b>" in t and "PRO — <b>1</b>" in t and "Простой — <b>0</b>" in t
+    assert "Пробный день — <b>1</b>" in t and "Оплат за всё время: 1 на 2 490 ₽" in t
     assert "?start=inst" in t and "?start=threads" in t
     await dp.feed_update(bot, msg(T.MENU_ADMIN, USER))                                       # не админ — не видит
     assert not any("Админ-панель" in (x or "") for x in s.texts(USER))

@@ -153,7 +153,7 @@ async def panel_text(bot: Bot, ctx: Ctx) -> str:
         today=sum(r["n"] for r in p["today"]), today_src=fmt(by_source(p["today"])),
         week=sum(r["n"] for r in p["week"]), week_src=fmt(by_source(p["week"])),
         all_src=" · ".join(f"{k} {v}" for k, v in by_source(p["all"]).items()) or "—",
-        subs=sum(subs.values()), subs_by=fmt({k: subs[k] for k in ("PRO", "Простой", "Пробный день") if k in subs}),
+        subs=sum(subs.values()), pro=subs.get("PRO", 0), basic=subs.get("Простой", 0), trial=subs.get("Пробный день", 0),
         paid_n=p["paid"]["n"], paid_sum=rub(p["paid"]["s"]), paid30_n=p["paid30"]["n"], paid30_sum=rub(p["paid30"]["s"]),
         free="" if ctx.cfg.payments_on else T.PANEL_FREE, link=f"https://t.me/{me.username}")
 
