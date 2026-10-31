@@ -29,7 +29,7 @@ import plans
 from db import DAY, DEDUP_DAYS
 from links import channel_name
 import ai
-from parse import SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, sale_verdict
+from parse import SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, price_options, sale_verdict
 from query import Filter, matches
 
 log = logging.getLogger(__name__)
@@ -37,6 +37,7 @@ NOT_CLEAN = {"damaged", "parts", "notrun"}      # такие цены не ид�
 MARKET_DAYS = 90         # цены за сколько дней берём для оценки рынка
 MARKET_MIN = 5           # меньше объявлений — оценку не показываем, чтобы не врать
 SHOW_DISCOUNT = 5        # «ниже рынка» пишем от 5%
+IMPLAUSIBLE = 55         # дешевле рынка больше чем на 55% — почти всегда взяли не ту сумму («зазор 200к», «вложено 150к»)
 CAPTION_MAX = 1024       # лимит Telegram на подпись к фото
 PHOTO_TIMEOUT = 3        # сколько ждём пересылку фото; дольше — шлём без фото, скорость важнее
 
@@ -225,21 +226,33 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] |
     if not L.is_car or not L.price:
         return r
     now = time.time()
-    fp, ckey = fingerprint(raw.text), car_key(L)
-    r.duplicate = await ctx.db.seen_before(fp, ckey, now - DEDUP_DAYS * DAY)
-    clean = not (set(L.markers) & NOT_CLEAN)
-    r.post_id = await ctx.db.add_post(channel["id"], raw.msg_id, L, fp, ckey, r.duplicate, clean)
+    market, doubtful = None, False
     if L.model:
         # рынок — медиана той же модели ±1 год, без дублей и без битых: медиана не боится единичных выбросов.
         # Мало объявлений — берём ±2 года, но тогда нужно больше объявлений
-        prices = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, r.post_id)
+        prices = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, 0)
         if len(prices) < MARKET_MIN:
-            wide = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, r.post_id, span=2)
+            wide = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, 0, span=2)
             prices = wide if len(wide) >= MARKET_MIN + 2 else prices
         r.samples = len(prices)
         if r.samples >= MARKET_MIN:
-            r.market = round(median(prices))
-            r.discount = round((r.market - L.price) / r.market * 100)
+            market = round(median(prices))
+            # проверка здравым смыслом: «−80% к рынку» почти всегда значит, что правила взяли не ту сумму.
+            # Ищем в посте другую сумму, похожую на цену этой машины; нет такой — цену оставляем, но «ниже рынка» не пишем
+            if (market - L.price) / market * 100 > IMPLAUSIBLE:
+                alt = next((v for v in price_options(raw.text) if v != L.price and market * (1 - IMPLAUSIBLE / 100) <= v <= market * 1.6), None)
+                log.warning("цена %s при рынке %s — %s", L.price, market, f"беру {alt}" if alt else "скидку не показываю")
+                if alt:
+                    L.price = alt
+                else:
+                    r.samples, market, doubtful = 0, None, True
+    fp, ckey = fingerprint(raw.text), car_key(L)
+    r.duplicate = await ctx.db.seen_before(fp, ckey, now - DEDUP_DAYS * DAY)
+    clean = not (set(L.markers) & NOT_CLEAN) and not doubtful      # сомнительная цена не портит оценку рынка
+    r.post_id = await ctx.db.add_post(channel["id"], raw.msg_id, L, fp, ckey, r.duplicate, clean)
+    if market:
+        r.market = market
+        r.discount = round((market - L.price) / market * 100)
     return r
 
 

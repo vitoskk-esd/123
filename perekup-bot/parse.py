@@ -67,33 +67,47 @@ def clean(text: str) -> str:
     return PHONE.sub(" ", URL.sub(" ", text))
 
 
-# сумма сразу после этих слов (в той же фразе) — не цена машины: «замена цепи на 250к» (это пробег), «вложено 150к»,
-# «торг 20к», «ниже рынка на 100к», «налог 5к». Такие суммы берём, только если других нет совсем.
+# Как человек читает цену в посте. Смотрим на фразу перед суммой (от прошлой точки/запятой/строки):
+#  5 — «моя/наша/финальная цена», «цена всего», «отдам/продаю за», «ценник» — это точно цена продавца;
+#  4 — «цена», «стоимость», «прошу» (если во фразе нет слов про рынок и оценки);
+#  3 — сумма с ₽ / «руб» / «т.р.» / «млн»; 2 — с «к» / «тыс»; 1 — просто «850 000»;
+#  0 — сумма про другое: рынок, оценка Авито, «старт рынка», зазор, выгода, вложения, торг, ремонт, налог, кредит…;
+#  пробег («пробег щиток 220.000», «по базе 147.000», «одометр») — вообще не сумма.
 NOT_PRICE_BEFORE = re.compile(
     r"(?:\bна|\bпри|\bпосле|кажды\w*|через)\s*$"
     r"|вложен|вложил|влож\w*\s+\w*$|потрачен|чек\w*|торг|налог|страхов|осаго|каско|рын\w*|дешевле|дороже|скидк|доплат"
-    r"|кредит|залог|остат|платеж|взнос|ремонт|замен|поменя|обслуж|\bто\b|диагност|покраск|запчаст|комплект\s+резин")
+    r"|кредит|залог|остат|платеж|взнос|ремонт|замен|поменя|обслуж|\bто\b|диагност|покраск|запчаст|комплект\s+резин"
+    r"|зазор|выгод|эконом|разниц|марж|навар|прибыл|заработ|оценк|авито|дром|авто\.?ру|старт|средн|аналог|конкурент"
+    r"|предложени|ниже|выше|минус")
+MILEAGE_BEFORE = re.compile(r"пробег|одометр|одо\b|щит[оке]|приборк|по\s+базе|в\s+базе|по\s+автотек|пробежал|наезд")
+STRONG_PRICE = re.compile(r"(?:мо[яю]|наш[аиу]|финальн\w*|итогов\w*|окончательн\w*|реальн\w*)\s+цен|цен[аы]\s+(?:всего|лишь|только|сегодня|сейчас)"
+                          r"|(?:отда[юм]|продаю|продам|забрать|заберет\w*|забирай\w*)\s+(?:\w+\s+)?за\b|ценник")
+LABEL_PRICE = re.compile(r"цен[аыу]|стоимост|прошу|\bprice")
 
 
 def price_candidates(text: str) -> list[tuple[int, int]]:
-    """Все суммы, похожие на цену машины, с приоритетом: 4 — «цена: …», 3 — с рублями / «т.р.» / «млн»,
-    2 — с «к» / «тыс» (так пишут и пробег), 1 — просто «850 000», 0 — сумма после «замена на», «вложено», «торг»…"""
+    """Все суммы, похожие на цену машины, с приоритетом (см. правила выше)."""
     t = clean(text).lower().replace("ё", "е")
     found: list[tuple[int, int]] = []
     pattern = re.compile(rf"(?P<label>цена|стоимость|продам за|отдам за|прошу|price)?\s*[:\-–—=]?\s*(?P<num>{NUM})\s*(?P<unit>{MLN}|{THS}|{CUR})?\s*(?P<cur>{CUR})?")
     for m in pattern.finditer(t):
-        num, unit, label = m.group("num"), m.group("unit") or "", m.group("label")
+        num, unit = m.group("num"), m.group("unit") or ""
         tail = t[m.end():m.end() + 6]
-        head = t[max(0, m.start() - 12):m.start()]
+        # фраза перед суммой: от прошлого знака препинания или начала строки («1.150к» — точка внутри числа не граница)
+        clause = re.split(r"(?<!\d)[.,;!?(]|[.,;!?(](?!\d)|\n", t[max(0, m.start("num") - 60):m.start("num")])[-1]
+        clause = re.split(r"\d", clause)[-1]        # «пробег 167000 цена 1150000» — фраза цены начинается после пробега
         if FOREIGN.match(t[m.end("num"):m.end("num") + 8]) or FOREIGN.match(tail):
             continue
-        if re.match(r"\s*(км|km|т\.?\s?км|тыс\.?\s?км)", t[m.end("num"):m.end("num") + 10]) or "пробег" in head:
+        if re.match(r"\s*(км|km|т\.?\s?км|тыс\.?\s?км)", t[m.end("num"):m.end("num") + 10]) or MILEAGE_BEFORE.search(clause):
             continue
         value = _to_int(num, unit)
         if value is None:
             continue
+        strong = bool(STRONG_PRICE.search(clause))
+        other = bool(NOT_PRICE_BEFORE.search(clause))
+        label = strong or bool(m.group("label")) or (bool(LABEL_PRICE.search(clause)) and not other)
         has_cur = bool(m.group("cur") or re.match(CUR, unit) or re.match(r"т\.?\s?р|тр\b", unit))
-        grouped = bool(re.fullmatch(r"\d{1,3}(?:[ .  ]\d{3})+", num))
+        grouped = bool(re.fullmatch(r"\d{1,3}(?:[ .  ]\d{3})+", num))
         if not (label or unit or grouped):
             continue
         if re.fullmatch(YEAR, num) and not (label or unit):
@@ -102,11 +116,12 @@ def price_candidates(text: str) -> list[tuple[int, int]]:
         if label and not unit and value < 10_000:
             value *= 1000
         if PRICE_MIN <= value <= PRICE_MAX:
-            clause = re.split(r"[.,;!?\n(]", t[max(0, m.start("num") - 40):m.start("num")])[-1]
-            if label:
-                prio = 4
-            elif NOT_PRICE_BEFORE.search(clause):
+            if strong and not re.search(r"рын|оценк|авито|старт|средн|зазор|аналог", clause):
+                prio = 5
+            elif other:
                 prio = 0
+            elif label:
+                prio = 4
             else:
                 prio = 3 if (has_cur or re.match(MLN, unit)) else 2 if unit else 1
             found.append((prio, value))
@@ -125,6 +140,11 @@ def price_unsure(text: str) -> bool:
     """Правила не уверены в цене: нет «цена: …», а сумм, похожих на цену, несколько разных — пусть проверит ИИ."""
     found = price_candidates(text)
     return bool(found) and max(p for p, _ in found) < 4 and len({v for p, v in found if p >= 1}) > 1
+
+
+def price_options(text: str) -> list[int]:
+    """Другие суммы поста, которые могут быть ценой (для проверки по рынку): лучшие приоритеты первыми."""
+    return [v for p, v in sorted(price_candidates(text), key=lambda x: -x[0]) if p >= 1]
 
 
 def parse_year(text: str) -> int | None:

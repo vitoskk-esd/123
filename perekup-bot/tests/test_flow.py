@@ -1013,6 +1013,23 @@ async def test_admin_always_pro_and_market_from_history(env):
     assert "−21% к рынку" in card and "рынок ≈ 1 510 000 ₽ (6 объявл.)" in card
 
 
+
+async def test_implausible_discount_takes_other_sum(env):
+    """«−80% к рынку» почти всегда значит, что взяли не ту сумму: берём другую сумму поста, похожую на цену;
+    другой нет — цену оставляем, но «ниже рынка» не пишем и в оценку рынка такой пост не берём."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "любая тойота до 2 млн", uid=ADMIN, plan=None)
+    from pipeline import learn_history
+    ch = ctx.channels[CH2]
+    old = [(3000 + i, f"Toyota RAV4 2010, цена {p:,} ₽, Москва".replace(",", " "), time.time() - (i + 1) * 86400)
+           for i, p in enumerate((950_000, 980_000, 999_000, 1_020_000, 1_050_000, 1_100_000))]
+    assert await learn_history(ctx, ch, old) == 6
+    r = await process(bot, ctx, post(CH1, "Toyota RAV4 2010, 200к сверху всех, полный привод, 960 000"))
+    assert r.listing.price == 960_000 and r.discount == 5
+    r = await process(bot, ctx, post(CH1, "Toyota RAV4 2010, автомат, всего 190к, Москва"))
+    assert r.listing.price == 190_000 and r.discount is None and "к рынку" not in s.texts(ADMIN)[-1]
+
+
 async def test_vk_token_variable_accepts_whole_address(env, monkeypatch):
     """В переменную VK_TOKEN вставили весь адрес из браузера — бот сам берёт из него ключ."""
     dp, bot, s, ctx = env
