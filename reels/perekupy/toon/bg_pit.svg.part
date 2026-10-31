@@ -1,0 +1,24 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs>
+      <linearGradient id="pWall" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2a2d33"/><stop offset="1" stop-color="#4a4f58"/></linearGradient>
+      <linearGradient id="pWall2" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#2a2d33"/><stop offset="1" stop-color="#4a4f58"/></linearGradient>
+      <radialGradient id="pLamp" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2c4" stop-opacity=".55"/><stop offset="1" stop-color="#fff2c4" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1080" height="1920" fill="#16181d"/>
+    <!-- днище над головой -->
+    <path d="M60 60 H1020 V660 H60 Z" fill="#3b3f47" stroke="#000" stroke-width="8"/>
+    <path d="M120 120 H960 V600 H120 Z" fill="#4a4f58" stroke="#000" stroke-width="6"/>
+    <ellipse cx="874" cy="198" rx="52" ry="17" fill="#a35a20" opacity=".85"/><ellipse cx="531" cy="371" rx="52" ry="18" fill="#a35a20" opacity=".85"/><ellipse cx="389" cy="338" rx="66" ry="27" fill="#6b3814" opacity=".85"/><ellipse cx="916" cy="524" rx="71" ry="19" fill="#8a4a1c" opacity=".85"/><ellipse cx="585" cy="401" rx="34" ry="33" fill="#a35a20" opacity=".85"/><ellipse cx="689" cy="331" rx="36" ry="14" fill="#6b3814" opacity=".85"/><ellipse cx="767" cy="244" rx="59" ry="24" fill="#a35a20" opacity=".85"/><ellipse cx="610" cy="154" rx="68" ry="31" fill="#6b3814" opacity=".85"/><ellipse cx="326" cy="265" rx="35" ry="17" fill="#6b3814" opacity=".85"/><ellipse cx="518" cy="518" rx="51" ry="33" fill="#6b3814" opacity=".85"/><ellipse cx="426" cy="426" rx="33" ry="20" fill="#a35a20" opacity=".85"/><ellipse cx="250" cy="259" rx="57" ry="21" fill="#6b3814" opacity=".85"/><ellipse cx="695" cy="285" rx="34" ry="27" fill="#a35a20" opacity=".85"/><ellipse cx="388" cy="380" rx="53" ry="22" fill="#a35a20" opacity=".85"/><ellipse cx="669" cy="281" rx="58" ry="30" fill="#8a4a1c" opacity=".85"/><ellipse cx="390" cy="527" rx="51" ry="14" fill="#8a4a1c" opacity=".85"/><ellipse cx="330" cy="380" rx="26" ry="15.6" fill="#0b0b0b" stroke="#c2691f" stroke-width="5"/><ellipse cx="720" cy="250" rx="20" ry="12.0" fill="#0b0b0b" stroke="#c2691f" stroke-width="5"/><ellipse cx="610" cy="470" rx="16" ry="9.6" fill="#0b0b0b" stroke="#c2691f" stroke-width="5"/>
+    <path d="M200 330 H900" stroke="#6d737d" stroke-width="40" stroke-linecap="round"/><path d="M200 330 H900" stroke="#000" stroke-width="6" stroke-dasharray="1 0" fill="none" opacity=".4"/>
+    <path d="M780 300 q60 0 60 60 v120" stroke="#9aa1ab" stroke-width="30" fill="none" stroke-linecap="round"/><rect x="800" y="470" width="80" height="150" rx="20" fill="#7b818b" stroke="#000" stroke-width="6"/>
+    <g fill="#141416" stroke="#000" stroke-width="7"><rect x="20" y="140" width="120" height="260" rx="40"/><rect x="940" y="140" width="120" height="260" rx="40"/></g>
+    <!-- стены ямы, уходящие вверх -->
+    <path d="M0 660 L220 760 L220 1920 L0 1920 Z" fill="url(#pWall)" stroke="#000" stroke-width="8"/>
+    <path d="M1080 660 L860 760 L860 1920 L1080 1920 Z" fill="url(#pWall2)" stroke="#000" stroke-width="8"/>
+    <g stroke="#23262c" stroke-width="5"><path d="M0 820 L220 880"/><path d="M1080 820 L860 880"/><path d="M0 960 L220 1020"/><path d="M1080 960 L860 1020"/><path d="M0 1100 L220 1160"/><path d="M1080 1100 L860 1160"/><path d="M0 1240 L220 1300"/><path d="M1080 1240 L860 1300"/><path d="M0 1380 L220 1440"/><path d="M1080 1380 L860 1440"/><path d="M0 1520 L220 1580"/><path d="M1080 1520 L860 1580"/><path d="M0 1660 L220 1720"/><path d="M1080 1660 L860 1720"/><path d="M0 1800 L220 1860"/><path d="M1080 1800 L860 1860"/></g>
+    <rect x="220" y="760" width="640" height="1160" fill="#1f2228"/>
+    <path d="M220 1700 H860 V1920 H220 Z" fill="#2b2620"/><ellipse cx="420" cy="1780" rx="120" ry="20" fill="#121212" opacity=".7"/>
+    <!-- переноска -->
+    <path d="M300 660 q-20 120 40 200" stroke="#ff9f0a" stroke-width="8" fill="none"/><rect x="315" y="850" width="56" height="100" rx="20" fill="#ffd23f" stroke="#000" stroke-width="6"/>
+    <circle cx="343" cy="900" r="300" fill="url(#pLamp)"/>
+  </svg>

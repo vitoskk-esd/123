@@ -1,0 +1,100 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="bgs.js"></script>
+<script>
+// Приора сбоку — по рисунку владельца (kit/img/priora/priora_*.png): black — пацанская с наклейкой, white, yellow — такси, patch
+const IMG = (v, l, t, w = 900, z = 3, extra = "") => `<img class="el" src="../../kit/img/priora/priora_${v}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const P = (k, o) => "";
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4) => el(CHARS[kind](p), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+// ВАЗ-2114 владельца (kit/img/vaz2114/vaz2114_white.png, вырезан из его картинки)
+const CAR = (l, t, w = 820, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2114/vaz2114_white.png" style="left:${l}px;top:${t + w * .04}px;width:${w}px;z-index:${z};${extra}">`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const odo = (v, l, t, c = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">ОДО ${v}</div>`;
+// крупные планы: протектор с монеткой, боковина с кодом года, рамка «из багажника»
+const TREAD = (l, t, w = 960, coin = true) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * .62}px;z-index:5"><svg viewBox="0 0 960 600">
+  <rect x="0" y="0" width="960" height="600" rx="60" fill="#1c1c20" stroke="#000" stroke-width="10"/>
+  ${[0,1,2,3,4,5,6].map(i => `<path d="M${-40 + i * 150} 0 l70 150 l-70 150 l70 150 l-70 150" stroke="#0b0b0d" stroke-width="34" fill="none"/>`).join("")}
+  <path d="M0 300 H960" stroke="#0b0b0d" stroke-width="30"/>
+  ${[[180,120],[560,420],[770,200],[330,500]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="13" fill="#b9bfca" stroke="#000" stroke-width="4"/>`).join("")}
+  ${coin ? `<g><circle cx="480" cy="250" r="125" fill="#d4a93a" stroke="#000" stroke-width="9"/><circle cx="480" cy="250" r="100" fill="none" stroke="#a37c1f" stroke-width="6"/>
+    <text x="480" y="290" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="110" fill="#7a5a10">10</text></g>
+    <rect x="300" y="330" width="360" height="70" fill="#1c1c20"/>` : ""}
+</svg></div>`;
+const SIDE = (l, t, w = 1000) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * .6}px;z-index:5"><svg viewBox="0 0 1000 600">
+  <circle cx="500" cy="900" r="860" fill="#232327" stroke="#000" stroke-width="10"/><circle cx="500" cy="900" r="640" fill="#8b929c" stroke="#000" stroke-width="10"/>
+  <circle cx="500" cy="900" r="610" fill="none" stroke="#5c626b" stroke-width="20"/><circle cx="500" cy="900" r="820" fill="none" stroke="#2d2d33" stroke-width="10"/>
+  <text x="500" y="168" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="72" fill="#4a4a52" stroke="#111" stroke-width="2">DOT X3 BV 2312</text>
+  <text x="500" y="232" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="38" fill="#45454c">WINTER · 195/65 R15</text>
+</svg></div>`;
+const TRUNK = () => `<div class="el" style="inset:0;left:0;top:0;width:1080px;height:1920px;z-index:6;pointer-events:none;background:radial-gradient(ellipse 52% 30% at 50% 52%, transparent 96%, #0b0b0d 97%)"></div>`
+  + `<div class="el" style="left:60px;top:1500px;width:960px;height:420px;z-index:7;background:#16171b;border-top:10px solid #000;border-radius:30px 30px 0 0"></div>`;
+const S = [
+ { h: "ПЕРВЫЙ СНЕГ", tc: "1/8 · 0:00–0:07", bg: "interior", y: 700,
+   els: () => `<div class="title" style="top:760px;z-index:9"><span class="lab" style="position:static;display:inline-block;background:#fff;color:#151515;font-size:64px;transform:rotate(-3deg)">ПЕРВЫЙ</span><br><span class="lab" style="position:static;display:inline-block;margin-top:18px;background:#2e86de;font-size:100px;transform:rotate(2deg)">СНЕГ ❄️</span></div>`,
+   vo: "Первый снег. Для коммунальщиков — внезапность. Для перекупов — урожай.", who: "Лис",
+   mv: "<b>Новый ракурс — из-за руля.</b> Снег летит в лобовое, дворники смахивают его на каждом слове, ёлочка болтается, встречные фары слепят. На «урожай» — дворник смахивает титр." },
+ { h: "ШИНОМОНТАЖ", tc: "2/8 · 0:07–0:16", bg: "tireshop", y: 700,
+   els: () => CAR(240, 1170, 640) + ch("vika", "v", 760, 900, .85) + lab("ПОЛГОРОДА — В ОЧЕРЕДИ", 40, 760, "#151515", "#fff", 40, -3) + lab("ВТОРАЯ ПОЛОВИНА — В КЮВЕТЕ", 120, 860, "#ff3b30", "#fff", 38, 2),
+   vo: "Очередь на шиномонтаж — полгорода. Вторая половина уже в кювете. Вика стоит шестой час — на той самой четырке. Да, от Эдика. Один владелец, дед.", who: "Лис",
+   mv: "<b>Новая локация.</b> Камера плывёт вдоль очереди машин под снегом, табличка «ОЧЕРЕДЬ ~6 ЧАСОВ». В конце — Вика у белой четырки из 15-й серии (хронология). Снег идёт весь ролик." },
+ { h: "ИЗ БАГАЖНИКА", tc: "3/8 · 0:16–0:28", bg: "tireshop", y: 700,
+   els: () => TRUNK() + ch("tolyan", "t", 330, 860, 1.05, 5) + bub("Зимняя резина, почти новая!<br><em>Шипы — как родные!</em>", 80, 730) + lab("ШИПОВ: 4", 620, 1250, "#ffd23f", "#151515", 54, -4),
+   vo: "Толян: «Зимняя резина, почти новая! Шипы — как родные!» Лис: «Шипы правда родные. Их осталось четыре. На весь комплект».", who: "Толян + Лис",
+   mv: "<b>Ракурс изнутри багажника:</b> темнота, крышка открывается — свет, Толян в проёме раскидывает руки. В кадре колесо — шипы подсвечиваются и считаются: 1… 2… 3… 4. Всё." },
+ { h: "МОНЕТКА", tc: "4/8 · 0:28–0:38", bg: "tireshop", y: 700,
+   els: () => TREAD(60, 820, 960) + bub("Толян, монетка<br>торчит целиком.<br><em>Тут протектора нет.</em>", 300, 720) + lab("2 ММ · ЗИМОЙ НУЖНО ОТ 4", 120, 1380, "#ff3b30", "#fff", 44, -2),
+   vo: "Вика: «Толян, монетка торчит целиком. Тут протектора нет». Лис: «Зимой по закону — минимум четыре миллиметра. Тут — два и надежда».", who: "Вика + Лис",
+   mv: "<b>Макро-план:</b> протектор во весь экран, рука Вики вставляет десятирублёвую монетку — она торчит почти целиком. Линейка-шкала выезжает сбоку: 2 мм против 4." },
+ { h: "БОКОВИНА", tc: "5/8 · 0:38–0:50", bg: "tireshop", y: 700,
+   els: () => SIDE(40, 900) + `<div class="el" style="left:650px;top:990px;width:250px;height:110px;border:9px solid #ffd23f;border-radius:50%;z-index:8"></div>`
+     + bub("Двенадцатый год.<br><em>Она старше моего стажа.</em>", 60, 720) + lab("ВЫДЕРЖАННАЯ, КАК КОНЬЯК! 🥃", 120, 1330, "#151515", "#ffd23f", 40, 3),
+   vo: "Вика: «Двенадцатый год. Она старше моего стажа». Толян: «Сестрёнка, выдержанная, как коньяк!» Лис: «Резина — не коньяк. С годами она только дубеет».", who: "Вика + Толян + Лис",
+   mv: "<b>Макро-план 2:</b> камера скользит по боковине шины, находит четыре цифры «2312», обводит их кружком — «23-я неделя 2012-го». На «дубеет» шина стучит, как деревяшка: «тук-тук»." },
+ { h: "ИЗ ЯМЫ", tc: "6/8 · 0:50–1:04", bg: "pit", y: 700,
+   els: () => ch("mihalych", "m", 330, 860, 1.05, 5) + bub("Резину поменяем.<br>А днище, дочка,<br><em>только отпевать.</em>", 60, 720),
+   vo: "Лис: «Вика доехала до Михалыча». Михалыч: «Резину поменяем. А днище, дочка, только отпевать». Вика: «Продавали — один владелец, дед…» Михалыч: «Ну вот. Оба отъездились».", who: "Лис + Михалыч + Вика",
+   mv: "<b>Ракурс снизу, из смотровой ямы:</b> над головой ржавое днище четырки, сквозь дырки пробивается свет, переноска качается. Михалыч стучит по днищу — сыплется ржавчина. На «оба отъездились» — пауза, капля падает в лужу." },
+ { h: "КЮВЕТ", tc: "7/8 · 1:04–1:16", bg: "ditch", y: 700,
+   els: () => IMG("black", 360, 1240, 680, 3, "transform:rotate(-10deg)") + `<div class="el" style="left:470px;top:1400px;width:640px;height:200px;border-radius:50%;background:#f4f7fc;border:6px solid #000;z-index:4"></div>` + ch("tolyan", "t", -10, 870, .9) + bub("Брат…<br><em>вытащи, а?</em>", 60, 720),
+   vo: "Лис: «А Толян свою резину так и не продал. Поставил себе». Толян: «Брат… вытащи, а?» Лис: «Первый снег — он для всех первый».", who: "Лис + Толян",
+   mv: "<b>Новая локация — трасса за городом.</b> Чёрная Приора Толяна из 14-й серии едет, на знаке «гололёд» её начинает крутить — медленный разворот и мягкая посадка в сугроб. Толян стоит по колено в снегу и голосует." },
+ { h: "МОРАЛЬ", tc: "8/8 · 1:16–1:28", bg: "interior", y: 700,
+   els: () => `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:38px;line-height:1.4">ЗИМНЯЯ РЕЗИНА:<br><span style="color:#ffd23f">🪙 протектор от 4 мм · 📅 год — 4 цифры на боковине · 🔩 шипы — считай</span></div>`,
+   vo: "Зимняя резина: протектор от четырёх миллиметров, год — четыре цифры на боковине, шипы — считай до покупки. Машины без перекупов — в боте «Перехват». Сохрани, пока первый снег не стал последним.", who: "Лис",
+   mv: "<b>Финал — снова из-за руля,</b> но машина уже стоит на новой резине у шиномонтажа. Чек-лист появляется на лобовом стекле, дворник «стирает» снег. Дальше маскот-лис и бот. ~1:30, 8 сцен, 4 новые локации, 3 новых ракурса." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>«${sc.vo}»`;
+document.getElementById("mv").innerHTML = sc.mv;
+["a","b","c","d","e","f","g","h","i"].forEach(p => { const e = document.getElementById(p); });
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = ""; const sh2 = document.getElementById("t2-shades"); if (sh2) sh2.style.display = "";
+mouth && document.getElementById("t") && mouth("t", "grin"); document.getElementById("g") && mouth("g", "talk"); document.getElementById("e") && mouth("e", "grin"); document.getElementById("v") && mouth("v", "talk");
+window.READY = true;
+</script></body></html>
