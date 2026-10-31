@@ -1,0 +1,49 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<!-- Шапка YouTube 2560×1440. Видна везде только «безопасная зона» 1546×423 по центру (x 507–2053, y 508–931):
+     там лиса, название и призыв. На компьютере видна полоса 2560×423 — по краям машины из серий. -->
+<link rel="stylesheet" href="../kit/base.css">
+<style>
+html,body{margin:0;width:2560px;height:1440px;overflow:hidden;background:#0b0c10}
+.bg{position:absolute;inset:0;background:
+  radial-gradient(ellipse 900px 520px at 820px 720px, rgba(255,122,26,.42), transparent 70%),
+  radial-gradient(ellipse 1400px 700px at 1700px 760px, rgba(46,134,222,.18), transparent 70%),
+  linear-gradient(180deg,#0e1016 0%,#14161d 55%,#1b1e26 100%)}
+/* асфальт и разметка по низу полосы */
+.road{position:absolute;left:0;right:0;top:860px;height:600px;background:linear-gradient(180deg,#22252d,#16181e)}
+.road::before{content:"";position:absolute;left:0;right:0;top:34px;height:12px;background:repeating-linear-gradient(90deg,#ffd23f 0 110px,transparent 110px 200px);opacity:.85}
+.grain{position:absolute;inset:0;opacity:.06;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+.city{position:absolute;left:0;right:0;top:520px;height:340px;opacity:.5}
+.fox{position:absolute;left:560px;top:478px;width:470px;filter:drop-shadow(0 18px 0 rgba(0,0,0,.45))}
+.ring{position:absolute;left:575px;top:500px;width:440px;height:440px;border-radius:50%;background:#ff7a1a;border:10px solid #151515;box-shadow:0 0 120px rgba(255,122,26,.55)}
+.t{position:absolute;left:1090px;top:520px;width:960px}
+.t h1{margin:0;font-family:Unbounded;font-weight:900;font-size:150px;line-height:1;letter-spacing:-4px;color:#fff;-webkit-text-stroke:14px #151515;paint-order:stroke fill;
+  text-shadow:0 12px 0 #151515}
+.t h1 span{color:#ff7a1a}
+.t p{margin:26px 0 0;font-family:Onest;font-weight:700;font-size:42px;line-height:1.25;color:#d6dae2}
+.cta{display:inline-flex;align-items:center;gap:16px;margin-top:28px;font-family:Unbounded;font-weight:900;font-size:34px;color:#151515;background:#ffd23f;
+  border:7px solid #151515;border-radius:22px;padding:12px 26px;box-shadow:0 10px 0 #151515;transform:rotate(-1.5deg)}
+.car{position:absolute;filter:drop-shadow(0 14px 10px rgba(0,0,0,.6))}
+.dark{filter:drop-shadow(0 0 3px rgba(255,255,255,.55)) drop-shadow(0 0 16px rgba(160,190,230,.35)) drop-shadow(0 14px 10px rgba(0,0,0,.6))}
+.guide{position:absolute;left:507px;top:508px;width:1546px;height:423px;outline:4px dashed #4cd964;display:none}
+body.g .guide{display:block}
+</style></head><body>
+<div class="bg"></div>
+<svg class="city" viewBox="0 0 2560 340" preserveAspectRatio="none"><g fill="#1d2130">
+  <rect x="0" y="120" width="140" height="220"/><rect x="150" y="60" width="110" height="280"/><rect x="270" y="150" width="160" height="190"/><rect x="2120" y="90" width="150" height="250"/><rect x="2280" y="40" width="120" height="300"/><rect x="2410" y="140" width="150" height="200"/>
+  <rect x="1180" y="180" width="200" height="160"/><rect x="1400" y="120" width="130" height="220"/><rect x="1560" y="200" width="240" height="140"/><rect x="1830" y="150" width="170" height="190"/></g>
+  <g fill="#ffd23f" opacity=".5">${''}</g></svg>
+<div class="road"></div>
+<!-- машины из серий: по краям, видны на компьютере и ТВ -->
+<img class="car dark" src="../kit/img/priora/priora_black.png" style="left:-60px;top:700px;width:560px">
+<img class="car" src="../kit/img/vaz2109/vaz2109.png" style="left:2080px;top:640px;width:500px">
+<div class="ring"></div>
+<img class="fox" src="fox_cut.png">
+<div class="t">
+  <h1>ПЕРЕ<span>КУПЫ</span></h1>
+  <p>Мультсериал про авторынок: скрученные пробеги,<br>«одна хозяйка» и чёрный юмор</p>
+  <div class="cta">🚘 Тачки раньше перекупов — бот «Перехват»</div>
+</div>
+<div class="grain"></div>
+<div class="guide"></div>
+<script>document.querySelectorAll(".city g")[1].innerHTML = Array.from({length: 70}, (_, i) => `<rect x="${(i * 157) % 2540}" y="${80 + (i * 61) % 220}" width="14" height="18"/>`).join(""); if (location.search.includes("guide")) document.body.className = "g";</script>
+</body></html>
