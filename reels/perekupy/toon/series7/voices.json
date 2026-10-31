@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor mini-movie: one day of a used-car flipper, like a deadpan crime documentary narrator. Punchlines are short and dry, delivered after a tiny pause, with perfect comic timing."
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor mini-movie about the first snow and used-car flippers selling bald winter tires, like a deadpan crime documentary narrator. Punchlines are short and dry, delivered after a tiny pause, with perfect comic timing."
  },
  "seryoga": {
   "voice": "Puck",
@@ -15,19 +15,19 @@
   "voice": "Kore",
   "tempo": 1.15,
   "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Confident, calm, sharp, slightly sarcastic, she knows her rights."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: dry, sarcastic, unimpressed. Line 2: sarcastic. Line 3: uncertain, starting to realize she was scammed, trailing quietly but still clear."
  },
  "mihalych": {
   "voice": "Gacrux",
   "tempo": 1.12,
   "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
-  "notes": "One line: old master, tired dry humor, unhurried; the second sentence is a deadpan punchline after a short pause."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Old master looking up at a rusty car bottom from the inspection pit. Line 1: tired dry verdict, dark punchline at the end. Line 2: short deadpan punchline after a sigh. Pronounce every word clearly and separately, especially «А вот днище, дочка»."
  },
  "tolyan": {
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: suspicious question. Line 2: casual, conspiratorial request to a mechanic. Line 3: cocky, loud sales pitch. Line 4: offended, indignant."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: loud cocky sales pitch from his car trunk. Line 2: charming, flattering, cheeky. Line 3: quiet, embarrassed, pleading from a snowy ditch."
  },
  "galya": {
   "voice": "Sulafat",
