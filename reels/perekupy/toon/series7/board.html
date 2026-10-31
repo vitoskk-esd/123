@@ -50,6 +50,7 @@ const SIDE = (l, t, w = 1000) => `<div class="el" style="left:${l}px;top:${t}px;
   <text x="500" y="168" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="72" fill="#4a4a52" stroke="#111" stroke-width="2">DOT X3 BV 2312</text>
   <text x="500" y="232" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="38" fill="#45454c">WINTER · 195/65 R15</text>
 </svg></div>`;
+const DRIFT = (l, t, w, h, z = 4) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z}"><svg viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M0 120 C10 70 50 50 90 62 C120 26 180 18 220 48 C260 22 320 30 350 62 C380 70 398 96 400 120 Z" fill="#eef3fa" stroke="#000" stroke-width="6" vector-effect="non-scaling-stroke"/><path d="M60 90 q40 -18 80 0 M240 84 q40 -16 80 0" stroke="#bcc8da" stroke-width="5" fill="none" vector-effect="non-scaling-stroke"/></svg></div>`;
 const TRUNK = () => `<div class="el" style="inset:0;left:0;top:0;width:1080px;height:1920px;z-index:6;pointer-events:none;background:radial-gradient(ellipse 52% 30% at 50% 52%, transparent 96%, #0b0b0d 97%)"></div>`
   + `<div class="el" style="left:60px;top:1500px;width:960px;height:420px;z-index:7;background:#16171b;border-top:10px solid #000;border-radius:30px 30px 0 0"></div>`;
 const S = [
@@ -79,10 +80,9 @@ const S = [
    vo: "Лис: «Вика доехала до Михалыча». Михалыч: «Резину поменяем. А днище, дочка, только отпевать». Вика: «Продавали — один владелец, дед…» Михалыч: «Ну вот. Оба отъездились».", who: "Лис + Михалыч + Вика",
    mv: "<b>Ракурс снизу, из смотровой ямы:</b> над головой ржавое днище четырки, сквозь дырки пробивается свет, переноска качается. Михалыч стучит по днищу — сыплется ржавчина. На «оба отъездились» — пауза, капля падает в лужу." },
  { h: "КЮВЕТ", tc: "7/8 · 1:04–1:22", bg: "ditch", y: 700,
-   els: () => IMG("black", 420, 1250, 640, 3, "transform:rotate(-10deg)") + `<div class="el" style="left:500px;top:1400px;width:600px;height:200px;border-radius:50%;background:#f4f7fc;border:6px solid #000;z-index:4"></div>`
-     + `<img class="el" src="../../kit/img/vaz2109/vaz2109.png" style="left:250px;top:960px;width:520px;z-index:3;transform:rotate(6deg)">`
-     + `<div class="el" style="left:250px;top:1150px;width:560px;height:110px;border-radius:50%;background:#f4f7fc;border:6px solid #000;z-index:3"></div>`
-     + ch("tolyan", "t", -10, 870, .9, 6) + bub("Брат…<br><em>вытащи, а?</em>", 60, 720) + lab("КЛИРЕНС: 0", 640, 900, "#ffd23f", "#151515", 44, 4),
+   els: () => IMG("black", 590, 1150, 540, 3, "transform:rotate(-9deg);filter:drop-shadow(0 0 3px rgba(255,255,255,.6)) drop-shadow(0 0 14px rgba(160,190,230,.4))") + DRIFT(540, 1280, 600, 130, 4)
+     + `<img class="el" src="../../kit/img/vaz2109/vaz2109.png" style="left:230px;top:1090px;width:440px;z-index:3;transform:rotate(6deg)">` + DRIFT(200, 1260, 520, 120, 4)
+     + ch("tolyan", "t", -60, 900, .9, 6) + bub("Брат…<br><em>вытащи, а?</em>", 40, 720) + lab("КЛИРЕНС: 0", 520, 860, "#ffd23f", "#151515", 44, 4),
    vo: "Лис: «А Толян свою резину так и не продал. Поставил себе». Толян: «Брат… вытащи, а?» Лис: «Остановилась только заниженная девятка. Теперь в кювете их двое. Первый снег — он для всех первый».", who: "Лис + Толян",
    mv: "<b>Новая локация — трасса за городом.</b> Чёрная Приора Толяна из 14-й серии на знаке «гололёд» медленно разворачивается и садится в сугроб. Толян голосует. По дороге к камере едет <b>вишнёвая заниженная девятка на золотых штампах</b> (ракурс 3/4) — тормозит, съезжает на обочину и «ложится» брюхом на снег. Пауза. Снег падает на обе машины." },
  { h: "МОРАЛЬ", tc: "8/8 · 1:16–1:28", bg: "interior", y: 700,

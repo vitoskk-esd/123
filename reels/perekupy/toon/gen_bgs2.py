@@ -110,27 +110,38 @@ pit = HEAD + f'''    <defs>
   </svg>
 '''
 
-# ---------- трасса за городом, кювет, сугробы
+# ---------- трасса за городом: дорога поперёк кадра, под ней кювет, на переднем плане сугроб
+posts = "".join(f'<g><rect x="{x}" y="{y - 70}" width="16" height="70" fill="#f4f6f8" stroke="{K}" stroke-width="4"/><rect x="{x}" y="{y - 62}" width="16" height="14" fill="#ff7a1a"/></g>' for x, y in [(60, 1000), (300, 994), (540, 988), (780, 982), (1020, 976)])
 ditch = HEAD + f'''    <defs>
-      <linearGradient id="dSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d4a6e"/><stop offset="1" stop-color="#a6b2c8"/></linearGradient>
-      <linearGradient id="dField" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3e9f2"/><stop offset="1" stop-color="#b9c4d4"/></linearGradient>
+      <linearGradient id="dSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f2846"/><stop offset=".7" stop-color="#5a6789"/><stop offset="1" stop-color="#9aa6c0"/></linearGradient>
+      <linearGradient id="dField" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe6f0"/><stop offset="1" stop-color="#c3cddc"/></linearGradient>
+      <linearGradient id="dDitch" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8794ab"/><stop offset=".55" stop-color="#aeb9cb"/><stop offset="1" stop-color="#d7dfea"/></linearGradient>
+      <linearGradient id="dFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fc"/><stop offset="1" stop-color="#cdd7e6"/></linearGradient>
+      <radialGradient id="dMoon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6d6" stop-opacity=".7"/><stop offset="1" stop-color="#fff6d6" stop-opacity="0"/></radialGradient>
     </defs>
     <rect width="1080" height="1920" fill="url(#dSky)"/>
-    <path d="M0 880 Q300 820 600 870 T1080 850 V1920 H0 Z" fill="url(#dField)"/>
-    <g fill="#26324f">{"".join(f'<path d="M{x} 880 l26 -{h} l26 {h} z"/>' for x, h in [(40, 80), (90, 110), (150, 70), (700, 90), (760, 120), (830, 80), (900, 100), (980, 70)])}</g>
-    <!-- столбы с проводами -->
-    <g stroke="#1b2235" stroke-width="10">{"".join(f'<path d="M{x} {y} v-{h}"/><path d="M{x - 30} {y - h + 20} h60" stroke-width="7"/>' for x, y, h in [(120, 900, 260), (420, 880, 200), (700, 875, 160)])}</g>
-    <path d="M120 660 Q270 700 420 700 Q560 710 700 735" stroke="#1b2235" stroke-width="3" fill="none"/>
-    <!-- дорога по диагонали, кювет справа -->
-    <path d="M330 880 L520 880 L760 1920 L-200 1920 Z" fill="#59606d" stroke="{K}" stroke-width="7"/>
-    <path d="M425 890 L280 1920" stroke="#e9eff7" stroke-width="14" stroke-dasharray="70 70"/>
-    <path d="M520 880 L572 880 L1040 1920 L760 1920 Z" fill="#7d8aa0" stroke="{K}" stroke-width="5"/>
-    <path d="M546 880 L900 1920" stroke="#5f6b82" stroke-width="10" opacity=".7"/>
-    <g fill="#f4f7fc" stroke="{K}" stroke-width="6"><ellipse cx="80" cy="1800" rx="230" ry="80"/><ellipse cx="660" cy="1120" rx="70" ry="22"/><ellipse cx="840" cy="1450" rx="120" ry="34"/><ellipse cx="1040" cy="1820" rx="160" ry="50"/></g>
-    <!-- знак «гололёд» -->
-    <g><path d="M880 1080 V880" stroke="#1b2235" stroke-width="12"/><path d="M880 760 L960 900 L800 900 Z" fill="#fff" stroke="#e53935" stroke-width="14" stroke-linejoin="round"/>
-      <path d="M850 880 q15 -40 40 -40 l10 20" stroke="{K}" stroke-width="7" fill="none"/></g>
-    <g>{flakes(110, 0, 0, 1080, 1900, "#f6f9fd")}</g>
+    <circle cx="820" cy="420" r="150" fill="url(#dMoon)"/><circle cx="820" cy="420" r="48" fill="#f3ead0" stroke="{K}" stroke-width="5"/>
+    <!-- дальний лес -->
+    <path d="M0 860 {"".join(f'L{x} {800 - (x * 37) % 70} L{x + 30} 860 ' for x in range(0, 1080, 60))} L1080 900 L0 900 Z" fill="#1a2440"/>
+    <rect y="880" width="1080" height="120" fill="url(#dField)"/>
+    <!-- столбы ЛЭП -->
+    <g stroke="#141b30" stroke-width="9"><path d="M160 900 V620"/><path d="M125 650 h70" stroke-width="6"/><path d="M640 890 V650"/><path d="M610 676 h60" stroke-width="6"/></g>
+    <path d="M160 652 Q400 700 640 678 Q860 662 1080 700" stroke="#141b30" stroke-width="3" fill="none"/>
+    <!-- дорога поперёк кадра -->
+    <path d="M0 990 L1080 970 L1080 1100 L0 1124 Z" fill="#5d6470" stroke="{K}" stroke-width="7"/>
+    <path d="M0 1057 L1080 1035" stroke="#e9eff7" stroke-width="10" stroke-dasharray="80 70"/>
+    <path d="M0 990 L1080 970 L1080 982 L0 1004 Z" fill="#eef3f9"/>
+    {posts}
+    <!-- знак «гололёд» у обочины -->
+    <g><path d="M960 980 V780" stroke="#141b30" stroke-width="12"/><path d="M960 650 L1040 790 L880 790 Z" fill="#fff" stroke="#e53935" stroke-width="14" stroke-linejoin="round"/>
+      <path d="M930 770 q15 -40 40 -40 l10 20" stroke="{K}" stroke-width="7" fill="none"/></g>
+    <!-- кювет: откос вниз от дороги -->
+    <path d="M0 1124 L1080 1100 L1080 1180 C900 1300 720 1330 540 1330 C340 1330 160 1300 0 1250 Z" fill="url(#dDitch)" stroke="{K}" stroke-width="6"/>
+    <path d="M0 1250 C160 1300 340 1330 540 1330 C720 1330 900 1300 1080 1180" stroke="#6f7c93" stroke-width="8" fill="none" opacity=".6"/>
+    <!-- передний сугроб -->
+    <path d="M0 1380 C120 1330 220 1360 320 1340 C440 1316 520 1360 640 1350 C780 1338 880 1300 1080 1330 L1080 1920 L0 1920 Z" fill="url(#dFront)" stroke="{K}" stroke-width="7"/>
+    <g stroke="#b8c4d6" stroke-width="6" fill="none" stroke-linecap="round"><path d="M80 1500 q80 -30 160 0"/><path d="M620 1560 q90 -34 180 0"/><path d="M380 1720 q70 -26 140 0"/><path d="M860 1800 q60 -20 120 0"/></g>
+    <g>{flakes(120, 0, 0, 1080, 1900, "#f6f9fd")}</g>
   </svg>
 ''' + SNOW
 
