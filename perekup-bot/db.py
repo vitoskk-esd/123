@@ -491,6 +491,9 @@ class DB:
             "ideas": (await n("SELECT COUNT(*) n FROM events WHERE kind='idea'"))["n"],
             "ideas7": (await n("SELECT COUNT(*) n FROM events WHERE kind='idea' AND at>?", now - 7 * DAY))["n"],
             "paid30": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY),
+            # сколько людей из каждого источника хоть раз заплатили — какая соцсеть приводит покупателей, а не просто зрителей
+            "buyers": await self._all("SELECT u.source source, COUNT(DISTINCT p.user_id) n FROM payments p JOIN users u ON u.id=p.user_id "
+                                      "WHERE p.status='succeeded' GROUP BY u.source"),
         }
 
     async def admin_stats(self) -> dict:

@@ -1308,6 +1308,25 @@ async def test_admin_notified_of_new_users_and_panel(env):
     assert not any("Админ-панель" in (x or "") for x in s.texts(USER))
 
 
+async def test_youtube_and_tiktok_links_tracked(env):
+    """Ссылки ?start=youtube и ?start=tiktok: админ видит, откуда пришёл человек, сколько новых из каждой соцсети
+    и сколько из них заплатили — какая соцсеть приводит покупателей."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg("/start youtube", USER))
+    assert "Пришёл из: <b>YouTube</b>" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, msg("/start tiktok", OTHER))
+    assert "Пришёл из: <b>TikTok</b>" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, msg("/start tiktok", 333))
+    await ctx.db.add_payment(OTHER, "t1", 490, "trial"); await ctx.db.finish_payment("t1", "succeeded")
+    await ctx.db.add_payment(OTHER, "t2", 2490, "pro"); await ctx.db.finish_payment("t2", "succeeded")   # повторная — тот же человек
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
+    t = s.texts(ADMIN)[-1]
+    assert "Сегодня новых: <b>4</b> — " in t and "YouTube 1" in t and "TikTok 2" in t
+    assert "Купили хоть раз: TikTok 1" in t
+    assert "?start=youtube" in t and "?start=tiktok" in t
+
+
 async def test_admin_can_turn_off_new_user_notifications(env):
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start", ADMIN))
