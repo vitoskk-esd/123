@@ -84,8 +84,9 @@ def soft(seg):
     return seg
 
 
-def squeeze(seg, keep=.12):
-    """паузы внутри реплики длиннее keep → keep: уходят «зависания», темп речи тот же"""
+def squeeze(seg, keep=.12, cuts=None):
+    """паузы внутри реплики длиннее keep → keep: уходят «зависания», темп речи тот же.
+    cuts — сюда пишем вырезанные куски [(начало, длина) в секундах исходной реплики], чтобы сдвинуть время слов"""
     fr = int(.02 * SR); n = len(seg) // fr
     quiet = [np.sqrt(np.mean(seg[i * fr:(i + 1) * fr] ** 2)) < db(-40) for i in range(n)]
     out, i = [], 0
@@ -93,7 +94,9 @@ def squeeze(seg, keep=.12):
         j = i
         while j < n and quiet[j] == quiet[i]: j += 1
         chunk = seg[i * fr:j * fr]
-        if quiet[i] and 0 < i and j < n and (j - i) * fr > keep * SR: chunk = chunk[:int(keep * SR)]
+        if quiet[i] and 0 < i and j < n and (j - i) * fr > keep * SR:
+            if cuts is not None: cuts.append(((i * fr + int(keep * SR)) / SR, (len(chunk) - int(keep * SR)) / SR))
+            chunk = chunk[:int(keep * SR)]
         out.append(chunk); i = j
     out.append(seg[n * fr:])
     return np.concatenate(out)
@@ -127,12 +130,13 @@ for who, lines in IDX.items():
                     while en < hi and (lv(en) or lv(en + .01) or lv(en + .02)): en += .01
                     lo, hi = max(lo, st - .04), min(hi, max(en + .04, t1 + .03, st + .36))   # короче «блин» не бывает
                 bl.append((lo - a / SR, hi - a / SR))
-        line_words[name] = [[w, round(t0 - a / SR, 3), round(t1 - a / SR, 3)] for w, t0, t1 in words if inside(t0, t1)]
-        seg = x[a:b]
+        seg, cuts = x[a:b], []
         if bl:
             bleep_rel[name] = bl; segs[name] = (who, soft(seg))
         else:
-            segs[name] = (who, soft(squeeze(seg)))
+            segs[name] = (who, soft(squeeze(seg, cuts=cuts)))
+        shift = lambda tt: tt - sum(min(d, max(0, tt - c0)) for c0, d in cuts)     # время в реплике после сжатия пауз
+        line_words[name] = [[w, round(shift(t0 - a / SR), 3), round(shift(t1 - a / SR), 3)] for w, t0, t1 in words if inside(t0, t1)]
 print("\n".join(report))
 want = {ln["id"] for ln in SP["lines"] if "блин" in ln["text"].lower()}
 assert set(bleep_rel) == want, f"«блин» найден в {sorted(bleep_rel)}, а в сценарии — {sorted(want)}"
