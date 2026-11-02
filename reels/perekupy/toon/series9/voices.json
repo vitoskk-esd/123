@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor mini-movie: a girl finds out her used car was sold on behalf of a dead owner. Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor road movie: a used-car flipper drives a Toyota Mark II 9000 km from Vladivostok to Moscow. Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
  },
  "seryoga": {
   "voice": "Puck",
@@ -21,13 +21,13 @@
   "voice": "Gacrux",
   "tempo": 1.12,
   "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
-  "notes": "One line: warm, amused, honest old master, a little smile in the voice."
+  "notes": "One line: old master, amused, dry; the second sentence is a deadpan punchline after a short pause."
  },
  "tolyan": {
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: loud cocky sales pitch from his car trunk. Line 2: charming, flattering, cheeky. Line 3: quiet, embarrassed, pleading from a snowy ditch."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: excited, loud whisper on the phone in a night train, cocky. Line 2: embarrassed but cheeky, joking his way out with a traffic cop."
  },
  "galya": {
   "voice": "Sulafat",
@@ -46,5 +46,17 @@
   "tempo": 1.12,
   "profile": "A tired Russian traffic police registration clerk, a woman in her 40s, bureaucratic, flat, indifferent voice, has seen everything.",
   "notes": "One line, flat and indifferent, reading from a monitor; the last words are said dryly, without any emotion."
+ },
+ "seller": {
+  "voice": "Orus",
+  "tempo": 1.15,
+  "profile": "A cheerful man from Vladivostok selling his lowered Toyota from a balcony, loud, friendly, joking, a bit of a hustler.",
+  "notes": "One line, shouted happily from a balcony, joking."
+ },
+ "dps": {
+  "voice": "Iapetus",
+  "tempo": 1.1,
+  "profile": "A calm, tired Russian traffic police officer at a night checkpoint, short and formal.",
+  "notes": "One line, two short sentences, flat and formal. Pronounce «ОСАГО» clearly as a separate word: о-са-го."
  }
 }
