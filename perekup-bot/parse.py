@@ -89,7 +89,9 @@ def price_candidates(text: str) -> list[tuple[int, int]]:
     """Все суммы, похожие на цену машины, с приоритетом (см. правила выше)."""
     t = clean(text).lower().replace("ё", "е")
     found: list[tuple[int, int]] = []
-    pattern = re.compile(rf"(?P<label>цена|стоимость|продам за|отдам за|прошу|price)?\s*[:\-–—=]?\s*(?P<num>{NUM})\s*(?P<unit>{MLN}|{THS}|{CUR})?\s*(?P<cur>{CUR})?")
+    # число — отдельное слово: не хвост модели или кузова («F30 335», «RX 350 2010», «E 320») и не кусок соседнего числа
+    pattern = re.compile(rf"(?P<label>цена|стоимость|продам за|отдам за|прошу|price)?\s*[:\-–—=]?\s*(?<![\w.,/])(?P<num>{NUM})(?!\d)"
+                         rf"\s*(?P<unit>{MLN}|{THS}|{CUR})?\s*(?P<cur>{CUR})?")
     for m in pattern.finditer(t):
         num, unit = m.group("num"), m.group("unit") or ""
         tail = t[m.end():m.end() + 6]
@@ -124,6 +126,10 @@ def price_candidates(text: str) -> list[tuple[int, int]]:
                 prio = 4
             else:
                 prio = 3 if (has_cur or re.match(MLN, unit)) else 2 if unit else 1
+            # голое число без ₽, «к», «млн» и без слова «цена» — цена, только если круглое, как пишут цены:
+            # «650 000», «1 249 990», «899 999». «30 335», «147 382» — это код, пробег или номер, а не цена
+            if prio == 1 and not (value % 100 == 0 or value % 1000 in (990, 999)):
+                continue
             found.append((prio, value))
     return found
 

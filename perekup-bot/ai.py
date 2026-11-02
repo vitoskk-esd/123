@@ -12,7 +12,7 @@ import time
 import urllib.error
 import urllib.request
 
-from parse import PRICE_MAX, PRICE_MIN, YEAR_MAX, Listing
+from parse import PRICE_MAX, PRICE_MIN, YEAR_MAX, Listing, price_candidates
 from words import Dictionary, norm
 
 log = logging.getLogger(__name__)
@@ -141,6 +141,8 @@ def apply(L: Listing, r: dict, d: Dictionary) -> Listing:
         L.year = r["year"]
     if PRICE_MIN <= (r.get("price_rub") or 0) <= PRICE_MAX:
         L.price = r["price_rub"]
+    elif not any(p >= 4 for p, _ in price_candidates(L.text)):
+        L.price = None          # ИИ не нашёл цену, а правила взяли сумму без слова «цена» — не выдумываем цену
     if 0 < (r.get("mileage_km") or 0) < 2_000_000:
         L.mileage = r["mileage_km"]
     if r.get("city"):
