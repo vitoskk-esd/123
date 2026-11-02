@@ -1,0 +1,19 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><radialGradient id="hLamp" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#fff6d6" stop-opacity=".7"/><stop offset="1" stop-color="#fff6d6" stop-opacity="0"/></radialGradient></defs>
+    <rect width="1080" height="1920" fill="#2a2f38"/>
+    <rect width="1080" height="1920" fill="url(#hLamp)"/>
+    <!-- потолок гаража и лампа -->
+    <g stroke="#1c2027" stroke-width="10"><path d="M0 120 H1080"/><path d="M0 260 H1080"/><path d="M0 400 H1080"/></g>
+    <rect x="390" y="200" width="300" height="30" rx="12" fill="#f4fbff" stroke="#000" stroke-width="6"/>
+    <!-- открытый капот (вид снизу) -->
+    <path d="M60 560 L1020 560 L940 160 L140 160 Z" fill="#e8ecef" stroke="#000" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M200 520 L880 520 L830 220 L250 220 Z" fill="#c9ced6" stroke="#9aa3ab" stroke-width="6"/>
+    <path d="M300 520 L340 240 M540 520 V220 M780 520 L740 240" stroke="#aab1ba" stroke-width="8"/>
+    <path d="M900 1100 L960 560" stroke="#555" stroke-width="12"/>
+    <!-- края моторного отсека снизу -->
+    <path d="M0 1500 Q540 1380 1080 1500 V1920 H0 Z" fill="#14171c" stroke="#000" stroke-width="10"/>
+    <path d="M0 1100 L120 1500 L0 1500 Z M1080 1100 L960 1500 L1080 1500 Z" fill="#1d2128" stroke="#000" stroke-width="8"/>
+    <g><rect x="120" y="1560" width="260" height="140" rx="16" fill="#3a3f48" stroke="#000" stroke-width="7"/><circle cx="250" cy="1630" r="40" fill="#ffd23f" stroke="#000" stroke-width="6"/>
+      <rect x="700" y="1560" width="240" height="160" rx="12" fill="#2b2f37" stroke="#000" stroke-width="7"/><path d="M720 1600 h200 M720 1640 h200 M720 1680 h200" stroke="#555" stroke-width="6"/>
+      <path d="M380 1640 Q540 1560 700 1640" stroke="#111" stroke-width="22" fill="none"/></g>
+  </svg>
