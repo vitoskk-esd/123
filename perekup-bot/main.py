@@ -2,6 +2,7 @@
 Служебный аккаунт подключается потом из чата с ботом: /connect."""
 import asyncio
 import logging
+import time
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -22,8 +23,24 @@ from words import load_dictionary
 log = logging.getLogger("bot")
 
 
+SEEN_EVERY = 600         # «последний заход» обновляем не чаще раза в 10 минут на человека — база не дёргается на каждый клик
+
+
 def build_dispatcher(ctx: Ctx) -> Dispatcher:
     dp = Dispatcher(storage=MemoryStorage(), ctx=ctx)
+    last: dict[int, float] = {}
+
+    @dp.update.outer_middleware()
+    async def seen(handler, event, data):
+        u = data.get("event_from_user")
+        if u and not u.is_bot and time.time() - last.get(u.id, 0) > SEEN_EVERY:
+            last[u.id] = time.time()
+            try:
+                await ctx.db.seen(u.id, u.username, u.first_name, u.last_name, u.language_code)
+            except Exception:
+                log.exception("не записал последний заход")
+        return await handler(event, data)
+
     dp.include_router(admin.router)   # админские команды раньше пользовательских
     dp.include_router(connect.router)
     dp.include_router(support.router)  # ответ админа на обращение — раньше, чем «свободный текст» пользователя

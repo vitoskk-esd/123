@@ -40,8 +40,8 @@ def fmt_date(ts: float) -> str:
 async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContext, bot: Bot) -> None:
     await state.clear()
     source = re.sub(r"[^\w-]", "", command.args or "")[:32] or None   # t.me/<бот>?start=reels — откуда пришёл
-    new = await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, source, None,
-                                ctx.cfg.trial_days)
+    f = msg.from_user
+    new = await ctx.db.add_user(f.id, f.username, f.first_name, source, None, ctx.cfg.trial_days, f.last_name, f.language_code)
     await make_admins_pro(ctx)
     admin = await is_admin(msg, ctx)
     if new and not admin:

@@ -81,6 +81,9 @@ class DB:
         for sql in ("ALTER TABLE posts ADD COLUMN recv_ms INTEGER",       # новые столбцы в уже созданной базе
                     "ALTER TABLE users ADD COLUMN plan TEXT DEFAULT ''",
                     "ALTER TABLE users ADD COLUMN trial_used INTEGER DEFAULT 0",
+                    "ALTER TABLE users ADD COLUMN last_name TEXT",
+                    "ALTER TABLE users ADD COLUMN lang TEXT",
+                    "ALTER TABLE users ADD COLUMN last_seen REAL",
                     "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'",
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
                     "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
@@ -120,17 +123,34 @@ class DB:
         return cur.rowcount
 
     # ---------- люди ----------
-    async def add_user(self, uid: int, username, first_name, source, ref_by, trial_days: int) -> bool:
-        """Новый человек → True и пробный период. Источник и пригласивший — только при первом запуске."""
-        if await self._one("SELECT 1 FROM users WHERE id=?", uid):
-            await self._run("UPDATE users SET username=?, first_name=?, blocked=0 WHERE id=?", username, first_name, uid)
-            return False
+    async def add_user(self, uid: int, username, first_name, source, ref_by, trial_days: int,
+                       last_name=None, lang=None) -> bool:
+        """Новый человек → True и пробный период. Источник и пригласивший — только при первом запуске;
+        @ник, имя, фамилию и язык обновляем при каждом /start — люди их меняют."""
         now = time.time()
-        await self._run("INSERT INTO users (id, username, first_name, source, ref_by, created_at, trial_until) VALUES (?,?,?,?,?,?,?)",
-                        uid, username, first_name, source or "direct", ref_by if ref_by != uid else None, now,
+        if await self._one("SELECT 1 FROM users WHERE id=?", uid):
+            await self._run("UPDATE users SET username=?, first_name=?, last_name=?, lang=COALESCE(?, lang), last_seen=?, blocked=0 WHERE id=?",
+                            username, first_name, last_name, lang, now, uid)
+            return False
+        await self._run("INSERT INTO users (id, username, first_name, last_name, lang, source, ref_by, created_at, last_seen, trial_until) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        uid, username, first_name, last_name, lang, source or "direct", ref_by if ref_by != uid else None, now, now,
                         now + trial_days * DAY)
         await self.event(uid, "start", source)
         return True
+
+    async def seen(self, uid: int, username, first_name, last_name, lang) -> None:
+        """Человек что-то нажал или написал: время последнего захода и свежие @ник / имя (только тех, кто уже есть в базе)."""
+        await self._run("UPDATE users SET last_seen=?, username=?, first_name=?, last_name=?, lang=COALESCE(?, lang) WHERE id=?",
+                        time.time(), username, first_name, last_name, lang, uid)
+
+    async def contacts(self) -> list:
+        """Все, кто нажимал /start: контакт, откуда пришёл, заходы, тариф и сколько заплатил — для выгрузки админу."""
+        return await self._all(
+            "SELECT u.id, u.username, u.first_name, u.last_name, u.lang, u.source, u.created_at, u.last_seen, u.plan, u.paid_until, u.blocked, "
+            "COALESCE(SUM(CASE WHEN p.status='succeeded' THEN p.amount END), 0) paid_sum, "
+            "COUNT(CASE WHEN p.status='succeeded' THEN 1 END) paid_n "
+            "FROM users u LEFT JOIN payments p ON p.user_id=u.id GROUP BY u.id ORDER BY u.created_at")
 
     async def first_user(self) -> int | None:
         row = await self._one("SELECT id FROM users ORDER BY created_at LIMIT 1")

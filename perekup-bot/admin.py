@@ -3,12 +3,12 @@ import asyncio
 import logging
 import html
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from aiogram import Bot, F, Router
 from aiogram.exceptions import TelegramForbiddenError
 from aiogram.filters import Command, CommandObject
-from aiogram.types import CallbackQuery, LinkPreviewOptions, Message
+from aiogram.types import BufferedInputFile, CallbackQuery, LinkPreviewOptions, Message
 
 import keyboards as K
 from ctx import Ctx
@@ -257,6 +257,62 @@ async def health_btn(cb: CallbackQuery, bot: Bot, ctx: Ctx) -> None:
         return await cb.answer()
     await cb.answer("Проверяю…")
     await cb.message.answer(await health(bot, ctx), link_preview_options=LinkPreviewOptions(is_disabled=True))
+
+
+MSK = timezone(timedelta(hours=3))
+PLAN_NAMES = {"pro": "PRO", "basic": "Простой", "": "Простой", "trial": "Пробный день", "admin": "админ"}
+
+
+def contacts_xlsx(rows, now: float) -> bytes:
+    """База контактов в Excel: сводка сверху, дальше по строке на человека; фильтры и закреплённая шапка."""
+    import io
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+    from openpyxl.utils import get_column_letter
+    when = lambda ts: datetime.fromtimestamp(ts, MSK).strftime("%d.%m.%Y %H:%M") if ts else ""
+    wb = Workbook(); ws = wb.active; ws.title = "Контакты"
+    with_nick = sum(1 for r in rows if r["username"])
+    ws.append([f"База контактов «Перехват» · {when(now)} МСК"])
+    ws.append([f"Всего людей: {len(rows)} · с @username: {with_nick} · платили хоть раз: {sum(1 for r in rows if r['paid_n'])} · "
+               f"заблокировали бота: {sum(1 for r in rows if r['blocked'])}"])
+    ws.append([])
+    head = ["№", "Telegram ID", "@username", "Написать", "Имя", "Фамилия", "Язык", "Откуда пришёл", "Первый заход", "Последний заход",
+            "Тариф", "Оплачен до", "Заплатил всего, ₽", "Оплат", "Заблокировал бота"]
+    ws.append(head)
+    for i, r in enumerate(rows, 1):
+        paid = r["paid_until"] or 0
+        ws.append([i, r["id"], f"@{r['username']}" if r["username"] else "",
+                   f"https://t.me/{r['username']}" if r["username"] else f"tg://user?id={r['id']}",
+                   r["first_name"] or "", r["last_name"] or "", r["lang"] or "", source_name(r["source"]),
+                   when(r["created_at"]), when(r["last_seen"] or r["created_at"]),
+                   PLAN_NAMES.get(r["plan"] or "", r["plan"]) if paid > now else "—", when(paid) if paid > now else "",
+                   r["paid_sum"], r["paid_n"], "да" if r["blocked"] else ""])
+        ws.cell(row=ws.max_row, column=4).hyperlink = ws.cell(row=ws.max_row, column=4).value
+    ws["A1"].font = Font(bold=True, size=14)
+    for c in ws[4]:
+        c.font = Font(bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="FF7A1A"); c.alignment = Alignment(vertical="center")
+    for k, w in enumerate([5, 14, 20, 30, 18, 18, 6, 14, 17, 17, 13, 17, 16, 7, 10], 1):
+        ws.column_dimensions[get_column_letter(k)].width = w
+    ws.freeze_panes = "A5"
+    ws.auto_filter.ref = f"A4:{get_column_letter(len(head))}{ws.max_row}"
+    buf = io.BytesIO(); wb.save(buf)
+    return buf.getvalue()
+
+
+@router.message(Command("contacts"))
+@router.callback_query(F.data == "adm:contacts")
+async def contacts(ev, ctx: Ctx) -> None:
+    """📇 База контактов — только админу: Excel со всеми, кто нажимал /start."""
+    msg = ev.message if isinstance(ev, CallbackQuery) else ev
+    if not await is_admin(ev, ctx):
+        return await ev.answer() if isinstance(ev, CallbackQuery) else None
+    if isinstance(ev, CallbackQuery):
+        await ev.answer("Собираю файл…")
+    now = time.time()
+    rows = await ctx.db.contacts()
+    name = f"kontakty_{datetime.fromtimestamp(now, MSK).strftime('%Y-%m-%d')}.xlsx"
+    await msg.answer_document(BufferedInputFile(contacts_xlsx(rows, now), filename=name),
+                              caption=T.CONTACTS.format(n=len(rows), nick=sum(1 for r in rows if r["username"])))
 
 
 @router.message(F.text == T.MENU_ADMIN)

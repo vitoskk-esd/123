@@ -1327,6 +1327,33 @@ async def test_youtube_and_tiktok_links_tracked(env):
     assert "?start=youtube" in t and "?start=tiktok" in t
 
 
+async def test_contacts_export_for_admin(env):
+    """Каждый, кто нажал /start, — в базе контактов: «📇 База контактов» в админ-панели присылает Excel (только админу)."""
+    import io
+    from aiogram.methods import SendDocument
+    from openpyxl import load_workbook
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg("/start youtube", USER))
+    await dp.feed_update(bot, msg("/start tiktok", OTHER))
+    await ctx.db.add_payment(OTHER, "c1", 490, "trial"); await ctx.db.finish_payment("c1", "succeeded")
+    await ctx.db.set_user(OTHER, paid_until=time.time() + 86400, plan="trial")
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
+    assert T.BTN_CONTACTS in [b.text for row in last_markup(s).inline_keyboard for b in row]
+    await dp.feed_update(bot, cb("adm:contacts", USER))                               # не админ — ничего
+    assert not any(isinstance(m, SendDocument) for m in s.sent)
+    await dp.feed_update(bot, cb("adm:contacts", ADMIN))
+    doc = [m for m in s.sent if isinstance(m, SendDocument)][-1]
+    assert doc.chat_id == ADMIN and doc.document.filename.startswith("kontakty_") and "3 чел." in doc.caption
+    ws = load_workbook(io.BytesIO(doc.document.data)).active
+    assert "Всего людей: 3" in ws["A2"].value
+    rows = {r[1]: r for r in ws.iter_rows(min_row=5, values_only=True)}
+    assert rows[USER][2] == f"@u{USER}" and rows[USER][3] == f"https://t.me/u{USER}" and rows[USER][7] == "YouTube"
+    assert rows[OTHER][7] == "TikTok" and rows[OTHER][10] == "Пробный день" and rows[OTHER][12] == 490 and rows[OTHER][13] == 1
+    await dp.feed_update(bot, msg("/contacts", ADMIN))                                 # и командой
+    assert len([m for m in s.sent if isinstance(m, SendDocument)]) == 2
+
+
 async def test_admin_can_turn_off_new_user_notifications(env):
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start", ADMIN))
