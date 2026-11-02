@@ -1,0 +1,13 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="cSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b4f8f"/><stop offset=".55" stop-color="#f6a46b"/><stop offset="1" stop-color="#ffd9a8"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#cSky)"/>
+    <circle cx="300" cy="880" r="110" fill="#ffe08a" opacity=".9"/>
+    <g fill="#6a5a7a"><rect x="560" y="700" width="90" height="280"/><rect x="660" y="640" width="70" height="340"/><rect x="740" y="720" width="110" height="260"/><rect x="860" y="600" width="80" height="380"/><rect x="950" y="680" width="130" height="300"/></g>
+    <path d="M0 980 H1080 V1920 H0 Z" fill="#7a8a5a"/>
+    <path d="M380 980 L700 980 L1080 1920 L0 1920 Z" fill="#4f5562" stroke="#000" stroke-width="7"/>
+    <path d="M540 990 L540 1920" stroke="#f4f6f8" stroke-width="12" stroke-dasharray="60 60"/>
+    <!-- указатель -->
+    <g><path d="M860 1220 V860" stroke="#9aa3ab" stroke-width="20"/><rect x="700" y="620" width="340" height="250" rx="14" fill="#1d4fb8" stroke="#f4f6f8" stroke-width="10"/>
+      <text x="870" y="725" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="54" fill="#fff">МОСКВА</text>
+      <text x="870" y="820" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="64" fill="#fff">10 км</text></g>
+  </svg>

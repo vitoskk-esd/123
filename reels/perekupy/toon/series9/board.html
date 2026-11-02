@@ -1,0 +1,98 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="bgs.js"></script>
+<script>
+// Приора сбоку — по рисунку владельца (kit/img/priora/priora_*.png): black — пацанская с наклейкой, white, yellow — такси, patch
+const IMG = (v, l, t, w = 900, z = 3, extra = "") => `<img class="el" src="../../kit/img/priora/priora_${v}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const P = (k, o) => "";
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4) => el(CHARS[kind](p), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+// ВАЗ-2114 владельца (kit/img/vaz2114/vaz2114_white.png, вырезан из его картинки)
+const CAR = (l, t, w = 820, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2114/vaz2114_white.png" style="left:${l}px;top:${t + w * .04}px;width:${w}px;z-index:${z};${extra}">`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const odo = (v, l, t, c = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">ОДО ${v}</div>`;
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+// девятка владельца (3/4), карточка бота в телефоне, чек расходов
+const V09 = (l, t, w, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2109/vaz2109.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const BOTCARD = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:560px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 60px rgba(120,180,255,.35)">
+  <div style="font-family:Onest;font-weight:700;font-size:22px;color:#8b93a3;margin-bottom:10px">ПЕРЕХВАТ · бот · 03:02</div>
+  <div style="background:#1c1f26;border-radius:22px;padding:18px 20px;font-family:Onest;color:#fff;font-size:28px;line-height:1.45">
+  <b style="color:#ff7a1a">🔥 −40% к рынку</b><br><b>ВАЗ-2109 · 95 000 ₽</b><br>📍 Самара<br>⏱ 1,2 с после публикации</div></div>`;
+const RECEIPT = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:600px;z-index:6;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 36px;font-family:'JetBrains Mono';font-weight:800;font-size:30px;color:#222;line-height:1.6;transform:rotate(2deg)">
+  <div style="text-align:center;font-family:Unbounded;font-weight:900;font-size:32px">ЧЕК · ПЕРЕГОН</div>
+  ${[["Девятка", "95 000"], ["Плацкарт", "3 000"], ["Бензин", "9 000"], ["Штраф", "800"], ["Эвакуатор", "8 000"], ["Мотор", "60 000"]].map(([a, b]) => `<div style="display:flex;justify-content:space-between"><span>${a}</span><span>${b}</span></div>`).join("")}
+  <div style="border-top:4px dashed #222;margin-top:10px;padding-top:8px;display:flex;justify-content:space-between;font-size:36px"><span>ИТОГО</span><span style="color:#e53935">175 800</span></div>
+  <div style="font-size:24px;color:#666">рынок ≈ 160 000</div></div>`;
+const S = [
+ { h: "ПЕРЕГОН", tc: "1/8 · 0:00–0:09", bg: "room", y: 700,
+   els: () => clock("💸 0 ₽") + ch("tolyan", "t", -20, 880, .95) + BOTCARD(470, 760)
+     + `<div class="title" style="top:1330px;z-index:9;left:-200px"><span class="lab" style="position:static;display:inline-block;background:#ffd23f;color:#151515;font-size:60px;transform:rotate(-3deg)">ПЕРЕГОН</span><br><span class="lab" style="position:static;display:inline-block;margin-top:14px;background:#ff3b30;font-size:64px;transform:rotate(2deg)">1000 КМ</span></div>`,
+   vo: "Три часа ночи. Перехват прислал Толяну девятку за полцены. В Самаре. Тысяча километров — разве это расстояние для перекупа?", who: "Лис",
+   mv: "<b>Хук — комната Толяна ночью</b> (ковёр на стене, луна). Телефон вспыхивает — карточка бота «Перехват»: −40% к рынку, Самара, 1,2 с. Толян резко садится в кровати, очки уже на нём. В углу запускается <b>счётчик расходов 💸</b> — он будет расти весь ролик." },
+ { h: "ПЛАЦКАРТ", tc: "2/8 · 0:09–0:20", bg: "train", y: 700,
+   els: () => clock("💸 3 000 ₽") + ch("tolyan", "t", 330, 900, .85) + bub("Брат, никому не отдавай,<br><em>я в пути!</em>", 60, 730),
+   vo: "Толян: «Брат, никому не отдавай, я в пути!» Лис: «Плацкарт, курица в фольге, сосед храпит. Перекуп едет за победой».", who: "Толян + Лис",
+   mv: "<b>Новая локация — плацкарт:</b> за окном бегут огни, стакан в подстаканнике дрожит в такт стыкам рельсов («тук-тук»). Толян шепчет в телефон. Счётчик: <b>+3 000 билет</b>." },
+ { h: "САМАРА", tc: "3/8 · 0:20–0:32", bg: "yard", y: 700,
+   els: () => clock("💸 98 000 ₽") + V09(250, 1100, 560) + ch("tolyan", "t", -40, 880, .9, 6)
+     + bub("Забирай, брат! Она только<br>с виду низкая — <em>по жизни высокая!</em>", 300, 720) + `<div class="el" style="left:700px;top:880px;font-size:80px;z-index:9">👋</div>`,
+   vo: "Продавец с балкона: «Забирай, брат! Она только с виду низкая — по жизни высокая!» Лис: «Девяносто пять тысяч. Девятка — его».", who: "Продавец + Лис",
+   mv: "<b>Новая локация — двор самарской хрущёвки:</b> качели, лавка, берёза. Продавца не видно — только рука с балкона и голос. Вишнёвая заниженная девятка (та самая, из кювета в 16-й серии) скребёт брюхом по бордюру. Счётчик: <b>+95 000</b>." },
+ { h: "НОЧНАЯ ЗАПРАВКА", tc: "4/8 · 0:32–0:42", bg: "azs", y: 700,
+   els: () => clock("💸 107 000 ₽") + V09(420, 1080, 560) + lab("15 Л / 100 КМ", 120, 760, "#ff3b30", "#fff", 46, -3),
+   vo: "Двести километров — счастье. Расход — пятнадцать литров. Девятка пила, как бывший хозяин.", who: "Лис",
+   mv: "<b>Новая локация — заправка ночью:</b> навес светит, цифры на колонке бешено крутятся, Толян бледнеет. Звук — «бульк-бульк». Счётчик: <b>+9 000 бензин</b>." },
+ { h: "ПОСТ ДПС", tc: "5/8 · 0:42–0:54", bg: "dps", y: 700,
+   els: () => clock("💸 107 800 ₽") + V09(60, 1100, 520) + ch("tolyan", "t", 560, 880, .9, 6)
+     + bub("Полис<br><em>ОСАГО есть?</em>", 640, 720) + bub("Брат, она застрахована…<br><em>молитвой.</em>", 40, 900),
+   vo: "Инспектор: «Полис ОСАГО есть?» Толян: «Брат, она застрахована… молитвой». Лис: «Штраф — восемьсот. Пока выгодно».", who: "Инспектор + Толян + Лис",
+   mv: "<b>Новая локация — пост ночью:</b> шлагбаум, конусы, фонарь. Инспектора не видно — голос из будки и луч фонарика по лицу Толяна. Счётчик: <b>+800 штраф</b>." },
+ { h: "МОСКВА · 10 КМ", tc: "6/8 · 0:54–1:08", bg: "citysign", y: 700,
+   els: () => clock("💸 175 800 ₽") + V09(180, 1080, 520) + `<div class="el" style="left:330px;top:960px;font-size:120px;z-index:9">💨</div>`
+     + ch("mihalych", "m", 660, 860, .95, 6) + bub("Довёз? Почти.<br><em>Мотор приехал отдельно.</em>", 300, 720),
+   vo: "Лис: «За десять километров до Москвы мотор решил, что он уже дома». Михалыч: «Довёз? Почти. Мотор приехал отдельно».", who: "Лис + Михалыч",
+   mv: "<b>Новая локация — рассвет, указатель «МОСКВА 10 км».</b> Девятка дёргается, из-под капота дым, тишина. Пауза. Из-за горизонта — эвакуатор Михалыча. Счётчик рывком: <b>+8 000 эвакуатор, +60 000 мотор</b>." },
+ { h: "ЧЕК", tc: "7/8 · 1:08–1:18", bg: "desk", y: 700,
+   els: () => clock("💸 175 800 ₽") + RECEIPT(240, 740),
+   vo: "Девятка за полцены вышла дороже рынка. Зато с историей.", who: "Лис",
+   mv: "<b>Вид сверху:</b> длинный чек выезжает строчка за строчкой с треском кассы, «ИТОГО 175 800» бьёт красным, ниже — «рынок ≈ 160 000». Толян молча кладёт сверху ключи от девятки." },
+ { h: "МОРАЛЬ", tc: "8/8 · 1:18–1:30", bg: "desk", y: 700,
+   els: () => `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:35px;line-height:1.4">ПЕРЕД ПЕРЕГОНОМ:<br><span style="color:#ffd23f">🧮 считай в цену дорогу, бензин и ремонт<br>🔧 диагностика и толщиномер — до оплаты<br>📄 ОСАГО — до выезда, онлайн</span></div>`
+     + FOX(400, 1200, 280),
+   vo: "Перегон считай в цену: дорога, бензин, ремонт. Диагностику — до оплаты, на месте. ОСАГО оформи до выезда. А чтобы не ехать за тысячу километров — в Перехвате поставь свой город. Сохрани — пока полцены не вышли дороже рынка.", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист поверх чека, затем лиса с биноклем (аватарка бота) и подпись про бота. ~1:30, 8 сцен, <b>6 новых локаций</b>: комната, плацкарт, двор хрущёвки, заправка, пост, въезд в город." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>«${sc.vo}»`;
+document.getElementById("mv").innerHTML = sc.mv;
+["a","b","c","d","e","f","g","h","i"].forEach(p => { const e = document.getElementById(p); });
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = ""; const sh2 = document.getElementById("t2-shades"); if (sh2) sh2.style.display = "";
+mouth && document.getElementById("t") && mouth("t", "grin"); document.getElementById("g") && mouth("g", "talk"); document.getElementById("e") && mouth("e", "grin"); document.getElementById("v") && mouth("v", "talk");
+window.READY = true;
+</script></body></html>

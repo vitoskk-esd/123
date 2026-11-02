@@ -1,0 +1,16 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#2a2440"/>
+    <rect y="1250" width="1080" height="670" fill="#4a3426"/><g stroke="#3a281d" stroke-width="4"><path d="M0 1300 H1080"/><path d="M0 1370 H1080"/><path d="M0 1440 H1080"/><path d="M0 1510 H1080"/><path d="M0 1580 H1080"/><path d="M0 1650 H1080"/><path d="M0 1720 H1080"/><path d="M0 1790 H1080"/><path d="M0 1860 H1080"/></g>
+    <!-- ковёр на стене -->
+    <rect x="240" y="300" width="600" height="440" rx="14" fill="#9b1d20" stroke="#000" stroke-width="8"/><rect x="270" y="330" width="540" height="380" fill="none" stroke="#e0a030" stroke-width="8" stroke-dasharray="20 10"/>
+    <path d="M540 520 l60 60 l-60 60 l-60 -60 z" fill="#e0a030" stroke="#3a0d0d" stroke-width="4"/><path d="M360 520 l60 60 l-60 60 l-60 -60 z" fill="#2e6a8f" stroke="#3a0d0d" stroke-width="4"/><path d="M720 520 l60 60 l-60 60 l-60 -60 z" fill="#2e6a8f" stroke="#3a0d0d" stroke-width="4"/><path d="M540 370 l60 60 l-60 60 l-60 -60 z" fill="#2e6a8f" stroke="#3a0d0d" stroke-width="4"/><path d="M540 670 l60 60 l-60 60 l-60 -60 z" fill="#2e6a8f" stroke="#3a0d0d" stroke-width="4"/><path d="M360 370 l60 60 l-60 60 l-60 -60 z" fill="#e0a030" stroke="#3a0d0d" stroke-width="4"/><path d="M720 370 l60 60 l-60 60 l-60 -60 z" fill="#e0a030" stroke="#3a0d0d" stroke-width="4"/><path d="M360 670 l60 60 l-60 60 l-60 -60 z" fill="#e0a030" stroke="#3a0d0d" stroke-width="4"/><path d="M720 670 l60 60 l-60 60 l-60 -60 z" fill="#e0a030" stroke="#3a0d0d" stroke-width="4"/>
+    <!-- окно с луной -->
+    <rect x="860" y="250" width="200" height="320" fill="#0d1430" stroke="#000" stroke-width="8"/><circle cx="960" cy="340" r="40" fill="#f3ead0"/>
+    <path d="M960 250 v320 M860 410 h200" stroke="#000" stroke-width="6"/><circle cx="916" cy="322" r="3" fill="#fff"/><circle cx="955" cy="382" r="2" fill="#fff"/><circle cx="995" cy="512" r="2" fill="#fff"/><circle cx="992" cy="411" r="3" fill="#fff"/><circle cx="937" cy="360" r="3" fill="#fff"/><circle cx="1047" cy="320" r="3" fill="#fff"/><circle cx="1003" cy="349" r="2" fill="#fff"/><circle cx="913" cy="381" r="2" fill="#fff"/><circle cx="963" cy="554" r="2" fill="#fff"/><circle cx="1043" cy="512" r="2" fill="#fff"/>
+    <!-- кровать -->
+    <rect x="40" y="1050" width="700" height="220" rx="20" fill="#3d6fa3" stroke="#000" stroke-width="8"/><rect x="40" y="980" width="200" height="110" rx="30" fill="#f4f1ea" stroke="#000" stroke-width="7"/>
+    <rect x="20" y="900" width="40" height="420" fill="#6b4423" stroke="#000" stroke-width="6"/>
+    <!-- тумбочка, светящийся телефон -->
+    <rect x="800" y="1080" width="200" height="220" fill="#7a4f2a" stroke="#000" stroke-width="7"/><rect x="860" y="1050" width="80" height="34" rx="6" fill="#9fd3ff" stroke="#000" stroke-width="4"/>
+    <ellipse cx="900" cy="1060" rx="160" ry="90" fill="#9fd3ff" opacity=".18"/>
+  </svg>

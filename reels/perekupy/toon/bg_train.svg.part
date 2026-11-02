@@ -1,0 +1,20 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#7a8a6a"/>
+    <rect x="0" y="0" width="1080" height="180" fill="#5f6d52"/>
+    <!-- окно -->
+    <rect x="300" y="420" width="480" height="420" rx="40" fill="#0c1222" stroke="#000" stroke-width="10"/>
+    <g id="trainLights"><rect x="676" y="676" width="16" height="6" fill="#ffd27a" opacity=".8"/><rect x="313" y="687" width="20" height="6" fill="#ffd27a" opacity=".8"/><rect x="422" y="797" width="20" height="6" fill="#ffd27a" opacity=".8"/><rect x="585" y="688" width="26" height="6" fill="#ffd27a" opacity=".8"/><rect x="603" y="734" width="16" height="6" fill="#ffd27a" opacity=".8"/><rect x="732" y="669" width="27" height="6" fill="#ffd27a" opacity=".8"/><rect x="672" y="677" width="25" height="6" fill="#ffd27a" opacity=".8"/><rect x="368" y="672" width="23" height="6" fill="#ffd27a" opacity=".8"/><rect x="600" y="728" width="12" height="6" fill="#ffd27a" opacity=".8"/><rect x="563" y="775" width="28" height="6" fill="#ffd27a" opacity=".8"/><rect x="716" y="641" width="14" height="6" fill="#ffd27a" opacity=".8"/><rect x="415" y="765" width="29" height="6" fill="#ffd27a" opacity=".8"/><rect x="722" y="711" width="12" height="6" fill="#ffd27a" opacity=".8"/><rect x="518" y="731" width="23" height="6" fill="#ffd27a" opacity=".8"/></g>
+    <path d="M300 640 h480" stroke="#3a4560" stroke-width="6"/>
+    <!-- верхние полки -->
+    <rect x="-20" y="300" width="300" height="60" fill="#3d5a7a" stroke="#000" stroke-width="7"/><rect x="800" y="300" width="300" height="60" fill="#3d5a7a" stroke="#000" stroke-width="7"/>
+    <path d="M60 300 v-120 M1020 300 v-120" stroke="#9aa3ab" stroke-width="10"/>
+    <!-- нижние полки -->
+    <rect x="-20" y="1100" width="360" height="90" fill="#3d5a7a" stroke="#000" stroke-width="8"/><rect x="740" y="1100" width="360" height="90" fill="#3d5a7a" stroke="#000" stroke-width="8"/>
+    <rect x="-20" y="1190" width="360" height="300" fill="#5f6d52"/><rect x="740" y="1190" width="360" height="300" fill="#5f6d52"/>
+    <!-- столик -->
+    <rect x="340" y="960" width="400" height="40" fill="#c9b48a" stroke="#000" stroke-width="7"/><path d="M540 1000 v260" stroke="#9aa3ab" stroke-width="14"/>
+    <g><rect x="400" y="860" width="56" height="100" rx="6" fill="#f4e7c3" opacity=".8" stroke="#000" stroke-width="5"/><rect x="394" y="900" width="68" height="60" rx="6" fill="#b08d57" stroke="#000" stroke-width="5"/>
+      <path d="M462 915 q24 10 0 30" stroke="#000" stroke-width="5" fill="none"/></g>
+    <g><ellipse cx="640" cy="935" rx="80" ry="34" fill="#d9dde2" stroke="#000" stroke-width="5"/><path d="M590 930 l20 -12 l18 10 l22 -14 l24 12 l20 -6" stroke="#aab1ba" stroke-width="4" fill="none"/></g>
+    <rect y="1490" width="1080" height="430" fill="#5a4636"/><path d="M0 1490 H1080" stroke="#000" stroke-width="7"/>
+  </svg>
