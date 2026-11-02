@@ -29,7 +29,6 @@ import plans
 from db import DAY, DEDUP_DAYS
 from links import channel_name
 import ai
-import showcase
 from parse import SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, price_options, sale_verdict
 from query import Filter, matches
 
@@ -321,14 +320,6 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         if matches(Filter.loads(row["data"]), L, r.discount):
             targets[uid] = (row["fid"], row["text"], plan)
     recv_ms = int((raw.recv - raw.date) * 1000) if raw.recv else None
-    # машина ниже рынка с фото — кандидат в подборку для новых людей (фото проверим и замажем в фоне, рассылку не держим)
-    if raw.photo and ctx.buffer_chat and ctx.cfg.ai_on and showcase.worth(r, L.markers):
-        if not photo_task:
-            photo_task = asyncio.create_task(raw.photo())
-            photo_task.add_done_callback(lambda t: t.cancelled() or t.exception())
-        task = asyncio.create_task(showcase.collect(bot, ctx, r, photo_task, int((time.time() - raw.date) * 1000)))
-        ctx.background.add(task)
-        task.add_done_callback(ctx.background.discard)
     if not targets:
         await ctx.db.finish_post(r.post_id, 0, 0, recv_ms)
         return r

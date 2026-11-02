@@ -4,16 +4,16 @@ import logging
 import re
 import time
 from datetime import datetime
+from pathlib import Path
 
 from aiogram import Bot, F, Router
 from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
 
 import keyboards as K
 import plans
-import showcase
 import texts as T
 from support import ask_idea
 from admin import is_admin, is_admin_id, make_admins_pro, notify_new_user, queue_wait
@@ -37,6 +37,31 @@ def fmt_date(ts: float) -> str:
 
 
 # ---------- старт ----------
+WELCOME_DIR = Path(__file__).with_name("welcome")     # фото-примеры к приветствию: welcome/1.jpg, 2.jpg … (до 10)
+
+
+async def send_welcome_photos(bot: Bot, ctx: Ctx, uid: int) -> None:
+    """После приветствия — альбом из фото-примеров карточек. Файлы грузим в Telegram один раз, дальше шлём по file_id."""
+    files = sorted(WELCOME_DIR.glob("*.jpg"), key=lambda p: (len(p.stem), p.stem))[:10]
+    if not files:
+        return
+    stamp = "|".join(f"{p.name}:{p.stat().st_size}" for p in files)
+    saved = await ctx.db.get_setting("welcome_photos")
+    ids = None
+    if saved and saved.startswith(stamp + "\n"):
+        ids = saved.split("\n", 1)[1].split(",")
+    try:
+        media = [InputMediaPhoto(media=ids[k] if ids else FSInputFile(p)) for k, p in enumerate(files)]
+        media[0].caption = T.WELCOME_PHOTOS
+        sent = await bot.send_media_group(uid, media)
+        if not ids and isinstance(sent, list) and all(getattr(m, "photo", None) for m in sent):
+            await ctx.db.set_setting("welcome_photos", stamp + "\n" + ",".join(m.photo[-1].file_id for m in sent))
+    except Exception as e:
+        log.warning("фото к приветствию не отправлены: %s", e)
+        if ids:
+            await ctx.db.set_setting("welcome_photos", "")      # file_id устарели — в следующий раз загрузим заново
+
+
 @router.message(CommandStart())
 async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContext, bot: Bot) -> None:
     await state.clear()
@@ -50,7 +75,7 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     channels = await ctx.db.channel_count_for(msg.from_user.id)
     trial = T.WELCOME_TRIAL.format(price=ctx.cfg.price_trial) if ctx.cfg.payments_on else ""
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu(admin))
-    await showcase.send(bot, ctx, f.id)          # 2–3 свежие машины ниже рынка с фото — каждому свои
+    await send_welcome_photos(bot, ctx, f.id)    # примеры карточек — одни и те же фото из папки welcome/
     if ctx.reader and not ctx.reader.online and admin:
         await msg.answer(T.NEED_CONNECT)
         return
