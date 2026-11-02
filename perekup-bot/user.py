@@ -12,6 +12,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
 
+import contract
 import keyboards as K
 import plans
 import texts as T
@@ -478,7 +479,7 @@ async def show_help(msg: Message, ctx: Ctx, state: FSMContext) -> None:
 
 
 MENU = {T.MENU_FILTERS: show_filters, T.OLD_MENU_FILTERS: show_filters, T.MENU_CHANNELS: show_channels, T.MENU_STATS: show_stats,
-        T.MENU_SUB: show_sub, T.MENU_HELP: show_help, T.MENU_IDEA: ask_idea}
+        T.MENU_SUB: show_sub, T.MENU_HELP: show_help, T.MENU_IDEA: ask_idea, T.MENU_DKP: contract.ask}
 
 
 @router.message(F.text.in_(MENU))

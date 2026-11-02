@@ -509,6 +509,46 @@ async def test_welcome_photos_after_start(env):
     assert [m.media for m in album[0].media] == [f"wp{k}" for k in range(n)]      # уже загруженные — по file_id
 
 
+def test_dkp_parse_words_and_files():
+    """Шаблон «поле: значение» разбирается (длинные подписи раньше коротких), сумма прописью, Word и PDF собираются."""
+    import dkp
+    d = dkp.parse("Продавец ФИО: Иванов Пётр Сергеевич\nПродавец паспорт: 9205 123456\nПродавец паспорт выдан: МВД, 14.05.2020\n"
+                  "Покупатель: Смирнов С. О.\nVIN: JT2AE09B000000001\nМарка, модель: Toyota Corolla\nЦена: 350к\nЧто-то лишнее")
+    assert d["seller_passport"] == "9205 123456" and d["seller_issued"] == "МВД, 14.05.2020" and d["buyer_name"] == "Смирнов С. О."
+    assert d["price"] == "350000" and d["car"] == "Toyota Corolla"
+    assert dkp.words(1_250_000) == "один миллион двести пятьдесят тысяч" and dkp.words(21_001) == "двадцать одна тысяча один"
+    text = " ".join(t for _, t in dkp.paragraphs(d))
+    assert "350 000 (триста пятьдесят тысяч) рублей" in text and "/ Иванов П. С. /" in text and dkp.BLANK in text   # чего нет — линия
+    assert dkp.docx_bytes(d)[:2] == b"PK" and dkp.pdf_bytes(d)[:4] == b"%PDF"
+
+
+async def test_dkp_in_bot_pro_only(env):
+    """«📝 Договор купли-продажи»: на «Простом» — предложение PRO; на PRO — шаблон, разбор, Word + PDF; данные не остаются."""
+    from aiogram.methods import SendDocument
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg("/start", USER))
+    await ctx.db.set_user(USER, paid_until=time.time() + 86400 * 30, plan="basic")
+    await dp.feed_update(bot, msg(T.MENU_DKP, USER))
+    assert "в тарифе <b>PRO</b>" in s.texts(USER)[-1]
+    await ctx.db.set_user(USER, paid_until=time.time() + 86400 * 30, plan="pro")
+    await dp.feed_update(bot, msg(T.MENU_DKP, USER))
+    assert "Продавец паспорт:" in s.texts(USER)[-1] and "не сохраняю" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("Продавец ФИО: Иванов Пётр\nМарка, модель: Kia Rio\nЦена: 650 000\nVIN: Z94CB41AAER000001", USER))
+    t = s.texts(USER)[-1]
+    assert "Kia Rio" in t and "650 000 ₽" in t and "Не хватает" in t and "Покупатель ФИО" in t
+    await dp.feed_update(bot, msg("Покупатель ФИО: Смирнов Сергей\nПокупатель паспорт: 4510 654321\nПродавец паспорт: 9205 123456", USER))
+    assert "Всё главное есть" in s.texts(USER)[-1]                                    # дописал — данные сложились
+    await dp.feed_update(bot, cb("dkp:make", USER))
+    docs = [m for m in s.sent if isinstance(m, SendDocument) and m.chat_id == USER]
+    assert [d.document.filename.rsplit(".", 1)[1] for d in docs] == ["docx", "pdf"] and docs[0].document.filename.startswith("DKP_Kia_Rio_")
+    assert await dp.fsm.storage.get_data(key=__import__("aiogram").fsm.storage.base.StorageKey(bot_id=bot.id, chat_id=USER, user_id=USER)) == {}
+    await dp.feed_update(bot, msg("камри до 1,5 млн", USER))                           # дальше текст — снова фильтр, а не договор
+    assert "Похоже на фильтр" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg(T.MENU_DKP, USER)); await dp.feed_update(bot, cb("dkp:blank", USER))   # пустой бланк
+    assert len([m for m in s.sent if isinstance(m, SendDocument) and m.chat_id == USER]) == 4
+
+
 class FakeCreator(FakeTelethon):
     async def __call__(self, request):
         self.calls.append(type(request).__name__)

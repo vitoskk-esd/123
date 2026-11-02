@@ -21,6 +21,7 @@ class Plan:
     delay: int = 0          # через сколько секунд после публикации приходит машина
     market: bool = True     # оценка «ниже рынка» и фильтр по ней
     ai: bool = True         # ИИ-проверка поста
+    dkp: bool = True        # договор купли-продажи по данным клиента
 
     @property
     def unlimited(self) -> bool:
@@ -31,7 +32,7 @@ def plans(cfg: Config) -> dict[str, Plan]:
     return {
         "trial": Plan("trial", "Пробный день", cfg.price_trial, 1, UNLIMITED, UNLIMITED),
         "basic": Plan("basic", "Простой", cfg.price_basic, 30, cfg.basic_filters, cfg.basic_own,
-                      delay=cfg.basic_delay, market=False, ai=False),
+                      delay=cfg.basic_delay, market=False, ai=False, dkp=False),
         "pro": Plan("pro", "PRO", cfg.price_pro, 30, UNLIMITED, UNLIMITED),
     }
 

@@ -14,6 +14,7 @@ def kb(*rows: list[B]) -> InlineKeyboardMarkup:
 def menu(admin: bool = False) -> ReplyKeyboardMarkup:
     rows = [[KeyboardButton(text=T.MENU_FILTERS), KeyboardButton(text=T.MENU_CHANNELS)],
             [KeyboardButton(text=T.MENU_STATS), KeyboardButton(text=T.MENU_SUB)],   # по две в ряд — иначе подписи переносятся
+            [KeyboardButton(text=T.MENU_DKP)],
             [KeyboardButton(text=T.MENU_HELP), KeyboardButton(text=T.MENU_IDEA)]]
     if admin:                                                   # «плашка» админа — только у него
         rows.append([KeyboardButton(text=T.MENU_ADMIN)])
@@ -24,6 +25,14 @@ def admin_panel(notify: bool = True) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_PANEL_REFRESH, callback_data="adm:panel"), B(text=T.BTN_HEALTH, callback_data="adm:health")],
               [B(text=T.BTN_CONTACTS, callback_data="adm:contacts")],
               [B(text=T.BTN_NOTIFY_ON if notify else T.BTN_NOTIFY_OFF, callback_data="adm:notify")])
+
+
+def dkp_start() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_DKP_BLANK, callback_data="dkp:blank")])
+
+
+def dkp_check() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_DKP_MAKE, callback_data="dkp:make")], [B(text=T.BTN_DKP_RESET, callback_data="dkp:reset")])
 
 
 def new_filter() -> InlineKeyboardMarkup:
