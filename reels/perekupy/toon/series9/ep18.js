@@ -147,7 +147,7 @@ window.build = R => {
   slam("#tot", W("l6", "дороже"), "impact"); slam("#mkt", W("l6", "сто"), "pop");
   // 8. мораль
   swap("check", "moral", st.rule - .7);
-  tl.fromTo("#moralCard", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: .4, ease: "expo.out", immediateRender: false }, st.rule);
+  tl.fromTo("#moralCard", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: .4, ease: "expo.out", immediateRender: false }, st.rule - .4);
   [W("rule", "дорог"), W("rule", "диагност"), W("rule", "оформ"), W("rule", "чтобы")].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
   ending(R, st.end - .15);
 };
