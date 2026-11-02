@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor mini-movie about the first snow and used-car flippers selling bald winter tires, like a deadpan crime documentary narrator. Punchlines are short and dry, delivered after a tiny pause, with perfect comic timing."
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor mini-movie: a girl finds out her used car was sold on behalf of a dead owner. Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
  },
  "seryoga": {
   "voice": "Puck",
@@ -15,13 +15,13 @@
   "voice": "Kore",
   "tempo": 1.15,
   "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: dry, sarcastic, unimpressed. Line 2: sarcastic. Line 3: uncertain, starting to realize she was scammed, trailing quietly but still clear."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: confused, trailing off but still clear. Line 2: angry, loud, on the phone. Line 3: short dry sarcastic punchline. Line 4: careful, polite, a bit suspicious."
  },
  "mihalych": {
   "voice": "Gacrux",
   "tempo": 1.12,
   "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Old master looking up at a rusty car bottom from the inspection pit. Line 1: tired dry verdict, dark punchline at the end. Line 2: short deadpan punchline after a sigh. Pronounce every word clearly and separately, especially «А вот днище, дочка»."
+  "notes": "One line: warm, amused, honest old master, a little smile in the voice."
  },
  "tolyan": {
   "voice": "Algenib",
@@ -33,12 +33,18 @@
   "voice": "Sulafat",
   "tempo": 1.12,
   "profile": "Baba Galya — a sly Russian grandmother in her 70s selling a car from a garage; sweet, folksy voice, calls everyone «сынок» and «милок», but she is in on a scam. Warm, slightly cracked old voice.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: sweet, folksy, selling a car. Line 2: calm, matter-of-fact, almost tender — dark humor, she doesn't notice how creepy it sounds."
+  "notes": "One line: sweet, calm, folksy, completely unbothered, while gardening; dark humor — she does not notice how creepy it sounds."
  },
  "edik": {
   "voice": "Fenrir",
   "tempo": 1.18,
   "profile": "Edik — a slick, fast-talking Russian car dealership manager in his 30s, overly polite, pushy, fake-friendly smile in the voice, sales script energy.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: slick, fake-sympathetic lowball offer. Line 2: polite, cold, deadpan punchline."
+  "notes": "One line on the phone: slick, fast, defensive, overly cheerful, trying to calm her down."
+ },
+ "inspector": {
+  "voice": "Autonoe",
+  "tempo": 1.12,
+  "profile": "A tired Russian traffic police registration clerk, a woman in her 40s, bureaucratic, flat, indifferent voice, has seen everything.",
+  "notes": "One line, flat and indifferent, reading from a monitor; the last words are said dryly, without any emotion."
  }
 }
