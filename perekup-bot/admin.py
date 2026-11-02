@@ -240,6 +240,9 @@ async def health(bot: Bot, ctx: Ctx) -> str:
             "добавь VK_SERVICE_TOKEN — его ВК не ограничивает за «подозрительный» аккаунт")
         t = await ctx.db.last_post_at(True)
         add(True if t and now - t < 6 * 3600 else None, f"сообществ ВК: {vkn}, последний пост из ВК: {ago(t)}", "долго тишина — /vkcheck")
+    sc = (await ctx.db._one("SELECT COUNT(*) n FROM showcase WHERE status='ok' AND at>?", now - 86400))["n"]
+    add(sc >= 2 or (None if cfg.ai_on else False), f"подборка после /start: машин ниже рынка с фото за сутки — {sc}",
+        "нужен ИИ (GEMINI_API_KEY) и канал-буфер для фото" if not cfg.ai_on else "пока мало — придут с новыми постами")
     queued = len(await ctx.db.queued_channels()) + len(await ctx.db.queued_channels("vk"))
     add(queued < 20 or None, f"в очереди на подключение: {queued}", "много в очереди — подключение идёт по одному, подожди")
     return T.HEALTH.format(lines="\n".join(html.escape(l) for l in lines), summary=T.HEALTH_OK if not bad else T.HEALTH_BAD)

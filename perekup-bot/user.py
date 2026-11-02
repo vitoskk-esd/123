@@ -13,6 +13,7 @@ from aiogram.types import CallbackQuery, Message
 
 import keyboards as K
 import plans
+import showcase
 import texts as T
 from support import ask_idea
 from admin import is_admin, is_admin_id, make_admins_pro, notify_new_user, queue_wait
@@ -49,6 +50,7 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     channels = await ctx.db.channel_count_for(msg.from_user.id)
     trial = T.WELCOME_TRIAL.format(price=ctx.cfg.price_trial) if ctx.cfg.payments_on else ""
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu(admin))
+    await showcase.send(bot, ctx, f.id)          # 2–3 свежие машины ниже рынка с фото — каждому свои
     if ctx.reader and not ctx.reader.online and admin:
         await msg.answer(T.NEED_CONNECT)
         return

@@ -10,7 +10,7 @@ import pytest
 from aiogram import Bot
 from aiogram.client.session.base import BaseSession
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.methods import AnswerCallbackQuery, CopyMessage, EditMessageReplyMarkup, EditMessageText, GetMe, SendMessage, SendPhoto
+from aiogram.methods import AnswerCallbackQuery, CopyMessage, EditMessageReplyMarkup, EditMessageText, ForwardMessage, GetMe, SendMediaGroup, SendMessage, SendPhoto
 from aiogram.types import CallbackQuery, Chat, Message, MessageId, PhotoSize, Update, User
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
@@ -48,6 +48,9 @@ class FakeSession(BaseSession):
         if isinstance(method, (SendMessage, EditMessageText)):
             return Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=method.chat_id or USER, type="private"),
                            text=method.text)
+        if isinstance(method, ForwardMessage):
+            return Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=method.chat_id, type="channel"),
+                           photo=[PhotoSize(file_id=f"src{method.message_id}", file_unique_id="u", width=1280, height=960)])
         if isinstance(method, SendPhoto):
             return Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=method.chat_id, type="private"),
                            caption=method.caption, photo=[PhotoSize(file_id=f"ph{next(ids)}", file_unique_id="u", width=1080, height=1240)])
@@ -485,6 +488,77 @@ async def test_post_comes_with_car_photo(env):
         raise RuntimeError("ChatForwardsRestrictedError")
     r = await process(bot, ctx, RawPost(CH1, next(ids), "Hyundai Solaris 2016, 750 000 ₽", time.time() - 1, forbidden))
     assert r.sent == [USER] and "Hyundai Solaris 2016" in s.texts(USER)[-1]          # без фото — обычная карточка
+
+
+def test_showcase_blur_hides_only_boxes():
+    """Надпись канала на фото замазывается мозаикой, остальное фото не трогаем."""
+    import io
+    from PIL import Image
+    import showcase
+    im = Image.new("RGB", (1000, 800), "white")
+    for x in range(0, 1000, 4):                       # «надпись» — частые полосы в правом нижнем углу
+        im.paste((0, 0, 0), (x, 700, x + 2, 780))
+    buf = io.BytesIO(); im.save(buf, "JPEG", quality=95)
+    out = Image.open(io.BytesIO(showcase.blur(buf.getvalue(), [[875, 0, 975, 1000]]))).convert("L")
+    stripes = [out.getpixel((x, 740)) for x in range(400, 440)]
+    assert max(stripes) - min(stripes) < 60                                     # полосы размыты
+    assert out.getpixel((500, 200)) > 240                                       # верх фото как был
+
+
+async def test_showcase_after_start(env, monkeypatch):
+    """Машина ниже рынка с фото → ИИ проверил фото (машина снаружи), замазал надписи → новому человеку после /start
+    приходит подборка из разных машин без названия канала; второй раз — другие варианты; не машина на фото — не берём."""
+    import dataclasses, io
+    from PIL import Image
+    import showcase
+    from pipeline import learn_history
+    dp, bot, s, ctx = env
+    ctx.cfg = dataclasses.replace(ctx.cfg, ai_proxy=True)
+    ctx.buffer_chat = -1009999999999
+    monkeypatch.setattr("pipeline.ai.ask", lambda *a, **k: asyncio.sleep(0, None))
+    boxes = []
+    def fake_look(cfg, jpeg):
+        boxes.append(1)
+        return {"car": True, "exterior": True, "quality": 4, "hide": [[880, 0, 980, 1000]]}
+    monkeypatch.setattr(showcase, "look", fake_look)
+    img = io.BytesIO(); Image.new("RGB", (640, 480), "gray").save(img, "JPEG")
+    async def download(file_id, *a, **k):
+        return io.BytesIO(img.getvalue())
+    monkeypatch.setattr(bot, "download", download)
+    await make_filter(dp, bot, "любые до 3 млн", uid=OTHER)
+    ch = ctx.channels[CH2]
+    cars = [("Toyota Camry", 2015, 1_500_000), ("Kia Rio", 2017, 1_000_000), ("Hyundai Solaris", 2016, 900_000),
+            ("Skoda Octavia", 2014, 1_100_000), ("Volkswagen Polo", 2015, 800_000)]
+    old = [(9000 + 10 * k + i, f"Продам {c} {y}, цена {int(p * (0.95 + i * .02)):,} ₽".replace(",", " "), time.time() - (i + 1) * 86400)
+           for k, (c, y, p) in enumerate(cars) for i in range(6)]
+    await learn_history(ctx, ch, old)
+    async def photo():
+        return 777
+    for c, y, p in cars:                                  # каждая на ~20% дешевле рынка, с фото, без «ПРОДАНО»
+        await process(bot, ctx, RawPost(CH1, next(ids), f"{c} {y}, {int(p * .8):,} ₽, Казань. Один владелец".replace(",", " "), time.time() - 2, photo))
+    await asyncio.gather(*ctx.background)
+    assert len(boxes) == 5
+    rows = await ctx.db.showcase_fresh(USER, time.time() - 86400)
+    assert len(rows) == 5 and all(r["status"] == "ok" and r["file_id"] for r in rows)
+
+    await dp.feed_update(bot, msg("/start", USER))
+    album = [m for m in s.sent if isinstance(m, SendMediaGroup) and m.chat_id == USER]
+    assert len(album) == 1 and len(album[0].media) == 3
+    cap = album[0].media[0].caption
+    assert "ниже рынка" in cap and "−20% к рынку" in cap and "Казань" in cap
+    assert ctx.channels[CH1]["title"] not in cap                                  # канал-источник не показываем
+    first = {r["post_id"] for r in await ctx.db.showcase_fresh(USER, 0)}
+    await dp.feed_update(bot, msg("/start", USER))                                # второй раз — оставшиеся две
+    album = [m for m in s.sent if isinstance(m, SendMediaGroup) and m.chat_id == USER]
+    assert len(album) == 2 and len(album[1].media) == 2
+    assert not await ctx.db.showcase_fresh(USER, 0) and len(first) == 2
+    await dp.feed_update(bot, msg("/start", USER))                                # всё видел — подборки нет, бот не ломается
+    assert len([m for m in s.sent if isinstance(m, SendMediaGroup) and m.chat_id == USER]) == 2
+
+    monkeypatch.setattr(showcase, "look", lambda cfg, jpeg: {"car": False, "exterior": False, "quality": 2, "hide": []})
+    await process(bot, ctx, RawPost(CH1, next(ids), "Kia Rio 2017, 790 000 ₽, Казань, скрин из автотеки", time.time() - 2, photo))
+    await asyncio.gather(*ctx.background)
+    assert (await ctx.db._one("SELECT status FROM showcase ORDER BY at DESC LIMIT 1"))["status"] == "bad"
 
 
 class FakeCreator(FakeTelethon):

@@ -77,12 +77,12 @@ def _prompt(d: Dictionary, text: str) -> str:
     )
 
 
-def _post(key: str, model: str, body: dict) -> dict:
+def _post(key: str, model: str, body: dict, timeout: float = TIMEOUT) -> dict:
     headers = {"Content-Type": "application/json"}
     if key:   # в облачной среде разработки ключ подставляет прокси сам
         headers["x-goog-api-key"] = key
     req = urllib.request.Request(f"{API}/{model}:generateContent", json.dumps(body).encode(), headers)
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = json.load(resp)
     return json.loads(data["candidates"][0]["content"]["parts"][0]["text"])
 

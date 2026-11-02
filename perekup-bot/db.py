@@ -52,6 +52,12 @@ CREATE TABLE IF NOT EXISTS payments (
   id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, yk_id TEXT UNIQUE, amount INTEGER,
   status TEXT DEFAULT 'pending', auto INTEGER DEFAULT 0, created_at REAL, paid_at REAL
 );
+CREATE TABLE IF NOT EXISTS showcase (
+  post_id INTEGER PRIMARY KEY, at REAL, make TEXT, model TEXT, year INTEGER, price INTEGER, mileage INTEGER, region TEXT,
+  discount INTEGER, latency_ms INTEGER, file_id TEXT, status TEXT, quality INTEGER
+);
+CREATE INDEX IF NOT EXISTS showcase_at ON showcase(at);
+CREATE TABLE IF NOT EXISTS showcase_seen (user_id INTEGER, post_id INTEGER, at REAL, PRIMARY KEY (user_id, post_id));
 CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, kind TEXT, meta TEXT, at REAL);
 CREATE INDEX IF NOT EXISTS events_kind ON events(kind, at);
 CREATE TABLE IF NOT EXISTS marks (key TEXT PRIMARY KEY, at REAL);
@@ -151,6 +157,31 @@ class DB:
             "COALESCE(SUM(CASE WHEN p.status='succeeded' THEN p.amount END), 0) paid_sum, "
             "COUNT(CASE WHEN p.status='succeeded' THEN 1 END) paid_n "
             "FROM users u LEFT JOIN payments p ON p.user_id=u.id GROUP BY u.id ORDER BY u.created_at")
+
+    # ---------- подборка после /start ----------
+    async def add_showcase(self, post_id: int, L, discount: int, latency_ms: int, file_id, status: str, quality=None) -> None:
+        await self._run("INSERT OR REPLACE INTO showcase (post_id, at, make, model, year, price, mileage, region, discount, latency_ms, "
+                        "file_id, status, quality) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", post_id, time.time(), L.make, L.model, L.year,
+                        L.price, L.mileage, L.region, discount, latency_ms, file_id, status, quality)
+
+    async def showcase_checked_since(self, since: float) -> int:
+        return (await self._one("SELECT COUNT(*) n FROM showcase WHERE at>?", since))["n"]
+
+    async def showcase_has(self, post_id: int, make, model, year, price, since: float) -> bool:
+        """Этот пост или та же машина (марка, модель, год, цена — перепост в другом канале) уже проверены."""
+        return bool(await self._one("SELECT 1 FROM showcase WHERE post_id=? OR (make=? AND model=? AND year=? AND price=? AND at>?)",
+                                    post_id, make, model, year, price, since))
+
+    async def showcase_fresh(self, uid: int, since: float) -> list:
+        """Готовые машины для подборки за сутки, которых этот человек ещё не видел."""
+        return await self._all("SELECT * FROM showcase s WHERE status='ok' AND file_id IS NOT NULL AND at>? AND NOT EXISTS "
+                               "(SELECT 1 FROM showcase_seen v WHERE v.user_id=? AND v.post_id=s.post_id)", since, uid)
+
+    async def showcase_seen(self, uid: int, post_ids: list[int]) -> None:
+        now = time.time()
+        await self.conn.executemany("INSERT OR IGNORE INTO showcase_seen (user_id, post_id, at) VALUES (?,?,?)",
+                                    [(uid, p, now) for p in post_ids])
+        await self.conn.commit()
 
     async def first_user(self) -> int | None:
         row = await self._one("SELECT id FROM users ORDER BY created_at LIMIT 1")
