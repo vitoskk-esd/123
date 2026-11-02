@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from config import ROOT
 from plans import Plan
 
-W, H = 1080, 1240
+W, H = 1080, 1326
 BG, CARD, LINE = (17, 19, 24), (28, 31, 39), (48, 52, 64)
 TEXT, MUTED = (240, 241, 245), (150, 155, 168)
 ORANGE, GREEN, GRAY = (255, 122, 26), (52, 199, 89), (110, 114, 126)
@@ -39,7 +39,7 @@ def render(basic: Plan, pro: Plan, trial: Plan) -> bytes:
     col_label, col_basic, col_pro = 70, 640, 890        # центр колонок «Простой» и PRO
     top = 170
     # подсветка колонки PRO
-    d.rounded_rectangle((col_pro - 125, top - 10, col_pro + 125, top + 905), radius=28, fill=(40, 30, 22), outline=ORANGE, width=4)
+    d.rounded_rectangle((col_pro - 125, top - 10, col_pro + 125, top + 991), radius=28, fill=(40, 30, 22), outline=ORANGE, width=4)
     d.rounded_rectangle((col_pro - 92, top - 32, col_pro + 92, top + 12), radius=20, fill=ORANGE)
     d.text((col_pro, top - 10), "ВЫГОДНЕЕ", font=_font(True, 24), fill=(20, 20, 20), anchor="mm")
 
@@ -61,6 +61,7 @@ def render(basic: Plan, pro: Plan, trial: Plan) -> bytes:
         ("Фильтр «ниже рынка»", basic.market, True),
         ("ИИ-проверка поста", basic.ai, True),
         ("Фото, метки, число ДТП", True, True),
+        ("Договор купли-продажи", basic.dkp, True),
     ]
     y = top + 215
     for label, b, p in rows:
@@ -76,7 +77,7 @@ def render(basic: Plan, pro: Plan, trial: Plan) -> bytes:
         y += 86
 
     # пробный день
-    box_top = top + 935
+    box_top = top + 1021
     d.rounded_rectangle((60, box_top, W - 60, box_top + 120), radius=24, fill=CARD)
     d.text((W // 2, box_top + 42), f"Пробный день — {trial.price} ₽", font=_font(True, 38), fill=ORANGE, anchor="mm")
     d.text((W // 2, box_top + 88), "всё как в PRO, без ограничений, на 24 часа · один раз", font=f_small, fill=MUTED, anchor="mm")
