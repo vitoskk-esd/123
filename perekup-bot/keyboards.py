@@ -27,6 +27,11 @@ def admin_panel(notify: bool = True) -> InlineKeyboardMarkup:
               [B(text=T.BTN_NOTIFY_ON if notify else T.BTN_NOTIFY_OFF, callback_data="adm:notify")])
 
 
+def dkp_choose() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_DKP_WITH, callback_data="dkp:with")], [B(text=T.BTN_DKP_WITHOUT, callback_data="dkp:without")],
+              [B(text=T.BTN_DKP_BLANK, callback_data="dkp:blank")])
+
+
 def dkp_start() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_DKP_BLANK, callback_data="dkp:blank")])
 

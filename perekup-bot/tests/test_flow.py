@@ -533,7 +533,15 @@ async def test_dkp_in_bot_pro_only(env):
     assert "в тарифе <b>PRO</b>" in s.texts(USER)[-1]
     await ctx.db.set_user(USER, paid_until=time.time() + 86400 * 30, plan="pro")
     await dp.feed_update(bot, msg(T.MENU_DKP, USER))
-    assert "Продавец паспорт (по желанию):" in s.texts(USER)[-1] and "Паспортные данные — по желанию" in s.texts(USER)[-1]
+    assert "в договоре есть всегда" in s.texts(USER)[-1]                               # сначала выбор: бот или от руки
+    await dp.feed_update(bot, cb("dkp:without", USER))
+    assert "от руки" in s.texts(USER)[-1] and "Продавец паспорт:" not in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("Продавец паспорт: 9205 123456\nПродавец ФИО: Иванов Пётр", USER))
+    assert "9205" not in s.texts(USER)[-1]                                            # выбрал «от руки» — паспорт не вписываем
+    import dkp
+    assert "паспорт " + dkp.BLANK in " ".join(t for _, t in dkp.paragraphs({"seller_name": "Иванов Пётр"}))   # строка в договоре есть всегда
+    await dp.feed_update(bot, cb("dkp:reset", USER)); await dp.feed_update(bot, cb("dkp:with", USER))
+    assert "Продавец паспорт:" in s.texts(USER)[-1] and "не сохраняю" in s.texts(USER)[-1]
     await dp.feed_update(bot, msg("Продавец ФИО: Иванов Пётр\nМарка, модель: Kia Rio\nЦена: 650 000\nVIN: Z94CB41AAER000001", USER))
     t = s.texts(USER)[-1]
     assert "Kia Rio" in t and "650 000 ₽" in t and "Не хватает" in t and "Покупатель ФИО" in t and "паспорт" not in t.split("Не хватает")[1]
@@ -545,7 +553,7 @@ async def test_dkp_in_bot_pro_only(env):
     assert await dp.fsm.storage.get_data(key=__import__("aiogram").fsm.storage.base.StorageKey(bot_id=bot.id, chat_id=USER, user_id=USER)) == {}
     await dp.feed_update(bot, msg("камри до 1,5 млн", USER))                           # дальше текст — снова фильтр, а не договор
     assert "Похоже на фильтр" in s.texts(USER)[-1]
-    await dp.feed_update(bot, msg(T.MENU_DKP, USER)); await dp.feed_update(bot, cb("dkp:blank", USER))   # пустой бланк
+    await dp.feed_update(bot, msg(T.MENU_DKP, USER)); await dp.feed_update(bot, cb("dkp:blank", USER))   # пустой бланк — сразу с выбора
     assert len([m for m in s.sent if isinstance(m, SendDocument) and m.chat_id == USER]) == 4
 
 

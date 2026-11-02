@@ -47,9 +47,9 @@ MAIN = ["seller_name", "buyer_name", "car", "price"]     # без этих до�
 OPTIONAL = {"seller_birth", "seller_passport", "seller_issued", "seller_address", "buyer_birth", "buyer_passport", "buyer_issued", "buyer_address"}
 
 
-def template() -> str:
-    """Шаблон для копирования; паспортные строки помечены «по желанию» — их можно стереть или оставить пустыми."""
-    return "\n".join(f"{label}{' (по желанию)' if k in OPTIONAL else ''}: " for k, (label, _) in FIELDS.items())
+def template(with_passport: bool = True) -> str:
+    """Шаблон для копирования. Без паспортных данных — строк про паспорт, дату рождения и адрес в нём нет."""
+    return "\n".join(f"{label}: " for k, (label, _) in FIELDS.items() if with_passport or k not in OPTIONAL)
 
 
 _norm = lambda s: re.sub(r"\s+", " ", re.sub(r"[^a-zа-я0-9 ]", " ", s.lower().replace("ё", "е"))).strip()
