@@ -533,11 +533,11 @@ async def test_dkp_in_bot_pro_only(env):
     assert "в тарифе <b>PRO</b>" in s.texts(USER)[-1]
     await ctx.db.set_user(USER, paid_until=time.time() + 86400 * 30, plan="pro")
     await dp.feed_update(bot, msg(T.MENU_DKP, USER))
-    assert "Продавец паспорт:" in s.texts(USER)[-1] and "не сохраняю" in s.texts(USER)[-1]
+    assert "Продавец паспорт (по желанию):" in s.texts(USER)[-1] and "Паспортные данные — по желанию" in s.texts(USER)[-1]
     await dp.feed_update(bot, msg("Продавец ФИО: Иванов Пётр\nМарка, модель: Kia Rio\nЦена: 650 000\nVIN: Z94CB41AAER000001", USER))
     t = s.texts(USER)[-1]
-    assert "Kia Rio" in t and "650 000 ₽" in t and "Не хватает" in t and "Покупатель ФИО" in t
-    await dp.feed_update(bot, msg("Покупатель ФИО: Смирнов Сергей\nПокупатель паспорт: 4510 654321\nПродавец паспорт: 9205 123456", USER))
+    assert "Kia Rio" in t and "650 000 ₽" in t and "Не хватает" in t and "Покупатель ФИО" in t and "паспорт" not in t.split("Не хватает")[1]
+    await dp.feed_update(bot, msg("Покупатель ФИО: Смирнов Сергей", USER))           # паспорта — по желанию, без них «всё главное есть»
     assert "Всё главное есть" in s.texts(USER)[-1]                                    # дописал — данные сложились
     await dp.feed_update(bot, cb("dkp:make", USER))
     docs = [m for m in s.sent if isinstance(m, SendDocument) and m.chat_id == USER]
