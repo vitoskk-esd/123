@@ -1,0 +1,23 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="wWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe3d6"/><stop offset="1" stop-color="#b3cfbe"/></linearGradient>
+      <linearGradient id="wIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3138"/><stop offset="1" stop-color="#3b434c"/></linearGradient>
+      <radialGradient id="wMon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9fd3ff" stop-opacity=".45"/><stop offset="1" stop-color="#9fd3ff" stop-opacity="0"/></radialGradient></defs>
+    <rect width="1080" height="1920" fill="url(#wWall)"/>
+    <rect x="90" y="560" width="900" height="760" fill="#e9ecef" stroke="#000" stroke-width="10"/>
+    <rect x="130" y="600" width="820" height="680" fill="url(#wIn)" stroke="#000" stroke-width="6"/>
+    <circle cx="700" cy="980" r="260" fill="url(#wMon)"/>
+    <g><rect x="560" y="900" width="260" height="170" rx="10" fill="#111" stroke="#000" stroke-width="6"/><rect x="574" y="914" width="232" height="142" fill="#2f6fb0"/>
+      <path d="M690 1070 v40 h-50 h100" stroke="#111" stroke-width="12" fill="none"/></g>
+    <g fill="#f2f4f6" stroke="#9aa3ab" stroke-width="3"><rect x="130" y="600" width="820" height="26"/><rect x="130" y="630" width="820" height="26"/><rect x="130" y="660" width="820" height="26"/><rect x="130" y="690" width="820" height="26"/><rect x="130" y="720" width="820" height="26"/><rect x="130" y="750" width="820" height="26"/><rect x="130" y="780" width="820" height="26"/></g>
+    <path d="M130 600 H950" stroke="#000" stroke-width="8"/>
+    <rect x="130" y="600" width="820" height="680" fill="#cfe8f7" opacity=".14"/>
+    <path d="M200 640 l120 -40 M220 700 l180 -60" stroke="#fff" stroke-width="10" opacity=".35"/>
+    <!-- щель для документов и стойка -->
+    <rect x="80" y="1300" width="920" height="80" fill="#b07a4a" stroke="#000" stroke-width="8"/>
+    <rect x="380" y="1250" width="320" height="50" rx="10" fill="#1a1d22" stroke="#000" stroke-width="6"/>
+    <rect y="1380" width="1080" height="540" fill="#9a6a3e"/><path d="M0 1380 H1080" stroke="#000" stroke-width="8"/>
+    <g><rect x="410" y="470" width="260" height="70" rx="12" fill="#1d6fb8" stroke="#000" stroke-width="6"/>
+      <text x="540" y="519" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="38" fill="#fff">ОКНО 3</text></g>
+    <g><rect x="760" y="1210" width="190" height="60" rx="6" fill="#f7f1e3" stroke="#000" stroke-width="5"/>
+      <text x="855" y="1247" text-anchor="middle" font-family="Onest" font-weight="700" font-size="22" fill="#333">ст. инспектор</text></g>
+  </svg>

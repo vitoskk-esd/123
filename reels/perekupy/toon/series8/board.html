@@ -1,0 +1,103 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="bgs.js"></script>
+<script>
+// Приора сбоку — по рисунку владельца (kit/img/priora/priora_*.png): black — пацанская с наклейкой, white, yellow — такси, patch
+const IMG = (v, l, t, w = 900, z = 3, extra = "") => `<img class="el" src="../../kit/img/priora/priora_${v}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const P = (k, o) => "";
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4) => el(CHARS[kind](p), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+// ВАЗ-2114 владельца (kit/img/vaz2114/vaz2114_white.png, вырезан из его картинки)
+const CAR = (l, t, w = 820, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2114/vaz2114_white.png" style="left:${l}px;top:${t + w * .04}px;width:${w}px;z-index:${z};${extra}">`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const odo = (v, l, t, c = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">ОДО ${v}</div>`;
+// договор купли-продажи крупно; табличка «✝ 2023»; разделённый экран; лиса с аватарки бота
+const DKP = (l, t, w = 760, rot = -3) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:5;transform:rotate(${rot}deg);background:#fbfaf6;border:6px solid #151515;
+  box-shadow:0 18px 0 rgba(0,0,0,.35);padding:34px 40px;font-family:Onest;color:#222;font-size:27px;line-height:1.55">
+  <div style="font-family:Unbounded;font-weight:900;font-size:30px;text-align:center;margin-bottom:14px">ДОГОВОР КУПЛИ-ПРОДАЖИ ТС</div>
+  <div style="display:flex;justify-content:space-between"><span>г. Москва</span><span>12.10.2025</span></div>
+  <div style="margin-top:10px"><b>Продавец:</b> Иванов Пётр Иванович</div><div><b>Покупатель:</b> ____________</div>
+  <div><b>ТС:</b> ВАЗ-2114, белый</div><div><b>Цена:</b> 390 000 ₽</div>
+  <div style="margin-top:18px;display:flex;align-items:center;gap:20px"><b>Подпись продавца:</b>
+    <svg width="220" height="70" viewBox="0 0 220 70"><path d="M5 50 q20 -50 40 -6 q14 30 30 -10 q14 -34 26 8 q10 30 30 -6 q18 -30 34 0 q10 18 45 -10" stroke="#1d3fb8" stroke-width="5" fill="none"/></svg></div></div>`;
+const RIP = (l, t, fs = 54, rot = -6) => `<div class="lab" style="left:${l}px;top:${t}px;background:#151515;color:#fff;font-size:${fs}px;transform:rotate(${rot}deg);z-index:9">✝ 2023</div>`;
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const HALF = (bg, top) => `<div class="el" style="left:0;top:${top}px;width:1080px;height:${1920 - top}px;overflow:hidden;z-index:4;border-top:10px solid #151515">
+  <div style="position:absolute;left:0;top:${-(top - 300)}px;width:1080px;height:1920px">${BGS[bg]}</div></div>`;
+const S = [
+ { h: "ДОГОВОР С ТОГО СВЕТА", tc: "1/8 · 0:00–0:08", bg: "mreo", y: 700,
+   els: () => ch("vika", "v", 330, 880, .95) + lab("Б-347", 720, 1180, "#fff", "#151515", 46, 6)
+     + `<div class="title" style="top:760px;z-index:9"><span class="lab" style="position:static;display:inline-block;background:#fff;color:#151515;font-size:60px;transform:rotate(-3deg)">ДОГОВОР</span><br><span class="lab" style="position:static;display:inline-block;margin-top:18px;background:#151515;color:#fff;font-size:76px;transform:rotate(2deg)">С ТОГО СВЕТА ✝</span></div>`,
+   vo: "Вика пришла поставить четырку на учёт. Через пять минут выяснилось: машину ей продал покойник.", who: "Лис",
+   mv: "<b>Новая локация — зал регистрации ГИБДД.</b> Табло пищит «Б-347 → окно 3», Вика (из 15–16 серий, та самая белая четырка «один владелец, дед») встаёт с талончиком. На «покойник» — свет мигает, гул ламп обрывается." },
+ { h: "ОКНО №3", tc: "2/8 · 0:08–0:22", bg: "window", y: 700,
+   els: () => RIP(600, 950, 44, -4) + bub("Собственник по базе —<br>Пётр Иванович.<br><em>Умер в двадцать третьем.</em>", 60, 720)
+     + bub("А договор —<br><em>этого года…</em>", 560, 1200) + `<div class="el" style="left:180px;top:1180px;font-size:110px;z-index:9;transform:rotate(-20deg)">🗂️</div>`,
+   vo: "Инспектор: «Собственник по базе — Пётр Иванович. Умер в двадцать третьем». Вика: «А договор — этого года…» Лис: «Дед продал машину через два года после смерти. Активный был дед».", who: "Инспектор + Вика + Лис",
+   mv: "<b>Ракурс от посетителя:</b> стекло окна, жалюзи, в глубине — монитор. Инспектора не видно — только рука, которая просовывает документы обратно. На мониторе всплывает «✝ 2023». Медленный наезд на стекло." },
+ { h: "ДОГОВОР КРУПНО", tc: "3/8 · 0:22–0:30", bg: "desk", y: 700,
+   els: () => DKP(150, 760) + `<div class="el" style="left:460px;top:1080px;width:420px;height:130px;border:9px solid #ff3b30;border-radius:50%;z-index:8;transform:rotate(-3deg)"></div>` + RIP(600, 1210, 56, 8),
+   vo: "Подпись уверенная. Для покойника — даже слишком.", who: "Лис",
+   mv: "<b>Вид сверху на стол:</b> договор купли-продажи, кофе, ручка. Камера едет по строчкам: «Продавец: Иванов Пётр Иванович… Цена: 390 000 ₽…» — и обводит красным подпись. Сверху штамп «✝ 2023»." },
+ { h: "ЗВОНОК ЭДИКУ", tc: "4/8 · 0:30–0:44", bg: "mreo", y: 700,
+   els: () => HALF("dealer", 1120) + ch("vika", "v", 40, 790, .55, 6) + ch("edik", "e", 40, 1210, .55, 6)
+     + bub("Эдик, ты продал мне<br><em>машину покойника!</em>", 330, 760) + bub("Мы брали у Толяна, Толян —<br>у бабушки. <em>Все живые!</em>", 300, 1190)
+     + lab("КРОМЕ ПРОДАВЦА", 520, 1440, "#ff3b30", "#fff", 40, -4),
+   vo: "Вика: «Эдик, ты продал мне машину покойника!» Эдик: «Вика, мы брали у Толяна. Толян — у бабушки. Все живые!» Вика: «Кроме продавца».", who: "Вика + Эдик",
+   mv: "<b>Новый приём — разделённый экран:</b> сверху Вика в ГИБДД, снизу Эдик в салоне. Цепочка перепродаж рисуется стрелками: дед ✝ → баба Галя → Толян → Эдик → Вика. На «кроме продавца» — стрелка от деда краснеет." },
+ { h: "ДАЧА", tc: "5/8 · 0:44–0:58", bg: "dacha", y: 700,
+   els: () => ch("vika", "v", -20, 880, .9) + ch("galya", "g", 560, 860, .95) + bub("Дочка, Петя бы не возражал.<br>Вон он, <em>под яблоней</em>, — спроси.", 60, 720),
+   vo: "Галя: «Дочка, Петя бы не возражал. Вон он, под яблоней, — спроси». Лис: «Договор подписывала Галя. За Петю. Петя не возражал».", who: "Галя + Лис",
+   mv: "<b>Новая локация — дача бабы Гали</b> (та самая яблоня из 15-й серии). Камера с уровня грядок поднимается к яблоне — под ней холмик с цветами. Падает яблоко. Пауза. Галя невозмутимо поливает грядку." },
+ { h: "ПОЛГОДА", tc: "6/8 · 0:58–1:10", bg: "dacha", y: 700,
+   els: () => CAR(140, 1180, 640) + `<div class="el" style="left:600px;top:760px;z-index:9;width:340px;background:#fff;border:7px solid #151515;border-radius:18px;box-shadow:0 10px 0 #151515;text-align:center;font-family:Unbounded;font-weight:900;color:#151515;overflow:hidden">
+     <div style="background:#ff3b30;color:#fff;font-size:30px;padding:8px 0">НАСЛЕДСТВО</div><div style="font-size:96px;line-height:1.1">6</div><div style="font-size:30px;padding-bottom:10px">МЕСЯЦЕВ</div></div>`
+     + `<div style="position:absolute;inset:0;background:rgba(255,120,40,.18);z-index:3"></div>`,
+   vo: "Пока наследство не оформят — а это минимум полгода — машину на учёт не поставить. Вика полгода ездит к деду. Как к собственнику.", who: "Лис",
+   mv: "<b>Та же дача на закате — смена времени:</b> календарь срывает листы: ноябрь… апрель. Белая четырка каждый раз у калитки, Вика с цветами идёт к яблоне. Чёрный юмор на повторе." },
+ { h: "ЖИВОЙ ПРОДАВЕЦ", tc: "7/8 · 1:10–1:22", bg: "city", y: 700,
+   els: () => `<div class="el" style="left:120px;top:1130px;width:840px;height:300px;z-index:3;border:8px dashed #ffd23f;border-radius:30px;display:flex;align-items:center;justify-content:center;font-family:Unbounded;font-weight:900;font-size:40px;color:#ffd23f;background:rgba(0,0,0,.35)">ВАЗ-2115 · твоя картинка</div>`
+     + ch("vika", "v", -30, 880, .9, 6) + ch("mihalych", "m", 680, 860, .95, 6)
+     + bub("Михалыч, вы<br><em>собственник?</em>", 40, 720) + bub("Живой, дочка.<br><em>Паспорт показать?</em>", 520, 760),
+   vo: "Лис: «Весной Вика купила пятнашку. У Михалыча». Вика: «Михалыч, вы собственник?» Михалыч: «Живой, дочка. Паспорт показать?» Лис: «Впервые за сериал продавец оказался живым — и тем, кто в ПТС».", who: "Лис + Вика + Михалыч",
+   mv: "<b>Светлый финал истории:</b> город, весна. Михалыч продаёт свою серую пятнашку (ВАЗ-2115 — по картинке владельца). Вика сверяет паспорт с ПТС — галочки ✓ загораются по очереди, Михалыч подписывает договор при ней." },
+ { h: "МОРАЛЬ", tc: "8/8 · 1:22–1:35", bg: "desk", y: 700,
+   els: () => `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:36px;line-height:1.4">ПЕРЕД ПОКУПКОЙ:<br><span style="color:#ffd23f">🪪 продавец = собственник в ПТС (сверь паспорт)<br>✍️ договор подписывает при тебе<br>🔎 проверка на сайте ГИБДД и в реестре залогов</span></div>`
+     + FOX(400, 1200, 280),
+   vo: "Продавец должен быть в ПТС — сверь паспорт. Договор он подписывает при тебе. Машину проверь на сайте ГИБДД и в реестре залогов. Свежие объявления раньше перекупов — в боте Перехват. Сохрани — пока тебе не продали машину с того света.", who: "Лис",
+   mv: "<b>Финал на том же столе:</b> поверх договора — чек-лист из трёх пунктов, затем маскот — <b>лиса с биноклем с аватарки бота</b> (по новому правилу) и подпись про бота. ~1:25, 7 сцен, 4 новые локации, новый приём — разделённый экран." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>«${sc.vo}»`;
+document.getElementById("mv").innerHTML = sc.mv;
+["a","b","c","d","e","f","g","h","i"].forEach(p => { const e = document.getElementById(p); });
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = ""; const sh2 = document.getElementById("t2-shades"); if (sh2) sh2.style.display = "";
+mouth && document.getElementById("t") && mouth("t", "grin"); document.getElementById("g") && mouth("g", "talk"); document.getElementById("e") && mouth("e", "grin"); document.getElementById("v") && mouth("v", "talk");
+window.READY = true;
+</script></body></html>
