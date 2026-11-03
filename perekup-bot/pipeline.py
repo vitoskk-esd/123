@@ -149,7 +149,9 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
     lines = []
     if plan.market and r.discount is not None and r.discount >= SHOW_DISCOUNT:
         lines.append(T.CARD_DISCOUNT.format(d=r.discount))
-    lines.append(T.CARD_TITLE.format(car=html.escape(d.car_name(L.make, L.model)), year=f" {L.year}" if L.year else "",
+    from parse import KIND_ICON
+    name = (f"{KIND_ICON.get(L.kind, '🚘')} {L.kind.capitalize()}" + (f" · {L.title}" if L.title else "")) if L.kind else d.car_name(L.make, L.model)
+    lines.append(T.CARD_TITLE.format(car=html.escape(name), year=f" {L.year}" if L.year else "",
                                      price=rub(L.price)))
     info = []
     if L.mileage:
@@ -193,7 +195,7 @@ def worth_ai(L: Listing, text: str, filters: list[Filter], d, doubt: bool = Fals
         return False
     if not (L.is_car and L.price):
         return looks_like_ad(text)          # правила не поняли пост — пусть посмотрит ИИ
-    wanted = any(not f.cars for f in filters) or any(mk == L.make for f in filters for mk, _ in f.cars)
+    wanted = any(not f.cars for f in filters) or (not L.kind and any(mk == L.make for f in filters for mk, _ in f.cars))
     several = len({mk for mk, _ in d.find_cars(L.tokens)}) > 1     # в посте несколько марок — правила могли выбрать не ту
     if not (wanted or several):
         return False                        # эту марку никто не ищет — лимит не тратим

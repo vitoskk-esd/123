@@ -35,10 +35,13 @@ class Listing:
     tokens: list[str] = field(default_factory=list)
     parsed_by: str = "rules"
     price_unsure: bool = False      # в посте несколько сумм, похожих на цену, — ИИ перепроверит
+    kind: str | None = None         # не легковая: «мотоцикл», «скутер», «мотоблок»… (None — автомобиль)
+    title: str | None = None        # как назвал продавец: «Ducati Panigale 899»
 
     @property
     def is_car(self) -> bool:
-        return bool(self.make)
+        """Продаётся транспорт, который можно прислать: машина из словаря или другая техника с названным видом."""
+        return bool(self.make or self.kind)
 
     @property
     def complete(self) -> bool:
@@ -289,6 +292,9 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
     tokens = norm(clean(text)).split()
     L = Listing(text=text, tokens=tokens)
     L.make, L.model = pick_car(text, d)
+    kind = vehicle_kind(text)
+    if kind and not L.model:                  # «Honda CBR 600, спортбайк» — мотоцикл, а не машина Honda
+        L.kind, L.title, L.make = kind, vehicle_title(text), None
     L.price = parse_price(text)
     L.price_unsure = price_unsure(text)
     L.year = parse_year(text)
@@ -341,15 +347,38 @@ SPECS = re.compile(r"владел|хозя|собственник|птс|vin|а�
 def sale_score(text: str, L: Listing) -> int:
     """Насколько пост похож на объявление о продаже: машина, модель, год, цена, пробег, слова продажи, характеристики."""
     t = text.lower().replace("ё", "е")
-    return (bool(L.make) + bool(L.model) + bool(L.year) + bool(L.price) + bool(L.mileage)
+    return (bool(L.make or L.kind) + bool(L.model or L.title) + bool(L.year) + bool(L.price) + bool(L.mileage)
             + bool(SALE_WORDS.search(t)) + (len(set(m.group(0)[:5] for m in SPECS.finditer(t))) >= 2))
 
 
-# не автомобиль: мотоциклы, квадроциклы, снегоходы, лодки, спецтехника — бот про машины, такие посты не шлём
-NOT_CAR = re.compile(
-    r"мотоцикл|спортбайк|\bбайк|питбайк|мопед|скутер|квадроцикл|квадрик|снегоход|гидроцикл|\bэндуро"
-    r"|\bмот\b|\bмото\b|мототехник|ducati|kawasaki|harley|\bktm\b|aprilia|husqvarna|\bbrp\b|sea[\s-]?doo|ski[\s-]?doo|\bcfmoto"
-    r"|трактор|экскаватор|погрузчик|спецтехник")
+# другая техника: шлём тем, у кого фильтр без марки, и подписываем, что это. Порядок важен: «квадроцикл» раньше «мото»
+KINDS = [
+    ("квадроцикл", "🛞", re.compile(r"квадроцикл|квадрик|\batv\b|\butv\b|багги")),
+    ("снегоход", "🛷", re.compile(r"снегоход|ski[\s-]?doo|буран\b")),
+    ("гидроцикл", "🌊", re.compile(r"гидроцикл|sea[\s-]?doo|водный\s+мотоцикл")),
+    ("мотоблок", "🚜", re.compile(r"мотоблок|мотокультиватор|культиватор")),
+    ("скутер", "🛵", re.compile(r"скутер|мопед|максискутер")),
+    ("мотоцикл", "🏍", re.compile(r"мотоцикл|спортбайк|\bбайк|питбайк|\bэндуро|\bмот\b|\bмото\b|чоппер|круизер|ducati|kawasaki|harley|\bktm\b|aprilia|husqvarna|triumph\s+\w|\bcbr\s?\d|\byzf|\bgsx|\bmt[\s-]?\d{2}")),
+    ("трактор", "🚜", re.compile(r"трактор|минитрактор")),
+    ("спецтехника", "🏗", re.compile(r"экскаватор|погрузчик|спецтехник|манипулятор|автокран")),
+]
+KIND_ICON = {k: icon for k, icon, _ in KINDS}
+VEHICLE_BRAND = re.compile(r"\b(ducati|kawasaki|yamaha|honda|suzuki|bmw|ktm|harley[\s-]?davidson|aprilia|triumph|husqvarna|stels|irbis|cfmoto|"
+                           r"brp|polaris|lifan|racer|vespa|piaggio|минск|урал|иж|ява|нева|каскад|кировец|мтз|беларус)\b([ \t]+[\w-]+){0,2}", re.I)
+
+
+def vehicle_kind(text: str) -> str | None:
+    t = text.lower().replace("ё", "е")
+    return next((k for k, _, rx in KINDS if rx.search(t)), None)
+
+
+def vehicle_title(text: str) -> str | None:
+    """Название техники как у продавца: марка и 1–2 слова после неё («Ducati Panigale 899»), без года и цены."""
+    m = VEHICLE_BRAND.search(clean(text))
+    if not m:
+        return None
+    words = [w for w in m.group(0).split() if not re.fullmatch(YEAR, w) and not re.fullmatch(r"\d{4,}", w)]
+    return " ".join(words)[:40] or None
 
 
 def sale_verdict(text: str, L: Listing) -> str:
@@ -359,9 +388,7 @@ def sale_verdict(text: str, L: Listing) -> str:
     t = text.lower().replace("ё", "е")
     if L.teaser or SOLD.search(t):
         return "not_sale"
-    if not (L.make and L.price):
-        return "not_sale"
-    if NOT_CAR.search(t):
+    if not (L.is_car and L.price):
         return "not_sale"
     score = sale_score(text, L)
     owners, contact = bool(OWNERS.search(t)), bool(PHONE_OR_NICK.search(t))
@@ -389,7 +416,9 @@ def fingerprint(text: str) -> str:
 
 def car_key(L: Listing) -> str | None:
     """Та же машина, переписанная другими словами: марка, модель, год, цена, пробег (до тысяч)."""
+    km = L.mileage // 1000 if L.mileage else "-"
+    if L.kind and L.title and L.year and L.price:
+        return f"{L.kind}|{L.title.lower()}|{L.year}|{L.price}|{km}"
     if not (L.make and L.model and L.year and L.price):
         return None
-    km = L.mileage // 1000 if L.mileage else "-"
     return f"{L.make}|{L.model}|{L.year}|{L.price}|{km}"

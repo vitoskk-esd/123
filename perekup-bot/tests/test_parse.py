@@ -262,15 +262,16 @@ def test_price_amount_traps(text, price):
     assert parse_price(text) == price
 
 
-# мототехника — не машина: «Ducati» не путаем с Fiat Ducato (латиница сравнивается целиком), мотоциклы и спецтехнику не шлём
-@pytest.mark.parametrize("text,make,verdict", [
- ("Ducati Panigale 899\nЧистый породистый спортбайк, АБС.\n2015г\nМот с Японии!\n18.000 родного пробега.\n850.000₽", None, "not_sale"),
- ("Kawasaki Ninja 650 2019, 520 000 ₽", None, "not_sale"),
- ("Квадроцикл CFMOTO 2021, 700 000 ₽", None, "not_sale"),
- ("Продам Fiat Ducato 2015, пробег 200 тыс, 1 500 000 ₽", "fiat", "sale"),
- ("Нива 2019, 650 000 ₽, лодка в подарок. Тел 89001234567", "lada", "sale"),
+# другая техника: шлём с подписью вида; «Ducati» не путаем с Fiat Ducato (латиница сравнивается целиком)
+@pytest.mark.parametrize("text,kind,title,make", [
+ ("Ducati Panigale 899\nЧистый породистый спортбайк, АБС.\n2015г\nМот с Японии!\n18.000 родного пробега.\n850.000₽\n+79620202299", "мотоцикл", "Ducati Panigale 899", None),
+ ("Honda CBR 600RR 2008, спортбайк, 450 000 ₽", "мотоцикл", "Honda CBR 600RR", None),
+ ("Мотоблок Нева МБ-2, 2020, 55 000 ₽", "мотоблок", "Нева МБ-2", None),
+ ("Скутер Yamaha Jog 2019 45 000 р", "скутер", "Yamaha Jog", None),
+ ("Продам Fiat Ducato 2015, пробег 200 тыс, 1 500 000 ₽", None, None, "fiat"),
+ ("Камри 2014, 1 200 000, обмен на мотоцикл", None, None, "toyota"),
 ])
-def test_moto_is_not_car(text, make, verdict):
+def test_vehicle_kinds(text, kind, title, make):
     from parse import sale_verdict
     L = parse_post(text, D)
-    assert (L.make if verdict == "sale" else None) == make and sale_verdict(text, L).endswith(verdict)
+    assert (L.kind, L.title, L.make) == (kind, title, make) and sale_verdict(text, L) != "not_sale"

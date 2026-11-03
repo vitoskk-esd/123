@@ -64,7 +64,7 @@ def _prompt(d: Dictionary, text: str) -> str:
         "«через 5 минут в продаже», «скоро выставим»), даже если характеристики уже расписаны.\n"
         "2. Какой автомобиль ПРОДАЁТСЯ (make и model латиницей, как пишет производитель). Если в посте упомянуты другие "
         "машины для сравнения («по цене плохой приоры», «дешевле камри», «рассмотрю обмен на…») — их не бери.\n"
-        "   Мотоциклы, мопеды, квадроциклы, снегоходы, лодки, гидроциклы, тракторы и спецтехника — это НЕ автомобиль: is_car_sale=false "
+        "   Мотоцикл, скутер, квадроцикл, снегоход, мотоблок, трактор — тоже продажа техники: is_car_sale=true, make и model — как у продавца "
         "(Ducati — мотоцикл, а не Fiat Ducato).\n"
         "3. year, price_rub (цена в рублях; цена в другой валюте — не заполняй), mileage_km, city — только если есть в тексте.\n"
         "   price_rub — только цена, за которую продают ЭТУ машину: «Моя цена», «Цена», «Отдам за», «Продаю за», «Ценник», обычно внизу поста. "
@@ -131,7 +131,13 @@ def apply(L: Listing, r: dict, d: Dictionary) -> Listing:
         L.teaser = True
         return L
     if not r.get("is_car_sale"):
-        L.make = L.model = None
+        L.make = L.model = L.kind = None
+        return L
+    if L.kind:                                # мотоцикл, скутер… — марку из словаря легковых не подставляем
+        if 1970 <= (r.get("year") or 0) <= YEAR_MAX:
+            L.year = r["year"]
+        if PRICE_MIN <= (r.get("price_rub") or 0) <= PRICE_MAX:
+            L.price = r["price_rub"]
         return L
     cars = d.find_cars(norm(f"{r.get('make', '')} {r.get('model', '')}").split())
     with_model = [c for c in cars if c[1]]

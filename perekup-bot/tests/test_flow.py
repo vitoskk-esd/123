@@ -557,6 +557,15 @@ async def test_dkp_in_bot_pro_only(env):
     assert len([m for m in s.sent if isinstance(m, SendDocument) and m.chat_id == USER]) == 4
 
 
+async def test_motorcycle_sent_with_label(env):
+    """Мотоцикл приходит тем, у кого фильтр без марки, — с подписью «🏍 Мотоцикл · Ducati Panigale 899»; фильтру «камри» — нет."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "любые до 1,5 млн", uid=USER)
+    await make_filter(dp, bot, "камри до 1,5 млн", uid=OTHER)
+    r = await process(bot, ctx, post(CH1, "Ducati Panigale 899\nСпортбайк, АБС.\n2015г\n18.000 пробега.\n850.000₽\n+79620202299"))
+    assert r.sent == [USER] and "🏍 Мотоцикл · Ducati Panigale 899 2015" in s.texts(USER)[-1] and "Ducato" not in s.texts(USER)[-1]
+
+
 class FakeCreator(FakeTelethon):
     async def __call__(self, request):
         self.calls.append(type(request).__name__)
