@@ -3,13 +3,13 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor story about a flood-damaged car sold as «not crashed, not repainted». Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor story about a used car that turned out to be pledged to a bank. Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
  },
  "seryoga": {
   "voice": "Puck",
   "tempo": 1.15,
   "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
-  "notes": "One line: calm, suspicious, a bit smug question — he has learned to check things."
+  "notes": "One line: shocked, indignant, in slippers at his apartment door."
  },
  "vika": {
   "voice": "Kore",
@@ -27,7 +27,7 @@
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: proud, cocky, drying a car with a hairdryer. Line 2: loud charming sales pitch. Line 3: quick cheeky excuse. Line 4: panicked, stuck in a flooded tunnel."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: loud cocky sales pitch. Line 2: confident lie. Line 3: caught, deflated, quiet but clear embarrassed admission."
  },
  "galya": {
   "voice": "Sulafat",
@@ -64,5 +64,17 @@
   "tempo": 1.15,
   "profile": "A fast-talking Russian junkyard parts seller in his 40s, hoarse, cheerful, a hustler, sells used engines.",
   "notes": "One line, loud and quick sales pitch; the last phrase is a cheeky joke said fast."
+ },
+ "pristav": {
+  "voice": "Iapetus",
+  "tempo": 1.12,
+  "profile": "A calm, formal Russian court bailiff in his 40s, polite, bureaucratic, unhurried.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: formal, reading from a paper. Line 2: short dry deadpan reply."
+ },
+ "banker": {
+  "voice": "Despina",
+  "tempo": 1.12,
+  "profile": "A polite, cold Russian bank manager woman in her 30s, corporate smile in the voice.",
+  "notes": "One line, polite and cold; the last two words are a deadpan corporate punchline."
  }
 }
