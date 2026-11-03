@@ -345,6 +345,13 @@ def sale_score(text: str, L: Listing) -> int:
             + bool(SALE_WORDS.search(t)) + (len(set(m.group(0)[:5] for m in SPECS.finditer(t))) >= 2))
 
 
+# не автомобиль: мотоциклы, квадроциклы, снегоходы, лодки, спецтехника — бот про машины, такие посты не шлём
+NOT_CAR = re.compile(
+    r"мотоцикл|спортбайк|\bбайк|питбайк|мопед|скутер|квадроцикл|квадрик|снегоход|гидроцикл|\bэндуро"
+    r"|\bмот\b|\bмото\b|мототехник|ducati|kawasaki|harley|\bktm\b|aprilia|husqvarna|\bbrp\b|sea[\s-]?doo|ski[\s-]?doo|\bcfmoto"
+    r"|трактор|экскаватор|погрузчик|спецтехник")
+
+
 def sale_verdict(text: str, L: Listing) -> str:
     """Продажа машины или нет — как решил бы человек, пролистывая канал.
     sale / not_sale — правила уверены; check_sale / check_not_sale — пусть посмотрит ИИ (если он недоступен —
@@ -353,6 +360,8 @@ def sale_verdict(text: str, L: Listing) -> str:
     if L.teaser or SOLD.search(t):
         return "not_sale"
     if not (L.make and L.price):
+        return "not_sale"
+    if NOT_CAR.search(t):
         return "not_sale"
     score = sale_score(text, L)
     owners, contact = bool(OWNERS.search(t)), bool(PHONE_OR_NICK.search(t))

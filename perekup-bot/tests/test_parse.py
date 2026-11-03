@@ -260,3 +260,17 @@ PRICE_TRAPS = [
 @pytest.mark.parametrize("text,price", PRICE_TRAPS)
 def test_price_amount_traps(text, price):
     assert parse_price(text) == price
+
+
+# мототехника — не машина: «Ducati» не путаем с Fiat Ducato (латиница сравнивается целиком), мотоциклы и спецтехнику не шлём
+@pytest.mark.parametrize("text,make,verdict", [
+ ("Ducati Panigale 899\nЧистый породистый спортбайк, АБС.\n2015г\nМот с Японии!\n18.000 родного пробега.\n850.000₽", None, "not_sale"),
+ ("Kawasaki Ninja 650 2019, 520 000 ₽", None, "not_sale"),
+ ("Квадроцикл CFMOTO 2021, 700 000 ₽", None, "not_sale"),
+ ("Продам Fiat Ducato 2015, пробег 200 тыс, 1 500 000 ₽", "fiat", "sale"),
+ ("Нива 2019, 650 000 ₽, лодка в подарок. Тел 89001234567", "lada", "sale"),
+])
+def test_moto_is_not_car(text, make, verdict):
+    from parse import sale_verdict
+    L = parse_post(text, D)
+    assert (L.make if verdict == "sale" else None) == make and sale_verdict(text, L).endswith(verdict)

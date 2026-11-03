@@ -40,6 +40,8 @@ def _tok_match(alias_tok: str, tok: str) -> bool:
     """Короткие и цифровые — целиком; длинные — с окончанием: «приора» ~ «приору», «москва» ~ «москве»."""
     if len(alias_tok) < 5 or any(ch.isdigit() for ch in alias_tok):
         return tok == alias_tok
+    if not CYR.search(alias_tok):           # латиница не склоняется: «ducati» ≠ «ducato»
+        return tok == alias_tok or tok == alias_tok + "s"
     return tok.startswith(alias_tok[:-1]) and len(tok) <= len(alias_tok) + 3
 
 
