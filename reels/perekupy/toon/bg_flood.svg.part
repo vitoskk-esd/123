@@ -1,0 +1,20 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="fSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3445"/><stop offset="1" stop-color="#55607a"/></linearGradient>
+      <linearGradient id="fWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b7d5a" stop-opacity=".92"/><stop offset="1" stop-color="#3d4a33"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#fSky)"/>
+    <!-- мост и арка тоннеля -->
+    <rect y="380" width="1080" height="200" fill="#7c828c" stroke="#000" stroke-width="8"/>
+    <g stroke="#5f656e" stroke-width="6"><path d="M60 380 V580"/><path d="M180 380 V580"/><path d="M300 380 V580"/><path d="M420 380 V580"/><path d="M540 380 V580"/><path d="M660 380 V580"/><path d="M780 380 V580"/><path d="M900 380 V580"/><path d="M1020 380 V580"/></g>
+    <path d="M0 580 H1080 V1920 H0 Z" fill="#4a4f58"/>
+    <path d="M120 1920 V900 Q540 560 960 900 V1920 Z" fill="#1c2027" stroke="#000" stroke-width="10"/>
+    <g fill="#ffd27a" opacity=".85"><rect x="330" y="760" width="40" height="14" rx="6"/><rect x="520" y="700" width="40" height="14" rx="6"/><rect x="710" y="760" width="40" height="14" rx="6"/></g>
+    <!-- знак ограничения высоты -->
+    <g><circle cx="540" cy="480" r="62" fill="#fff" stroke="#e53935" stroke-width="16"/><text x="540" y="498" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="40">2,5м</text></g>
+    <!-- вода -->
+    <path d="M0 1240 Q270 1210 540 1240 T1080 1240 V1920 H0 Z" fill="url(#fWater)"/>
+    <path d="M0 1240 Q270 1210 540 1240 T1080 1240" stroke="#cfe3c4" stroke-width="8" fill="none" opacity=".7"/>
+    <g fill="none" stroke="#cfe3c4" stroke-width="5" opacity=".5"><ellipse cx="987" cy="1454" rx="46" ry="8"/><ellipse cx="750" cy="1403" rx="50" ry="8"/><ellipse cx="646" cy="1473" rx="31" ry="8"/><ellipse cx="481" cy="1716" rx="34" ry="8"/><ellipse cx="165" cy="1428" rx="50" ry="8"/><ellipse cx="545" cy="1760" rx="56" ry="8"/><ellipse cx="273" cy="1504" rx="50" ry="8"/><ellipse cx="700" cy="1643" rx="51" ry="8"/><ellipse cx="497" cy="1394" rx="70" ry="8"/><ellipse cx="590" cy="1803" rx="55" ry="8"/></g>
+    <g><rect x="120" y="1250" width="70" height="40" rx="6" fill="#d35400" stroke="#000" stroke-width="4" transform="rotate(-12 155 1270)"/>
+      <ellipse cx="880" cy="1262" rx="44" ry="14" fill="#2e86de" stroke="#000" stroke-width="4"/></g>
+  </svg>
+  <div id="rainfx" style="position:absolute;inset:0;pointer-events:none;z-index:40"></div>

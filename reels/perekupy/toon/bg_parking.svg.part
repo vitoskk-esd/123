@@ -1,0 +1,15 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="pSky3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9cc9f0"/><stop offset="1" stop-color="#e2f0fb"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#pSky3)"/>
+    <g fill="#fff" opacity=".9"><ellipse cx="220" cy="250" rx="120" ry="40"/><ellipse cx="860" cy="200" rx="140" ry="44"/></g>
+    <rect x="60" y="560" width="960" height="460" fill="#e8e2d4" stroke="#000" stroke-width="8"/>
+    <rect x="60" y="560" width="960" height="110" fill="#c0392b" stroke="#000" stroke-width="8"/>
+    <text x="540" y="638" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="58" fill="#fff">ПРОДУКТЫ 24</text>
+    <rect x="420" y="800" width="240" height="220" fill="#9fc3c9" stroke="#000" stroke-width="7"/><path d="M540 800 V1020" stroke="#000" stroke-width="6"/>
+    <g fill="#9fc3c9" stroke="#000" stroke-width="6"><rect x="120" y="720" width="220" height="160"/><rect x="740" y="720" width="220" height="160"/></g>
+    <rect y="1020" width="1080" height="900" fill="#6f7680"/><path d="M0 1020 H1080" stroke="#000" stroke-width="7"/>
+    <g stroke="#f4f6f8" stroke-width="10"><path d="M60 1150 L-82.0 1920"/><path d="M300 1150 L230.0 1920"/><path d="M540 1150 L542.0 1920"/><path d="M780 1150 L854.0 1920"/><path d="M1020 1150 L1166.0 1920"/></g>
+    <g><rect x="880" y="1080" width="110" height="80" rx="8" fill="#9aa3ab" stroke="#000" stroke-width="5"/><path d="M890 1160 v40 M980 1160 v40" stroke="#333" stroke-width="8"/>
+      <path d="M870 1080 l-30 -40" stroke="#333" stroke-width="8"/></g>
+    <g fill="#3a3f48" opacity=".5"><ellipse cx="300" cy="1700" rx="160" ry="20"/></g>
+  </svg>
