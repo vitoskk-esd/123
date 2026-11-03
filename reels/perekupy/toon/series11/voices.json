@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor story at a car junkyard about used engines with fake mileage stickers. Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor story about a flood-damaged car sold as «not crashed, not repainted». Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
  },
  "seryoga": {
   "voice": "Puck",
@@ -15,7 +15,7 @@
   "voice": "Kore",
   "tempo": 1.15,
   "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: confused, trailing off but still clear. Line 2: angry, loud, on the phone. Line 3: short dry sarcastic punchline. Line 4: careful, polite, a bit suspicious."
+  "notes": "One line: calm, dry, sarcastic, she already knows the answer."
  },
  "mihalych": {
   "voice": "Gacrux",
@@ -27,7 +27,7 @@
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: casual, confident, asking a junkyard seller. Line 2: loud cocky sales pitch, now he is the seller himself."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: proud, cocky, drying a car with a hairdryer. Line 2: loud charming sales pitch. Line 3: quick cheeky excuse. Line 4: panicked, stuck in a flooded tunnel."
  },
  "galya": {
   "voice": "Sulafat",
