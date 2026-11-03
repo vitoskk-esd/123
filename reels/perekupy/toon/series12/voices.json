@@ -1,0 +1,68 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.08,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor story about a flood-damaged car sold as «not crashed, not repainted». Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
+ },
+ "seryoga": {
+  "voice": "Puck",
+  "tempo": 1.15,
+  "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
+  "notes": "One line: calm, suspicious, a bit smug question — he has learned to check things."
+ },
+ "vika": {
+  "voice": "Kore",
+  "tempo": 1.15,
+  "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
+  "notes": "One line: calm, dry, sarcastic, she already knows the answer."
+ },
+ "mihalych": {
+  "voice": "Gacrux",
+  "tempo": 1.12,
+  "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
+  "notes": "One line: old honest master looking at an engine, tired dry humor, unhurried; the last sentence is a deadpan punchline."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.2,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: proud, cocky, drying a car with a hairdryer. Line 2: loud charming sales pitch. Line 3: quick cheeky excuse. Line 4: panicked, stuck in a flooded tunnel."
+ },
+ "galya": {
+  "voice": "Sulafat",
+  "tempo": 1.12,
+  "profile": "Baba Galya — a sly Russian grandmother in her 70s selling a car from a garage; sweet, folksy voice, calls everyone «сынок» and «милок», but she is in on a scam. Warm, slightly cracked old voice.",
+  "notes": "One line: sweet, calm, folksy, completely unbothered, while gardening; dark humor — she does not notice how creepy it sounds."
+ },
+ "edik": {
+  "voice": "Fenrir",
+  "tempo": 1.18,
+  "profile": "Edik — a slick, fast-talking Russian car dealership manager in his 30s, overly polite, pushy, fake-friendly smile in the voice, sales script energy.",
+  "notes": "One line on the phone: slick, fast, defensive, overly cheerful, trying to calm her down."
+ },
+ "inspector": {
+  "voice": "Autonoe",
+  "tempo": 1.12,
+  "profile": "A tired Russian traffic police registration clerk, a woman in her 40s, bureaucratic, flat, indifferent voice, has seen everything.",
+  "notes": "One line, flat and indifferent, reading from a monitor; the last words are said dryly, without any emotion."
+ },
+ "seller": {
+  "voice": "Orus",
+  "tempo": 1.15,
+  "profile": "A cheerful man from Vladivostok selling his lowered Toyota from a balcony, loud, friendly, joking, a bit of a hustler.",
+  "notes": "One line, shouted happily from a balcony, joking."
+ },
+ "dps": {
+  "voice": "Iapetus",
+  "tempo": 1.1,
+  "profile": "A calm, tired Russian traffic police officer at a night checkpoint, short and formal.",
+  "notes": "One line, two short sentences, flat and formal. Pronounce «ОСАГО» clearly as a separate word: о-са-го."
+ },
+ "razbor": {
+  "voice": "Enceladus",
+  "tempo": 1.15,
+  "profile": "A fast-talking Russian junkyard parts seller in his 40s, hoarse, cheerful, a hustler, sells used engines.",
+  "notes": "One line, loud and quick sales pitch; the last phrase is a cheeky joke said fast."
+ }
+}
