@@ -36,7 +36,7 @@ let CLK = ""; const clock = (t) => (CLK = t, "");
 const odo = (v, l, t, c = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">ОДО ${v}</div>`;
 const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
 // машина-«утопленник» (синий седан из библиотеки), вода поверх, крупные планы: коврик, фара, разъём
-const SEDAN = (id, l, t, w = 820, z = 4, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * .4}px;z-index:${z};${extra}">${CHARS.car(id, 1, "#2e86de", "#3a4a5e")}</div>`;
+const SEDAN = (id, l, t, w = 820, z = 4, extra = "") => `<img class="el" id="${id}" src="../../kit/img/hyundai/hyundai.png" style="left:${l}px;top:${t + w * .02}px;width:${w}px;z-index:${z};${extra}">`;   // белый Hyundai владельца
 const WATER = (top, z = 5) => `<div class="el" style="left:0;top:${top}px;width:1080px;height:${1920 - top}px;z-index:${z};background:linear-gradient(#6b7d5aee,#3d4a33);border-top:8px solid #cfe3c4"></div>`;
 const FLOOR = () => `<div class="el" style="left:60px;top:780px;width:960px;height:700px;z-index:5;background:#3a3f48;border:8px solid #151515;border-radius:30px;overflow:hidden">
   <div style="position:absolute;left:120px;top:160px;width:620px;height:420px;background:radial-gradient(ellipse at 40% 50%,#b89b6a,#7d6a46 60%,#4a3f2c);border-radius:40px"></div>
@@ -49,15 +49,15 @@ const LAMP = () => `<div class="el" style="left:80px;top:800px;width:520px;heigh
   ${[0, 1, 2, 3].map(i => `<div style="position:absolute;left:${30 + i * 75}px;top:50px;width:50px;height:90px;border-radius:8px;background:#3aa76d;box-shadow:inset 0 0 0 6px #6fdc9a"></div>`).join("")}</div>`;
 const LISTING = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:620px;z-index:9;background:#0d0e12;border:10px solid #2a2d34;border-radius:56px;padding:26px;box-shadow:0 0 60px rgba(120,180,255,.35)">
   <div style="background:#fff;border-radius:34px;padding:24px;font-family:Onest;color:#151515">
-  <div style="height:200px;background:#2e86de;border-radius:20px;margin-bottom:16px;position:relative;overflow:hidden">${CHARS.car("lst", 1, "#2e86de", "#3a4a5e").replace('<svg', '<svg style="width:100%;height:100%"')}</div>
-  <div style="font-family:Unbounded;font-weight:900;font-size:36px">Solaris 2017 · 690 000 ₽</div>
+  <div style="height:200px;background:#c9d3df;border-radius:20px;margin-bottom:16px;display:flex;align-items:center;justify-content:center"><img src="../../kit/img/hyundai/hyundai.png" style="width:92%"></div>
+  <div style="font-family:Unbounded;font-weight:900;font-size:36px">Hyundai 2017 · 690 000 ₽</div>
   <div style="font-size:30px;margin-top:10px;line-height:1.4">✅ Не бита, не крашена!<br>✅ Один владелец<br>🔥 Срочно!</div></div></div>`;
 const S = [
  { h: "УТОПЛЕННИК", tc: "1/8 · 0:00–0:08", bg: "flood", y: 700,
    els: () => SEDAN("c1", 130, 1060, 820) + WATER(1240) + `<div class="el" style="left:700px;top:1150px;font-size:90px;z-index:9">🫧</div>`
      + `<div class="title" style="top:760px;z-index:9"><span class="lab" style="position:static;display:inline-block;background:#2e86de;color:#fff;font-size:96px;transform:rotate(-3deg)">УТОПЛЕННИК</span></div>`,
    vo: "Летом эта машина плавала. Осенью её продают как «не битую, не крашеную». Формально — правда.", who: "Лис",
-   mv: "<b>Новая локация — затопленный тоннель под мостом в ливень:</b> седан стоит в мутной воде по окна, пузыри, мимо плывёт мусор. Камера медленно опускается к воде." },
+   mv: "<b>Новая локация — затопленный тоннель под мостом в ливень:</b> белый Хёндай стоит в мутной воде по окна, пузыри, мимо плывёт мусор. Камера медленно опускается к воде." },
  { h: "СУШИЛКА", tc: "2/8 · 0:08–0:18", bg: "dryroom", y: 700,
    els: () => SEDAN("c2", 140, 1140, 760) + ch("tolyan", "t", 640, 880, .9, 6) + bub("Два фена, десять ёлочек —<br><em>и как новая!</em>", 60, 730)
      + `<div class="el" style="left:560px;top:1130px;font-size:90px;z-index:9">💨</div>`,
