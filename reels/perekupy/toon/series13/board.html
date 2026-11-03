@@ -36,7 +36,8 @@ let CLK = ""; const clock = (t) => (CLK = t, "");
 const odo = (v, l, t, c = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">ОДО ${v}</div>`;
 const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
 // новые машины: чёрная Камри (CHARS.sedan), ДПС, эвакуатор; лиса с аватарки
-const CAM = (id, l, t, w = 760, z = 4, o = {}, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * .38}px;z-index:${z};filter:drop-shadow(0 0 3px rgba(255,255,255,.5));${extra}">${CHARS.sedan(id, o)}</div>`;
+const CAM = (id, l, t, w = 760, z = 4, o = {}, extra = "") => o.police ? `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * .38}px;z-index:${z};${extra}">${CHARS.sedan(id, o)}</div>`
+  : `<img class="el" id="${id}" src="../../kit/img/camry/camry.png" style="left:${l}px;top:${t - w * .1}px;width:${w}px;z-index:${z};${extra}">`;   // белая Камри владельца
 const VIN = (txt, l, t, fs = 54) => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:${fs}px;color:#151515;background:#c9ced6;border:6px solid #151515;border-radius:12px;padding:8px 18px;letter-spacing:4px">${txt}</div>`;
 const PANEL = (bg, l, t, w, h, inner = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;overflow:hidden;border:8px solid #151515;z-index:5;border-radius:16px">
   <div style="position:absolute;left:${-(1080 - w) / 2}px;top:-760px;width:1080px;height:1920px">${BGS[bg]}</div>${inner}</div>`;
@@ -45,7 +46,7 @@ const S = [
    els: () => CAM("a1", 20, 1190, 520) + CAM("a2", 540, 1190, 520) + lab("Р 777 АА", 160, 1080, "#fff", "#151515", 36, -3) + lab("Р 777 АА", 690, 1080, "#fff", "#151515", 36, 3)
      + `<div class="title" style="top:780px;z-index:9"><span class="lab" style="position:static;display:inline-block;background:#151515;color:#fff;font-size:100px;transform:rotate(-3deg)">ДВОЙНИК</span></div>`,
    vo: "Две одинаковые Камри. Один номер. Один VIN. За рулём одной из них — Серёга. Вопрос: за рулём какой?", who: "Лис",
-   mv: "<b>Хук — перекрёсток днём:</b> две чёрные Камри встают рядом на красный, номера одинаковые. Камера мечется между ними (зеркальный кадр). Красный свет щёлкает — стоп-кадр, титр «ДВОЙНИК»." },
+   mv: "<b>Хук — перекрёсток днём:</b> две белые Камри встают рядом на красный, номера одинаковые. Камера мечется между ними (зеркальный кадр). Красный свет щёлкает — стоп-кадр, титр «ДВОЙНИК»." },
  { h: "ПАРКИНГ B2 · МЕСЯЦ НАЗАД", tc: "2/10 · 0:08–0:20", bg: "parkade", y: 700,
    els: () => CAM("b", 250, 1180, 620) + ch("tolyan", "t", -30, 900, .9, 6) + ch("seryoga", "s", 720, 900, .9, 6)
      + bub("Камри, четырнадцатый год,<br>девятьсот! <em>Документы — свежие!</em>", 40, 720) + lab("⏪ МЕСЯЦ НАЗАД", 560, 1020, "#ffd23f", "#151515", 38, 3),
@@ -67,12 +68,12 @@ const S = [
    vo: "Следователь: «Машина в розыске. Угнана в Самаре. Её оригинал ездит по городу. С теми же номерами. Только законно».", who: "Следователь",
    mv: "<b>Новая локация — кабинет следователя:</b> пробковая доска с фото и красными нитками (как в детективе), лампа, жалюзи. Нитки сами тянутся от фото Камри к фото Толяна… и обрываются. Серёга нервно отпивает воду." },
  { h: "ПОИСКИ ДВОЙНИКА", tc: "6/10 · 0:58–1:10", bg: "night", y: 700,
-   els: () => PANEL("mall", 30, 720, 330, 500, `<div style="position:absolute;left:10px;bottom:20px;width:300px">${CHARS.sedan("p1")}</div>`)
-     + PANEL("azs", 375, 720, 330, 500, `<div style="position:absolute;left:-120px;bottom:20px;width:300px">${CHARS.sedan("p2")}</div>`)
-     + PANEL("dealer", 720, 720, 330, 500, `<div style="position:absolute;left:-200px;bottom:20px;width:300px">${CHARS.sedan("p3")}</div>`)
+   els: () => PANEL("mall", 30, 720, 330, 500, `<div style="position:absolute;left:10px;bottom:20px;width:300px"><img src="../../kit/img/camry/camry.png" style="width:100%"></div>`)
+     + PANEL("azs", 375, 720, 330, 500, `<div style="position:absolute;left:-120px;bottom:20px;width:300px"><img src="../../kit/img/camry/camry.png" style="width:100%"></div>`)
+     + PANEL("dealer", 720, 720, 330, 500, `<div style="position:absolute;left:-200px;bottom:20px;width:300px"><img src="../../kit/img/camry/camry.png" style="width:100%"></div>`)
      + lab("ТОЛЬКО УЕХАЛ", 60, 1260, "#151515", "#fff", 26, -3) + lab("ТОЛЬКО УЕХАЛ", 400, 1260, "#151515", "#fff", 26, 3) + lab("ТОЛЬКО УЕХАЛ", 740, 1260, "#151515", "#fff", 26, -2),
    vo: "Три дня Серёга искал двойника. На мойке — только уехал. На заправке — только уехал. В салоне — только уехал. Двойник всегда был на шаг впереди. Как перекуп.", who: "Лис",
-   mv: "<b>Новый приём — тройной сплит-экран:</b> мойка, заправка, салон Эдика — в каждом окне задний бампер чёрной Камри уезжает из кадра за секунду до появления Серёги. Ритм ускоряется." },
+   mv: "<b>Новый приём — тройной сплит-экран:</b> мойка, заправка, салон Эдика — в каждом окне задний бампер белой Камри уезжает из кадра за секунду до появления Серёги. Ритм ускоряется." },
  { h: "ПЕРЕКРЁСТОК · РАЗВЯЗКА", tc: "7/10 · 1:10–1:20", bg: "cross", y: 700,
    els: () => CAM("g1", 20, 1190, 520) + CAM("g2", 540, 1190, 520) + `<div class="el" style="left:760px;top:1040px;width:240px;height:460px;z-index:6;overflow:hidden">${CHARS.tolyan("t2")}</div>`
      + bub("Брат…<br><em>мир тесен.</em>", 520, 720) + lab("ОРИГИНАЛ — У ТОЛЯНА", 60, 1000, "#ff3b30", "#fff", 40, -3),
@@ -85,15 +86,16 @@ const S = [
    vo: "Тут подъехала ДПС. Инспектор посмотрел на две одинаковые Камри и впервые за смену улыбнулся.", who: "Лис",
    mv: "<b>Новая машина — ДПС:</b> бело-синий седан с мигалкой въезжает сзади, красно-синие отсветы на всём кадре, сирена коротким «вжик». Свет светофора — зелёный, но никто не едет." },
  { h: "ЭВАКУАТОР", tc: "9/10 · 1:28–1:38", bg: "impound", y: 700,
-   els: () => `<div class="el" style="left:-20px;top:1070px;width:1120px;height:392px;z-index:4">${CHARS.flatbed("f")}</div>` + CAM("i1", 60, 1010, 440, 5) + CAM("i2", 470, 1010, 440, 5)
-     + `<img class="el" src="../../kit/img/markii/markii.png" style="left:620px;top:860px;width:360px;z-index:3;filter:grayscale(.3)">` + lab("ПРИВЕТ, СЕРЁГА 👋", 600, 760, "#ffd23f", "#151515", 36, 4),
+   els: () => `<div class="el" style="left:-120px;top:1070px;width:1000px;height:350px;z-index:4">${CHARS.flatbed("f")}</div>`
+     + `<img class="el" src="../../kit/img/camry/camry.png" style="left:-30px;top:1124px;width:330px;z-index:5">` + `<img class="el" src="../../kit/img/camry/camry.png" style="left:290px;top:1124px;width:330px;z-index:5">`
+     + `<img class="el" src="../../kit/img/markii/markii.png" style="left:810px;top:1250px;width:260px;z-index:3;filter:grayscale(.3)">` + lab("ПРИВЕТ, СЕРЁГА 👋", 600, 1040, "#ffd23f", "#151515", 34, 4),
    vo: "Эвакуатор увёз обе. Справедливость тоже бывает двойной. На штрафстоянке Серёгу встретил его Марк из прошлой серии. Серёга тут уже свой.", who: "Лис",
-   mv: "<b>Новая машина — эвакуатор-платформа:</b> обе Камри на одной платформе, въезжают на штрафстоянку из 21-й серии. За сеткой — белый Марк Серёги, «машет» фарами. Чёрный юмор + хронология." },
+   mv: "<b>Новая машина — эвакуатор-платформа:</b> обе Камри стоят на одной платформе, въезжают на штрафстоянку из 21-й серии. За сеткой — белый Марк Серёги, «машет» фарами. Чёрный юмор + хронология." },
  { h: "МОРАЛЬ", tc: "10/10 · 1:38–1:50", bg: "expert", y: 700,
    els: () => `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:33px;line-height:1.4">VIN ПРОВЕРЯЙ В ТРЁХ МЕСТАХ:<br><span style="color:#ffd23f">🚗 на кузове · 📄 в ПТС/ЭПТС · 🖥 в базе ГИБДД<br>🔍 шрифт, сварка и краска вокруг номера<br>🚓 розыск — до оплаты, не после</span></div>`
      + FOX(400, 1250, 250),
    vo: "VIN проверяй в трёх местах: на кузове, в ПТС и в базе Госавтоинспекции. Смотри шрифт, сварку и свежую краску вокруг номера. Розыск — до оплаты, не после. А свежие объявления раньше перекупов — в боте Перехват. Сохрани — пока тебе не продали машину с двойником.", who: "Лис",
-   mv: "<b>Финал:</b> чек-лист, лиса с биноклем (аватарка бота). ~1:50, <b>10 сцен, 6 новых локаций</b> (перекрёсток, паркинг, подпольный гараж, экспертиза, кабинет следователя, сплит-экран), <b>3 новые машины</b> (Камри, ДПС, эвакуатор), новые голоса: мастер, эксперт, следователь." },
+   mv: "<b>Финал:</b> чек-лист, лиса с биноклем (аватарка бота). ~1:50, <b>10 сцен, 6 новых локаций</b> (перекрёсток, паркинг, подпольный гараж, экспертиза, кабинет следователя, сплит-экран), <b>новые машины</b>: белая Камри (рисунок владельца), ДПС, эвакуатор, новые голоса: мастер, эксперт, следователь." },
 ];
 
 const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
