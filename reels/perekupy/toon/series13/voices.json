@@ -3,13 +3,13 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor story about a used car that turned out to be pledged to a bank. Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing."
+  "notes": "Each line is separate, with a clear 0.8-second pause between lines. You narrate a dark-humor crime mini-movie about a cloned car with a forged VIN. Deadpan crime-documentary narrator, dry punchlines after a tiny pause, perfect comic timing. Say «VIN» as «вин»."
  },
  "seryoga": {
   "voice": "Puck",
   "tempo": 1.15,
   "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
-  "notes": "One line: shocked, indignant, in slippers at his apartment door."
+  "notes": "One line: naive, hopeful, a bit silly question."
  },
  "vika": {
   "voice": "Kore",
@@ -27,7 +27,7 @@
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: loud cocky sales pitch. Line 2: confident lie. Line 3: caught, deflated, quiet but clear embarrassed admission."
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: loud cocky sales pitch in a dark parking garage. Line 2: careless, quick. Line 3: slow, smug, caught but cool."
  },
  "galya": {
   "voice": "Sulafat",
@@ -76,5 +76,23 @@
   "tempo": 1.12,
   "profile": "A polite, cold Russian bank manager woman in her 30s, corporate smile in the voice.",
   "notes": "One line, polite and cold; the last two words are a deadpan corporate punchline."
+ },
+ "master": {
+  "voice": "Algieba",
+  "tempo": 1.12,
+  "profile": "A gruff Russian underground garage craftsman, low hoarse voice, works with a hammer, few words.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Short, gruff, businesslike."
+ },
+ "expert": {
+  "voice": "Rasalgethi",
+  "tempo": 1.1,
+  "profile": "A meticulous Russian forensic vehicle expert in his 50s, calm, precise, a little bored, nerdy.",
+  "notes": "One line: calm, precise, matter-of-fact; the last sentence is a dry nerdy punchline. Say «VIN» as «вин»."
+ },
+ "sled": {
+  "voice": "Schedar",
+  "tempo": 1.1,
+  "profile": "A tired Russian police investigator in his 40s, flat, ironic, has seen everything.",
+  "notes": "One line: flat, ironic; the last two words are a deadpan punchline after a tiny pause."
  }
 }
