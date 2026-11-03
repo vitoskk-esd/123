@@ -1,0 +1,13 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#2b2f37"/>
+    <rect y="0" width="1080" height="420" fill="#3d424c"/><path d="M0 420 H1080" stroke="#000" stroke-width="10"/>
+    <g fill="#f4fbff" stroke="#000" stroke-width="4"><rect x="80" y="320" width="200" height="22" rx="8"/><rect x="440" y="320" width="200" height="22" rx="8"/><rect x="800" y="320" width="200" height="22" rx="8"/></g>
+    <g fill="#fff3c4" opacity=".12"><path d="M180 342 L-40 1300 L400 1300 Z"/><path d="M540 342 L320 1300 L760 1300 Z"/><path d="M900 342 L680 1300 L1120 1300 Z"/></g>
+    <g fill="#9aa3ab" stroke="#000" stroke-width="7"><rect x="120" y="420" width="70" height="700"/><rect x="890" y="420" width="70" height="700"/></g>
+    <g><rect x="110" y="600" width="90" height="90" fill="#ffd23f" stroke="#000" stroke-width="5"/><text x="155" y="665" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="54">B2</text></g>
+    <g><rect x="880" y="600" width="90" height="90" fill="#ffd23f" stroke="#000" stroke-width="5"/><text x="925" y="665" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="54">B2</text></g>
+    <rect y="1120" width="1080" height="800" fill="#3a3f48"/><path d="M0 1120 H1080" stroke="#000" stroke-width="7"/>
+    <g stroke="#ffd23f" stroke-width="8"><path d="M100 1160 L-15.0 1920"/><path d="M380 1160 L335.0 1920"/><path d="M660 1160 L685.0 1920"/><path d="M940 1160 L1035.0 1920"/></g>
+    <g><rect x="380" y="520" width="320" height="70" rx="8" fill="#2e7d32" stroke="#000" stroke-width="5"/>
+      <text x="540" y="568" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="34" fill="#fff">ВЫЕЗД →</text></g>
+  </svg>

@@ -1,0 +1,108 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="bgs.js"></script>
+<script>
+// Приора сбоку — по рисунку владельца (kit/img/priora/priora_*.png): black — пацанская с наклейкой, white, yellow — такси, patch
+const IMG = (v, l, t, w = 900, z = 3, extra = "") => `<img class="el" src="../../kit/img/priora/priora_${v}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const P = (k, o) => "";
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4) => el(CHARS[kind](p), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+// ВАЗ-2114 владельца (kit/img/vaz2114/vaz2114_white.png, вырезан из его картинки)
+const CAR = (l, t, w = 820, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2114/vaz2114_white.png" style="left:${l}px;top:${t + w * .04}px;width:${w}px;z-index:${z};${extra}">`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const odo = (v, l, t, c = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">ОДО ${v}</div>`;
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+// новые машины: чёрная Камри (CHARS.sedan), ДПС, эвакуатор; лиса с аватарки
+const CAM = (id, l, t, w = 760, z = 4, o = {}, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * .38}px;z-index:${z};filter:drop-shadow(0 0 3px rgba(255,255,255,.5));${extra}">${CHARS.sedan(id, o)}</div>`;
+const VIN = (txt, l, t, fs = 54) => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:${fs}px;color:#151515;background:#c9ced6;border:6px solid #151515;border-radius:12px;padding:8px 18px;letter-spacing:4px">${txt}</div>`;
+const PANEL = (bg, l, t, w, h, inner = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;overflow:hidden;border:8px solid #151515;z-index:5;border-radius:16px">
+  <div style="position:absolute;left:${-(1080 - w) / 2}px;top:-760px;width:1080px;height:1920px">${BGS[bg]}</div>${inner}</div>`;
+const S = [
+ { h: "ДВОЙНИК", tc: "1/10 · 0:00–0:08", bg: "cross", y: 700,
+   els: () => CAM("a1", 20, 1190, 520) + CAM("a2", 540, 1190, 520) + lab("Р 777 АА", 160, 1080, "#fff", "#151515", 36, -3) + lab("Р 777 АА", 690, 1080, "#fff", "#151515", 36, 3)
+     + `<div class="title" style="top:780px;z-index:9"><span class="lab" style="position:static;display:inline-block;background:#151515;color:#fff;font-size:100px;transform:rotate(-3deg)">ДВОЙНИК</span></div>`,
+   vo: "Две одинаковые Камри. Один номер. Один VIN. За рулём одной из них — Серёга. Вопрос: за рулём какой?", who: "Лис",
+   mv: "<b>Хук — перекрёсток днём:</b> две чёрные Камри встают рядом на красный, номера одинаковые. Камера мечется между ними (зеркальный кадр). Красный свет щёлкает — стоп-кадр, титр «ДВОЙНИК»." },
+ { h: "ПАРКИНГ B2 · МЕСЯЦ НАЗАД", tc: "2/10 · 0:08–0:20", bg: "parkade", y: 700,
+   els: () => CAM("b", 250, 1180, 620) + ch("tolyan", "t", -30, 900, .9, 6) + ch("seryoga", "s", 720, 900, .9, 6)
+     + bub("Камри, четырнадцатый год,<br>девятьсот! <em>Документы — свежие!</em>", 40, 720) + lab("⏪ МЕСЯЦ НАЗАД", 560, 1020, "#ffd23f", "#151515", 38, 3),
+   vo: "Толян: «Камри, четырнадцатый год, девятьсот! Документы — свежие!» Лис: «Документы и правда свежие. Ещё тёплые из принтера».", who: "Толян + Лис",
+   mv: "<b>Новая локация — подземный паркинг ночью:</b> лампы мигают, жёлтые столбы «B2». Толян продаёт Камри из багажника… то есть из-под полы. Перемотка «⏪» с эффектом VHS." },
+ { h: "ПОДПОЛЬНЫЙ ГАРАЖ", tc: "3/10 · 0:20–0:32", bg: "numgarage", y: 700,
+   els: () => VIN("JTN·B·К·Ж·4·…", 200, 1180, 50) + `<div class="el" style="left:420px;top:1050px;font-size:110px;z-index:9">🔨</div><div class="el" style="left:620px;top:1120px;font-size:80px;z-index:9">✨</div>`
+     + bub("— Буква какая?<br>— Да любую!<br><em>— Пиши «Ж».</em>", 300, 760),
+   vo: "Лис: «Здесь машине делают новую личность. Как в программе защиты свидетелей». Мастер: «Буква какая?» — «Да любую!» — «Пиши „Ж“».", who: "Лис + мастер (за кадром)",
+   mv: "<b>Новая локация — подпольный гараж в красном свете:</b> трафареты цифр, набор клейм, искры. Видно только руки мастера: молоток бьёт по клейму — буква за буквой, на последней «Ж» — удар и тишина." },
+ { h: "ЭКСПЕРТИЗА", tc: "4/10 · 0:32–0:46", bg: "expert", y: 700,
+   els: () => CAM("d", 140, 1000, 800, 4) + VIN("JTN…КЖ4…", 290, 1340, 54) + `<div class="el" style="left:600px;top:1240px;font-size:150px;z-index:9">🔍</div>`
+     + bub("Номер перебит. А буквы «Ж»<br>в VIN не бывает. <em>У японцев<br>её просто нет.</em>", 40, 720) + ch("seryoga", "s", 760, 1000, .7, 6),
+   vo: "Эксперт: «Номер перебит. Шрифт не заводской. А буквы „Ж“ в VIN не бывает. У японцев её просто нет». Серёга: «А может, это японская „Ж“?»", who: "Эксперт + Серёга",
+   mv: "<b>Новая локация — эстакада экспертизы ГИБДД:</b> Камри на эстакаде, лупа скользит по кузову, буквы VIN под лупой «плывут», последняя «Ж» увеличивается на весь экран. Пауза. Реплика Серёги." },
+ { h: "КАБИНЕТ СЛЕДОВАТЕЛЯ", tc: "5/10 · 0:46–0:58", bg: "detective", y: 700,
+   els: () => ch("seryoga", "s", -30, 900, .9, 6) + bub("Машина в розыске.<br>Угнана в Самаре.<br><em>Оригинал ездит по городу.</em>", 330, 740)
+     + lab("ОРИГИНАЛ ?", 640, 1100, "#ff3b30", "#fff", 44, 4),
+   vo: "Следователь: «Машина в розыске. Угнана в Самаре. Её оригинал ездит по городу. С теми же номерами. Только законно».", who: "Следователь",
+   mv: "<b>Новая локация — кабинет следователя:</b> пробковая доска с фото и красными нитками (как в детективе), лампа, жалюзи. Нитки сами тянутся от фото Камри к фото Толяна… и обрываются. Серёга нервно отпивает воду." },
+ { h: "ПОИСКИ ДВОЙНИКА", tc: "6/10 · 0:58–1:10", bg: "night", y: 700,
+   els: () => PANEL("mall", 30, 720, 330, 500, `<div style="position:absolute;left:10px;bottom:20px;width:300px">${CHARS.sedan("p1")}</div>`)
+     + PANEL("azs", 375, 720, 330, 500, `<div style="position:absolute;left:-120px;bottom:20px;width:300px">${CHARS.sedan("p2")}</div>`)
+     + PANEL("dealer", 720, 720, 330, 500, `<div style="position:absolute;left:-200px;bottom:20px;width:300px">${CHARS.sedan("p3")}</div>`)
+     + lab("ТОЛЬКО УЕХАЛ", 60, 1260, "#151515", "#fff", 26, -3) + lab("ТОЛЬКО УЕХАЛ", 400, 1260, "#151515", "#fff", 26, 3) + lab("ТОЛЬКО УЕХАЛ", 740, 1260, "#151515", "#fff", 26, -2),
+   vo: "Три дня Серёга искал двойника. На мойке — только уехал. На заправке — только уехал. В салоне — только уехал. Двойник всегда был на шаг впереди. Как перекуп.", who: "Лис",
+   mv: "<b>Новый приём — тройной сплит-экран:</b> мойка, заправка, салон Эдика — в каждом окне задний бампер чёрной Камри уезжает из кадра за секунду до появления Серёги. Ритм ускоряется." },
+ { h: "ПЕРЕКРЁСТОК · РАЗВЯЗКА", tc: "7/10 · 1:10–1:20", bg: "cross", y: 700,
+   els: () => CAM("g1", 20, 1190, 520) + CAM("g2", 540, 1190, 520) + `<div class="el" style="left:760px;top:1040px;width:240px;height:460px;z-index:6;overflow:hidden">${CHARS.tolyan("t2")}</div>`
+     + bub("Брат…<br><em>мир тесен.</em>", 520, 720) + lab("ОРИГИНАЛ — У ТОЛЯНА", 60, 1000, "#ff3b30", "#fff", 40, -3),
+   vo: "Возвращаемся на перекрёсток. Из соседней Камри выходит водитель. Толян: «Брат… мир тесен». Лис: «Оригинал Толян оставил себе. Для души».", who: "Лис + Толян",
+   mv: "<b>Возврат к хуку:</b> тот же перекрёсток, дверь соседней Камри открывается — выходит Толян в очках, поправляет цепь. Камера: Серёга → Толян → Серёга (наезды)." },
+ { h: "ДПС", tc: "8/10 · 1:20–1:28", bg: "cross", y: 700,
+   els: () => CAM("h1", 20, 1190, 500) + CAM("h2", 530, 1190, 500) + CAM("h3", 280, 1000, 520, 3, { color: "#f4f6f8", rim: "#9aa3ab", police: true }, "filter:none")
+     + `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:2;background:radial-gradient(circle 400px at 30% 55%, rgba(255,59,48,.25), transparent),radial-gradient(circle 400px at 70% 55%, rgba(46,134,222,.25), transparent)"></div>`
+     + lab("ОБЕ — К ОБОЧИНЕ 🚨", 140, 760, "#1d4fb8", "#fff", 50, -3),
+   vo: "Тут подъехала ДПС. Инспектор посмотрел на две одинаковые Камри и впервые за смену улыбнулся.", who: "Лис",
+   mv: "<b>Новая машина — ДПС:</b> бело-синий седан с мигалкой въезжает сзади, красно-синие отсветы на всём кадре, сирена коротким «вжик». Свет светофора — зелёный, но никто не едет." },
+ { h: "ЭВАКУАТОР", tc: "9/10 · 1:28–1:38", bg: "impound", y: 700,
+   els: () => `<div class="el" style="left:-20px;top:1070px;width:1120px;height:392px;z-index:4">${CHARS.flatbed("f")}</div>` + CAM("i1", 60, 1010, 440, 5) + CAM("i2", 470, 1010, 440, 5)
+     + `<img class="el" src="../../kit/img/markii/markii.png" style="left:620px;top:860px;width:360px;z-index:3;filter:grayscale(.3)">` + lab("ПРИВЕТ, СЕРЁГА 👋", 600, 760, "#ffd23f", "#151515", 36, 4),
+   vo: "Эвакуатор увёз обе. Справедливость тоже бывает двойной. На штрафстоянке Серёгу встретил его Марк из прошлой серии. Серёга тут уже свой.", who: "Лис",
+   mv: "<b>Новая машина — эвакуатор-платформа:</b> обе Камри на одной платформе, въезжают на штрафстоянку из 21-й серии. За сеткой — белый Марк Серёги, «машет» фарами. Чёрный юмор + хронология." },
+ { h: "МОРАЛЬ", tc: "10/10 · 1:38–1:50", bg: "expert", y: 700,
+   els: () => `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:33px;line-height:1.4">VIN ПРОВЕРЯЙ В ТРЁХ МЕСТАХ:<br><span style="color:#ffd23f">🚗 на кузове · 📄 в ПТС/ЭПТС · 🖥 в базе ГИБДД<br>🔍 шрифт, сварка и краска вокруг номера<br>🚓 розыск — до оплаты, не после</span></div>`
+     + FOX(400, 1250, 250),
+   vo: "VIN проверяй в трёх местах: на кузове, в ПТС и в базе Госавтоинспекции. Смотри шрифт, сварку и свежую краску вокруг номера. Розыск — до оплаты, не после. А свежие объявления раньше перекупов — в боте Перехват. Сохрани — пока тебе не продали машину с двойником.", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист, лиса с биноклем (аватарка бота). ~1:50, <b>10 сцен, 6 новых локаций</b> (перекрёсток, паркинг, подпольный гараж, экспертиза, кабинет следователя, сплит-экран), <b>3 новые машины</b> (Камри, ДПС, эвакуатор), новые голоса: мастер, эксперт, следователь." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>«${sc.vo}»`;
+document.getElementById("mv").innerHTML = sc.mv;
+["a","b","c","d","e","f","g","h","i"].forEach(p => { const e = document.getElementById(p); });
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = ""; const sh2 = document.getElementById("t2-shades"); if (sh2) sh2.style.display = "";
+mouth && document.getElementById("t") && mouth("t", "grin"); document.getElementById("g") && mouth("g", "talk"); document.getElementById("e") && mouth("e", "grin"); document.getElementById("v") && mouth("v", "talk");
+window.READY = true;
+</script></body></html>

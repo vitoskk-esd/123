@@ -1,0 +1,15 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#d6dde4"/>
+    <rect y="0" width="1080" height="160" fill="#1d4fb8"/>
+    <text x="540" y="104" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="50" fill="#fff">ЭКСПЕРТИЗА ТС</text>
+    <g fill="#f4fbff" stroke="#000" stroke-width="5"><rect x="140" y="250" width="300" height="26" rx="10"/><rect x="640" y="250" width="300" height="26" rx="10"/></g>
+    <path d="M290 276 L60 1200 L520 1200 Z M790 276 L560 1200 L1020 1200 Z" fill="#fff" opacity=".22"/>
+    <g><rect x="60" y="430" width="300" height="200" fill="#fff" stroke="#000" stroke-width="6"/><text x="210" y="480" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="24">ГДЕ ИСКАТЬ VIN</text>
+      <path d="M90 560 q60 -60 120 -50 q60 10 120 -10 v70 h-240 z" fill="#c9ced6" stroke="#000" stroke-width="4"/>
+      <circle cx="140" cy="530" r="10" fill="#ff3b30"/><circle cx="250" cy="520" r="10" fill="#ff3b30"/><circle cx="310" cy="560" r="10" fill="#ff3b30"/></g>
+    <!-- эстакада -->
+    <path d="M60 1120 L1020 1120 L1020 1160 L60 1160 Z" fill="#ffd23f" stroke="#000" stroke-width="7"/>
+    <g stroke="#151515" stroke-width="10"><path d="M60 1120 l40 40"/><path d="M140 1120 l40 40"/><path d="M220 1120 l40 40"/><path d="M300 1120 l40 40"/><path d="M380 1120 l40 40"/><path d="M460 1120 l40 40"/><path d="M540 1120 l40 40"/><path d="M620 1120 l40 40"/><path d="M700 1120 l40 40"/><path d="M780 1120 l40 40"/><path d="M860 1120 l40 40"/><path d="M940 1120 l40 40"/></g>
+    <rect x="120" y="1160" width="50" height="300" fill="#5c626b" stroke="#000" stroke-width="5"/><rect x="910" y="1160" width="50" height="300" fill="#5c626b" stroke="#000" stroke-width="5"/>
+    <rect y="1460" width="1080" height="460" fill="#9aa3ab"/><path d="M0 1460 H1080" stroke="#000" stroke-width="7"/>
+  </svg>
