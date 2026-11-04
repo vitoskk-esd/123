@@ -138,7 +138,7 @@ window.build = R => {
   tl.to("#title", { opacity: 0, y: -50, duration: .25 }, pub - .3);
   tl.fromTo("#pub0", { scale: 1 }, { scale: .9, duration: .1, yoyo: true, repeat: 1, immediateRender: false }, pub - .2).set("#pub0", { opacity: 0 }, pub).set("#pub1", { opacity: 1 }, pub);
   R.sfx("tap", pub - .2, .8); R.sfx("ping", pub, .6);
-  tl.fromTo(cam, { s: 1, x: 0, y: 0 }, { s: 1.12, x: -120, y: -60, duration: 1.4, ease: "power2.inOut", immediateRender: false }, pub).to(cam, { s: 1, x: 0, y: 0, duration: .6 }, st.g1 - .2);
+  tl.fromTo(cam, { s: 1, x: 0, y: 0 }, { s: 1.12, x: -55, y: -50, duration: 1.4, ease: "power2.inOut", immediateRender: false }, pub).to(cam, { s: 1, x: 0, y: 0, duration: .6 }, st.g1 - .2);
   // 2. штаб: маячок, «НОВОЕ», все к телефонам
   swap("kit", "hq", st.l1 - .5);
   slam("#newad", st.l1 + .3, "ping");
