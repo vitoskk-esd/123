@@ -1,0 +1,20 @@
+{
+ "_": "Проба манеры «Сказки в 90-х» (владелец 04.11, вариант 1 — дешёвый: картинки + движение камеры нашим движком). Герои — наши (образцы из chars.js), машина — Hyundai владельца.",
+ "style": "Neo-noir 1990s crime comic illustration for an adult animated series: polished digital painting with clean bold ink outlines and cel shading, dramatic rim light, saturated neon accents (magenta, cyan, hot red) against a deep blue rainy night, wet asphalt with reflections, light rain, cinematic composition with depth. Russian street atmosphere (panel blocks, kiosks, old cars). Expressive, slightly exaggerated faces, consistent character designs and one consistent color grade for the whole series. Vertical 9:16. No text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "designs": [
+  {"id": "d_tol", "refs": ["reels/perekupy/style-probe/ref/tolyan.png"],
+   "prompt": "Redraw this exact character in the series style as a full-body character design on a dark neon-lit night street background: Tolyan, a cocky Russian used-car flipper in his 30s — buzz cut, stubble, black sunglasses, black leather jacket over a white t-shirt, thick gold chain with a round gold pendant, one gold tooth in a smug grin, dark tracksuit pants with white stripes, white sneakers, a brown leather man-bag in one hand, car keys in the other. Keep his outfit and colors from the reference."},
+  {"id": "d_ser", "refs": ["reels/perekupy/style-probe/ref/seryoga.png"],
+   "prompt": "Redraw this exact character in the series style as a full-body character design on a dark neon-lit night street background: Seryoga, a naive kind Russian guy in his early 20s — messy brown hair, big honest eyes, open hopeful face, teal hoodie with a front pocket, blue jeans, orange sneakers. Keep his outfit and colors from the reference."}
+ ],
+ "brand": [],
+ "images": [
+  {"id": "f_hook", "refs": ["reels/perekupy/style-probe/hf/d_tol.png", "reels/perekupy/style-probe/hf/d_ser.png", "reels/perekupy/kit/img/hyundai/hyundai.png"],
+   "prompt": "Night used-car market in the rain, neon sign glow over rows of old cars, kiosk lights. In the middle stands the white sedan from the third reference (keep its shape and white color), side view. On the left Tolyan from the first reference proudly presents the car with an open palm, smug grin with a gold tooth; on the right Seryoga from the second reference looks at the car with naive trust. Both full body, standing on wet asphalt, reflections, wide shot, characters in the lower two thirds of the frame."},
+  {"id": "f_tol", "refs": ["reels/perekupy/style-probe/hf/d_tol.png"],
+   "prompt": "Close-up of Tolyan from the reference talking straight to camera with a sly grin and a gold tooth, neon magenta and cyan reflections in his black sunglasses, rain drops, blurred neon car market behind him, shoulders and head in frame."}
+ ],
+ "clips": []
+}
