@@ -24,6 +24,8 @@ html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden
 <script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
 <script>
 // ep23 «ПЕРВАЯ ЦЕНА»: баба Галя выставила BMW — перекупы звонят через 8 секунд. В каждом диалоге в кадре оба собеседника.
+// двор без качелей: на асфальте у подъезда стоит BMW
+BGS.yard = BGS.yard.replace(/<g><path d="M120 1320[\s\S]*?<\/g>/, "");
 const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
 const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
 const PK = (p, l, t, s, o, z = 4) => ch("perekup", p, l, t, s, z, o);
@@ -70,12 +72,12 @@ const S = [
    vo: "Лис: «За первую минуту — сорок семь звонков. И все — „не перекупы“». Галя (в трубку): «Сынок, у вас там что — слёт „не перекупов“?»", who: "Лис + Галя",
    mv: "Крупно телефон: список входящих растёт сам — «Не перекуп», «Частник Вадим», «Срочный выкуп 24/7», «Сергей (не перекуп)». Счётчик пропущенных щёлкает до 47, телефон вибрирует и ползёт по столу." },
  { h: "ОЧЕРЕДЬ ВО ДВОРЕ", tc: "5/10 · 0:38–0:50", bg: "yard", y: 700, els: () => clock("10:00")
-     + COR(560, 1250, 480, 3) + PK("y1", 40, 980, .62, { jacket: "#6b3a1f", cap: "#1d1d1f", item: "cash" }) + PK("y2", 220, 1000, .6, { jacket: "#4a6b3a", hair: "#151515", item: "flowers" })
-     + PK("y3", 380, 1010, .58, { jacket: "#2b4c7e", beard: true, cap: "#c0392b", item: "phone" }) + ch("tolyan", "t", 640, 760, .7, 6)
-     + `<div class="el" style="left:700px;top:880px;width:40px;height:620px;z-index:5;background:repeating-linear-gradient(180deg,transparent 0 50px,#8b5a2b 50px 62px);border-left:12px solid #8b5a2b;border-right:12px solid #8b5a2b"></div>`
-     + bub("Мать! Наличкой —<br><em>прямо в форточку!</em>", 330, 740),
+     + COR(10, 1095, 470, 3) + PK("y1", 640, 1000, .55, { jacket: "#6b3a1f", cap: "#1d1d1f", item: "cash" }) + PK("y2", 780, 1010, .54, { jacket: "#4a6b3a", hair: "#151515", item: "flowers" })
+     + PK("y3", 910, 1020, .52, { jacket: "#2b4c7e", beard: true, cap: "#c0392b", item: "phone" }) + ch("tolyan", "t", 330, 580, .7, 6)
+     + `<div class="el" style="left:440px;top:640px;width:60px;height:640px;z-index:5;background:repeating-linear-gradient(180deg,transparent 0 50px,#8b5a2b 50px 62px);border-left:12px solid #8b5a2b;border-right:12px solid #8b5a2b"></div>`
+     + bub("Мать! Наличкой —<br><em>прямо в форточку!</em>", 560, 720),
    vo: "Лис: «Через десять минут во дворе — очередь. Один принёс цветы, другой — лестницу». Толян (с лестницы у окна): «Мать! Наличкой — прямо в форточку!»", who: "Лис + Толян",
-   mv: "Двор хрущёвки, под окном — белая BMW Гали. Очередь «не перекупов»: с пачкой денег, с букетом, с телефоном. Толян влез по лестнице к окну второго этажа." },
+   mv: "Двор хрущёвки, у подъезда на асфальте — белая BMW Гали. Очередь «не перекупов»: с пачкой денег, с букетом, с телефоном. Толян влез по лестнице к окну второго этажа." },
  { h: "МИНУС 10 МИНУТ · МАРШРУТКА", tc: "6/10 · 0:50–1:02", bg: "minibus", y: 640, els: () => clock("⏪ 00:03")
      + ch("vika", "v", 120, 860, .95, 6) + PHONE(600, 820, 300, BOT) + bub("Остановите<br><em>у пятиэтажки!</em>", 60, 1300),
    vo: "Лис: «Отмотаем. Ноль-ноль, ноль три. Вика едет в маршрутке — и бот присылает ей бэху через три секунды после публикации». Вика: «Остановите у пятиэтажки!»", who: "Лис + Вика",
@@ -85,9 +87,9 @@ const S = [
    vo: "Вика: «Здравствуйте! Я по БМВ. Осмотр, договор — и триста, без торга». Галя: «Вот! Культурный человек!»", who: "Вика + Галя",
    mv: "Подъезд, дверь квартиры Гали. Вика пришла <b>на минуту раньше очереди</b>. Галя в дверях, Вика с папкой договора. Обе в кадре. Галя снимает бигуди — гость приличный." },
  { h: "ПРОДАНО", tc: "8/10 · 1:14–1:24", bg: "yard", y: 700, els: () => clock("15:00")
-     + COR(640, 1250, 420, 3, "filter:drop-shadow(0 0 0 #fff)") + lab("ПРОДАНО", 640, 1200, "#ff3b30", "#fff", 50, -6, 7)
-     + PK("z1", 40, 1000, .6, { jacket: "#6b3a1f", cap: "#1d1d1f", item: "cash", look: "angry" }) + PK("z2", 210, 1010, .58, { jacket: "#4a6b3a", hair: "#151515", item: "flowers", look: "o" })
-     + ch("tolyan", "t", 380, 900, .75, 6) + bub("Опять этот бот,<br><em>пииип!</em>", 520, 820) + `<div class="el" style="left:900px;top:760px;width:40px;height:740px;z-index:5;background:repeating-linear-gradient(180deg,transparent 0 50px,#8b5a2b 50px 62px);border-left:12px solid #8b5a2b;border-right:12px solid #8b5a2b"></div>`,
+     + COR(620, 1110, 440, 3) + lab("ПРОДАНО", 680, 1060, "#ff3b30", "#fff", 50, -6, 7)
+     + PK("z1", 10, 1000, .6, { jacket: "#6b3a1f", cap: "#1d1d1f", item: "cash", look: "angry" }) + PK("z2", 160, 1010, .58, { jacket: "#4a6b3a", hair: "#151515", item: "flowers", look: "o" })
+     + ch("tolyan", "t", 300, 900, .75, 6) + bub("Опять этот бот,<br><em>пииип!</em>", 520, 820) + `<div class="el" style="left:560px;top:840px;width:40px;height:440px;z-index:5;background:repeating-linear-gradient(180deg,transparent 0 50px,#8b5a2b 50px 62px);border-left:12px solid #8b5a2b;border-right:12px solid #8b5a2b"></div>`,
    vo: "Лис: «Вика уехала на бэхе. Очередь разошлась. Лестница осталась». Толян: «Опять этот бот, блин!» (запикано)", who: "Лис + Толян",
    mv: "BMW с Викой за рулём уезжает со двора, на ней наклейка «ПРОДАНО». Очередь сдувается: букет падает, пачка денег прячется. Толян у пустой лестницы." },
  { h: "ЧАС СПУСТЯ · СЕРЁГА", tc: "9/10 · 1:24–1:34", bg: "parking", y: 640, els: () => clock("1:00:00")
