@@ -126,6 +126,7 @@ class Dictionary:
     cars: Finder = field(repr=False, default=None)
     places: Finder = field(repr=False, default=None)
     marks: Finder = field(repr=False, default=None)
+    latin: dict[str, list[str]] = field(repr=False, default_factory=dict)   # регион → его города латиницей (для ников каналов)
 
     def car_name(self, make: str | None, model: str | None) -> str:
         if make and model:
@@ -139,10 +140,74 @@ class Dictionary:
     def find_regions(self, tokens: list[str]) -> list[str]:
         return list(dict.fromkeys(h.payload[0] for h in self.places.find(tokens)))
 
+    def find_location(self, tokens: list[str]) -> str | None:
+        """Где машина стоит. Первый город текста, кроме «откуда» и «куда»: «пригнана из Москвы», «с Питера», «доставка
+        до Москвы», «пригоню в Москву / в Донецк» — это не место продажи. Есть только такие упоминания — не знаем (None)."""
+        for h in self.places.find(tokens):
+            prev, tok = (tokens[h.start - 1] if h.start else ""), tokens[h.end - 1]      # падеж видно по последнему слову: «в Нижнем Новгороде»
+            if prev in ORIGIN:
+                continue
+            if prev in ("в", "во", "на") and len(tok) > 3 and not tok.endswith(LOCATIVE) and tok not in LOCATIVE_U:
+                continue                                    # «в Москву», «в Донецк» — направление; «в Москве», «в Донецке» — место
+            return h.payload[0]
+        return None
+
+    def guess_region(self, title: str | None, username: str | None) -> str | None:
+        """Город канала по названию («АвтоРынок ДНР», «Авто Воронеж») или нику (avto_moskva, AvtoVoronezh, avto_msk)."""
+        if title and (found := self.find_regions(norm(title).split())):
+            return found[0]
+        if not username:
+            return None
+        parts = [p for p in re.split(r"[_\d]+|(?<=[a-z])(?=[A-Z])", username) if p]
+        segs, flat = {p.lower() for p in parts}, username.lower()
+        for rid, names in self.latin.items():
+            for n in names:
+                if n in segs or (len(n) >= 5 and n in flat):
+                    return rid
+        return None
+
     def find_markers(self, tokens: list[str]) -> list[str]:
         """Маркеры одной фразы (текст режем по знакам препинания до вызова). «Без запретов / залогов», «не требует
         вложений», «без дтп» — не маркер: в той же фразе за несколько слов до него стоит отрицание."""
         return list(dict.fromkeys(h.payload[0] for h in self.marks.find(tokens) if not negated(tokens, h)))
+
+
+ORIGIN = ("из", "изо", "с", "со", "до")                          # «из Москвы», «с Питера», «доставка до Казани»
+LOCATIVE = ("е", "и", "ах", "ях")                                 # «в Москве», «в Перми», «в Челнах»
+LOCATIVE_U = ("крыму",)                                           # «в Крыму» — место, хотя на -у
+TR = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", ["a", "b", "v", "g", "d", "e", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p", "r", "s", "t",
+                                                   "u", "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ya"]))
+
+
+def translit(s: str) -> str:
+    return "".join(TR.get(c, c if c.isascii() and c.isalnum() else "") for c in s.lower())
+
+
+ADJ = {"ий": ("ий", "ем", "его", "ему", "им"), "ый": ("ый", "ом", "ого", "ому", "ым"), "ой": ("ой", "ом", "ого", "ому", "ым"),
+       "ая": ("ая", "ой", "ую"), "яя": ("яя", "ей", "юю"), "ое": ("ое", "ом", "ого"), "ее": ("ее", "ем", "его")}
+WORD_FORMS = {"край": ("край", "крае", "края", "краю"), "область": ("область", "области", "обл"), "республика": ("республика", "республике", "республики"),
+              "округ": ("округ", "округе", "округа")}
+
+
+def place_forms(alias: str) -> list[str]:
+    """Все падежи названия места: «нижний новгород» → «нижнем новгороде» (второе слово склоняет поиск по основе),
+    «московская область» → «московской обл», «краснодарский край» → «краснодарском крае». Одно слово склоняет сам поиск."""
+    toks = alias.split()
+    if len(toks) == 1:
+        return [alias]
+    opts = []
+    for t in toks:
+        if t in WORD_FORMS:
+            opts.append(WORD_FORMS[t])
+        elif len(t) >= 5 and t[-2:] in ADJ:
+            end = "ый" if t[-2:] == "ий" and t[-3] in "кгхжшчщ" else t[-2:]     # «краснодарский» → «краснодарском», а не «-скем»
+            opts.append(tuple(t[:-2] + e for e in ADJ[end]))
+        else:
+            opts.append((t,))
+    out = [""]
+    for o in opts:
+        out = [f"{x} {y}".strip() for x in out for y in o]
+    return out
 
 
 def load_dictionary(path: Path) -> Dictionary:
@@ -161,10 +226,13 @@ def load_dictionary(path: Path) -> Dictionary:
     regions, place_phrases = {}, []
     for rid, r in (data.get("regions") or {}).items():
         regions[rid] = r["name"]
-        place_phrases += [(str(a), (rid,)) for a in r.get("aliases") or []]
+        place_phrases += [(v, (rid,)) for a in r.get("aliases") or [] for v in place_forms(str(a))]
     markers, mark_phrases = {}, []
     for mk in data.get("markers") or []:
         markers[mk["id"]] = Marker(mk["id"], mk["kind"], mk["label"])
         mark_phrases += [(str(w), (mk["id"],)) for w in mk.get("words") or []]
+    latin = {rid: list(dict.fromkeys(translit(str(a)) for a in r.get("aliases") or [] if " " not in str(a) and len(translit(str(a))) >= 3))
+             for rid, r in (data.get("regions") or {}).items()}
+    latin["msk"] += ["moscow", "mos"]; latin["spb"] += ["piter", "spb"]; latin["ekb"] += ["yekaterinburg", "ekb"]
     return Dictionary(makes, models, regions, markers,
-                      cars=Finder(car_phrases), places=Finder(place_phrases), marks=Finder(mark_phrases))
+                      cars=Finder(car_phrases), places=Finder(place_phrases), marks=Finder(mark_phrases), latin=latin)

@@ -78,9 +78,20 @@ async def capacity(bot: Bot, ctx: Ctx) -> None:
                 await send(bot, ctx, uid, T.CAP_TG.format(n=tg))
 
 
+_regions_at = 0.0
+
+
+async def regions(bot: Bot, ctx: Ctx) -> None:
+    """Раз в час — города каналов по истории: новый канал без города в названии узнаёт свой город по первым машинам."""
+    global _regions_at
+    if time.time() - _regions_at > 3600:
+        _regions_at = time.time()
+        await ctx.guess_regions()
+
+
 async def loop(bot: Bot, ctx: Ctx) -> None:
     while True:
-        for job in (tick, capacity):
+        for job in (tick, capacity, regions):
             try:
                 await job(bot, ctx)
             except Exception:

@@ -233,6 +233,17 @@ class DB:
     async def set_archived(self, ids: list[int]) -> None:
         await self._run(f"UPDATE channels SET archived=1 WHERE id IN ({','.join('?' * len(ids))})", *ids)
 
+    async def learned_regions(self, days: int = 60, min_n: int = 8, share: float = .6) -> dict[int, str]:
+        """Канал → город, где продаётся большинство его машин (по разобранным постам). Нет уверенности — канала нет в ответе."""
+        rows = await self._all("SELECT channel_id, region, COUNT(*) AS n FROM posts WHERE region IS NOT NULL AND at>? "
+                               "GROUP BY channel_id, region", time.time() - days * 86400)
+        total, best = {}, {}
+        for r in rows:
+            total[r["channel_id"]] = total.get(r["channel_id"], 0) + r["n"]
+            if r["n"] > best.get(r["channel_id"], ("", 0))[1]:
+                best[r["channel_id"]] = (r["region"], r["n"])
+        return {c: reg for c, (reg, n) in best.items() if total[c] >= min_n and n / total[c] >= share}
+
     async def joined_channels(self) -> list:
         return await self._all("SELECT * FROM channels WHERE status='joined'")
 

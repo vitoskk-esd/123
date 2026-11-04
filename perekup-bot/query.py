@@ -140,7 +140,8 @@ def _has_word(word: str, tokens: list[str]) -> bool:
 
 def matches(f: Filter, L, discount: int | None) -> bool:
     """Подходит ли объявление под фильтр. Без цены не шлём ничего — перекупу нужна цифра.
-    Неизвестный год, пробег или город не отсекают: в постах их часто нет, а машина может быть та самая."""
+    Неизвестный год или пробег не отсекают: в постах их часто нет, а машина может быть та самая. Город — отсекает:
+    его берём из текста, а нет в тексте — из названия, ника или истории канала; совсем неизвестный город в фильтр с городом не идёт."""
     if not L.is_car or not L.price:
         return False
     if f.cars and not any(mk == L.make and (md is None or md == L.model) for mk, md in f.cars):
@@ -151,8 +152,8 @@ def matches(f: Filter, L, discount: int | None) -> bool:
         return False
     if L.mileage and f.mileage_max and L.mileage > f.mileage_max:
         return False
-    if f.regions and L.region and L.region not in f.regions:
-        return False
+    if f.regions and L.region not in f.regions:
+        return False                                  # город фильтра — строго: неизвестный город не шлём (иначе Донецк уходит в «Москву»)
     if any(mk in L.markers for mk in f.exclude_markers):
         return False
     if "damaged" in f.exclude_markers and getattr(L, "accidents", None):

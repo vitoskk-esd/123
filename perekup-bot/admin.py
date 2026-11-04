@@ -49,6 +49,16 @@ async def is_admin_id(ctx: Ctx, uid: int) -> bool:
     return uid == await ctx.db.first_user()
 
 
+def region_label(ctx: Ctx, ch) -> str:
+    """Город канала для админа: заданный, угаданный (по названию/нику/истории) или «не знаю» — такой канал не попадает в фильтры с городом."""
+    if ch["region"]:
+        return ctx.dict.regions.get(ch["region"], ch["region"])
+    live = next((c for c in ctx.channels.values() if c["id"] == ch["id"]), {})
+    if live.get("region_guess"):
+        return ctx.dict.regions.get(live["region_guess"], live["region_guess"]) + " (определил сам)"
+    return "не знаю — посты без города не идут в фильтры с городом"
+
+
 async def queue_wait(ctx: Ctx, channel_ids: list[int]) -> str:
     """Сколько ждать, пока подключится последний из этих каналов: каналы впереди в очереди + свои, по одному за паузу.
     У Telegram и ВК очереди свои и идут параллельно — ждать дольше там, где дольше."""
@@ -525,7 +535,7 @@ async def base_buttons(cb: CallbackQuery, ctx: Ctx) -> None:
         text = T.ADMIN_CHANNEL.format(
             icon=K.STATUS_ICON.get(ch["status"], "?"), name=html.escape(name),
             kind="ВКонтакте" if ch["vk"] else "Telegram", link=f" · {url}" if url else "", status=status,
-            error=f" ({html.escape(ch['error'])})" if ch["error"] else "", region=ch["region"] or "—", posts=ch["posts"],
+            error=f" ({html.escape(ch['error'])})" if ch["error"] else "", region=region_label(ctx, ch), posts=ch["posts"],
             last=when(ch["last_post_at"]), added=when(ch["created_at"]))
         await cb.message.edit_text(text, reply_markup=K.admin_channel(ch["id"], page, url),
                                    link_preview_options=LinkPreviewOptions(is_disabled=True))

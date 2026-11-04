@@ -65,7 +65,8 @@ def test_matching():
     assert not matches(f, parse_post("Toyota Camry 2012, 1 450 000 ₽, Москва", D), None)          # дороже
     assert not matches(f, parse_post("Toyota Camry 2008, 900 000 ₽, Москва", D), None)            # старше
     assert not matches(f, parse_post("Toyota Camry 2012, 1 250 000 ₽, Казань", D), None)          # другой город
-    assert matches(f, parse_post("Toyota Camry 2012, 1 250 000 ₽", D), None)                      # город не указан — шлём
+    assert not matches(f, parse_post("Toyota Camry 2012, 1 250 000 ₽", D), None)                  # город неизвестен — в «Москву» не шлём
+    assert matches(f, parse_post("Toyota Camry 2012, 1 250 000 ₽", D, "msk"), None)               # в тексте нет — город канала
     assert not matches(f, parse_post("Toyota Camry 2012, 1 250 000 ₽, после ДТП", D), None)       # битая
     assert not matches(f, parse_post("Toyota Camry 2012, 1 250 000 ₽, стоит ГБО", D), None)       # своё слово
     assert not matches(f, parse_post("Toyota Camry 2012, Москва", D), None)                        # без цены — не шлём
@@ -275,3 +276,38 @@ def test_vehicle_kinds(text, kind, title, make):
     from parse import sale_verdict
     L = parse_post(text, D)
     assert (L.kind, L.title, L.make) == (kind, title, make) and sale_verdict(text, L) != "not_sale"
+
+
+def test_city_donetsk_not_moscow():
+    """Скрин владельца 04.11: Solaris из «АвтоРынок ДНР» пришёл по фильтру «Москва до 1,5 млн». Донецк/ДНР теперь в справочнике,
+    город канала берётся из названия, а неизвестный город в фильтр с городом не идёт."""
+    f = parse_filter("Москва до 1,5 миллиона любая марка", D)
+    text = ("Продам! Я собственник✅\n HYUNDAI Solaris.\nГод 2012\nОбъём 1.6 MPI (123л.с)\nПробег 186000\nСамый надёжный мотор✅\n"
+            "Автомобиль в родной краске без ДТП!\nЦена 845 000\nг. Донецк")
+    L = parse_post(text, D)
+    assert L.region == "dnr" and not matches(f, L, None)
+    no_city = text.replace("г. Донецк", "")
+    assert D.guess_region("АвтоРынок ДНР", None) == "dnr"
+    assert not matches(f, parse_post(no_city, D, D.guess_region("АвтоРынок ДНР", None)), None)    # город — по названию канала
+    assert not matches(f, parse_post(no_city, D), None)                                            # город неизвестен — не шлём
+    assert matches(parse_filter("донецк до 1 млн", D), L, None)
+
+
+def test_city_location_vs_origin():
+    """Место продажи — не «откуда пригнали» и не «куда доставим»."""
+    loc = lambda t, ch=None: parse_post("Kia Rio 2017, 900 000 ₽. " + t, D, ch).region
+    assert loc("Пригнана из Москвы, находится в Донецке") == "dnr"
+    assert loc("Авто с Питера, стоит в Казани") == "kzn"
+    assert loc("Возможна доставка в Москву") is None
+    assert loc("Возможна доставка до Москвы", "vrn") == "vrn"
+    assert loc("Осмотр в Москве") == "msk"
+    assert loc("г. Мариуполь") == "dnr" and loc("в Крыму") == "crm" and loc("в Нижнем Новгороде") == "nnov"
+    assert loc("Краснодарский край, Сочи") == "krd" and loc("в Краснодарском крае") == "krd" and loc("Московская обл.") == "msk"
+
+
+def test_channel_region_guess():
+    g = D.guess_region
+    assert g("Авто Воронеж | продажа", None) == "vrn"
+    assert g(None, "avto_moskva") == "msk" and g(None, "AvtoVoronezh") == "vrn" and g(None, "avto_msk") == "msk"
+    assert g(None, "perekup_ufa") == "ufa" and g(None, "avto_kzn") == "kzn" and g(None, "new_cars_spb") == "spb"
+    assert g("Корейские авто", "asia_express_auto") is None

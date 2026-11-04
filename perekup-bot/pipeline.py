@@ -202,11 +202,16 @@ def worth_ai(L: Listing, text: str, filters: list[Filter], d, doubt: bool = Fals
     return doubt or several or L.price_unsure or bool(TRICKY.search(text))
 
 
+def channel_region(channel: dict) -> str | None:
+    """Город канала: задан админом (/add … москва) → по названию/нику → по истории (где продаётся большинство его машин)."""
+    return channel.get("region") or channel.get("region_guess")
+
+
 async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None,
                   ai_filters: list[Filter] | None = None) -> Result:
     """Разбор (правила + ИИ-проверка), дубль, рынок. Без отправки — удобно и для тестов."""
     r = Result()
-    L = r.listing = parse_post(raw.text, ctx.dict, channel.get("region"))
+    L = r.listing = parse_post(raw.text, ctx.dict, channel_region(channel))
     if L.teaser:                            # «скоро в продаже» — купить ещё нельзя, не отвлекаем людей
         r.teaser = True
         return r
@@ -268,7 +273,7 @@ async def learn_history(ctx: Ctx, channel: dict, msgs: list[tuple[int, str, floa
     for msg_id, text, at in msgs:
         if msg_id in known or not text or time.time() - at > MARKET_DAYS * DAY:
             continue
-        L = parse_post(text, ctx.dict, channel.get("region"))
+        L = parse_post(text, ctx.dict, channel_region(channel))
         if L.teaser or not (L.make and L.model and L.price) or sale_verdict(text, L) != "sale":
             continue
         fp, ckey = fingerprint(text), car_key(L)

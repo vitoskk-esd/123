@@ -29,3 +29,11 @@ class Ctx:
     async def refresh_channels(self) -> None:
         self.channels = {r["tg_id"] or VK_KEY + r["vk_id"]: dict(r) for r in await self.db.joined_channels()
                          if r["tg_id"] or r["vk_id"]}
+        await self.guess_regions()
+
+    async def guess_regions(self) -> None:
+        """Город каналов без города: по названию и нику, а нет — по истории (≥ 8 машин за 2 месяца, ≥ 60 % из одного города)."""
+        learned = await self.db.learned_regions()
+        for ch in self.channels.values():
+            ch["region_guess"] = None if ch.get("region") else (
+                self.dict.guess_region(ch.get("title"), ch.get("username")) or learned.get(ch["id"]))

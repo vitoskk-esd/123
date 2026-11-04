@@ -307,8 +307,8 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
         if not (L.make in named_makes([norm(line).split() for line in clean(text).splitlines()], d)
                 and L.year and (L.price or L.mileage)):
             L.make = L.model = None
-    regions = d.find_regions(tokens)
-    L.region = regions[0] if regions else channel_region
+    # где машина: город из текста (кроме «пригнана из Москвы», «доставка в Москву»), иначе — город канала
+    L.region = d.find_location(tokens) or channel_region
     # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)
     for clause in re.split(r"[.,;!?\n]+", clean(text)):
         L.markers += [m for m in d.find_markers(norm(clause).split()) if m not in L.markers]

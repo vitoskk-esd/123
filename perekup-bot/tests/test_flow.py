@@ -1593,3 +1593,31 @@ async def test_vk_sessions_closed(env):
     await reader.attach("good")
     await reader.close(); await asyncio.sleep(0)
     assert len(closed) == 2 and reader.runner.done()
+
+
+async def test_city_from_channel_title(env):
+    """Скрин 04.11: пост без города из «АвтоРынок ДНР» не уходит в фильтр «Москва», уходит в «Донецк»; пост без города из
+    канала без города в названии — не уходит в фильтр с городом (уходит в фильтр «вся Россия»)."""
+    dp, bot, s, ctx = env
+    DNR = -1001000000077
+    cid, _ = await ctx.db.add_channel(username="avtorynok_dnr_x", base=True)
+    await ctx.db.channel_joined(cid, DNR, "АвтоРынок ДНР", None, "main")
+    await ctx.refresh_channels()
+    await make_filter(dp, bot, "Москва до 1,5 миллиона любая марка", uid=USER)
+    await make_filter(dp, bot, "донецк до 1 млн", uid=OTHER)
+    text = "Продам! Я собственник✅\nHYUNDAI Solaris.\nГод 2012\nПробег 186000\nЦена 845 000"
+    r = await process(bot, ctx, post(DNR, text))
+    assert r.sent == [OTHER] and "📍 ДНР" in s.texts(OTHER)[-1]
+    r = await process(bot, ctx, post(CH2, "Kia Rio 2016\nПробег 120000\nЦена 790 000"))   # perekup_rf: город неизвестен
+    assert USER not in r.sent and OTHER not in r.sent
+
+
+async def test_city_learned_from_history(env):
+    """Канал без города в названии узнаёт город по своим машинам: 10 постов из Казани → посты без города считаются казанскими."""
+    dp, bot, s, ctx = env
+    for i in range(10):
+        await process(bot, ctx, post(CH2, f"Lada Vesta 20{10 + i % 9}\nЦена {500 + i * 7} 000\nКазань"))
+    await ctx.guess_regions()
+    assert next(c for c in ctx.channels.values() if c["username"] == "perekup_rf")["region_guess"] == "kzn"
+    await make_filter(dp, bot, "казань до 1 млн", uid=USER)
+    assert USER in (await process(bot, ctx, post(CH2, "Kia Rio 2016\nПробег 120000\nЦена 790 000"))).sent
