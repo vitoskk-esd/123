@@ -5,7 +5,9 @@
   "reels/perekupy/style-probe2/hf/d_tol.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/e696a460-f13f-4076-b97c-f431a7569994.png",
   "reels/perekupy/kit/img/hyundai/hyundai.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/65e1ca59-46d6-47c6-92a3-b049e9360375.png",
   "reels/perekupy/style-probe2/hf/d_ser.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/f5ab8fc6-2156-4628-8239-7acb5698d774.png",
-  "reels/perekupy/style-probe2/hf/k_a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/d7c933ba-9444-4e05-92f5-c6be73f4c172.png"
+  "reels/perekupy/style-probe2/hf/k_a.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/d7c933ba-9444-4e05-92f5-c6be73f4c172.png",
+  "reels/perekupy/style-probe2/hf/k_b.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/f6e689be-84b3-41d6-820e-20ba579a2d81.png",
+  "reels/perekupy/style-probe2/hf/k_c.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/df6a77d0-9266-4cf3-a421-aea04cf353d7.png"
  },
  "d_tol": {
   "request_id": "01a1a7f0-3c4f-7563-9d9d-5beaa0287c44",
@@ -40,6 +42,19 @@
  "v_a": {
   "request_id": "01a1a7f6-745d-70a1-bc5a-79bcb20e635a",
   "app": "kling-video/v3.0/pro/image-to-video",
-  "status": "queued"
+  "status": "completed",
+  "sec": 107
+ },
+ "v_b": {
+  "request_id": "01a1a7f8-21c7-733d-a25b-c3972a9ff5bc",
+  "app": "kling-video/v3.0/pro/image-to-video",
+  "status": "completed",
+  "sec": 91
+ },
+ "v_c": {
+  "request_id": "01a1a7f9-8b1e-7f12-b9cf-a28b089f2705",
+  "app": "kling-video/v3.0/pro/image-to-video",
+  "status": "completed",
+  "sec": 107
  }
 }
