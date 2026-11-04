@@ -1,0 +1,113 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ep23 «ПЕРВАЯ ЦЕНА»: баба Галя выставила Короллу — перекупы звонят через 8 секунд. В каждом диалоге в кадре оба собеседника.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const PK = (p, l, t, s, o, z = 4) => ch("perekup", p, l, t, s, z, o);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+// Королла бабы Гали — картинка владельца (kit/img/corolla), мордой вправо
+const COR = (l, t, w = 700, z = 3, extra = "") => `<img class="el" src="../../kit/img/corolla/corolla.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+// окно-панель с другим фоном: bx/by — какой кусок фона 1080×1920 показать
+const PANEL = (bg, l, t, w, h, bx, by, inner = "", z = 5) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;overflow:hidden;border:8px solid #151515;z-index:${z};border-radius:16px;background:#000">
+  <div style="position:absolute;left:${-bx}px;top:${-by}px;width:1080px;height:1920px">${BGS[bg].replace('id="bg"', "")}</div>${inner}</div>`;
+// телефон бабы Гали
+const PHONE = (l, t, w, inner, z = 8) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * 1.9}px;z-index:${z};background:#0d0e12;border:8px solid #151515;outline:4px solid #4a4e58;border-radius:44px;padding:18px;box-sizing:border-box">
+  <div style="width:100%;height:100%;background:#fff;border-radius:28px;overflow:hidden;font-family:Onest;color:#151515">${inner}</div></div>`;
+const AD = `<div style="padding:16px"><div style="background:#cfe3f2;border-radius:16px;height:150px;display:flex;align-items:center;justify-content:center"><img src="../../kit/img/corolla/corolla.png" style="width:92%"></div>
+  <div style="font-family:Unbounded;font-weight:900;font-size:26px;margin-top:12px">Toyota Corolla, 1997</div><div style="font-family:Unbounded;font-weight:900;font-size:34px;margin-top:4px">250 000 ₽</div>
+  <div style="font-size:19px;font-weight:700;margin-top:6px;line-height:1.3">Одна хозяйка. Ездила на дачу и в поликлинику. Гараж.</div>
+  <div style="margin-top:12px;background:#4cd964;border-radius:14px;text-align:center;font-family:Unbounded;font-weight:900;font-size:22px;padding:10px">ОПУБЛИКОВАТЬ</div></div>`;
+const CALLS = `<div style="padding:14px"><div style="font-family:Unbounded;font-weight:900;font-size:24px;color:#ff3b30">47 пропущенных</div>
+  ${["Не перекуп", "Частник Вадим", "Срочный выкуп 24/7", "Без посредников", "Сергей (не перекуп)", "Автоэксперт Женя", "Не перекуп 2"].map(n => `<div style="display:flex;justify-content:space-between;border-bottom:3px solid #e6e8ec;padding:9px 2px;font-weight:800;font-size:21px"><span>📞 ${n}</span><span style="color:#8b93a3">0:0${Math.floor(Math.random() * 9)}</span></div>`).join("")}</div>`;
+const BOT = `<div style="padding:14px;background:#e9f1fb;height:100%"><div style="font-family:Unbounded;font-weight:900;font-size:20px;color:#1d4fb8">🦊 Перехват · 3 сек назад</div>
+  <div style="margin-top:10px;background:#fff;border-radius:16px;padding:12px;border:3px solid #c9d3df"><img src="../../kit/img/corolla/corolla.png" style="width:100%">
+  <div style="font-family:Unbounded;font-weight:900;font-size:21px;margin-top:6px">Corolla 1997 · 250 000 ₽</div>
+  <div style="font-size:18px;font-weight:800;margin-top:6px;color:#2f7a2f">✅ собственник · рынок ≈ 300 000</div><div style="font-size:18px;font-weight:800;color:#ff3b30">⚡ ниже рынка на 50 000</div></div></div>`;
+const S = [
+ { h: "ПЕРВАЯ ЦЕНА", tc: "1/10 · 0:00–0:08", bg: "kitchen", y: 640,
+   els: () => clock("00:00") + ch("galya", "g", 80, 860, .95, 6) + PHONE(560, 700, 300, AD) + bub("Ну, к выходным, может,<br><em>кто и позвонит…</em>", 330, 1300)
+     + `<div class="title" style="top:690px;left:-560px;font-size:84px;color:#fff;-webkit-text-stroke:10px #151515;paint-order:stroke fill;transform:rotate(-4deg)">00:00</div>`,
+   vo: "Лис: «Баба Галя выставила Короллу девяносто седьмого года. Угадай: через сколько секунд ей позвонят? Пиши в комментах». Галя: «Ну, к выходным, может, кто и позвонит…»", who: "Лис + Галя",
+   mv: "<b>Новая локация — кухня бабы Гали:</b> ковёр, сервант с хрусталём, герань, «ЗиЛ» с магнитами. Галя жмёт «Опубликовать» — запускается <b>секундомер</b> на всю серию." },
+ { h: "ШТАБ ПЕРЕКУПОВ", tc: "2/10 · 0:08–0:16", bg: "hq", y: 520, els: () => clock("00:04")
+     + PK("x1", 600, 900, .85, { jacket: "#6b3a1f", cap: "#1d1d1f", item: "phone" }) + PK("x2", 790, 920, .8, { jacket: "#2b4c7e", hair: "#151515", beard: true, item: "phone" })
+     + ch("tolyan", "t", 150, 860, 1, 6) + lab("НОВОЕ: COROLLA · 250 000 · СОБСТВЕННИК", 60, 650, "#ff3b30", "#fff", 30, -2) + bub("Бабушкин вариант!<br><em>Все на телефоны!</em>", 470, 760),
+   vo: "Лис: «Тем временем в штабе перекупов». Толян: «Бабушкин вариант! Все на телефоны!»", who: "Лис + Толян",
+   mv: "<b>Новая локация — штаб перекупов:</b> стена мониторов с лентой объявлений, карта «зона выкупа», доска «План: звонить первым, «я не перекуп», минус 50% сразу, не моргать». Массовка «не перекупов» (новые персонажи) хватает телефоны, как на бирже." },
+ { h: "ЗВОНОК · 8 СЕКУНД", tc: "3/10 · 0:16–0:28", bg: "hq", y: 600, els: () => clock("00:08 📞")
+     + PANEL("kitchen", 20, 640, 512, 860, 40, 600, ch("galya", "g", -20, 200, .8, 6)) + PANEL("hq", 548, 640, 512, 860, 120, 600, ch("tolyan", "t", 60, 200, .85, 6))
+     + bub("Мать, ещё продаёте? Даю сто —<br><em>забираю прямо сейчас!</em>", 330, 650, 12) + bub("Так там двести<br>пятьдесят написано…", 40, 1120, 12) + lab("ЦЕНА ДЛЯ НАЛОГОВОЙ", 580, 1300, "#ffd23f", "#151515", 30, 3, 12),
+   vo: "Толян: «Мать, ещё продаёте? Даю сто — забираю прямо сейчас!» Галя: «Так там двести пятьдесят написано…» Толян: «Это цена для налоговой!»", who: "Толян + Галя",
+   mv: "<b>Новый приём — сплит-экран звонка:</b> слева Галя на кухне, справа Толян в штабе, <b>оба в кадре, оба говорят</b>. Секундомер замирает на 00:08 — звонок. Плашка «ЦЕНА ДЛЯ НАЛОГОВОЙ» хлопает на панчлайн." },
+ { h: "47 ПРОПУЩЕННЫХ", tc: "4/10 · 0:28–0:38", bg: "kitchen", y: 640, els: () => clock("01:00")
+     + ch("galya", "g", 60, 860, .95, 6) + PHONE(560, 690, 320, CALLS) + bub("Сынок, у вас там что —<br><em>слёт «не перекупов»?</em>", 220, 1300),
+   vo: "Лис: «За первую минуту — сорок семь звонков. И все — „не перекупы“». Галя (в трубку): «Сынок, у вас там что — слёт „не перекупов“?»", who: "Лис + Галя",
+   mv: "Крупно телефон: список входящих растёт сам — «Не перекуп», «Частник Вадим», «Срочный выкуп 24/7», «Сергей (не перекуп)». Счётчик пропущенных щёлкает до 47, телефон вибрирует и ползёт по столу." },
+ { h: "ОЧЕРЕДЬ ВО ДВОРЕ", tc: "5/10 · 0:38–0:50", bg: "yard", y: 700, els: () => clock("10:00")
+     + COR(560, 1250, 480, 3) + PK("y1", 40, 980, .62, { jacket: "#6b3a1f", cap: "#1d1d1f", item: "cash" }) + PK("y2", 220, 1000, .6, { jacket: "#4a6b3a", hair: "#151515", item: "flowers" })
+     + PK("y3", 380, 1010, .58, { jacket: "#2b4c7e", beard: true, cap: "#c0392b", item: "phone" }) + ch("tolyan", "t", 640, 760, .7, 6)
+     + `<div class="el" style="left:700px;top:880px;width:40px;height:620px;z-index:5;background:repeating-linear-gradient(180deg,transparent 0 50px,#8b5a2b 50px 62px);border-left:12px solid #8b5a2b;border-right:12px solid #8b5a2b"></div>`
+     + bub("Мать! Наличкой —<br><em>прямо в форточку!</em>", 330, 740),
+   vo: "Лис: «Через десять минут во дворе — очередь. Один принёс цветы, другой — лестницу». Толян (с лестницы у окна): «Мать! Наличкой — прямо в форточку!»", who: "Лис + Толян",
+   mv: "Двор хрущёвки, под окном — зелёная Королла Гали. Очередь «не перекупов»: с пачкой денег, с букетом, с телефоном. Толян влез по лестнице к окну второго этажа." },
+ { h: "МИНУС 10 МИНУТ · МАРШРУТКА", tc: "6/10 · 0:50–1:02", bg: "minibus", y: 640, els: () => clock("⏪ 00:03")
+     + ch("vika", "v", 120, 860, .95, 6) + PHONE(600, 820, 300, BOT) + bub("Остановите<br><em>у пятиэтажки!</em>", 60, 1300),
+   vo: "Лис: «Отмотаем. Ноль-ноль, ноль три. Вика едет в маршрутке — и бот присылает ей Короллу через три секунды после публикации». Вика: «Остановите у пятиэтажки!»", who: "Лис + Вика",
+   mv: "<b>Новая локация — маршрутка:</b> поручни, «Остановка по требованию», «Сдачи с 5000 нет», за окном бежит город. Перемотка назад к 00:03, пуш бота «Перехват»: «ниже рынка на 50 000»." },
+ { h: "ПОДЪЕЗД · ПЕРВАЯ У ДВЕРИ", tc: "7/10 · 1:02–1:14", bg: "stairs", y: 640, els: () => clock("09:00")
+     + ch("galya", "g", 170, 800, .95, 6) + ch("vika", "v", 640, 820, .95, 6) + bub("Я по Королле. Осмотр, договор —<br><em>и двести пятьдесят, без торга.</em>", 340, 660) + bub("Вот! <em>Культурный человек!</em>", 60, 1300),
+   vo: "Вика: «Здравствуйте! Я по Королле. Осмотр, договор — и двести пятьдесят, без торга». Галя: «Вот! Культурный человек!»", who: "Вика + Галя",
+   mv: "Подъезд, дверь квартиры Гали. Вика пришла <b>на минуту раньше очереди</b>. Галя в дверях, Вика с папкой договора. Обе в кадре. Галя снимает бигуди — гость приличный." },
+ { h: "ПРОДАНО", tc: "8/10 · 1:14–1:24", bg: "yard", y: 700, els: () => clock("15:00")
+     + COR(640, 1250, 420, 3, "filter:drop-shadow(0 0 0 #fff)") + lab("ПРОДАНО", 640, 1200, "#ff3b30", "#fff", 50, -6, 7)
+     + PK("z1", 40, 1000, .6, { jacket: "#6b3a1f", cap: "#1d1d1f", item: "cash", look: "angry" }) + PK("z2", 210, 1010, .58, { jacket: "#4a6b3a", hair: "#151515", item: "flowers", look: "o" })
+     + ch("tolyan", "t", 380, 900, .75, 6) + bub("Опять этот бот,<br><em>пииип!</em>", 520, 820) + `<div class="el" style="left:900px;top:760px;width:40px;height:740px;z-index:5;background:repeating-linear-gradient(180deg,transparent 0 50px,#8b5a2b 50px 62px);border-left:12px solid #8b5a2b;border-right:12px solid #8b5a2b"></div>`,
+   vo: "Лис: «Вика уехала на Королле. Очередь разошлась. Лестница осталась». Толян: «Опять этот бот, блин!» (запикано)", who: "Лис + Толян",
+   mv: "Королла с Викой за рулём уезжает со двора, на ней наклейка «ПРОДАНО». Очередь сдувается: букет падает, пачка денег прячется. Толян у пустой лестницы." },
+ { h: "ЧАС СПУСТЯ · СЕРЁГА", tc: "9/10 · 1:24–1:34", bg: "parking", y: 640, els: () => clock("1:00:00")
+     + PANEL("parking", 20, 640, 512, 860, 40, 600, ch("seryoga", "s", 40, 200, .8, 6)) + PANEL("kitchen", 548, 640, 512, 860, 300, 600, ch("galya", "g", 60, 200, .8, 6))
+     + bub("Здравствуйте! Королла<br><em>ещё продаётся?</em>", 40, 650, 12) + bub("Продана, милок.<br><em>Ты сорок восьмой.</em>", 560, 1240, 12),
+   vo: "Серёга: «Здравствуйте! Королла ещё продаётся?» Галя: «Продана, милок. Ты сорок восьмой».", who: "Серёга + Галя",
+   mv: "Сплит-экран звонка: Серёга с телефоном на парковке, Галя на кухне пьёт чай с тортиком от Вики. <b>Оба в кадре.</b> Секундомер — 1:00:00. Плашка «№ 48»." },
+ { h: "МОРАЛЬ", tc: "10/10 · 1:34–1:46", bg: "kitchen", y: 640,
+   els: () => `<div class="el" style="left:60px;top:700px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:26px 30px;color:#fff;font-family:Unbounded;font-weight:900;font-size:33px;line-height:1.4">ХОРОШАЯ МАШИНА ЖИВЁТ МИНУТЫ:<br><span style="color:#ffd23f">⏱ перекупы звонят через 8 секунд<br>💰 первая цена — от собственника<br>📄 смотри, сравни с рынком — и звони</span></div>`
+     + FOX(200, 1170, 250),
+   vo: "Лис: «Хорошая машина от собственника живёт минуты. Перекупы звонят через восемь секунд. Успей раньше: свежие объявления с оценкой рынка — в боте Перехват. Сохрани — и пусть сорок восьмым будет кто-то другой».", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист, лиса с аватарки. ~1:45." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+document.getElementById("t") && mouth("t", "talk"); document.getElementById("g") && mouth("g", "talk"); document.getElementById("v") && mouth("v", "talk"); document.getElementById("s") && mouth("s", "talk");
+window.READY = true;
+</script></body></html>
