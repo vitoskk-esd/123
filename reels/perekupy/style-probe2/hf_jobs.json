@@ -1,0 +1,33 @@
+{
+ "_": "Проба 2 (владелец 04.11): манера как в рилсе ANNA AI CREATOR «Правда о Буратино» — мультфильм 90-х с живым движением. 10 с хука ep24, днём, без неона. Герои — наши (chars.js), машина — Hyundai владельца.",
+ "style": "1990s TV cartoon look, classic cel animation style: thick clean black ink outlines, flat saturated colors with simple two-tone cel shading, expressive slightly grotesque characters with big readable faces, richly detailed but flat-painted backgrounds, natural warm afternoon daylight, soft blue sky. Adult comedy series about Russian used-car flippers, consistent character designs and one color palette across all frames. Vertical 9:16. No neon, no text, no letters, no numbers, no logos, no watermarks.",
+ "style_vertical": "",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "clip_app": "kling-video/v3.0/pro/image-to-video",
+ "designs": [
+  {"id": "d_tol", "refs": ["reels/perekupy/style-probe2/ref/tolyan.png"],
+   "prompt": "Redraw this exact character in the series style as a full-body character design, standing, plain light background: Tolyan, a cocky Russian used-car flipper in his 30s — buzz cut, stubble, black sunglasses, black leather jacket over a white t-shirt, thick gold chain with a round gold pendant, one gold tooth in a smug grin, dark tracksuit pants with white side stripes, white sneakers, a brown leather man-bag in one hand, car keys in the other. Keep his outfit and colors from the reference."},
+  {"id": "d_ser", "refs": ["reels/perekupy/style-probe2/ref/seryoga.png"],
+   "prompt": "Redraw this exact character in the series style as a full-body character design, standing, plain light background: Seryoga, a naive kind Russian guy in his early 20s — messy brown hair, big round honest eyes, open hopeful face, teal hoodie with a front pocket, blue jeans, orange sneakers. Keep his outfit and colors from the reference."}
+ ],
+ "brand": [],
+ "images": [
+  {"id": "k_a", "refs": ["reels/perekupy/style-probe2/hf/d_tol.png", "reels/perekupy/kit/img/hyundai/hyundai.png"],
+   "prompt": "Outdoor used-car market in a Russian town on a sunny afternoon: rows of old cars with price cards behind glass, a small kiosk, panel apartment blocks and birch trees in the background, cracked asphalt. Medium shot: Tolyan from the first reference stands next to the white sedan from the second reference (keep its shape and white color), one hand resting on the car roof, smug grin with a gold tooth, looking at the viewer. The car and Tolyan are fully inside the frame, Tolyan from the knees up in the lower two thirds."},
+  {"id": "k_b", "refs": ["reels/perekupy/style-probe2/hf/d_tol.png", "reels/perekupy/style-probe2/hf/d_ser.png", "reels/perekupy/kit/img/hyundai/hyundai.png"],
+   "prompt": "Same sunny outdoor used-car market. Wide shot, the whole white sedan from the third reference in side view in the middle of the frame with free space around it. Tolyan from the first reference stands at the front of the car proudly, arms crossed; Seryoga from the second reference stands at the rear of the car, leaning slightly towards the side window with naive curiosity. Both full body, feet on the asphalt, characters and car in the lower half of the frame."},
+  {"id": "k_c", "refs": ["reels/perekupy/style-probe2/hf/d_ser.png"],
+   "prompt": "Same sunny outdoor used-car market, soft background with old cars. Close-up of Seryoga from the reference, head and shoulders, looking at the viewer with a naive happy smile, eyebrows slightly raised, the edge of the white car roof in the corner of the frame."}
+ ],
+ "clips": [
+  {"id": "v_a", "from": "k_a", "duration": 5,
+   "prompt": "Tolyan talks to the viewer with a smug grin, his mouth moving as he speaks; he pats the car roof twice with his palm, then gestures towards the car with the open hand. Light breeze in the birch leaves. Static camera.",
+   "beats": ["Tolyan talks to the viewer and pats the car roof with his palm"]},
+  {"id": "v_b", "from": "k_b", "duration": 5,
+   "prompt": "Seryoga bends down and peers through the side window of the white car with naive curiosity, Tolyan stands proudly with arms crossed and nods. Slow gentle camera push in.",
+   "beats": ["Seryoga bends down and peers through the side window"]},
+  {"id": "v_c", "from": "k_c", "duration": 5,
+   "prompt": "Seryoga looks at the viewer with a naive smile, then slowly raises his eyebrows in doubt and tilts his head. Static camera.",
+   "beats": ["Seryoga slowly raises his eyebrows in doubt and tilts his head"]}
+ ]
+}
