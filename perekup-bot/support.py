@@ -7,15 +7,30 @@ import logging
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.filters import Command, CommandObject
 from aiogram.types import CallbackQuery, Message
+import re
 
 import keyboards as K
 import texts as T
-from admin import admin_ids
+from admin import admin_ids, is_admin
 from ctx import Ctx
 
 log = logging.getLogger(__name__)
 router = Router(name="support")
+
+
+async def support_username(ctx: Ctx) -> str:
+    """Кому писать в поддержку: /support в боте → SUPPORT_USERNAME в переменных → служебный аккаунт (его @ бот узнаёт сам). Пусто — поддержка внутри бота."""
+    name = await ctx.db.get_setting("support_username")
+    if name == "-":                      # /support off — вернуть переписку через бота
+        return ""
+    return name or ctx.cfg.support_username or await ctx.db.get_setting("reader_username") or ""
+
+
+async def support_url(ctx: Ctx) -> str | None:
+    name = await support_username(ctx)
+    return f"https://t.me/{name}" if name else None
 
 
 class Sup(StatesGroup):
@@ -29,8 +44,30 @@ async def ask_idea(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = 
     await msg.answer(T.IDEA_ASK, reply_markup=K.support_cancel())
 
 
+@router.message(Command("support"))
+async def set_support(msg: Message, ctx: Ctx, command: CommandObject) -> None:
+    """Админ: /support @аккаунт — кнопка поддержки ведёт в личку этого аккаунта; /support off — переписка через бота; без слов — что сейчас."""
+    if not await is_admin(msg, ctx):
+        return
+    arg = (command.args or "").strip()
+    if not arg:
+        name = await support_username(ctx)
+        return await msg.answer(T.SUPPORT_NOW.format(now=f"личный чат с @{name}" if name else "переписку через бота"))
+    if arg.lower() in ("off", "выкл", "бот", "-"):
+        await ctx.db.set_setting("support_username", "-")
+        return await msg.answer(T.SUPPORT_OFF)
+    name = re.sub(r"^(https?://)?(t\.me/|telegram\.me/)?@?", "", arg).split("?")[0].strip("/")
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{3,31}", name):
+        return await msg.answer(T.SUPPORT_BAD)
+    await ctx.db.set_setting("support_username", name)
+    await msg.answer(T.SUPPORT_SET.format(name=name))
+
+
 @router.callback_query(F.data == "sup")
-async def ask(cb: CallbackQuery, state: FSMContext) -> None:
+async def ask(cb: CallbackQuery, state: FSMContext, ctx: Ctx) -> None:
+    if url := await support_url(ctx):     # старые кнопки в чатах: тоже отправляем в личку аккаунта поддержки
+        await cb.message.answer(T.SUPPORT_LINK, reply_markup=K.support_link(url))
+        return await cb.answer()
     await state.set_state(Sup.message)
     await cb.message.answer(T.SUPPORT_ASK, reply_markup=K.support_cancel())
     await cb.answer()

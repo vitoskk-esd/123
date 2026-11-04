@@ -613,6 +613,40 @@ async def test_support_chat_in_bot(env):
     assert "Похоже на фильтр" in s.texts(USER)[-1]
 
 
+async def test_support_link_to_work_account(env):
+    """Аккаунт поддержки задан (/support @…) — «Написать в поддержку» открывает личный чат с ним; /support off — снова через бота."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", uid=ADMIN))
+    await dp.feed_update(bot, msg("/support @Perekhvat_Help", uid=ADMIN))
+    assert "@Perekhvat_Help" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, msg("❓ Помощь"))
+    help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    btn = help_msg.reply_markup.inline_keyboard[0][0]
+    assert btn.url == "https://t.me/Perekhvat_Help" and not btn.callback_data
+    await dp.feed_update(bot, cb("sup"))                                   # старая кнопка в чате — тоже ссылка, а не переписка
+    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert last.reply_markup.inline_keyboard[0][0].url == "https://t.me/Perekhvat_Help"
+    await dp.feed_update(bot, msg("/support нет такого!", uid=ADMIN))
+    assert "Не похоже" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, msg("/support off", uid=ADMIN))
+    await dp.feed_update(bot, msg("❓ Помощь"))
+    help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert help_msg.reply_markup.inline_keyboard[0][0].callback_data == "sup"
+    await dp.feed_update(bot, msg("/support @Perekhvat_Help", uid=USER))      # не админ — ничего не меняет
+    assert await ctx.db.get_setting("support_username") == "-"
+
+
+async def test_support_falls_back_to_reader_account(env):
+    """Аккаунт не задан — кнопка ведёт к служебному аккаунту (его @ бот запомнил при подключении)."""
+    dp, bot, s, ctx = env
+    await ctx.db.set_setting("reader_username", "perekhvat_reader")
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, msg("❓ Помощь"))
+    help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert help_msg.reply_markup.inline_keyboard[0][0].url == "https://t.me/perekhvat_reader"
+
+
 async def test_accidents_on_card_and_filter(env):
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "камри до 1 млн")

@@ -60,8 +60,14 @@ def filter_saved(fid: int) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_EDIT_FILTER, callback_data=f"f:e:{fid}")])
 
 
-def help_menu() -> InlineKeyboardMarkup:
-    return kb([B(text=T.BTN_SUPPORT, callback_data="sup")], [B(text=T.BTN_OFFER, callback_data="offer")])
+def help_menu(support_url: str | None = None) -> InlineKeyboardMarkup:
+    """«Написать в поддержку»: есть аккаунт поддержки — ссылка в личный чат с ним, нет — переписка через бота (как раньше)."""
+    sup = B(text=T.BTN_SUPPORT, url=support_url) if support_url else B(text=T.BTN_SUPPORT, callback_data="sup")
+    return kb([sup], [B(text=T.BTN_OFFER, callback_data="offer")])
+
+
+def support_link(url: str) -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_SUPPORT_OPEN, url=url)])
 
 
 def support_cancel() -> InlineKeyboardMarkup:

@@ -42,6 +42,7 @@ class Config:
     seller_name: str = ""            # реквизиты самозанятого для оферты (/offer) — их проверяет Робокасса
     seller_inn: str = ""
     seller_contact: str = ""         # email или телефон для клиентов
+    support_username: str = ""       # аккаунт поддержки: кнопка «Написать в поддержку» открывает личный чат с ним (можно задать /support в боте)
     join_interval: int = 90          # пауза между вступлениями в каналы, сек — чтобы Telegram не заблокировал аккаунт
     poll_rps: float = 3.0            # сколько каналов в секунду опрашиваем сами (Telegram присылает посты больших каналов с опозданием)
     ai_key: str = ""                 # ключ Gemini (aistudio.google.com) — ИИ перепроверяет каждый подходящий пост
@@ -87,6 +88,7 @@ def get_config() -> Config:
         seller_name=e("SELLER_NAME", ""),
         seller_inn=e("SELLER_INN", ""),
         seller_contact=e("SELLER_CONTACT", ""),
+        support_username=e("SUPPORT_USERNAME", "").strip().lstrip("@"),
         poll_rps=float(e("POLL_RPS", "3")),
         ai_key=e("GEMINI_API_KEY", ""),
         ai_model=e("GEMINI_MODEL", "gemini-3.1-flash-lite"),

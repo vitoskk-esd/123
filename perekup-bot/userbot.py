@@ -94,6 +94,11 @@ class Reader:
             self.runner.cancel()
         self.client = client
         await self.ctx.db.set_setting("session", client.session.save())
+        try:                                    # @ служебного аккаунта — запасной адрес для «Написать в поддержку»
+            me = await client.get_me()
+            await self.ctx.db.set_setting("reader_username", getattr(me, "username", None) or "")
+        except Exception as e:
+            log.warning("не узнал @ служебного аккаунта: %s", e)
         client.add_event_handler(self._on_message, events.NewMessage())
         client.add_event_handler(self._on_edit, events.MessageEdited())
         await self.ensure_buffer()
