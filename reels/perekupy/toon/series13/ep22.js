@@ -113,7 +113,7 @@ window.build = R => {
 
   // 1. перекрёсток: камера мечется между Камри, «=» между номерами
   tl.fromTo(cam, { x: 120, s: 1.08 }, { x: -120, s: 1.08, duration: .9, ease: "power2.inOut", yoyo: true, repeat: 3, immediateRender: false }, .3).set(cam, { x: 0, s: 1 }, W("h", "вопрос") - .1);
-  slam("#eq", W("h", "один"), "pop");
+  slam("#eq", W("h", "номер"), "pop");
   tl.to("#title", { opacity: 0, y: -50, duration: .25 }, W("h", "за") - .1);
   R.punch(cam, W("h", "какой"), .1); R.sfx("boom", W("h", "какой"), .7);
   // 2. паркинг: перемотка VHS, продажа
@@ -171,6 +171,6 @@ window.build = R => {
   // 10. мораль
   swap("tow", "moral", st.rule - .7);
   tl.fromTo("#moralCard", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: .4, ease: "expo.out", immediateRender: false }, st.rule - .4);
-  [W("rule", "кузов"), W("rule", "шрифт"), W("rule", "розыск"), W("rule", "свеж") - .2].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
+  [W("rule", "кузов"), W("rule", "шрифт"), W("rule", "розыск"), W("rule", "свеж", 1) - .2].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
   ending(R, st.end - .15);
 };
