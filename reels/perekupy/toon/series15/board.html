@@ -1,0 +1,101 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ep24 «ТАКСИ ПОД ПРИКРЫТИЕМ»: «одна хозяйка, ездила в поликлинику» — а это такси с пробегом 600 тысяч. В каждом диалоге в кадре оба собеседника.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const PK = (p, l, t, s, o, z = 4) => ch("perekup", p, l, t, s, z, o);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+// Hyundai владельца (kit/img/hyundai): белый — «одна хозяйка», жёлтый — он же в такси (recolor.py). Мордой влево.
+const CAR = (l, t, w = 700, z = 3, taxi = false, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * .316}px;z-index:${z};${extra}">
+  <img src="../../kit/img/hyundai/hyundai${taxi ? "_taxi" : ""}.png" style="width:100%;display:block">
+  ${taxi ? `<div style="position:absolute;left:46%;top:${-w * .05}px;width:${w * .13}px;height:${w * .045}px;background:repeating-linear-gradient(90deg,#151515 0 ${w * .0217}px,#fff ${w * .0217}px ${w * .0434}px);border:4px solid #151515;border-radius:6px"></div>`
+    : `<div style="position:absolute;left:47%;top:${w * .006}px;width:${w * .012}px;height:${w * .012}px;border-radius:50%;background:#151515"></div><div style="position:absolute;left:57%;top:${w * .006}px;width:${w * .012}px;height:${w * .012}px;border-radius:50%;background:#151515"></div>`}</div>`;
+// круглая вставка-лупа
+const ZOOM = (html, l, t, d = 300, cap = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${d}px;height:${d}px;z-index:10;border-radius:50%;border:10px solid #151515;outline:6px solid #ffd23f;overflow:hidden;background:#fff">${html}</div>`
+  + (cap ? lab(cap, l - 20, t + d - 30, "#ffd23f", "#151515", 26, -3, 11) : "");
+const WHEEL = `<svg viewBox="0 0 300 300"><rect width="300" height="300" fill="#2a2d34"/><circle cx="150" cy="160" r="110" fill="none" stroke="#151515" stroke-width="40"/>
+  <circle cx="150" cy="160" r="110" fill="none" stroke="#5a5f6a" stroke-width="28"/><path d="M95 95 a80 80 0 0 1 110 0" stroke="#fff" stroke-width="12" fill="none" opacity=".9"/>
+  <path d="M60 170 a95 95 0 0 0 40 70" stroke="#fff" stroke-width="10" fill="none" opacity=".8"/><circle cx="150" cy="160" r="38" fill="#151515"/><path d="M150 160 L60 175 M150 160 L240 175 M150 160 L150 260" stroke="#151515" stroke-width="26"/>
+  <text x="150" y="40" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="26" fill="#ffd23f">✨ ✨ ✨</text></svg>`;
+const ROOF = `<svg viewBox="0 0 300 300"><rect width="300" height="300" fill="#bfe3ff"/><path d="M-10 150 q160 -70 320 0 v160 h-320 z" fill="#f4f6f8" stroke="#151515" stroke-width="8"/>
+  <circle cx="105" cy="140" r="20" fill="#151515"/><circle cx="195" cy="140" r="20" fill="#151515"/><circle cx="105" cy="140" r="30" fill="none" stroke="#c9ced6" stroke-width="5"/><circle cx="195" cy="140" r="30" fill="none" stroke="#c9ced6" stroke-width="5"/></svg>`;
+const SEAL = `<svg viewBox="0 0 300 300"><rect width="300" height="300" fill="#f4f6f8"/><path d="M0 120 h300 v40 h-300 z" fill="#151515"/><path d="M20 160 q60 30 130 0 q70 -26 140 6 v30 h-270 z" fill="#f5c400" stroke="#151515" stroke-width="5"/>
+  <path d="M120 110 q30 -60 60 -10" stroke="#151515" stroke-width="8" fill="none"/></svg>`;
+const ODO = (v, l, t, c = "#ffd23f", fs = 54) => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:'JetBrains Mono';font-weight:800;font-size:${fs}px;color:${c};background:#111;border:6px solid #151515;outline:4px solid #555;border-radius:12px;padding:6px 20px">${v}</div>`;
+const S = [
+ { h: "ТАКСИ ПОД ПРИКРЫТИЕМ", tc: "1/8 · 0:00–0:10", bg: "market", y: 640,
+   els: () => CAR(230, 1150, 620, 3) + ch("tolyan", "t", 10, 800, .9, 6) + ch("seryoga", "s", 760, 840, .8, 6) + ODO("ПРОБЕГ 40 000", 330, 1080, "#4cd964", 36)
+     + bub("Одна хозяйка! Ездила<br><em>в поликлинику и обратно!</em>", 260, 680),
+   vo: "Толян: «Одна хозяйка! Ездила в поликлинику и обратно!» Лис: «Пробег — сорок тысяч. Угадай, сколько на самом деле? Пиши в комментах».", who: "Толян + Лис",
+   mv: "Авторынок. Белый Hyundai, на лобовом «ПРОБЕГ 40 000». Толян в очках, Серёга верит. Хук — вопрос зрителю про реальный пробег." },
+ { h: "ОСМОТР", tc: "2/8 · 0:10–0:24", bg: "market", y: 640,
+   els: () => CAR(230, 1150, 620, 3) + ch("tolyan", "t", 10, 800, .9, 6) + ch("seryoga", "s", 760, 840, .8, 6)
+     + ZOOM(WHEEL, 300, 900, 240, "РУЛЬ КАК ЗЕРКАЛО") + ZOOM(ROOF, 560, 1040, 200, "ДЫРКИ НА КРЫШЕ") + bub("А почему руль<br><em>блестит, как лысина?</em>", 470, 670) + bub("Хозяйка руль любила.<br><em>Полировала!</em>", 20, 1300),
+   vo: "Серёга: «А почему руль блестит, как лысина?» Толян: «Хозяйка руль любила. Полировала!» Серёга: «А дырки на крыше?» Толян: «Антенна! Бабушка радио слушала!»", who: "Серёга + Толян",
+   mv: "Круглые вставки-«лупы» по ходу диалога: сначала стёртый до блеска руль, потом <b>две дырки на крыше</b> (от крепления шашки). Оба в кадре, отвечают друг другу." },
+ { h: "ТРИ ГОДА НАЗАД · ТАКСОПАРК", tc: "3/8 · 0:24–0:36", bg: "taxipark", y: 600, els: () => clock("⏪ 3 ГОДА")
+     + CAR(200, 1200, 680, 6, true) + ODO("612 000 КМ", 300, 1080, "#ff3b30", 46) + lab("★ 4.97 · 18 432 ПОЕЗДКИ", 560, 1000, "#f5c400", "#151515", 30, 3),
+   vo: "Лис: «Отмотаем на три года. „Одна хозяйка“ — это таксопарк. А „поликлиника“ — восемнадцать тысяч заказов».", who: "Лис",
+   mv: "<b>Новая локация — таксопарк ночью:</b> ангар, вывеска «ТАКСОПАРК» в шашечку, табло «СМЕНА 24/7 · ЗАКАЗОВ 18 432», диспетчерская. Тот же Hyundai — <b>жёлтый, с шашкой</b>. Счётчик пробега крутится до 612 000." },
+ { h: "ПОКРАСКА", tc: "4/8 · 0:36–0:46", bg: "paintbooth", y: 600, els: () => clock("⏪ МЕСЯЦ НАЗАД")
+     + CAR(170, 1200, 680, 4, true) + CAR(170, 1200, 680, 5, false, "clip-path:inset(0 0 0 52%)") + PK("x1", 820, 860, .75, { jacket: "#f4f6f8", cap: "#2e86de", item: "" }, 6)
+     + ODO("612 000 → 40 000", 120, 960, "#ffd23f", 40) + lab("ШАШКА — В ГАРАЖ", 560, 1100, "#151515", "#ffd23f", 30, 4),
+   vo: "Лис: «Потом жёлтое стало белым, шашка уехала в гараж, а шестьсот тысяч пробега — в сорок».", who: "Лис",
+   mv: "<b>Новая локация — покрасочная камера:</b> белые стены в жёлтых брызгах, плёнка, краскопульты. Маляр (массовка) проходит краскопультом — машина становится белой полосой за полосой. Цифры пробега «скручиваются» вниз." },
+ { h: "СТО У МИХАЛЫЧА", tc: "5/8 · 0:46–1:02", bg: "sto", y: 640,
+   els: () => CAR(240, 1220, 600, 3) + ch("mihalych", "m", 10, 820, .9, 6) + ch("seryoga", "s", 780, 860, .8, 6) + ZOOM(SEAL, 400, 760, 240, "ЖЁЛТОЕ ПОД УПЛОТНИТЕЛЕМ")
+     + bub("Это такси, сынок.<br><em>Тысяч шестьсот.</em>", 300, 660),
+   vo: "Михалыч: «Под уплотнителем — жёлтая краска. Водительское сиденье — до дыр. Это такси, сынок. Тысяч шестьсот». Серёга: «А как же поликлиника?» Михалыч: «Возила. Всех подряд».", who: "Михалыч + Серёга",
+   mv: "СТО «У Михалыча». Михалыч отгибает резинку двери — под белым жёлтое. Вставки-лупы: краска, протёртое сиденье. Оба в кадре, Михалыч отвечает Серёге." },
+ { h: "РАЗБОРКИ", tc: "6/8 · 1:02–1:10", bg: "market", y: 640,
+   els: () => CAR(230, 1150, 620, 3) + ch("seryoga", "s", 20, 820, .85, 6) + ch("tolyan", "t", 700, 800, .9, 6)
+     + bub("Толян, <em>это же такси!</em>", 30, 680) + bub("Брат, зато опытная!<br><em>Дорогу сама знает!</em>", 420, 1290),
+   vo: "Серёга: «Толян, это же такси!» Толян: «Брат, зато опытная! Дорогу сама знает!»", who: "Серёга + Толян",
+   mv: "Снова авторынок. Серёга с распечаткой из реестра такси, Толян не моргает. Над машиной появляется призрачная шашка." },
+ { h: "ПОЛИКЛИНИКА № 3", tc: "7/8 · 1:10–1:22", bg: "clinic", y: 680,
+   els: () => CAR(40, 1180, 560, 3) + ch("seryoga", "s", 470, 860, .8, 6) + ch("galya", "g", 760, 840, .8, 6)
+     + bub("Это ж моя ласточка!<br><em>Три года меня в поликлинику возила!</em>", 120, 700),
+   vo: "Галя: «Это ж моя ласточка! Три года меня в поликлинику возила!» Серёга: «Так вот кто „одна хозяйка“…» Лис: «Объявление не врало. Одна хозяйка действительно ездила в поликлинику. На заднем сиденье».", who: "Галя + Серёга + Лис",
+   mv: "<b>Новая локация — улица у поликлиники № 3</b> с остановкой («№ 12 — когда-нибудь»). Серёга остановился, баба Галя с остановки узнаёт машину по дыркам на крыше. Оба в кадре. Панчлайн Лиса." },
+ { h: "МОРАЛЬ", tc: "8/8 · 1:22–1:36", bg: "sto", y: 640,
+   els: () => `<div class="el" style="left:50px;top:700px;right:50px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:24px 28px;color:#fff;font-family:Unbounded;font-weight:900;font-size:30px;line-height:1.4">БЫВШЕЕ ТАКСИ ВИДНО:<br><span style="color:#ffd23f">🔩 следы крепления шашки на крыше<br>🎯 стёртый руль и сиденье при «малом» пробеге<br>🟡 чужая краска под уплотнителями<br>📋 номер — в реестр такси, в ПТС — не юрлицо ли</span></div>`
+     + FOX(400, 1220, 220),
+   vo: "Лис: «Бывшее такси выдают следы на крыше, стёртый руль и сиденье, краска под уплотнителями. Номер пробей в реестре такси, а в ПТС посмотри, не было ли собственником юрлицо. Свежие объявления раньше перекупов — в боте Перехват. Сохрани — пока тебе не продали такси под прикрытием».", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист, лиса с аватарки. ~1:35." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "g", "v", "s", "m"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>

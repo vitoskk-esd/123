@@ -1,0 +1,28 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="clSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fc3ee"/><stop offset="1" stop-color="#e3f1fb"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#clSky)"/>
+    <ellipse cx="220" cy="180" rx="110" ry="34" fill="#fff"/><ellipse cx="820" cy="140" rx="130" ry="38" fill="#fff"/>
+    <!-- здание поликлиники -->
+    <rect x="160" y="300" width="760" height="780" fill="#f2efe6" stroke="#000" stroke-width="8"/>
+    <rect x="200" y="320" width="680" height="90" rx="10" fill="#1d6fa5" stroke="#000" stroke-width="6"/>
+    <text x="540" y="360" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="30" fill="#fff">ГОРОДСКАЯ ПОЛИКЛИНИКА</text>
+    <text x="540" y="398" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="30" fill="#ffd23f">№ 3</text>
+    <rect x="200" y="440" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="200" y="600" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="340" y="440" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="340" y="600" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="480" y="440" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="480" y="600" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="620" y="440" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="620" y="600" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="760" y="440" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/><rect x="760" y="600" width="90" height="100" fill="#bfe3ff" stroke="#000" stroke-width="5"/>
+    <g><rect x="460" y="800" width="160" height="280" fill="#cfe3f2" stroke="#000" stroke-width="7"/><path d="M540 800 V1080" stroke="#000" stroke-width="5"/>
+      <rect x="500" y="740" width="80" height="50" fill="#fff" stroke="#000" stroke-width="5"/><path d="M540 748 v34 M523 765 h34" stroke="#e53935" stroke-width="10"/></g>
+    <text x="300" y="900" text-anchor="middle" font-family="Onest" font-weight="800" font-size="24" fill="#6b7280">Приём с 8:00</text>
+    <g><rect x="76" y="860" width="28" height="220" fill="#7a4a24" stroke="#000" stroke-width="5"/><circle cx="90" cy="820" r="90" fill="#7fae52" stroke="#000" stroke-width="6"/><circle cx="40" cy="870" r="60" fill="#8fbe60" stroke="#000" stroke-width="5"/></g><g><rect x="986" y="860" width="28" height="220" fill="#7a4a24" stroke="#000" stroke-width="5"/><circle cx="1000" cy="820" r="90" fill="#7fae52" stroke="#000" stroke-width="6"/><circle cx="950" cy="870" r="60" fill="#8fbe60" stroke="#000" stroke-width="5"/></g>
+    <!-- тротуар и дорога -->
+    <rect y="1080" width="1080" height="160" fill="#b8bec7"/><path d="M0 1080 H1080 M0 1240 H1080" stroke="#000" stroke-width="6"/>
+    <rect y="1240" width="1080" height="680" fill="#5b616b"/>
+    <g fill="#fff"><rect x="20" y="1560" width="110" height="16" rx="4"/><rect x="210" y="1560" width="110" height="16" rx="4"/><rect x="400" y="1560" width="110" height="16" rx="4"/><rect x="590" y="1560" width="110" height="16" rx="4"/><rect x="780" y="1560" width="110" height="16" rx="4"/><rect x="970" y="1560" width="110" height="16" rx="4"/></g>
+    <!-- остановка -->
+    <g><path d="M640 900 h400 v20 h-400 z" fill="#2e86de" stroke="#000" stroke-width="6"/><path d="M660 920 V1150 M1020 920 V1150" stroke="#3a3d46" stroke-width="14"/>
+      <rect x="680" y="930" width="320" height="150" fill="#cfe8f5" opacity=".6" stroke="#000" stroke-width="5"/>
+      <rect x="700" y="1110" width="280" height="22" fill="#7a4a24" stroke="#000" stroke-width="5"/>
+      <rect x="560" y="850" width="60" height="60" rx="8" fill="#ffd23f" stroke="#000" stroke-width="5"/><text x="590" y="892" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="34">А</text>
+      <path d="M590 910 V1150" stroke="#3a3d46" stroke-width="10"/>
+      <rect x="720" y="950" width="120" height="90" fill="#fff" stroke="#000" stroke-width="4"/>
+      <text x="780" y="980" text-anchor="middle" font-family="Onest" font-weight="800" font-size="16">Расписание</text>
+      <text x="780" y="1008" text-anchor="middle" font-family="Onest" font-weight="700" font-size="14">№ 12 — когда-нибудь</text></g>
+  </svg>
