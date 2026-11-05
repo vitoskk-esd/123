@@ -23,7 +23,7 @@ html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden
 <div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
 <script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
 <script>
-// ep25 «ТЕСТ-ДРАЙВ»: перекупа развели — «покупатель» уехал на тест-драйв с Камри Толяна. В каждом диалоге в кадре оба собеседника.
+// ep25 «ТЕСТ-ДРАЙВ»: перекупа развели — «покупатель» уехал на тест-драйв на Гелике Толяна. В каждом диалоге в кадре оба собеседника.
 const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
 const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
 const ARK = { coat: "#c69c6d", jacket: "#c69c6d", glasses: true, mustache: true, hair: "#2b1d14", tie: "#8e1b1b" };
@@ -33,16 +33,16 @@ const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div cla
 const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
 let CLK = ""; const clock = (t) => (CLK = t, "");
 const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
-// белая Камри владельца — «оригинал для души» из 22-й серии
-const CAM = (l, t, w = 700, z = 3, extra = "") => `<img class="el" src="../../kit/img/camry/camry.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+// Гелик владельца (kit/img/gelik: gelik_34 — 3/4 спереди, gelik_side — сбоку мордой вправо). l,t,w — как у прежней Камри: низ колёс там же
+const CAM = (l, t, w = 700, z = 3, extra = "") => `<img class="el" src="../../kit/img/gelik/gelik_34.png" style="left:${l - w * .08}px;top:${t + w * .476 - w * 1.16 * .69}px;width:${w * 1.16}px;z-index:${z};${extra}">`;
 const PANEL = (bg, l, t, w, h, bx, by, inner = "", z = 5) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;overflow:hidden;border:8px solid #151515;z-index:${z};border-radius:16px;background:#000">
   <div style="position:absolute;left:${-bx}px;top:${-by}px;width:1080px;height:1920px">${BGS[bg].replace('id="bg"', "")}</div>${inner}</div>`;
 const PHONE = (l, t, w, inner, z = 8) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * 1.9}px;z-index:${z};background:#0d0e12;border:8px solid #151515;outline:4px solid #4a4e58;border-radius:44px;padding:18px;box-sizing:border-box">
   <div style="width:100%;height:100%;background:#e9f1fb;border-radius:28px;overflow:hidden;font-family:Onest;color:#151515;padding:14px;box-sizing:border-box">${inner}</div></div>`;
 const BOT = `<div style="font-family:Unbounded;font-weight:900;font-size:19px;color:#1d4fb8">🦊 Перехват · 2 сек назад</div>
-  <div style="margin-top:10px;background:#fff;border-radius:16px;padding:12px;border:3px solid #c9d3df"><img src="../../kit/img/camry/camry.png" style="width:100%">
-  <div style="font-family:Unbounded;font-weight:900;font-size:20px;margin-top:6px">Toyota Camry 2014 · 1 190 000 ₽</div>
-  <div style="font-size:17px;font-weight:800;margin-top:6px;color:#ff3b30">⚡ ниже рынка на 400 000</div><div style="font-size:16px;font-weight:700;margin-top:4px">«Одна хозяйка. Срочно. Торг.»</div></div>`;
+  <div style="margin-top:10px;background:#fff;border-radius:16px;padding:12px;border:3px solid #c9d3df"><img src="../../kit/img/gelik/gelik_34.png" style="width:100%">
+  <div style="font-family:Unbounded;font-weight:900;font-size:20px;margin-top:6px">Mercedes G 63 · 9 900 000 ₽</div>
+  <div style="font-size:17px;font-weight:800;margin-top:6px;color:#ff3b30">⚡ ниже рынка на 4 млн</div><div style="font-size:16px;font-weight:700;margin-top:4px">«Одна хозяйка. Срочно. Торг.»</div></div>`;
 const DOLL = el(`<svg viewBox="0 0 400 260"><rect x="10" y="40" width="380" height="210" rx="20" fill="#1f2a44" stroke="#151515" stroke-width="8"/><path d="M10 90 h380" stroke="#3b4a6b" stroke-width="6"/>
   <rect x="60" y="20" width="280" height="110" rx="6" fill="#f4e7c3" stroke="#151515" stroke-width="6"/><g stroke="#9a8a6a" stroke-width="4">${[40, 56, 72, 88, 104].map(y => `<path d="M80 ${y} h240"/>`).join("")}</g>
   <rect x="60" y="6" width="280" height="30" rx="6" fill="#e07a5f" stroke="#151515" stroke-width="6"/><text x="200" y="28" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="20" fill="#fff">5000</text></svg>`, 590, 880, 340, 221, 9);
@@ -51,12 +51,12 @@ const S = [
    els: () => CAM(260, 1130, 560, 3) + ch("tolyan", "t", 10, 800, .9, 6) + PK("a", 760, 800, .85, ARK, 6)
      + bub("Беру не глядя. Только дай<br><em>прокатиться — пять минут.</em>", 260, 660) + bub("Для хорошего человека —<br><em>хоть десять!</em>", 20, 1310),
    vo: "Аркадий: «Беру не глядя. Только дай прокатиться — пять минут». Толян: «Для хорошего человека — хоть десять!» Лис: «Перекупа развести невозможно. Так думал Толян».", who: "Аркадий + Толян + Лис",
-   mv: "<b>Новая локация — улица у шаурмичной «24»</b>, лавочка, парковка. Толян продаёт ту самую белую Камри — «оригинал для души» из 22-й серии. <b>Новый герой — Аркадий:</b> пальто, очки, усы, галстук. Толян отдаёт ключи." },
+   mv: "<b>Новая локация — улица у шаурмичной «24»</b>, лавочка, парковка. Толян продаёт свой Гелик — G 63 с красными дисками, гордость района. <b>Новый герой — Аркадий:</b> пальто, очки, усы, галстук. Толян отдаёт ключи." },
  { h: "ЗАЛОГ", tc: "2/7 · 0:14–0:26", bg: "street", y: 640, els: () => clock("00:05")
      + CAM(400, 1130, 560, 3) + PK("a", 760, 800, .85, Object.assign({ item: "bag" }, ARK), 6) + ch("tolyan", "t", 10, 800, .9, 6)
      + bub("В залог — сумка.<br><em>Там миллион.</em>", 420, 660),
    vo: "Аркадий: «В залог — сумка. Там миллион». Лис: «Прошло пять минут. Потом сорок. Потом Толян открыл сумку».", who: "Аркадий + Лис",
-   mv: "Аркадий вручает сумку, садится в Камри и уезжает за угол — машет из окна. Часы в углу: 00:05 → 00:40. Толян на лавочке с сумкой, ест шаурму и ждёт." },
+   mv: "Аркадий вручает сумку, садится в Гелик и уезжает за угол — машет из окна. Часы в углу: 00:05 → 00:40. Толян на лавочке с сумкой, ест шаурму и ждёт." },
  { h: "«КУКЛА»", tc: "3/7 · 0:26–0:36", bg: "street", y: 640, els: () => clock("00:40")
      + ch("tolyan", "t", 40, 820, .9, 6) + DOLL + bub("…Газета «Из рук в руки».<br><em>Две тысячи третий год.</em>", 300, 660)
      + lab("«КУКЛА»", 640, 1230, "#ff3b30", "#fff", 44, 4),
@@ -70,14 +70,14 @@ const S = [
  { h: "ПЕРЕХВАТ", tc: "5/7 · 0:50–1:02", bg: "minibus", y: 600,
    els: () => PANEL("minibus", 20, 640, 512, 860, 40, 600, ch("seryoga", "s", 40, 200, .8, 6) + PHONE(290, 360, 200, BOT))
      + PANEL("police", 548, 640, 512, 860, 20, 600, ch("tolyan", "t", 60, 200, .85, 6))
-     + bub("Толян! Твою Камри продают!<br><em>Ниже рынка!</em>", 40, 650, 12) + bub("Где?!", 700, 1180, 12),
-   vo: "Лис: «Через час бот Перехват прислал Серёге свежее объявление». Серёга: «Толян! Твою Камри продают! Ниже рынка!» Толян: «Где?!»", who: "Лис + Серёга + Толян",
-   mv: "Сплит-экран звонка: Серёга в маршрутке с телефоном (пуш бота: «Camry 2014 · ниже рынка на 400 000 · „Одна хозяйка. Срочно“»), Толян у участкового. <b>Оба в кадре.</b>" },
+     + bub("Толян! Твой Гелик продают!<br><em>Ниже рынка!</em>", 40, 650, 12) + bub("Где?!", 700, 1180, 12),
+   vo: "Лис: «Через час бот Перехват прислал Серёге свежее объявление». Серёга: «Толян! Твой Гелик продают! Ниже рынка!» Толян: «Где?!»", who: "Лис + Серёга + Толян",
+   mv: "Сплит-экран звонка: Серёга в маршрутке с телефоном (пуш бота: «Mercedes G 63 · ниже рынка на 4 млн · „Одна хозяйка. Срочно“»), Толян у участкового. <b>Оба в кадре.</b>" },
  { h: "ПОКАЗ", tc: "6/7 · 1:02–1:16", bg: "mall", y: 680,
-   els: () => CAM(220, 1150, 540, 3) + PK("a", 740, 830, .8, ARK, 6) + ch("tolyan", "t", 10, 840, .85, 6) + PK("c", 200, 760, .75, COP, 5)
+   els: () => CAM(220, 1150, 540, 3) + PK("a", 740, 830, .8, ARK, 6) + ch("tolyan", "t", 10, 840, .85, 6) + PK("c", 230, 885, .75, COP, 5)
      + bub("Тест-драйв окончен,<br><em>Аркадий.</em>", 40, 700) + bub("…А до угла<br><em>прокатиться можно?</em>", 560, 1300),
-   vo: "Толян: «Тест-драйв окончен, Аркадий». Аркадий: «…А до угла прокатиться можно?» Лис: «Камри вернулась к Толяну. Аркадий — к участковому».", who: "Толян + Аркадий + Лис",
-   mv: "Парковка у ТЦ: Аркадий показывает «свою» Камри новому покупателю — а это Толян с участковым. Аркадий в пальто медленно поднимает руки. Оба говорящих в кадре." },
+   vo: "Толян: «Тест-драйв окончен, Аркадий». Аркадий: «…А до угла прокатиться можно?» Лис: «Гелик вернулся к Толяну. Аркадий — к участковому».", who: "Толян + Аркадий + Лис",
+   mv: "Парковка у ТЦ: Аркадий показывает «свой» Гелик новому покупателю — а это Толян с участковым. Аркадий в пальто медленно поднимает руки. Оба говорящих в кадре." },
  { h: "МОРАЛЬ", tc: "7/7 · 1:16–1:30", bg: "police", y: 640,
    els: () => `<div class="el" style="left:50px;top:700px;right:50px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:24px 28px;color:#fff;font-family:Unbounded;font-weight:900;font-size:30px;line-height:1.4">ТЕСТ-ДРАЙВ БЕЗ СЮРПРИЗОВ:<br><span style="color:#ffd23f">🚗 только вместе с тобой в машине<br>🪪 фото паспорта и прав — до поездки<br>🔑 ключи и документы из рук не выпускай<br>💵 «залог» — пересчитай при нём</span></div>`
      + FOX(400, 1220, 220),
