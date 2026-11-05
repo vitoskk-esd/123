@@ -12,6 +12,8 @@ EPS = sys.argv[1:]; V = json.load(open("voices.json")); os.makedirs("vo", exist_
 MODEL = os.environ.get("MODEL", "gemini-3.1-flash-tts-preview")
 SR = 24000
 norm = lambda s: re.sub(r"[^а-я0-9a-z]", "", s.lower().replace("ё", "е"))
+# для сопоставления слов Whisper со сценарием — с поправкой на аканье: «Талян» = «Толян», «Сереге» = «Серёге»
+loose = lambda s: norm(s).replace("о", "а").replace("е", "и").replace("ь", "").replace("ъ", "")
 lines = [(e, ln["id"], ln["who"], ln["text"]) for e in EPS for ln in json.load(open(f"{e}.json"))["lines"]]
 cnt = {}
 for _, _, w, t in lines: cnt[w] = cnt.get(w, 0) + len(t)
@@ -60,8 +62,8 @@ def cut(path, who):
     exp, owner = [], []
     for k, (_, _, _, t) in enumerate(mine):
         for w in t.split():
-            if norm(w): exp.append(norm(w)); owner.append(k)
-    got = [norm(w) for w, _, _ in words]
+            if norm(w): exp.append(loose(w)); owner.append(k)
+    got = [loose(w) for w, _, _ in words]
     first, last = {}, {}
     for blk in difflib.SequenceMatcher(None, exp, got, autojunk=False).get_matching_blocks():
         for d in range(blk.size):
