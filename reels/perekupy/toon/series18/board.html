@@ -1,0 +1,97 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ep27 «ЯПОНСКИЙ АУКЦИОН»: Серёга везёт машину из Японии сам — «оценка 4,5», а в листе «R». В каждом диалоге в кадре оба собеседника.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const GENA = { vest: true, jacket: "#2b3a55", pants: "#2b2f37", cap: "#1d1d1f", hair: "#3a2d22", beard: true, item: "phone" };
+const PK = (p, l, t, s, o, z = 4) => ch("perekup", p, l, t, s, z, o);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const COR = (l, t, w = 640, z = 3, extra = "") => `<img class="el" src="../../kit/img/corolla/corolla.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const PANEL = (bg, l, t, w, h, bx, by, inner = "", z = 5) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;overflow:hidden;border:8px solid #151515;z-index:${z};border-radius:16px;background:#000">
+  <div style="position:absolute;left:${-bx}px;top:${-by}px;width:1080px;height:1920px">${BGS[bg].replace('id="bg"', "")}</div>${inner}</div>`;
+// экран аукциона на ноутбуке
+const AUC = el(`<div style="width:100%;height:100%;background:#f4f6f8;border:10px solid #2b2f37;border-radius:22px;font-family:Onest;color:#151515;overflow:hidden">
+  <div style="background:#c0392b;color:#fff;font-family:Unbounded;font-weight:900;font-size:26px;padding:12px 20px">JAPAN AUCTION · LOT 51288</div>
+  <div style="display:flex;gap:18px;padding:18px"><div style="width:330px;height:150px;background:#cfe3f2;border-radius:12px;display:flex;align-items:center;justify-content:center"><img src="../../kit/img/corolla/corolla.png" style="width:92%"></div>
+  <div style="font-weight:800;font-size:26px;line-height:1.45">Toyota Corolla<br>Пробег: 38 000 км<br><span style="color:#2f7a2f;font-family:Unbounded;font-weight:900;font-size:34px;white-space:nowrap">ОЦЕНКА 4.5</span></div></div>
+  <div style="margin:0 18px;background:#ffd23f;border-radius:12px;padding:10px 16px;font-family:Unbounded;font-weight:900;font-size:24px;white-space:nowrap">СТАВКА ¥ 480 000 · 00:12</div></div>`, 40, 300, 700, 420, 8);
+// аукционный лист: схема кузова сверху с пометками
+const MARK = (t, x, y, c = "#ff3b30") => `<text x="${x}" y="${y}" font-family="JetBrains Mono" font-weight="800" font-size="34" fill="${c}">${t}</text>`;
+const SHEET = el(`<svg viewBox="0 0 760 640" style="width:100%;height:100%"><rect x="6" y="6" width="748" height="628" fill="#fbf7ec" stroke="#151515" stroke-width="8"/>
+  <rect x="6" y="6" width="748" height="64" fill="#e8e1cf" stroke="#151515" stroke-width="6"/><text x="30" y="50" font-family="Unbounded" font-weight="900" font-size="28">AUCTION SHEET · 51288</text>
+  <circle cx="660" cy="150" r="64" fill="none" stroke="#ff3b30" stroke-width="10"/><text x="660" y="182" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="90" fill="#ff3b30">R</text>
+  <g fill="none" stroke="#151515" stroke-width="6"><rect x="120" y="120" width="300" height="480" rx="90"/><path d="M150 230 h240 M150 470 h240 M120 330 h300 M120 380 h300"/>
+    <rect x="160" y="250" width="220" height="70" rx="16"/><rect x="160" y="400" width="220" height="60" rx="16"/></g>
+  ${MARK("A2", 200, 175)}${MARK("U3", 330, 205)}${MARK("XX", 60, 300)}${MARK("W2", 440, 300)}${MARK("XX", 440, 420)}${MARK("A3", 60, 430)}${MARK("U2", 230, 560)}${MARK("W3", 330, 540)}${MARK("S1", 200, 365)}
+  <text x="500" y="560" font-family="Onest" font-weight="800" font-size="24" fill="#6b7280">mileage 38 000 km?</text></svg>`, 160, 760, 760, 640, 8);
+const NOTE = (t, l, tp, rot) => lab(t, l, tp, "#ffd23f", "#151515", 30, rot, 10);
+const S = [
+ { h: "ЯПОНСКИЙ АУКЦИОН", tc: "1/7 · 0:00–0:12", bg: "flat", y: 260,
+   els: () => AUC + ch("seryoga", "s", 720, 640, .75, 6) + bub("Оценка четыре с половиной!<br><em>Почти пятёрка!</em>", 40, 760),
+   vo: "Серёга: «Оценка четыре с половиной! Почти пятёрка!» Лис: «Серёга решил: хватит перекупов. Повезу машину из Японии сам. Что может пойти не так?»", who: "Серёга + Лис",
+   mv: "<b>Новая локация — комната Серёги ночью:</b> ноутбук светит в лицо, банки энергетика, постер JDM, окно с городом. На экране — японский аукцион: Corolla, «оценка 4.5», таймер ставки 00:12." },
+ { h: "ПОСРЕДНИК ГЕНА", tc: "2/7 · 0:12–0:24", bg: "flat", y: 600,
+   els: () => PANEL("flat", 20, 640, 512, 860, 260, 600, ch("seryoga", "s", 40, 200, .8, 6)) + PANEL("port", 548, 640, 512, 860, 120, 600, PK("g", 60, 200, .85, GENA, 6))
+     + bub("Брат, четыре с половиной — как с завода.<br><em>Предоплата сто процентов.</em>", 40, 650, 12) + bub("А лист аукционный<br><em>покажете?</em>", 40, 1180, 12),
+   vo: "Гена: «Брат, четыре с половиной — как с завода. Предоплата сто процентов». Серёга: «А лист аукционный покажете?» Гена: «Там всё по-японски. Тебе не надо».", who: "Гена + Серёга",
+   mv: "Сплит-экран звонка: Серёга дома у ноутбука, <b>новый герой — посредник Гена</b> (тельняшка, кепка, борода) — на причале во Владивостоке. Оба в кадре." },
+ { h: "ПОРТ ВЛАДИВОСТОКА", tc: "3/7 · 0:24–0:36", bg: "port", y: 500,
+   els: () => COR(560, 560, 520, 4, "transform:rotate(-4deg)") + PK("g", 40, 760, .65, GENA, 6) + lab("ОЦЕНКА… R", 620, 1040, "#ff3b30", "#fff", 50, 4)
+     + bub("Брат, приплыла!<br><em>Почти целая!</em>", 40, 600),
+   vo: "Лис: «Через месяц машина приплыла». Гена: «Брат, приплыла! Почти целая!» Лис: «Почти — это ключевое слово».", who: "Лис + Гена",
+   mv: "<b>Новая локация — порт Владивостока:</b> сопки, вантовый мост, портовый кран опускает Короллу на стропах, контейнеры, чайки. На крышу садится чайка. Гена машет телефоном." },
+ { h: "АУКЦИОННЫЙ ЛИСТ", tc: "4/7 · 0:36–0:50", bg: "desk", y: 640,
+   els: () => SHEET + NOTE("A — ЦАРАПИНА", 60, 650, -4) + NOTE("U — ВМЯТИНА", 600, 640, 3) + NOTE("W — ШПАКЛЁВКА", 40, 1400, 3) + NOTE("XX — ЗАМЕНА", 640, 1420, -3),
+   vo: "Лис: «А вот и лист. „A“ — царапина. „U“ — вмятина. „W“ — шпаклёвка. „XX“ — деталь заменена. А „R“ в углу — машина была в ДТП. Не лист, а морской бой: ранен, убит, убит».", who: "Лис",
+   mv: "Крупно, сверху на столе: аукционный лист — схема кузова вся в пометках A2, U3, W2, XX, в углу красная «R». Жёлтые стикеры-расшифровки появляются по одному. Шутка про морской бой." },
+ { h: "СТО У МИХАЛЫЧА", tc: "5/7 · 0:50–1:04", bg: "sto", y: 640,
+   els: () => COR(240, 1210, 600, 3) + ch("mihalych", "m", 10, 820, .9, 6) + ch("seryoga", "s", 780, 860, .8, 6)
+     + bub("Перед — от одной, зад — от другой.<br><em>Японцы тоже собирают из двух.</em>", 60, 660),
+   vo: "Михалыч: «Перед — от одной, зад — от другой. Японцы тоже собирают из двух». Серёга: «Так там же четыре с половиной было!» Михалыч: «Четыре с половиной — это сколько раз её красили».", who: "Михалыч + Серёга",
+   mv: "СТО «У Михалыча». Михалыч проводит толщиномером вдоль стыка посередине кузова. Оба в кадре." },
+ { h: "«R» — ЭТО РОССИЯ", tc: "6/7 · 1:04–1:16", bg: "sto", y: 600,
+   els: () => PANEL("sto", 20, 640, 512, 860, 300, 600, ch("seryoga", "s", 40, 200, .8, 6)) + PANEL("port", 548, 640, 512, 860, 120, 600, PK("g", 60, 200, .85, GENA, 6))
+     + bub("Гена, в листе<br><em>была «R»!</em>", 40, 650, 12) + bub("Брат, «R» — это «Россия».<br><em>Значит, к нам ехала.</em>", 380, 1180, 12),
+   vo: "Серёга: «Гена, в листе была „R“!» Гена: «Брат, „R“ — это „Россия“. Значит, к нам ехала». Лис: «Лист надо было перевести до ставки, а не после».", who: "Серёга + Гена + Лис",
+   mv: "Сплит-экран: Серёга на СТО, Гена в порту. Оба в кадре. Панчлайн Гены, вывод Лиса." },
+ { h: "МОРАЛЬ", tc: "7/7 · 1:16–1:30", bg: "port", y: 280,
+   els: () => `<div class="el" style="left:50px;top:420px;right:50px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:24px 28px;color:#fff;font-family:Unbounded;font-weight:900;font-size:28px;line-height:1.4">ЯПОНСКИЙ АУКЦИОН БЕЗ СЮРПРИЗОВ:<br><span style="color:#ffd23f">📄 перевод листа — до ставки<br>🅡 «R» и «RA» — была в ДТП<br>🔤 A — царапина, U — вмятина, W — шпаклёвка, XX — замена<br>🤝 посредник — по договору, без 100% предоплаты</span></div>`
+     + FOX(430, 860, 220),
+   vo: "Лис: «Аукционный лист проси с переводом до ставки. „R“ и „RA“ — машина была в ДТП. Буквы на схеме — это не морской бой, а ремонт. Посредник — только по договору. А свежие объявления раньше перекупов — в боте Перехват. Сохрани — пока тебе не привезли морской бой».", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист на фоне порта, лиса с аватарки. ~1:30." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+["s", "g", "m"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>

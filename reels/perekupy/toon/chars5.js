@@ -43,7 +43,8 @@
   ${o.towel ? `<path d="M128 520 q82 26 164 0 l14 120 q-96 26 -192 0 z" fill="${o.towel}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
     <path d="M150 540 v90 M190 548 v90 M230 548 v90 M270 540 v90" stroke="#fff" stroke-width="5" opacity=".5"/><path d="M165 430 q45 30 90 0" stroke="#c99b78" stroke-width="5" fill="none"/>` : ""}
   ${o.coat ? `<path d="M118 400 q-26 160 -6 290 h196 q20 -130 -6 -290 z" fill="${o.coat}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>` : ""}
-  ${o.towel ? "" : `<path d="M210 352 v214" stroke="${K}" stroke-width="5"/><path d="M180 356 l30 34 l30 -34" fill="none" stroke="${K}" stroke-width="5"/>`}
+  ${o.vest ? `<path d="M172 356 h76 l-8 210 h-60 z" fill="#f4f6f8" stroke="${K}" stroke-width="5"/>${[380, 404, 428, 452, 476, 500, 524, 548].map(y => `<path d="M${176 + (y - 356) * .04} ${y} h${68 - (y - 356) * .08}" stroke="#1f4fb8" stroke-width="9"/>`).join("")}` : ""}
+  ${o.towel || o.vest ? "" : `<path d="M210 352 v214" stroke="${K}" stroke-width="5"/><path d="M180 356 l30 34 l30 -34" fill="none" stroke="${K}" stroke-width="5"/>`}
   ${o.chain ? `<path d="M178 368 q32 52 64 0" fill="none" stroke="#f5c542" stroke-width="9" stroke-linecap="round"/><circle cx="210" cy="420" r="11" fill="#f5c542" stroke="${K}" stroke-width="4"/>` : ""}
   ${o.tie ? `<path d="M202 372 h16 l8 90 l-16 22 l-16 -22 z" fill="${o.tie}" stroke="${K}" stroke-width="4"/>` : ""}
   ${o.police ? `<path d="M126 384 h46 M248 384 h46" stroke="#f5c542" stroke-width="10" stroke-linecap="round"/>` : ""}
