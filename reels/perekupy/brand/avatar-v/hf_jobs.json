@@ -27,6 +27,15 @@
     "reels/perekupy/brand/avatar-v/ref.jpg"
    ],
    "prompt": "The same fox, full upper body, leans on the open window of a black car door in a parking lot at night, arms crossed on the door frame, binoculars hanging on a strap around its neck, a toothpick in its grin, one eyebrow raised; behind it a row of parked cars with tiny glowing orange headlights; bold orange diagonal stripe across the background instead of a circle. Different pose and composition from the reference. Absolutely no text or lettering anywhere."
+  },
+  {
+   "id": "a1c",
+   "ar": "1:1",
+   "raw": true,
+   "refs": [
+    "reels/perekupy/brand/avatar-v/v1_src.jpg"
+   ],
+   "prompt": "Edit this image. Keep everything exactly the same — the fox, the cap, the chain, the phone, the stopwatch, colors, outlines, composition. Only change: the fox's left eye (on the left side of the image, next to the white cheek fur under the cap brim) is barely visible — draw it clearly as a sly narrowed eye with a white eyeball, dark pupil and a bold angry eyebrow, exactly matching the right eye in shape, size and style, so both eyes are clearly visible and symmetrical. No text."
   }
  ],
  "brand": [],

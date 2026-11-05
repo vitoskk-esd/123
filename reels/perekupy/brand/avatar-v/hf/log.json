@@ -1,6 +1,7 @@
 {
  "_uploads": {
-  "reels/perekupy/brand/avatar-v/ref.jpg": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/a6e18ee0-7e4d-4c2b-a2ba-3e9cc04968a4.jpeg"
+  "reels/perekupy/brand/avatar-v/ref.jpg": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/a6e18ee0-7e4d-4c2b-a2ba-3e9cc04968a4.jpeg",
+  "reels/perekupy/brand/avatar-v/v1_src.jpg": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/cd9a60d4-87f8-433a-827e-c2f37df7e169.jpeg"
  },
  "a1": {
   "request_id": "01a1abe7-6808-7ec0-b376-f07144989035",
@@ -31,5 +32,11 @@
   "app": "alibaba/qwen-image-3/edit",
   "status": "completed",
   "sec": 53
+ },
+ "a1c": {
+  "request_id": "01a1abec-4d31-7ab4-a3c1-cc714441b877",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
  }
 }
