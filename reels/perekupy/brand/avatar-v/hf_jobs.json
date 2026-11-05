@@ -36,6 +36,30 @@
     "reels/perekupy/brand/avatar-v/v1_src.jpg"
    ],
    "prompt": "Edit this image. Keep everything exactly the same — the fox, the cap, the chain, the phone, the stopwatch, colors, outlines, composition. Only change: the fox's left eye (on the left side of the image, next to the white cheek fur under the cap brim) is barely visible — draw it clearly as a sly narrowed eye with a white eyeball, dark pupil and a bold angry eyebrow, exactly matching the right eye in shape, size and style, so both eyes are clearly visible and symmetrical. No text."
+  },
+  {
+   "id": "a4",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "The same fox counts a fan of orange-tinted banknotes in its paws like a card dealer, sly half-smile, one eye winking, a small gold car key ring hanging from its claw; the cap turned slightly sideways; behind it a bold orange speedometer arc with the needle in the red zone instead of a circle. Different pose and composition from the reference. Absolutely no text or lettering anywhere."
+  },
+  {
+   "id": "a5",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "The same fox shown in three-quarter view from below, leaning forward over the hood of a dark car, tapping the hood with one claw and inspecting it with a small magnifying glass held to one eye, the magnified eye looks huge and sly; little orange sparkle marks on the hood; orange hexagon badge outline behind. Different pose and composition from the reference. Absolutely no text or lettering anywhere."
+  },
+  {
+   "id": "a6",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "The same fox runs forward dynamically holding a big orange magnet that attracts tiny orange car icons flying towards it, ears back from the speed, confident grin, chain swinging; orange motion trail and a broken orange ring behind as if it bursts out of the logo frame. Different pose and composition from the reference. Absolutely no text or lettering anywhere."
   }
  ],
  "brand": [],
