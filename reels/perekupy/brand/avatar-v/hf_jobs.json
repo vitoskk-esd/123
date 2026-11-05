@@ -1,0 +1,35 @@
+{
+ "_": "3 варианта аватарки бота «Перехват» (владелец 05.11): та же лиса (кепка, цепь, прищур, оранжево-чёрная гамма), но другая сцена, поза и детали — не просто фон.",
+ "style": "Keep EXACTLY the same fox mascot character from the reference: same orange-and-white fur, sly narrowed eyes and smug grin, black baseball cap, gold chain, same clean vector mascot illustration style with bold dark outlines, flat colors and soft highlights, same orange-and-black brand palette on a dark charcoal background. Square esports-style logo avatar, the fox head and shoulders large in the center, readable at small size. No text, no letters, no numbers, no watermark.",
+ "style_vertical": "",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "designs": [
+  {
+   "id": "a1b",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "The same fox holds a smartphone up close to the viewer with one paw; the phone screen glows orange and shows only a simple car pictogram and a bell icon, no writing at all; the fox winks and smirks; orange motion speed lines behind; a small orange stopwatch icon next to the phone; thin orange circular ring badge behind the fox. Absolutely no text or lettering anywhere."
+  },
+  {
+   "id": "a2",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "Variant «За рулём»: the same fox sits behind the steering wheel of a car, seen through the windshield from the front, one paw on the wheel, the other lowering black sunglasses to look at the viewer with a sly grin, car keys with an orange keychain dangling from the ignition; dashboard glow in orange; shield-shaped badge outline behind instead of a ring."
+  },
+  {
+   "id": "a3b",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "The same fox, full upper body, leans on the open window of a black car door in a parking lot at night, arms crossed on the door frame, binoculars hanging on a strap around its neck, a toothpick in its grin, one eyebrow raised; behind it a row of parked cars with tiny glowing orange headlights; bold orange diagonal stripe across the background instead of a circle. Different pose and composition from the reference. Absolutely no text or lettering anywhere."
+  }
+ ],
+ "brand": [],
+ "images": [],
+ "clips": []
+}
