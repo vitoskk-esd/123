@@ -129,7 +129,7 @@ window.build = R => {
   R.punch(cam, W("l3", "морск"), .08); R.sfx("boom", W("l3", "убит"), .5);
   // 5. СТО: шов посередине кузова
   swap("sheet", "sto", st.m1 - .7);
-  tl.to("#seam", { opacity: 1, duration: .3 }, W("m1", "зад")); R.sfx("ping", W("m1", "зад"), .5);
+  tl.to("#seam", { opacity: 1, duration: .3 }, W("m1", "за")); R.sfx("ping", W("m1", "за"), .5);
   // 6. звонок: R — Россия
   swap("sto", "call2", st.s4 - .7, "cut"); R.sfx("ring", st.s4 - .6, .5);
   tl.fromTo("#qL", { x: -560 }, { x: 0, duration: .35, ease: "power3.out", immediateRender: false }, st.s4 - .7).fromTo("#qR", { x: 560 }, { x: 0, duration: .35, ease: "power3.out", immediateRender: false }, st.s4 - .7);
@@ -137,6 +137,6 @@ window.build = R => {
   // 7. мораль
   swap("call2", "moral", st.rule - .7);
   tl.fromTo("#moralCard", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: .4, ease: "expo.out", immediateRender: false }, st.rule - .4);
-  [st.rule + .1, W("rule", "ra"), W("rule", "букв"), W("rule", "посредн"), W("rule", "перехват") - .2].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
+  [st.rule + .1, W("rule", "r"), W("rule", "букв"), W("rule", "посредн"), W("rule", "перехват") - .2].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
   ending(R, st.end - .15);
 };
