@@ -105,7 +105,7 @@ window.build = R => {
   const slam = (sel, at, sfx = "impact") => { tl.fromTo(sel, { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: .18, ease: "power4.out", immediateRender: false }, at); R.sfx(sfx, at + .02, .7); };
   const zin = (id, at, until) => { tl.fromTo(`#${id}, #${id}c`, { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .3, ease: "back.out(2)", immediateRender: false }, at).to(`#${id}, #${id}c`, { opacity: 0, duration: .2 }, until); R.sfx("pop", at, .6); };
   // счётчики пробега: [id, от, до, начало, конец]
-  const CNT = [["od2", 40000, 612000, st.l1 + .2, W("l1", "заказ") + .4, " КМ"], ["od3", 612000, 40000, W("l2", "шестьсот") - .2, W("l2", "сорок") + .3, ""]];
+  const CNT = [["od2", 40000, 612000, st.l1 + .2, W("l1", "заказ") + .4, " КМ"], ["od3", 612000, 40000, W("l2", "600") - .2, W("l2", "40") + .3, ""]];
   R.hooks.push(t => CNT.forEach(([id, a, b, t0, t1, sfx]) => { const k = Math.min(1, Math.max(0, (t - t0) / (t1 - t0))), v = Math.round((a + (b - a) * k) / 1000) * 1000;
     document.getElementById(id).textContent = (id === "od3" ? (k > 0 ? "612 000 → " : "") : "") + v.toLocaleString("ru-RU").replace(/ /g, " ") + sfx; }));
 
