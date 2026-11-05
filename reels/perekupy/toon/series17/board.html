@@ -47,17 +47,20 @@ const BOT = `<div style="font-family:Unbounded;font-weight:900;font-size:19px;co
   <div style="font-size:16px;font-weight:800;margin-top:6px;color:#2f7a2f">✅ собственник · история ТО</div></div>`;
 const TOW = { towel: "#f4f6f8", shades: true, chain: true, saunaHat: true };             // Толян в бане: очки и цепь — узнаётся
 const STAS_SAUNA = { towel: "#2e86de", saunaHat: true, hair: "#3a2d22" };
+// синий BMW X6 Вики (kit/img/x6: x6_side — сбоку мордой вправо, x6_34 — 3/4 спереди)
+const X6 = (l, t, w = 600, z = 3) => `<img class="el" src="../../kit/img/x6/x6_side.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z}">`;
 const BMW = (l, t, w = 600, z = 3) => `<img class="el" src="../../kit/img/bmw/bmw_side.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z}">`;
 // маленький Толян в окне соседней кабинки колеса (окно 222,582 156×92 на фоне ferris)
 const NEXT = (look = "grin") => `<div class="el" style="left:222px;top:582px;width:156px;height:92px;overflow:hidden;z-index:4;border-radius:14px">
   <div style="position:absolute;left:28px;top:-6px;width:420px;height:800px;transform:scale(.24);transform-origin:0 0">${CHARS.tolyan("tn")}</div></div>`;
 // бинокль: что видит Вика — дверь бани, Толян и Стас с конвертом
-const BINO = `<div class="el" style="left:180px;top:640px;width:720px;height:380px;z-index:10;background:#000;border-radius:190px;
-  -webkit-mask:radial-gradient(circle at 27% 50%,#000 46%,transparent 47%),radial-gradient(circle at 73% 50%,#000 46%,transparent 47%);mask:radial-gradient(circle at 27% 50%,#000 46%,transparent 47%),radial-gradient(circle at 73% 50%,#000 46%,transparent 47%)">
-  <div style="position:absolute;left:-260px;top:-640px;width:1080px;height:1920px;transform:scale(1.25);transform-origin:520px 900px">${BGS.banya.replace('id="bg"', "")}</div>
-  <div style="position:absolute;left:150px;top:90px;width:420px;height:800px;transform:scale(.36);transform-origin:0 0">${CHARS.tolyan("tb")}</div>
-  <div style="position:absolute;left:390px;top:96px;width:420px;height:800px;transform:scale(.34);transform-origin:0 0">${CHARS.perekup("pb", { jacket: "#e67e22", pants: "#3b3f46", cap: "#151515" })}</div>
-  ${ENV(330, 220, 10).replace('class="el"', 'class="el" style="position:absolute"')}</div>`;
+const BINO = `<div class="el" style="left:90px;top:650px;width:640px;height:330px;z-index:10;overflow:hidden;border-radius:30px">
+  <div style="position:absolute;left:-250px;top:-640px;width:1080px;height:1920px;transform:scale(1.2);transform-origin:520px 900px">${BGS.banya.replace('id="bg"', "")}</div>
+  <div style="position:absolute;left:150px;top:70px;width:420px;height:800px;transform:scale(.33);transform-origin:0 0">${CHARS.tolyan("tb")}</div>
+  <div style="position:absolute;left:360px;top:76px;width:420px;height:800px;transform:scale(.31);transform-origin:0 0">${CHARS.perekup("pb", { jacket: "#e67e22", pants: "#3b3f46", cap: "#151515" })}</div>
+  <div style="position:absolute;left:300px;top:200px;width:70px;height:44px;transform:rotate(10deg);background:#f4e7c3;border:4px solid #151515;border-radius:5px"></div>
+  <svg viewBox="0 0 640 330" style="position:absolute;inset:0;width:100%;height:100%"><path fill="#05070f" fill-rule="evenodd" d="M0 0H640V330H0Z M332 165a150 150 0 1 0 0 .1Z M608 165a150 150 0 1 0 0 .1Z"/>
+    <circle cx="182" cy="165" r="150" fill="none" stroke="#2b2f37" stroke-width="12"/><circle cx="458" cy="165" r="150" fill="none" stroke="#2b2f37" stroke-width="12"/></svg></div>`;
 const S = [
  { h: "ПОДБОРЩИК", tc: "1/7 · 0:00–0:14", bg: "ferris", y: 560,
    els: () => NEXT() + PK("p", 560, 880, .78, STAS, 6) + ch("vika", "v", 60, 900, .78, 6)
@@ -76,11 +79,11 @@ const S = [
    vo: "Толян: «Тридцать — тебе, как договаривались». Стас: «И веник — за твой счёт». Лис: «Двадцать тысяч подборщик взял с Вики, тридцать — с Толяна. Работает на обе стороны. Как зарядка тайп-си».", who: "Толян + Стас + Лис",
    mv: "<b>Новая локация — парилка «Бани № 1»:</b> вагонка, каменка, ковш, 110°, пар. Толян в полотенце, банной шапке, <b>очках и цепи</b>; Стас в синем полотенце. Конверт переходит из рук в руки в клубах пара." },
  { h: "СЛЕЖКА", tc: "4/7 · 0:40–0:50", bg: "banya", y: 640,
-   els: () => BMW(40, 1190, 560, 3) + ch("vika", "v", 680, 860, .85, 6)
+   els: () => X6(30, 1150, 600, 3) + ch("vika", "v", 680, 860, .85, 6)
      + `<div class="el" style="left:808px;top:1012px;width:110px;height:56px;z-index:7;background:#151515;border-radius:28px;box-shadow:inset 0 0 0 6px #3b3f46"></div>` + BINO
-     + bub("Ну здравствуй,<br><em>«честность — моё второе имя».</em>", 160, 1290),
+     + bub("Ну здравствуй,<br><em>«честность —<br>моё второе имя».</em>", 60, 990),
    vo: "Вика: «Ну здравствуй, „честность — моё второе имя“».", who: "Вика",
-   mv: "<b>Новая локация — ночная улица у «Бани № 1».</b> Вика на своей BMW из 23-й серии, с биноклем. <b>Новый ракурс — вид через бинокль:</b> Толян и Стас выходят из бани, Стас прячет конверт." },
+   mv: "<b>Новая локация — ночная улица у «Бани № 1».</b> Вика на своём синем BMW X6, с биноклем. <b>Новый ракурс — вид через бинокль:</b> Толян и Стас выходят из бани, Стас прячет конверт." },
  { h: "ИЗ ЯМЫ", tc: "5/7 · 0:50–1:04", bg: "pit", y: 200,
    els: () => ch("mihalych", "m", 30, 560, .9, 6) + ch("vika", "v", 650, 600, .85, 6)
      + bub("Шпаклёвки — на хрущёвку хватит.<br><em>А днище — как дуршлаг.</em>", 160, 230),
