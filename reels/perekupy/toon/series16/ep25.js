@@ -77,7 +77,7 @@ bub("a3", "…А до угла<br><em>прокатиться можно?</em>", 
 window.build = R => {
   const tl = R.tl, cam = R.camera($("#cam"), { hand: .6 });
   R.grain(.03);
-  gsap.set(".scn", { opacity: 0 }); gsap.set("#sc_st1", { opacity: 1 });
+  gsap.set(".scn", { opacity: 0 }); gsap.set("#sc_st1", { opacity: 1 }); gsap.set("#phS", { opacity: 0 });
   const { pop } = common(R, cam, { mood: () => "grin" });
   R.hooks.push(t => { const f = Math.floor(t * 30), talk = lv => lv > .28 && !(lv < .55 && f % 3 === 2);
     const lt = (LIP.tolyan || [])[f] || 0, la = (LIP.arkady || [])[f] || 0, lc = (LIP.cop || [])[f] || 0;
@@ -94,7 +94,8 @@ window.build = R => {
   };
   window.MUSIC = { style: "bed", bpm: 100, end: R.dur - 1.2, mute: [[st.t2 - .3, en.t2 + .3]] };
   const ids = E.lines.map(l => l.id);
-  for (const l of ["a1", "t1", "a2", "t2", "c1", "t3", "c2", "s1", "t4", "t5", "a3"]) { const nx = ids[ids.indexOf(l) + 1]; pop("#b_" + l, st[l] - .05, Math.min(en[l] + .9, st[nx] - .1)); }
+  const CUT = { t2: st.c1 - .75, c2: st.l3 - .75, t4: st.t5 - .75 };      // перед сменой сцены пузырь убираем раньше
+  for (const l of ["a1", "t1", "a2", "t2", "c1", "t3", "c2", "s1", "t4", "t5", "a3"]) { const nx = ids[ids.indexOf(l) + 1]; pop("#b_" + l, st[l] - .05, Math.min(en[l] + .9, st[nx] - .1, CUT[l] ?? 1e9)); }
   const slam = (sel, at, sfx = "impact") => { tl.fromTo(sel, { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: .18, ease: "power4.out", immediateRender: false }, at); R.sfx(sfx, at + .02, .7); };
 
   // часы ожидания: 00:00 при залоге → 00:05 на «пять» → 00:40 на «сорок»; видны только пока ждём
