@@ -60,7 +60,7 @@ def build(v):
     subprocess.run(["ffmpeg", "-v", "error", "-y", *inputs, "-filter_complex", fc, "-map", "[vout]", "-c:v", "libx264", "-preset", "medium", "-crf", "19",
                     "-pix_fmt", "yuv420p", "-an", f"{tmp}.video.mp4", "-map", "[voice]", f"{tmp}.voice.wav", "-map", "[sfx]", f"{tmp}.sfx.wav"], check=True)
     # своя музыка: тот же синтезатор, другой стиль и темп, ровно на длину варианта
-    score = {"dur": round(dur, 2), "events": [], "music": dict(v["music"], end=round(dur - 1.2, 2)), "lead": 0}
+    score = {"dur": round(dur, 2), "events": [], "music": dict({"start": 0}, **v["music"], end=round(dur - 1.2, 2)), "lead": 0}
     json.dump(score, open(f"{tmp}.score.json", "w"))
     subprocess.run(["node", f"{K}/audio.js", f"{tmp}.score.json", f"{tmp}.music.wav", f"{tmp}.nosfx.wav"], check=True, capture_output=True)
     vol = v.get("music_vol", .16)
