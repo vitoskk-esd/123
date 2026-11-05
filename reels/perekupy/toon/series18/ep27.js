@@ -42,7 +42,7 @@ const SER = ["s", "s2", "s3", "s4"], GEN = ["g", "g2", "g3"];
 
 // 1. комната: аукцион на ноутбуке
 scene("flat", "flat");
-add("flat", AUC + hero("seryoga", "s", 720, 640, .75));
+add("flat", AUC + hero("seryoga", "s", 700, 900, .85, 9));
 // 2. звонок Гене
 scene("call", null);
 add("call", `<div class="el" style="inset:0;background:#0b0c10"></div>` + panel("pL", "flat", 20, 260, hero("seryoga", "s2", 40, 200, .8)) + panel("pR", "port", 548, 120, hero("perekup", "g", 60, 200, .85, 6, GENA)));
@@ -71,7 +71,7 @@ add("moral", `<div class="card" id="moralCard" style="top:380px;z-index:20"><h3>
 
 $("#end h2").innerHTML = E.end;
 const bub = (line, html, l, t, tx, fs) => { const b = bubble(line, html, l, t, tx); if (fs) b.style.fontSize = fs + "px"; return b; };
-bub("s1", "Оценка четыре с половиной!<br><em>Почти пятёрка!</em>", 40, 1100, 690, 44);
+bub("s1", "Оценка четыре с половиной!<br><em>Почти пятёрка!</em>", 140, 730, 580, 44);
 bub("g1", "Брат, четыре с половиной — как с завода.<br><em>Предоплата сто процентов.</em>", 40, 620, 720, 34);
 bub("s2", "А лист аукционный<br><em>покажете?</em>", 40, 620, 170, 44);
 bub("g2", "Там всё по-японски.<br><em>Тебе не надо.</em>", 480, 620, 280, 44);
