@@ -1,0 +1,27 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#dfe6d3"/><rect y="0" width="1080" height="700" fill="#e9eedf"/>
+    <path d="M0 700 H1080" stroke="#a9b39a" stroke-width="10"/>
+    <!-- окно с решёткой -->
+    <rect x="640" y="250" width="360" height="380" fill="#bfe3ff" stroke="#000" stroke-width="10"/>
+    <g stroke="#2b2f37" stroke-width="10"><path d="M700 250 V630"/><path d="M760 250 V630"/><path d="M820 250 V630"/><path d="M880 250 V630"/><path d="M940 250 V630"/><path d="M640 440 H1000"/></g>
+    <!-- плакат -->
+    <g><rect x="80" y="240" width="420" height="300" fill="#fff" stroke="#000" stroke-width="7"/><rect x="80" y="240" width="420" height="70" fill="#c0392b"/>
+      <text x="290" y="288" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="30" fill="#fff">ОСТОРОЖНО,</text>
+      <text x="290" y="360" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="38" fill="#151515">МОШЕННИКИ!</text>
+      <text x="290" y="420" text-anchor="middle" font-family="Onest" font-weight="800" font-size="24" fill="#151515">Не отдавайте ключи</text>
+      <text x="290" y="456" text-anchor="middle" font-family="Onest" font-weight="800" font-size="24" fill="#151515">незнакомцам</text>
+      <text x="290" y="510" text-anchor="middle" font-family="Onest" font-weight="700" font-size="20" fill="#6b7280">ОМВД по району</text></g>
+    <!-- сейф и шкаф -->
+    <rect x="60" y="600" width="200" height="330" fill="#6b7280" stroke="#000" stroke-width="7"/><circle cx="160" cy="740" r="34" fill="#c9ced6" stroke="#000" stroke-width="6"/>
+    <path d="M160 740 l20 -14" stroke="#000" stroke-width="6"/>
+    <!-- стол -->
+    <rect x="220" y="930" width="760" height="40" fill="#7a4a24" stroke="#000" stroke-width="7"/><rect x="240" y="970" width="720" height="360" fill="#8b5a2b" stroke="#000" stroke-width="7"/>
+    <path d="M600 970 V1330" stroke="#000" stroke-width="5"/><circle cx="560" cy="1150" r="8" fill="#d4ac0d"/><circle cx="640" cy="1150" r="8" fill="#d4ac0d"/>
+    <g><rect x="300" y="760" width="260" height="170" fill="#2b2f37" stroke="#000" stroke-width="7"/><rect x="316" y="776" width="228" height="128" fill="#4c7aa8"/>
+      <rect x="410" y="930" width="40" height="8" fill="#000"/></g>
+    <g><rect x="700" y="900" width="200" height="18" fill="#f4e7c3" stroke="#000" stroke-width="3"/><rect x="704" y="882" width="200" height="18" fill="#e8d6a8" stroke="#000" stroke-width="3"/><rect x="708" y="864" width="200" height="18" fill="#f4e7c3" stroke="#000" stroke-width="3"/><rect x="712" y="846" width="200" height="18" fill="#e8d6a8" stroke="#000" stroke-width="3"/><rect x="716" y="828" width="200" height="18" fill="#f4e7c3" stroke="#000" stroke-width="3"/>
+      <text x="805" y="860" text-anchor="middle" font-family="Onest" font-weight="800" font-size="16">ДЕЛО №</text></g>
+    <g><rect x="600" y="880" width="60" height="50" rx="6" fill="#fff" stroke="#000" stroke-width="4"/><path d="M660 892 q20 4 0 24" stroke="#000" stroke-width="4" fill="none"/></g>
+    <!-- пол -->
+    <rect y="1330" width="1080" height="590" fill="#9a8a6a"/><g stroke="#86775a" stroke-width="5"><path d="M0 1390 H1080"/><path d="M0 1460 H1080"/><path d="M0 1530 H1080"/><path d="M0 1600 H1080"/><path d="M0 1670 H1080"/><path d="M0 1740 H1080"/><path d="M0 1810 H1080"/><path d="M0 1880 H1080"/></g>
+  </svg>
