@@ -4,7 +4,7 @@
 (() => {
   const K = "#151515", W = 7;
   CHARS.perekup = (p, o = {}) => {
-    const jk = o.jacket || "#3b3f46", pt = o.pants || "#232c47", sk = o.skin || "#e8b48c", hr = o.hair || "#3a2d22", cap = o.cap;
+    const sk = o.skin || "#e8b48c", jk = o.towel ? sk : o.jacket || "#3b3f46", pt = o.towel ? sk : o.pants || "#232c47", hr = o.hair || "#3a2d22", cap = o.cap;
     const sd = "#c99b78";
     const item = o.item === "phone" ? `<rect x="300" y="196" width="34" height="62" rx="8" fill="#111" stroke="${K}" stroke-width="5"/><rect x="306" y="204" width="22" height="40" rx="4" fill="#5ac8fa"/>`
       : o.item === "cash" ? `<g transform="rotate(-14 330 470)"><rect x="296" y="440" width="96" height="52" rx="6" fill="#7fbf6a" stroke="${K}" stroke-width="5"/><rect x="300" y="430" width="96" height="52" rx="6" fill="#8fd17a" stroke="${K}" stroke-width="5"/>
@@ -40,8 +40,11 @@
   <path d="M150 560 L140 735 L195 735 L210 600 L225 735 L280 735 L268 560 Z" fill="${pt}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
   <path d="M120 740 q0 -26 30 -26 h48 q14 0 14 26 z M212 740 q0 -26 14 -26 h48 q32 0 32 26 z" fill="#2b2b2e" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
   <path d="M118 390 q-10 90 20 178 h146 q30 -88 20 -178 q-30 -40 -93 -40 q-63 0 -93 40 z" fill="${jk}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+  ${o.towel ? `<path d="M128 520 q82 26 164 0 l14 120 q-96 26 -192 0 z" fill="${o.towel}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+    <path d="M150 540 v90 M190 548 v90 M230 548 v90 M270 540 v90" stroke="#fff" stroke-width="5" opacity=".5"/><path d="M165 430 q45 30 90 0" stroke="#c99b78" stroke-width="5" fill="none"/>` : ""}
   ${o.coat ? `<path d="M118 400 q-26 160 -6 290 h196 q20 -130 -6 -290 z" fill="${o.coat}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>` : ""}
-  <path d="M210 352 v214" stroke="${K}" stroke-width="5"/><path d="M180 356 l30 34 l30 -34" fill="none" stroke="${K}" stroke-width="5"/>
+  ${o.towel ? "" : `<path d="M210 352 v214" stroke="${K}" stroke-width="5"/><path d="M180 356 l30 34 l30 -34" fill="none" stroke="${K}" stroke-width="5"/>`}
+  ${o.chain ? `<path d="M178 368 q32 52 64 0" fill="none" stroke="#f5c542" stroke-width="9" stroke-linecap="round"/><circle cx="210" cy="420" r="11" fill="#f5c542" stroke="${K}" stroke-width="4"/>` : ""}
   ${o.tie ? `<path d="M202 372 h16 l8 90 l-16 22 l-16 -22 z" fill="${o.tie}" stroke="${K}" stroke-width="4"/>` : ""}
   ${o.police ? `<path d="M126 384 h46 M248 384 h46" stroke="#f5c542" stroke-width="10" stroke-linecap="round"/>` : ""}
  </g>
@@ -61,6 +64,8 @@
   <ellipse cx="244" cy="216" rx="18" ry="15" fill="#fff" stroke="${K}" stroke-width="5"/><circle cx="248" cy="218" r="7" fill="${K}"/>
   <path d="M206 224 q-14 32 -2 42 q10 6 20 0" fill="${sd}" stroke="${K}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   ${mouths}${mustache}${glasses}${police}
+  ${o.shades ? `<g><path d="M146 200 h62 q4 34 -28 36 q-34 0 -34 -36 z M212 200 h62 q0 36 -34 36 q-32 -2 -28 -36 z" fill="#0d0d10" stroke="${K}" stroke-width="5" stroke-linejoin="round"/><path d="M206 206 h8" stroke="${K}" stroke-width="6"/></g>` : ""}
+  ${o.saunaHat ? `<path d="M118 196 q8 -132 92 -136 q84 4 92 136 q-92 -22 -184 0 z" fill="#d9c39a" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/><path d="M118 196 q92 -26 184 0 l6 18 q-98 -26 -196 0 z" fill="#c4ab7e" stroke="${K}" stroke-width="5"/>` : ""}
  </g>
 </svg>`;
   };
