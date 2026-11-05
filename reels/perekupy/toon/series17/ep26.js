@@ -116,18 +116,18 @@ window.build = R => {
   tl.to("#title", { opacity: 0, y: -50, duration: .25 }, st.v1 - .2);
   tl.fromTo(cam, { s: 1, x: 0, y: 0 }, { s: 2.2, x: 288, y: 398, duration: .5, ease: "power3.inOut", immediateRender: false }, W("h", "соседн") - .2)
     .to(cam, { s: 1, x: 0, y: 0, duration: .4, ease: "power2.inOut" }, en.h + .4);
-  R.sfx("whoosh", W("h", "соседн") - .2, .6); R.sfx("ping", W("h", "толян") + .05, .7);
-  tl.fromTo("#tn-armR", { rotation: 0, svgOrigin: "292 400" }, { rotation: -140, svgOrigin: "292 400", duration: .25, yoyo: true, repeat: 3, immediateRender: false }, W("h", "толян"));
+  R.sfx("whoosh", W("h", "соседн") - .2, .6); R.sfx("ping", W("h", "талян") + .05, .7);
+  tl.fromTo("#tn-armR", { rotation: 0, svgOrigin: "292 400" }, { rotation: -140, svgOrigin: "292 400", duration: .25, yoyo: true, repeat: 3, immediateRender: false }, W("h", "талян"));
   // 2. мойка: пена сползает — под ней другой оттенок
   swap("fw1", "wash", st.s3 - .7);
   slam("#g1", st.s3 + .2, "ping");
   for (let i = 0; i < 10; i++) tl.to(`#fm${i}`, { y: 260, opacity: 0, duration: 1.2, ease: "power1.in" }, W("l1", "толщином") - .6 + i * .05);
   tl.fromTo("#door", { opacity: 0 }, { opacity: 1, duration: .4, immediateRender: false }, W("l1", "толщином") - .2);
-  slam("#shade", W("l1", "тысяч"), "impact");
+  slam("#shade", W("l1", "1200"), "impact");
   // 3. парилка: конверт из рук в руки, счёт
   swap("wash", "sauna", st.t2 - .7);
   tl.fromTo("#env", { x: -140, rotation: -20 }, { x: 160, rotation: 8, duration: .6, ease: "power2.inOut", immediateRender: false }, W("t2", "договар")); R.sfx("swish", W("t2", "договар"), .6);
-  slam("#k20", W("l2", "двадцать"), "pop"); slam("#k30", W("l2", "тридцать"), "pop");
+  slam("#k20", W("l2", "20"), "pop"); slam("#k30", W("l2", "30"), "pop");
   // 4. слежка: бинокль
   swap("sauna", "spy", st.v2 - .7);
   tl.fromTo("#bino", { opacity: 0, scale: .6 }, { opacity: 1, scale: 1, duration: .35, ease: "back.out(1.8)", immediateRender: false }, st.v2 - .4); R.sfx("lock", st.v2 - .4, .6);
@@ -141,6 +141,6 @@ window.build = R => {
   // 7. мораль
   swap("fw2", "moral", st.rule - .7);
   tl.fromTo("#moralCard", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: .4, ease: "expo.out", immediateRender: false }, st.rule - .4);
-  [W("rule", "плати"), W("rule", "осмотр"), W("rule", "замер"), W("rule", "забрак"), W("rule", "перехват") - .2].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
+  [st.rule + .1, W("rule", "осмотр"), W("rule", "замер"), W("rule", "забрак"), W("rule", "перехват") - .2].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
   ending(R, st.end - .15);
 };
