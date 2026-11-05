@@ -1,0 +1,21 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#f1e4d0"/>
+    <g opacity=".5" stroke="#e2cfb1" stroke-width="6"><path d="M0 0 V1080"/><path d="M90 0 V1080"/><path d="M180 0 V1080"/><path d="M270 0 V1080"/><path d="M360 0 V1080"/><path d="M450 0 V1080"/><path d="M540 0 V1080"/><path d="M630 0 V1080"/><path d="M720 0 V1080"/><path d="M810 0 V1080"/><path d="M900 0 V1080"/><path d="M990 0 V1080"/></g>
+    <!-- меловая доска -->
+    <g><rect x="60" y="250" width="440" height="330" rx="10" fill="#2f3a33" stroke="#7a4a24" stroke-width="14"/>
+      <text x="280" y="320" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="38" fill="#f4f6f8">МЕНЮ</text>
+      <text x="100" y="380" font-family="Onest" font-weight="800" font-size="30" fill="#f4f6f8">Капучино</text><text x="460" y="380" text-anchor="end" font-family="Onest" font-weight="800" font-size="30" fill="#ffd23f">220</text><text x="100" y="430" font-family="Onest" font-weight="800" font-size="30" fill="#f4f6f8">Раф</text><text x="460" y="430" text-anchor="end" font-family="Onest" font-weight="800" font-size="30" fill="#ffd23f">260</text><text x="100" y="480" font-family="Onest" font-weight="800" font-size="30" fill="#f4f6f8">Латте</text><text x="460" y="480" text-anchor="end" font-family="Onest" font-weight="800" font-size="30" fill="#ffd23f">240</text><text x="100" y="530" font-family="Onest" font-weight="800" font-size="30" fill="#f4f6f8">Круассан</text><text x="460" y="530" text-anchor="end" font-family="Onest" font-weight="800" font-size="30" fill="#ffd23f">190</text></g>
+    <!-- окно -->
+    <rect x="580" y="230" width="440" height="520" fill="#cfe8f5" stroke="#7a4a24" stroke-width="14"/><path d="M800 230 V750 M580 490 H1020" stroke="#7a4a24" stroke-width="10"/>
+    <g opacity=".8"><rect x="600" y="560" width="190" height="170" fill="#a7c4a0"/><rect x="820" y="520" width="180" height="210" fill="#c6a98a"/></g>
+    <!-- лампы -->
+    <g><path d="M300 0 V150" stroke="#2b2b2e" stroke-width="5"/><path d="M250 150 h100 l-30 -50 h-40 z" fill="#2b2b2e" stroke="#000" stroke-width="4"/><circle cx="300" cy="165" r="16" fill="#ffe9a8"/><circle cx="300" cy="200" r="120" fill="#ffe9a8" opacity=".15"/></g><g><path d="M780 0 V150" stroke="#2b2b2e" stroke-width="5"/><path d="M730 150 h100 l-30 -50 h-40 z" fill="#2b2b2e" stroke="#000" stroke-width="4"/><circle cx="780" cy="165" r="16" fill="#ffe9a8"/><circle cx="780" cy="200" r="120" fill="#ffe9a8" opacity=".15"/></g>
+    <!-- стойка с кофемашиной -->
+    <rect x="0" y="860" width="1080" height="60" fill="#7a4a24" stroke="#000" stroke-width="7"/><rect x="0" y="920" width="1080" height="160" fill="#8b5a2b" stroke="#000" stroke-width="7"/>
+    <g><rect x="80" y="700" width="220" height="160" rx="14" fill="#c9ced6" stroke="#000" stroke-width="7"/><rect x="110" y="730" width="160" height="40" rx="8" fill="#2b2f37"/>
+      <path d="M150 800 v30 M230 800 v30" stroke="#000" stroke-width="10"/><rect x="170" y="824" width="40" height="36" rx="4" fill="#fff" stroke="#000" stroke-width="4"/></g>
+    <g><rect x="380" y="810" width="44" height="50" rx="6" fill="#fff" stroke="#000" stroke-width="4"/><path d="M424 822 q18 4 0 24" stroke="#000" stroke-width="4" fill="none"/></g><g><rect x="450" y="810" width="44" height="50" rx="6" fill="#fff" stroke="#000" stroke-width="4"/><path d="M494 822 q18 4 0 24" stroke="#000" stroke-width="4" fill="none"/></g>
+    <!-- пол -->
+    <rect y="1080" width="1080" height="840" fill="#b98b5e"/><g stroke="#a3784e" stroke-width="5"><path d="M0 1140 H1080"/><path d="M0 1210 H1080"/><path d="M0 1280 H1080"/><path d="M0 1350 H1080"/><path d="M0 1420 H1080"/><path d="M0 1490 H1080"/><path d="M0 1560 H1080"/><path d="M0 1630 H1080"/><path d="M0 1700 H1080"/><path d="M0 1770 H1080"/><path d="M0 1840 H1080"/><path d="M0 1910 H1080"/></g>
+    <path d="M0 1080 H1080" stroke="#000" stroke-width="7"/>
+  </svg>
