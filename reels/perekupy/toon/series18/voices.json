@@ -3,13 +3,13 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "You narrate a dark-humor comedy about a dishonest car-buying consultant who takes money from both sides. Deadpan, dry punchlines after a tiny pause, perfect comic timing. «тайп-си» say as «тайп-си»."
+  "notes": "You narrate a dark-humor comedy about importing a car from a Japanese auction. Deadpan, dry punchlines after a tiny pause. Pronounce letters as Latin: «A» = «эй», «U» = «ю», «W» = «дабл-ю», «XX» = «икс-икс», «R» = «ар», «RA» = «ар-эй»."
  },
  "seryoga": {
   "voice": "Puck",
   "tempo": 1.15,
   "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
-  "notes": "One line: excited, fast, shouting into the phone."
+  "notes": "Line 1: excited, at a laptop at night. Line 2: cautious question. Line 3: outraged, betrayed. Line 4: angry, into the phone."
  },
  "vika": {
   "voice": "Kore",
@@ -21,7 +21,7 @@
   "voice": "Gacrux",
   "tempo": 1.12,
   "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
-  "notes": "Line 1: gruff old mechanic from under a car, disgusted. Line 2: deadpan self-irony, punchline."
+  "notes": "Line 1: gruff old mechanic, dry, matter-of-fact. Line 2: deadpan punchline."
  },
  "tolyan": {
   "voice": "Algenib",
@@ -112,5 +112,11 @@
   "tempo": 1.1,
   "profile": "Stas — a slick, fast-talking Russian car-buying consultant in his late 20s; upbeat salesman energy, overconfident, a bit shady.",
   "notes": "Line 1: confident pitch. Line 2: conspiratorial whisper-like but clear. Line 3: loud, enthusiastic lie. Line 4: cheeky. Line 5: caught, sheepish, slow."
+ },
+ "gena": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.1,
+  "profile": "Gena — a laid-back, slick Russian car import middleman from Vladivostok in his 40s; easygoing sailor drawl, calls everyone «брат», always calm, never worried.",
+  "notes": "Line 1: smooth and confident. Line 2: dismissive, lazy. Line 3: cheerful, shouting over port noise. Line 4: totally unbothered, sly punchline."
  }
 }
