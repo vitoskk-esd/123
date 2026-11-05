@@ -32,7 +32,9 @@ const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div cla
 const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
 let CLK = ""; const clock = (t) => (CLK = t, "");
 const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
-// Королла владельца (kit/img/corolla), мордой вправо; низ колёс — t + w*.34
+// Мерседес W124 владельца (kit/img/w124: w124_34 — 3/4 спереди, w124_side — сбоку мордой вправо)
+const W124 = (l, t, w = 700, z = 3) => `<img class="el" src="../../kit/img/w124/w124_34.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z}">`;
+// Королла (kit/img/corolla) — запасная машина, мордой вправо; низ колёс — t + w*.34
 const COR = (l, t, w = 640, z = 3) => `<img class="el" src="../../kit/img/corolla/corolla.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z}">`;
 const GAUGE = (v, l, t, c = "#ff3b30") => `<div class="el" style="left:${l}px;top:${t}px;z-index:11;font-family:'JetBrains Mono';font-weight:800;font-size:44px;color:${c};background:#cfe9c4;border:6px solid #151515;outline:5px solid #ffd23f;border-radius:12px;padding:4px 16px">${v}</div>`;
 const ENV = (l, t, rot = -8) => `<div class="el" style="left:${l}px;top:${t}px;width:120px;height:76px;z-index:10;transform:rotate(${rot}deg);background:#f4e7c3;border:5px solid #151515;border-radius:6px">
@@ -40,8 +42,8 @@ const ENV = (l, t, rot = -8) => `<div class="el" style="left:${l}px;top:${t}px;w
 const PHONE = (l, t, w, inner, z = 8) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * 1.9}px;z-index:${z};background:#0d0e12;border:8px solid #151515;outline:4px solid #4a4e58;border-radius:44px;padding:18px;box-sizing:border-box">
   <div style="width:100%;height:100%;background:#e9f1fb;border-radius:28px;overflow:hidden;font-family:Onest;color:#151515;padding:14px;box-sizing:border-box">${inner}</div></div>`;
 const BOT = `<div style="font-family:Unbounded;font-weight:900;font-size:19px;color:#1d4fb8">🦊 Перехват · 4 сек назад</div>
-  <div style="margin-top:10px;background:#fff;border-radius:16px;padding:12px;border:3px solid #c9d3df"><img src="../../kit/img/corolla/corolla.png" style="width:100%">
-  <div style="font-family:Unbounded;font-weight:900;font-size:19px;margin-top:6px">Toyota Corolla · 340 000 ₽</div>
+  <div style="margin-top:10px;background:#fff;border-radius:16px;padding:12px;border:3px solid #c9d3df"><img src="../../kit/img/w124/w124_34.png" style="width:100%">
+  <div style="font-family:Unbounded;font-weight:900;font-size:19px;margin-top:6px">Mercedes W124 · 420 000 ₽</div>
   <div style="font-size:16px;font-weight:800;margin-top:6px;color:#2f7a2f">✅ собственник · история ТО</div></div>`;
 const TOW = { towel: "#f4f6f8", shades: true, chain: true, saunaHat: true };             // Толян в бане: очки и цепь — узнаётся
 const STAS_SAUNA = { towel: "#2e86de", saunaHat: true, hair: "#3a2d22" };
@@ -63,11 +65,11 @@ const S = [
    vo: "Стас: «Подбор под ключ — двадцать тысяч. Найду машину мечты». Вика: «А почему мы на колесе обозрения?» Стас: «Чтобы никто не подслушал». Лис: «Подслушивать и не надо было. В соседней кабинке ехал Толян».", who: "Стас + Вика + Лис",
    mv: "<b>Новая локация — кабинка колеса обозрения на закате:</b> город внизу, спицы, соседняя красная кабинка. Подборщик Стас назначает встречу «на высоте». На панчлайне камера перескакивает на соседнюю кабинку — там машет Толян." },
  { h: "МОЙКА 24", tc: "2/7 · 0:14–0:28", bg: "carwash", y: 640,
-   els: () => COR(180, 1110, 640, 3) + `<div class="el" style="left:${180 + 640 * .29}px;top:${1110 + 640 * .12}px;width:${640 * .19}px;height:${640 * .2}px;z-index:4;background:#9dc48f;border:4px dashed #ff3b30;border-radius:6px"></div>`
-     + lab("ДРУГОЙ ОТТЕНОК", 300, 1290, "#ff3b30", "#fff", 26, -3) + ch("tolyan", "t", 0, 800, .88, 6) + PK("p", 700, 830, .8, STAS, 6) + GAUGE("1200 мкм", 660, 1000)
+   els: () => W124(150, 1020, 720, 3) + `<div class="el" style="left:${150 + 720 * .665}px;top:${1020 + 720 * .438 * .3}px;width:${720 * .135}px;height:${720 * .438 * .45}px;z-index:4;background:#e2cfa5;border:4px dashed #ff3b30;border-radius:6px;opacity:.9"></div>`
+     + lab("ДРУГОЙ ОТТЕНОК", 520, 1215, "#ff3b30", "#fff", 26, -3) + ch("tolyan", "t", 0, 800, .88, 6) + PK("p", 700, 830, .8, STAS, 6) + GAUGE("1200 мкм", 430, 930)
      + bub("Родная краска!<br><em>Сто двадцать микрон!</em>", 470, 660) + bub("Пену не смывай, брат.<br><em>Так блестит.</em>", 20, 1300),
    vo: "Стас: «Родная краска! Сто двадцать микрон!» Толян: «Пену не смывай, брат. Так блестит». Лис: «Толщиномер показывал тысячу двести».", who: "Стас + Толян + Лис",
-   mv: "<b>Новая локация — мойка самообслуживания «Мойка 24»:</b> пена, пистолеты, решётка в полу. Королла вся в пене; пена стекает с двери — под ней <b>другой оттенок</b>. Толян брызгает пеной обратно. Толщиномер мигает «1200»." },
+   mv: "<b>Новая локация — мойка самообслуживания «Мойка 24»:</b> пена, пистолеты, решётка в полу. Мерседес W124 весь в пене; пена стекает с двери — под ней <b>другой оттенок</b>. Толян брызгает пеной обратно. Толщиномер мигает «1200»." },
  { h: "С ЛЁГКИМ ПАРОМ", tc: "3/7 · 0:28–0:40", bg: "sauna", y: 640,
    els: () => PK("tt", 60, 780, .88, TOW, 6) + PK("p", 600, 790, .88, STAS_SAUNA, 6) + ENV(470, 1150, -12)
      + bub("Тридцать — тебе,<br><em>как договаривались.</em>", 40, 660) + bub("И веник —<br><em>за твой счёт.</em>", 620, 1300),
@@ -83,7 +85,7 @@ const S = [
    els: () => ch("mihalych", "m", 30, 560, .9, 6) + ch("vika", "v", 650, 600, .85, 6)
      + bub("Шпаклёвки — на хрущёвку хватит.<br><em>А днище — как дуршлаг.</em>", 160, 230),
    vo: "Михалыч: «Шпаклёвки — на хрущёвку хватит. А днище — как дуршлаг». Вика: «А подборщик сказал — идеальная». Михалыч: «Стасик? Он и мне подбирал. Я с тех пор из ямы не вылезаю».", who: "Михалыч + Вика",
-   mv: "<b>Новый ракурс — из смотровой ямы, снизу вверх:</b> над головой ржавое днище Короллы в дырах, лампа-переноска. Михалыч и Вика стоят в яме и смотрят вверх. Оба в кадре." },
+   mv: "<b>Новый ракурс — из смотровой ямы, снизу вверх:</b> над головой ржавое днище Мерседеса в дырах, лампа-переноска. Михалыч и Вика стоят в яме и смотрят вверх. Оба в кадре." },
  { h: "ВЕРХНЯЯ ТОЧКА", tc: "6/7 · 1:04–1:16", bg: "ferris", y: 560,
    els: () => PK("p", 560, 880, .78, Object.assign({}, STAS, { item: "", look: "o" }), 6) + ch("vika", "v", 60, 900, .78, 6)
      + lab("ВЕРХНЯЯ ТОЧКА · 20 МИН", 560, 600, "#151515", "#ffd23f", 28, 3)
