@@ -24,6 +24,8 @@ html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden
 <script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
 <script>
 // ep25 «ТЕСТ-ДРАЙВ»: перекупа развели — «покупатель» уехал на тест-драйв на Гелике Толяна. В каждом диалоге в кадре оба собеседника.
+// парковка ТЦ без розового отражения неона на асфальте — в кадре 6 оно ложилось бликом за Гелик
+BGS.mall = BGS.mall.replace('<g fill="#ff2ea6" opacity=".18">', '<g fill="#ff2ea6" opacity="0">');
 const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
 const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
 const ARK = { coat: "#c69c6d", jacket: "#c69c6d", glasses: true, mustache: true, hair: "#2b1d14", tie: "#8e1b1b" };
