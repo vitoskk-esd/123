@@ -4,6 +4,7 @@
 $("#title .a").textContent = E.rubric; $("#title .b").textContent = E.subtitle; $("#tag span").textContent = "жизнь одной четырки";
 $("#title .a").style.fontSize = "76px"; $("#title .b").style.fontSize = "120px";
 document.querySelector("#cam > svg#bg")?.remove();
+BGS.yard = BGS.yard.replace(/<g><path d="M120 1320[\s\S]*?<\/g>/, "");   // двор без качелей
 const W = (line, pre, n = 0) => {
   const norm = s => s.toLowerCase().replace(/ё/g, "е").replace(/[^а-я0-9a-z]/g, "");
   const hits = (TT.words[line] || []).filter(w => norm(w[0]).startsWith(norm(pre)));
@@ -40,10 +41,10 @@ add("dealer", T14S("car1", 320, 1180, 700, [["c1s", "silver"]]) + hero("perekup"
   + stamp("n1a", "ЧЕХЛЫ", 560, 560, "#fff", "#151515", 44, 3) + stamp("n1b", "ЁЛОЧКА 🌲", 600, 660, "#4cd964", "#151515", 44, -3) + stamp("n1c", "РАССАДА 🌱", 560, 760, "#ffd23f", "#151515", 44, 2));
 // 3. двор, 2013: внук — чёрная, тонировка в ноль, занижение, пушка
 scene("yard", "yard");
-add("yard", T14S("car2", 200, 1050, 700, [["c2s", "silver"], ["c2b", "black"], ["c2t", "black", "", true]], 4, true)
-  + `<div class="el" id="boom2" style="left:120px;top:1150px;font-size:140px;z-index:9;opacity:0">💥</div>`
-  + stamp("n2a", "ТОНИРОВКА В НОЛЬ", 60, 880, "#151515", "#fff", 40, -4) + stamp("n2b", "ЗАНИЖЕНИЕ", 620, 900, "#151515", "#fff", 40, 3)
-  + stamp("n2c", "ПУШКА В ВЫХЛОП", 300, 1380, "#ff3b30", "#fff", 40, -2) + stamp("n2d", "РАССАДА ✗", 380, 560, "#ffd23f", "#151515", 52, 3));
+add("yard", T14S("car2", 200, 930, 700, [["c2s", "silver"], ["c2b", "black"], ["c2t", "black", "", true]], 4, true)
+  + `<div class="el" id="boom2" style="left:100px;top:1030px;font-size:140px;z-index:9;opacity:0">💥</div>`
+  + stamp("n2a", "ТОНИРОВКА В НОЛЬ", 60, 770, "#151515", "#fff", 40, -4) + stamp("n2b", "ЗАНИЖЕНИЕ", 620, 790, "#151515", "#fff", 40, 3)
+  + stamp("n2c", "ПУШКА В ВЫХЛОП", 300, 1330, "#ff3b30", "#fff", 40, -2) + stamp("n2d", "РАССАДА ✗", 380, 540, "#ffd23f", "#151515", 52, 3));
 // 4. гаражи, 2016: отбойник, сварили из двух
 scene("garage", "garages");
 add("garage", T14S("car3", 190, 1200, 700, [["c3c", "cherry", "inset(0 0 0 50%)"], ["c3b", "black", "inset(0 50% 0 0)"], ["c3o", "own"]])
@@ -53,7 +54,7 @@ add("garage", T14S("car3", 190, 1200, 700, [["c3c", "cherry", "inset(0 0 0 50%)"
   + stamp("n3c", "ОТБОЙНИК 1 : 0", 200, 560, "#ff3b30", "#fff", 56, -3) + stamp("n3d", "ШОВ ЗАКРАШЕН", 300, 1500, "#4cd964", "#151515", 44, 2));
 // 5. аэродром, 2021: дрифт
 scene("drift", "airfield");
-add("drift", T34("car4", 160, 1130, 760, 4) + Array.from({ length: 8 }, (_, i) => `<div class="smk" id="sm${i}" style="left:${120 + (i * 61) % 300}px;top:${1300 + (i * 37) % 120}px;width:${120 + (i * 29) % 90}px;height:${80 + (i * 17) % 50}px"></div>`).join("")
+add("drift", T34("car4", 160, 1130, 760, 4) + Array.from({ length: 8 }, (_, i) => `<div class="smk" id="sm${i}" style="left:${640 + (i * 61) % 260}px;top:${1300 + (i * 37) % 120}px;width:${120 + (i * 29) % 90}px;height:${80 + (i * 17) % 50}px"></div>`).join("")
   + stamp("n4a", "КАРКАС", 80, 940, "#ffd23f", "#151515", 44, -4) + stamp("n4b", "РАСТЯЖКА", 640, 920, "#ffd23f", "#151515", 44, 3)
   + stamp("n4c", "ОПЯТЬ.", 380, 560, "#ff3b30", "#fff", 70, -3));
 // 6. рынок, 2024: Толян продаёт, баба Галя проходит мимо
@@ -91,11 +92,11 @@ window.build = R => {
   const YR = [[0, "2024"], [SW.d1 + .25, "2008"], [SW.l2 + .25, "2013"], [SW.l3 + .25, "2016"], [SW.l4 + .25, "2021"], [SW.t1 + .25, "2024"], [SW.m1 + .25, ""]];
   R.hooks.push(t => { const f = Math.floor(t * 30), lv = (LIP.ded || [])[f] || 0;
     if (document.getElementById("d")) mouth("d", lv > .28 && !(lv < .55 && f % 3 === 2) ? "talk" : "grin");
-    const y = YR.filter(([a]) => t >= a).pop()[1]; $("#yr").textContent = y; $("#yr").style.display = y && t < st.end - .2 ? "" : "none";
+    const y = YR.filter(([a]) => t >= a).pop()[1]; $("#yr").textContent = y; $("#yr").style.display = y && t > W("h", "пят") - .1 && t < st.end - .2 ? "" : "none";
     const dr = t > SW.l4 && t < SW.t1 ? t - SW.l4 : 0;                          // дрифт: машина ходит маятником
     if (dr) $("#car4").style.transform = `translate(${Math.sin(dr * 1.6) * 60}px,${Math.sin(dr * 3.2) * 8}px) rotate(${-6 + Math.sin(dr * 1.6 + .6) * 7}deg)`;
     for (let i = 0; i < 8; i++) { const s = document.getElementById("sm" + i), p = dr ? ((dr * .7 + i / 8) % 1) : 0;
-      s.style.opacity = dr ? (1 - p) * .9 : 0; s.style.transform = `translate(${-p * 260}px,${-p * 160}px) scale(${.5 + p * 1.4})`; }
+      s.style.opacity = dr ? (1 - p) * .9 : 0; s.style.transform = `translate(${p * 240}px,${-p * 160}px) scale(${.5 + p * 1.4})`; }
     for (let i = 0; i < 12; i++) { const s = document.getElementById("sp" + i), w = t > W("l3", "свар") && t < W("l3", "шов") + .3;
       s.style.opacity = w && ((f + i * 7) % 9 < 4) ? 1 : 0; s.style.transform = `translate(${Math.sin(f * 1.3 + i) * 50}px,${Math.cos(f * .9 + i * 2) * 40}px)`; } });
   const swap = (from, to, at, kind = "swipe") => {
