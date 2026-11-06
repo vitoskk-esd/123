@@ -36,11 +36,15 @@ def request(who, out):
     body = {"contents": [{"parts": [{"text": f"{style}\n\n{text}"}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
     for attempt in range(6):
         rr = subprocess.run(["curl", "-sS", "-m", "600", "-w", "\n__HTTP__%{http_code} %{time_total}", "-X", "POST", "-H", "Content-Type: application/json",
-                            f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent", "--data-binary", "@-"],
+                            f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:streamGenerateContent?alt=sse", "--data-binary", "@-"],
                            input=json.dumps(body, ensure_ascii=False).encode(), capture_output=True)
         r, _, meta = rr.stdout.rpartition(b"\n__HTTP__")
-        try:
-            j = json.loads(r)
+        try:   # поток SSE (прокси рвёт ответ дольше 30 с): склеиваем куски звука из всех «data:»
+            ev = [json.loads(x[5:]) for x in r.decode().splitlines() if x.startswith("data:")]
+            j = ev[-1] if ev and all("candidates" in e for e in ev) else (next((e for e in ev if "error" in e), None) or json.loads(r))
+            if "candidates" in j:
+                parts = [p["inlineData"]["data"] for e in ev for c in e.get("candidates", []) for p in c.get("content", {}).get("parts", []) if "inlineData" in p]
+                j = {"pcm": b"".join(base64.b64decode(p) for p in parts)}
         except Exception:
             print(who, "пустой ответ", meta.decode(), rr.stderr.decode()[:200], r[:200], "— повтор через 70 с"); time.sleep(70); continue
         if "error" in j:
@@ -48,7 +52,7 @@ def request(who, out):
             if j["error"].get("code") == 429 and "free_tier_requests" in msg and "PerDay" in json.dumps(j):
                 sys.exit("дневная квота основной модели исчерпана")
             print(who, "ошибка", j["error"].get("code"), msg[:120]); time.sleep(75); continue
-        pcm = base64.b64decode(j["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
+        pcm = j["pcm"]
         with open(out, "wb") as f:
             subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", "-", out], input=pcm, check=True)
         print(who, out, round(len(pcm) / 2 / SR, 1), "с"); return True
