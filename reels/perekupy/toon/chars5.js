@@ -1,6 +1,6 @@
 // Массовка серий с 23-й: перекупы-«не перекупы» (очередь во дворе, штаб). Без реплик — говорят только Толян и основные герои.
 // CHARS.perekup(p, {jacket, pants, cap, hair, skin, item: "phone"|"cash"|"flowers"|"bag"|"", look: "grin"|"o"|"angry",
-//                   glasses, mustache, coat (длинное пальто, цвет), police (фуражка и погоны), tie}) — с ep25 и говорящие: рты -mouth-talk/-grin/-o/-flat
+//                   glasses, mustache, coat (длинное пальто, цвет), police (фуражка и погоны), tie, ushanka (цвет меха), scarf (цвет)}) — с ep25 и говорящие: рты -mouth-talk/-grin/-o/-flat
 (() => {
   const K = "#151515", W = 7;
   CHARS.perekup = (p, o = {}) => {
@@ -45,6 +45,7 @@
   ${o.coat ? `<path d="M118 400 q-26 160 -6 290 h196 q20 -130 -6 -290 z" fill="${o.coat}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>` : ""}
   ${o.vest ? `<path d="M172 356 h76 l-8 210 h-60 z" fill="#f4f6f8" stroke="${K}" stroke-width="5"/>${[380, 404, 428, 452, 476, 500, 524, 548].map(y => `<path d="M${176 + (y - 356) * .04} ${y} h${68 - (y - 356) * .08}" stroke="#1f4fb8" stroke-width="9"/>`).join("")}` : ""}
   ${o.towel || o.vest ? "" : `<path d="M210 352 v214" stroke="${K}" stroke-width="5"/><path d="M180 356 l30 34 l30 -34" fill="none" stroke="${K}" stroke-width="5"/>`}
+  ${o.scarf ? `<path d="M156 352 q54 30 108 0 l8 30 q-62 30 -124 0 z" fill="${o.scarf}" stroke="${K}" stroke-width="6" stroke-linejoin="round"/><path d="M236 372 l18 96 l-34 4 l-6 -92 z" fill="${o.scarf}" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>` : ""}
   ${o.chain ? `<path d="M178 368 q32 52 64 0" fill="none" stroke="#f5c542" stroke-width="9" stroke-linecap="round"/><circle cx="210" cy="420" r="11" fill="#f5c542" stroke="${K}" stroke-width="4"/>` : ""}
   ${o.tie ? `<path d="M202 372 h16 l8 90 l-16 22 l-16 -22 z" fill="${o.tie}" stroke="${K}" stroke-width="4"/>` : ""}
   ${o.police ? `<path d="M126 384 h46 M248 384 h46" stroke="#f5c542" stroke-width="10" stroke-linecap="round"/>` : ""}
@@ -59,13 +60,17 @@
   <ellipse cx="122" cy="232" rx="20" ry="28" fill="${sk}" stroke="${K}" stroke-width="${W}"/><ellipse cx="298" cy="232" rx="20" ry="28" fill="${sk}" stroke="${K}" stroke-width="${W}"/>
   <path d="M120 200 q0 -120 90 -120 q90 0 90 120 q0 70 -30 108 q-26 32 -60 32 q-34 0 -60 -32 q-30 -38 -30 -108 z" fill="${sk}" stroke="${K}" stroke-width="${W}"/>
   ${o.beard ? `<path d="M140 250 q4 90 70 92 q66 -2 70 -92 q-20 40 -70 42 q-50 -2 -70 -42 z" fill="${hr}" stroke="${K}" stroke-width="5"/>` : ""}
-  ${o.police ? "" : head}
+  ${o.police || o.ushanka ? "" : head}
   ${brows}
   <ellipse cx="176" cy="216" rx="18" ry="15" fill="#fff" stroke="${K}" stroke-width="5"/><circle cx="180" cy="218" r="7" fill="${K}"/>
   <ellipse cx="244" cy="216" rx="18" ry="15" fill="#fff" stroke="${K}" stroke-width="5"/><circle cx="248" cy="218" r="7" fill="${K}"/>
   <path d="M206 224 q-14 32 -2 42 q10 6 20 0" fill="${sd}" stroke="${K}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   ${mouths}${mustache}${glasses}${police}
   ${o.shades ? `<g><path d="M146 200 h62 q4 34 -28 36 q-34 0 -34 -36 z M212 200 h62 q0 36 -34 36 q-32 -2 -28 -36 z" fill="#0d0d10" stroke="${K}" stroke-width="5" stroke-linejoin="round"/><path d="M206 206 h8" stroke="${K}" stroke-width="6"/></g>` : ""}
+  ${o.ushanka ? `<g><path d="M112 250 q-10 -60 6 -70 h22 q8 40 4 96 q-20 6 -32 -26 z M308 250 q10 -60 -6 -70 h-22 q-8 40 -4 96 q20 6 32 -26 z" fill="${o.ushanka}" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M118 186 q4 -116 92 -118 q88 2 92 118 z" fill="${o.ushanka}" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/>
+    <path d="M112 196 q98 -40 196 0 l-4 -46 q-94 -34 -188 0 z" fill="${o.ushanka}" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M140 170 q20 -8 30 2 M200 158 q14 -6 24 4 M256 168 q14 -6 22 6" stroke="${K}" stroke-width="4" fill="none" opacity=".5"/></g>` : ""}
   ${o.saunaHat ? `<path d="M118 196 q8 -132 92 -136 q84 4 92 136 q-92 -22 -184 0 z" fill="#d9c39a" stroke="${K}" stroke-width="${W}" stroke-linejoin="round"/><path d="M118 196 q92 -26 184 0 l6 18 q-98 -26 -196 0 z" fill="#c4ab7e" stroke="${K}" stroke-width="5"/>` : ""}
  </g>
 </svg>`;

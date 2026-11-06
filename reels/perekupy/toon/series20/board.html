@@ -1,0 +1,94 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ep29 «ПЕРЕГОН ИЗ ЯКУТСКА» (по образцу ep18 «Перегон 9000 км» с Марком): ночью «Перехват» присылает Толяну Прадо на треть дешевле — в Якутске.
+// Прадо — картинка владельца (kit/img/prado). Каждый, кто говорит, — в кадре; Лис — за кадром. Сквозной счётчик расходов 💸 — как в ep18.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const PK = (p, l, t, s, o, z = 4) => ch("perekup", p, l, t, s, z, o);
+const SANYA = { coat: "#5b4636", jacket: "#5b4636", pants: "#2b2f37", ushanka: "#8a6a4a", scarf: "#c0392b", beard: true, hair: "#3a2d22" };
+const DPS = { police: true, jacket: "#2a3a5a", pants: "#1f2a44" };
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const PR = (v, l, t, w, z = 3, extra = "") => `<img class="el" src="../../kit/img/prado/prado_${v}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+let CNTV = ""; const CNT = v => (CNTV = v, "");
+const BOT = `<div class="botcard"><div class="bh">ПЕРЕХВАТ · бот · 03:02</div><div class="bb"><b style="color:#ff7a1a">🔥 −30% к рынку</b><br><b>Toyota Land Cruiser Prado · 2 900 000 ₽</b><br>📍 Якутск<br>⏱ 1,2 с после публикации</div></div>`;
+const STEAM = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:200px;height:160px;z-index:4;border-radius:50%;background:radial-gradient(ellipse,rgba(255,255,255,.9),rgba(255,255,255,0) 70%)"></div>`;
+const THERMO = `<div class="el" style="left:40px;top:720px;z-index:8;font-family:'JetBrains Mono';font-weight:800;font-size:72px;color:#7cc8ff;background:#0d0e12;border:6px solid #7cc8ff;border-radius:18px;padding:0 20px;box-shadow:0 0 26px rgba(124,200,255,.6)">−48°</div>`;
+const S = [
+ { h: "ПЕРЕГОН ИЗ ЯКУТСКА", tc: "1/8 · 0:00–0:10", bg: "room", y: 640, els: () => clock("03:02")
+     + BOT + ch("tolyan", "t", -20, 900, .95, 6) + bub("Брат, никому не отдавай,<br><em>я уже в аэропорту!</em>", 380, 1040),
+   vo: "Лис: «Три часа ночи. Перехват прислал Толяну Прадо на треть дешевле рынка. В Якутске. Восемь тысяч километров — разве это расстояние для перекупа?» Толян: «Брат, никому не отдавай, я уже в аэропорту!»", who: "Лис + Толян",
+   mv: "<b>Начало — точно как в ролике с Марком:</b> ночная комната, Толян, на телефоне вспыхивает карточка бота «Перехват» (−30% к рынку · Prado · Якутск · 1,2 с после публикации). Толян подскакивает. Камера медленно наезжает." },
+ { h: "ЯКУТСК · −48°", tc: "2/8 · 0:10–0:24", bg: "winter", y: 700, els: () => CNT("40 000") + THERMO
+     + PR("34", 330, 1120, 660) + STEAM(820, 1120) + PK("sa", 690, 860, .82, SANYA, 6) + ch("tolyan", "t", -10, 860, .85, 6) + `<div class="el" style="left:115px;top:1028px;width:115px;height:36px;z-index:7;border-radius:14px;background:rgba(225,242,255,.8)"></div>`
+     + bub("Забирай, брат! Заводится<br>с полпинка. <em>С третьего.</em>", 360, 700),
+   vo: "Лис: «Якутск. Минус сорок восемь. Очки Толяна замёрзли раньше, чем он вышел из аэропорта». Продавец Саня: «Забирай, брат! Заводится с полпинка. С третьего». Лис: «Два миллиона девятьсот. Прадо — его. Тёплые носки — нет».",
+   who: "Лис + Саня", mv: "Двор панелек в мороз, пар столбом. <b>Новый говорящий — продавец Саня</b> (ушанка, шарф, борода). Толян в очках, на них иней. Счётчик расходов 💸 — как в ролике с Марком." },
+ { h: "ЛЕДОВАЯ ПЕРЕПРАВА", tc: "3/8 · 0:24–0:34", bg: "icecross", y: 700, els: () => CNT("40 000")
+     + PR("side", 240, 1150, 600) + lab("ЛЁД ТРЕЩИТ", 560, 980, "#1f4fb8", "#fff", 40, 3) + lab("ТОЛЯН МОЛИТСЯ", 80, 1420, "#151515", "#fff", 38, -2),
+   vo: "Лис: «Моста через Лену нет. Зимой — по льду. Лёд трещит, Толян молится, Прадо делает вид, что он лодка».", who: "Лис",
+   mv: "<b>Новая локация — ледовая переправа через Лену:</b> лёд до горизонта, вешки-ёлочки, знак «ДО 3 Т», тайга на том берегу. По льду бегут трещины, камера дрожит." },
+ { h: "ТРАССА «ЛЕНА» · НОЧЬ", tc: "4/8 · 0:34–0:44", bg: "zimnik", y: 700, els: () => CNT("112 000")
+     + PR("side", 180, 1140, 600) + lab("СОЛЯРКА — ЛЕТНЯЯ", 120, 940, "#ff3b30", "#fff", 40, -3) + lab("= ХОЛОДЕЦ", 560, 1020, "#ffd23f", "#151515", 44, 3)
+     + `<div class="el" style="left:700px;top:1340px;font-size:90px;z-index:8">🔥</div>`,
+   vo: "Лис: «Солярка — летняя. В минус сорок она превращается в холодец. Двое суток бак отогревали паяльной лампой. Прадо — паяльной, Толяна — надеждой».", who: "Лис",
+   mv: "<b>Новая локация — ночной зимник в тайге:</b> звёзды, сугробы, столб «ЛЕНА · 1 237 КМ». Прадо встал, под баком — паяльная лампа. Счётчик растёт." },
+ { h: "ПОСТ ДПС", tc: "5/8 · 0:44–0:56", bg: "dps", y: 700, els: () => CNT("124 000")
+     + PR("side_r", 20, 1140, 560) + PK("dp", 600, 860, .82, DPS, 6) + ch("tolyan", "t", 340, 880, .8, 7)
+     + bub("Договор от 15-го, сегодня 30-е.<br><em>На учёт не поставили.</em>", 300, 730) + lab("ШТРАФ 1 500 ₽", 60, 1330, "#ff3b30", "#fff", 50, -3),
+   vo: "Инспектор: «Договор от пятнадцатого. Сегодня тридцатое. На учёт не поставили — протокол». Толян: «Брат, я её не ставил — я её гнал!» Лис: «Штраф — полторы тысячи. Пока выгодно».", who: "Инспектор + Толян",
+   mv: "Ночной пост: <b>инспектор ДПС нарисован и говорит</b> (фуражка, погоны), Толян рядом. Луч фонарика по номерам." },
+ { h: "СТО У МИХАЛЫЧА", tc: "6/8 · 0:56–1:08", bg: "sto", y: 700, els: () => CNT("1 309 500")
+     + PR("34", 260, 1180, 600) + ch("mihalych", "m", 10, 820, .9, 6) + ch("tolyan", "t", 790, 870, .78, 6)
+     + bub("Довёз? Молодец.<br><em>Блок треснул ещё в Якутске.</em>", 140, 720) + lab("ВОДА ВМЕСТО АНТИФРИЗА", 40, 1400, "#ff3b30", "#fff", 36, -2),
+   vo: "Михалыч: «Довёз? Молодец. Только в системе вода вместо антифриза. Блок треснул ещё в Якутске. Ты его просто довёз». Лис: «Мотор — миллион сто пятьдесят. С работой».", who: "Михалыч + Лис",
+   mv: "Москва, СТО. Михалыч объясняет, почему Прадо был на треть дешевле. Толян в кадре молча снимает очки." },
+ { h: "ЧЕК", tc: "7/8 · 1:08–1:16", bg: "desk", y: 600, els: () => `<div class="receipt" style="top:640px"><h4>ЧЕК · ПЕРЕГОН</h4>${[["Prado", "2 900 000"], ["Самолёт", "40 000"], ["Солярка, 8 000 км", "72 000"], ["Ночёвки", "35 000"], ["Паяльная лампа и тягач", "25 000"], ["Штраф", "1 500"], ["Мотор с работой", "1 150 000"]].map(([a, b]) => `<div class="row"><span>${a}</span><span>${b}</span></div>`).join("")}<div class="tot"><span>ИТОГО</span><span>4 223 500</span></div><div style="text-align:center;font-size:28px;color:#6b7280">рынок ≈ 4 100 000 · +123 500</div></div>`,
+   vo: "Лис: «Прадо на треть дешевле рынка вышел дороже рынка на сто двадцать три тысячи. Зато закалённый».", who: "Лис",
+   mv: "Чек сверху, строки выпрыгивают по одной, итог — красным. Как в ролике с Марком." },
+ { h: "МОРАЛЬ", tc: "8/8 · 1:16–1:30", bg: "desk", y: 600,
+   els: () => `<div class="el" style="left:60px;top:660px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:24px 28px;color:#fff;font-family:Unbounded;font-weight:900;font-size:30px;line-height:1.4">ПЕРЕД ПЕРЕГОНОМ:<br><span style="color:#ffd23f">🧮 билеты, топливо, ночёвки, ремонт — в цену<br>🔧 зимой: антифриз, солярка, пуск на холодную — до оплаты<br>📄 на учёт — за 10 дней<br>🔔 в «Перехвате» поставь свой город</span></div>` + FOX(420, 1250, 220),
+   vo: "Лис: «Перегон считай в цену: билеты, топливо, ночёвки, ремонт. Зимой — диагностика до оплаты: антифриз, солярка, пуск на холодную. На учёт — за десять дней. А чтобы не лететь за восемь тысяч километров — в Перехвате поставь свой город. Сохрани — пока выгода не вышла дороже рынка».", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист, лиса с аватарки. ~1:30." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CNTV) document.querySelector(".view").insertAdjacentHTML("beforeend", `<div class="cnt" style="top:auto;bottom:20px;left:auto;right:20px">💸 ${CNTV} ₽</div>`); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "m", "sa", "dp"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
