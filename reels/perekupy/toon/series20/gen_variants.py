@@ -1,7 +1,7 @@
 # Розовый не использовать (владелец 06.11).
 # python3 gen_variants.py — 7 «пересъёмок» ep29 «Перегон из Якутска» (схема ep27, владелец 05–06.11): та же история, порядок и озвучка;
 # у каждой своя гамма фонов, движение камеры, стиль пузырей, обложка, музыка и одежда героев. → ep29b…ep29h (.json/.js/.css + vo/<id>)
-import json, os, shutil
+import json, os, shutil, sys
 
 BASE_JS, BASE_CSS, BASE_JSON = open("ep29.js").read(), open("ep29.css").read(), json.load(open("ep29.json"))
 # одежда: Михалыч — комбинезон #2f5d9c/#24497d; Саня — тулуп #5b4636, шарф #c0392b, ушанка #8a6a4a; Толян — штаны #232c47
@@ -14,7 +14,7 @@ V = {
    bub=("#101826", "#fff", "#ffd23f", "#ffd23f"), tag="#ffd23f",
    cloth={"SA": {"#5b4636": "#2c3e50", "#c0392b": "#f1c40f"}, "T": {"#232c47": "#3a3a3a"}},
    title=("ПРАДО −30%", "В ЯКУТСКЕ", "#ffd23f", "#151515"), cam="in", music={"style": "phonk", "bpm": 120}),
- "ep29d": dict(name="Приглушённая", bg="saturate(.6) brightness(1.04) contrast(1.12)",
+ "ep29d": dict(name="Холодная", bg="sepia(.25) hue-rotate(165deg) saturate(.9) brightness(1.04)",
    bub=("#1d4fb8", "#fff", "#fff", "#ffd23f"), tag="#7cc8ff",
    cloth={"M": {"#2f5d9c": "#7a4a24", "#24497d": "#5e3819"}, "SA": {"#c0392b": "#16a085"}},
    title=("МИНУС 48", "И ЛЕТНЯЯ СОЛЯРКА", "#1d4fb8", "#fff"), cam="out", music={"style": "tech", "bpm": 116}),
@@ -30,14 +30,15 @@ V = {
    bub=("#f4e7c3", "#3a2010", "#6b3a1f", "#c0392b"), tag="#e8d6a8",
    cloth={"M": {"#2f5d9c": "#2c3e50", "#24497d": "#1f2d3a"}, "SA": {"#c0392b": "#2f7a3a"}},
    title=("«ЗАВОДИТСЯ", "С ПОЛПИНКА»", "#c0392b", "#f4e7c3"), cam="pan", music={"style": "show", "bpm": 104, "tension": [0.2, 1.6]}),
- "ep29h": dict(name="Пастель", bg="saturate(.75) brightness(1.13) contrast(.96)",
-   bub=("#fff", "#151515", "#2e86de", "#2e86de"), tag="#4cd964",
-   cloth={"SA": {"#5b4636": "#4a5a2a", "#c0392b": "#2e86de"}, "M": {"#2f5d9c": "#16a085", "#24497d": "#117a65"}},
-   title=("ВЫГОДА", "ДОРОЖЕ РЫНКА", "#4cd964", "#151515"), cam="alt", music={"style": "bed", "bpm": 110}),
+ "ep29h": dict(name="Пастель", bg="saturate(.7) brightness(1.12) hue-rotate(40deg)",
+   bub=("#fff", "#151515", "#ff4fa3", "#ff4fa3"), tag="#ff6fae",
+   cloth={"SA": {"#5b4636": "#4a5a2a", "#c0392b": "#ff6fae"}, "M": {"#2f5d9c": "#16a085", "#24497d": "#117a65"}},
+   title=("ВЫГОДА", "ДОРОЖЕ РЫНКА", "#ff6fae", "#151515"), cam="alt", music={"style": "bed", "bpm": 110}),
 }
 WHO = {"SA": '#SA', "M": '#M', "T": '[id^="T"]'}
 
 for vid, v in V.items():
+    if len(sys.argv) > 1 and vid not in sys.argv[1:]: continue
     d = dict(BASE_JSON, id=vid); json.dump(d, open(f"{vid}.json", "w"), ensure_ascii=False, indent=1)
     if os.path.exists(f"vo/{vid}"): shutil.rmtree(f"vo/{vid}")
     shutil.copytree("vo/ep29", f"vo/{vid}")

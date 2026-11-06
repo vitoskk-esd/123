@@ -259,12 +259,12 @@
   border-radius: 20px; padding: 0 24px; box-shadow: 0 0 30px rgba(124,200,255,.6), 0 8px 0 #151515; z-index: 52; opacity: 0; }
 
 /* ep29h — пересъёмка «Пастель»: гамма фонов, пузыри, тег, одежда */
-.scn > svg[id^="bg_"], .pin2 > svg { filter: saturate(.75) brightness(1.13) contrast(.96); }
-.bub { background: #fff; color: #151515; border-color: #2e86de; box-shadow: 0 0 0 7px #fff, 0 18px 40px rgba(0,0,0,.45); }
-.bub::after { background: #fff; border-color: #2e86de; }
-.bub em { color: #2e86de; }
-#tag b { background: #4cd964; }
+.scn > svg[id^="bg_"], .pin2 > svg { filter: saturate(.7) brightness(1.12) hue-rotate(40deg); }
+.bub { background: #fff; color: #151515; border-color: #ff4fa3; box-shadow: 0 0 0 7px #fff, 0 18px 40px rgba(0,0,0,.45); }
+.bub::after { background: #fff; border-color: #ff4fa3; }
+.bub em { color: #ff4fa3; }
+#tag b { background: #ff6fae; }
 .c#SA [fill="#5b4636"] { fill: #4a5a2a; }
-.c#SA [fill="#c0392b"] { fill: #2e86de; }
+.c#SA [fill="#c0392b"] { fill: #ff6fae; }
 .c#M [fill="#2f5d9c"] { fill: #16a085; }
 .c#M [fill="#24497d"] { fill: #117a65; }

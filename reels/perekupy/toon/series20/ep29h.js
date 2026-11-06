@@ -162,7 +162,7 @@ window.build = R => {
 
 // ── ep29h «Пастель»: та же история и озвучка, другая «съёмка» ──
 (() => {
-  const C = {"t1": "ВЫГОДА", "t2": "ДОРОЖЕ РЫНКА", "c1": "#4cd964", "c2": "#151515", "cam": "alt", "music": {"style": "bed", "bpm": 110}};
+  const C = {"t1": "ВЫГОДА", "t2": "ДОРОЖЕ РЫНКА", "c1": "#ff6fae", "c2": "#151515", "cam": "alt", "music": {"style": "bed", "bpm": 110}};
   const orig = window.build;
   window.build = R => {
     orig(R);

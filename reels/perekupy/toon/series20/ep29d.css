@@ -258,8 +258,8 @@
 #thermo { position: absolute; left: 40px; top: 400px; font-family: "JetBrains Mono"; font-weight: 800; font-size: 90px; color: #7cc8ff; background: #0d0e12; border: 7px solid #7cc8ff;
   border-radius: 20px; padding: 0 24px; box-shadow: 0 0 30px rgba(124,200,255,.6), 0 8px 0 #151515; z-index: 52; opacity: 0; }
 
-/* ep29d — пересъёмка «Приглушённая»: гамма фонов, пузыри, тег, одежда */
-.scn > svg[id^="bg_"], .pin2 > svg { filter: saturate(.6) brightness(1.04) contrast(1.12); }
+/* ep29d — пересъёмка «Холодная»: гамма фонов, пузыри, тег, одежда */
+.scn > svg[id^="bg_"], .pin2 > svg { filter: sepia(.25) hue-rotate(165deg) saturate(.9) brightness(1.04); }
 .bub { background: #1d4fb8; color: #fff; border-color: #fff; box-shadow: 0 0 0 7px #1d4fb8, 0 18px 40px rgba(0,0,0,.45); }
 .bub::after { background: #1d4fb8; border-color: #fff; }
 .bub em { color: #ffd23f; }
