@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "You narrate a dark-humor comedy: the life story of one old Russian car (VAZ-2114) through five owners. Deadpan, dry punchlines after a tiny pause. Say «VIN» as «вин». Years are said fully and clearly."
+  "notes": "You narrate a dark-humor comedy about a car flipper driving a used Toyota Prado 8000 km from Yakutsk in -48 frost. Deadpan, dry punchlines after a tiny pause. Numbers are said fully and clearly."
  },
  "seryoga": {
   "voice": "Puck",
@@ -21,13 +21,13 @@
   "voice": "Gacrux",
   "tempo": 1.12,
   "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
-  "notes": "Line 1: gruff, dry, tapping the car body. Line 2: deadpan punchline."
+  "notes": "One line: gruff, dry, slow, like a master who has seen everything; the last sentence is a deadpan punchline."
  },
  "tolyan": {
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "One line: cocky, loud sales pitch at a car market."
+  "notes": "Line 1: excited, hurried, at 3 a.m., into the phone. Line 2: indignant, cocky excuse to a traffic cop."
  },
  "galya": {
   "voice": "Sulafat",
@@ -57,7 +57,7 @@
   "voice": "Iapetus",
   "tempo": 1.1,
   "profile": "A calm, tired Russian traffic police officer at a night checkpoint, short and formal.",
-  "notes": "One line, two short sentences, flat and formal. Pronounce «ОСАГО» clearly as a separate word: о-са-го."
+  "notes": "One line, flat, formal and tired, reading a document at a night checkpoint; the last word is said dryly."
  },
  "razbor": {
   "voice": "Enceladus",
@@ -124,5 +124,11 @@
   "tempo": 1.1,
   "profile": "Ded Petrovich — a kind, proud Russian grandfather in his late 60s buying his first new car in 2008; warm, slightly cracked old voice, cheerful, gardener.",
   "notes": "One line: delighted, tender, patting the new car, proud."
+ },
+ "sanya": {
+  "voice": "Achird",
+  "tempo": 1.12,
+  "profile": "Sanya — a cheerful, easygoing Russian car seller from Yakutsk in his 40s, used to extreme frost, friendly, a bit sly, warm voice.",
+  "notes": "One line: loud and cheerful in the freezing yard; the last two words are a sly afterthought after a short pause."
  }
 }
