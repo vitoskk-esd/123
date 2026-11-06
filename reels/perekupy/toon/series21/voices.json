@@ -3,19 +3,19 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "You narrate a dark-humor comedy about a car flipper driving a used Toyota Prado 8000 km from Yakutsk in -48 frost. Deadpan, dry punchlines after a tiny pause. Numbers are said fully and clearly."
+  "notes": "You narrate a dark-humor comedy about how a car flipper secretly 'prepares' a used car overnight before showing it. Deadpan, dry punchlines after a tiny pause."
  },
  "seryoga": {
   "voice": "Puck",
   "tempo": 1.15,
   "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
-  "notes": "One line: puzzled, naive question at a car repair shop."
+  "notes": "One line: naive, delighted, admiring a shiny engine."
  },
  "vika": {
   "voice": "Kore",
   "tempo": 1.15,
   "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
-  "notes": "Line 1: puzzled, ironic. Line 2: cold, sarcastic, quiet triumph. Line 3: doubtful. Line 4: calm, sharp interrogation. Line 5: icy, unhurried, dominant."
+  "notes": "Line 1: suspicious, ironic, looking at her phone in the morning. Line 2: calm, cold, hand on a warm hood. Line 3: sharp, triumphant verdict. Line 4: quick, excited, decisive, looking at a new notification."
  },
  "mihalych": {
   "voice": "Gacrux",
@@ -27,7 +27,7 @@
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Line 1: excited, hurried, at 3 a.m., into the phone. Line 2: indignant, cocky excuse to a traffic cop."
+  "notes": "Line 1: cocky, cheerful, at night in his garage. Line 2: caught, sly, fake-innocent excuse."
  },
  "galya": {
   "voice": "Sulafat",
