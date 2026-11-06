@@ -1,5 +1,5 @@
 // «СХЕМЫ · МАРАФЕТ ЗА НОЧЬ» — новая структура «на переходы» (владелец 06.11): бот на экране с первой секунды, призыв на ~60% ролика,
-// развязка через «Перехват», один призыв в финале (на экране; голос Лиса — без «пиши в комментариях», чтобы плашку можно было менять без озвучки).
+// развязка через «Перехват», один призыв в финале — «ссылка в шапке» (без «пиши в комментариях»: владелец 06.11 — зрители устали от таких призывов).
 // 8 сцен: кухня Вики (карточка бота), бокс Толяна ночью, мотор (мойка + присадка), приборка и прогрев, призыв, показ в паркинге, развязка, финал.
 $("#title .a").textContent = E.rubric; $("#title .b").textContent = E.subtitle; $("#tag span").textContent = "марафет за ночь";
 $("#title .a").style.cssText = "font-size:90px;background:#ffd23f;color:#151515"; $("#title .b").style.cssText = "font-size:80px;background:#151515;color:#fff";
@@ -60,7 +60,7 @@ add("dash", CAM("car2", "camry_side", 200, 1260, 720) + el(DASH, 90, 680, 900, 4
 smoke("dash", 6, 160, 1360);
 // 5. призыв в середине
 scene("cta", "box");
-add("cta", `<div class="ctab" id="cta1" style="top:560px"><div class="big">Каждую такую машину<br>перекуп купил у хозяина.<br><span>Первым.</span></div><div class="sm">🔔 Свежие объявления — через секунду после публикации · бот «Перехват»</div></div>`
+add("cta", `<div class="ctab" id="cta1" style="top:560px"><div class="cbig">Каждую такую машину<br>перекуп купил у хозяина.<br><span>Первым.</span></div><div class="csm">🔔 Свежие объявления — через секунду после публикации · бот «Перехват»</div></div>`
   + BOT("bot2", "неделю назад", "Toyota Camry 2018", "1 350 000 ₽", "🔥 −25% к рынку · хозяин", "1,1 с", 240, 1110));
 // 6–7. показ в паркинге и развязка
 scene("show", "parkade");
@@ -72,7 +72,7 @@ scene("moral", "box");
 add("moral", `<div class="card" id="moralCard" style="top:330px;z-index:20"><h3>ПРОТИВ МАРАФЕТА</h3>
   <div class="li" id="mo0">🖐 Капот холодный — пуск при тебе</div><div class="li" id="mo1">💡 При зажигании все лампы загораются</div>
   <div class="li" id="mo2">✨ Мытый мотор — смотри внимательнее</div></div>
-  <div class="ctab" id="cta2" style="top:1060px"><div class="big">Напиши <span>ПЕРЕХВАТ</span><br>в комментариях</div><div class="sm">пришлю бота: объявления по твоему городу через секунду после публикации</div></div>`);
+  <div class="ctab" id="cta2" style="top:1060px"><div class="cbig">Бот <span>«Перехват»</span><br>— ссылка в шапке профиля</div><div class="csm">свежие объявления по твоему городу через секунду после публикации — раньше перекупов</div></div>`);
 
 $("#over").insertAdjacentHTML("beforeend", `<div id="tmr">⏳ 08:00</div><div id="rew"><b>⏪ −8 ЧАСОВ</b></div>`);
 TOL.forEach(p => { const s = document.getElementById(p + "-shades"); if (s) s.style.display = ""; });
@@ -84,7 +84,7 @@ bub("v2", "Капот тёплый.<br><em>Вы её уже грели?</em>", 4
 bub("t2", "Сестрёнка, она<br><em>на солнышке стояла!</em>", 40, 700, 140, 44);
 bub("s1", "Зато мотор<br><em>какой чистый!</em>", 560, 720, 360, 46);
 bub("v3", "Чистый мотор на 200 тысячах —<br><em>это не забота. Это улика.</em>", 200, 680, 520, 38);
-bub("v4", "Хозяин выложил 2 секунды назад.<br><em>Перекупы ещё спят. Едем!</em>", 200, 1130, 520, 38);
+bub("v4", "Хозяин выложил 2 секунды назад.<br><em>Перекупы ещё спят. Едем!</em>", 360, 750, 370, 36);
 
 window.build = R => {
   const tl = R.tl, cam = R.camera($("#cam"), { hand: .6 });
@@ -152,7 +152,7 @@ window.build = R => {
   // 6. показ
   swap("cta", "show", SW.show);
   R.punch(cam, W("v2", "грел"), .05);
-  slam("#p1", W("l5", "подзем"), "impact");
+  slam("#p1", W("l5", "подзем"), "impact"); tl.to("#p1", { opacity: 0, duration: .2 }, st.s1 - .1);
   // 7. развязка через бота
   R.sfx("ping", en.v3 + .25, 1);
   tl.fromTo("#bot3", { opacity: 0, scale: .6, y: 60 }, { opacity: 1, scale: .9, y: 0, duration: .35, ease: "back.out(1.8)", immediateRender: false }, en.v3 + .3);
@@ -162,7 +162,7 @@ window.build = R => {
   swap("show", "moral", SW.moral);
   tl.fromTo("#moralCard", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: .4, ease: "expo.out", immediateRender: false }, st.rule - .4);
   [st.rule + .1, W("rule", "лампы"), W("rule", "мыт")].forEach((at, i) => { tl.fromTo(`#mo${i}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: .22, immediateRender: false }, at); R.sfx("pop", at, .5); });
-  tl.fromTo("#cta2", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, W("rule", "перво")); R.sfx("impact", W("rule", "перво"), .6);
+  tl.fromTo("#cta2", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, W("rule", "перв")); R.sfx("impact", W("rule", "перв"), .6);
   tl.fromTo("#cta2", { scale: 1 }, { scale: 1.05, duration: .25, yoyo: true, repeat: 3, immediateRender: false }, W("rule", "перехват"));
   ending(R, st.end - .15);
 };
