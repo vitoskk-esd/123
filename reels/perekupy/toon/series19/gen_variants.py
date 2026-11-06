@@ -1,7 +1,7 @@
 # Розовый не использовать (владелец 06.11).
 # python3 gen_variants.py — 7 «пересъёмок» ep28 «Жизнь одной четырки» (схема ep27, владелец 05–06.11): та же история, порядок и озвучка;
 # у каждой своя гамма фонов, движение камеры, стиль пузырей, обложка, музыка и одежда героев. → ep28b…ep28h (.json/.js/.css + vo/<id>)
-import json, os, shutil
+import json, os, shutil, sys
 
 BASE_JS, BASE_CSS, BASE_JSON = open("ep28.js").read(), open("ep28.css").read(), json.load(open("ep28.json"))
 # одежда: Серёга — толстовка #25b39b/#1f9a85, джинсы #3d6fb6; Михалыч — комбинезон #2f5d9c/#24497d; баба Галя — пальто #c4553f/#c2402f; дед — куртка #6b5a3a
@@ -30,14 +30,16 @@ V = {
    bub=("#f4e7c3", "#3a2010", "#6b3a1f", "#c0392b"), tag="#e8d6a8",
    cloth={"S": {"#25b39b": "#2c3e50", "#1f9a85": "#1f2d3a"}, "M": {"#2f5d9c": "#c0392b", "#24497d": "#962d22"}},
    title=("«БАБУШКА", "НА ДАЧУ ЕЗДИЛА»", "#c0392b", "#f4e7c3"), cam="pan", music={"style": "show", "bpm": 104, "tension": [0.2, 1.6]}),
- "ep28h": dict(name="Пастель", bg="saturate(.75) brightness(1.13) contrast(.96)",
-   bub=("#fff", "#151515", "#2e86de", "#2e86de"), tag="#4cd964",
-   cloth={"S": {"#25b39b": "#16a085", "#1f9a85": "#117a65"}, "G": {"#c4553f": "#4a5a2a", "#c2402f": "#3b4a20"}},
-   title=("КАРКАС —", "ЭТО ПРОШЛОЕ", "#4cd964", "#151515"), cam="alt", music={"style": "bed", "bpm": 110}),
+ # h — всегда розовая (владелец 06.11)
+ "ep28h": dict(name="Пастель", bg="saturate(.7) brightness(1.12) hue-rotate(40deg)",
+   bub=("#fff", "#151515", "#ff4fa3", "#ff4fa3"), tag="#ff6fae",
+   cloth={"S": {"#25b39b": "#ff6fae", "#1f9a85": "#e0559a"}, "G": {"#c4553f": "#4a5a2a", "#c2402f": "#3b4a20"}},
+   title=("КАРКАС —", "ЭТО ПРОШЛОЕ", "#ff6fae", "#151515"), cam="alt", music={"style": "bed", "bpm": 110}),
 }
 WHO = {"S": '#S', "G": '#G', "M": '#M', "D": '#D'}
 
 for vid, v in V.items():
+    if len(sys.argv) > 1 and vid not in sys.argv[1:]: continue
     d = dict(BASE_JSON, id=vid); json.dump(d, open(f"{vid}.json", "w"), ensure_ascii=False, indent=1)
     if os.path.exists(f"vo/{vid}"): shutil.rmtree(f"vo/{vid}")
     shutil.copytree("vo/ep28", f"vo/{vid}")
