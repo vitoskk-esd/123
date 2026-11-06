@@ -30,6 +30,7 @@ V = {
    bub=("#f4e7c3", "#3a2010", "#6b3a1f", "#c0392b"), tag="#e8d6a8",
    cloth={"M": {"#2f5d9c": "#2c3e50", "#24497d": "#1f2d3a"}, "SA": {"#c0392b": "#2f7a3a"}},
    title=("«ЗАВОДИТСЯ", "С ПОЛПИНКА»", "#c0392b", "#f4e7c3"), cam="pan", music={"style": "show", "bpm": 104, "tension": [0.2, 1.6]}),
+ # h — всегда розовая (владелец 06.11)
  "ep29h": dict(name="Пастель", bg="saturate(.7) brightness(1.12) hue-rotate(40deg)",
    bub=("#fff", "#151515", "#ff4fa3", "#ff4fa3"), tag="#ff6fae",
    cloth={"SA": {"#5b4636": "#4a5a2a", "#c0392b": "#ff6fae"}, "M": {"#2f5d9c": "#16a085", "#24497d": "#117a65"}},
