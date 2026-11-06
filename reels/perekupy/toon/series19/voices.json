@@ -3,13 +3,13 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "You narrate a dark-humor comedy about importing a car from a Japanese auction. Deadpan, dry punchlines after a tiny pause. Pronounce letters as Latin: «A» = «эй», «U» = «ю», «W» = «дабл-ю», «XX» = «икс-икс», «R» = «ар», «RA» = «ар-эй»."
+  "notes": "You narrate a dark-humor comedy: the life story of one old Russian car (VAZ-2114) through five owners. Deadpan, dry punchlines after a tiny pause. Say «VIN» as «вин». Years are said fully and clearly."
  },
  "seryoga": {
   "voice": "Puck",
   "tempo": 1.15,
   "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
-  "notes": "Line 1: excited, at a laptop at night. Line 2: cautious question. Line 3: outraged, betrayed. Line 4: angry, into the phone."
+  "notes": "One line: puzzled, naive question at a car repair shop."
  },
  "vika": {
   "voice": "Kore",
@@ -21,19 +21,19 @@
   "voice": "Gacrux",
   "tempo": 1.12,
   "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
-  "notes": "Line 1: gruff old mechanic, dry, matter-of-fact. Line 2: deadpan punchline."
+  "notes": "Line 1: gruff, dry, tapping the car body. Line 2: deadpan punchline."
  },
  "tolyan": {
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Line 1: sly, hurried, at a car wash. Line 2: low, conspiratorial, in a steamy sauna."
+  "notes": "One line: cocky, loud sales pitch at a car market."
  },
  "galya": {
   "voice": "Sulafat",
   "tempo": 1.12,
   "profile": "Baba Galya — a kind, sharp-tongued Russian grandmother in her 70s selling her old BMW; warm folksy voice, calls everyone «сынок» and «милок», slightly cracked old voice, unimpressed by hustlers.",
-  "notes": "One line: delighted, loud, recognizing an old friend at a bus stop."
+  "notes": "One line: walking past, amused and dry, unimpressed by the hustler."
  },
  "edik": {
   "voice": "Fenrir",
@@ -118,5 +118,11 @@
   "tempo": 1.1,
   "profile": "Gena — a laid-back, slick Russian car import middleman from Vladivostok in his 40s; easygoing sailor drawl, calls everyone «брат», always calm, never worried.",
   "notes": "Line 1: smooth and confident. Line 2: dismissive, lazy. Line 3: cheerful, shouting over port noise. Line 4: totally unbothered, sly punchline."
+ },
+ "ded": {
+  "voice": "Sadaltager",
+  "tempo": 1.1,
+  "profile": "Ded Petrovich — a kind, proud Russian grandfather in his late 60s buying his first new car in 2008; warm, slightly cracked old voice, cheerful, gardener.",
+  "notes": "One line: delighted, tender, patting the new car, proud."
  }
 }
