@@ -1,0 +1,122 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.08,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
+  "notes": "You narrate a dark-humor comedy about importing a car from a Japanese auction. Deadpan, dry punchlines after a tiny pause. Pronounce letters as Latin: «A» = «эй», «U» = «ю», «W» = «дабл-ю», «XX» = «икс-икс», «R» = «ар», «RA» = «ар-эй»."
+ },
+ "seryoga": {
+  "voice": "Puck",
+  "tempo": 1.15,
+  "profile": "Seryoga — a naive, kind young Russian guy in his 20s who buys a used car; eager, a bit gullible, but learns fast. Bright, quick voice.",
+  "notes": "Line 1: excited, at a laptop at night. Line 2: cautious question. Line 3: outraged, betrayed. Line 4: angry, into the phone."
+ },
+ "vika": {
+  "voice": "Kore",
+  "tempo": 1.15,
+  "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
+  "notes": "Line 1: puzzled, ironic. Line 2: cold, sarcastic, quiet triumph. Line 3: doubtful. Line 4: calm, sharp interrogation. Line 5: icy, unhurried, dominant."
+ },
+ "mihalych": {
+  "voice": "Gacrux",
+  "tempo": 1.12,
+  "profile": "Mihalych — an old, experienced Russian car mechanic in his 60s, gruff, calm, a bit tired, speaks like a master who has seen everything. Low husky voice.",
+  "notes": "Line 1: gruff old mechanic, dry, matter-of-fact. Line 2: deadpan punchline."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.2,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
+  "notes": "Line 1: sly, hurried, at a car wash. Line 2: low, conspiratorial, in a steamy sauna."
+ },
+ "galya": {
+  "voice": "Sulafat",
+  "tempo": 1.12,
+  "profile": "Baba Galya — a kind, sharp-tongued Russian grandmother in her 70s selling her old BMW; warm folksy voice, calls everyone «сынок» and «милок», slightly cracked old voice, unimpressed by hustlers.",
+  "notes": "One line: delighted, loud, recognizing an old friend at a bus stop."
+ },
+ "edik": {
+  "voice": "Fenrir",
+  "tempo": 1.18,
+  "profile": "Edik — a slick, fast-talking Russian car dealership manager in his 30s, overly polite, pushy, fake-friendly smile in the voice, sales script energy.",
+  "notes": "One line on the phone: slick, fast, defensive, overly cheerful, trying to calm her down."
+ },
+ "inspector": {
+  "voice": "Autonoe",
+  "tempo": 1.12,
+  "profile": "A tired Russian traffic police registration clerk, a woman in her 40s, bureaucratic, flat, indifferent voice, has seen everything.",
+  "notes": "One line, flat and indifferent, reading from a monitor; the last words are said dryly, without any emotion."
+ },
+ "seller": {
+  "voice": "Orus",
+  "tempo": 1.15,
+  "profile": "A cheerful man from Vladivostok selling his lowered Toyota from a balcony, loud, friendly, joking, a bit of a hustler.",
+  "notes": "One line, shouted happily from a balcony, joking."
+ },
+ "dps": {
+  "voice": "Iapetus",
+  "tempo": 1.1,
+  "profile": "A calm, tired Russian traffic police officer at a night checkpoint, short and formal.",
+  "notes": "One line, two short sentences, flat and formal. Pronounce «ОСАГО» clearly as a separate word: о-са-го."
+ },
+ "razbor": {
+  "voice": "Enceladus",
+  "tempo": 1.15,
+  "profile": "A fast-talking Russian junkyard parts seller in his 40s, hoarse, cheerful, a hustler, sells used engines.",
+  "notes": "One line, loud and quick sales pitch; the last phrase is a cheeky joke said fast."
+ },
+ "pristav": {
+  "voice": "Iapetus",
+  "tempo": 1.12,
+  "profile": "A calm, formal Russian court bailiff in his 40s, polite, bureaucratic, unhurried.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: formal, reading from a paper. Line 2: short dry deadpan reply."
+ },
+ "banker": {
+  "voice": "Despina",
+  "tempo": 1.12,
+  "profile": "A polite, cold Russian bank manager woman in her 30s, corporate smile in the voice.",
+  "notes": "One line, polite and cold; the last two words are a deadpan corporate punchline."
+ },
+ "master": {
+  "voice": "Algieba",
+  "tempo": 1.12,
+  "profile": "A gruff Russian underground garage craftsman, low hoarse voice, works with a hammer, few words.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Short, gruff, businesslike."
+ },
+ "expert": {
+  "voice": "Rasalgethi",
+  "tempo": 1.1,
+  "profile": "A meticulous Russian forensic vehicle expert in his 50s, calm, precise, a little bored, nerdy.",
+  "notes": "One line: calm, precise, matter-of-fact; the last sentence is a dry nerdy punchline. Say «VIN» as «вин»."
+ },
+ "sled": {
+  "voice": "Schedar",
+  "tempo": 1.1,
+  "profile": "A tired Russian police investigator in his 40s, flat, ironic, has seen everything.",
+  "notes": "One line: flat, ironic; the last two words are a deadpan punchline after a tiny pause."
+ },
+ "arkady": {
+  "voice": "Orus",
+  "tempo": 1.1,
+  "profile": "Arkady — a smooth, polite Russian con man in his 40s in a long coat and glasses; velvety, trustworthy, slightly too sweet voice.",
+  "notes": "Line 1: calm, generous, relaxed. Line 2: casual, as if a million is nothing. Line 3: caught red-handed, sheepish, hopeful, slow."
+ },
+ "cop": {
+  "voice": "Iapetus",
+  "tempo": 1.08,
+  "profile": "A tired Russian district police officer in his 50s; deep, flat, bored voice, dry humor.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: flat, bored question. Line 2: deadpan, weary, slow and very clear: «У меня таких... Аркадиев» — pronounce «таких Аркадиев» distinctly, then a short pause, then «полрайона»."
+ },
+ "stas": {
+  "voice": "Sadachbia",
+  "tempo": 1.1,
+  "profile": "Stas — a slick, fast-talking Russian car-buying consultant in his late 20s; upbeat salesman energy, overconfident, a bit shady.",
+  "notes": "Line 1: confident pitch. Line 2: conspiratorial whisper-like but clear. Line 3: loud, enthusiastic lie. Line 4: cheeky. Line 5: caught, sheepish, slow."
+ },
+ "gena": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.1,
+  "profile": "Gena — a laid-back, slick Russian car import middleman from Vladivostok in his 40s; easygoing sailor drawl, calls everyone «брат», always calm, never worried.",
+  "notes": "Line 1: smooth and confident. Line 2: dismissive, lazy. Line 3: cheerful, shouting over port noise. Line 4: totally unbothered, sly punchline."
+ }
+}

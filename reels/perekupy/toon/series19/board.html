@@ -1,0 +1,88 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ep28 «ЖИЗНЬ ОДНОЙ ЧЕТЫРКИ»: формат ep14 «Жизнь одной Приоры» (зашёл). Четырка владельца (kit/img/vaz2114t), в каждой «жизни» — свой цвет кузова.
+// двор без качелей — машина стоит на асфальте
+BGS.yard = BGS.yard.replace(/<g><path d="M120 1320[\s\S]*?<\/g>/, "");
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const PK = (p, l, t, s, o, z = 4) => ch("perekup", p, l, t, s, z, o);
+const DED = { jacket: "#6b5a3a", pants: "#3b3f46", hair: "#d9d9d9", mustache: true, glasses: true };
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = ""; const clock = (t) => (CLK = t, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+// четырка владельца; paint — CSS-фильтр «перекраски» под жизнь (розовый не используем)
+const PAINT = { silver: "grayscale(1) brightness(1.45) contrast(1.05)", black: "grayscale(.6) brightness(.42) contrast(1.25)", cherry: "sepia(1) saturate(4.2) hue-rotate(-38deg) brightness(.8)", own: "none" };
+const T14 = (l, t, w = 700, paint = "own", z = 3, side = true, extra = "") => `<img class="el" src="../../kit/img/vaz2114t/vaz2114t_${side ? "side" : "34"}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};filter:${PAINT[paint]};${extra}">`;
+const PRICE = (t, l, tp, bg = "#ffd23f") => lab(t, l, tp, bg, "#151515", 40, -4, 10);
+const S = [
+ { h: "ЖИЗНЬ ОДНОЙ ЧЕТЫРКИ", tc: "1/8 · 0:00–0:08", bg: "market", y: 700, els: () => clock("2024")
+     + T14(150, 1130, 760, "own", 3, false) + PRICE("450 000 ₽ · ОДНА ХОЗЯЙКА", 140, 1000) + `<div class="title" style="top:760px;font-size:80px;color:#fff;-webkit-text-stroke:10px #151515;paint-order:stroke fill">ШЕСТЬ ЖИЗНЕЙ</div>`,
+   vo: "Лис: «Эта четырка прожила шесть жизней. И в каждой стоила дороже, чем в прошлой»", who: "Лис",
+   mv: "Авторынок, четырка с твоей картинки (каркас, растяжка, спойлер), ценник «450 000 · одна хозяйка». Хук — «шесть жизней». В углу — год, он будет щёлкать назад и вперёд." },
+ { h: "ЖИЗНЬ 1 · САЛОН", tc: "2/8 · 0:08–0:20", bg: "dealer", y: 700, els: () => clock("2008")
+     + T14(320, 1180, 700, "silver") + PK("d", 30, 820, .95, DED, 6) + bub("Ласточка! Только на дачу<br><em>и обратно. Рассаду возить.</em>", 120, 700) + PRICE("НОВАЯ · 280 000 ₽", 470, 1080, "#4cd964"),
+   vo: "Дед Петрович: «Ласточка! Только на дачу и обратно. Рассаду возить». Лис: «Две тысячи восьмой. Серебристая. Рассада, чехлы, ёлочка. Самая спокойная жизнь».", who: "Дед + Лис",
+   mv: "Салон, 2008: серебристая новая четырка. <b>Новый говорящий герой — дед Петрович</b> (очки, усы, седой), первый владелец. Оба в кадре: дед и машина." },
+ { h: "ЖИЗНЬ 2 · ВНУК", tc: "3/8 · 0:20–0:30", bg: "yard", y: 700, els: () => clock("2013")
+     + T14(200, 1050, 700, "black") + lab("ТОНИРОВКА В НОЛЬ", 60, 1000, "#151515", "#fff", 36, -4) + lab("ЗАНИЖЕНИЕ", 620, 960, "#151515", "#fff", 36, 3) + lab("ПУШКА В ВЫХЛОП", 300, 1360, "#ff3b30", "#fff", 36, -2),
+   vo: "Лис: «Две тысячи тринадцатый. Деда отправили на пенсию, машину — к внуку. Тонировка в ноль, занижение и пушка в выхлоп. Рассада больше не помещалась».", who: "Лис",
+   mv: "Двор хрущёвки ночью: та же четырка — чёрная, тонированная, заниженная. Плашки-доработки появляются по одной, хлопок выхлопа." },
+ { h: "ЖИЗНЬ 3 · ИЗ ДВУХ", tc: "4/8 · 0:30–0:42", bg: "garages", y: 700, els: () => clock("2016")
+     + T14(190, 1200, 700, "cherry", 3, true, "clip-path:inset(0 0 0 50%)") + T14(190, 1200, 700, "black", 3, true, "clip-path:inset(0 50% 0 0)")
+     + `<div class="el" style="left:532px;top:1188px;width:14px;height:240px;z-index:4;background:repeating-linear-gradient(180deg,#ffd23f 0 14px,#ff7a1a 14px 24px)"></div>` + lab("ПЕРЕД — ВИШНЁВЫЙ", 520, 1040, "#a8302b", "#fff", 32, 3) + lab("ЗАД — ЧЁРНЫЙ", 60, 1040, "#151515", "#fff", 32, -3),
+   vo: "Лис: «Шестнадцатый. Встреча с отбойником. Её сварили из двух. Перед — от вишнёвой, зад — свой. Шов посередине замазали и покрасили».", who: "Лис",
+   mv: "Гараж: машина буквально из двух половин — перед вишнёвый, зад чёрный, посередине искрит сварка. Потом шов закрашивают серо-зелёным." },
+ { h: "ЖИЗНЬ 4 · ДРИФТ", tc: "5/8 · 0:42–0:54", bg: "airfield", y: 700, els: () => clock("2021")
+     + T14(160, 1130, 760, "own", 3, false, "transform:rotate(-6deg)") + lab("КАРКАС", 80, 980, "#ffd23f", "#151515", 40, -4) + lab("РАСТЯЖКА", 660, 960, "#ffd23f", "#151515", 40, 3),
+   vo: "Лис: «Двадцать первый. Аэродром, дрифт по выходным. В неё вварили каркас, чтобы не сложилась. Опять».", who: "Лис",
+   mv: "<b>Новая локация — дрифт-день на старом аэродроме:</b> бетонка, конусы, дым от шин, старт-арка DRIFT DAY, зрители за сеткой. Четырка в заносе — такая, как на твоей картинке." },
+ { h: "ЖИЗНЬ 5 · ОДНА ХОЗЯЙКА", tc: "6/8 · 0:54–1:08", bg: "market", y: 700, els: () => clock("2024")
+     + T14(260, 1180, 620, "own", 3, false) + ch("tolyan", "t", 0, 820, .9, 6) + ch("galya", "g", 780, 880, .78, 6)
+     + bub("Брат, одна хозяйка!<br><em>Бабушка на дачу ездила!</em>", 160, 680) + bub("Сынок, я на такой<br><em>даже не сидела.</em>", 560, 1340),
+   vo: "Толян: «Брат, одна хозяйка! Бабушка на дачу ездила!» Галя (мимо проходит): «Сынок, я на такой даже не сидела». Лис: «Про дачу — правда. Это была первая жизнь из шести».", who: "Толян + Галя + Лис",
+   mv: "Авторынок: Толян продаёт её Серёге как «бабушкину». Мимо идёт баба Галя — и разоблачает. Оба говорящих в кадре." },
+ { h: "СТО У МИХАЛЫЧА", tc: "7/8 · 1:08–1:20", bg: "sto", y: 700,
+   els: () => T14(240, 1220, 600) + ch("mihalych", "m", 10, 820, .9, 6) + ch("seryoga", "s", 780, 860, .8, 6)
+     + bub("От родной тут — номер.<br><em>И то не факт.</em>", 160, 680) + bub("А каркас<br><em>зачем?</em>", 640, 1330),
+   vo: "Михалыч: «От родной тут — номер. И то не факт». Серёга: «А каркас зачем?» Михалыч: «Чтобы кузов не развалился, пока ты платишь».", who: "Михалыч + Серёга",
+   mv: "СТО: Михалыч простукивает шов посередине кузова, под краской — вишнёвый. Оба в кадре." },
+ { h: "МОРАЛЬ", tc: "8/8 · 1:20–1:32", bg: "market", y: 700,
+   els: () => `<div class="el" style="left:60px;top:740px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:24px 28px;color:#fff;font-family:Unbounded;font-weight:900;font-size:30px;line-height:1.4">У КАЖДОЙ ЧЕТЫРКИ ЕСТЬ ПРОШЛОЕ:<br><span style="color:#ffd23f">📄 автотека — ДТП, владельцы, пробег<br>🖼 старые объявления по VIN — какого цвета была<br>📏 толщиномер и шов посередине кузова<br>🔩 каркас и растяжка — значит, «спортивное прошлое»</span></div>`
+     + FOX(400, 1260, 220),
+   vo: "Лис: «Проверь историю: автотека, старые объявления по VIN — какого она была цвета, толщиномер и шов посередине кузова. Каркас — это не „для безопасности“, это прошлое. Свежие объявления раньше перекупов — в боте Перехват. Сохрани — пока тебе не продали седьмую жизнь».", who: "Лис",
+   mv: "<b>Финал:</b> чек-лист, лиса с аватарки. ~1:30." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "s", "g", "m", "d"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
