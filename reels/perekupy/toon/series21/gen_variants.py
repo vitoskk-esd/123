@@ -5,7 +5,7 @@ import json, os, shutil, sys
 
 BASE_JS, BASE_CSS, BASE_JSON = open("ep30.js").read(), open("ep30.css").read(), json.load(open("ep30.json"))
 # одежда: Вика — куртка #8e1f3a/#5c1426; Серёга — толстовка #25b39b/#1f9a85, джинсы #3d6fb6; Толян — штаны #232c47
-# озвучка — vo/ep30fix: перезаписана реплика Вики «Капот тёплый» (владелец 06.11: ударение), основной ролик ep30 — со старой дорожкой
+# озвучка — vo/ep30fix: перезаписана реплика Вики «Капот тёплый» (владелец 06.11: ударение); основной ep30 тоже пересобран с ней (старая — vo/ep30_old)
 V = {
  "ep30b": dict(name="Детектив", bg="sepia(.3) saturate(1.2) hue-rotate(-15deg) brightness(.95) contrast(1.08)",
    bub=("#151515", "#fff", "#ff7a1a", "#ff7a1a"), tag="#ff7a1a",
