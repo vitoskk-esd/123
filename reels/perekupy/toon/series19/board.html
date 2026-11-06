@@ -37,6 +37,13 @@ const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="l
 // четырка владельца; paint — CSS-фильтр «перекраски» под жизнь (розовый не используем)
 const PAINT = { silver: "grayscale(1) brightness(1.45) contrast(1.05)", black: "grayscale(.6) brightness(.42) contrast(1.25)", cherry: "sepia(1) saturate(4.2) hue-rotate(-38deg) brightness(.8)", own: "none" };
 const T14 = (l, t, w = 700, paint = "own", z = 3, side = true, extra = "") => `<img class="el" src="../../kit/img/vaz2114t/vaz2114t_${side ? "side" : "34"}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};filter:${PAINT[paint]};${extra}">`;
+// вид сбоку: кузов перекрашен, колёса — в родном цвете (поверх — колёса из оригинала), по желанию наклейка на стекле задней двери
+const SIDE = "../../kit/img/vaz2114t/vaz2114t_side.png";
+const WHEELS = [[18.2, 77.5], [80.3, 77.5]];
+const T14S = (l, t, w, paints, z = 3, sticker = false) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${w * 244 / 725}px;z-index:${z}">
+  ${paints.map(([p, clip, tint]) => `<img src="${tint ? SIDE.replace("_side", "_side_tint") : SIDE}" style="position:absolute;left:0;top:0;width:100%;filter:${PAINT[p]};${clip ? `clip-path:${clip}` : ""}">`).join("")}
+  ${WHEELS.map(([x, y]) => `<img src="${SIDE}" style="position:absolute;left:0;top:0;width:100%;clip-path:circle(10.8% at ${x}% ${y}%)">`).join("")}
+  ${sticker ? `<img src="../../kit/img/sticker.png" style="position:absolute;left:30.5%;top:13%;width:9.5%;opacity:.95">` : ""}</div>`;
 const PRICE = (t, l, tp, bg = "#ffd23f") => lab(t, l, tp, bg, "#151515", 40, -4, 10);
 const S = [
  { h: "ЖИЗНЬ ОДНОЙ ЧЕТЫРКИ", tc: "1/8 · 0:00–0:08", bg: "market", y: 700, els: () => clock("2024")
@@ -48,11 +55,11 @@ const S = [
    vo: "Дед Петрович: «Ласточка! Только на дачу и обратно. Рассаду возить». Лис: «Две тысячи восьмой. Серебристая. Рассада, чехлы, ёлочка. Самая спокойная жизнь».", who: "Дед + Лис",
    mv: "Салон, 2008: серебристая новая четырка. <b>Новый говорящий герой — дед Петрович</b> (очки, усы, седой), первый владелец. Оба в кадре: дед и машина." },
  { h: "ЖИЗНЬ 2 · ВНУК", tc: "3/8 · 0:20–0:30", bg: "yard", y: 700, els: () => clock("2013")
-     + T14(200, 1050, 700, "black") + lab("ТОНИРОВКА В НОЛЬ", 60, 1000, "#151515", "#fff", 36, -4) + lab("ЗАНИЖЕНИЕ", 620, 960, "#151515", "#fff", 36, 3) + lab("ПУШКА В ВЫХЛОП", 300, 1360, "#ff3b30", "#fff", 36, -2),
+     + T14S(200, 1050, 700, [["black", "", true]], 3, true) + lab("ТОНИРОВКА В НОЛЬ", 60, 940, "#151515", "#fff", 36, -4) + lab("ЗАНИЖЕНИЕ", 620, 960, "#151515", "#fff", 36, 3) + lab("ПУШКА В ВЫХЛОП", 300, 1360, "#ff3b30", "#fff", 36, -2),
    vo: "Лис: «Две тысячи тринадцатый. Деда отправили на пенсию, машину — к внуку. Тонировка в ноль, занижение и пушка в выхлоп. Рассада больше не помещалась».", who: "Лис",
-   mv: "Двор хрущёвки ночью: та же четырка — чёрная, тонированная, заниженная. Плашки-доработки появляются по одной, хлопок выхлопа." },
+   mv: "Двор хрущёвки: та же четырка — чёрная, тонированная, заниженная, с наклейкой на стекле задней двери (как у Приоры). Колёса — родные. Плашки-доработки появляются по одной, хлопок выхлопа." },
  { h: "ЖИЗНЬ 3 · ИЗ ДВУХ", tc: "4/8 · 0:30–0:42", bg: "garages", y: 700, els: () => clock("2016")
-     + T14(190, 1200, 700, "cherry", 3, true, "clip-path:inset(0 0 0 50%)") + T14(190, 1200, 700, "black", 3, true, "clip-path:inset(0 50% 0 0)")
+     + T14S(190, 1200, 700, [["cherry", "inset(0 0 0 50%)"], ["black", "inset(0 50% 0 0)"]])
      + `<div class="el" style="left:532px;top:1188px;width:14px;height:240px;z-index:4;background:repeating-linear-gradient(180deg,#ffd23f 0 14px,#ff7a1a 14px 24px)"></div>` + lab("ПЕРЕД — ВИШНЁВЫЙ", 520, 1040, "#a8302b", "#fff", 32, 3) + lab("ЗАД — ЧЁРНЫЙ", 60, 1040, "#151515", "#fff", 32, -3),
    vo: "Лис: «Шестнадцатый. Встреча с отбойником. Её сварили из двух. Перед — от вишнёвой, зад — свой. Шов посередине замазали и покрасили».", who: "Лис",
    mv: "Гараж: машина буквально из двух половин — перед вишнёвый, зад чёрный, посередине искрит сварка. Потом шов закрашивают серо-зелёным." },
