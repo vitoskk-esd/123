@@ -73,7 +73,7 @@ TOL.forEach(p => { const s = document.getElementById(p + "-shades"); if (s) s.st
 $("#end h2").innerHTML = E.end;
 const bub = (line, html, l, t, tx, fs) => { const b = bubble(line, html, l, t, tx); if (fs) b.style.fontSize = fs + "px"; return b; };
 bub("t1", "Брат, никому не отдавай,<br><em>я уже в аэропорту!</em>", 60, 760, 120, 44);
-bub("s1", "Забирай, брат! Заводится<br>с полпинка. <em>С третьего.</em>", 300, 700, 520, 42);
+bub("s1", "Забирай, брат! Заводится<br>с полпинка. <em>С третьего.</em>", 300, 620, 520, 42);
 bub("d1", "Договор от 15-го, сегодня 30-е.<br><em>На учёт не поставили — протокол.</em>", 120, 700, 620, 36);
 bub("t2", "Брат, я её не ставил —<br><em>я её гнал!</em>", 220, 720, 250, 44);
 bub("m1", "Довёз? Молодец. Только в системе<br>вода вместо антифриза.<br><em>Блок треснул ещё в Якутске.</em>", 60, 640, 140, 36);
@@ -121,7 +121,7 @@ window.build = R => {
   tl.fromTo("#T0", { y: 80 }, { y: 0, duration: .4, ease: "back.out(2.5)", immediateRender: false }, W("h", "перехват") + .2);
   tl.to("#title", { opacity: 0, y: -50, duration: .25 }, W("h", "перехват") - .2);
   tl.fromTo(cam, { s: 1 }, { s: 1.08, duration: SW.l1 - .3, ease: "none", immediateRender: false }, 0).set(cam, { s: 1 }, SW.l1);
-  R.punch(cam, W("h", "якутск"), .05);
+  R.punch(cam, W("h", "якуц"), .05);
   // 2. Якутск: −48, очки в инее, Прадо в пару
   swap("room", "yak", SW.l1);
   tl.fromTo("#thermo2", { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: .2, immediateRender: false }, W("l1", "минус") - .05); R.sfx("impact", W("l1", "минус"), .6);
