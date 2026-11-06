@@ -35,13 +35,14 @@ def request(who, out):
           if len(who) == 2 else {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": V[who[0]]["voice"]}}})
     body = {"contents": [{"parts": [{"text": f"{style}\n\n{text}"}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
     for attempt in range(6):
-        r = subprocess.run(["curl", "-s", "-m", "600", "-X", "POST", "-H", "Content-Type: application/json",
+        rr = subprocess.run(["curl", "-sS", "-m", "600", "-w", "\n__HTTP__%{http_code} %{time_total}", "-X", "POST", "-H", "Content-Type: application/json",
                             f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent", "--data-binary", "@-"],
-                           input=json.dumps(body, ensure_ascii=False).encode(), capture_output=True).stdout
+                           input=json.dumps(body, ensure_ascii=False).encode(), capture_output=True)
+        r, _, meta = rr.stdout.rpartition(b"\n__HTTP__")
         try:
             j = json.loads(r)
         except Exception:
-            print(who, "пустой ответ — повтор через 70 с"); time.sleep(70); continue
+            print(who, "пустой ответ", meta.decode(), rr.stderr.decode()[:200], r[:200], "— повтор через 70 с"); time.sleep(70); continue
         if "error" in j:
             msg = j["error"].get("message", "")
             if j["error"].get("code") == 429 and "free_tier_requests" in msg and "PerDay" in json.dumps(j):
