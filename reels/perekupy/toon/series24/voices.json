@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "You narrate part 1 of a comedy mini-series: a cocky guy Tolyan decides to become a used-car flipper starting with just 100 000 rubles, honestly this time. Deadpan, dry, warm irony; numbers said fully and clearly."
+  "notes": "You narrate part 1 of a comedy mini-series: a cocky guy Tolyan decides to become a used-car flipper with just 100 000 rubles, honestly this time; first sale with funny buyers. Deadpan, dry, warm irony; numbers said fully and clearly."
  },
  "seryoga": {
   "voice": "Puck",
@@ -27,7 +27,7 @@
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Line 1: excited, inspired, big dreams. Line 2: hurried, excited, at 3 a.m. Line 3: confident, a bit proud of being honest for once."
+  "notes": "Line 1: excited, inspired, big dreams. Line 2: hurried, excited, at 3 a.m. Line 3: confused, annoyed, on the phone. Line 4: calm, a bit proud of being honest."
  },
  "galya": {
   "voice": "Sulafat",
@@ -86,8 +86,8 @@
  "expert": {
   "voice": "Rasalgethi",
   "tempo": 1.1,
-  "profile": "A meticulous Russian forensic vehicle expert in his 50s, calm, precise, a little bored, nerdy.",
-  "notes": "One line: calm, precise, matter-of-fact; the last sentence is a dry nerdy punchline. Say «VIN» as «вин»."
+  "profile": "A self-proclaimed car 'expert' buyer, nerdy guy in his 30s with gadgets, slow, thorough, slightly pompous.",
+  "notes": "One line: lists his gadgets slowly with pauses, then a deadpan absurd conclusion."
  },
  "sled": {
   "voice": "Schedar",
@@ -136,5 +136,23 @@
   "tempo": 1.1,
   "profile": "Kostya — a calm, polite, slightly nerdy Russian guy in his late 20s, honest car owner, a bit boring, precise.",
   "notes": "Line 1: calm, matter-of-fact, showing documents. Line 2: polite, calm, final. Say «ПТС» as «пэ-тэ-эс», «ТО» as «тэ-о»."
+ },
+ "valera": {
+  "voice": "Alnilam",
+  "tempo": 1.1,
+  "profile": "Uncle Valera — a kind, practical Russian man in his 60s, garage owner, simple and warm, a bit proud of his old car.",
+  "notes": "One line: friendly, patting the car, proud."
+ },
+ "gosha": {
+  "voice": "Enceladus",
+  "tempo": 1.15,
+  "profile": "Gosha — a pushy Russian car flipper in his 30s in a tracksuit, fast, cheeky, lowballs everyone.",
+  "notes": "Line 1: fast, pushy lowball offer on the phone. Line 2: one word, cocky, matter-of-fact."
+ },
+ "dima": {
+  "voice": "Schedar",
+  "tempo": 1.1,
+  "profile": "Dima — a young, practical Russian courier in his 20s, short words, decisive, in a hurry.",
+  "notes": "Line 1: short question. Line 2: short, decisive, one word."
  }
 }
