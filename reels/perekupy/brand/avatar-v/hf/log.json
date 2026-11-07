@@ -56,5 +56,11 @@
   "app": "alibaba/qwen-image-3/edit",
   "status": "completed",
   "sec": 52
+ },
+ "a7": {
+  "request_id": "01a1b6e1-e60e-74eb-9448-2e90acbf235a",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 70
  }
 }
