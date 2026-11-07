@@ -42,10 +42,13 @@ const DED = { jacket: "#6b5a3a", pants: "#3b3f46", hair: "#d9d9d9", mustache: tr
 const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
 const PHONE = (l, t, inner) => `<div class="el" style="left:${l}px;top:${t}px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
 const S = [
- { h: "ТОЛЯН: СО СТА ТЫСЯЧ · 1", tc: "1/6 · 0:00–0:07", bg: "room", y: 640, els: () => CAP("100 000") + ch("tolyan", "t", 60, 860, .9, 6) + CASH(560, 1240)
-     + bub("Брат, сто тысяч.<br><em>Через месяц — миллион.</em>", 120, 700) + lab("ЧАСТЬ 1 · СТО ТЫСЯЧ", 480, 1330, "#ffd23f", "#151515", 38, 3),
-   vo: "Толян: «Брат, сто тысяч. Через месяц — миллион». Лис: «Челлендж: Толян начинает со ста тысяч. Правило одно — без скрутки и без вранья. И бот Перехват в помощь».", who: "Толян + Лис",
-   mv: "<b>Хук — сразу цель и ставки.</b> Комната Толяна, пачка денег на столе. В углу появляется счётчик «КАПИТАЛ: 100 000 ₽» — он идёт через весь сериал." },
+ { h: "КАК ТОЛЯН СТАЛ ПЕРЕКУПОМ · 1", tc: "1/6 · 0:00–0:08", bg: "room", y: 640, els: () => CAP("100 000") + ch("tolyan", "t", 40, 880, .88, 6) + CASH(600, 1260)
+     + `<div class="el" style="left:470px;top:870px;width:570px;height:300px;z-index:8;background:#fff;border:7px solid #151515;border-radius:50%;box-shadow:0 10px 0 #151515"></div>
+        <div class="el" style="left:410px;top:1150px;width:40px;height:40px;z-index:8;background:#fff;border:6px solid #151515;border-radius:50%"></div><div class="el" style="left:370px;top:1200px;width:24px;height:24px;z-index:8;background:#fff;border:5px solid #151515;border-radius:50%"></div>
+        <img class="el" src="../../kit/img/gelik/gelik_34.png" style="left:600px;top:895px;width:290px;z-index:9"><div class="el" style="left:590px;top:1095px;z-index:9;font-family:Unbounded;font-weight:900;font-size:36px;color:#151515;white-space:nowrap">1 000 000 ₽ 🤑</div>`
+     + bub("Всё, брат. Сто тысяч есть —<br><em>становлюсь перекупом!</em>", 40, 700) + lab("ЧАСТЬ 1 · СТО ТЫСЯЧ", 420, 1260, "#ffd23f", "#151515", 34, 3),
+   vo: "Толян: «Всё, брат. Сто тысяч есть — становлюсь перекупом!» Лис: «Это история о том, как Толян со ста тысячами решил стать перекупом. Без скрутки, без вранья — и с ботом Перехват».", who: "Толян + Лис",
+   mv: "<b>Хук — с чего всё началось:</b> комната Толяна, на столе его сто тысяч, над головой облако-мечта: Гелик и «1 000 000 ₽». Толян решает стать перекупом. Счётчик «100 000 ₽» появляется в углу и идёт через весь сериал." },
  { h: "03:00 · ФИЛЬТР ДО 100 000", tc: "2/6 · 0:07–0:16", bg: "room", y: 640, els: () => clock("03:00") + CAP("100 000") + ch("tolyan", "t", -20, 880, .84, 6)
      + PHONE(400, 700, `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · фильтр</div><div style="font-family:Onest;color:#fff;font-size:28px;line-height:1.5;margin:6px 0 14px">💰 до 100 000 ₽ · 📍 твой город</div>
        <div style="background:#1c1f26;border-radius:22px;padding:16px 20px;font-family:Onest;color:#fff;font-size:30px;line-height:1.45"><b style="color:#ff7a1a">🔥 −25% к рынку · хозяин</b><br><b>ВАЗ-2109 · 85 000 ₽</b><br>⏱ 1 с после публикации</div>`)
