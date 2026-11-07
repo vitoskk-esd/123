@@ -60,6 +60,14 @@
     "reels/perekupy/brand/avatar-v/ref.jpg"
    ],
    "prompt": "The same fox runs forward dynamically holding a big orange magnet that attracts tiny orange car icons flying towards it, ears back from the speed, confident grin, chain swinging; orange motion trail and a broken orange ring behind as if it bursts out of the logo frame. Different pose and composition from the reference. Absolutely no text or lettering anywhere."
+  },
+  {
+   "id": "a7",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "Variant «Радар перехвата»: the same fox, head and upper body, leans toward a big round green-black radar screen with a glowing orange sweep line and a few tiny orange car-shaped blips on it; the fox points one claw at a single blip and grins slyly with one eye narrowed, as if it just caught it; concentric orange radar rings form the circular badge behind the fox; soft orange glow on its face from the screen. Different pose and composition from the reference. Absolutely no text, letters or numbers anywhere."
   }
  ],
  "brand": [],
