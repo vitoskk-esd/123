@@ -102,7 +102,7 @@ window.build = R => {
   // 1. хук: ценники по одному, Вика идёт вдоль машин
   tl.to("#title", { opacity: 0, y: -50, duration: .25 }, W("h", "три") - .2);
   [["#g1", W("h", "перекуп")], ["#g2", W("h", "мошенн")], ["#g3", W("h", "хозя")]].forEach(([s, a]) => slam(s, a, "pop"));
-  tl.fromTo("#V0", { x: -380 }, { x: 0, duration: SW.p1 - .5, ease: "none", immediateRender: false }, .3);
+  // Вика просто стоит у машин (владелец 07.11: «очень быстро перемещается» — скачок в начале и скольжение без шагов убраны)
   // 2. Толян: крыло другого оттенка
   swap("hook", "p1", SW.p1);
   tl.fromTo("#ring1", { opacity: 0, scale: .6 }, { opacity: 1, scale: 1, duration: .25, ease: "back.out(2)", immediateRender: false }, W("v1", "крыл")); R.sfx("ping", W("v1", "крыл"), .5);
