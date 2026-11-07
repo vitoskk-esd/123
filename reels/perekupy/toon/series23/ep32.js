@@ -117,7 +117,7 @@ window.build = R => {
   // 5. Вика и «Перехват»
   swap("p3", "bot", SW.bot);
   tl.fromTo("#mkt", { opacity: 0, scale: .6, y: 60 }, { opacity: 1, scale: 1, y: 0, duration: .35, ease: "back.out(1.8)", immediateRender: false }, SW.bot + .4); R.sfx("ping", SW.bot + .37, 1);
-  R.punch(cam, W("v3", "беру"), .05); slam("#q6", W("l4", "десят"), "pop");
+  R.punch(cam, W("v3", "беру"), .05); slam("#q6", W("l4", "10"), "pop");
   // 6. Толян опоздал
   swap("bot", "late", SW.late);
   tl.fromTo("#T2", { x: 400 }, { x: 0, duration: .5, ease: "back.out(1.4)", immediateRender: false }, SW.late + .2);
@@ -125,6 +125,6 @@ window.build = R => {
   // 7. три типа продавцов + одна финальная карточка
   swap("late", "rules", SW.rules);
   [["#w1", st.rule + .1], ["#w2", W("rule", "сильно")], ["#w3", W("rule", "по", 1)]].forEach(([s, a]) => slam(s, a, "pop"));
-  tl.fromTo("#cta2", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, W("rule", "сверь")); R.sfx("impact", W("rule", "сверь"), .6);
+  tl.fromTo("#cta2", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, W("rule", "свер")); R.sfx("impact", W("rule", "свер"), .6);
   ending(R, st.end - .15);
 };
