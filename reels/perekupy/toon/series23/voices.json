@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "You narrate a dark-humor comedy about a car flipper who buys a car from a granny at 7 a.m. and resells it the same day pretending to be the owner. Deadpan, dry punchlines after a tiny pause. Say «ПТС» as «пэ-тэ-эс»."
+  "notes": "You narrate a dark-humor comedy: one evening on a city embankment, three identical used Mercedes cars are sold by a flipper, a scammer and an honest owner. Deadpan, dry punchlines after a tiny pause."
  },
  "seryoga": {
   "voice": "Puck",
@@ -15,7 +15,7 @@
   "voice": "Kore",
   "tempo": 1.15,
   "profile": "Vika — a sharp, confident young Russian woman in her 20s, street-smart, ironic, protective friend. Clear, firm voice with a smirk.",
-  "notes": "Line 1: suspicious, ironic, looking at her phone in the morning. Line 2: calm, cold, hand on a warm hood. Line 3: sharp, triumphant verdict. Line 4: quick, excited, decisive, looking at a new notification."
+  "notes": "Line 1: sharp, suspicious question. Line 2: calm, firm demand. Line 3: confident, decisive, looking at her phone."
  },
  "mihalych": {
   "voice": "Gacrux",
@@ -27,7 +27,7 @@
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Line 1: excited, hurried, waving cash. Line 2: cocky, fake-confident. Line 3: caught, stammering, slow, each word separate. Line 4: surprised, deflated."
+  "notes": "Line 1: cocky, loud sales pitch. Line 2: caught, quick lame excuse. Line 3: hurried, pushy, waving cash."
  },
  "galya": {
   "voice": "Sulafat",
@@ -99,7 +99,7 @@
   "voice": "Orus",
   "tempo": 1.1,
   "profile": "Arkady — a smooth, polite Russian con man in his 40s in a long coat and glasses; velvety, trustworthy, slightly too sweet voice.",
-  "notes": "Line 1: calm, generous, relaxed. Line 2: casual, as if a million is nothing. Line 3: caught red-handed, sheepish, hopeful, slow."
+  "notes": "Line 1: velvety, too sweet, hurried. Line 2: caught, slow, sheepish."
  },
  "cop": {
   "voice": "Iapetus",
@@ -130,5 +130,11 @@
   "tempo": 1.12,
   "profile": "Sanya — a cheerful, easygoing Russian car seller from Yakutsk in his 40s, used to extreme frost, friendly, a bit sly, warm voice.",
   "notes": "One line: loud and cheerful in the freezing yard; the last two words are a sly afterthought after a short pause."
+ },
+ "kostya": {
+  "voice": "Umbriel",
+  "tempo": 1.1,
+  "profile": "Kostya — a calm, polite, slightly nerdy Russian guy in his late 20s, honest car owner, a bit boring, precise.",
+  "notes": "Line 1: calm, matter-of-fact, showing documents. Line 2: polite, calm, final. Say «ПТС» as «пэ-тэ-эс», «ТО» as «тэ-о»."
  }
 }
