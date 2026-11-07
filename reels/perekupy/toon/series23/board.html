@@ -45,39 +45,41 @@ const KOS = { jacket: "#4a6b8a", pants: "#2b2f37", glasses: true, hair: "#6b4a2a
 const PAUSE = `<div class="el" style="left:390px;top:1060px;width:300px;height:300px;z-index:10;border-radius:50%;background:rgba(13,14,18,.82);border:8px solid #fff;display:flex;align-items:center;justify-content:center;font-size:150px;color:#fff">⏸</div>`;
 const MARKET = (l, t) => `<div class="botcard" style="left:${l}px;top:${t}px;width:640px"><div class="bh">ПЕРЕХВАТ · бот · карточка объявления</div><div class="bb"><b>Mercedes CLS 2008 · 1 190 000 ₽</b><br><b style="color:#4cd964">✅ по рынку</b> · похожие сейчас: <b>1,15–1,25 млн</b><br>📍 твой город</div></div>`;
 const VIKA = (p, l, t, s) => ch("vika", p, l, t, s, 6);
+const CARDS = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:560px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:40px;padding:18px;box-shadow:0 0 60px rgba(120,180,255,.35)">
+  <div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3;margin-bottom:10px">ПЕРЕХВАТ · бот · 3 новых</div>
+  ${[["1 450 000", "#ff7a1a", "▲ +20% к рынку"], ["890 000", "#ffd23f", "▼ −25% к рынку"], ["1 190 000", "#4cd964", "✅ по рынку"]].map(([p, c, d]) => `<div style="background:#1c1f26;border-radius:18px;padding:10px 16px;margin-top:8px;font-family:Onest;color:#fff;font-size:28px"><b>Mercedes CLS · ${p}</b><br><b style="color:${c}">${d}</b></div>`).join("")}</div>`;
+// пол-экрана: собеседник в своей локации (как звонок в ep27)
+const HALF = (bg, l, inner) => `<div class="el" style="left:${l}px;top:700px;width:540px;height:820px;overflow:hidden;z-index:5;border-left:${l ? "8px solid #151515" : "0"}"><div style="position:absolute;left:${l ? -400 : -100}px;top:-700px;width:1080px;height:1920px">${BGS[bg].replace('id="bg"', "")}</div>${inner}</div>`;
+const SOCHI = `<div class="el" style="left:560px;top:1080px;width:440px;z-index:9;background:#fff;border:8px solid #151515;padding:12px 12px 18px;transform:rotate(4deg);box-shadow:0 12px 0 #151515">
+  <div style="height:200px;background:linear-gradient(#7cc8ff,#bfe6ff);position:relative;overflow:hidden"><div style="position:absolute;left:20px;bottom:30px;font-size:90px">🌴</div><div style="position:absolute;right:16px;bottom:24px;font-size:80px">🌴</div>
+  <img src="../../kit/img/cls/cls_34.png" style="position:absolute;left:70px;bottom:6px;width:300px"></div><div style="font-family:Unbounded;font-weight:900;font-size:24px;text-align:center;margin-top:8px">📷 Сочи · 2019</div></div>`;
 const S = [
- { h: "ТРИ ПРОДАВЦА", tc: "1/8 · 0:00–0:08", bg: "embank", y: 700, els: () => MK("black", -40, 1220, 420) + MK("white", 330, 1240, 420) + MK("cherry", 690, 1220, 420)
-     + TAG("1 450 000", 1, 20, 1120, "#ff7a1a") + TAG("890 000", 2, 390, 1150, "#ffd23f") + TAG("1 190 000", 3, 720, 1120, "#4cd964") + VIKA("v", 400, 760, .56),
-   vo: "Лис: «Один вечер, одна набережная, три одинаковых Мерседеса. Продают перекуп, мошенник и хозяин. Вика пришла за одним».", who: "Лис",
-   mv: "<b>Набережная вечером — фон впервые.</b> Три Mercedes CLS в ряд: чёрный, белый, вишнёвый, ценники. Вика идёт вдоль них. Без загадок и пауз — сразу история." },
- { h: "№1 · ТОЛЯН · 1 450 000", tc: "2/8 · 0:08–0:20", bg: "embank", y: 700, els: () => MK("black", 280, 1210, 660) + ch("tolyan", "t", -20, 860, .84, 6) + VIKA("v", 800, 880, .74)
-     + bub("А почему крыло<br><em>другого оттенка?</em>", 470, 740) + lab("КРАСИЛИ 2 РАЗА", 80, 1440, "#151515", "#fff", 38, -3),
-   vo: "Толян: «Брат… сестрёнка, не бит, не крашен, мотор — пушка!» Вика: «А почему крыло другого оттенка?» Толян: «Это… освещение!» Лис: «Красили два раза. А пушка — это глушитель».", who: "Толян + Вика + Лис",
-   mv: "Чёрный CLS. Толян продаёт, Вика замечает другой оттенок крыла. Оба в кадре, пузыри у голов." },
- { h: "№2 · АРКАДИЙ · 890 000", tc: "3/8 · 0:20–0:32", bg: "embank", y: 700, els: () => MK("white", 280, 1210, 660) + VIKA("v", -10, 880, .74) + ch("perekup", "a", 740, 860, .82, 6, ARK)
-     + bub("Срочно, уезжаю. Скиньте<br><em>предоплату — придержу.</em>", 330, 720) + lab("−25% К РЫНКУ + ПРЕДОПЛАТА", 60, 1440, "#ff3b30", "#fff", 34, -2),
-   vo: "Аркадий (бархатно): «Срочно, уезжаю. Скиньте предоплату — придержу». Вика: «Покажите машину вживую». Аркадий: «Она… на другом берегу». Лис: «Дешевле рынка на четверть и деньги вперёд. Эта машина существует только на фото».", who: "Аркадий + Вика + Лис",
-   mv: "Белый CLS «мигает» — его нет, это фото на телефоне Аркадия. Мошенник в пальто и очках, Вика напротив." },
- { h: "№3 · КОСТЯ · 1 190 000", tc: "4/8 · 0:32–0:44", bg: "embank", y: 700, els: () => MK("cherry", 280, 1210, 660) + ch("perekup", "k", -10, 870, .84, 6, KOS) + VIKA("v", 800, 880, .74)
-     + bub("Продаю сам. ПТС на меня,<br><em>чеки по ТО — вот.</em>", 60, 720) + lab("СКУЧНО. ПОДОЗРИТЕЛЬНО СКУЧНО", 220, 1440, "#ffd23f", "#151515", 32, -2),
-   vo: "Костя: «Продаю сам. ПТС на меня, чеки по ТО — вот». Лис: «Скучно. Подозрительно скучно».", who: "Костя + Лис",
-   mv: "<b>Новый герой — Костя</b> (очки, синяя куртка, рюкзак), хозяин вишнёвого CLS, с папкой чеков. Вика рядом." },
- { h: "ВИКА СВЕРЯЕТ ЦЕНУ", tc: "5/8 · 0:44–0:54", bg: "embank", y: 700, els: () => MK("cherry", 330, 1250, 620) + VIKA("v", -10, 880, .8) + MARKET(400, 1000)
-     + bub("Миллион сто девяносто —<br><em>по рынку. Беру.</em>", 40, 730),
-   vo: "Вика: «Миллион сто девяносто — по рынку. Беру». Лис: «Перехват в каждой карточке показывает, ниже рынка объявление или выше. Вике хватило десяти секунд».", who: "Вика + Лис",
-   mv: "<b>Бот — инструмент героини</b> (не уведомление в хуке, не плашка): Вика открывает карточку объявления в «Перехвате» — «по рынку, похожие 1,15–1,25 млн»." },
- { h: "ТОЛЯН ОПОЗДАЛ", tc: "6/8 · 0:54–1:04", bg: "embank", y: 700, els: () => MK("cherry", 300, 1220, 640) + ch("perekup", "k", -10, 870, .84, 6, KOS) + ch("tolyan", "t", 790, 880, .76, 6)
-     + bub("Брат, за миллион<br><em>отдашь? Наличкой!</em>", 540, 730),
-   vo: "Толян (подбегает): «Брат, за миллион отдашь? Наличкой!» Костя: «Уже продал. По рынку». Лис: «Честные продают по рынку. И быстро».", who: "Толян + Костя + Лис",
-   mv: "Толян пытается перехватить честный CLS — поздно. Оба в кадре." },
- { h: "ТРИ ТИПА ПРОДАВЦОВ", tc: "7/8 · 1:04–1:14", bg: "embank", y: 700, els: () => MK("black", -40, 1220, 420) + MK("white", 330, 1240, 420) + MK("cherry", 690, 1220, 420)
-     + lab("ВЫШЕ РЫНКА + «НЕ БИТ» — ПЕРЕКУП", 40, 880, "#ff7a1a", "#151515", 30, -3) + lab("НИЖЕ РЫНКА + ПРЕДОПЛАТА — РАЗВОД", 40, 990, "#ffd23f", "#151515", 30, 2) + lab("ПО РЫНКУ + ДОКУМЕНТЫ — СМОТРИ", 60, 1100, "#4cd964", "#151515", 30, -2),
-   vo: "Лис: «Выше рынка и „не бит, не крашен“ — перекуп. Сильно ниже рынка и „скиньте предоплату“ — развод. По рынку и документы на продавца — вот это смотри».", who: "Лис",
-   mv: "Три CLS снова в ряд, над каждым — правило по словам." },
- { h: "ФИНАЛ", tc: "8/8 · 1:14–1:22", bg: "embank", y: 600,
-   els: () => `<div class="el" style="left:60px;right:60px;top:820px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">в каждой карточке — насколько ниже или выше рынка</div></div>` + FOX(440, 1150, 200),
-   vo: "Лис: «Сверь цену с рынком до звонка — и половина продавцов отсеется сама. Сохрани — пока тебе не продали пушку вместо мотора».", who: "Лис",
-   mv: "Одна короткая финальная карточка. Без «пиши в комментариях», без «угадай»." },
+ { h: "ТРИ CLS ЗА ВЕЧЕР", tc: "1/6 · 0:00–0:06", bg: "interior", y: 700, els: () => CARDS(260, 760),
+   vo: "Лис: «Три одинаковых CLS. Разница — полмиллиона. Вика решила посмотреть все три за один вечер».", who: "Лис",
+   mv: "<b>Салон машины Вики, ночная дорога.</b> На держателе телефон — три карточки «Перехвата»: +20% к рынку, −25%, по рынку. Бот здесь — реквизит, не уведомление." },
+ { h: "№1 · НОЧНОЙ РЫНОК · ТОЛЯН", tc: "2/6 · 0:06–0:17", bg: "night", y: 700, els: () => MK("black", 280, 1230, 660) + ch("tolyan", "t", -20, 860, .84, 6) + VIKA("v", 800, 880, .74)
+     + bub("Это…<br><em>освещение!</em>", 60, 740) + `<div class="el" style="left:250px;top:1000px;width:620px;height:260px;z-index:7;background:radial-gradient(ellipse at 0% 50%, rgba(255,245,190,.95), rgba(255,245,190,0) 70%);transform:rotate(-8deg)"></div><div class="el" style="left:250px;top:1080px;font-size:70px;z-index:8">🔦</div>`
+     + lab("КРАСИЛИ 2 РАЗА", 520, 1440, "#151515", "#fff", 38, 3),
+   vo: "Толян: «Сестрёнка, не бит, не крашен!» Вика: «А крыло другого оттенка». Толян (светит ей фонарём в глаза): «Это… освещение!» Лис: «Красили два раза».", who: "Толян + Вика + Лис",
+   mv: "<b>Ночной авторынок.</b> Толян светит Вике фонарём прямо в лицо, чтобы она не разглядела крыло. Быстрые реплики, ~11 с." },
+ { h: "№2 · НАБЕРЕЖНАЯ · АРКАДИЙ", tc: "3/6 · 0:17–0:28", bg: "embank", y: 700, els: () => HALF("embank", 0, VIKA("v2", 90, 180, .7).replace('left:90px;top:180px', 'left:90px;top:180px'))
+     + HALF("flat", 540, ch("perekup", "a", 80, 160, .78, 6, ARK)) + bub("Она… на другом<br><em>берегу.</em>", 560, 740) + SOCHI,
+   vo: "Аркадий (по телефону): «Скиньте предоплату — придержу». Вика: «Я на месте. Где машина?» Аркадий: «Она… на другом берегу». Лис: «Фото — из Сочи. Пятилетней давности».", who: "Аркадий + Вика + Лис",
+   mv: "<b>Пол-экрана — Вика на пустой набережной, пол-экрана — Аркадий у себя в квартире</b> (оба говорящих в кадре). Вылетает «фото объявления»: тот же CLS под пальмами, «Сочи · 2019»." },
+ { h: "№3 · ГАРАЖИ · КОСТЯ", tc: "4/6 · 0:28–0:40", bg: "garages", y: 700, els: () => MK("cherry", 300, 1240, 640) + ch("perekup", "k", -10, 870, .84, 6, KOS) + VIKA("v3", 800, 880, .74)
+     + Array.from({ length: 7 }, (_, i) => `<div class="el" style="left:${160 + i * 90}px;top:${760 + (i % 3) * 70}px;font-size:60px;z-index:8;transform:rotate(${(i * 37) % 50 - 25}deg)">🧾</div>`).join("")
+     + MARKET(400, 1010).replace('class="botcard"', 'class="botcard" style0') + lab("😴 ПОДОЗРИТЕЛЬНО СКУЧНО", 140, 1450, "#ffd23f", "#151515", 34, -2),
+   vo: "Костя: «ПТС на меня. Чеки за все ТО». Лис: «Скучно. Подозрительно скучно. Так выглядит хозяин». Вика (смотрит карточку в «Перехвате»): «По рынку. Беру».", who: "Костя + Лис + Вика",
+   mv: "<b>Гаражи ночью.</b> Костя открывает папку — чеки разлетаются по всему кадру, Вика зевает. Потом карточка «Перехвата» в её руке: «по рынку» — «Беру»." },
+ { h: "ПОВОРОТ · ТОЛЯН И АРКАДИЙ", tc: "5/6 · 0:40–0:50", bg: "night", y: 700, els: () => HALF("night", 0, ch("tolyan", "t2", 60, 160, .76, 6)) + HALF("flat", 540, ch("perekup", "a2", 80, 160, .78, 6, ARK))
+     + bub("Брат, CLS за 890.<br><em>Скинь предоплату.</em>", 560, 740) + lab("СКИДЫВАЮ! 💸", 60, 1440, "#ff3b30", "#fff", 44, -3),
+   vo: "Аркадий (звонит Толяну): «Брат, CLS за восемьсот девяносто. Скинь предоплату». Толян: «Скидываю! Никому не отдавай!» Лис: «Перекуп нашёл машину мечты. На другом берегу».", who: "Аркадий + Толян + Лис",
+   mv: "<b>Финальный поворот:</b> мошенник разводит перекупа. Пол-экрана — Толян на ночном рынке, пол-экрана — Аркадий. Смешной панч вместо морали." },
+ { h: "ФИНАЛ", tc: "6/6 · 0:50–0:56", bg: "embank", y: 600,
+   els: () => `<div class="el" style="left:60px;top:640px;right:60px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:20px 26px;color:#fff;font-family:Unbounded;font-weight:900;font-size:28px;line-height:1.4"><span style="color:#ff7a1a">выше рынка — перекуп</span> · <span style="color:#ffd23f">сильно ниже — развод</span> · <span style="color:#4cd964">по рынку + документы — смотри</span></div>`
+     + `<div class="el" style="left:60px;right:60px;top:960px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">в каждой карточке — насколько ниже или выше рынка</div></div>` + FOX(440, 1240, 200),
+   vo: "Лис: «Выше рынка — перекуп. Сильно ниже — развод. По рынку и документы на продавца — смотри. Сохрани — пока тебе не продали машину с другого берега».", who: "Лис",
+   mv: "Одна строка правил + короткая финальная карточка. Весь ролик ~55 с вместо 1:22." },
 ];
 
 const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
@@ -86,6 +88,6 @@ const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.inn
 document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
 document.getElementById("mv").innerHTML = sc.mv;
 const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
-["t", "a", "k", "v"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+["t", "t2", "a", "a2", "k", "v"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
 window.READY = true;
 </script></body></html>
