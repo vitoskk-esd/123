@@ -38,40 +38,54 @@ const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}
 let CLK = "", CNTV = ""; const clock = (t) => (CLK = t, ""); const CAP = v => (CNTV = v, "");
 const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
 const V09 = (l, t, w, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2105/vaz2105_34.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const VALERA = { jacket: "#3f6e5a", pants: "#2b2f37", cap: "#5b4636", mustache: true, hair: "#bdbdbd" };
+const GOSHA = { jacket: "#2e86de", pants: "#2e86de", cap: "#151515", chain: true, item: "phone" };
+const EXPERT = { jacket: "#6b8e23", pants: "#3b3f46", glasses: true, hair: "#3a2d22", scarf: "#ffd23f", item: "gauge" };
+const DIMA = { jacket: "#ffd23f", pants: "#2b2f37", cap: "#ffd23f", hair: "#2b1d14", item: "bag" };
 const DED = { jacket: "#6b5a3a", pants: "#3b3f46", hair: "#d9d9d9", mustache: true, glasses: true };
 const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
 const PHONE = (l, t, inner) => `<div class="el" style="left:${l}px;top:${t}px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const AD = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:560px;z-index:9;background:#fff;border:8px solid #151515;border-radius:30px;padding:18px 22px;font-family:Onest;color:#151515;box-shadow:0 12px 0 #151515">
+  <div style="height:170px;border-radius:18px;background:linear-gradient(#f6b26b,#fde3c3);position:relative;overflow:hidden"><img src="../../kit/img/vaz2105/vaz2105_34.png" style="position:absolute;left:60px;bottom:4px;width:380px"></div>
+  <div style="font-family:Unbounded;font-weight:900;font-size:30px;margin-top:10px">ВАЗ-2105 · 120 000 ₽</div><div style="font-size:24px;font-weight:800;color:#2f7a3a">без скрутки · аккумулятор новый</div></div>`;
 const S = [
- { h: "КАК ТОЛЯН СТАЛ ПЕРЕКУПОМ · 1", tc: "1/6 · 0:00–0:08", bg: "room", y: 640, els: () => CAP("100 000") + ch("tolyan", "t", 40, 880, .88, 6) + CASH(600, 1260)
-     + `<div class="el" style="left:470px;top:870px;width:570px;height:300px;z-index:8;background:#fff;border:7px solid #151515;border-radius:50%;box-shadow:0 10px 0 #151515"></div>
-        <div class="el" style="left:410px;top:1150px;width:40px;height:40px;z-index:8;background:#fff;border:6px solid #151515;border-radius:50%"></div><div class="el" style="left:370px;top:1200px;width:24px;height:24px;z-index:8;background:#fff;border:5px solid #151515;border-radius:50%"></div>
-        <img class="el" src="../../kit/img/gelik/gelik_34.png" style="left:600px;top:895px;width:290px;z-index:9"><div class="el" style="left:590px;top:1095px;z-index:9;font-family:Unbounded;font-weight:900;font-size:36px;color:#151515;white-space:nowrap">1 000 000 ₽ 🤑</div>`
-     + bub("Всё, брат. Сто тысяч есть —<br><em>становлюсь перекупом!</em>", 40, 700) + lab("ЧАСТЬ 1 · СТО ТЫСЯЧ", 420, 1260, "#ffd23f", "#151515", 34, 3),
-   vo: "Толян: «Всё, брат. Сто тысяч есть — становлюсь перекупом!» Лис: «Это история о том, как Толян со ста тысячами решил стать перекупом. Без скрутки, без вранья — и с ботом Перехват».", who: "Толян + Лис",
-   mv: "<b>Хук — с чего всё началось:</b> комната Толяна, на столе его сто тысяч, над головой облако-мечта: Гелик и «1 000 000 ₽». Толян решает стать перекупом. Счётчик «100 000 ₽» появляется в углу и идёт через весь сериал." },
- { h: "03:00 · ФИЛЬТР ДО 100 000", tc: "2/6 · 0:07–0:16", bg: "room", y: 640, els: () => clock("03:00") + CAP("100 000") + ch("tolyan", "t", -20, 880, .84, 6)
-     + PHONE(400, 700, `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · фильтр</div><div style="font-family:Onest;color:#fff;font-size:28px;line-height:1.5;margin:6px 0 14px">💰 до 100 000 ₽ · 📍 твой город</div>
+ { h: "КАК ТОЛЯН СТАЛ ПЕРЕКУПОМ · 1", tc: "1/8 · 0:00–0:07", bg: "coffee", y: 700, els: () => CAP("100 000") + ch("tolyan", "t", -10, 880, .86, 6) + CASH(560, 1250)
+     + `<div class="el" style="left:500px;top:760px;width:500px;height:270px;z-index:8;background:#fff;border:7px solid #151515;border-radius:50%;box-shadow:0 10px 0 #151515"></div>
+        <img class="el" src="../../kit/img/gelik/gelik_34.png" style="left:610px;top:780px;width:260px;z-index:9"><div class="el" style="left:600px;top:960px;z-index:9;font-family:Unbounded;font-weight:900;font-size:32px;color:#151515;white-space:nowrap">1 000 000 ₽ 🤑</div>`
+     + bub("Всё, брат. Сто тысяч есть —<br><em>становлюсь перекупом!</em>", 40, 700),
+   vo: "Толян: «Всё, брат. Сто тысяч есть — становлюсь перекупом!» Лис: «Как Толян со ста тысячами решил стать перекупом. Честно. С ботом Перехват».", who: "Толян + Лис",
+   mv: "<b>Новый фон — кофейня.</b> Толян за столиком с капучино, рядом его сто тысяч, над головой мечта — Гелик и миллион. Счётчик капитала в углу." },
+ { h: "03:00 · НОЧНОЙ ЛАРЁК", tc: "2/8 · 0:07–0:15", bg: "kiosk", y: 700, els: () => clock("03:00") + CAP("100 000") + ch("tolyan", "t", -20, 880, .84, 6)
+     + PHONE(400, 760, `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · фильтр</div><div style="font-family:Onest;color:#fff;font-size:28px;line-height:1.5;margin:6px 0 14px">💰 до 100 000 ₽ · 📍 твой город</div>
        <div style="background:#1c1f26;border-radius:22px;padding:16px 20px;font-family:Onest;color:#fff;font-size:30px;line-height:1.45"><b style="color:#ff7a1a">🔥 −25% к рынку · хозяин</b><br><b>ВАЗ-2105 · 85 000 ₽</b><br>⏱ 1 с после публикации</div>`)
      + bub("Брат,<br><em>беру!</em>", 60, 720),
-   vo: "Лис: «Фильтр — до ста тысяч, свой город. В три ночи — пятёрка за восемьдесят пять. На четверть ниже рынка. От хозяина». Толян: «Брат, беру!»", who: "Лис + Толян",
-   mv: "Крупно телефон: фильтр бота «до 100 000 ₽ · твой город» и карточка — ВАЗ-2105, −25% к рынку, хозяин, 1 с. Бот — рабочий инструмент героя." },
- { h: "ГАРАЖ ДЕДА ПЕТРОВИЧА", tc: "3/6 · 0:16–0:26", bg: "garages", y: 700, els: () => CAP("15 000 + 🚗") + V09(300, 1200, 680) + ch("perekup", "d", -10, 860, .86, 6, DED) + ch("tolyan", "t", 800, 880, .76, 6)
-     + bub("Сынок, только аккумулятор сел.<br><em>А так — зверь.</em>", 60, 720) + lab("−85 000 ₽", 600, 1240, "#ff3b30", "#fff", 46, 3),
-   vo: "Дед Петрович: «Сынок, только аккумулятор сел. А так — зверь». Лис: «Восемьдесят пять тысяч — и у Толяна первая машина. Капитал: пятнадцать тысяч и пятёрка».", who: "Петрович + Лис",
-   mv: "Гаражи утром. Продавец — дед Петрович (знакомый по «Жизни одной четырки»), бежевая пятёрка. Толян отсчитывает деньги, счётчик падает до 15 000." },
- { h: "ЧЕСТНАЯ ПРЕДПРОДАЖКА", tc: "4/6 · 0:26–0:35", bg: "carwash", y: 700, els: () => CAP("8 000 + 🚗") + V09(260, 1210, 680) + ch("tolyan", "t", -20, 880, .8, 6)
-     + lab("АККУМУЛЯТОР −6 000", 430, 960, "#151515", "#fff", 34, 3) + lab("МОЙКА −1 000", 520, 1060, "#151515", "#fff", 34, -2) + lab("СКРУТКА — НЕТ ❌", 60, 1370, "#4cd964", "#151515", 38, -3),
-   vo: "Лис: «Новый аккумулятор — шесть тысяч. Мойка — тысяча. Скрутку и „бабушку в церковь“ Толян в этот раз не трогает. Самому непривычно».", who: "Лис",
-   mv: "Мойка самообслуживания: пена, Толян моет пятёрку. Плашки расходов вылетают по одной, счётчик: 8 000 + машина." },
- { h: "ПРОДАЖА · СЕРЁГА", tc: "5/6 · 0:35–0:47", bg: "street", y: 700, els: () => CAP("128 000") + V09(300, 1210, 660) + ch("tolyan", "t", -20, 880, .8, 6) + ch("seryoga", "s", 800, 900, .74, 6)
-     + bub("Сто двадцать, брат.<br><em>Аккумулятор новый, всё честно.</em>", 40, 720) + CASH(420, 1460, 4),
-   vo: "Серёга: «Сколько?» Толян: «Сто двадцать, брат. Аккумулятор новый, всё честно». Серёга: «Беру». Лис: «Плюс двадцать восемь тысяч за неделю. Без скрутки. Толян сам в шоке».", who: "Серёга + Толян + Лис",
-   mv: "Улица у шаурмы. Серёга покупает пятёрку, счётчик взлетает до 128 000. Оба в кадре, пузыри у голов." },
- { h: "КРЮЧОК + ФИНАЛ", tc: "6/6 · 0:47–0:56", bg: "night", y: 600, els: () => CAP("128 000")
+   vo: "Лис: «Фильтр — до ста тысяч, свой город. Три ночи — пятёрка за восемьдесят пять, на четверть ниже рынка. От хозяина». Толян: «Брат, беру!»", who: "Лис + Толян",
+   mv: "<b>Новый фон — ночной ларёк «24 часа»</b>: фонарь, мотыльки. Толян с хот-догом, на телефоне фильтр и карточка «Перехвата»." },
+ { h: "ГАРАЖ ДЯДИ ВАЛЕРЫ", tc: "3/8 · 0:15–0:23", bg: "shed", y: 700, els: () => CAP("15 000 + 🚗") + V09(300, 1200, 680) + ch("perekup", "d", -10, 860, .86, 6, VALERA) + ch("tolyan", "t", 800, 880, .76, 6)
+     + bub("Сынок, только аккумулятор сел.<br><em>А так — зверь.</em>", 60, 720) + lab("−85 000 ₽", 330, 1080, "#ff3b30", "#fff", 46, 3),
+   vo: "Дядя Валера: «Сынок, только аккумулятор сел. А так — зверь». Лис: «Восемьдесят пять тысяч — и у Толяна первая машина».", who: "Валера + Лис",
+   mv: "<b>Новый фон — гараж изнутри</b>: банки с огурцами, плакат «Жигули», лампочка. <b>Новый герой — дядя Валера</b> (кепка, усы, рабочая куртка)." },
+ { h: "У ПОДЪЕЗДА · ОБЪЯВЛЕНИЕ", tc: "4/8 · 0:23–0:32", bg: "podezd", y: 700, els: () => CAP("8 000 + 🚗") + V09(330, 1210, 660) + ch("tolyan", "t", -20, 880, .8, 6) + AD(470, 740)
+     + lab("АККУМУЛЯТОР И ШАМПУНЬ −7 000", 40, 1350, "#151515", "#fff", 32, -3),
+   vo: "Лис: «Аккумулятор и шампунь — семь тысяч. Мойка из ведра. Фото на закате. Объявление: сто двадцать, без скрутки».", who: "Лис",
+   mv: "<b>Новый фон — двор у подъезда.</b> Толян моет пятёрку из ведра, фоткает её — и рядом всплывает его объявление «120 000 · без скрутки»." },
+ { h: "ЗВОНОК · ГОША", tc: "5/8 · 0:32–0:42", bg: "podezd", y: 700, els: () => CAP("8 000 + 🚗") + `<div class="el" style="left:540px;top:700px;width:540px;height:820px;z-index:5;border-left:8px solid #151515;overflow:hidden"><div style="position:absolute;left:-540px;top:-700px;width:1080px;height:1920px">${BGS.kiosk.replace('id="bg"', "")}</div>${ch("perekup", "g", 110, 180, .76, 6, GOSHA)}</div>`
+     + ch("tolyan", "t", 40, 880, .8, 6) + bub("Последняя цена? Шестьдесят —<br><em>и забираю сегодня.</em>", 440, 720) + lab("«ТЫ КТО?» — «ПЕРЕКУП»", 60, 1350, "#ff3b30", "#fff", 36, -3),
+   vo: "Гоша: «Последняя цена? Шестьдесят — и забираю сегодня». Толян: «Брат, ты кто вообще?» Гоша: «Перекуп». Лис: «Толян впервые оказался по ту сторону».", who: "Гоша + Толян + Лис",
+   mv: "Пол-экрана — Толян у подъезда, пол-экрана — <b>новый герой Гоша-перекуп</b> (синий спортивный костюм, цепь) звонит со своей точки. Оба в кадре." },
+ { h: "ВОКЗАЛ · «ЭКСПЕРТ»", tc: "6/8 · 0:42–0:53", bg: "vokzal", y: 700, els: () => CAP("8 000 + 🚗") + V09(280, 1220, 660) + ch("perekup", "e", 790, 880, .76, 6, EXPERT) + ch("tolyan", "t", -20, 880, .8, 6)
+     + bub("Хорошая машина.<br><em>Но я думал, она синяя.</em>", 470, 720) + lab("40 МИНУТ ОСМОТРА", 60, 1360, "#ffd23f", "#151515", 36, -2),
+   vo: "Эксперт: «Толщиномер, эндоскоп, магнит… Хорошая машина. Но я думал, она синяя». Лис: «Сорок минут осмотра. Уехал на автобусе».", who: "Эксперт + Лис",
+   mv: "<b>Новый фон — площадь у вокзала.</b> <b>Новый герой — «эксперт»</b> (очки, шарф, толщиномер) облазил всю машину и ушёл. Толян смотрит ему вслед." },
+ { h: "ВОКЗАЛ · ДИМА", tc: "7/8 · 0:53–1:03", bg: "vokzal", y: 700, els: () => CAP("128 000") + V09(280, 1220, 660) + ch("tolyan", "t", -20, 880, .8, 6) + ch("perekup", "m", 800, 880, .76, 6, DIMA)
+     + bub("Сколько?", 700, 760) + CASH(420, 1380, 4) + lab("+28 000 ₽", 60, 1360, "#4cd964", "#151515", 44, -3),
+   vo: "Дима: «Сколько?» Толян: «Сто двадцать. Всё честно». Дима: «Беру». Лис: «Плюс двадцать восемь тысяч за неделю. Без скрутки. Толян сам в шоке».", who: "Дима + Толян + Лис",
+   mv: "<b>Новый герой — курьер Дима</b> (жёлтая куртка, сумка). Короткая сделка, счётчик взлетает до 128 000." },
+ { h: "КРЮЧОК + ФИНАЛ", tc: "8/8 · 1:03–1:10", bg: "kiosk", y: 600, els: () => CAP("128 000")
      + `<div class="el" style="left:60px;right:60px;top:660px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:22px 26px;color:#fff;font-family:Unbounded;font-weight:900;font-size:34px;line-height:1.3;text-align:center">ЧАСТЬ 2:<br><span style="color:#ff3b30">Приора и первая ошибка</span></div>`
      + `<div class="el" style="left:60px;right:60px;top:960px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">фильтр по бюджету и городу · ниже рынка — видно сразу</div></div>` + FOX(440, 1240, 200),
-   vo: "Лис: «Сто двадцать восемь тысяч. В следующей части — Приора и первая ошибка Толяна. Подпишись, чтобы не пропустить».", who: "Лис",
-   mv: "<b>Крючок на часть 2</b> + одна финальная карточка. Ролик ~55 с." },
+   vo: "Лис: «Дальше — Приора и первая ошибка Толяна. Подпишись, чтобы не пропустить».", who: "Лис",
+   mv: "Крючок на часть 2 + одна финальная карточка." },
 ];
 
 const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
@@ -80,6 +94,6 @@ const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.inn
 document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
 document.getElementById("mv").innerHTML = sc.mv;
 const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
-["t", "t2", "d", "s"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+["t", "d", "g", "e", "m"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
 window.READY = true;
 </script></body></html>

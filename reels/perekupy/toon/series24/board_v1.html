@@ -1,0 +1,85 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ» (владелец 07.11) — часть 1 из 5 «Сто тысяч». Толян начинает со 100 000 ₽ и перепродаёт машины, находя их через бота.
+// Сквозной приём сериала — счётчик капитала в углу; в конце каждой части — крючок на следующую. Слов «заработок/лёгкие деньги» избегаем (правило 1b).
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = "", CNTV = ""; const clock = (t) => (CLK = t, ""); const CAP = v => (CNTV = v, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const V09 = (l, t, w, z = 3, extra = "") => `<img class="el" src="../../kit/img/vaz2105/vaz2105_34.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const DED = { jacket: "#6b5a3a", pants: "#3b3f46", hair: "#d9d9d9", mustache: true, glasses: true };
+const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
+const PHONE = (l, t, inner) => `<div class="el" style="left:${l}px;top:${t}px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const S = [
+ { h: "КАК ТОЛЯН СТАЛ ПЕРЕКУПОМ · 1", tc: "1/6 · 0:00–0:08", bg: "room", y: 640, els: () => CAP("100 000") + ch("tolyan", "t", 40, 880, .88, 6) + CASH(600, 1260)
+     + `<div class="el" style="left:470px;top:870px;width:570px;height:300px;z-index:8;background:#fff;border:7px solid #151515;border-radius:50%;box-shadow:0 10px 0 #151515"></div>
+        <div class="el" style="left:410px;top:1150px;width:40px;height:40px;z-index:8;background:#fff;border:6px solid #151515;border-radius:50%"></div><div class="el" style="left:370px;top:1200px;width:24px;height:24px;z-index:8;background:#fff;border:5px solid #151515;border-radius:50%"></div>
+        <img class="el" src="../../kit/img/gelik/gelik_34.png" style="left:600px;top:895px;width:290px;z-index:9"><div class="el" style="left:590px;top:1095px;z-index:9;font-family:Unbounded;font-weight:900;font-size:36px;color:#151515;white-space:nowrap">1 000 000 ₽ 🤑</div>`
+     + bub("Всё, брат. Сто тысяч есть —<br><em>становлюсь перекупом!</em>", 40, 700) + lab("ЧАСТЬ 1 · СТО ТЫСЯЧ", 420, 1260, "#ffd23f", "#151515", 34, 3),
+   vo: "Толян: «Всё, брат. Сто тысяч есть — становлюсь перекупом!» Лис: «Это история о том, как Толян со ста тысячами решил стать перекупом. Без скрутки, без вранья — и с ботом Перехват».", who: "Толян + Лис",
+   mv: "<b>Хук — с чего всё началось:</b> комната Толяна, на столе его сто тысяч, над головой облако-мечта: Гелик и «1 000 000 ₽». Толян решает стать перекупом. Счётчик «100 000 ₽» появляется в углу и идёт через весь сериал." },
+ { h: "03:00 · ФИЛЬТР ДО 100 000", tc: "2/6 · 0:07–0:16", bg: "room", y: 640, els: () => clock("03:00") + CAP("100 000") + ch("tolyan", "t", -20, 880, .84, 6)
+     + PHONE(400, 700, `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · фильтр</div><div style="font-family:Onest;color:#fff;font-size:28px;line-height:1.5;margin:6px 0 14px">💰 до 100 000 ₽ · 📍 твой город</div>
+       <div style="background:#1c1f26;border-radius:22px;padding:16px 20px;font-family:Onest;color:#fff;font-size:30px;line-height:1.45"><b style="color:#ff7a1a">🔥 −25% к рынку · хозяин</b><br><b>ВАЗ-2105 · 85 000 ₽</b><br>⏱ 1 с после публикации</div>`)
+     + bub("Брат,<br><em>беру!</em>", 60, 720),
+   vo: "Лис: «Фильтр — до ста тысяч, свой город. В три ночи — пятёрка за восемьдесят пять. На четверть ниже рынка. От хозяина». Толян: «Брат, беру!»", who: "Лис + Толян",
+   mv: "Крупно телефон: фильтр бота «до 100 000 ₽ · твой город» и карточка — ВАЗ-2105, −25% к рынку, хозяин, 1 с. Бот — рабочий инструмент героя." },
+ { h: "ГАРАЖ ДЕДА ПЕТРОВИЧА", tc: "3/6 · 0:16–0:26", bg: "garages", y: 700, els: () => CAP("15 000 + 🚗") + V09(300, 1200, 680) + ch("perekup", "d", -10, 860, .86, 6, DED) + ch("tolyan", "t", 800, 880, .76, 6)
+     + bub("Сынок, только аккумулятор сел.<br><em>А так — зверь.</em>", 60, 720) + lab("−85 000 ₽", 600, 1240, "#ff3b30", "#fff", 46, 3),
+   vo: "Дед Петрович: «Сынок, только аккумулятор сел. А так — зверь». Лис: «Восемьдесят пять тысяч — и у Толяна первая машина. Капитал: пятнадцать тысяч и пятёрка».", who: "Петрович + Лис",
+   mv: "Гаражи утром. Продавец — дед Петрович (знакомый по «Жизни одной четырки»), бежевая пятёрка. Толян отсчитывает деньги, счётчик падает до 15 000." },
+ { h: "ЧЕСТНАЯ ПРЕДПРОДАЖКА", tc: "4/6 · 0:26–0:35", bg: "carwash", y: 700, els: () => CAP("8 000 + 🚗") + V09(260, 1210, 680) + ch("tolyan", "t", -20, 880, .8, 6)
+     + lab("АККУМУЛЯТОР −6 000", 430, 960, "#151515", "#fff", 34, 3) + lab("МОЙКА −1 000", 520, 1060, "#151515", "#fff", 34, -2) + lab("СКРУТКА — НЕТ ❌", 60, 1370, "#4cd964", "#151515", 38, -3),
+   vo: "Лис: «Новый аккумулятор — шесть тысяч. Мойка — тысяча. Скрутку и „бабушку в церковь“ Толян в этот раз не трогает. Самому непривычно».", who: "Лис",
+   mv: "Мойка самообслуживания: пена, Толян моет пятёрку. Плашки расходов вылетают по одной, счётчик: 8 000 + машина." },
+ { h: "ПРОДАЖА · СЕРЁГА", tc: "5/6 · 0:35–0:47", bg: "street", y: 700, els: () => CAP("128 000") + V09(300, 1210, 660) + ch("tolyan", "t", -20, 880, .8, 6) + ch("seryoga", "s", 800, 900, .74, 6)
+     + bub("Сто двадцать, брат.<br><em>Аккумулятор новый, всё честно.</em>", 40, 720) + CASH(420, 1460, 4),
+   vo: "Серёга: «Сколько?» Толян: «Сто двадцать, брат. Аккумулятор новый, всё честно». Серёга: «Беру». Лис: «Плюс двадцать восемь тысяч за неделю. Без скрутки. Толян сам в шоке».", who: "Серёга + Толян + Лис",
+   mv: "Улица у шаурмы. Серёга покупает пятёрку, счётчик взлетает до 128 000. Оба в кадре, пузыри у голов." },
+ { h: "КРЮЧОК + ФИНАЛ", tc: "6/6 · 0:47–0:56", bg: "night", y: 600, els: () => CAP("128 000")
+     + `<div class="el" style="left:60px;right:60px;top:660px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:22px 26px;color:#fff;font-family:Unbounded;font-weight:900;font-size:34px;line-height:1.3;text-align:center">ЧАСТЬ 2:<br><span style="color:#ff3b30">Приора и первая ошибка</span></div>`
+     + `<div class="el" style="left:60px;right:60px;top:960px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">фильтр по бюджету и городу · ниже рынка — видно сразу</div></div>` + FOX(440, 1240, 200),
+   vo: "Лис: «Сто двадцать восемь тысяч. В следующей части — Приора и первая ошибка Толяна. Подпишись, чтобы не пропустить».", who: "Лис",
+   mv: "<b>Крючок на часть 2</b> + одна финальная карточка. Ролик ~55 с." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CNTV) document.querySelector(".view").insertAdjacentHTML("beforeend", `<div class="cnt" style="top:auto;bottom:20px;left:auto;right:20px">💸 ${CNTV} ₽</div>`); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "t2", "d", "s"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
