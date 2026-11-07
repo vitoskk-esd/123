@@ -1,0 +1,91 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ep32 «ТРИ ПРОДАВЦА» — разнообразие (владелец 07.11): без уведомления в хуке, без плашки в середине, без «угадай цену». Вика смотрит три Mark II
+// на набережной (фон впервые): перекуп, мошенник, хозяин. Бот — её инструмент: карточка «Перехвата» показывает, по рынку ли цена.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = "", CNTV = ""; const clock = (t) => (CLK = t, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const PAINT = { white: "none", black: "grayscale(.5) brightness(.42) contrast(1.3)", cherry: "sepia(1) saturate(4) hue-rotate(-40deg) brightness(.78)" };
+const MK = (p, l, t, w, z = 3) => `<img class="el" src="../../kit/img/markii/markii${p === "white" ? "" : "_" + p}.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z}">`;   // перекраска по пикселям (kit/img/markii/recolor.py), диски родные
+const TAG = (txt, n, l, t, bg) => `<div class="el" style="left:${l}px;top:${t}px;z-index:9;font-family:Unbounded;font-weight:900;font-size:40px;background:${bg};color:#151515;border:6px solid #151515;border-radius:16px;padding:4px 16px;box-shadow:0 8px 0 #151515"><span style="font-size:28px;opacity:.7">№${n}</span> ${txt}</div>`;
+const ARK = { coat: "#c69c6d", jacket: "#c69c6d", glasses: true, mustache: true, hair: "#2b1d14", tie: "#8e1b1b", item: "phone" };
+const KOS = { jacket: "#4a6b8a", pants: "#2b2f37", glasses: true, hair: "#6b4a2a", item: "bag" };
+const PAUSE = `<div class="el" style="left:390px;top:1060px;width:300px;height:300px;z-index:10;border-radius:50%;background:rgba(13,14,18,.82);border:8px solid #fff;display:flex;align-items:center;justify-content:center;font-size:150px;color:#fff">⏸</div>`;
+const MARKET = (l, t) => `<div class="botcard" style="left:${l}px;top:${t}px;width:640px"><div class="bh">ПЕРЕХВАТ · бот · карточка объявления</div><div class="bb"><b>Toyota Mark II 1998 · 560 000 ₽</b><br><b style="color:#4cd964">✅ по рынку</b> · похожие сейчас: <b>540–590 тыс.</b><br>📍 твой город</div></div>`;
+const VIKA = (p, l, t, s) => ch("vika", p, l, t, s, 6);
+const S = [
+ { h: "ТРИ ПРОДАВЦА", tc: "1/8 · 0:00–0:08", bg: "embank", y: 700, els: () => MK("black", -40, 1220, 420) + MK("white", 330, 1240, 420) + MK("cherry", 690, 1220, 420)
+     + TAG("650 000", 1, 30, 1120, "#ff7a1a") + TAG("420 000", 2, 380, 1140, "#ffd23f") + TAG("560 000", 3, 720, 1120, "#4cd964") + VIKA("v", 400, 760, .56),
+   vo: "Лис: «Один вечер, одна набережная, три одинаковых Марка. Продают перекуп, мошенник и хозяин. Вика пришла за одним».", who: "Лис",
+   mv: "<b>Набережная вечером — фон впервые.</b> Три Mark II в ряд: чёрный, белый, вишнёвый, ценники. Вика идёт вдоль них. Без загадок и пауз — сразу история." },
+ { h: "№1 · ТОЛЯН · 650 000", tc: "2/8 · 0:08–0:20", bg: "embank", y: 700, els: () => MK("black", 280, 1210, 660) + ch("tolyan", "t", -20, 860, .84, 6) + VIKA("v", 800, 880, .74)
+     + bub("А почему крыло<br><em>другого оттенка?</em>", 470, 740) + lab("КРАСИЛИ 2 РАЗА", 80, 1440, "#151515", "#fff", 38, -3),
+   vo: "Толян: «Брат… сестрёнка, не бит, не крашен, мотор — пушка!» Вика: «А почему крыло другого оттенка?» Толян: «Это… освещение!» Лис: «Красили два раза. А пушка — это глушитель».", who: "Толян + Вика + Лис",
+   mv: "Чёрный Марк. Толян продаёт, Вика замечает другой оттенок крыла. Оба в кадре, пузыри у голов." },
+ { h: "№2 · АРКАДИЙ · 420 000", tc: "3/8 · 0:20–0:32", bg: "embank", y: 700, els: () => MK("white", 280, 1210, 660) + VIKA("v", -10, 880, .74) + ch("perekup", "a", 740, 860, .82, 6, ARK)
+     + bub("Срочно, уезжаю. Скиньте<br><em>предоплату — придержу.</em>", 330, 720) + lab("−30% К РЫНКУ + ПРЕДОПЛАТА", 60, 1440, "#ff3b30", "#fff", 34, -2),
+   vo: "Аркадий (бархатно): «Срочно, уезжаю. Скиньте предоплату — придержу». Вика: «Покажите машину вживую». Аркадий: «Она… на другом берегу». Лис: «Дешевле рынка на треть и деньги вперёд. Эта машина существует только на фото».", who: "Аркадий + Вика + Лис",
+   mv: "Белый Марк «мигает» — его нет, это фото на телефоне Аркадия. Мошенник в пальто и очках, Вика напротив." },
+ { h: "№3 · КОСТЯ · 560 000", tc: "4/8 · 0:32–0:44", bg: "embank", y: 700, els: () => MK("cherry", 280, 1210, 660) + ch("perekup", "k", -10, 870, .84, 6, KOS) + VIKA("v", 800, 880, .74)
+     + bub("Продаю сам. ПТС на меня,<br><em>чеки по ТО — вот.</em>", 60, 720) + lab("СКУЧНО. ПОДОЗРИТЕЛЬНО СКУЧНО", 220, 1440, "#ffd23f", "#151515", 32, -2),
+   vo: "Костя: «Продаю сам. ПТС на меня, чеки по ТО — вот». Лис: «Скучно. Подозрительно скучно».", who: "Костя + Лис",
+   mv: "<b>Новый герой — Костя</b> (очки, синяя куртка, рюкзак), хозяин вишнёвого Марка, с папкой чеков. Вика рядом." },
+ { h: "ВИКА СВЕРЯЕТ ЦЕНУ", tc: "5/8 · 0:44–0:54", bg: "embank", y: 700, els: () => MK("cherry", 330, 1250, 620) + VIKA("v", -10, 880, .8) + MARKET(400, 1000)
+     + bub("Пятьсот шестьдесят —<br><em>по рынку. Беру.</em>", 40, 730),
+   vo: "Вика: «Пятьсот шестьдесят — по рынку. Беру». Лис: «Перехват в каждой карточке показывает, ниже рынка объявление или выше. Вике хватило десяти секунд».", who: "Вика + Лис",
+   mv: "<b>Бот — инструмент героини</b> (не уведомление в хуке, не плашка): Вика открывает карточку объявления в «Перехвате» — «по рынку, похожие 540–590 тыс.»." },
+ { h: "ТОЛЯН ОПОЗДАЛ", tc: "6/8 · 0:54–1:04", bg: "embank", y: 700, els: () => MK("cherry", 300, 1220, 640) + ch("perekup", "k", -10, 870, .84, 6, KOS) + ch("tolyan", "t", 790, 880, .76, 6)
+     + bub("Брат, за пятьсот<br><em>отдашь? Наличкой!</em>", 540, 730),
+   vo: "Толян (подбегает): «Брат, за пятьсот отдашь? Наличкой!» Костя: «Уже продал. По рынку». Лис: «Честные продают по рынку. И быстро».", who: "Толян + Костя + Лис",
+   mv: "Толян пытается перехватить честный Марк — поздно. Оба в кадре." },
+ { h: "ТРИ ТИПА ПРОДАВЦОВ", tc: "7/8 · 1:04–1:14", bg: "embank", y: 700, els: () => MK("black", -40, 1220, 420) + MK("white", 330, 1240, 420) + MK("cherry", 690, 1220, 420)
+     + lab("ВЫШЕ РЫНКА + «НЕ БИТ» — ПЕРЕКУП", 40, 880, "#ff7a1a", "#151515", 30, -3) + lab("НИЖЕ РЫНКА + ПРЕДОПЛАТА — РАЗВОД", 40, 990, "#ffd23f", "#151515", 30, 2) + lab("ПО РЫНКУ + ДОКУМЕНТЫ — СМОТРИ", 60, 1100, "#4cd964", "#151515", 30, -2),
+   vo: "Лис: «Выше рынка и „не бит, не крашен“ — перекуп. Сильно ниже рынка и „скиньте предоплату“ — развод. По рынку и документы на продавца — вот это смотри».", who: "Лис",
+   mv: "Три Марка снова в ряд, над каждым — правило по словам." },
+ { h: "ФИНАЛ", tc: "8/8 · 1:14–1:22", bg: "embank", y: 600,
+   els: () => `<div class="el" style="left:60px;right:60px;top:820px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">в каждой карточке — насколько ниже или выше рынка</div></div>` + FOX(440, 1150, 200),
+   vo: "Лис: «Сверь цену с рынком до звонка — и половина продавцов отсеется сама. Сохрани — пока тебе не продали пушку вместо мотора».", who: "Лис",
+   mv: "Одна короткая финальная карточка. Без «пиши в комментариях», без «угадай»." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CNTV) document.querySelector(".view").insertAdjacentHTML("beforeend", `<div class="cnt" style="top:auto;bottom:20px;left:auto;right:20px">💸 ${CNTV} ₽</div>`); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "a", "k", "v"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
