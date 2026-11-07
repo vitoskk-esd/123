@@ -40,7 +40,7 @@ const TOL = ["t0", "t"];
 
 // 1. хук: кухня Вики, карточка бота
 scene("hook", "kitchen");
-add("hook", BOT("bot1", "07:12", "Toyota Camry 2018", "1 590 000 ₽", "🔥 −12% к рынку", "0,9 с", 440, 760) + hero("vika", "v", 20, 860, .9, 7));
+add("hook", BOT("bot1", "07:12", "Toyota Camry 2018", "1 590 000 ₽", "🔥 −12% к рынку", "0,9 с", 440, 1010) + hero("vika", "v", 20, 860, .9, 7));
 // 2. бокс Толяна ночью
 scene("box", "box");
 add("box", CAM("car1", "camry", 370, 1200, 640) + hero("tolyan", "t0", -20, 860, .9, 7));
@@ -78,7 +78,7 @@ $("#over").insertAdjacentHTML("beforeend", `<div id="tmr">⏳ 08:00</div><div id
 TOL.forEach(p => { const s = document.getElementById(p + "-shades"); if (s) s.style.display = ""; });
 $("#end h2").innerHTML = E.end;
 const bub = (line, html, l, t, tx, fs) => { const b = bubble(line, html, l, t, tx); if (fs) b.style.fontSize = fs + "px"; return b; };
-bub("v1", "Ниже рынка на двести?<br><em>Или повезло, или марафет.</em>", 300, 1160, 120, 42);
+bub("v1", "Ниже рынка на двести?<br><em>Или повезло, или марафет.</em>", 40, 730, 160, 42);
 bub("t1", "Брат, за ночь сделаем<br><em>из неё невесту!</em>", 140, 700, 110, 46);
 bub("v2", "Капот тёплый.<br><em>Вы её уже грели?</em>", 420, 690, 300, 46);
 bub("t2", "Сестрёнка, она<br><em>на солнышке стояла!</em>", 40, 700, 140, 44);
