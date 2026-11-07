@@ -38,7 +38,7 @@ add("phone", hero("tolyan", "t2", -20, 880, .84, 7)
 // 3. гараж деда Петровича
 scene("garage", "garages");
 add("garage", V05("car1", 300, 1210, 680) + hero("perekup", "d", -10, 860, .86, 7, DED) + hero("tolyan", "t3", 800, 880, .76, 7)
-  + stamp("g1", "−85 000 ₽", 600, 1240, "#ff3b30", "#fff", 50, 3) + stamp("g2", "ПЕРВАЯ МАШИНА 🚗", 200, 560, "#ffd23f", "#151515", 50, -3));
+  + stamp("g1", "−85 000 ₽", 330, 1080, "#ff3b30", "#fff", 50, 3) + stamp("g2", "ПЕРВАЯ МАШИНА 🚗", 200, 560, "#ffd23f", "#151515", 50, -3));
 // 4. мойка: честная предпродажка
 scene("wash", "carwash");
 add("wash", V05("car2", 260, 1220, 680) + hero("tolyan", "t4", -20, 880, .8, 7)
@@ -46,7 +46,7 @@ add("wash", V05("car2", 260, 1220, 680) + hero("tolyan", "t4", -20, 880, .8, 7)
   + stamp("w1", "АККУМУЛЯТОР −6 000", 430, 960, "#151515", "#fff", 36, 3) + stamp("w2", "МОЙКА −1 000", 520, 1060, "#151515", "#fff", 36, -2) + stamp("w3", "СКРУТКА — НЕТ ❌", 60, 1560, "#4cd964", "#151515", 40, -3));
 // 5. продажа Серёге
 scene("sale", "street");
-add("sale", V05("car3", 300, 1220, 660) + hero("tolyan", "t5", -20, 880, .8, 7) + hero("seryoga", "s", 800, 900, .74, 7) + CASH("cash2", 420, 1520, 4)
+add("sale", V05("car3", 300, 1220, 660) + hero("tolyan", "t5", -20, 880, .8, 7) + hero("seryoga", "s", 800, 900, .74, 7) + CASH("cash2", 420, 1520, 4).replace('z-index:8">', 'z-index:8;opacity:0">')
   + stamp("u1", "+28 000 ₽ ЗА НЕДЕЛЮ", 200, 560, "#4cd964", "#151515", 50, -3));
 // 6. крючок на часть 2 + финальная карточка
 scene("next", "night");
@@ -72,7 +72,7 @@ window.build = R => {
   const talk = (lv, f) => lv > .28 && !(lv < .55 && f % 3 === 2);
   const SW = { phone: st.l1 - .7, garage: st.d1 - .7, wash: st.l3 - .7, sale: st.s1 - .7, next: st.end - .7 };
   // капитал: 100 000 → 15 000 + 🚗 → 9 000 → 8 000 → 128 000
-  const STEPS = [[0, 100000, 0], [W("l2", "восемь"), 15000, 1], [W("l3", "шест"), 9000, 1], [W("l3", "мойк"), 8000, 1], [en.s2, 128000, 0]];
+  const STEPS = [[0, 100000, 0], [W("l2", "85"), 15000, 1], [W("l3", "6"), 9000, 1], [W("l3", "мойк"), 8000, 1], [en.s2, 128000, 0]];
   const fmt = v => Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   R.hooks.push(t => { const f = Math.floor(t * 30), lt = (LIP.tolyan || [])[f] || 0, ld = (LIP.ded || [])[f] || 0;
     TOLS.forEach(p => { if (document.getElementById(p)) mouth(p, talk(lt, f) ? "talk" : "grin"); });
@@ -81,7 +81,7 @@ window.build = R => {
     $("#cnt").textContent = `💸 ${fmt(v)} ₽${car ? " + 🚗" : ""}`;
     for (let i = 0; i < 12; i++) { const d = document.getElementById("fm" + i), on = t > W("l3", "мойк") - .2 && t < SW.sale;
       d.style.opacity = on ? .95 : 0; d.style.transform = `translateY(${Math.sin(t * 3 + i) * 10}px) scale(${.8 + .3 * Math.sin(t * 2 + i)})`; } });
-  tl.to("#cnt", { opacity: 1, duration: .3 }, 1.4); tl.to("#cnt", { opacity: 0, duration: .2 }, st.end + 1.5);
+  tl.to("#cnt", { opacity: 1, duration: .3 }, en.t1); tl.to("#cnt", { opacity: 0, duration: .2 }, st.end + 1.5);
   STEPS.slice(1).forEach(([at]) => { tl.fromTo("#cnt", { scale: 1.35 }, { scale: 1, duration: .3, ease: "back.out(2)", immediateRender: false }, at); R.sfx("tick", at, .9); });
   const swap = (from, to, at) => {
     tl.set(`#sc_${to}`, { opacity: 1, x: 1080, filter: "blur(14px)" }, at)
@@ -107,7 +107,7 @@ window.build = R => {
   tl.fromTo("#T2", { y: 60 }, { y: 0, duration: .35, ease: "back.out(2.5)", immediateRender: false }, st.t2 - .1);
   // 3. гараж
   swap("phone", "garage", SW.garage);
-  slam("#g1", W("l2", "восемь"), "clack"); slam("#g2", W("l2", "перв"), "pop");
+  slam("#g1", W("l2", "85"), "clack"); slam("#g2", W("l2", "перв"), "pop");
   // 4. мойка
   swap("garage", "wash", SW.wash);
   slam("#w1", W("l3", "аккум"), "pop"); slam("#w2", W("l3", "мойк"), "pop"); slam("#w3", W("l3", "скрут"), "impact");
