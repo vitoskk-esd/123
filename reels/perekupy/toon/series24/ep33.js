@@ -30,7 +30,7 @@ const HALF = (bg, inner) => `<div class="el" style="left:540px;top:0;width:540px
 // 1. кофейня: сто тысяч и мечта
 scene("coffee", "coffee");
 add("coffee", hero("tolyan", "t", -10, 880, .86, 7) + CASH("cash1", 560, 1250)
-  + `<div class="el" id="dream" style="left:500px;top:760px;width:500px;height:300px;z-index:8;opacity:0"><div style="position:absolute;inset:0 0 30px 0;background:#fff;border:7px solid #151515;border-radius:50%;box-shadow:0 10px 0 #151515"></div>
+  + `<div class="el" id="dream" style="left:500px;top:880px;width:500px;height:300px;z-index:8;opacity:0"><div style="position:absolute;inset:0 0 30px 0;background:#fff;border:7px solid #151515;border-radius:50%;box-shadow:0 10px 0 #151515"></div>
      <img src="../../kit/img/gelik/gelik_34.png" style="position:absolute;left:110px;top:20px;width:260px"><div style="position:absolute;left:100px;top:200px;font-family:Unbounded;font-weight:900;font-size:32px;color:#151515;white-space:nowrap">1 000 000 ₽ 🤑</div></div>`
   + stamp("pt1", "ЧАСТЬ 1 · СТО ТЫСЯЧ", 420, 1420, "#ffd23f", "#151515", 36, 3));
 // 2. 03:00, ночной ларёк: фильтр и карточка бота
@@ -58,8 +58,8 @@ add("call", hero("tolyan", "t5", 40, 880, .8, 7) + HALF("kiosk", hero("perekup",
 // 6. вокзал: «эксперт»
 scene("vok1", "vokzal");
 add("vok1", V05("car3", 280, 1220, 660) + hero("tolyan", "t6", -20, 880, .8, 7) + hero("perekup", "ex", 790, 880, .76, 7, EXPERT)
-  + [["x1", "📏 толщиномер", 520, 560], ["x2", "🔦 эндоскоп", 560, 640], ["x3", "🧲 магнит", 600, 720]].map(([id, t, l, tp]) => stamp(id, t, l, tp, "#fff", "#151515", 32, 2)).join("")
-  + stamp("x4", "40 МИНУТ ОСМОТРА", 60, 1600, "#ffd23f", "#151515", 36, -2) + stamp("x5", "🚌 УЕХАЛ НА АВТОБУСЕ", 200, 480, "#151515", "#fff", 40, -2));
+  + [["x1", "📏 толщиномер", 680, 400], ["x2", "🔦 эндоскоп", 700, 480], ["x3", "🧲 магнит", 720, 560]].map(([id, t, l, tp]) => stamp(id, t, l, tp, "#fff", "#151515", 32, 2)).join("")
+  + stamp("x4", "40 МИНУТ ОСМОТРА", 60, 1620, "#ffd23f", "#151515", 36, -2) + stamp("x5", "🚌 УЕХАЛ НА АВТОБУСЕ", 120, 1500, "#151515", "#fff", 40, -2));
 // 7. вокзал: курьер Дима
 scene("vok2", "vokzal");
 add("vok2", V05("car4", 280, 1220, 660) + hero("tolyan", "t7", -20, 880, .8, 7) + hero("perekup", "di", 800, 880, .76, 7, DIMA)
@@ -91,7 +91,7 @@ window.build = R => {
   const { pop } = common(R, cam, { mood: () => "grin" });
   const talk = (lv, f) => lv > .28 && !(lv < .55 && f % 3 === 2);
   const SW = { kiosk: st.l1 - .7, shed: st.v1 - .7, podezd: st.l3 - .7, call: st.g1 - .7, vok1: st.e1 - .7, vok2: st.d1 - .7, next: st.end - .7 };
-  const STEPS = [[0, 100000, 0], [W("l2", "85"), 15000, 1], [W("l3", "7"), 8000, 1], [en.d2, 128000, 0]];
+  const STEPS = [[0, 100000, 0], [W("l2", "85"), 15000, 1], [W("l3", "сем"), 8000, 1], [en.d2, 128000, 0]];
   const fmt = v => Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   const SP = [["va", "valera"], ["go", "gosha"], ["ex", "expert"], ["di", "dima"]];
   R.hooks.push(t => { const f = Math.floor(t * 30), lt = (LIP.tolyan || [])[f] || 0;

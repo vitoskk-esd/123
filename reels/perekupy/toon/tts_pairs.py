@@ -14,6 +14,22 @@ SR = 24000
 norm = lambda s: re.sub(r"[^а-я0-9a-z]", "", s.lower().replace("ё", "е"))
 # для сопоставления слов Whisper со сценарием — с поправкой на аканье: «Талян» = «Толян», «Сереге» = «Серёге»
 loose = lambda s: norm(s).replace("о", "а").replace("е", "и").replace("ь", "").replace("ъ", "")
+# Whisper пишет числа цифрами («120») — для сопоставления со сценарием раскладываем их в слова («сто двадцать»)
+_U = "ноль один два три четыре пять шесть семь восемь девять".split(); _T = "десять одиннадцать двенадцать тринадцать четырнадцать пятнадцать шестнадцать семнадцать восемнадцать девятнадцать".split()
+_D = ",,двадцать тридцать сорок пятьдесят шестьдесят семьдесят восемьдесят девяносто".split(","); _D = ["", ""] + _D[2].split()
+_H = ["", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот"]
+def _w999(n):
+    out = [_H[n // 100]] if n >= 100 else []; n %= 100
+    if 10 <= n < 20: out.append(_T[n - 10])
+    else:
+        if n >= 20: out.append(_D[n // 10])
+        if n % 10 or not out: out.append(_U[n % 10])
+    return [w for w in out if w]
+def num_words(tok):
+    d = re.sub(r"\D", "", tok)
+    if not d or len(d) > 6: return [tok]
+    n = int(d); th, rest = divmod(n, 1000)
+    return (_w999(th) + ["тысяч"] if th else []) + (_w999(rest) if rest or not th else [])
 lines = [(e, ln["id"], ln["who"], ln["text"]) for e in EPS for ln in json.load(open(f"{e}.json"))["lines"]]
 cnt = {}
 for _, _, w, t in lines: cnt[w] = cnt.get(w, 0) + len(t)
@@ -68,6 +84,7 @@ def cut(path, who):
     for k, (_, _, _, t) in enumerate(mine):
         for w in t.split():
             if norm(w): exp.append(loose(w)); owner.append(k)
+    words = [(nw, a, b) for w, a, b in words for nw in (num_words(w) if re.search(r"\d", w) else [w])]   # «120» → «сто», «двадцать» (тайминг тот же)
     got = [loose(w) for w, _, _ in words]
     first, last = {}, {}
     for blk in difflib.SequenceMatcher(None, exp, got, autojunk=False).get_matching_blocks():
