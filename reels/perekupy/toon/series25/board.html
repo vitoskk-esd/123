@@ -1,0 +1,89 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ», часть 2 «Приора и первая ошибка». Все фоны новые (barber, bizpark, gibdd, razbor), второстепенные герои новые
+// (продавец Эдуард, покупатель Олег, инспектор, разборщик Михей). Ошибка: купил «не глядя» — на машине запрет на регистрацию из-за долгов прошлого владельца.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o) => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = "", CNTV = ""; const clock = (t) => (CLK = t, ""); const CAP = v => (CNTV = v, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const PRI = (l, t, w, z = 3) => `<img class="el" src="../../kit/img/priora/priora_white.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z}">`;
+const PHONE = (l, t, inner) => `<div class="el" style="left:${l}px;top:${t}px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
+const EDUARD = { jacket: "#2b2f37", pants: "#2b2f37", tie: "#c0392b", glasses: true, hair: "#5b4636", item: "phone" };
+const OLEG = { jacket: "#8e5a3a", pants: "#3d4a5c", hair: "#3a2d22", beard: true };
+const INSP = { police: true, jacket: "#2a3a5a", pants: "#1f2a44", glasses: true };
+const MIHEY = { jacket: "#d68a1a", pants: "#3b3f46", cap: "#2b2b2e", beard: true, hair: "#6b4a2a", vest: false };
+const S = [
+ { h: "ТОЛЯН: СО СТА ТЫСЯЧ · 2", tc: "1/7 · 0:00–0:09", bg: "barber", y: 700, els: () => CAP("128 000") + ch("tolyan", "t", 520, 860, .86, 6)
+     + PHONE(30, 760, `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div><div style="background:#1c1f26;border-radius:22px;padding:16px 20px;margin-top:10px;font-family:Onest;color:#fff;font-size:30px;line-height:1.45"><b style="color:#ff7a1a">🔥 −30% к рынку · хозяин</b><br><b>Lada Priora 2012 · 110 000 ₽</b><br>⏱ 1 с после публикации</div>`).replace("width:600px", "width:470px")
+     + bub("Брат, беру<br><em>не глядя!</em>", 560, 720) + lab("ЧАСТЬ 2 · ПЕРВАЯ ОШИБКА", 40, 1320, "#ff3b30", "#fff", 34, -3),
+   vo: "Лис: «Сто двадцать восемь тысяч. Толян почувствовал себя перекупом: барбершоп, борода — и Приора за сто десять». Толян: «Брат, беру не глядя!» Лис: «„Не глядя“ — это и была ошибка».", who: "Лис + Толян",
+   mv: "<b>Новый фон — барбершоп.</b> Толян в кресле, на телефоне карточка «Перехвата»: Приора, −30% к рынку. Счётчик капитала — 128 000 (итог части 1)." },
+ { h: "ПАРКОВКА БИЗНЕС-ЦЕНТРА", tc: "2/7 · 0:09–0:19", bg: "bizpark", y: 700, els: () => CAP("18 000 + 🚗") + PRI(250, 1250, 720) + ch("perekup", "ed", -10, 860, .84, 6, EDUARD) + ch("tolyan", "t", 800, 880, .76, 6)
+     + bub("ПТС оригинал. Только быстро —<br><em>у меня совещание.</em>", 60, 720) + lab("−110 000 ₽", 380, 1120, "#ff3b30", "#fff", 46, 3),
+   vo: "Эдуард: «ПТС оригинал. Только быстро — у меня совещание». Лис: «Сто десять тысяч — и Эдуард Олегович исчез в стеклянных дверях».", who: "Эдуард + Лис",
+   mv: "<b>Новый фон — парковка БЦ «Горизонт».</b> <b>Новый герой — продавец Эдуард</b> (костюм, галстук, очки, телефон), торопится. Толян отдаёт деньги." },
+ { h: "ГИБДД · ОКНО 2", tc: "3/7 · 0:19–0:32", bg: "gibdd", y: 700, els: () => CAP("158 000") + ch("perekup", "ol", -10, 880, .78, 6, OLEG) + ch("perekup", "in", 420, 840, .78, 5, INSP) + ch("tolyan", "t", 800, 890, .72, 6)
+     + bub("На машине запрет на регистрацию.<br><em>Долги прошлого владельца.</em>", 160, 700) + lab("ЗАПРЕТ ⛔", 330, 1300, "#ff3b30", "#fff", 50, -2),
+   vo: "Лис: «Через три дня Толян продал Приору за сто сорок. Покупатель Олег поехал ставить на учёт». Инспектор: «На машине запрет на регистрацию. Долги прошлого владельца — двести тысяч». Олег: «Брат… верни деньги».", who: "Лис + Инспектор + Олег",
+   mv: "<b>Новый фон — зал ГИБДД</b> с табло очереди. <b>Новые герои — покупатель Олег</b> (борода, коричневая куртка) <b>и инспектор</b> в окне. Толян бледнеет." },
+ { h: "ЭДУАРД НЕ В СЕТИ", tc: "4/7 · 0:32–0:40", bg: "bizpark", y: 700, els: () => CAP("18 000 + 🚗") + PRI(250, 1250, 720) + ch("tolyan", "t", -20, 880, .82, 6)
+     + PHONE(400, 760, `<div style="font-family:Onest;color:#fff;font-size:34px;text-align:center;padding:30px 0"><div style="font-size:90px">📵</div><b>Эдуард Олегович</b><br><span style="color:#ff3b30">абонент не в сети</span></div>`),
+   vo: "Лис: «Деньги Олегу Толян вернул. Эдуард Олегович — на совещании. Уже неделю».", who: "Лис",
+   mv: "Та же парковка, но Эдуарда нет. Телефон Толяна: «абонент не в сети». Счётчик откатывается — деньги вернул Олегу." },
+ { h: "ПРОВЕРКА — ПОСЛЕ ПОКУПКИ", tc: "5/7 · 0:40–0:48", bg: "barber", y: 700, els: () => CAP("18 000 + 🚗") + ch("tolyan", "t", 560, 880, .82, 6)
+     + PHONE(30, 760, `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">Проверка автомобиля · сайт Госавтоинспекции</div><div style="font-family:Onest;color:#fff;font-size:30px;line-height:1.5;margin-top:10px">Ограничения: <b style="color:#ff3b30">2</b><br>⛔ запрет на рег. действия<br><span style="color:#8b93a3">основание: судебные приставы</span></div>`).replace("width:600px", "width:500px")
+     + lab("1 МИНУТА · БЕСПЛАТНО", 60, 1320, "#4cd964", "#151515", 38, -3),
+   vo: "Лис: «Проверка на сайте Госавтоинспекции — одна минута, бесплатно. Толян сделал её. После покупки».", who: "Лис",
+   mv: "Снова барбершоп, но уже без улыбки: на телефоне проверка — 2 ограничения, запрет от приставов. Подпись «1 минута · бесплатно»." },
+ { h: "РАЗБОРКА · МИХЕЙ", tc: "6/7 · 0:48–1:00", bg: "razbor", y: 700, els: () => CAP("78 000") + PRI(250, 1250, 720) + ch("perekup", "mi", 790, 860, .8, 6, MIHEY) + ch("tolyan", "t", -20, 880, .8, 6)
+     + bub("С запретом? Шестьдесят.<br><em>На запчасти — нормально.</em>", 380, 720) + CASH(440, 1460, 3) + lab("−50 000 ₽", 60, 1330, "#ff3b30", "#fff", 46, -3),
+   vo: "Михей: «С запретом? Шестьдесят. На запчасти — нормально». Лис: «Минус пятьдесят тысяч. Первая ошибка вышла дорогой. Зато теперь Толян проверяет каждую машину».", who: "Михей + Лис",
+   mv: "<b>Новый фон — двор разборки</b> (колёса, капоты, кран-балка, «Куплю авто»). <b>Новый герой — разборщик Михей</b> (оранжевая куртка, борода). Счётчик падает до 78 000." },
+ { h: "КРЮЧОК + ФИНАЛ", tc: "7/7 · 1:00–1:08", bg: "gibdd", y: 600, els: () => CAP("78 000")
+     + `<div class="el" style="left:60px;right:60px;top:640px;z-index:9;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:20px 26px;color:#fff;font-family:Unbounded;font-weight:900;font-size:30px;line-height:1.35;text-align:center">Бот находит быстро —<br><span style="color:#ffd23f">проверять всё равно тебе</span><br><span style="font-size:26px;color:#ff3b30">ЧАСТЬ 3: конкурент</span></div>`
+     + `<div class="el" style="left:60px;right:60px;top:990px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">свежие объявления по бюджету и городу</div></div>` + FOX(440, 1250, 200),
+   vo: "Лис: «Бот находит быстро. А проверять — всё равно тебе. В следующей части у Толяна появится конкурент. Подпишись, чтобы не пропустить».", who: "Лис",
+   mv: "Мораль одной строкой + крючок на часть 3 + одна финальная карточка." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CNTV) document.querySelector(".view").insertAdjacentHTML("beforeend", `<div class="cnt" style="top:auto;bottom:20px;left:auto;right:20px">💸 ${CNTV} ₽</div>`); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "ed", "ol", "in", "mi"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
