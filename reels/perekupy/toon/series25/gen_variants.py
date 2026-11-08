@@ -17,7 +17,7 @@ V = {
  "ep34d": dict(name="Холодная", bg="sepia(.25) hue-rotate(165deg) saturate(.9) brightness(1.04)",
    bub=("#1d4fb8", "#fff", "#fff", "#ffd23f"), tag="#7cc8ff",
    cloth={"OL": {"#8e5a3a": "#16a085"}, "MI": {"#d68a1a": "#8e44ad"}},
-   title=("ЗАПРЕТ ⛔", "И МИНУС 50 000", "#1d4fb8", "#fff"), cam="out", music={"style": "tech", "bpm": 116}),
+   title=("ЗАПРЕТ!", "И МИНУС 50 000", "#1d4fb8", "#fff"), cam="out", music={"style": "tech", "bpm": 116}),
  # h — всегда розовая (владелец 06.11)
  "ep34h": dict(name="Пастель", bg="saturate(.7) brightness(1.12) hue-rotate(40deg)",
    bub=("#fff", "#151515", "#ff4fa3", "#ff4fa3"), tag="#ff6fae",

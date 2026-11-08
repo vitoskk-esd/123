@@ -39,7 +39,7 @@ add("biz", PRI("car1", 250, 1250, 720) + hero("perekup", "ed", -10, 860, .84, 7,
 // 3. ГИБДД: запрет
 scene("gibdd", "gibdd");
 add("gibdd", hero("perekup", "ol", -10, 880, .78, 7, OLEG) + hero("perekup", "in", 420, 840, .78, 6, INSP) + hero("tolyan", "t3", 800, 890, .72, 7)
-  + stamp("g1", "ПРОДАЛ ЗА 140 000", 200, 560, "#4cd964", "#151515", 46, -3) + stamp("g2", "ЗАПРЕТ ⛔", 330, 1360, "#ff3b30", "#fff", 60, -2));
+  + stamp("g1", "ПРОДАЛ ЗА 140 000", 200, 560, "#4cd964", "#151515", 46, -3) + stamp("g2", "ЗАПРЕТ!", 330, 1360, "#ff3b30", "#fff", 60, -2));
 // 4. парковка БЦ без Эдуарда: абонент не в сети
 scene("biz2", "bizpark");
 add("biz2", PRI("car2", 250, 1250, 720) + hero("tolyan", "t4", -20, 880, .82, 7)
@@ -76,7 +76,7 @@ window.build = R => {
   const { pop } = common(R, cam, { mood: () => "grin" });
   const talk = (lv, f) => lv > .28 && !(lv < .55 && f % 3 === 2);
   const SW = { biz: st.e1 - .7, gibdd: st.l3 - .7, biz2: st.l4 - .7, check: st.l5 - .7, razbor: st.m1 - .7, next: st.end - .7 };
-  const STEPS = [[0, 128000, 0], [W("l2", "сто"), 18000, 1], [W("l3", "сто"), 158000, 0], [W("l4", "верн"), 18000, 1], [en.m1, 78000, 0]];
+  const STEPS = [[0, 128000, 0], [W("l2", "110"), 18000, 1], [W("l3", "140"), 158000, 0], [W("l4", "верн"), 18000, 1], [en.m1, 78000, 0]];
   const fmt = v => Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   const SP = [["ed", "eduard"], ["in", "insp"], ["ol", "oleg"], ["mi", "mihey"]];
   R.hooks.push(t => { const f = Math.floor(t * 30), lt = (LIP.tolyan || [])[f] || 0;
@@ -106,11 +106,11 @@ window.build = R => {
   R.punch(cam, st.t1 + .1, .05); slam("#p1", W("l1", "ошиб"), "impact");
   // 2. парковка БЦ
   swap("barber", "biz", SW.biz);
-  slam("#b1", W("l2", "сто"), "clack");
+  slam("#b1", W("l2", "110"), "clack");
   tl.to("#ED", { x: 380, opacity: 0, duration: .8, ease: "power2.in" }, W("l2", "исчез")); R.sfx("whoosh", W("l2", "исчез"), .4);
   // 3. ГИБДД
   swap("biz", "gibdd", SW.gibdd);
-  slam("#g1", W("l3", "сто"), "pop"); tl.to("#g1", { opacity: 0, duration: .2 }, st.i1 - .2);
+  slam("#g1", W("l3", "140"), "pop"); tl.to("#g1", { opacity: 0, duration: .2 }, st.i1 - .2);
   slam("#g2", W("i1", "запрет"), "impact"); R.shake(cam, W("i1", "запрет"), .6, .4); R.sfx("boom", W("i1", "запрет"), .5);
   // 4. Эдуард не в сети
   swap("gibdd", "biz2", SW.biz2);
@@ -121,7 +121,7 @@ window.build = R => {
   // 6. разборка
   swap("check", "razbor", SW.razbor);
   tl.fromTo("#cash1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(2)", immediateRender: false }, en.m1); R.sfx("ping", en.m1, .5);
-  slam("#r1", W("l6", "минус"), "impact"); R.punch(cam, W("l6", "кажд"), .05);
+  slam("#r1", W("l6", "50"), "impact"); R.punch(cam, W("l6", "кажд"), .05);
   // 7. мораль + крючок + финальная карточка
   swap("razbor", "next", SW.next);
   tl.fromTo("#nx", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: .4, ease: "back.out(1.6)", immediateRender: false }, st.end); R.sfx("impact", st.end + .05, .6);
