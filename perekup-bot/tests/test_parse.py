@@ -311,3 +311,29 @@ def test_channel_region_guess():
     assert g(None, "avto_moskva") == "msk" and g(None, "AvtoVoronezh") == "vrn" and g(None, "avto_msk") == "msk"
     assert g(None, "perekup_ufa") == "ufa" and g(None, "avto_kzn") == "kzn" and g(None, "new_cars_spb") == "spb"
     assert g("Корейские авто", "asia_express_auto") is None
+
+
+# владелец 08.11: Citroen C3 «Этот авто можно купить в кредит! (Подробности у менеджера)» получил метку «кредит/залог».
+# Способ оплаты (кредит от салона/банка) — не обременение машины.
+@pytest.mark.parametrize("tail,credit", [
+    ("Этот авто можно купить в кредит! (Подробности у менеджера)", False),
+    ("оформим в кредит", False),
+    ("кредит от банка-партнёра, подробности у менеджера", False),
+    ("возможна покупка в кредит и рассрочку", False),
+    ("без залогов и запретов, можно купить в кредит", False),
+    ("залогов нет, поможем с кредитом", False),
+    ("машина в кредите", True),
+    ("кредитная, остаток 300", True),
+    ("в залоге у банка", True),
+    ("продам в кредит, остаток 200 тысяч", True),
+    ("есть запрет на регистрацию", True),
+    ("в залоге, можно в кредит", True),
+])
+def test_credit_offer_is_not_encumbrance(tail, credit):
+    L = parse_post("Citroen C3 2008, 1.4 АМТ, цена 175 000. " + tail, D)
+    assert ("credit" in L.markers) is credit
+
+
+def test_mileage_number_before_word():
+    L = parse_post("Citroen C3, 2008\n1.4 AMT\n🟢170.000 ПРОБЕГ🟢\nЦена: 175.000 💰", D)
+    assert L.mileage == 170000

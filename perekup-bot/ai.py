@@ -12,7 +12,7 @@ import time
 import urllib.error
 import urllib.request
 
-from parse import PRICE_MAX, PRICE_MIN, YEAR_MAX, Listing, price_candidates
+from parse import PRICE_MAX, PRICE_MIN, YEAR_MAX, Listing, credit_is_offer, price_candidates
 from words import Dictionary, norm
 
 log = logging.getLogger(__name__)
@@ -31,7 +31,8 @@ HINTS = {
     "notrun": "не на ходу, не заводится, нужен капремонт двигателя",
     "invest": "требует вложений или ремонта (НЕ ставь при «вложений не требует», «никаких вложений»)",
     "dupdoc": "дубликат ПТС, нет ПТС или документов",
-    "credit": "в кредите, залоге, под арестом или запретом (НЕ ставь при «без залогов», «ограничений нет»)",
+    "credit": "машина сейчас в кредите (не выплачен), в залоге, под арестом или запретом (НЕ ставь при «без залогов», «ограничений нет», "
+              "и НЕ ставь при «можно купить в кредит», «оформим в кредит», «кредит/рассрочка от банка или салона» — это способ оплаты, а не обременение)",
     "taxi": "работала в такси или каршеринге",
 }
 
@@ -157,6 +158,8 @@ def apply(L: Listing, r: dict, d: Dictionary) -> Listing:
         regions = d.find_regions(norm(r["city"]).split())
         L.region = regions[0] if regions else L.region
     L.markers = [m for m in dict.fromkeys(r.get("markers") or []) if m in d.markers]
+    if "credit" in L.markers and credit_is_offer(L.text):      # «можно купить в кредит» — способ оплаты, не залог
+        L.markers.remove("credit")
     acc = r.get("accidents")
     if isinstance(acc, int) and 0 <= acc <= 20:
         L.accidents = acc
