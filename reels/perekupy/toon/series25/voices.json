@@ -3,7 +3,7 @@
   "voice": "Charon",
   "tempo": 1.08,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers and scams. Low calm voice, dry humor, confident.",
-  "notes": "You narrate part 1 of a comedy mini-series: a cocky guy Tolyan decides to become a used-car flipper with just 100 000 rubles, honestly this time; first sale with funny buyers. Deadpan, dry, warm irony; numbers said fully and clearly."
+  "notes": "You narrate part 2 of a comedy mini-series about Tolyan, a new used-car flipper: he buys a Lada Priora 'without looking' and it turns out to have a registration ban. Deadpan, dry irony; numbers said fully. Say «ПТС» as «пэ-тэ-эс»."
  },
  "seryoga": {
   "voice": "Puck",
@@ -27,7 +27,7 @@
   "voice": "Algenib",
   "tempo": 1.2,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone \"брат\". Adult street comedy, not for kids.",
-  "notes": "Line 1: excited, inspired, big dreams. Line 2: hurried, excited, at 3 a.m. Line 3: confused, annoyed, on the phone. Line 4: calm, a bit proud of being honest."
+  "notes": "One line: cocky, excited, overconfident."
  },
  "galya": {
   "voice": "Sulafat",
@@ -154,5 +154,29 @@
   "tempo": 1.1,
   "profile": "Dima — a young, practical Russian courier in his 20s, short words, decisive, in a hurry.",
   "notes": "Line 1: short question. Line 2: short, decisive, one word."
+ },
+ "eduard": {
+  "voice": "Algieba",
+  "tempo": 1.15,
+  "profile": "Eduard — a nervous, polished Russian office man in a suit in his 40s, speaks fast, in a hurry, too smooth.",
+  "notes": "One line: fast, hurried, slightly nervous, glancing at his watch. Say «ПТС» as «пэ-тэ-эс»."
+ },
+ "insp": {
+  "voice": "Iapetus",
+  "tempo": 1.08,
+  "profile": "A calm, formal Russian traffic police registration inspector in his 40s, flat bureaucratic voice.",
+  "notes": "One line, flat and formal, reading from a monitor."
+ },
+ "oleg": {
+  "voice": "Achird",
+  "tempo": 1.05,
+  "profile": "Oleg — a calm, big Russian family man in his 40s with a beard, quiet but heavy voice.",
+  "notes": "One line: slow, quiet, heavy, disappointed."
+ },
+ "mihey": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.1,
+  "profile": "Mihey — a hoarse, easygoing Russian junkyard owner in his 50s, unbothered, businesslike.",
+  "notes": "One line: lazy, unbothered, businesslike lowball."
  }
 }
