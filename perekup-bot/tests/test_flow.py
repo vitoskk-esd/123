@@ -10,7 +10,7 @@ import pytest
 from aiogram import Bot
 from aiogram.client.session.base import BaseSession
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.methods import AnswerCallbackQuery, CopyMessage, EditMessageReplyMarkup, EditMessageText, ForwardMessage, GetMe, SendMediaGroup, SendMessage, SendPhoto
+from aiogram.methods import AnswerCallbackQuery, CopyMessage, CopyMessages, EditMessageReplyMarkup, EditMessageText, ForwardMessage, GetMe, SendMediaGroup, SendMessage, SendPhoto
 from aiogram.types import CallbackQuery, Chat, Message, MessageId, PhotoSize, Update, User
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
@@ -43,6 +43,8 @@ class FakeSession(BaseSession):
             return True
         if isinstance(method, CopyMessage):
             return MessageId(message_id=next(ids))
+        if isinstance(method, CopyMessages):
+            return [MessageId(message_id=next(ids)) for _ in method.message_ids]
         if isinstance(method, GetMe):
             return User(id=42, is_bot=True, first_name="Перехват", username="perekhvat_bot")
         if isinstance(method, (SendMessage, EditMessageText)):
@@ -1641,8 +1643,72 @@ async def test_private_channel_marked_on_card(env):
     btns = [b for row in card.reply_markup.inline_keyboard for b in row]
     assert btns[0].text == T.BTN_OPEN_PRIVATE and btns[0].url == f"https://t.me/c/1234567890/{raw.msg_id}"
     assert btns[1].text == T.BTN_JOIN and btns[1].url == "https://t.me/+AbCdEfGhIjKlMn"
+    assert T.BTN_ALBUM not in [b.text for b in btns]                       # в посте нет фото — и кнопки нет
     assert (await process(bot, ctx, post(CH1, "Toyota Camry 2013, 950 000 ₽, пробег 150 тыс"))).sent == [USER]
     card = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
     assert "Закрытый канал" not in card.text
     btns = [b for row in card.reply_markup.inline_keyboard for b in row]
     assert btns[0].text == T.BTN_OPEN and T.BTN_JOIN not in [b.text for b in btns]
+
+
+
+async def test_all_photos_button_only_for_private(env):
+    """«📸 Все фото» — только у закрытых каналов и только если в посте есть фото: служебный аккаунт пересылает альбом в буфер,
+    бот копирует его человеку одним альбомом без подписи; одно фото / не достали — всплывающее объяснение (владелец 09.11)."""
+    dp, bot, s, ctx = env
+    PRIV = -1001234567891
+    cid, _ = await ctx.db.add_channel(invite="ZyXwVuTsRqPoNm", base=True)
+    await ctx.db.channel_joined(cid, PRIV, "Закрытые тачки", None, "main")
+    await ctx.refresh_channels()
+    await make_filter(dp, bot, "камри до 1 млн")
+    ctx.buffer_chat = -1009999999999
+
+    async def forwarded():
+        return 555
+
+    class FakeReader:
+        online = True
+        def __init__(self): self.calls = []
+        async def album(self, chat_id, msg_id):
+            self.calls.append((chat_id, msg_id))
+            return [] if msg_id == 1 else [msg_id] if msg_id == 2 else [700, 701, 702, 703]
+    ctx.reader = FakeReader()
+    raw = RawPost(PRIV, next(ids), "Toyota Camry 2012, 900 000 ₽, пробег 180 тыс", time.time() - 1.5, forwarded)
+    assert (await process(bot, ctx, raw)).sent == [USER]
+    card = [m for m in s.sent if isinstance(m, CopyMessage) and m.chat_id == USER][-1]
+    btns = [b for row in card.reply_markup.inline_keyboard for b in row]
+    assert btns[0].text == T.BTN_ALBUM and btns[0].callback_data == f"ph:{PRIV}:{raw.msg_id}"
+    await dp.feed_update(bot, cb(btns[0].callback_data))
+    assert ctx.reader.calls == [(PRIV, raw.msg_id)]
+    album = [m for m in s.sent if isinstance(m, CopyMessages)][-1]
+    assert album.chat_id == USER and album.from_chat_id == ctx.buffer_chat and album.message_ids == [700, 701, 702, 703] and album.remove_caption
+    await dp.feed_update(bot, cb(f"ph:{PRIV}:2"))
+    assert [m for m in s.sent if isinstance(m, AnswerCallbackQuery)][-1].text == T.ALBUM_ONE
+    await dp.feed_update(bot, cb(f"ph:{PRIV}:1"))
+    assert [m for m in s.sent if isinstance(m, AnswerCallbackQuery)][-1].text == T.ALBUM_FAIL
+    # открытый канал с фото — кнопки нет
+    assert (await process(bot, ctx, RawPost(CH1, next(ids), "Toyota Camry 2013, 950 000 ₽, пробег 150 тыс", time.time() - 1.5, forwarded))).sent == [USER]
+    card = [m for m in s.sent if isinstance(m, CopyMessage) and m.chat_id == USER][-1]
+    assert T.BTN_ALBUM not in [b.text for row in card.reply_markup.inline_keyboard for b in row]
+
+
+async def test_reader_album_forwards_whole_group(env):
+    """Reader.album: берёт сообщения вокруг поста с тем же grouped_id (фото/видео), пересылает их в буфер одним запросом, кэширует."""
+    from types import SimpleNamespace as NS
+    from userbot import Reader
+    dp, bot, s, ctx = env
+
+    class Client:
+        def __init__(self): self.forwards = []
+        async def get_input_entity(self, chat_id): return "peer"
+        async def get_messages(self, peer, ids):
+            msgs = {100: NS(id=100, grouped_id=7, photo=True, video=None), 101: NS(id=101, grouped_id=7, photo=True, video=None),
+                    102: NS(id=102, grouped_id=7, photo=None, video=True), 103: NS(id=103, grouped_id=None, photo=True, video=None),
+                    99: NS(id=99, grouped_id=8, photo=True, video=None)}
+            return [msgs.get(i) for i in ids]
+        async def forward_messages(self, to, ids, from_peer):
+            self.forwards.append(list(ids)); return [NS(id=900 + i) for i in ids]
+    r = Reader(bot, ctx, Client()); r.buffer = "buf"
+    assert await r.album(-1001, 101) == [1000, 1001, 1002] and r.client.forwards == [[100, 101, 102]]
+    assert await r.album(-1001, 101) == [1000, 1001, 1002] and len(r.client.forwards) == 1      # кэш
+    assert await r.album(-1001, 103) == [1003]                                                  # без альбома — одно фото

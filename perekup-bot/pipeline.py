@@ -344,6 +344,7 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
 
     url = post_url(channel, raw.msg_id)
     private, join = is_private(channel), join_url(channel)
+    album = f"{raw.chat_id}:{raw.msg_id}" if private and raw.photo else None
     preview = LinkPreviewOptions(url=url, prefer_small_media=True) if url else LinkPreviewOptions(is_disabled=True)
     photo_id = None
     if photo_task:
@@ -357,9 +358,9 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         latency = int((time.time() - raw.date) * 1000)
         if photo_id:
             caption = card_text(ctx, r, channel, ftext, latency, CAPTION_MAX, plan)
-            return lambda: bot.copy_message(uid, ctx.buffer_chat, photo_id, caption=caption, reply_markup=K.card(url, fid, private, join))
+            return lambda: bot.copy_message(uid, ctx.buffer_chat, photo_id, caption=caption, reply_markup=K.card(url, fid, private, join, album))
         text = card_text(ctx, r, channel, ftext, latency, plan=plan)
-        return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid, private, join), link_preview_options=preview)
+        return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid, private, join, album), link_preview_options=preview)
 
     async def send_card(uid: int, fid: int, ftext: str, plan: plans.Plan, out: list, prio: int = 0):
         if await _send(message(uid, fid, ftext, plan), uid, ctx, prio):

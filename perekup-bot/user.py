@@ -208,6 +208,27 @@ async def pause_filter(cb: CallbackQuery, ctx: Ctx) -> None:
     await cb.answer(T.FILTER_PAUSED, show_alert=True)
 
 
+@router.callback_query(F.data.startswith("ph:"))
+async def send_album(cb: CallbackQuery, bot: Bot, ctx: Ctx) -> None:
+    """«📸 Все фото» под карточкой из закрытого канала: служебный аккаунт пересылает альбом в буфер, бот копирует его человеку."""
+    _, chat_id, msg_id = cb.data.split(":")
+    try:
+        ids = await ctx.reader.album(int(chat_id), int(msg_id)) if ctx.reader and ctx.buffer_chat else []
+    except Exception as e:
+        log.info("альбом %s:%s не достали: %s", chat_id, msg_id, e)
+        ids = []
+    if not ids:
+        return await cb.answer(T.ALBUM_FAIL, show_alert=True)
+    if len(ids) == 1:
+        return await cb.answer(T.ALBUM_ONE, show_alert=True)
+    await cb.answer()
+    try:
+        await bot.copy_messages(cb.from_user.id, ctx.buffer_chat, ids, remove_caption=True)
+    except Exception as e:
+        log.info("альбом %s:%s не отправлен: %s", chat_id, msg_id, e)
+        await cb.message.answer(T.ALBUM_FAIL)
+
+
 # ---------- каналы ----------
 async def show_channels(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = None) -> None:
     uid = uid or msg.chat.id

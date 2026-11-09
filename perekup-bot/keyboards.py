@@ -129,9 +129,11 @@ def own_list(rows) -> InlineKeyboardMarkup:
     return kb(*[[B(text="🗑 " + channel_name(r)[:40], callback_data=f"c:rm:{r['id']}")] for r in rows])
 
 
-def card(url: str | None, fid: int, private: bool = False, join: str | None = None) -> InlineKeyboardMarkup:
-    """Под карточкой: открыть пост; у закрытого канала — честная подпись и «Вступить в канал» (если есть приглашение)."""
-    rows = [[B(text=T.BTN_OPEN_PRIVATE if private else T.BTN_OPEN, url=url)]] if url else []
+def card(url: str | None, fid: int, private: bool = False, join: str | None = None, album: str | None = None) -> InlineKeyboardMarkup:
+    """Под карточкой: открыть пост; у закрытого канала — «📸 Все фото» (album = «канал:пост»), честная подпись поста
+    и «Вступить в канал» (если есть приглашение)."""
+    rows = [[B(text=T.BTN_ALBUM, callback_data=f"ph:{album}")]] if album else []
+    rows += [[B(text=T.BTN_OPEN_PRIVATE if private else T.BTN_OPEN, url=url)]] if url else []
     if private and join:
         rows.append([B(text=T.BTN_JOIN, url=join)])
     return kb(*rows, [B(text=T.BTN_PAUSE, callback_data=f"f:p:{fid}")])

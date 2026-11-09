@@ -67,6 +67,7 @@ class Reader:
         self.done_order: deque = deque()
         self.peers: dict[int, object] = {}                     # канал → InputPeer для опроса
         self.last: dict[int, int] = {}                         # канал → id последнего поста, который видели
+        self.albums: dict[tuple[int, int], list[int]] = {}     # (канал, пост) → id фото альбома в буфере
 
     @property
     def online(self) -> bool:
@@ -162,6 +163,30 @@ class Reader:
             sent = sent[0] if isinstance(sent, list) else sent
             return sent.id if sent else None
         return forward
+
+    async def album(self, chat_id: int, msg_id: int) -> list[int]:
+        """«📸 Все фото»: все фото и видео альбома этого поста → в канал-буфер одним запросом (альбом сохраняется) → id там.
+        Пост без альбома — одно его фото. Кэшируем: повторное нажатие не пересылает заново."""
+        key = (chat_id, msg_id)
+        if key in self.albums:
+            return self.albums[key]
+        if self.buffer is None or not self.client:
+            return []
+        peer = await self._peer(chat_id)
+        msgs = [m for m in await self.client.get_messages(peer, ids=list(range(max(1, msg_id - 10), msg_id + 11))) if m]
+        me = next((m for m in msgs if m.id == msg_id), None)
+        if not me:
+            return []
+        group = sorted((m for m in msgs if me.grouped_id and m.grouped_id == me.grouped_id and (m.photo or m.video)), key=lambda m: m.id) \
+            or ([me] if me.photo else [])
+        if not group:
+            return []
+        sent = await self.client.forward_messages(self.buffer, [m.id for m in group], from_peer=peer)
+        ids = [s.id for s in (sent if isinstance(sent, list) else [sent]) if s]
+        self.albums[key] = ids
+        if len(self.albums) > 2000:
+            self.albums.pop(next(iter(self.albums)))
+        return ids
 
     def _take(self, chat_id: int, m, peer_of) -> None:
         """Взять пост в работу — один раз, каким бы путём он ни пришёл первым."""
