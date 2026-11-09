@@ -31,7 +31,7 @@ html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden
 <script>
 // МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ», часть 6 «Первая машина за полмиллиона» (кредит как риск, владелец 09.11). Новые приёмы: ангел и чёрт на плечах,
 // счётчик процентов «−240 ₽/день», отрывной календарь + переписка с покупателями, поворот-отсылка (покупатель — Валерьич из части 5, «копил 30 лет»).
-// Функция бота: пометка «❗ кредит/залог» отсекает первую Камри. Фоны новые: balkon, stomat, mangal, prichal. Новый герой — стоматолог Станислав.
+// Функция бота: пометка «❗ кредит/залог» отсекает первую Камри. Фоны новые: balkon, stomat, mangal, pereezd (причал владельцу не понравился). Новый герой — стоматолог Станислав.
 const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
 const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
 const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
@@ -48,7 +48,7 @@ const ALBUM = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;ma
 const MARKS = (l, t) => [[0, 0], [150, 6]].map(([dx, dy]) => `<div class="el" style="left:${l + dx}px;top:${t + dy}px;width:110px;height:60px;z-index:4;border:5px dashed #ff7a1a;background:rgba(255,255,255,.7);border-radius:6px"></div>`).join("");
 const STAS = { coat: "#f4f6f8", pants: "#2b2f37", glasses: true, hair: "#3a2d22" };
 const VALERICH = { coat: "#f2a0c0", pants: "#f2a0c0", hair: "#8a8a8a", mustache: true, item: "bag" };
-const DEBT = (days) => `<div class="el" style="left:40px;top:${700 + 24}px;z-index:20;font-family:'JetBrains Mono';font-weight:800;font-size:30px;color:#fff;background:#3a0d0d;border:5px solid #ff3b30;border-radius:16px;padding:4px 14px;white-space:nowrap;box-shadow:0 0 18px rgba(255,59,48,.5)">🏦 КРЕДИТ −290 000 · −240 ₽/день${days ? ` · ${days}` : ""}</div>`;
+const DEBT = (days, vy = 700) => `<div class="el" style="left:40px;top:${vy + 24}px;z-index:20;font-family:'JetBrains Mono';font-weight:800;font-size:30px;color:#fff;background:#3a0d0d;border:5px solid #ff3b30;border-radius:16px;padding:4px 14px;white-space:nowrap;box-shadow:0 0 18px rgba(255,59,48,.5)">🏦 КРЕДИТ −290 000 · −240 ₽/день${days ? ` · ${days}` : ""}</div>`;
 const CAL = (day, l = 800, t = 780) => `<div class="el" style="left:${l}px;top:${t}px;width:220px;z-index:15;background:#fff;border:6px solid #151515;border-radius:14px;box-shadow:0 10px 0 #151515;text-align:center;overflow:hidden"><div style="background:#ff3b30;color:#fff;font-family:Unbounded;font-weight:900;font-size:24px;padding:6px">ДЕНЬ</div><div style="font-family:Unbounded;font-weight:900;font-size:96px;line-height:1.1;color:#151515">${day}</div></div>`;
 const MINI = (p, l, t, halo) => ch("tolyan", p, l, t, .3, 12) + (halo
   ? `<div class="el" style="left:${l + 30}px;top:${t - 4}px;width:66px;height:18px;border:6px solid #ffd23f;border-radius:50%;z-index:13;box-shadow:0 0 14px #ffd23f"></div>`
@@ -78,17 +78,17 @@ const S = [
      + bub("Ну что, студент,<br><em>банк уже звонил?</em>", 480, 790),
    vo: "Жора: «Ну что, студент, банк уже звонил?»", who: "Жора",
    mv: "<b>Новый фон — шашлычная у трассы</b> (мангал с дымом, навес, вывеска «ШАШЛЫК»). Жора подкалывает, Толян нервничает. День 11." },
- { h: "ПРИЧАЛ · ПОКУПАТЕЛЬ", tc: "6/7 · 0:47–1:00", bg: "prichal", y: 700, els: () => CAP("3 000 + 🚗") + DEBT("−2 880 ₽") + CAR("camry/camry_side.png", 250, 1220, 720)
+ { h: "ЖЕЛЕЗНОДОРОЖНЫЙ ПЕРЕЕЗД · ПОКУПАТЕЛЬ", tc: "6/7 · 0:47–1:00", bg: "pereezd", y: 560, els: () => CAP("3 000 + 🚗") + DEBT("−2 880 ₽", 560) + CAR("camry/camry_side.png", 250, 1220, 720)
      + ch("perekup", "vl", 620, 860, .8, 6, VALERICH) + ch("tolyan", "t", -20, 900, .76, 6) + CASH(400, 1440, 5) + CAL(12, 40, 1180)
-     + bub("Тридцать лет копил.<br><em>Наличкой можно?</em>", 440, 790),
+     + bub("Тридцать лет копил.<br><em>Наличкой можно?</em>", 440, 700),
    vo: "Лис: «На двенадцатый день позвонил покупатель. Тот самый». Валерьич: «Тридцать лет на неё копил. Наличкой можно?» Толян: «Отец… вам — можно!»", who: "Лис + Валерьич + Толян",
-   mv: "<b>Новый фон — речной причал на закате</b> (мостки, лодки, фонарь). <b>Приём 4 — поворот-отсылка:</b> покупатель — Валерьич из части 5, тот, что с сорока квитанциями у банкомата, и он платит наличкой (как хотел Рустам)." },
- { h: "КРЕДИТ ЗАКРЫТ + КРЮЧОК", tc: "7/7 · 1:00–1:12", bg: "prichal", y: 700, els: () => CAP("350 000") + ch("tolyan", "t", -20, 900, .76, 6)
+   mv: "<b>Новый фон — железнодорожный переезд на окраине</b> (рельсы, красно-белый шлагбаум, светофор с двумя красными огнями, будка дежурной, осенние деревья). <b>Приём 4 — поворот-отсылка:</b> покупатель — Валерьич из части 5, тот, что с сорока квитанциями у банкомата, и он платит наличкой (как хотел Рустам)." },
+ { h: "КРЕДИТ ЗАКРЫТ + КРЮЧОК", tc: "7/7 · 1:00–1:12", bg: "pereezd", y: 700, els: () => CAP("350 000") + ch("tolyan", "t", -20, 900, .76, 6)
      + PHONE(560, 760, `<div style="font-family:Onest;color:#fff;font-size:32px;text-align:center;padding:18px 0"><div style="font-size:70px">✅</div><b>Кредит погашен</b><br><span style="color:#8b93a3;font-size:24px">день 12 · проценты 2 880 ₽</span></div>`, 460)
      + lab("КРЕДИТ — ЭТО ТАЙМЕР", 330, 990, "#ff3b30", "#fff", 40, 3)
      + `<div class="el" style="left:60px;right:60px;top:1250px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:24px;color:#c0392b;margin-bottom:8px">ЧАСТЬ 7: МАШИНА-ДВОЙНИК</div><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">пометки «кредит/залог» · ниже рынка · ~1 с</div></div>` + FOX(160, 1080, 150),
    vo: "Лис: «Шестьсот сорок. Кредит закрыт в тот же день. Капитал — триста пятьдесят тысяч. Но запомни: кредит — это таймер. Толяну повезло. В седьмой части — машина-двойник. Подпишись, чтобы не пропустить».", who: "Лис",
-   mv: "Тот же причал: на телефоне «✅ Кредит погашен», капитал 350 000. Мораль «КРЕДИТ — ЭТО ТАЙМЕР» (без банков и ставок). Крючок на часть 7 + финальная карточка." },
+   mv: "Тот же переезд: на телефоне «✅ Кредит погашен», капитал 350 000. Мораль «КРЕДИТ — ЭТО ТАЙМЕР» (без банков и ставок). Крючок на часть 7 + финальная карточка." },
 ];
 
 const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
