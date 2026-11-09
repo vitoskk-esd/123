@@ -1623,3 +1623,26 @@ async def test_city_learned_from_history(env):
     assert next(c for c in ctx.channels.values() if c["username"] == "perekup_rf")["region_guess"] == "kzn"
     await make_filter(dp, bot, "казань до 1 млн", uid=USER)
     assert USER in (await process(bot, ctx, post(CH2, "Kia Rio 2016\nПробег 120000\nЦена 790 000"))).sent
+
+
+async def test_private_channel_marked_on_card(env):
+    """Закрытый канал (без @имени): в карточке — пометка «🔒 Закрытый канал», кнопка поста подписана «если ты в канале»
+    и рядом «Вступить в канал» по приглашению; у открытого канала — как раньше (владелец 09.11)."""
+    dp, bot, s, ctx = env
+    PRIV = -1001234567890
+    cid, _ = await ctx.db.add_channel(invite="AbCdEfGhIjKlMn", base=True)
+    await ctx.db.channel_joined(cid, PRIV, "Перекупы закрытый клуб", None, "main")
+    await ctx.refresh_channels()
+    await make_filter(dp, bot, "камри до 1 млн")
+    raw = post(PRIV, "Toyota Camry 2012, 900 000 ₽, пробег 180 тыс, звоните +7 900 000-00-00")
+    assert (await process(bot, ctx, raw)).sent == [USER]
+    card = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "🔒 <b>Закрытый канал</b>" in card.text and "по заявке" in card.text
+    btns = [b for row in card.reply_markup.inline_keyboard for b in row]
+    assert btns[0].text == T.BTN_OPEN_PRIVATE and btns[0].url == f"https://t.me/c/1234567890/{raw.msg_id}"
+    assert btns[1].text == T.BTN_JOIN and btns[1].url == "https://t.me/+AbCdEfGhIjKlMn"
+    assert (await process(bot, ctx, post(CH1, "Toyota Camry 2013, 950 000 ₽, пробег 150 тыс"))).sent == [USER]
+    card = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Закрытый канал" not in card.text
+    btns = [b for row in card.reply_markup.inline_keyboard for b in row]
+    assert btns[0].text == T.BTN_OPEN and T.BTN_JOIN not in [b.text for b in btns]

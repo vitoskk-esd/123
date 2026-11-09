@@ -129,6 +129,15 @@ def post_url(channel: dict, msg_id: int) -> str | None:
     return None
 
 
+def is_private(channel: dict) -> bool:
+    """Закрытый Telegram-канал: нет @имени — ссылка на пост откроется только участникам."""
+    return not channel.get("vk_id") and not channel.get("vk") and not channel.get("username")
+
+
+def join_url(channel: dict) -> str | None:
+    return f"https://t.me/+{channel['invite']}" if is_private(channel) and channel.get("invite") else None
+
+
 def rub(v: int) -> str:
     return f"{v:,}".replace(",", " ") + " ₽"
 
@@ -174,6 +183,8 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
         lines.append("❗ " + " · ".join(bad))
     name = channel_name(channel)
     lines.append(T.CARD_SOURCE.format(channel=html.escape(name), latency=seconds(latency_ms)))
+    if is_private(channel):
+        lines.append(T.CARD_PRIVATE)
     lines.append(T.CARD_FILTER.format(filter=html.escape(filter_text[:80])))
     if plan.delay:
         lines.append(T.CARD_DELAY_UPSELL.format(wait=wait_text(plan.delay)))
@@ -332,6 +343,7 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         return r
 
     url = post_url(channel, raw.msg_id)
+    private, join = is_private(channel), join_url(channel)
     preview = LinkPreviewOptions(url=url, prefer_small_media=True) if url else LinkPreviewOptions(is_disabled=True)
     photo_id = None
     if photo_task:
@@ -345,9 +357,9 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
         latency = int((time.time() - raw.date) * 1000)
         if photo_id:
             caption = card_text(ctx, r, channel, ftext, latency, CAPTION_MAX, plan)
-            return lambda: bot.copy_message(uid, ctx.buffer_chat, photo_id, caption=caption, reply_markup=K.card(url, fid))
+            return lambda: bot.copy_message(uid, ctx.buffer_chat, photo_id, caption=caption, reply_markup=K.card(url, fid, private, join))
         text = card_text(ctx, r, channel, ftext, latency, plan=plan)
-        return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid), link_preview_options=preview)
+        return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid, private, join), link_preview_options=preview)
 
     async def send_card(uid: int, fid: int, ftext: str, plan: plans.Plan, out: list, prio: int = 0):
         if await _send(message(uid, fid, ftext, plan), uid, ctx, prio):
