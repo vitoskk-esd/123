@@ -196,5 +196,29 @@
   "tempo": 1.12,
   "profile": "Timur — a young, happy Russian food-delivery courier in his early 20s buying his first car, energetic and excited.",
   "notes": "One line: excited, joyful, then confident."
+ },
+ "arsen": {
+  "voice": "Orus",
+  "tempo": 1.1,
+  "profile": "Arsen — a smooth, slick Russian car seller in his 40s, leather jacket and cap, overly friendly, persuasive, slightly shady.",
+  "notes": "One line: confident, sweet-talking, reassuring, a bit too smooth."
+ },
+ "vadik": {
+  "voice": "Iapetus",
+  "tempo": 1.08,
+  "profile": "Vadik — a calm, nerdy Russian auto electrician in his 30s with glasses, dry humour, matter-of-fact.",
+  "notes": "One line: calm and dry; slight pause before the last word «Скрутка», said flatly."
+ },
+ "kolya": {
+  "voice": "Gacrux",
+  "tempo": 1.08,
+  "profile": "Uncle Kolya — a good-natured Russian pensioner and fisherman in his 60s, warm, slow, a little hoarse, calls people «сынок».",
+  "notes": "One line: relaxed, kind, a little proud."
+ },
+ "artur": {
+  "voice": "Alnilam",
+  "tempo": 1.1,
+  "profile": "Artur — an energetic Russian fitness trainer in his 30s, upbeat, loud, confident.",
+  "notes": "One line: happy, decisive."
  }
 }
