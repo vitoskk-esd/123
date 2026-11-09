@@ -29,8 +29,9 @@ html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden
 <div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
 <script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
 <script>
-// МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ», часть 5 «Бот против бота». Все фоны новые (pekarnya, prospekt, chastnik, kampus), второстепенные герои новые
-// (продавец Рустам, покупатель Лёха); Жора — сквозной соперник, теперь тоже с ботом. Выигрывает точный фильтр + «📸 Все фото» из закрытого канала.
+// МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ», часть 5 «Бот против бота», v2 (владелец 09.11: «однообразно — нужны уникальные события»). Новые приёмы: разделённый экран, карта гонки,
+// стоп-кадр, комедийное препятствие (банкомат и Валерьич в халате), двойной твист (бот Жоры присылает ему машину Толяна — «беру не глядя»).
+// Фоны новые: pekarnya, spalnya, prospekt, chastnik, bankomat, kampus. Новые герои: Рустам, Валерьич.
 const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
 const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
 const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
@@ -44,44 +45,62 @@ const SCORE = (a, b) => `<div class="el" style="left:40px;top:${700 + 24}px;z-in
 const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
 const ZHORA = { jacket: "#1d1d1f", pants: "#2b2f37", cap: "#c0392b", mustache: true, chain: true, hair: "#1d1d1f", item: "phone", look: "grin" };
 const RUSTAM = { jacket: "#4f6b3a", pants: "#3b3f46", beard: true, hair: "#1d1d1f" };
-const LYOHA = { jacket: "#6a3d9a", pants: "#2b2f37", glasses: true, hair: "#c9a06b", item: "phone" };
+const VALERICH = { coat: "#f2a0c0", pants: "#f2a0c0", hair: "#8a8a8a", mustache: true, look: "o" };
+const SPLIT = (bg, inner) => `<div class="el" style="left:540px;top:0;width:540px;height:1920px;overflow:hidden;z-index:5"><div style="position:absolute;left:-270px;top:0;width:1080px;height:1920px">${BGS[bg]}</div>${inner}</div><div class="el" style="left:532px;top:0;width:16px;height:1920px;background:#fff;z-index:12;box-shadow:0 0 0 5px #151515"></div>`;
+const BLANKET = (l, t, w) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:260px;z-index:8;background:#e0b25a radial-gradient(circle,#5a3a1a 0 9px,transparent 10px) 0 0/46px 40px;border:7px solid #151515;border-radius:26px 26px 0 0"></div>`;
+const PING = (l, t, text) => `<div class="el" style="left:${l}px;top:${t}px;z-index:14;background:#0d0e12;border:5px solid #2a2d34;border-radius:22px;padding:10px 16px;font-family:Onest;font-weight:800;font-size:24px;color:#fff;box-shadow:0 0 30px rgba(120,180,255,.5);white-space:nowrap">${text}</div>`;
+const MAP = (l, t, w, tolyan = "3 км", zhora = "9 км · пробка") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:14;background:#0d0e12;border:6px solid #fff;border-radius:28px;padding:12px;box-shadow:0 12px 0 #151515">
+  <svg viewBox="0 0 600 380" style="width:100%;height:auto;display:block;border-radius:18px;background:#e9efe6">
+   <path d="M0 250 q150 -60 300 0 t300 -20 v40 q-150 40 -300 -10 t-300 20 z" fill="#9fc8e8"/>
+   <g stroke="#fff" stroke-width="14">${[60, 150, 330, 470].map(x => `<path d="M${x} 0 V380"/>`).join("")}${[80, 170, 320].map(y => `<path d="M0 ${y} H600"/>`).join("")}</g>
+   <path d="M150 80 H330 V170" stroke="#ffd23f" stroke-width="10" stroke-dasharray="18 12" fill="none"/><path d="M560 350 L470 320 V170 H330" stroke="#ff3b30" stroke-width="10" stroke-dasharray="18 12" fill="none"/>
+   <circle cx="330" cy="170" r="22" fill="#4cd964" stroke="#151515" stroke-width="5"/><text x="330" y="180" text-anchor="middle" font-size="24">🚗</text>
+   <circle cx="150" cy="80" r="20" fill="#ffd23f" stroke="#151515" stroke-width="5"/><text x="150" y="88" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="20">Т</text>
+   <circle cx="560" cy="350" r="20" fill="#ff3b30" stroke="#151515" stroke-width="5"/><text x="560" y="358" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="20" fill="#fff">Ж</text>
+   <rect x="440" y="250" width="70" height="26" rx="6" fill="#ff3b30"/><text x="475" y="269" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="15" fill="#fff">ПРОБКА</text>
+  </svg>
+  <div style="display:flex;justify-content:space-between;margin-top:8px;font-family:'JetBrains Mono';font-weight:800;font-size:24px"><span style="color:#ffd23f">Т · ${tolyan}</span><span style="color:#ff3b30">Ж · ${zhora}</span></div></div>`;
+const FREEZE = (label) => `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:10;backdrop-filter:grayscale(1) contrast(1.15);background:rgba(20,20,20,.12)"></div>
+  <div class="el" style="left:40px;top:1180px;z-index:16;font-family:Unbounded;font-weight:900;font-size:64px;color:#fff;-webkit-text-stroke:10px #151515;paint-order:stroke fill;transform:rotate(-4deg)">СТОП-КАДР</div>${label}`;
 const ALBUM = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">${[0, 1, 2, 3].map(k => `<div style="height:90px;border-radius:10px;background:${["#7fb2a0", "#9fc3b8", "#6f9f8f", "#8fbfae"][k]};position:relative">${k === 2 ? '<div style="position:absolute;left:30%;top:20%;width:46px;height:46px;border:6px solid #ff3b30;border-radius:50%"></div>' : ""}</div>`).join("")}</div>`;
 const MARKS = (l, t) => [[0, 0], [150, 6]].map(([dx, dy]) => `<div class="el" style="left:${l + dx}px;top:${t + dy}px;width:110px;height:60px;z-index:4;border:5px dashed #ff7a1a;background:rgba(255,255,255,.7);border-radius:6px"></div>`).join("");
 const S = [
- { h: "ТОЛЯН: СО СТА ТЫСЯЧ · 5", tc: "1/7 · 0:00–0:09", bg: "pekarnya", y: 700, els: () => CAP("148 000") + clock("07:02") + ch("tolyan", "t", 600, 880, .8, 6)
-     + PHONE(30, 740, BOT(`<b style="color:#ff7a1a">🔥 −30% к рынку</b><br><b>Toyota Corolla 2003 · 145 000 ₽</b><br>⏱ 1 с · 🔒 закрытый канал`), 560)
-     + lab("ЧАСТЬ 5 · БОТ ПРОТИВ БОТА", 40, 1330, "#ff2da6", "#fff", 36, -3),
-   vo: "Лис: «Сто сорок восемь тысяч. Семь ноль две. Уведомление пришло двоим сразу — Толяну и Жоре».", who: "Лис",
-   mv: "<b>Новый фон — пекарня утром</b> (витрина с булками, меловое меню, рассвет в окне). Толян у витрины, на телефоне — карточка бота: Королла −30%, закрытый канал. Капитал — 148 000 (итог части 4)." },
- { h: "ПРОСПЕКТ · ПРОБКА", tc: "2/7 · 0:09–0:21", bg: "prospekt", y: 700, els: () => CAP("148 000") + CAR("w124/w124_34.png", 380, 1180, 600) + ch("perekup", "zh", 40, 860, .8, 6, ZHORA)
-     + bub("Алло! Я первый звонил —<br><em>еду!</em>", 60, 700) + lab("200 УВЕДОМЛЕНИЙ В ДЕНЬ", 300, 1330, "#ffd23f", "#151515", 38, 3),
-   vo: "Жора: «Алло! Я первый звонил — еду!» Лис: «Бот у них одинаковый. А фильтры — нет. У Жоры „всё подряд по области“: двести уведомлений в день — и он стоит в пробке на другом конце города».", who: "Жора + Лис",
-   mv: "<b>Новый фон — проспект в пробке</b> (ряд машин, красный светофор, щит «ШИНЫ −20%»). Жора у своего «Мерседеса» в пробке кричит в телефон." },
- { h: "ПЕКАРНЯ · ВСЕ ФОТО", tc: "3/7 · 0:21–0:33", bg: "pekarnya", y: 700, els: () => CAP("148 000") + clock("07:03") + ch("tolyan", "t", 600, 880, .8, 6)
-     + PHONE(30, 720, BOT(`🔎 мой город · до 150 000 · ниже рынка<br><b>📸 Все фото</b> — 4 шт.`, 26) + ALBUM, 540)
-     + bub("Скол на лобовом.<br><em>Будет торг.</em>", 600, 720),
-   vo: "Лис: «У Толяна фильтр узкий: свой город, до ста пятидесяти, ниже рынка. Канал закрытый — но все фото пришли прямо в бот». Толян: «Скол на лобовом. Будет торг».", who: "Лис + Толян",
-   mv: "Та же пекарня: на телефоне фильтр Толяна и альбом из закрытого канала (кнопка «📸 Все фото»), на третьем фото обведён скол лобового." },
- { h: "ЧАСТНЫЙ СЕКТОР · УЛ. САДОВАЯ", tc: "4/7 · 0:33–0:44", bg: "chastnik", y: 700, els: () => CAP("13 000 + 🚗") + CAR("corolla/corolla.png", 260, 1180, 700)
-     + ch("perekup", "ru", 620, 860, .8, 6, RUSTAM) + ch("tolyan", "t", -20, 900, .76, 6) + CASH(420, 1440, 4)
-     + bub("Первый обещал через час…<br><em>Ладно, по рукам!</em>", 400, 700),
-   vo: "Толян: «Сто тридцать пять — и деньги прямо сейчас». Рустам: «Первый обещал через час… Ладно, по рукам!»", who: "Толян + Рустам",
-   mv: "<b>Новый фон — частный сектор</b> (деревянный дом с наличниками, зелёные ворота, будка, коробки «ПЕРЕЕЗД»). <b>Новый герой — Рустам</b> (зелёная куртка, борода), переезжает. Мятная Королла." },
- { h: "ЖОРА ПРИЕХАЛ", tc: "5/7 · 0:44–0:53", bg: "chastnik", y: 700, els: () => CAP("13 000 + 🚗") + CAR("w124/w124_34.png", 520, 1180, 560)
-     + ch("perekup", "zh", 640, 860, .8, 6, { ...ZHORA, look: "angry" }) + ch("tolyan", "t", -20, 900, .76, 6)
-     + bub("Опять ты?!", 640, 720) + lab("ТОЧНЫЙ ФИЛЬТР > СОРОК ЧАТОВ", 40, 1330, "#4cd964", "#151515", 34, -3),
-   vo: "Жора: «Опять ты?!» Лис: «Бот присылает обоим за секунду. Выигрывает тот, у кого фильтр точнее — и деньги с собой».", who: "Жора + Лис",
-   mv: "Тот же двор: «Мерседес» Жоры подлетает, Толян уже с ключами. Мораль плашкой." },
- { h: "КАМПУС · ПРОДАЖА", tc: "6/7 · 0:53–1:05", bg: "kampus", y: 700, els: () => CAP("213 000") + CAR("corolla/corolla.png", 260, 1190, 700)
-     + ch("perekup", "ly", 620, 860, .8, 6, LYOHA) + ch("tolyan", "t", -20, 900, .76, 6)
-     + bub("Наконец-то<br><em>не на автобусе!</em>", 560, 700) + lab("+65 000 ₽", 60, 1330, "#4cd964", "#151515", 46, -3),
-   vo: "Лис: «Через неделю Королла ушла программисту Лёхе за двести». Лёха: «Наконец-то не на автобусе!» Лис: «Капитал — двести тринадцать тысяч. Вдвое больше, чем в начале».", who: "Лис + Лёха",
-   mv: "<b>Новый фон — кампус университета</b> (корпус с колоннами, часы, лестница, осенние деревья). <b>Новый герой — программист Лёха</b> (фиолетовое худи, очки). Капитал 213 000 — вдвое больше старта." },
- { h: "КРЮЧОК + ФИНАЛ", tc: "7/7 · 1:05–1:14", bg: "kampus", y: 700, els: () => ""
-     + ch("perekup", "zh", 640, 860, .8, 6, ZHORA) + ch("tolyan", "t", -20, 900, .76, 6) + bub("Студент… а научи<br><em>фильтр настраивать?</em>", 440, 700)
+ { h: "ТОЛЯН: СО СТА ТЫСЯЧ · 5", tc: "1/7 · 0:00–0:08", bg: "pekarnya", y: 700, els: () => CAP("148 000") + clock("07:02")
+     + ch("tolyan", "t", 90, 900, .72, 6) + PING(20, 1250, "📲 Corolla · 145 000 ₽")
+     + SPLIT("spalnya", ch("perekup", "zh", 150, 860, .72, 6, { ...ZHORA, look: "o" }) + BLANKET(40, 1240, 500) + PING(40, 1250, "📲 Corolla · 145 000 ₽"))
+     + bub("Моя!", 150, 760, 15) + bub("Моя!", 720, 740, 15) + lab("ЧАСТЬ 5 · БОТ ПРОТИВ БОТА", 40, 1360, "#ff2da6", "#fff", 34, -3, 15),
+   vo: "Лис: «Семь ноль две. Бот прислал Короллу за сто сорок пять — двоим сразу». Жора: «Моя!» Толян: «Моя!»", who: "Лис + Жора + Толян",
+   mv: "<b>Приём 1 — разделённый экран.</b> Слева пекарня (Толян у витрины), справа <b>новый фон — спальня Жоры</b> (леопардовый плед, будильник 7:02, постер «Мерседеса»). У обоих одновременно всплывает одно уведомление, оба вскакивают с криком «Моя!»." },
+ { h: "КАРТА ГОНКИ", tc: "2/7 · 0:08–0:17", bg: "prospekt", y: 700, els: () => CAP("148 000") + CAR("w124/w124_34.png", 420, 1200, 560) + ch("perekup", "zh", 640, 860, .8, 6, { ...ZHORA, look: "angry" })
+     + MAP(30, 790, 560) + bub("Пропустите,<br><em>я перекуп!</em>", 600, 700),
+   vo: "Лис: «Толяну — три километра. Жоре — девять: у него фильтр „вся область“». Жора: «Пропустите, я перекуп!»", who: "Лис + Жора",
+   mv: "<b>Приём 2 — карта гонки:</b> две точки «Т» и «Ж» едут к машине, у Жоры красная плашка «ПРОБКА». <b>Новый фон — проспект в пробке</b>, Жора сигналит у «Мерседеса»." },
+ { h: "СТОП-КАДР", tc: "3/7 · 0:17–0:27", bg: "chastnik", y: 700, els: () => CAP("148 000") + CAR("corolla/corolla.png", 260, 1180, 700)
+     + ch("perekup", "ru", 620, 860, .8, 6, RUSTAM) + ch("tolyan", "t", -20, 900, .76, 6, { look: "o" }) + bub("Только наличкой.<br><em>Переводы не признаю.</em>", 440, 700, 18)
+     + FREEZE(lab("ЭТО ТОЛЯН. НАЛИЧКИ — 0 ₽", 40, 1330, "#ffd23f", "#151515", 36, -3, 17)),
+   vo: "Рустам: «Только наличкой. Переводы не признаю». Лис: «Стоп-кадр. Это Толян. Он только что понял, что налички у него — ноль».", who: "Рустам + Лис",
+   mv: "<b>Новый фон — частный сектор</b>, <b>новый герой — Рустам</b> (переезжает, коробки). <b>Приём 3 — стоп-кадр:</b> картинка замирает и обесцвечивается, надпись «СТОП-КАДР», Лис комментирует провал." },
+ { h: "БАНКОМАТ · ВАЛЕРЬИЧ", tc: "4/7 · 0:27–0:36", bg: "bankomat", y: 700, els: () => CAP("148 000") + ch("perekup", "vl", 560, 860, .8, 6, VALERICH) + [0, 1, 2, 3].map(i => `<div class="el" style="left:${790 + i * 8}px;top:${1210 - i * 10}px;width:110px;height:70px;z-index:8;background:#fff;border:4px solid #151515;border-radius:4px;transform:rotate(${-8 + i * 6}deg)"></div>`).join("") + ch("tolyan", "t", -20, 900, .76, 6)
+     + bub("Подождёшь.<br><em>У меня сорок квитанций.</em>", 420, 700) + lab("ЖОРА: 2 КМ", 60, 1330, "#ff3b30", "#fff", 44, -3),
+   vo: "Валерьич: «Подождёшь. У меня сорок квитанций». Толян: «Отец, у меня машина уезжает!»", who: "Валерьич + Толян",
+   mv: "<b>Приём 4 — комедийное препятствие.</b> <b>Новый фон — банкомат у отделения</b> (на экране «ОПЛАТА ЖКХ…»). <b>Новый герой — Валерьич</b> в розовом халате и с пачкой квитанций. Внизу тикает «ЖОРА: 2 КМ»." },
+ { h: "ПО РУКАМ · ЖОРА ОПОЗДАЛ", tc: "5/7 · 0:36–0:48", bg: "chastnik", y: 700, els: () => CAP("13 000 + 🚗") + CAR("w124/w124_34.png", 600, 1200, 480, 2)
+     + ch("perekup", "ru", 330, 880, .74, 5, RUSTAM) + ch("perekup", "zh", 700, 860, .78, 6, { ...ZHORA, look: "angry" }) + ch("tolyan", "t", -20, 900, .76, 6) + CASH(200, 1440, 4)
+     + bub("Опять ты?!", 700, 720) + lab("−10 000 ЗА СКОЛ", 40, 1330, "#ff7a1a", "#151515", 40, -3),
+   vo: "Лис: «Скол на лобовом Толян увидел ещё в пекарне — по всем фото из закрытого канала. Сто тридцать пять — по рукам». Жора: «Опять ты?!»", who: "Лис + Жора",
+   mv: "Тот же двор: Толян запыхавшись отдаёт наличку, Рустам жмёт руку. Отсылка к кнопке «📸 Все фото» (скол на фото → торг). Подлетает «Мерседес» Жоры." },
+ { h: "ТВИСТ: БОТ ЖОРЫ", tc: "6/7 · 0:48–0:56", bg: "spalnya", y: 700, els: () => CAP("13 000 + 🚗") + clock("07:02")
+     + ch("perekup", "zh", 560, 860, .8, 6, ZHORA) + BLANKET(420, 1240, 660)
+     + PHONE(30, 760, BOT(`<b style="color:#ff7a1a">🔥 −10% к рынку</b><br><b>Toyota Corolla 2003 · 200 000 ₽</b><br>⏱ 1 с после публикации`, 28), 500)
+     + bub("О! Беру<br><em>не глядя!</em>", 600, 700) + lab("«НЕ ГЛЯДЯ» — ЗНАКОМО?", 40, 1360, "#ff2da6", "#fff", 36, -3, 15),
+   vo: "Лис: «Через неделю Толян выставил Короллу за двести. И бот Жоры прислал её Жоре». Жора: «О! Беру не глядя!»", who: "Лис + Жора",
+   mv: "<b>Приём 5 — твист.</b> Снова спальня Жоры, снова 7:02: бот присылает ему ту самую Короллу — уже от Толяна. «Беру не глядя» — отсылка к ошибке Толяна из части 2." },
+ { h: "КАМПУС · ПРОДАВЕЦ — ТОЛЯН", tc: "7/7 · 0:56–1:10", bg: "kampus", y: 700, els: () => CAP("213 000") + CAR("corolla/corolla.png", 260, 1190, 700)
+     + ch("perekup", "zh", 640, 860, .8, 6, { ...ZHORA, look: "o" }) + ch("tolyan", "t", -20, 900, .76, 6)
+     + bub("Студент?!", 660, 720) + bub("Глядеть надо,<br><em>брат.</em>", 40, 740)
      + `<div class="el" style="left:60px;right:60px;top:1250px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:24px;color:#c0392b;margin-bottom:8px">ЧАСТЬ 6: ПЕРВАЯ МАШИНА ЗА ПОЛМИЛЛИОНА</div><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">свой город · бюджет · ниже рынка · ~1 с</div></div>` + FOX(440, 1090, 160),
-   vo: "Жора: «Студент… а научи фильтр настраивать?» Толян: «Первый урок — бесплатно, брат». Лис: «В шестой части — первая машина за полмиллиона. Подпишись, чтобы не пропустить».", who: "Жора + Толян + Лис",
-   mv: "Тот же кампус: Жора сам приходит учиться. Крючок на часть 6 + финальная карточка." },
+   vo: "Жора: «Студент?!» Толян: «Глядеть надо, брат». Лис: «Жора купил. Молча. Капитал Толяна — двести тринадцать тысяч. В шестой части — первая машина за полмиллиона. Подпишись, чтобы не пропустить».", who: "Жора + Толян + Лис",
+   mv: "<b>Новый фон — кампус</b> (место встречи). Жора приезжает за «не глядя» и видит, что продавец — Толян. Капитал 213 000 — вдвое больше старта. Крючок + финальная карточка." },
 ];
 
 const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
@@ -90,6 +109,6 @@ const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.inn
 document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
 document.getElementById("mv").innerHTML = sc.mv;
 const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
-["t", "zh", "ru", "ly"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+["t", "zh", "ru", "vl"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
 window.READY = true;
 </script></body></html>

@@ -1,0 +1,19 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#c9d6e3"/>
+    <!-- фасад отделения -->
+    <g><rect x="40" y="220" width="1000" height="780" fill="#e8ecf0" stroke="#000" stroke-width="8"/><rect x="40" y="220" width="1000" height="130" fill="#1f6b3a" stroke="#000" stroke-width="8"/>
+      <text x="540" y="310" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="72" fill="#fff">БАНК</text>
+      <rect x="90" y="420" width="320" height="400" fill="#9fc3e0" stroke="#000" stroke-width="7"/><path d="M250 420 v400" stroke="#000" stroke-width="5"/>
+      <!-- банкомат -->
+      <g><rect x="560" y="430" width="300" height="570" fill="#2b2f37" stroke="#000" stroke-width="8"/><rect x="540" y="400" width="340" height="50" fill="#1f6b3a" stroke="#000" stroke-width="6"/>
+        <rect x="600" y="480" width="220" height="150" fill="#7fd6a0" stroke="#000" stroke-width="6"/><text x="710" y="560" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="26" fill="#151515">ОПЛАТА ЖКХ…</text>
+        <g fill="#9aa3ad"><rect x="620" y="660" width="48" height="36" rx="6"/><rect x="620" y="710" width="48" height="36" rx="6"/><rect x="620" y="760" width="48" height="36" rx="6"/><rect x="682" y="660" width="48" height="36" rx="6"/><rect x="682" y="710" width="48" height="36" rx="6"/><rect x="682" y="760" width="48" height="36" rx="6"/><rect x="744" y="660" width="48" height="36" rx="6"/><rect x="744" y="710" width="48" height="36" rx="6"/><rect x="744" y="760" width="48" height="36" rx="6"/></g>
+        <rect x="620" y="830" width="180" height="20" fill="#151515"/><text x="710" y="420" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="24" fill="#fff">24 ЧАСА</text></g>
+      <rect x="900" y="520" width="110" height="80" fill="#ffd23f" stroke="#000" stroke-width="5"/><text x="955" y="570" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="16" fill="#151515">ОЧЕРЕДЬ</text></g>
+    <!-- урна -->
+    <g><path d="M460 1000 l10 -110 h70 l10 110 z" fill="#5b6068" stroke="#000" stroke-width="6"/></g>
+    <!-- тротуар, лужи -->
+    <rect y="1000" width="1080" height="920" fill="#8d949c"/><path d="M0 1000 H1080" stroke="#000" stroke-width="7"/>
+    <g stroke="#7d848c" stroke-width="5"><path d="M60 1000 l-40 920"/><path d="M180 1000 l-40 920"/><path d="M300 1000 l-40 920"/><path d="M420 1000 l-40 920"/><path d="M540 1000 l-40 920"/><path d="M660 1000 l-40 920"/><path d="M780 1000 l-40 920"/><path d="M900 1000 l-40 920"/><path d="M1020 1000 l-40 920"/><path d="M1140 1000 l-40 920"/></g>
+    <ellipse cx="240" cy="1260" rx="140" ry="16" fill="#aec4d8" opacity=".7"/><ellipse cx="820" cy="1420" rx="120" ry="16" fill="#aec4d8" opacity=".7"/><ellipse cx="480" cy="1720" rx="180" ry="16" fill="#aec4d8" opacity=".7"/>
+  </svg>
