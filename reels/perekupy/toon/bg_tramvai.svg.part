@@ -1,0 +1,21 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#e9e2c9"/>
+    <rect y="0" width="1080" height="200" fill="#d8d0b4"/>
+    <!-- табло остановок -->
+    <g><rect x="300" y="60" width="480" height="100" rx="12" fill="#151515" stroke="#000" stroke-width="6"/><text x="540" y="125" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="36" fill="#ff7a1a">→ ПЛ. ЛЕНИНА</text></g>
+    <g><rect x="40" y="300" width="300" height="400" rx="20" fill="#9fc3e0" stroke="#000" stroke-width="8"/>
+      <rect x="70" y="560" width="70" height="140" fill="#d9a066"/><rect x="160" y="500" width="90" height="200" fill="#c9d6e3"/><rect x="260" y="580" width="60" height="120" fill="#e8d9c4"/>
+      <path d="M40 470 h300" stroke="#000" stroke-width="6"/></g><g><rect x="390" y="300" width="300" height="400" rx="20" fill="#9fc3e0" stroke="#000" stroke-width="8"/>
+      <rect x="420" y="560" width="70" height="140" fill="#d9a066"/><rect x="510" y="500" width="90" height="200" fill="#c9d6e3"/><rect x="610" y="580" width="60" height="120" fill="#e8d9c4"/>
+      <path d="M390 470 h300" stroke="#000" stroke-width="6"/></g><g><rect x="740" y="300" width="300" height="400" rx="20" fill="#9fc3e0" stroke="#000" stroke-width="8"/>
+      <rect x="770" y="560" width="70" height="140" fill="#d9a066"/><rect x="860" y="500" width="90" height="200" fill="#c9d6e3"/><rect x="960" y="580" width="60" height="120" fill="#e8d9c4"/>
+      <path d="M740 470 h300" stroke="#000" stroke-width="6"/></g>
+    <!-- поручни -->
+    <path d="M0 240 H1080" stroke="#c9a20c" stroke-width="16"/><path d="M360 240 V1000" stroke="#c9a20c" stroke-width="14"/><path d="M720 240 V1000" stroke="#c9a20c" stroke-width="14"/>
+    <g><path d="M90 248 v50" stroke="#555" stroke-width="5"/><path d="M72 298 h36 v30 h-36 z" fill="none" stroke="#2e86de" stroke-width="7"/></g><g><path d="M240 248 v50" stroke="#555" stroke-width="5"/><path d="M222 298 h36 v30 h-36 z" fill="none" stroke="#2e86de" stroke-width="7"/></g><g><path d="M390 248 v50" stroke="#555" stroke-width="5"/><path d="M372 298 h36 v30 h-36 z" fill="none" stroke="#2e86de" stroke-width="7"/></g><g><path d="M540 248 v50" stroke="#555" stroke-width="5"/><path d="M522 298 h36 v30 h-36 z" fill="none" stroke="#2e86de" stroke-width="7"/></g><g><path d="M690 248 v50" stroke="#555" stroke-width="5"/><path d="M672 298 h36 v30 h-36 z" fill="none" stroke="#2e86de" stroke-width="7"/></g><g><path d="M840 248 v50" stroke="#555" stroke-width="5"/><path d="M822 298 h36 v30 h-36 z" fill="none" stroke="#2e86de" stroke-width="7"/></g><g><path d="M990 248 v50" stroke="#555" stroke-width="5"/><path d="M972 298 h36 v30 h-36 z" fill="none" stroke="#2e86de" stroke-width="7"/></g>
+    <!-- сиденья -->
+    <g><rect x="60" y="760" width="220" height="150" rx="20" fill="#c0392b" stroke="#000" stroke-width="7"/><rect x="60" y="900" width="220" height="40" rx="10" fill="#9b2c22" stroke="#000" stroke-width="6"/></g><g><rect x="800" y="760" width="220" height="150" rx="20" fill="#c0392b" stroke="#000" stroke-width="7"/><rect x="800" y="900" width="220" height="40" rx="10" fill="#9b2c22" stroke="#000" stroke-width="6"/></g>
+    <!-- пол — рифлёный -->
+    <rect y="1000" width="1080" height="920" fill="#8a8f96"/><path d="M0 1000 H1080" stroke="#000" stroke-width="8"/>
+    <g stroke="#7a7f86" stroke-width="6"><path d="M40 1000 l-40 920"/><path d="M110 1000 l-40 920"/><path d="M180 1000 l-40 920"/><path d="M250 1000 l-40 920"/><path d="M320 1000 l-40 920"/><path d="M390 1000 l-40 920"/><path d="M460 1000 l-40 920"/><path d="M530 1000 l-40 920"/><path d="M600 1000 l-40 920"/><path d="M670 1000 l-40 920"/><path d="M740 1000 l-40 920"/><path d="M810 1000 l-40 920"/><path d="M880 1000 l-40 920"/><path d="M950 1000 l-40 920"/><path d="M1020 1000 l-40 920"/><path d="M1090 1000 l-40 920"/><path d="M1160 1000 l-40 920"/></g>
+  </svg>

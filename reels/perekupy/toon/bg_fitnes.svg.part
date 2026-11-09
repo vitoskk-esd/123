@@ -1,0 +1,16 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#dfe8ef"/>
+    <!-- фасад со стеклом -->
+    <g><rect x="40" y="200" width="1000" height="800" fill="#2b2f37" stroke="#000" stroke-width="8"/>
+      <rect x="80" y="380" width="200" height="420" fill="#5f8fb5" stroke="#000" stroke-width="6"/><rect x="300" y="380" width="200" height="420" fill="#5f8fb5" stroke="#000" stroke-width="6"/><rect x="780" y="380" width="200" height="420" fill="#5f8fb5" stroke="#000" stroke-width="6"/>
+      <rect x="540" y="560" width="200" height="440" fill="#9fc3e0" stroke="#000" stroke-width="7"/><path d="M640 560 v440" stroke="#000" stroke-width="5"/>
+      <g><rect x="150" y="640" width="12" height="80" fill="#151515"/><rect x="126" y="660" width="60" height="40" rx="8" fill="#151515"/></g><g><rect x="380" y="640" width="12" height="80" fill="#151515"/><rect x="356" y="660" width="60" height="40" rx="8" fill="#151515"/></g>
+      <rect x="80" y="230" width="920" height="120" fill="#ff3b30" stroke="#000" stroke-width="7"/><text x="540" y="312" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="66" fill="#fff">ЖЕЛЕЗО · FITNESS</text>
+      <rect x="790" y="420" width="180" height="70" rx="10" fill="#ffd23f" stroke="#000" stroke-width="5"/><text x="880" y="466" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="28" fill="#151515">24/7</text></g>
+    <!-- велопарковка -->
+    <g><path d="M80 1000 v-70 q30 -30 60 0 v70" fill="none" stroke="#9aa3ad" stroke-width="10"/><path d="M180 1000 v-70 q30 -30 60 0 v70" fill="none" stroke="#9aa3ad" stroke-width="10"/><path d="M280 1000 v-70 q30 -30 60 0 v70" fill="none" stroke="#9aa3ad" stroke-width="10"/></g>
+    <!-- плитка тротуара, асфальт -->
+    <rect y="1000" width="1080" height="920" fill="#5b6068"/><rect y="1000" width="1080" height="120" fill="#b9c2c9"/><path d="M0 1000 H1080 M0 1120 H1080" stroke="#000" stroke-width="6"/>
+    <g stroke="#a7b0b8" stroke-width="4"><path d="M0 1000 v120"/><path d="M90 1000 v120"/><path d="M180 1000 v120"/><path d="M270 1000 v120"/><path d="M360 1000 v120"/><path d="M450 1000 v120"/><path d="M540 1000 v120"/><path d="M630 1000 v120"/><path d="M720 1000 v120"/><path d="M810 1000 v120"/><path d="M900 1000 v120"/><path d="M990 1000 v120"/></g>
+    <g stroke="#fff" stroke-width="9"><path d="M200 1160 l-50 220"/><path d="M440 1160 l-50 220"/><path d="M680 1160 l-50 220"/><path d="M920 1160 l-50 220"/></g>
+  </svg>

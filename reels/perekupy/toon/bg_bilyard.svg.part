@@ -1,0 +1,18 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#3a2b2b"/>
+    <g stroke="#2e2222" stroke-width="6"><path d="M0 0 V1000"/><path d="M90 0 V1000"/><path d="M180 0 V1000"/><path d="M270 0 V1000"/><path d="M360 0 V1000"/><path d="M450 0 V1000"/><path d="M540 0 V1000"/><path d="M630 0 V1000"/><path d="M720 0 V1000"/><path d="M810 0 V1000"/><path d="M900 0 V1000"/><path d="M990 0 V1000"/></g>
+    <!-- табло и стойка с киями -->
+    <g><rect x="60" y="420" width="300" height="160" rx="12" fill="#151515" stroke="#000" stroke-width="6"/><text x="210" y="480" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="30" fill="#ffd23f">СТОЛ 3</text>
+      <text x="210" y="545" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="46" fill="#ff3b30">00:47</text></g>
+    <g><rect x="820" y="400" width="200" height="560" fill="#6b4a2a" stroke="#000" stroke-width="7"/><path d="M850 420 v520" stroke="#e8c48a" stroke-width="9"/><path d="M876 420 v520" stroke="#e8c48a" stroke-width="9"/><path d="M902 420 v520" stroke="#e8c48a" stroke-width="9"/><path d="M928 420 v520" stroke="#e8c48a" stroke-width="9"/><path d="M954 420 v520" stroke="#e8c48a" stroke-width="9"/><path d="M980 420 v520" stroke="#e8c48a" stroke-width="9"/></g>
+    <text x="540" y="200" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="58" fill="#ff7a1a" style="filter:drop-shadow(0 0 12px #ff7a1a)">БИЛЬЯРД · БАР</text>
+    <g><path d="M300 0 v260" stroke="#000" stroke-width="5"/><path d="M190 330 q110 -110 220 0 z" fill="#1f6b3a" stroke="#000" stroke-width="6"/><ellipse cx="300" cy="338" rx="100" ry="14" fill="#fff2a8" style="filter:drop-shadow(0 0 22px #ffe066)"/></g><g><path d="M780 0 v260" stroke="#000" stroke-width="5"/><path d="M670 330 q110 -110 220 0 z" fill="#1f6b3a" stroke="#000" stroke-width="6"/><ellipse cx="780" cy="338" rx="100" ry="14" fill="#fff2a8" style="filter:drop-shadow(0 0 22px #ffe066)"/></g>
+    <!-- бильярдный стол -->
+    <g><path d="M120 900 L960 900 L1040 1080 L40 1080 Z" fill="#2f8f4e" stroke="#5b3a1e" stroke-width="26" stroke-linejoin="round"/>
+      <circle cx="130" cy="905" r="18" fill="#151515"/><circle cx="540" cy="900" r="18" fill="#151515"/><circle cx="950" cy="905" r="18" fill="#151515"/><circle cx="55" cy="1075" r="18" fill="#151515"/><circle cx="1025" cy="1075" r="18" fill="#151515"/>
+      <circle cx="600" cy="980" r="20" fill="#ffd23f" stroke="#000" stroke-width="4"/><circle cx="640" cy="958" r="20" fill="#c0392b" stroke="#000" stroke-width="4"/><circle cx="640" cy="1002" r="20" fill="#2e86de" stroke="#000" stroke-width="4"/><circle cx="680" cy="936" r="20" fill="#8e44ad" stroke="#000" stroke-width="4"/><circle cx="680" cy="980" r="20" fill="#151515" stroke="#000" stroke-width="4"/><circle cx="300" cy="990" r="20" fill="#fff" stroke="#000" stroke-width="4"/>
+      <rect x="140" y="1080" width="60" height="140" fill="#5b3a1e" stroke="#000" stroke-width="6"/><rect x="880" y="1080" width="60" height="140" fill="#5b3a1e" stroke="#000" stroke-width="6"/></g>
+    <!-- пол -->
+    <rect y="1080" width="1080" height="840" fill="#5a2f2f"/><path d="M0 1080 H1080" stroke="#000" stroke-width="7"/>
+    <g stroke="#4a2626" stroke-width="5"><path d="M0 1180 H1080"/><path d="M0 1290 H1080"/><path d="M0 1400 H1080"/><path d="M0 1510 H1080"/><path d="M0 1620 H1080"/><path d="M0 1730 H1080"/><path d="M0 1840 H1080"/></g>
+  </svg>

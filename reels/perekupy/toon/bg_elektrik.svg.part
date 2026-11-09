@@ -1,0 +1,21 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#2b3540"/>
+    <g stroke="#26303a" stroke-width="6"><path d="M0 80 H1080"/><path d="M0 170 H1080"/><path d="M0 260 H1080"/><path d="M0 350 H1080"/><path d="M0 440 H1080"/><path d="M0 530 H1080"/><path d="M0 620 H1080"/><path d="M0 710 H1080"/><path d="M0 800 H1080"/><path d="M0 890 H1080"/><path d="M0 980 H1080"/></g>
+    <g transform="rotate(-2 540 170)"><rect x="240" y="110" width="600" height="110" rx="20" fill="#151515" stroke="#2ec4b6" stroke-width="8" style="filter:drop-shadow(0 0 14px #2ec4b6)"/>
+      <text x="540" y="186" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="50" fill="#2ec4b6">⚡ АВТОЭЛЕКТРИК</text></g>
+    <!-- стенд с приборной панелью -->
+    <g><rect x="80" y="320" width="520" height="300" rx="20" fill="#151515" stroke="#000" stroke-width="8"/>
+      <circle cx="230" cy="470" r="100" fill="#0d0e12" stroke="#ff7a1a" stroke-width="10"/><circle cx="450" cy="470" r="100" fill="#0d0e12" stroke="#ff7a1a" stroke-width="10"/>
+      <path d="M230 470 l60 -50 M450 470 l-30 -70" stroke="#ff3b30" stroke-width="8"/>
+      <rect x="250" y="560" width="180" height="40" rx="6" fill="#2b3a2b"/><text x="340" y="590" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="28" fill="#4cd964">120 000</text></g>
+    <!-- провода на стене -->
+    <path d="M660 300 q60 120 10 300" stroke="#ff3b30" stroke-width="7" fill="none"/><path d="M700 300 q-35 120 -16 300" stroke="#ffd23f" stroke-width="7" fill="none"/><path d="M740 300 q14 120 -8 300" stroke="#2e86de" stroke-width="7" fill="none"/><path d="M780 300 q-26 120 -24 300" stroke="#4cd964" stroke-width="7" fill="none"/><path d="M820 300 q-41 120 25 300" stroke="#ff7a1a" stroke-width="7" fill="none"/>
+    <!-- верстак с ноутбуком и мультиметром -->
+    <g><rect x="40" y="820" width="1000" height="40" fill="#8a5a33" stroke="#000" stroke-width="7"/><path d="M80 860 v140 M1000 860 v140" stroke="#000" stroke-width="12"/>
+      <rect x="640" y="660" width="300" height="170" rx="10" fill="#1d2330" stroke="#000" stroke-width="7"/><rect x="660" y="680" width="260" height="130" fill="#2e86de" opacity=".85"/>
+      <path d="M600 830 h380 l-30 -10 h-320 z" fill="#9aa3ad" stroke="#000" stroke-width="5"/>
+      <rect x="160" y="740" width="90" height="80" rx="10" fill="#ffd23f" stroke="#000" stroke-width="5"/><rect x="175" y="755" width="60" height="26" fill="#cfe9c4"/></g>
+    <!-- пол — бетон с пятнами -->
+    <rect y="1000" width="1080" height="920" fill="#59606a"/><path d="M0 1000 H1080" stroke="#000" stroke-width="8"/>
+    <ellipse cx="631" cy="1696" rx="83" ry="15" fill="#40464e" opacity=".7"/><ellipse cx="938" cy="1204" rx="55" ry="10" fill="#40464e" opacity=".7"/><ellipse cx="1003" cy="1750" rx="114" ry="16" fill="#40464e" opacity=".7"/><ellipse cx="395" cy="1358" rx="97" ry="14" fill="#40464e" opacity=".7"/><ellipse cx="709" cy="1547" rx="65" ry="16" fill="#40464e" opacity=".7"/><ellipse cx="500" cy="1554" rx="124" ry="17" fill="#40464e" opacity=".7"/><ellipse cx="300" cy="1285" rx="124" ry="21" fill="#40464e" opacity=".7"/>
+  </svg>
