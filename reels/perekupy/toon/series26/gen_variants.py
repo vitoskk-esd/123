@@ -1,36 +1,36 @@
 # Розовый не использовать (владелец 06.11).
-# python3 gen_variants.py — 4 «пересъёмки» ep34 «Толян: со ста тысяч · 2» (владелец 08.11) (схема ep27, владелец 05–06.11): та же история, порядок и озвучка;
-# у каждой своя гамма фонов, движение камеры, стиль пузырей, обложка, музыка и одежда героев. → ep34b, ep34c, ep34d, ep34h (.json/.js/.css + vo/<id>)
+# python3 gen_variants.py — 4 «пересъёмки» ep35 «Толян: со ста тысяч · 3 — Конкурент» (владелец 09.11): та же история, порядок и озвучка;
+# у каждой своя гамма фонов, движение камеры, стиль пузырей, обложка, музыка и одежда героев. → ep35b, ep35c, ep35d, ep35h (.json/.js/.css + vo/<id>)
 import json, os, shutil, sys
 
-BASE_JS, BASE_CSS, BASE_JSON = open("ep34.js").read(), open("ep34.css").read(), json.load(open("ep34.json"))
-# одежда: Эдуард — костюм #2b2f37; Олег — куртка #8e5a3a; Михей — куртка #d68a1a; Толян — штаны #232c47
+BASE_JS, BASE_CSS, BASE_JSON = open("ep35.js").read(), open("ep35.css").read(), json.load(open("ep35.json"))
+# одежда: Жора — кепка #c0392b; Тимур — куртка #2ec4b6; Семёныч — тулуп #5b4a3a; Нина — платье #c4553f (в базе перекрашено CSS); Толян — штаны #232c47
 V = {
- "ep34b": dict(name="Детектив", bg="sepia(.3) saturate(1.2) hue-rotate(-15deg) brightness(.95) contrast(1.08)",
+ "ep35b": dict(name="Детектив", bg="sepia(.3) saturate(1.2) hue-rotate(-15deg) brightness(.95) contrast(1.08)",
    bub=("#151515", "#fff", "#ff7a1a", "#ff7a1a"), tag="#ff7a1a",
-   cloth={"OL": {"#8e5a3a": "#2c3e50"}, "MI": {"#d68a1a": "#2f7a3a"}},
-   title=("ПРИОРА", "И ПЕРВАЯ ОШИБКА", "#ff7a1a", "#151515"), cam="vpan", music={"style": "detective", "bpm": 100}),
- "ep34c": dict(name="Ночь", bg="brightness(.72) contrast(1.12) saturate(1.1) hue-rotate(12deg)",
+   cloth={"ZH": {"#c0392b": "#2c3e50"}, "TI": {"#2ec4b6": "#e67e22"}},
+   title=("ЖОРА", "ВСЕГДА ПЕРВЫЙ?", "#ff7a1a", "#151515"), cam="vpan", music={"style": "detective", "bpm": 100}),
+ "ep35c": dict(name="Ночь", bg="brightness(.72) contrast(1.12) saturate(1.1) hue-rotate(12deg)",
    bub=("#101826", "#fff", "#ffd23f", "#ffd23f"), tag="#ffd23f",
-   cloth={"ED": {"#2b2f37": "#4a3a6a"}, "MI": {"#d68a1a": "#c0392b"}},
-   title=("«БЕРУ", "НЕ ГЛЯДЯ»", "#ffd23f", "#151515"), cam="in", music={"style": "phonk", "bpm": 120}),
- "ep34d": dict(name="Холодная", bg="sepia(.25) hue-rotate(165deg) saturate(.9) brightness(1.04)",
+   cloth={"SE": {"#5b4a3a": "#2f4f6f"}, "NI": {"#c4553f": "#6a3d9a"}, "NI2": {"#c4553f": "#6a3d9a"}},
+   title=("5:47", "КТО БЫСТРЕЕ?", "#ffd23f", "#151515"), cam="in", music={"style": "phonk", "bpm": 120}),
+ "ep35d": dict(name="Холодная", bg="sepia(.25) hue-rotate(165deg) saturate(.9) brightness(1.04)",
    bub=("#1d4fb8", "#fff", "#fff", "#ffd23f"), tag="#7cc8ff",
-   cloth={"OL": {"#8e5a3a": "#16a085"}, "MI": {"#d68a1a": "#8e44ad"}},
-   title=("ЗАПРЕТ!", "И МИНУС 50 000", "#1d4fb8", "#fff"), cam="out", music={"style": "tech", "bpm": 116}),
+   cloth={"TI": {"#2ec4b6": "#8e44ad"}, "ZH": {"#c0392b": "#16a085"}},
+   title=("ЖОРА 3 : 0", "ТОЛЯН", "#1d4fb8", "#fff"), cam="out", music={"style": "tech", "bpm": 116}),
  # h — всегда розовая (владелец 06.11)
- "ep34h": dict(name="Пастель", bg="saturate(.7) brightness(1.12) hue-rotate(40deg)",
+ "ep35h": dict(name="Пастель", bg="saturate(.7) brightness(1.12) hue-rotate(40deg)",
    bub=("#fff", "#151515", "#ff4fa3", "#ff4fa3"), tag="#ff6fae",
-   cloth={"MI": {"#d68a1a": "#ff6fae"}, "T": {"#232c47": "#2b2b2e"}},
-   title=("ЭДУАРД", "НА СОВЕЩАНИИ", "#ff6fae", "#151515"), cam="alt", music={"style": "bed", "bpm": 110}),
+   cloth={"TI": {"#2ec4b6": "#ff6fae"}, "T": {"#232c47": "#2b2b2e"}},
+   title=("ОПОЗДАЛ,", "СТУДЕНТ", "#ff6fae", "#151515"), cam="alt", music={"style": "bed", "bpm": 110}),
 }
-WHO = {"ED": '#ED', "OL": '#OL', "MI": '#MI', "T": '[id^="T"]'}
+WHO = {"ZH": '[id^="ZH"]', "TI": '#TI', "SE": '#SE', "NI": "#NI", "NI2": "#NI2", "T": '[id^="T"]:not(#TI)'}
 
 for vid, v in V.items():
     if len(sys.argv) > 1 and vid not in sys.argv[1:]: continue
     d = dict(BASE_JSON, id=vid); json.dump(d, open(f"{vid}.json", "w"), ensure_ascii=False, indent=1)
     if os.path.exists(f"vo/{vid}"): shutil.rmtree(f"vo/{vid}")
-    shutil.copytree("vo/ep34", f"vo/{vid}")
+    shutil.copytree("vo/ep35", f"vo/{vid}")
     bb, bt, bo, em = v["bub"]
     cloth = "\n".join(f'.c{WHO[k]} [fill="{a}"] {{ fill: {b}; }}' for k, m in v["cloth"].items() for a, b in m.items())
     open(f"{vid}.css", "w").write(BASE_CSS + f'''
@@ -56,9 +56,9 @@ for vid, v in V.items():
     $("#title .a").textContent = C.t1; $("#title .a").style.cssText = `font-size:110px;background:${{C.c1}};color:${{C.c2}}`;
     const b = $("#title .b"); b.style.display = ""; b.textContent = C.t2; b.style.cssText = `font-size:60px;background:${{C.c2}};color:${{C.c1}}`;
     tl.set("#title", {{ opacity: 1, y: 0 }}, 0).to("#title", {{ opacity: 0, y: -50, duration: .3 }}, 1.2);
-    const S = [["barber", 0, st.e1 - .7, "60% 55%"], ["biz", st.e1 - .7, st.l3 - .7, "45% 60%"], ["gibdd", st.l3 - .7, st.l4 - .7, "50% 55%"],
-               ["biz2", st.l4 - .7, st.l5 - .7, "45% 55%"], ["check", st.l5 - .7, st.m1 - .7, "55% 55%"], ["razbor", st.m1 - .7, st.end - .7, "50% 60%"],
-               ["next", st.end - .7, en.end + .3, "50% 40%"]];
+    const S = [["pochta", 0, st.l1 - .7, "55% 55%"], ["shaurma", st.l1 - .7, st.l2 - .7, "60% 55%"], ["laundry", st.l2 - .7, st.l3 - .7, "45% 55%"],
+               ["sad", st.l3 - .7, st.z3 - .7, "50% 60%"], ["sad2", st.z3 - .7, st.l6 - .7, "55% 55%"], ["most", st.l6 - .7, st.z4 - .7, "50% 60%"],
+               ["most2", st.z4 - .7, en.end + .3, "50% 45%"]];
     S.forEach(([n, a, z, o], i) => {{
       const sel = `#sc_${{n}}`, d = z - a;
       if (C.cam === "in") tl.fromTo(sel, {{ scale: 1 }}, {{ scale: 1.12, transformOrigin: o, duration: d, ease: "none", immediateRender: false }}, a);
