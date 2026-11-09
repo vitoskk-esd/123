@@ -15,7 +15,7 @@ def menu(admin: bool = False) -> ReplyKeyboardMarkup:
     rows = [[KeyboardButton(text=T.MENU_FILTERS), KeyboardButton(text=T.MENU_CHANNELS)],
             [KeyboardButton(text=T.MENU_STATS), KeyboardButton(text=T.MENU_SUB)],   # по две в ряд — иначе подписи переносятся
             [KeyboardButton(text=T.MENU_DKP)],
-            [KeyboardButton(text=T.MENU_HELP), KeyboardButton(text=T.MENU_IDEA)]]
+            [KeyboardButton(text=T.MENU_HELP), KeyboardButton(text=T.MENU_SUPPORT)]]
     if admin:                                                   # «плашка» админа — только у него
         rows.append([KeyboardButton(text=T.MENU_ADMIN)])
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
@@ -60,10 +60,9 @@ def filter_saved(fid: int) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_EDIT_FILTER, callback_data=f"f:e:{fid}")])
 
 
-def help_menu(support_url: str | None = None) -> InlineKeyboardMarkup:
-    """«Написать в поддержку»: есть аккаунт поддержки — ссылка в личный чат с ним, нет — переписка через бота (как раньше)."""
-    sup = B(text=T.BTN_SUPPORT, url=support_url) if support_url else B(text=T.BTN_SUPPORT, callback_data="sup")
-    return kb([sup], [B(text=T.BTN_OFFER, callback_data="offer")])
+def help_menu() -> InlineKeyboardMarkup:
+    """«❓ Помощь»: «Предложить идею» (поддержка теперь кнопкой в меню) и оферта."""
+    return kb([B(text=T.BTN_IDEA, callback_data="idea")], [B(text=T.BTN_OFFER, callback_data="offer")])
 
 
 def support_link(url: str) -> InlineKeyboardMarkup:

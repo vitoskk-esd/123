@@ -585,13 +585,12 @@ async def test_reader_creates_photo_channel_once(env):
 
 
 async def test_support_chat_in_bot(env):
-    """«❓ Помощь» → «Написать в поддержку» → сообщение уходит админу; ответ админа (Reply) приходит человеку."""
+    """«✉️ Написать в поддержку» в меню → сообщение уходит админу; ответ админа (Reply) приходит человеку."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
-    await dp.feed_update(bot, msg("❓ Помощь"))
-    help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
-    assert "Написать в поддержку" in str(help_msg.reply_markup)
-    await dp.feed_update(bot, cb("sup"))
+    kb = [b.text for row in [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][0].reply_markup.keyboard for b in row]
+    assert T.MENU_SUPPORT in kb and T.MENU_IDEA not in kb
+    await dp.feed_update(bot, msg(T.MENU_SUPPORT))
     await dp.feed_update(bot, msg("Не приходят машины по фильтру"))
     assert "отправлено менеджеру" in s.texts(USER)[-1]
     head = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == ADMIN][-1]
@@ -620,7 +619,7 @@ async def test_support_link_to_work_account(env):
     await dp.feed_update(bot, msg("/support @Perekhvat_Help", uid=ADMIN))
     assert "@Perekhvat_Help" in s.texts(ADMIN)[-1]
     await dp.feed_update(bot, msg("/start"))
-    await dp.feed_update(bot, msg("❓ Помощь"))
+    await dp.feed_update(bot, msg(T.MENU_SUPPORT))
     help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
     btn = help_msg.reply_markup.inline_keyboard[0][0]
     assert btn.url == "https://t.me/Perekhvat_Help" and not btn.callback_data
@@ -630,9 +629,9 @@ async def test_support_link_to_work_account(env):
     await dp.feed_update(bot, msg("/support нет такого!", uid=ADMIN))
     assert "Не похоже" in s.texts(ADMIN)[-1]
     await dp.feed_update(bot, msg("/support off", uid=ADMIN))
-    await dp.feed_update(bot, msg("❓ Помощь"))
+    await dp.feed_update(bot, msg(T.MENU_SUPPORT))
     help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
-    assert help_msg.reply_markup.inline_keyboard[0][0].callback_data == "sup"
+    assert help_msg.text == T.SUPPORT_ASK and help_msg.reply_markup.inline_keyboard[0][0].callback_data == "sup:x"
     await dp.feed_update(bot, msg("/support @Perekhvat_Help", uid=USER))      # не админ — ничего не меняет
     assert await ctx.db.get_setting("support_username") == "-"
 
@@ -642,7 +641,7 @@ async def test_support_falls_back_to_reader_account(env):
     dp, bot, s, ctx = env
     await ctx.db.set_setting("reader_username", "perekhvat_reader")
     await dp.feed_update(bot, msg("/start"))
-    await dp.feed_update(bot, msg("❓ Помощь"))
+    await dp.feed_update(bot, msg(T.MENU_SUPPORT))
     help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
     assert help_msg.reply_markup.inline_keyboard[0][0].url == "https://t.me/perekhvat_reader"
 
@@ -1545,8 +1544,11 @@ async def test_users_suggest_ideas(env):
     await dp.feed_update(bot, msg("/start", ADMIN))
     await dp.feed_update(bot, msg("/start"))
     kb = [b.text for row in [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][0].reply_markup.keyboard for b in row]
-    assert T.MENU_IDEA in kb
-    await dp.feed_update(bot, msg(T.MENU_IDEA))
+    assert T.MENU_IDEA not in kb                                       # «Предложить идею» теперь в «❓ Помощь»
+    await dp.feed_update(bot, msg(T.MENU_HELP))
+    help_msg = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert help_msg.reply_markup.inline_keyboard[0][0].callback_data == "idea"
+    await dp.feed_update(bot, cb("idea"))
     assert "Мы ценим каждого клиента" in s.texts(USER)[-1] and "что-то не нравится" in s.texts(USER)[-1]
     await dp.feed_update(bot, msg("Добавьте фильтр по цвету кузова"))
     assert "Спасибо! Идея уже у команды" in s.texts(USER)[-1]
@@ -1554,7 +1556,7 @@ async def test_users_suggest_ideas(env):
     assert head and "@u111" in head[-1].text
     copy = [m for m in s.sent if isinstance(m, CopyMessage) and m.chat_id == ADMIN][-1]
     assert copy.from_chat_id == USER
-    await dp.feed_update(bot, msg(T.MENU_IDEA)); await dp.feed_update(bot, msg(T.MENU_FILTERS))   # передумал — меню работает
+    await dp.feed_update(bot, msg(T.MENU_IDEA)); await dp.feed_update(bot, msg(T.MENU_FILTERS))   # старая кнопка меню тоже работает; передумал — меню работает
     assert "Спасибо!" not in s.texts(USER)[-1]
     await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
     assert "Идей от пользователей: 1 (за 7 дней: 1)" in s.texts(ADMIN)[-1]

@@ -63,13 +63,25 @@ async def set_support(msg: Message, ctx: Ctx, command: CommandObject) -> None:
     await msg.answer(T.SUPPORT_SET.format(name=name))
 
 
+async def open_support(msg: Message, ctx: Ctx, state: FSMContext) -> None:
+    """«✉️ Написать в поддержку» (кнопка меню): есть аккаунт поддержки — ссылка в личный чат с ним, нет — переписка через бота."""
+    if url := await support_url(ctx):
+        return await msg.answer(T.SUPPORT_LINK, reply_markup=K.support_link(url))
+    await state.set_state(Sup.message)
+    await msg.answer(T.SUPPORT_ASK, reply_markup=K.support_cancel())
+
+
 @router.callback_query(F.data == "sup")
 async def ask(cb: CallbackQuery, state: FSMContext, ctx: Ctx) -> None:
-    if url := await support_url(ctx):     # старые кнопки в чатах: тоже отправляем в личку аккаунта поддержки
-        await cb.message.answer(T.SUPPORT_LINK, reply_markup=K.support_link(url))
-        return await cb.answer()
-    await state.set_state(Sup.message)
-    await cb.message.answer(T.SUPPORT_ASK, reply_markup=K.support_cancel())
+    """Старые кнопки «Написать в поддержку» в чатах и «Написать ещё» под ответом поддержки."""
+    await open_support(cb.message, ctx, state)
+    await cb.answer()
+
+
+@router.callback_query(F.data == "idea")
+async def ask_idea_cb(cb: CallbackQuery, state: FSMContext, ctx: Ctx) -> None:
+    """«💡 Предложить идею» в «❓ Помощь»."""
+    await ask_idea(cb.message, ctx, state)
     await cb.answer()
 
 

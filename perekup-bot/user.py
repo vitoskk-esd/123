@@ -16,7 +16,7 @@ import contract
 import keyboards as K
 import plans
 import texts as T
-from support import ask_idea
+from support import ask_idea, open_support
 from admin import is_admin, is_admin_id, make_admins_pro, notify_new_user, queue_wait
 from ctx import Ctx
 from db import DAY
@@ -475,12 +475,11 @@ async def check(cb: CallbackQuery, ctx: Ctx, bot: Bot) -> None:
 
 # ---------- помощь и меню ----------
 async def show_help(msg: Message, ctx: Ctx, state: FSMContext) -> None:
-    from support import support_url
-    await msg.answer(T.HELP, reply_markup=K.help_menu(await support_url(ctx)))
+    await msg.answer(T.HELP, reply_markup=K.help_menu())
 
 
 MENU = {T.MENU_FILTERS: show_filters, T.OLD_MENU_FILTERS: show_filters, T.MENU_CHANNELS: show_channels, T.MENU_STATS: show_stats,
-        T.MENU_SUB: show_sub, T.MENU_HELP: show_help, T.MENU_IDEA: ask_idea, T.MENU_DKP: contract.ask}
+        T.MENU_SUB: show_sub, T.MENU_HELP: show_help, T.MENU_IDEA: ask_idea, T.MENU_SUPPORT: open_support, T.MENU_DKP: contract.ask}
 
 
 @router.message(F.text.in_(MENU))
