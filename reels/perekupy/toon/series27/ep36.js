@@ -45,7 +45,7 @@ add("tram", hero("tolyan", "t3", 600, 880, .8, 7)
 // 4. мастерская автоэлектрика: пробег в блоке
 scene("el", "elektrik");
 add("el", CAR("car2", "hyundai/hyundai.png", 360, 1160, 620) + hero("perekup", "va", 600, 860, .8, 7, VADIK) + hero("tolyan", "t4", -20, 900, .76, 7)
-  + `<div class="odo" id="odo" style="top:300px"><small>ПРОБЕГ В БЛОКЕ</small><b>470 000</b></div>`
+  + `<div class="odo" id="odo" style="top:470px"><small>ПРОБЕГ В БЛОКЕ</small><b>470 000</b></div>`
   + stamp("e1", "СКРУТКА −350 000 КМ", 60, 1540, "#ff3b30", "#fff", 50, -3));
 // 5. снова бильярдная: отказ
 scene("bil2", "bilyard");
