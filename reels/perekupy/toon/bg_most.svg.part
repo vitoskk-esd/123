@@ -1,0 +1,17 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#5b6f86"/>
+    <!-- полотно путепровода сверху -->
+    <rect x="0" y="0" width="1080" height="320" fill="#8a929b" stroke="#000" stroke-width="8"/><rect x="0" y="300" width="1080" height="60" fill="#6c747d" stroke="#000" stroke-width="7"/>
+    <g stroke="#727a83" stroke-width="5"><path d="M60 0 V300"/><path d="M180 0 V300"/><path d="M300 0 V300"/><path d="M420 0 V300"/><path d="M540 0 V300"/><path d="M660 0 V300"/><path d="M780 0 V300"/><path d="M900 0 V300"/><path d="M1020 0 V300"/></g>
+    <!-- бетонные опоры -->
+    <g><rect x="60" y="360" width="170" height="640" fill="#a7afb7" stroke="#000" stroke-width="8"/><rect x="40" y="360" width="210" height="50" fill="#959da6" stroke="#000" stroke-width="7"/><path d="M90 430 v540" stroke="#959da6" stroke-width="8"/></g><g><rect x="850" y="360" width="170" height="640" fill="#a7afb7" stroke="#000" stroke-width="8"/><rect x="830" y="360" width="210" height="50" fill="#959da6" stroke="#000" stroke-width="7"/><path d="M880 430 v540" stroke="#959da6" stroke-width="8"/></g>
+    <!-- стена с граффити между опорами -->
+    <rect x="230" y="520" width="620" height="480" fill="#b9b2a6" stroke="#000" stroke-width="7"/>
+    <text x="420" y="640" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="54" fill="#ff2da6" stroke="#000" stroke-width="3" transform="rotate(-6 420 640)">ПЕРЕКУП</text><text x="720" y="720" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="54" fill="#ffd23f" stroke="#000" stroke-width="3" transform="rotate(5 720 720)">2009</text><text x="540" y="860" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="54" fill="#2ec4b6" stroke="#000" stroke-width="3" transform="rotate(-3 540 860)">ГОРОД СПИТ</text>
+    <!-- фонари -->
+    <g><path d="M300 1000 V560 h50" stroke="#2b2f37" stroke-width="12" fill="none"/><path d="M330 560 h60 l-10 26 h-40 z" fill="#2b2f37"/><ellipse cx="360" cy="600" rx="26" ry="10" fill="#fff2a8" style="filter:drop-shadow(0 0 16px #ffe066)"/></g><g><path d="M700 1000 V560 h50" stroke="#2b2f37" stroke-width="12" fill="none"/><path d="M730 560 h60 l-10 26 h-40 z" fill="#2b2f37"/><ellipse cx="760" cy="600" rx="26" ry="10" fill="#fff2a8" style="filter:drop-shadow(0 0 16px #ffe066)"/></g>
+    <!-- асфальт, лужи, бордюр -->
+    <rect y="1000" width="1080" height="920" fill="#3d434b"/><path d="M0 1000 H1080" stroke="#000" stroke-width="8"/><rect y="1000" width="1080" height="40" fill="#9aa3ad"/>
+    <g stroke="#e8ecf0" stroke-width="10" stroke-dasharray="80 70"><path d="M0 1500 H1080"/></g>
+    <ellipse cx="260" cy="1260" rx="150" ry="24" fill="#7f95ad" opacity=".55"/><ellipse cx="820" cy="1340" rx="110" ry="18" fill="#7f95ad" opacity=".55"/><ellipse cx="520" cy="1700" rx="180" ry="26" fill="#7f95ad" opacity=".55"/>
+  </svg>

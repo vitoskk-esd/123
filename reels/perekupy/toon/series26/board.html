@@ -1,0 +1,98 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+#g [fill="#c4553f"]{fill:#3f7f5a}#g [fill="#e8c547"]{fill:#f28cb1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ», часть 3 «Конкурент». Все фоны новые (pochta, shaurma, laundry, sad, most), второстепенные герои новые
+// (конкурент Жора, дед Семёныч, Нина Петровна из СНТ, курьер Тимур). Жора берёт скоростью звонков; Толян — фильтром бота (~1 с) и проверкой на сайте Госавтоинспекции.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = "", CNTV = ""; const clock = (t) => (CLK = t, ""); const CAP = v => (CNTV = v, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const CAR = (img, l, t, w, z = 3, flip = false) => `<img class="el" src="../../kit/img/${img}" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${flip ? "transform:scaleX(-1)" : ""}">`;
+const PHONE = (l, t, inner, w = 520) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const BOT = (body) => `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div><div style="background:#1c1f26;border-radius:22px;padding:16px 20px;margin-top:10px;font-family:Onest;color:#fff;font-size:30px;line-height:1.45">${body}</div>`;
+const SCORE = (a, b) => `<div class="el" style="left:40px;top:${700 + 24}px;z-index:20;font-family:'JetBrains Mono';font-weight:800;font-size:38px;color:#fff;background:#151515;border:5px solid #ff2da6;border-radius:16px;padding:2px 16px;white-space:nowrap">ЖОРА ${a} : ${b} ТОЛЯН</div>`;
+const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
+const ZHORA = { jacket: "#1d1d1f", pants: "#2b2f37", cap: "#c0392b", mustache: true, chain: true, hair: "#1d1d1f", item: "phone", look: "grin" };
+const SEMEN = { coat: "#5b4a3a", pants: "#3b3f46", ushanka: true, beard: true, hair: "#d9d9d9", scarf: "#c0392b" };
+const TIMUR = { jacket: "#2ec4b6", pants: "#2b2f37", cap: "#3fae4f", hair: "#1d1d1f", item: "bag" };
+const NINA = "";
+const S = [
+ { h: "ТОЛЯН: СО СТА ТЫСЯЧ · 3", tc: "1/7 · 0:00–0:09", bg: "pochta", y: 700, els: () => CAP("78 000") + SCORE(1, 0)
+     + CAR("vaz2115/vaz2115.png", 330, 1130, 620) + ch("perekup", "zh", 520, 860, .8, 6, ZHORA) + ch("perekup", "se", 230, 880, .76, 5, SEMEN) + ch("tolyan", "t", -40, 900, .74, 6)
+     + bub("Опоздал, студент.<br><em>Машина моя.</em>", 520, 700) + lab("ЧАСТЬ 3 · КОНКУРЕНТ", 40, 1320, "#ff2da6", "#fff", 36, -3),
+   vo: "Лис: «Семьдесят восемь тысяч. Толян снова в деле — и у него появился конкурент». Жора: «Опоздал, студент. Машина моя».", who: "Лис + Жора",
+   mv: "<b>Новый фон — у отделения почты</b>, зима. <b>Новый герой — конкурент Жора</b> (кожанка, красная кепка, усы, цепь) уже жмёт руку <b>деду Семёнычу</b> (ушанка, борода) у ВАЗ-2115. Толян прибежал запыхавшись. Счёт «ЖОРА 1 : 0 ТОЛЯН»." },
+ { h: "КТО ТАКОЙ ЖОРА", tc: "2/7 · 0:09–0:19", bg: "shaurma", y: 700, els: () => CAP("78 000") + SCORE(3, 0)
+     + ch("perekup", "zh", 560, 860, .82, 6, ZHORA) + ch("tolyan", "t", 20, 900, .74, 6)
+     + [[600, 1210, -14], [700, 1250, 8], [810, 1200, -4]].map(([l, t, r]) => `<div class="el" style="left:${l}px;top:${t}px;width:90px;height:160px;z-index:8;background:#151515;border:6px solid #2a2d34;border-radius:16px;transform:rotate(${r}deg)"><div style="margin:10px;height:110px;background:#2e86de;border-radius:8px"></div></div>`).join("")
+     + bub("Ты ещё читаешь —<br><em>а я уже звоню.</em>", 560, 700),
+   vo: "Лис: «Жора — двадцать лет на рынке, три телефона и сорок чатов. Третья машина за неделю — опять его». Жора: «Ты ещё читаешь объявление — а я уже звоню».", who: "Лис + Жора",
+   mv: "<b>Новый фон — ночная шаурмичная «24»</b> (вертел, меню, неон). Жора у стойки с тремя телефонами, Толян грустно жуёт шаурму. Счёт растёт до 3 : 0." },
+ { h: "ФИЛЬТР НА НОЧЬ", tc: "3/7 · 0:19–0:30", bg: "laundry", y: 700, els: () => CAP("78 000") + clock("23:40") + ch("tolyan", "t", 620, 880, .8, 6)
+     + PHONE(30, 760, BOT(`<b>⚙️ Фильтр</b><br>🏙 Город: мой<br>💰 Бюджет: до 80 000 ₽<br>🔔 Новое объявление → сразу, ~1 с`), 560)
+     + bub("Посмотрим,<br><em>кто быстрее.</em>", 620, 720) + lab("БОТ «ПЕРЕХВАТ» — ССЫЛКА В ШАПКЕ", 40, 1330, "#ffd23f", "#151515", 28, -2),
+   vo: "Лис: «Толян не стал сидеть в сорока чатах. Настроил в боте город и бюджет до восьмидесяти тысяч — и лёг спать». Толян: «Посмотрим, кто быстрее».", who: "Лис + Толян",
+   mv: "<b>Новый фон — прачечная самообслуживания ночью.</b> Толян ждёт стирку, на телефоне — экран фильтра «Перехвата» (город, бюджет). <b>Короткий мид-CTA</b> плашкой внизу." },
+ { h: "5:47 · СНТ «РОМАШКА»", tc: "4/7 · 0:30–0:43", bg: "sad", y: 700, els: () => CAP("10 000 + 🚗") + clock("05:47") + SCORE(3, 1)
+     + CAR("vaz2109/vaz2109.png", 300, 1150, 640) + ch("galya", "g", 590, 870, .8, 5, undefined, NINA) + ch("tolyan", "t", 20, 900, .76, 6)
+     + PHONE(30, 1300, BOT(`<b style="color:#ff7a1a">🔥 −28% к рынку</b><br><b>ВАЗ-2109 · 75 000 ₽</b><br>⏱ 1 с · ✅ ограничений нет`).replace("font-size:30px", "font-size:24px"), 440)
+     + bub("Сынок, ты первый.<br><em>Остальные — с восьми.</em>", 520, 700),
+   vo: "Лис: «Пять сорок семь. Девятка за семьдесят пять — уведомление через секунду. Толян приехал первым и сразу проверил машину на сайте Госавтоинспекции: чисто». Нина Петровна: «Сынок, ты первый. Остальные звонят с восьми». Лис: «Сторговались на шестьдесят восемь».", who: "Лис + Нина Петровна",
+   mv: "<b>Новый фон — СНТ на рассвете</b> (домики, теплица, калитка № 47). <b>Новая героиня — Нина Петровна</b> у вишнёвой «девятки». Карточка бота + «✅ ограничений нет» (урок части 2). Капитал → 10 000 + 🚗." },
+ { h: "ЖОРА ОПОЗДАЛ", tc: "5/7 · 0:43–0:51", bg: "sad", y: 700, els: () => CAP("10 000 + 🚗") + clock("08:02") + SCORE(3, 1)
+     + CAR("w124/w124_34.png", 520, 1180, 560, 3) + ch("perekup", "zh", 640, 860, .8, 6, { ...ZHORA, look: "angry" }) + ch("galya", "g", 230, 880, .76, 5, undefined, NINA) + ch("tolyan", "t", -40, 900, .74, 6)
+     + bub("Мать, даю<br><em>восемьдесят!</em>", 640, 700) + lab("ПОЗДНО, МИЛОК", 220, 1320, "#4cd964", "#151515", 40, 3),
+   vo: "Жора: «Мать, даю восемьдесят!» Нина Петровна: «Поздно, милок. Уже продала». Лис: «Первый раз Жора приехал вторым».", who: "Жора + Нина Петровна + Лис",
+   mv: "Тот же СНТ, 8:02: в пыли подлетает чёрный «Мерседес» Жоры. Жора злой, Нина Петровна разводит руками, Толян уже с ключами. Счёт 3 : 1." },
+ { h: "ПОД МОСТОМ · ПРОДАЖА", tc: "6/7 · 0:51–1:02", bg: "most", y: 700, els: () => CAP("108 000") + CAR("vaz2109/vaz2109.png", 280, 1160, 640)
+     + ch("perekup", "ti", 600, 870, .78, 6, TIMUR) + ch("tolyan", "t", -20, 900, .76, 6) + CASH(420, 1460, 4)
+     + bub("Первая машина!<br><em>Проверю — и беру.</em>", 560, 700) + lab("+30 000 ₽", 60, 1330, "#4cd964", "#151515", 46, -3),
+   vo: "Лис: «Через четыре дня девятка ушла курьеру Тимуру за девяносто восемь». Тимур: «Первая машина! Проверю — и беру». Лис: «Проверил. Чисто. Капитал — сто восемь тысяч».", who: "Лис + Тимур",
+   mv: "<b>Новый фон — под путепроводом</b> (опоры, граффити, фонари, лужи). <b>Новый герой — курьер Тимур</b> (бирюзовая куртка, зелёная кепка, термосумка). Деньги в руки, капитал 108 000." },
+ { h: "КРЮЧОК + ФИНАЛ", tc: "7/7 · 1:02–1:10", bg: "most", y: 700, els: () => ""
+     + ch("perekup", "zh", 640, 860, .8, 6, ZHORA) + ch("tolyan", "t", -20, 900, .76, 6) + bub("Студент…<br><em>давай работать вместе?</em>", 520, 700)
+     + `<div class="el" style="left:60px;right:60px;top:1250px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:26px;color:#c0392b;margin-bottom:8px">ЧАСТЬ 4: ПАРТНЁР ИЛИ ЛОВУШКА?</div><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">новые объявления через ~1 с · город и бюджет</div></div>` + FOX(440, 1090, 160),
+   vo: "Жора: «Студент… давай работать вместе?» Лис: «Партнёр — или ловушка? Узнаем в четвёртой части».", who: "Жора + Лис",
+   mv: "Тот же мост: Жора сам пришёл к Толяну, протягивает руку. Крючок на часть 4 + одна финальная карточка с лисом." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CNTV) document.querySelector(".view").insertAdjacentHTML("beforeend", `<div class="cnt" style="top:auto;bottom:20px;left:auto;right:20px">💸 ${CNTV} ₽</div>`); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "zh", "se", "ti", "g"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
