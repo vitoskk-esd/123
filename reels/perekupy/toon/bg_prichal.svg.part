@@ -1,0 +1,18 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="prSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a6a"/><stop offset=".55" stop-color="#ffd2a1"/><stop offset="1" stop-color="#bfe0f5"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#prSky)"/><circle cx="760" cy="560" r="110" fill="#ffe07a" opacity=".9"/>
+    <!-- дальний берег -->
+    <path d="M0 640 q200 -50 400 -10 t400 -20 t280 10 V700 H0 Z" fill="#6f8f5a" stroke="#000" stroke-width="6"/>
+    <!-- река с бликами -->
+    <rect y="700" width="1080" height="300" fill="#5fa8d3"/>
+    <path d="M640 740 h220" stroke="#ffe7b0" stroke-width="6" opacity=".8"/><path d="M680 790 h160" stroke="#ffe7b0" stroke-width="6" opacity=".8"/><path d="M600 850 h260" stroke="#ffe7b0" stroke-width="6" opacity=".8"/><path d="M700 920 h140" stroke="#ffe7b0" stroke-width="6" opacity=".8"/>
+    <!-- лодки -->
+    <g><path d="M120 820 h160 l-30 40 h-100 z" fill="#c0392b" stroke="#000" stroke-width="6"/><path d="M200 820 v-90 l50 70 z" fill="#fff" stroke="#000" stroke-width="5"/></g><g><path d="M420 870 h160 l-30 40 h-100 z" fill="#2e86de" stroke="#000" stroke-width="6"/><path d="M500 870 v-90 l50 70 z" fill="#fff" stroke="#000" stroke-width="5"/></g>
+    <!-- мостки и фонарь -->
+    <path d="M600 1000 L1080 860 L1080 1000 Z" fill="#8a5a33" stroke="#000" stroke-width="7"/>
+    <path d="M640 989 v90" stroke="#6b4a2a" stroke-width="14"/><path d="M730 963 v90" stroke="#6b4a2a" stroke-width="14"/><path d="M820 936 v90" stroke="#6b4a2a" stroke-width="14"/><path d="M910 910 v90" stroke="#6b4a2a" stroke-width="14"/><path d="M1000 884 v90" stroke="#6b4a2a" stroke-width="14"/>
+    <g><path d="M560 1000 V620" stroke="#2b2f37" stroke-width="14"/><rect x="536" y="580" width="48" height="56" rx="8" fill="#fff2a8" stroke="#000" stroke-width="5"/></g>
+    <!-- набережная -->
+    <rect y="1000" width="1080" height="920" fill="#c9b8a0"/><path d="M0 1000 H1080" stroke="#000" stroke-width="7"/>
+    <g stroke="#b8a68c" stroke-width="5"><path d="M0 1100 H1080"/><path d="M0 1200 H1080"/><path d="M0 1300 H1080"/><path d="M0 1400 H1080"/><path d="M0 1500 H1080"/><path d="M0 1600 H1080"/><path d="M0 1700 H1080"/><path d="M0 1800 H1080"/><path d="M0 1900 H1080"/><path d="M0 1000 V1920"/><path d="M135 1000 V1920"/><path d="M270 1000 V1920"/><path d="M405 1000 V1920"/><path d="M540 1000 V1920"/><path d="M675 1000 V1920"/><path d="M810 1000 V1920"/><path d="M945 1000 V1920"/></g>
+  </svg>

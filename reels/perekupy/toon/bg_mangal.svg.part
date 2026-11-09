@@ -1,0 +1,18 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="mgSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb37a"/><stop offset="1" stop-color="#ffe2b8"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#mgSky)"/>
+    <!-- навес и вывеска -->
+    <g><path d="M40 360 H1040 L980 460 H100 Z" fill="#c0392b" stroke="#000" stroke-width="8"/><path d="M100 460 V1000 M980 460 V1000" stroke="#6b4a2a" stroke-width="22"/>
+      <rect x="300" y="200" width="480" height="140" rx="16" fill="#151515" stroke="#000" stroke-width="6"/><text x="540" y="295" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="66" fill="#ffd23f" style="filter:drop-shadow(0 0 10px #ff7a1a)">ШАШЛЫК</text></g>
+    <!-- мангал с дымом -->
+    <g><rect x="620" y="800" width="360" height="90" fill="#2b2f37" stroke="#000" stroke-width="7"/><path d="M640 890 v110 M960 890 v110" stroke="#000" stroke-width="10"/>
+      <path d="M640 790 h120" stroke="#9aa3ad" stroke-width="6"/><g><rect x="654" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/><rect x="680" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/><rect x="706" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/><rect x="732" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/></g><path d="M820 790 h120" stroke="#9aa3ad" stroke-width="6"/><g><rect x="834" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/><rect x="860" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/><rect x="886" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/><rect x="912" y="778" width="20" height="20" rx="5" fill="#a0522d" stroke="#000" stroke-width="3"/></g>
+      <rect x="630" y="810" width="340" height="20" fill="#ff7a1a" opacity=".7"/>
+      <circle cx="700" cy="700" r="40" fill="#e8e3dc" opacity="0.75"/><circle cx="750" cy="640" r="52" fill="#e8e3dc" opacity="0.63"/><circle cx="800" cy="580" r="64" fill="#e8e3dc" opacity="0.51"/><circle cx="850" cy="520" r="76" fill="#e8e3dc" opacity="0.39"/><circle cx="900" cy="460" r="88" fill="#e8e3dc" opacity="0.27"/></g>
+    <!-- пластиковые столы -->
+    <g><ellipse cx="260" cy="900" rx="110" ry="24" fill="#fff" stroke="#000" stroke-width="6"/><path d="M260 924 v76" stroke="#000" stroke-width="10"/><rect x="110" y="900" width="50" height="100" fill="#fff" stroke="#000" stroke-width="5"/></g>
+    <!-- обочина трассы -->
+    <rect y="1000" width="1080" height="920" fill="#a08a6a"/><path d="M0 1000 H1080" stroke="#000" stroke-width="7"/>
+    <rect y="1500" width="1080" height="420" fill="#4d535b"/><path d="M0 1500 H1080" stroke="#000" stroke-width="6"/>
+    <g stroke="#e8ecf0" stroke-width="10" stroke-dasharray="80 60"><path d="M0 1720 H1080"/></g>
+  </svg>

@@ -1,0 +1,102 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ», часть 6 «Первая машина за полмиллиона» (кредит как риск, владелец 09.11). Новые приёмы: ангел и чёрт на плечах,
+// счётчик процентов «−240 ₽/день», отрывной календарь + переписка с покупателями, поворот-отсылка (покупатель — Валерьич из части 5, «копил 30 лет»).
+// Функция бота: пометка «❗ кредит/залог» отсекает первую Камри. Фоны новые: balkon, stomat, mangal, prichal. Новый герой — стоматолог Станислав.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = "", CNTV = ""; const clock = (t) => (CLK = t, ""); const CAP = v => (CNTV = v, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const CAR = (img, l, t, w, z = 3, flip = false) => `<img class="el" src="../../kit/img/${img}" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${flip ? "transform:scaleX(-1)" : ""}">`;
+const PHONE = (l, t, inner, w = 520) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const BOT = (body) => `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div><div style="background:#1c1f26;border-radius:22px;padding:16px 20px;margin-top:10px;font-family:Onest;color:#fff;font-size:30px;line-height:1.45">${body}</div>`;
+const SCORE = (a, b) => `<div class="el" style="left:40px;top:${700 + 24}px;z-index:20;font-family:'JetBrains Mono';font-weight:800;font-size:38px;color:#fff;background:#151515;border:5px solid #ff2da6;border-radius:16px;padding:2px 16px;white-space:nowrap">ЖОРА ${a} : ${b} ТОЛЯН</div>`;
+const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
+const ZHORA = { jacket: "#1d1d1f", pants: "#2b2f37", cap: "#c0392b", mustache: true, chain: true, hair: "#1d1d1f", item: "phone", look: "grin" };
+const ALBUM = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">${[0, 1, 2, 3].map(k => `<div style="height:90px;border-radius:10px;background:${["#7fb2a0", "#9fc3b8", "#6f9f8f", "#8fbfae"][k]};position:relative">${k === 2 ? '<div style="position:absolute;left:30%;top:20%;width:46px;height:46px;border:6px solid #ff3b30;border-radius:50%"></div>' : ""}</div>`).join("")}</div>`;
+const MARKS = (l, t) => [[0, 0], [150, 6]].map(([dx, dy]) => `<div class="el" style="left:${l + dx}px;top:${t + dy}px;width:110px;height:60px;z-index:4;border:5px dashed #ff7a1a;background:rgba(255,255,255,.7);border-radius:6px"></div>`).join("");
+const STAS = { coat: "#f4f6f8", pants: "#2b2f37", glasses: true, hair: "#3a2d22" };
+const VALERICH = { coat: "#f2a0c0", pants: "#f2a0c0", hair: "#8a8a8a", mustache: true, item: "bag" };
+const DEBT = (days) => `<div class="el" style="left:40px;top:${700 + 24}px;z-index:20;font-family:'JetBrains Mono';font-weight:800;font-size:30px;color:#fff;background:#3a0d0d;border:5px solid #ff3b30;border-radius:16px;padding:4px 14px;white-space:nowrap;box-shadow:0 0 18px rgba(255,59,48,.5)">🏦 КРЕДИТ −290 000 · −240 ₽/день${days ? ` · ${days}` : ""}</div>`;
+const CAL = (day, l = 800, t = 780) => `<div class="el" style="left:${l}px;top:${t}px;width:220px;z-index:15;background:#fff;border:6px solid #151515;border-radius:14px;box-shadow:0 10px 0 #151515;text-align:center;overflow:hidden"><div style="background:#ff3b30;color:#fff;font-family:Unbounded;font-weight:900;font-size:24px;padding:6px">ДЕНЬ</div><div style="font-family:Unbounded;font-weight:900;font-size:96px;line-height:1.1;color:#151515">${day}</div></div>`;
+const MINI = (p, l, t, halo) => ch("tolyan", p, l, t, .3, 12) + (halo
+  ? `<div class="el" style="left:${l + 30}px;top:${t - 4}px;width:66px;height:18px;border:6px solid #ffd23f;border-radius:50%;z-index:13;box-shadow:0 0 14px #ffd23f"></div>`
+  : `<div class="el" style="left:${l + 26}px;top:${t + 2}px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:30px solid #ff3b30;z-index:13"></div><div class="el" style="left:${l + 76}px;top:${t + 2}px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:30px solid #ff3b30;z-index:13"></div>`);
+const CHAT = (msgs) => `<div style="font-family:Onest;font-weight:700;font-size:22px;color:#8b93a3">Сообщения · Toyota Camry</div>` + msgs.map(([m, me]) => `<div style="margin-top:10px;${me ? "margin-left:60px;background:#2e86de" : "margin-right:60px;background:#1c1f26"};border-radius:18px;padding:10px 14px;font-family:Onest;color:#fff;font-size:26px">${m}</div>`).join("");
+const S = [
+ { h: "ТОЛЯН: СО СТА ТЫСЯЧ · 6", tc: "1/7 · 0:00–0:12", bg: "balkon", y: 700, els: () => CAP("213 000") + clock("23:48") + ch("tolyan", "t", 600, 880, .8, 6)
+     + PHONE(30, 740, BOT(`<s style="color:#8b93a3">Toyota Camry 2008 · 480 000 ₽</s><br><b style="color:#ff3b30">❗ кредит/залог</b> — мимо`, 26) + BOT(`<b style="color:#ff7a1a">🔥 −22% к рынку</b><br><b>Toyota Camry 2008 · 500 000 ₽</b><br>⏱ 1 с · ✅ без ограничений`, 26).replace("ПЕРЕХВАТ · бот", ""), 560)
+     + lab("ЧАСТЬ 6 · ПЕРВАЯ МАШИНА ЗА ПОЛМИЛЛИОНА", 40, 1330, "#ff2da6", "#fff", 28, -3),
+   vo: "Лис: «Двести тринадцать тысяч. Толян захотел машину подороже. Бот прислал две Камри за пятьсот. Первая — с пометкой „кредит, залог“. Мимо. Вторая — чистая, минус двадцать два процента к рынку».", who: "Лис",
+   mv: "<b>Новый фон — балкон панельки ночью</b> (бельё на сушилке, банки, огни города). На телефоне две карточки бота: первую отсекает пометка «❗ кредит/залог» (реальная функция бота), вторая — чистая." },
+ { h: "АНГЕЛ И ЧЁРТ", tc: "2/7 · 0:12–0:21", bg: "balkon", y: 700, els: () => CAP("213 000") + ch("tolyan", "t", 330, 880, .8, 6, { look: "o" })
+     + MINI("ta", 290, 920, true) + MINI("td", 580, 920, false)
+     + bub("Не бери.<br><em>Это таймер.</em>", 40, 740) + bub("Бери, брат!<br><em>Раз живём!</em>", 640, 740),
+   vo: "Толян: «Не хватает двухсот девяноста…» Ангел: «Не бери. Это таймер». Чёрт: «Бери, брат! Раз живём!» Лис: «Толян взял кредит. Двести девяносто тысяч. И включился счётчик».", who: "Толян ×3 + Лис",
+   mv: "<b>Приём 1 — ангел и чёрт:</b> на плечах у Толяна два маленьких Толяна — с нимбом и с рожками — спорят, брать ли кредит. Новый для сериала приём." },
+ { h: "СТОМАТОЛОГИЯ · КАМРИ", tc: "3/7 · 0:21–0:30", bg: "stomat", y: 700, els: () => CAP("3 000 + 🚗") + DEBT("") + CAR("camry/camry.png", 280, 1150, 680)
+     + ch("perekup", "st", 620, 860, .8, 6, STAS) + ch("tolyan", "t", -20, 900, .76, 6)
+     + bub("Пятьсот — и она ваша.<br><em>Улыбайтесь, вам идёт.</em>", 420, 790),
+   vo: "Станислав: «Пятьсот — и она ваша. Улыбайтесь, вам идёт».", who: "Станислав",
+   mv: "<b>Новый фон — у стоматологии</b> (белый фасад, вывеска-зуб, клумба). <b>Новый герой — стоматолог Станислав</b> (белый халат, очки). <b>Приём 2 — счётчик кредита</b>: красная плашка «−290 000 · −240 ₽/день» висит до конца серии." },
+ { h: "ДНИ ИДУТ", tc: "4/7 · 0:30–0:40", bg: "balkon", y: 700, els: () => CAP("3 000 + 🚗") + DEBT("−2 160 ₽") + ch("tolyan", "t", 580, 900, .76, 6, { look: "o" }) + CAL(9, 40, 1180)
+     + PHONE(30, 790, CHAT([["Ещё актуально?", 0], ["Да!", 1], ["А за 300 отдадите?", 0], ["Я подумаю 🤔", 0]]), 520),
+   vo: "Лис: «Дорогую машину быстро не продашь. День первый… пятый… девятый. Проценты капают каждый день».", who: "Лис",
+   mv: "<b>Приём 3 — отрывной календарь + переписка:</b> листки календаря слетают (1 → 5 → 9), на телефоне покупатели «Ещё актуально?», «А за 300?», «Я подумаю». Счётчик процентов растёт." },
+ { h: "ШАШЛЫЧНАЯ У ТРАССЫ", tc: "5/7 · 0:40–0:47", bg: "mangal", y: 700, els: () => CAP("3 000 + 🚗") + DEBT("−2 640 ₽") + ch("perekup", "zh", 640, 860, .8, 6, ZHORA) + ch("tolyan", "t", -20, 900, .76, 6, { look: "o" }) + CAL(11, 40, 1180)
+     + bub("Ну что, студент,<br><em>банк уже звонил?</em>", 480, 790),
+   vo: "Жора: «Ну что, студент, банк уже звонил?»", who: "Жора",
+   mv: "<b>Новый фон — шашлычная у трассы</b> (мангал с дымом, навес, вывеска «ШАШЛЫК»). Жора подкалывает, Толян нервничает. День 11." },
+ { h: "ПРИЧАЛ · ПОКУПАТЕЛЬ", tc: "6/7 · 0:47–1:00", bg: "prichal", y: 700, els: () => CAP("3 000 + 🚗") + DEBT("−2 880 ₽") + CAR("camry/camry_side.png", 250, 1220, 720)
+     + ch("perekup", "vl", 620, 860, .8, 6, VALERICH) + ch("tolyan", "t", -20, 900, .76, 6) + CASH(400, 1440, 5) + CAL(12, 40, 1180)
+     + bub("Тридцать лет копил.<br><em>Наличкой можно?</em>", 440, 790),
+   vo: "Лис: «На двенадцатый день позвонил покупатель. Тот самый». Валерьич: «Тридцать лет на неё копил. Наличкой можно?» Толян: «Отец… вам — можно!»", who: "Лис + Валерьич + Толян",
+   mv: "<b>Новый фон — речной причал на закате</b> (мостки, лодки, фонарь). <b>Приём 4 — поворот-отсылка:</b> покупатель — Валерьич из части 5, тот, что с сорока квитанциями у банкомата, и он платит наличкой (как хотел Рустам)." },
+ { h: "КРЕДИТ ЗАКРЫТ + КРЮЧОК", tc: "7/7 · 1:00–1:12", bg: "prichal", y: 700, els: () => CAP("350 000") + ch("tolyan", "t", -20, 900, .76, 6)
+     + PHONE(560, 760, `<div style="font-family:Onest;color:#fff;font-size:32px;text-align:center;padding:18px 0"><div style="font-size:70px">✅</div><b>Кредит погашен</b><br><span style="color:#8b93a3;font-size:24px">день 12 · проценты 2 880 ₽</span></div>`, 460)
+     + lab("КРЕДИТ — ЭТО ТАЙМЕР", 330, 990, "#ff3b30", "#fff", 40, 3)
+     + `<div class="el" style="left:60px;right:60px;top:1250px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:24px;color:#c0392b;margin-bottom:8px">ЧАСТЬ 7: МАШИНА-ДВОЙНИК</div><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">пометки «кредит/залог» · ниже рынка · ~1 с</div></div>` + FOX(160, 1080, 150),
+   vo: "Лис: «Шестьсот сорок. Кредит закрыт в тот же день. Капитал — триста пятьдесят тысяч. Но запомни: кредит — это таймер. Толяну повезло. В седьмой части — машина-двойник. Подпишись, чтобы не пропустить».", who: "Лис",
+   mv: "Тот же причал: на телефоне «✅ Кредит погашен», капитал 350 000. Мораль «КРЕДИТ — ЭТО ТАЙМЕР» (без банков и ставок). Крючок на часть 7 + финальная карточка." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CNTV) document.querySelector(".view").insertAdjacentHTML("beforeend", `<div class="cnt" style="top:auto;bottom:20px;left:auto;right:20px">💸 ${CNTV} ₽</div>`); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "zh", "st", "vl", "ta", "td"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
