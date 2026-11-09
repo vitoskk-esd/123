@@ -108,10 +108,10 @@
   "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: flat, bored question. Line 2: deadpan, weary, slow and very clear: «У меня таких... Аркадиев» — pronounce «таких Аркадиев» distinctly, then a short pause, then «полрайона»."
  },
  "stas": {
-  "voice": "Sadachbia",
-  "tempo": 1.1,
-  "profile": "Stas — a slick, fast-talking Russian car-buying consultant in his late 20s; upbeat salesman energy, overconfident, a bit shady.",
-  "notes": "Line 1: confident pitch. Line 2: conspiratorial whisper-like but clear. Line 3: loud, enthusiastic lie. Line 4: cheeky. Line 5: caught, sheepish, slow."
+  "voice": "Schedar",
+  "tempo": 1.08,
+  "profile": "Stanislav — a polite, slightly smug Russian dentist in his 40s in a white coat, smooth professional voice with a dentist's joke.",
+  "notes": "One line: polite, smiling, a little smug; the second sentence is a playful dentist joke."
  },
  "gena": {
   "voice": "Zubenelgenubi",
@@ -232,5 +232,17 @@
   "tempo": 1.05,
   "profile": "Valerich — a grumpy Russian retiree in his 60s in a pink bathrobe paying forty utility bills at an ATM, unhurried and unimpressed.",
   "notes": "One line: slow, grumpy, totally unbothered."
+ },
+ "angel": {
+  "voice": "Algenib",
+  "tempo": 1.15,
+  "profile": "Tolyan's tiny inner angel — the same cocky Russian car flipper's voice, but suddenly calm, wise and gentle, like a conscience whispering into his ear.",
+  "notes": "One line: calm, soft, wise, a bit tired."
+ },
+ "devil": {
+  "voice": "Algenib",
+  "tempo": 1.2,
+  "profile": "Tolyan's tiny inner devil — the same cocky Russian car flipper's voice, but reckless, excited and tempting, adult street comedy.",
+  "notes": "One line: fast, excited, tempting, cheeky."
  }
 }
