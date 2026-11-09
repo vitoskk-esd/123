@@ -160,7 +160,7 @@ async def paylog(bot: Bot, ctx: Ctx, u, pay, until: float) -> None:
     who = html.escape(u["first_name"] or "без имени") + (f" (@{u['username']})" if u["username"] else "") + f" · id {u['id']}"
     word = "оплата" if n % 10 == 1 and n % 100 != 11 else "оплаты" if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14) else "оплат"
     text = T.PAYLOG.format(amount=f"{pay['amount']:,}".replace(",", " "), plan=plan.title if plan else pay["plan"], who=who,
-                           until=datetime.fromtimestamp(until).strftime("%d.%m.%Y"), src=source_name(u["source"]),
+                           until=datetime.fromtimestamp(until, MSK).strftime("%d.%m.%Y %H:%M МСК"), src=source_name(u["source"]),
                            kind=T.PAYLOG_FIRST if k <= 1 else T.PAYLOG_AGAIN.format(k=k), n=n, word=word, sum=f"{total:,}".replace(",", " "))
     targets = [ctx.paylog_chat] if ctx.paylog_chat else await admin_ids(ctx)
     for chat in targets:
@@ -189,7 +189,7 @@ async def panel_text(bot: Bot, ctx: Ctx) -> str:
     me = await bot.me()
     rub = lambda v: f"{v:,}".replace(",", " ")
     return T.PANEL.format(
-        date=datetime.fromtimestamp(now).strftime("%d.%m.%Y %H:%M"), total=p["total"],
+        date=datetime.fromtimestamp(now, MSK).strftime("%d.%m.%Y %H:%M МСК"), total=p["total"],
         blocked=f" (заблокировали бота: {p['blocked']})" if p["blocked"] else "",
         today=sum(r["n"] for r in p["today"]), today_src=fmt(by_source(p["today"])),
         week=sum(r["n"] for r in p["week"]), week_src=fmt(by_source(p["week"])),
@@ -528,7 +528,7 @@ async def base_buttons(cb: CallbackQuery, ctx: Ctx) -> None:
         return await cb.message.edit_text(text, reply_markup=markup)
     name = channel_name(ch)
     if action == "ch":
-        when = lambda ts: datetime.fromtimestamp(ts).strftime("%d.%m.%Y %H:%M") if ts else "—"
+        when = lambda ts: datetime.fromtimestamp(ts, MSK).strftime("%d.%m.%Y %H:%M МСК") if ts else "—"
         status = {"joined": "читаю", "queued": "в очереди на вступление", "awaiting": "ждём одобрения админа",
                   "failed": "не подключился"}.get(ch["status"], ch["status"])
         url = channel_url(ch)

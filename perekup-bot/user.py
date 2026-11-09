@@ -3,7 +3,7 @@ import html
 import logging
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from aiogram import Bot, F, Router
@@ -33,8 +33,12 @@ class S(StatesGroup):
     channel = State()
 
 
+MSK = timezone(timedelta(hours=3))     # Москва без перехода на летнее время; сервер (Amvera) живёт в UTC
+
+
 def fmt_date(ts: float) -> str:
-    return datetime.fromtimestamp(ts).strftime("%d.%m.%Y")
+    """Срок доступа людям — с часами и по Москве: пробный день длится 24 часа, одной даты мало (владелец 09.11)."""
+    return datetime.fromtimestamp(ts, MSK).strftime("%d.%m.%Y в %H:%M") + " МСК"
 
 
 # ---------- старт ----------

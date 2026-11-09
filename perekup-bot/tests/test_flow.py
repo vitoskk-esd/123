@@ -1712,3 +1712,12 @@ async def test_reader_album_forwards_whole_group(env):
     assert await r.album(-1001, 101) == [1000, 1001, 1002] and r.client.forwards == [[100, 101, 102]]
     assert await r.album(-1001, 101) == [1000, 1001, 1002] and len(r.client.forwards) == 1      # кэш
     assert await r.album(-1001, 103) == [1003]                                                  # без альбома — одно фото
+
+
+def test_fmt_date_moscow_time():
+    """Срок доступа — дата и время по Москве (UTC+3), а не только дата по часам сервера (владелец 09.11)."""
+    from datetime import datetime, timezone
+    from user import fmt_date
+    paid = datetime(2026, 11, 9, 15, 0, tzinfo=timezone.utc).timestamp()          # 18:00 МСК
+    assert fmt_date(paid + 86400) == "10.11.2026 в 18:00 МСК"                    # пробный день — ровно 24 часа
+    assert fmt_date(datetime(2026, 11, 9, 22, 30, tzinfo=timezone.utc).timestamp()) == "10.11.2026 в 01:30 МСК"   # по UTC ещё 9-е
