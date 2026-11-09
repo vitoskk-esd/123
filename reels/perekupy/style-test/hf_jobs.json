@@ -1,0 +1,41 @@
+{
+ "_": "Проба рисовки по референсу владельца (рилс ГЛЕБ ЛЫСКОВ, 09.11): кинематографичный аниме-полуреализм с нашими героями. 3 кадра 9:16, Qwen Image 3 edit.",
+ "style": "Cinematic anime illustration in the exact art style of the first reference image: painterly semi-realistic anime, highly detailed background, moody cinematic lighting, deep shadows, wet reflections, film color grading, subtle film grain. Vertical 9:16 frame, the character in the lower two thirds. Keep the character's face, clothes and colors recognisable from the second reference, but redraw him in this realistic anime style, not flat vector. No text, no letters, no numbers, no watermark, no weapons, no cigarettes.",
+ "style_vertical": "",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "images": [
+  {
+   "id": "s1",
+   "refs": [
+    "reels/perekupy/style-test/ref_style_garage.jpg",
+    "reels/perekupy/style-test/ref_tolyan.png"
+   ],
+   "prompt": "Tolyan from the second reference image: a cocky Russian used-car flipper in his 30s, short brown buzzcut, black rectangular sunglasses, stubble, one gold tooth in a sly grin, thin gold chain with a round gold pendant over a white T-shirt, open black jacket, dark navy track pants with white side stripes, a brown leather wallet in one hand, stands in a small Russian bakery at dawn — glass display case with buns and croissants, chalkboard menu without readable words, warm orange sunrise light through the window — and looks down at the glowing smartphone in his other hand; the phone light glows blue on his face and sunglasses; confident smirk. Medium shot from a slightly low angle."
+  },
+  {
+   "id": "s2",
+   "refs": [
+    "reels/perekupy/style-test/ref_style_night.jpg",
+    "reels/perekupy/style-test/ref_zhora.png"
+   ],
+   "prompt": "Zhora from the second reference image: a brash Russian car flipper in his 50s, red baseball cap, thick black mustache, gold chain, black leather jacket, dark trousers, a smartphone pressed to his ear, stands at night in heavy rain in a traffic jam on a wide city avenue next to his old beige Mercedes W124 sedan with the door open, shouting angrily into the phone; rows of cars with glowing red brake lights, a red traffic light, wet asphalt with neon reflections, raindrops in the headlights. Medium-wide shot."
+  },
+  {
+   "id": "s3",
+   "refs": [
+    "reels/perekupy/style-test/ref_style_night.jpg",
+    "reels/perekupy/style-test/ref_tolyan.png"
+   ],
+   "prompt": "Extreme close-up of the face of Tolyan from the second reference image — black sunglasses that reflect a glowing smartphone notification card with a small car icon (no readable writing), stubble, gold tooth in a sly grin; rainy neon city bokeh behind him, raindrops on the lenses. Very cinematic, shallow depth of field."
+  },
+  {
+   "id": "s1b",
+   "raw": true,
+   "refs": [
+    "reels/perekupy/style-test/hf/s1.png"
+   ],
+   "prompt": "Edit this exact image. The man must have exactly two hands: his right hand holds the smartphone, his left hand stays in his trouser pocket. Remove the extra third hand holding the brown wallet on the left, and remove the wallet; fill that area with the glass bakery display case with croissants behind him. Keep everything else exactly the same: face, sunglasses, clothes, light, colors, composition, style. No text."
+  }
+ ],
+ "clips": []
+}

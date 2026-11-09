@@ -1,0 +1,33 @@
+{
+ "_uploads": {
+  "reels/perekupy/style-test/ref_style_garage.jpg": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/cc8de56f-0892-4337-97d2-92c608ff375e.jpeg",
+  "reels/perekupy/style-test/ref_tolyan.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/8b3e02be-e281-4405-a0a0-948b20265d29.png",
+  "reels/perekupy/style-test/ref_style_night.jpg": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/0d912a2c-86fd-41f5-ad24-a4eebf2977bf.jpeg",
+  "reels/perekupy/style-test/ref_zhora.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/fa857b8e-c94e-427b-a2d1-e641cb2509e5.png",
+  "reels/perekupy/style-test/hf/s1.png": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/415fd34f-8cea-4bfe-885f-cb5abc0104b6.png"
+ },
+ "s1": {
+  "request_id": "01a1c175-aecf-76d2-9ed1-1ab1cd21cb94",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 65
+ },
+ "s2": {
+  "request_id": "01a1c176-b309-75d4-8f1c-917c9bbd81c2",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 69
+ },
+ "s3": {
+  "request_id": "01a1c177-c146-7863-bda4-6feb4df75a56",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 86
+ },
+ "s1b": {
+  "request_id": "01a1c179-9f51-759e-ac3c-189e53537ef7",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 65
+ }
+}
