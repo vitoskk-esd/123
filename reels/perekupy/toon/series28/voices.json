@@ -220,5 +220,17 @@
   "tempo": 1.1,
   "profile": "Artur — an energetic Russian fitness trainer in his 30s, upbeat, loud, confident.",
   "notes": "One line: happy, decisive."
+ },
+ "rustam": {
+  "voice": "Rasalgethi",
+  "tempo": 1.08,
+  "profile": "Rustam — a stubborn, old-school Russian man in his 40s moving house, distrusts banks, calm and firm.",
+  "notes": "One line: firm, unhurried, a bit proud of being old-school."
+ },
+ "valerich": {
+  "voice": "Algieba",
+  "tempo": 1.05,
+  "profile": "Valerich — a grumpy Russian retiree in his 60s in a pink bathrobe paying forty utility bills at an ATM, unhurried and unimpressed.",
+  "notes": "One line: slow, grumpy, totally unbothered."
  }
 }
