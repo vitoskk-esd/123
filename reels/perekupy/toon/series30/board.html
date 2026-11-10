@@ -45,6 +45,7 @@ const SCORE = (a, b) => `<div class="el" style="left:40px;top:${700 + 24}px;z-in
 const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
 const ALBUM = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">${[0, 1, 2, 3].map(k => `<div style="height:90px;border-radius:10px;background:${["#7fb2a0", "#9fc3b8", "#6f9f8f", "#8fbfae"][k]};position:relative">${k === 2 ? '<div style="position:absolute;left:30%;top:20%;width:46px;height:46px;border:6px solid #ff3b30;border-radius:50%"></div>' : ""}</div>`).join("")}</div>`;
 const MARKS = (l, t) => [[0, 0], [150, 6]].map(([dx, dy]) => `<div class="el" style="left:${l + dx}px;top:${t + dy}px;width:110px;height:60px;z-index:4;border:5px dashed #ff7a1a;background:rgba(255,255,255,.7);border-radius:6px"></div>`).join("");
+const SON = { jacket: "#ff7a1a", pants: "#2b2f37", hair: "#5b4636", look: "o" };
 const ARNOLD = { coat: "#c9a06b", pants: "#2b2f37", shades: true, hair: "#8a6d48", item: "phone" };
 const SUIT = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:150px;height:200px;z-index:7;background:#c0392b;border:7px solid #151515;border-radius:22px;box-shadow:inset 0 -18px 0 rgba(0,0,0,.18)"><div style="position:absolute;left:45px;top:-44px;width:46px;height:44px;border:7px solid #151515;border-bottom:none;border-radius:12px 12px 0 0"></div></div>`;
 const LENS = (l, t, inner, ring = "#ffd23f") => `<div class="el" style="left:${l}px;top:${t}px;width:400px;height:400px;z-index:14;border-radius:50%;border:12px solid ${ring};box-shadow:0 0 0 8px #151515, 0 18px 0 8px rgba(0,0,0,.35);overflow:hidden;background:#2b2f37">${inner}</div>`;
@@ -54,41 +55,55 @@ const MAGNET = `<div style="position:absolute;inset:0;background:linear-gradient
 const TIMER = (v) => `<div class="el" style="left:700px;top:${700 + 20}px;z-index:20;font-family:'JetBrains Mono';font-weight:800;font-size:64px;color:#ff3b30;background:#0d0e12;border:6px solid #ff3b30;border-radius:18px;padding:0 18px;box-shadow:0 0 24px rgba(255,59,48,.6)">⏱ ${v}</div>`;
 const CHECK = (items, t = 1300) => `<div class="el" style="left:40px;top:${t}px;z-index:20;background:#0d0e12;border:5px solid #fff;border-radius:18px;padding:10px 16px;font-family:Onest;font-weight:800;font-size:26px;color:#fff;line-height:1.5">${items.map(([ok, t]) => `${ok ? "✅" : "❗"} ${t}`).join("<br>")}</div>`;
 const S = [
- { h: "60 СЕКУНД НА ОСМОТР", tc: "1/7 · 0:00–0:07", bg: "aeroport", y: 700, els: () => TIMER("0:60") + CAR("bmw/bmw_34.png", 300, 1190, 640)
+ { h: "ДОМ ВИКИ · ВЕЧЕР", tc: "1/10 · 0:00–0:09", bg: "gostinaya", y: 520, els: () => ch("perekup", "sn", 640, 880, .76, 6, SON) + ch("vika", "v", -10, 880, .8, 6)
+     + bub("Мам, я опять полтора часа<br><em>на автобусе…</em>", 380, 640) + lab("ПОЛГОДА ПОИСКОВ", 40, 1180, "#ff2da6", "#fff", 40, -3),
+   vo: "Даня: «Мам, я опять полтора часа на автобусе…» Лис: «Вика полгода искала сыну первую машину. Каждый вечер — сотни объявлений. А хорошие уходят за минуты».", who: "Даня + Лис",
+   mv: "<b>Новое начало (владелец 10.11).</b> <b>Новый фон — гостиная вечером</b> (диван, торшер, телевизор, окно с ночным городом, без ковра). <b>Новый герой — сын Даня</b> (оранжевая толстовка), устал от автобусов. Вика с ноутбуком/телефоном." },
+ { h: "ВИКА СТАВИТ БОТ", tc: "2/10 · 0:09–0:17", bg: "gostinaya", y: 520, els: () => ch("vika", "v", -10, 880, .8, 6)
+     + PHONE(540, 800, BOT(`<b>⚙️ Фильтр</b><br>🚗 BMW E30 · до 1 000 000 ₽<br>🏙 Город: мой<br>🔔 Новое объявление → сразу`, 26), 500)
+     + bub("Всё.<br><em>Ставлю «Перехват».</em>", 30, 620),
+   vo: "Вика: «Всё. Ставлю „Перехват“». Лис: «Через два дня, в шесть утра, — уведомление через секунду после публикации».", who: "Вика + Лис",
+   mv: "Вика настраивает фильтр в боте (марка, бюджет, город). Бот — как способ найти машину (приём конверсии этой серии). Даня — мечтает о BMW E30." },
+ { h: "6:04 · УВЕДОМЛЕНИЕ", tc: "3/10 · 0:17–0:22", bg: "gostinaya", y: 520, els: () => clock("06:04") + ch("vika", "v", -10, 880, .8, 6)
+     + PHONE(520, 640, BOT(`<b style="color:#ff7a1a">🔥 −3% к рынку</b><br><b>BMW E30 1990 · 950 000 ₽</b><br>📍 парковка аэропорта · «улетаю, срочно»<br>⏱ 1 с после публикации`, 28), 540)
+     + lab("АЭРОПОРТ · СРОЧНО", 40, 1180, "#ffd23f", "#151515", 40, -3),
+   vo: "Лис: «BMW E30, продавец на парковке аэропорта — улетает и продаёт срочно».", who: "Лис",
+   mv: "Та же гостиная на рассвете: карточка бота — BMW E30, «улетаю, срочно». Вика срывается в аэропорт." },
+ { h: "60 СЕКУНД НА ОСМОТР", tc: "4/10 · 0:00–0:07", bg: "aeroport", y: 700, els: () => TIMER("0:60") + CAR("bmw/bmw_34.png", 300, 1190, 640)
      + ch("perekup", "ar", 640, 860, .8, 6, ARNOLD) + SUIT(900, 1330) + ch("vika", "v", -10, 880, .8, 6)
      + bub("У меня самолёт!<br><em>Минута — и я уехал.</em>", 420, 790) + lab("ОСМОТР ЗА 60 СЕКУНД", 40, 1330, "#ff2da6", "#fff", 40, -3),
    vo: "Арнольд: «У меня самолёт! Минута — и я уехал». Лис: «У Вики шестьдесят секунд. Время пошло».", who: "Арнольд + Лис",
    mv: "<b>Отдельная серия, не про Толяна.</b> <b>Новый фон — парковка у терминала аэропорта</b> (стекло, вывеска, табло вылетов, самолёт, тележки). <b>Новый герой — Арнольд</b> (бежевый плащ, очки, чемодан), торопится на рейс. Вика — из сериала. <b>Приём 1 — таймер ⏱ 0:60</b> тикает весь ролик." },
- { h: "ШИНЫ", tc: "2/7 · 0:07–0:14", bg: "aeroport", y: 700, els: () => TIMER("0:51") + CHECK([[0, "шины 2019"]]) + CAR("bmw/bmw_34.png", 300, 1190, 640)
+ { h: "ШИНЫ", tc: "5/10 · 0:07–0:14", bg: "aeroport", y: 700, els: () => TIMER("0:51") + CHECK([[0, "шины 2019"]]) + CAR("bmw/bmw_34.png", 300, 1190, 640)
      + ch("vika", "v", -10, 880, .8, 6) + LENS(600, 860, TIRE) + bub("Шины 2019 года.<br><em>Минус двадцать.</em>", 40, 780),
    vo: "Вика: «Шины девятнадцатого года. Минус двадцать».", who: "Вика",
    mv: "<b>Приём 2 — «лупа» крупного плана:</b> круглая вставка с боковиной шины «DOT 2219». В чек-листе появляется первый пункт." },
- { h: "VIN", tc: "3/7 · 0:14–0:21", bg: "aeroport", y: 700, els: () => TIMER("0:42") + CHECK([[0, "шины 2019"], [1, "VIN = СТС"]]) + CAR("bmw/bmw_34.png", 300, 1190, 640)
+ { h: "VIN", tc: "6/10 · 0:14–0:21", bg: "aeroport", y: 700, els: () => TIMER("0:42") + CHECK([[0, "шины 2019"], [1, "VIN = СТС"]]) + CAR("bmw/bmw_34.png", 300, 1190, 640)
      + ch("perekup", "ar", 640, 860, .8, 6, ARNOLD) + ch("vika", "v", -10, 880, .8, 6) + LENS(330, 1040, VIN, "#4cd964").replace("width:400px;height:400px", "width:340px;height:340px")
      + bub("Сорок секунд!", 620, 800),
    vo: "Арнольд: «Сорок секунд!» Вика: «VIN совпадает. Дальше».", who: "Арнольд + Вика",
    mv: "Лупа на табличке VIN и СТС — совпадает ✅. Арнольд стучит по часам." },
- { h: "МАГНИТ", tc: "4/7 · 0:21–0:30", bg: "aeroport", y: 700, els: () => TIMER("0:31") + CHECK([[0, "шины 2019"], [1, "VIN = СТС"], [0, "крыло в шпаклёвке"]]) + CAR("bmw/bmw_34.png", 300, 1190, 640)
+ { h: "МАГНИТ", tc: "7/10 · 0:21–0:30", bg: "aeroport", y: 700, els: () => TIMER("0:31") + CHECK([[0, "шины 2019"], [1, "VIN = СТС"], [0, "крыло в шпаклёвке"]]) + CAR("bmw/bmw_34.png", 300, 1190, 640)
      + ch("vika", "v", -10, 880, .8, 6) + LENS(600, 860, MAGNET, "#ff3b30") + bub("Магнит не держится.<br><em>Крыло крашеное.</em>", 40, 780),
    vo: "Вика: «Магнит не держится. Крыло крашеное — и не раз».", who: "Вика",
    mv: "Лупа: магнит соскальзывает с крыла — под краской шпаклёвка. Третий пункт чек-листа — ❗." },
- { h: "ТОРГ · БОТ В КАРМАНЕ", tc: "5/7 · 0:30–0:42", bg: "aeroport", y: 700, els: () => TIMER("0:18") + CAR("bmw/bmw_34.png", 300, 1190, 640)
+ { h: "ТОРГ · БОТ В КАРМАНЕ", tc: "8/10 · 0:30–0:42", bg: "aeroport", y: 700, els: () => TIMER("0:18") + CAR("bmw/bmw_34.png", 300, 1190, 640)
      + ch("perekup", "ar", 640, 860, .8, 6, { ...ARNOLD, look: "angry" }) + ch("vika", "v", -10, 880, .8, 6)
      + PHONE(30, 1190, BOT(`<b>BMW E30 1990 · 950 000 ₽</b><br>📊 рынок ≈ 980 000 ₽ (41 объявл.)`, 26), 520)
      + bub("С крылом и шинами —<br><em>восемьсот девяносто.</em>", 40, 760),
    vo: "Лис: «Восемнадцать секунд. Вика открывает бота». Вика: «Рынок — девятьсот восемьдесят. С крылом и шинами — восемьсот девяносто». Арнольд: «Да вы что?!»", who: "Лис + Вика + Арнольд",
    mv: "<b>Бот — рычаг торга:</b> в карточке «Перехвата» оценка рынка по похожим объявлениям (реальная функция PRO). Вика называет цену с учётом найденного." },
- { h: "ТАБЛО", tc: "6/7 · 0:42–0:54", bg: "aeroport", y: 700, els: () => TIMER("0:03") + CAR("bmw/bmw_34.png", 300, 1190, 640)
+ { h: "ТАБЛО", tc: "9/10 · 0:42–0:54", bg: "aeroport", y: 700, els: () => TIMER("0:03") + CAR("bmw/bmw_34.png", 300, 1190, 640)
      + ch("perekup", "ar", 640, 860, .8, 6, { ...ARNOLD, look: "o" }) + ch("vika", "v", -10, 880, .8, 6)
      + `<div class="el" style="left:60px;right:340px;top:760px;z-index:14;background:#0d0e12;border:8px solid #151515;outline:5px solid #3a3d46;border-radius:20px;padding:16px 22px;font-family:'JetBrains Mono';font-weight:800;font-size:40px;color:#ffd23f;box-shadow:0 14px 0 #151515">SU 1402 СОЧИ<br><span style="color:#ff3b30">ЗАДЕРЖАН · +3 ЧАСА</span></div>`
      + bub("…Ладно. Может,<br><em>ещё поторгуемся?</em>", 520, 920),
    vo: "Лис: «Три секунды… И тут табло». Арнольд: «…Ладно. Может, ещё поторгуемся?» Вика: «Восемьсот девяносто. По рукам».", who: "Лис + Арнольд + Вика",
    mv: "<b>Приём 3 — поворот через табло:</b> строка рейса перещёлкивается на «ЗАДЕРЖАН · +3 ЧАСА», таймер встаёт на 0:03. Спешка Арнольда кончилась — а цена уже названа." },
- { h: "СДЕЛКА + ФИНАЛ", tc: "7/7 · 0:54–1:02", bg: "aeroport", y: 700, els: () => TIMER("✅ СДЕЛКА").replace("color:#ff3b30", "color:#4cd964").replace("border:6px solid #ff3b30", "border:6px solid #4cd964") + ch("vika", "v", -10, 880, .8, 6) + bub("Восемьсот девяносто.<br><em>По рукам.</em>", 40, 760)
-     + lab("−60 000 ₽ ЗА 60 СЕКУНД", 300, 1000, "#4cd964", "#151515", 40, 3)
-     + `<div class="el" style="left:60px;right:60px;top:1250px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">рынок по похожим объявлениям · ~1 с</div></div>` + FOX(440, 1090, 160),
-   vo: "Лис: «Шестьдесят секунд, магнит и бот — минус шестьдесят тысяч. Подпишись, чтобы не пропустить».", who: "Лис",
-   mv: "Вика: «Восемьсот девяносто. По рукам». Таймер становится зелёным «✅ СДЕЛКА», плашка «−60 000 ₽ за 60 секунд», финальная карточка с лисом (голос не читает текст плашки)." },
+ { h: "СДЕЛКА + КЛЮЧИ ДАНЕ", tc: "10/10 · 0:54–1:02", bg: "aeroport", y: 700, els: () => TIMER("✅ СДЕЛКА").replace("color:#ff3b30", "color:#4cd964").replace("border:6px solid #ff3b30", "border:6px solid #4cd964") + ch("vika", "v", -10, 880, .8, 6) + ch("perekup", "sn", 660, 880, .76, 6, { ...SON, look: "grin" }) + bub("Мам…<br><em>это E30?!</em>", 440, 830)
+     + lab("−60 000 ₽ ЗА 60 СЕКУНД", 40, 1160, "#4cd964", "#151515", 40, 3)
+     + `<div class="el" style="left:60px;right:60px;top:1250px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">рынок по похожим объявлениям · ~1 с</div></div>` + FOX(880, 1060, 150),
+   vo: "Вика: «Восемьсот девяносто. По рукам». Даня: «Мам… это E30?!» Лис: «Полгода поисков, шестьдесят секунд осмотра — и минус шестьдесят тысяч. Подпишись, чтобы не пропустить».", who: "Вика + Даня + Лис",
+   mv: "Вика: «По рукам». К машине подбегает Даня — он приехал встретить маму (на автобусе): «Мам… это E30?!» Таймер становится зелёным «✅ СДЕЛКА», плашка «−60 000 ₽ за 60 секунд», финальная карточка с лисом (голос не читает текст плашки)." },
 ];
 
 const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
@@ -97,6 +112,6 @@ const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.inn
 document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
 document.getElementById("mv").innerHTML = sc.mv;
 const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
-["ar", "v"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+["ar", "v", "sn"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
 window.READY = true;
 </script></body></html>
