@@ -22,7 +22,7 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateNotifySettingsRequest, UpdateStatusRequest
 from telethon.tl.functions.folders import EditPeerFoldersRequest
 from telethon.tl.functions.channels import (CreateChannelRequest, EditAdminRequest, GetChannelRecommendationsRequest,
-                                            JoinChannelRequest)
+                                            GetFullChannelRequest, JoinChannelRequest)
 from telethon.tl.types import (ChatAdminRights, InputFolderPeer, InputNotifyPeer, InputPeerChannel,
                                InputPeerNotifySettings)
 from telethon.tl.functions.messages import CheckChatInviteRequest, ExportChatInviteRequest, ImportChatInviteRequest
@@ -68,6 +68,7 @@ class Reader:
         self.peers: dict[int, object] = {}                     # канал → InputPeer для опроса
         self.last: dict[int, int] = {}                         # канал → id последнего поста, который видели
         self.albums: dict[tuple[int, int], list[int]] = {}     # (канал, пост) → id фото альбома в буфере
+        self.about: dict[int, tuple[float, str]] = {}           # канал → (когда, описание + закреп) для контактов
 
     @property
     def online(self) -> bool:
@@ -188,6 +189,29 @@ class Reader:
             self.albums.pop(next(iter(self.albums)))
         return ids
 
+    @staticmethod
+    def extras(m) -> str:
+        """Ссылки, которых не видно в тексте поста: скрытые ссылки («Написать» → t.me/…) и URL-кнопки под постом."""
+        urls = [getattr(e, "url", None) for e in (getattr(m, "entities", None) or [])]
+        for row in getattr(getattr(m, "reply_markup", None), "rows", None) or []:
+            urls += [getattr(b, "url", None) for b in getattr(row, "buttons", []) or []]
+        return " ".join(u for u in urls if u)
+
+    async def channel_about(self, chat_id: int) -> str:
+        """Описание канала + закреплённое сообщение (текст и ссылки) — там контакты, когда в постах их нет. Кэш на 6 часов."""
+        hit = self.about.get(chat_id)
+        if hit and time.time() - hit[0] < 6 * 3600:
+            return hit[1]
+        peer = await self._peer(chat_id)
+        full = (await self.client(GetFullChannelRequest(peer))).full_chat
+        text = full.about or ""
+        if getattr(full, "pinned_msg_id", None):
+            pin = await self.client.get_messages(peer, ids=full.pinned_msg_id)
+            if pin:
+                text += "\n" + (pin.message or "") + " " + self.extras(pin)
+        self.about[chat_id] = (time.time(), text)
+        return text
+
     def _take(self, chat_id: int, m, peer_of) -> None:
         """Взять пост в работу — один раз, каким бы путём он ни пришёл первым."""
         key = (chat_id, m.id)
@@ -201,7 +225,8 @@ class Reader:
         if not m.message:                                       # фото альбома без подписи — пропускаем
             return
         photo = self._photo(peer_of, m.id) if m.photo else None
-        raw = RawPost(chat_id, m.id, m.message, m.date.timestamp(), photo, recv=time.time())
+        raw = RawPost(chat_id, m.id, m.message, m.date.timestamp(), photo, recv=time.time(), extra=self.extras(m),
+                      about=lambda c=chat_id: self.channel_about(c))
         task = asyncio.create_task(self._process(raw))
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
@@ -258,7 +283,8 @@ class Reader:
         if not m.message or e.chat_id not in self.ctx.channels or not await self.ctx.db.is_teaser(e.chat_id, m.id):
             return
         photo = self._photo(e.get_input_chat, m.id) if m.photo else None
-        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, time.time(), photo, recv=time.time())))
+        task = asyncio.create_task(self._process(RawPost(e.chat_id, m.id, m.message, time.time(), photo, recv=time.time(), extra=self.extras(m),
+                                                         about=lambda c=e.chat_id: self.channel_about(c))))
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
 

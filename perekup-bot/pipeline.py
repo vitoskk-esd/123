@@ -50,6 +50,8 @@ class RawPost:
     date: float                  # время публикации (unix)
     photo: Callable[[], Awaitable[int | None]] | None = None   # переслать фото в буфер → id сообщения там
     recv: float | None = None    # когда пост дошёл до бота — разница с date = задержка Telegram
+    extra: str = ""              # ссылки, которых нет в тексте: кнопки под постом, скрытые ссылки «Написать» (там часто контакт продавца)
+    about: Callable[[], Awaitable[str]] | None = None   # описание + закреп канала — контакты, если в посте их нет (закрытые каналы)
 
 
 @dataclass
@@ -193,7 +195,7 @@ def wait_text(sec: int) -> str:
 
 
 def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: int, limit: int = 4096,
-              plan: plans.Plan = plans.FREE) -> str:
+              plan: plans.Plan = plans.FREE, contact: tuple[list[str], bool] | None = None) -> str:
     L, d = r.listing, ctx.dict
     lines = []
     if plan.market and r.discount is not None and r.discount >= SHOW_DISCOUNT:
@@ -221,8 +223,9 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
         lines.append("⚡ " + " · ".join(good))
     if bad:
         lines.append("❗ " + " · ".join(bad))
-    if found := contacts(L.text, channel):
-        lines.append(T.CARD_CONTACTS.format(items=" · ".join(html.escape(c) for c in found)))
+    found, of_channel = contact if contact is not None else (contacts(L.text, channel), False)
+    if found:
+        lines.append((T.CARD_CONTACTS_CHANNEL if of_channel else T.CARD_CONTACTS).format(items=" · ".join(html.escape(c) for c in found)))
     name = channel_name(channel)
     lines.append(T.CARD_SOURCE.format(channel=html.escape(name), latency=seconds(latency_ms)))
     if is_private(channel):
@@ -386,6 +389,13 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
 
     url = post_url(channel, raw.msg_id)
     private, join = is_private(channel), join_url(channel)
+    # контакты продавца: текст поста + кнопки/скрытые ссылки; нет — из описания и закрепа канала (в закрытых каналах контакт обычно там)
+    contact = (contacts(L.text + " " + raw.extra, channel), False)
+    if not contact[0] and raw.about:
+        try:
+            contact = (contacts(await asyncio.wait_for(raw.about(), 2.0), channel), True)
+        except Exception as e:
+            log.info("описание канала не прочитали: %s", e)
     album = f"{raw.chat_id}:{raw.msg_id}" if private and raw.photo else None
     preview = LinkPreviewOptions(url=url, prefer_small_media=True) if url else LinkPreviewOptions(is_disabled=True)
     photo_id = None
@@ -399,9 +409,9 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     def message(uid: int, fid: int, ftext: str, plan: plans.Plan):
         latency = int((time.time() - raw.date) * 1000)
         if photo_id:
-            caption = card_text(ctx, r, channel, ftext, latency, CAPTION_MAX, plan)
+            caption = card_text(ctx, r, channel, ftext, latency, CAPTION_MAX, plan, contact)
             return lambda: bot.copy_message(uid, ctx.buffer_chat, photo_id, caption=caption, reply_markup=K.card(url, fid, private, join, album))
-        text = card_text(ctx, r, channel, ftext, latency, plan=plan)
+        text = card_text(ctx, r, channel, ftext, latency, plan=plan, contact=contact)
         return lambda: bot.send_message(uid, text, reply_markup=K.card(url, fid, private, join, album), link_preview_options=preview)
 
     async def send_card(uid: int, fid: int, ftext: str, plan: plans.Plan, out: list, prio: int = 0):

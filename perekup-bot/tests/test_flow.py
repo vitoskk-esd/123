@@ -1747,3 +1747,34 @@ async def test_contacts_survive_long_caption(env):
     import re
     visible = re.sub(r"<[^>]+>", "", copy.caption)
     assert len(visible) <= 1024 and "📞 Связь: +7 999 765-43-21 · @camry_owner" in visible
+
+
+async def test_contacts_from_buttons_and_channel_info(env):
+    """Контакта в тексте нет: берём из кнопок/скрытых ссылок поста; нет и там — из описания и закрепа канала (закрытые каналы, владелец 10.11)."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "камри до 1 млн")
+    # кнопка «Написать менеджеру» под постом
+    raw = RawPost(CH1, next(ids), "Toyota Camry 2012, 900 000 ₽, пробег 180 тыс", time.time() - 1.5, extra="https://t.me/manager_ivan")
+    assert (await process(bot, ctx, raw)).sent == [USER]
+    assert "📞 <b>Связь:</b> @manager_ivan" in s.texts(USER)[-1]
+    # в посте пусто — контакты канала
+    calls = []
+
+    async def about():
+        calls.append(1)
+        return "Авто под заказ. По всем вопросам: +7 (900) 111-22-33, WhatsApp wa.me/79001112233"
+    raw = RawPost(CH1, next(ids), "Toyota Camry 2013, 950 000 ₽, пробег 150 тыс", time.time() - 1.5, about=about)
+    assert (await process(bot, ctx, raw)).sent == [USER]
+    assert "📞 <b>Связь (контакты канала):</b> +7 900 111-22-33 · WhatsApp +79001112233" in s.texts(USER)[-1] and calls == [1]
+    # контакт в тексте есть — описание канала не трогаем
+    raw = RawPost(CH1, next(ids), "Toyota Camry 2014, 990 000 ₽, звоните 89991234567", time.time() - 1.5, about=about)
+    assert (await process(bot, ctx, raw)).sent == [USER]
+    assert "📞 <b>Связь:</b> +7 999 123-45-67" in s.texts(USER)[-1] and calls == [1]
+
+
+def test_reader_extras_reads_buttons_and_hidden_links():
+    from types import SimpleNamespace as NS
+    from userbot import Reader
+    m = NS(entities=[NS(url="https://t.me/seller_pro"), NS()], reply_markup=NS(rows=[NS(buttons=[NS(url="https://wa.me/79161234567"), NS(text="Подробнее")])]))
+    assert Reader.extras(m) == "https://t.me/seller_pro https://wa.me/79161234567"
+    assert Reader.extras(NS(entities=None, reply_markup=None)) == ""
