@@ -1721,3 +1721,29 @@ def test_fmt_date_moscow_time():
     paid = datetime(2026, 11, 9, 15, 0, tzinfo=timezone.utc).timestamp()          # 18:00 МСК
     assert fmt_date(paid + 86400) == "10.11.2026 в 18:00 МСК"                    # пробный день — ровно 24 часа
     assert fmt_date(datetime(2026, 11, 9, 22, 30, tzinfo=timezone.utc).timestamp()) == "10.11.2026 в 01:30 МСК"   # по UTC ещё 9-е
+
+
+def test_contacts_from_post_text():
+    """Контакты продавца из текста: телефоны в любом виде → +7 999 123-45-67, WhatsApp, @ники и t.me/ники; без @канала и ботов."""
+    from pipeline import contacts
+    t = ("Продам. Звонить 8 (999) 123-45-67 или +7 912 000 11 22, WhatsApp wa.me/79161234567. Пишите @seller_msk или https://t.me/manager_ivan. "
+         "Подписывайтесь @avto_msk, бот @perekhvat_bot, VIN XTA21099012345678, цена 145.000₽")
+    assert contacts(t, {"username": "avto_msk"}) == ["+7 999 123-45-67", "+7 912 000-11-22", "WhatsApp +79161234567", "@seller_msk"]
+    assert contacts("звоните 89991234567 и пишите t.me/manager_ivan", None) == ["+7 999 123-45-67", "@manager_ivan"]
+    assert contacts("Toyota Camry 2014, 1 500 000 ₽, пробег 180 000 км", None) == []
+
+
+async def test_contacts_survive_long_caption(env):
+    """Длинный пост с фото: подпись режется на 1024 символах, но телефон и @ник продавца из конца поста — в строке «📞 Связь» наверху (владелец 10.11)."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "любые до 2 млн")
+    ctx.buffer_chat = -1009999999999
+
+    async def forwarded():
+        return 556
+    long_text = "Toyota Camry 2014, 1 500 000 ₽, Москва. " + "Состояние отличное, всё работает. " * 80 + "\n📲 Звонить: +7 (999) 765-43-21, пишите @camry_owner"
+    assert (await process(bot, ctx, RawPost(CH1, next(ids), long_text, time.time() - 1, forwarded))).sent == [USER]
+    copy = [m for m in s.sent if isinstance(m, CopyMessage)][-1]
+    import re
+    visible = re.sub(r"<[^>]+>", "", copy.caption)
+    assert len(visible) <= 1024 and "📞 Связь: +7 999 765-43-21 · @camry_owner" in visible

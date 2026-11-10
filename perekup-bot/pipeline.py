@@ -29,7 +29,7 @@ import plans
 from db import DAY, DEDUP_DAYS
 from links import channel_name
 import ai
-from parse import SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, price_options, sale_verdict
+from parse import PHONE, SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, price_options, sale_verdict
 from query import Filter, matches
 
 log = logging.getLogger(__name__)
@@ -138,6 +138,46 @@ def join_url(channel: dict) -> str | None:
     return f"https://t.me/+{channel['invite']}" if is_private(channel) and channel.get("invite") else None
 
 
+NICK = re.compile(r"(?<![\w@/.])@([A-Za-z][A-Za-z0-9_]{3,31})(?![\w@])")
+TG_LINK = re.compile(r"(?:https?://)?(?:t\.me|telegram\.me)/(?!c/|\+|joinchat/|s/|addlist/)([A-Za-z][A-Za-z0-9_]{3,31})(?![\w/])", re.I)
+WA_LINK = re.compile(r"(?:https?://)?(?:wa\.me/|api\.whatsapp\.com/send/?\?phone=)\+?(\d{10,15})", re.I)
+
+
+def contacts(text: str, channel: dict | None = None, limit: int = 4) -> list[str]:
+    """Как связаться с продавцом — из текста поста: телефоны (+7 999 123-45-67), WhatsApp, @ники и t.me/ники.
+    Длинный пост в подписи к фото обрезается на 1024 символах, а контакты обычно в самом конце — выносим их наверх карточки.
+    @имя самого канала не считаем (это подпись канала, а не продавец)."""
+    own = (channel or {}).get("username") or ""
+    out: list[str] = []
+
+    def put(x: str) -> None:
+        if x not in out and len(out) < limit:
+            out.append(x)
+    wa = [m.span() for m in WA_LINK.finditer(text or "")]
+    for m in PHONE.finditer(text or ""):
+        if any(a <= m.start() < b for a, b in wa):      # номер внутри ссылки wa.me — покажем как WhatsApp ниже
+            continue
+        d = re.sub(r"\D", "", m.group(0))
+        if len(d) == 11 and d[0] in "78":
+            d = "7" + d[1:]
+        elif len(d) == 10 and d[0] == "9":
+            d = "7" + d
+        else:
+            continue
+        put(f"+7 {d[1:4]} {d[4:7]}-{d[7:9]}-{d[9:11]}")
+    for m in WA_LINK.finditer(text or ""):
+        d = m.group(1)
+        if len(d) == 11 and d[0] in "78":
+            d = "7" + d[1:]
+        put(f"WhatsApp +{d}")
+    for rx in (NICK, TG_LINK):
+        for m in rx.finditer(text or ""):
+            name = m.group(1)
+            if name.lower() != own.lower() and not name.lower().endswith("bot"):
+                put("@" + name)
+    return out
+
+
 def rub(v: int) -> str:
     return f"{v:,}".replace(",", " ") + " ₽"
 
@@ -181,6 +221,8 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
         lines.append("⚡ " + " · ".join(good))
     if bad:
         lines.append("❗ " + " · ".join(bad))
+    if found := contacts(L.text, channel):
+        lines.append(T.CARD_CONTACTS.format(items=" · ".join(html.escape(c) for c in found)))
     name = channel_name(channel)
     lines.append(T.CARD_SOURCE.format(channel=html.escape(name), latency=seconds(latency_ms)))
     if is_private(channel):
