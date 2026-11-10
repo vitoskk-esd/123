@@ -1,0 +1,122 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ОТДЕЛЬНАЯ СЕРИЯ (не про Толяна, владелец 10.11): «СЕМЕЙНЫЙ ЧАТ». Гена три месяца выбирает первую машину — точнее, выбирает семейный чат.
+// Приёмы (новые): 1) кружочки Telegram — родня спорит видеосообщениями, говорящий в кадре внутри кружка; 2) «документалка» — Гена говорит
+// в камеру, рамка REC и подпись-титр; 3) опрос в чате как развязка. Поворот: бот приносит Мерседес… дяди Бори (дороже рынка).
+// Бот — разоблачитель (рынок по похожим) и развязка (салатовая Нива владельца через 1 с после публикации, успел первым).
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 15, fs) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z};${fs ? "font-size:" + fs + "px" : ""}">${html}</div>`;
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const CAR = (img, l, t, w, z = 3, flip = false) => `<img class="el" src="../../kit/img/${img}" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${flip ? "transform:scaleX(-1)" : ""}">`;
+const PHONE = (l, t, inner, w = 520, z = 12) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const BOT = (body, fs = 30) => `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div><div style="background:#1c1f26;border-radius:22px;padding:16px 20px;margin-top:10px;font-family:Onest;color:#fff;font-size:${fs}px;line-height:1.42">${body}</div>`;
+// герои: все новые, кроме Лиса за кадром
+const GENA = { jacket: "#3fa34d", pants: "#2b2f37", hair: "#6b4a2b", glasses: true, item: "phone" };
+const PALYCH = { jacket: "#6d7f8f", pants: "#3b3f46", hair: "#c9ccd1", mustache: true, ushanka: "#8a6d48" };   // тесть
+const BORYA = { jacket: "#2b2b2e", pants: "#232c47", cap: "#151515", chain: true, hair: "#3a2d22" };          // дядя, «только Мерседес»
+const VOVAN = { jacket: "#1f4fb8", pants: "#151515", hair: "#d9a441", scarf: "#ffd23f" };                     // брат жены, «только Лада»
+const SEMEN = { jacket: "#e8e2d0", pants: "#4f5b3a", hair: "#b0b4ba", beard: true, vest: true };             // продавец-голубятник
+// кружочек Telegram: голова героя в круге, имя и длительность — говорящий всегда в кадре
+const KR = (o, id, l, t, d = 250, name = "", dur = "0:07", ring = "#5ac8fa", z = 14) => {
+  const s = d / 230;
+  return `<div class="el" style="left:${l}px;top:${t}px;width:${d}px;height:${d}px;z-index:${z};border-radius:50%;overflow:hidden;border:8px solid ${ring};box-shadow:0 0 0 6px #151515,0 14px 0 6px rgba(0,0,0,.35);background:radial-gradient(circle at 50% 35%,#5a6b85,#2b3445)">
+    ${el(CHARS.perekup(id, o), d / 2 - 210 * s, d / 2 - 222 * s, 420 * s, 800 * s, 1)}</div>
+    <div class="el" style="left:${l + d / 2 - 110}px;top:${t + d - 6}px;width:220px;z-index:${z + 1};text-align:center;font-family:Onest;font-weight:800;font-size:24px;color:#fff;background:#151515cc;border-radius:12px;padding:2px 0">${name} · ▶ ${dur}</div>`;
+};
+const CHAT = (t, text, l = 40) => `<div class="el" style="left:${l}px;top:${t}px;z-index:16;background:#17212b;border:5px solid #151515;border-radius:18px;padding:8px 18px;font-family:Onest;font-weight:800;font-size:28px;color:#fff;white-space:nowrap;box-shadow:0 8px 0 #151515">${text}</div>`;
+const REC = (name, sub) => `<div class="el" style="left:26px;top:726px;width:1028px;height:770px;z-index:13;border:4px solid rgba(255,255,255,.75);border-radius:8px;pointer-events:none"></div>
+  <div class="el" style="left:50px;top:746px;z-index:16;font-family:'JetBrains Mono';font-weight:800;font-size:32px;color:#ff3b30">● REC</div>
+  <div class="el" style="left:40px;top:1330px;z-index:16;background:#fff;border-left:16px solid #ffd23f;padding:10px 22px;font-family:Unbounded;font-weight:900;font-size:34px;color:#151515;box-shadow:0 8px 0 #151515">${name}<div style="font-family:Onest;font-weight:800;font-size:24px;color:#555">${sub}</div></div>`;
+const POLL = (rows, t = 760, foot = "") => `<div class="el" style="left:40px;top:${t}px;width:600px;z-index:16;background:#17212b;border:6px solid #151515;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;box-shadow:0 12px 0 #151515">
+  <div style="font-weight:800;font-size:24px;color:#8b93a3">СЕМЬЯ · ОПРОС</div><div style="font-weight:900;font-size:34px;margin:6px 0 12px">Беру Ниву?</div>
+  ${rows.map(([t, v, c]) => `<div style="position:relative;margin:8px 0;border-radius:12px;background:#24303c;overflow:hidden;font-weight:800;font-size:28px;padding:8px 14px"><div style="position:absolute;left:0;top:0;bottom:0;width:${v}%;background:${c};opacity:.55"></div><span style="position:relative">${t}</span><b style="position:relative;float:right">${v}%</b></div>`).join("")}${foot}</div>`;
+const PIGEON = (l, t, s = 1, flip = false) => `<svg class="el" viewBox="-50 -30 100 60" style="left:${l}px;top:${t}px;width:${100 * s}px;z-index:8;${flip ? "transform:scaleX(-1)" : ""}"><ellipse cx="0" cy="0" rx="26" ry="16" fill="#8f98a6" stroke="#151515" stroke-width="4"/><circle cx="22" cy="-12" r="10" fill="#7a8494" stroke="#151515" stroke-width="4"/><path d="M30 -12 l10 3 -10 3" fill="#ffb02e"/><path d="M-26 0 l-16 -8 v16 z" fill="#6f7886" stroke="#151515" stroke-width="3"/></svg>`;
+const S = [
+ { h: "ОСТАНОВКА · ДОЖДЬ", tc: "1/9 · 0:00–0:11", bg: "ostanovka", y: 700, els: () => ch("perekup", "gn", 30, 880, .8, 6, GENA)
+     + CHAT(730, "👨‍👩‍👧 СЕМЬЯ · <span style='color:#ff3b30'>147 новых</span>", 360)
+     + KR(PALYCH, "pl", 400, 830, 230, "Палыч", "0:07") + KR(BORYA, "br", 790, 860, 230, "дядя Боря", "0:12", "#ff7a1a") + KR(VOVAN, "vv", 620, 1160, 210, "Вован", "0:04", "#4cd964")
+     + bub("Только японца!<br><em>Остальное — металлолом.</em>", 330, 1100, 17, 30),
+   vo: "Палыч (кружок): «Гена, бери только японца. Остальное — металлолом». Дядя Боря: «Какой японец?! Только Мерседес! Я двадцать лет на нём!» Вован: «Лада! Запчасти — копейки!» Лис: «Гена третий месяц выбирает первую машину. Точнее — выбирает семейный чат».", who: "Палыч + Боря + Вован + Лис",
+   mv: "<b>Отдельная серия, все герои новые.</b> <b>Новый фон — остановка под дождём</b> (козырёк, расписание № 47, фонарь, лужи с огнями). Гена (зелёная куртка, очки) мокнет, телефон разрывается. <b>Приём 1 — кружочки Telegram:</b> родня спорит видеосообщениями, кружки выскакивают по очереди, у говорящего шевелятся губы — говорящий в кадре, пузырь у его кружка. Хук — первая реплика тестя." },
+ { h: "ДОКУМЕНТАЛКА · 94-й ДЕНЬ", tc: "2/9 · 0:11–0:20", bg: "lift", y: 700, els: () => ch("perekup", "gn", 330, 840, .9, 6, { ...GENA, item: "", look: "o" })
+     + REC("ГЕНА, 32 года", "ищет первую машину · 94-й день") + bub("Нашёл Короллу — пока тесть думал,<br><em>продали.</em> Нашёл Октавию —<br>пока голосовали, <em>продали.</em>", 60, 760, 17, 30),
+   vo: "Гена (в камеру): «Нашёл Короллу — пока тесть думал, продали. Нашёл Октавию — пока голосовали, продали». Лис: «Хорошие машины уходят за минуты. А семейный чат думает сутками».", who: "Гена + Лис",
+   mv: "<b>Новый фон — кабина лифта</b> (зеркало, кнопки, табло «7▲», наклейки «Ремонт дверей», «Вова + Лена»). <b>Приём 2 — «документалка»:</b> Гена смотрит прямо в камеру, рамка видоискателя с ● REC, титр «ГЕНА, 32 года · 94-й день». Лёгкая тряска «ручной камеры»." },
+ { h: "БЕЗ ГОЛОСОВАНИЯ", tc: "3/9 · 0:20–0:28", bg: "lift", y: 700, els: () => ch("perekup", "gn", -10, 880, .8, 6, GENA)
+     + PHONE(470, 760, BOT(`<b>⚙️ Фильтр</b><br>🚗 любая машина<br>💰 до 800 000 ₽ · 🏙 мой город<br>🔔 новое объявление → сразу<br><span style="color:#ffd23f">🎁 пробный день — бесплатно</span>`, 28), 540)
+     + bub("Всё.<br><em>Без голосования.</em>", 40, 760),
+   vo: "Гена: «Всё. Без голосования». Лис: «Гена ставит „Перехват“ — и впервые за три месяца ничего не пишет в чат».", who: "Гена + Лис",
+   mv: "Тот же лифт. Гена настраивает фильтр в боте: иномарка до 800 000, свой город, уведомления сразу. На экране — «пробный день — бесплатно» (текст на экране, голос его не читает). Табло лифта едет 7 → 1." },
+ { h: "7:40 · УВЕДОМЛЕНИЕ", tc: "4/9 · 0:28–0:36", bg: "lift", y: 700, els: () => ch("perekup", "gn", -10, 880, .8, 6, { ...GENA, look: "o" })
+     + PHONE(450, 740, BOT(`<b>Mercedes W124 · 1994 · 690 000 ₽</b><br>📊 рынок ≈ 480 000 ₽ (27 объявл.)<br>👤 продавец: <b style="color:#ff7a1a">Борис</b><br>📞 контакт — из описания закрытого канала`, 27), 580)
+     + bub("Дядя<br><em>Боря?!</em>", 40, 760),
+   vo: "Гена: «Дядя Боря?!» Лис: «Тот самый дядя Боря. Который советовал только Мерседес. Свой. На двести тысяч дороже рынка».", who: "Гена + Лис",
+   mv: "<b>Поворот:</b> утро, лифт. Первое уведомление — Мерседес W124 из закрытого канала (бот достал контакт из описания канала — реальная новая функция). Продавец — дядя Боря. Бот показывает рынок по похожим объявлениям — дороже на 210 тысяч. Зум на имя «Борис»." },
+ { h: "СЕМЕЙНАЯ СКИДКА", tc: "5/9 · 0:36–0:42", bg: "lift", y: 700, els: () => ch("perekup", "gn", -10, 880, .8, 6, { ...GENA, look: "angry" })
+     + CAR("w124/w124_34.png", 560, 1250, 480, 5) + KR(BORYA, "br", 560, 760, 280, "дядя Боря", "0:09", "#ff7a1a")
+     + bub("Генка, ну это…<br><em>семейная скидка будет!</em>", 330, 1080, 17, 32),
+   vo: "Дядя Боря (кружок): «Генка, ну это… семейная скидка будет!»", who: "Дядя Боря",
+   mv: "Кружок дяди Бори выскакивает сам — он увидел, что Гена смотрел объявление. Рядом фото его Мерседеса. Гена хмурится. Пузырь — у кружка Бори." },
+ { h: "+1 С · НИВА", tc: "6/9 · 0:42–0:50", bg: "lift", y: 700, els: () => ch("perekup", "gn", -10, 880, .8, 6, { ...GENA, look: "grin" })
+     + PHONE(450, 740, BOT(`<b style="color:#ff7a1a">🔥 −11% к рынку</b><br><b>Lada Niva 4×4 · 2018 · 650 000 ₽</b><br>📍 двор на Садовой · голубятня<br>⏱ 1 с после публикации`, 28), 580)
+     + lab("ЛИФТ: ДВЕРИ ОТКРЫВАЮТСЯ", 30, 1330, "#ffd23f", "#151515", 34, -3),
+   vo: "Лис: «И тут, через секунду после публикации, — Нива. На восемьдесят тысяч ниже рынка. Двери лифта открываются…»", who: "Лис",
+   mv: "Второе уведомление сразу за первым: салатовая Нива 4×4 −11% к рынку (рынок ≈ 730 000), через 1 с после публикации. Двери лифта разъезжаются — Гена выбегает (переход «двери» в следующую сцену)." },
+ { h: "ГОЛУБЯТНЯ · СЕМЁНЫЧ", tc: "7/9 · 0:50–0:59", bg: "golubyatnya", y: 700, els: () => CAR("niva/niva_side.svg", 200, 1120, 760, 5)
+     + ch("perekup", "sm", 760, 880, .8, 6, SEMEN) + ch("perekup", "gn", -10, 880, .8, 6, GENA) + PIGEON(520, 1140, 1) + PIGEON(700, 1142, .9, true)
+     + bub("Ты первый. Уже двенадцать звонят.<br><em>Голубей не пугай — они машину охраняют.</em>", 260, 760, 17, 28)
+     + CHAT(1420, "📞 Семёныч: <span style='color:#ff3b30'>12 пропущенных</span>", 330),
+   vo: "Семёныч: «Ты первый. Мне уже двенадцать человек звонят. Только голубей не пугай — они машину охраняют». Гена: «Беру»", who: "Семёныч + Гена",
+   mv: "<b>Новый фон — старый двор с голубятней</b> (сарайки, бельё, тополь, голуби на крыше). <b>Новый герой — Семёныч</b>, голубятник в тельняшке и с бородой. У него телефон: «12 пропущенных» растёт. Гена успел первым — бот как развязка. Голуби расхаживают по капоту. <b>Машина — салатовая Нива с картинки владельца</b> (нарисована в нашем стиле)." },
+ { h: "ОПРОС В ЧАТЕ", tc: "8/9 · 0:59–1:08", bg: "golubyatnya", y: 700, els: () => ch("perekup", "gn", 20, 960, .8, 6, GENA)
+     + POLL([["✅ Да", 33, "#4cd964"], ["❌ Нет", 67, "#ff3b30"]], 730, `<div style="font-size:22px;color:#8b93a3;margin-top:8px">3 голоса · Палыч, Боря, Вован</div>`)
+     + KR(PALYCH, "pl", 700, 740, 200, "Палыч", "0:02") + KR(BORYA, "br", 820, 1000, 200, "дядя Боря", "0:03", "#ff7a1a") + KR(VOVAN, "vv", 700, 1250, 190, "Вован", "0:02", "#4cd964")
+     + bub("Опрос закрыт.<br><em>Я уже за рулём.</em>", 300, 1110, 17, 32),
+   vo: "Палыч: «Ниву?! Не японец же!» Боря: «А как же мой Мерседес?» Вован: «Я же говорил — Лада!» Гена: «Опрос закрыт. Я уже за рулём».", who: "Палыч + Боря + Вован + Гена",
+   mv: "<b>Приём 3 — опрос в чате:</b> Гена кидает опрос «Беру Ниву?»: «Нет» — 67% (тесть и дядя), «Да» — 33% (Вован, торжествует). Три кружка-реплики друг за другом. Гена ставит штамп «ОПРОС ЗАКРЫТ». Отсылка к началу: Вован единственный был за Ладу." },
+ { h: "ФИНАЛ", tc: "9/9 · 1:08–1:16", bg: "golubyatnya", y: 700, els: () => CAR("niva/niva_side.svg", 200, 1080, 820, 5) + ch("perekup", "gn", 445, 1105, .5, 4, { ...GENA, item: "" })
+     + KR(PALYCH, "pl", 40, 760, 230, "Палыч", "0:05") + bub("…Слушай, а на дачу подвезёшь?<br><em>Там как раз грязь.</em>", 310, 790, 17, 30)
+     + `<div class="el" style="left:60px;right:60px;top:1330px;z-index:18;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">свежие объявления за ~1 с · рынок по похожим</div></div>` + FOX(880, 1140, 150),
+   vo: "Палыч (кружок): «…Слушай, а на дачу подвезёшь? Там как раз грязь». Лис: «Три месяца споров — и одна секунда, чтобы успеть первым».", who: "Палыч + Лис",
+   mv: "Гена за рулём Нивы во дворе (виден в окне), голуби на крыше. Кружок Палыча — внезапно мирный: «на дачу подвезёшь?» Финальная карточка «Бот „Перехват“ — ссылка в шапке» с лисом (голос её не читает)." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els();
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+["gn", "pl", "br", "vv", "sm"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
