@@ -244,5 +244,17 @@
   "tempo": 1.2,
   "profile": "Tolyan's tiny inner devil — the same cocky Russian car flipper's voice, but reckless, excited and tempting, adult street comedy.",
   "notes": "One line: fast, excited, tempting, cheeky. The first word is «Бери» (take it) — say it very clearly with a hard rolled R: «бе-РИ», never «беги»."
+ },
+ "arnold": {
+  "voice": "Enceladus",
+  "tempo": 1.12,
+  "profile": "Arnold — a fussy, hurried Russian man in his 40s in a beige trench coat and sunglasses, late for his flight, nervous and impatient, a bit theatrical.",
+  "notes": "Lines 1–3: hurried, nervous, impatient, glancing at his watch. Line 4: suddenly relaxed and sly — the flight is delayed. Say «Сорок секунд!» loudly."
+ },
+ "danya": {
+  "voice": "Umbriel",
+  "tempo": 1.1,
+  "profile": "Danya — Vika's son, a Russian student of about 19, tired of buses, then overjoyed.",
+  "notes": "Line 1: tired, whiny, sighing. Line 2: stunned, breathless with joy; say «Е-тридцать» as «е-тридцать»."
  }
 }
