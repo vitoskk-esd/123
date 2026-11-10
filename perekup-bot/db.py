@@ -525,6 +525,11 @@ class DB:
                                     "WHERE paid_until>? AND plan!='admin' AND blocked=0 GROUP BY p", now),
             "paid": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded'"),
             "ideas": (await n("SELECT COUNT(*) n FROM events WHERE kind='idea'"))["n"],
+            # бесплатный пробный день: брали всего / за 7 дней (по событию «trial») / потом оплатили «Простой» или PRO
+            "trial_all": (await n("SELECT COUNT(*) n FROM users WHERE trial_used=1"))["n"],
+            "trial7": (await n("SELECT COUNT(DISTINCT user_id) n FROM events WHERE kind='trial' AND at>?", now - 7 * DAY))["n"],
+            "trial_paid": (await n("SELECT COUNT(*) n FROM users u WHERE trial_used=1 AND EXISTS(SELECT 1 FROM payments p WHERE p.user_id=u.id "
+                                   "AND p.status='succeeded' AND p.plan IN ('basic','pro',''))"))["n"],
             "ideas7": (await n("SELECT COUNT(*) n FROM events WHERE kind='idea' AND at>?", now - 7 * DAY))["n"],
             "paid30": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY),
             # сколько людей из каждого источника хоть раз заплатили — какая соцсеть приводит покупателей, а не просто зрителей

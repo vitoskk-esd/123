@@ -1411,13 +1411,15 @@ async def test_admin_notified_of_new_users_and_panel(env):
     n = len(s.texts(ADMIN)); await dp.feed_update(bot, msg("/start inst", USER))              # повторный старт — без уведомления
     assert len(s.texts(ADMIN)) == n
     await ctx.db.set_user(USER, paid_until=time.time() + 86400 * 30, plan="pro")
-    await ctx.db.set_user(OTHER, paid_until=time.time() + 86400, plan="trial")
+    await dp.feed_update(bot, cb("s:pay:trial", OTHER))                     # OTHER включил бесплатный пробный день
+    await ctx.db.set_user(USER, trial_used=1)                                # USER брал пробный раньше и потом купил PRO
     await ctx.db.add_payment(USER, "p1", 2490, "pro"); await ctx.db.finish_payment("p1", "succeeded")
     await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
     t = s.texts(ADMIN)[-1]
     assert "Всего пользователей: <b>4</b>" in t and "Сегодня новых: <b>4</b> — Instagram 1 · Threads 1" in t
-    assert "Активные подписки сейчас: 2</b>" in t and "PRO — <b>1</b>" in t and "Простой — <b>0</b>" in t
-    assert "Пробный день — <b>1</b>" in t and "Оплат за всё время: 1 на 2 490 ₽" in t
+    assert "На пробном дне прямо сейчас: 1</b>" in t and "брали всего: 2 · за 7 дней: 1 · потом купили тариф: 1 (50%)" in t
+    assert "Платные подписки сейчас: 1</b>" in t and "PRO — <b>1</b>" in t and "Простой — <b>0</b>" in t
+    assert "Оплат за всё время: 1 на 2 490 ₽" in t
     assert "?start=inst" in t and "?start=threads" in t
     await dp.feed_update(bot, msg(T.MENU_ADMIN, USER))                                       # не админ — не видит
     assert not any("Админ-панель" in (x or "") for x in s.texts(USER))
