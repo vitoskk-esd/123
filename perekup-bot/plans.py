@@ -30,7 +30,8 @@ class Plan:
 
 def plans(cfg: Config) -> dict[str, Plan]:
     return {
-        "trial": Plan("trial", "Пробный день", cfg.price_trial, 1, UNLIMITED, UNLIMITED),
+        # пробный день — бесплатно (владелец 10.11): как PRO, но один фильтр и без договора купли-продажи; один раз на человека
+        "trial": Plan("trial", "Пробный день", 0, 1, 1, UNLIMITED, dkp=False),
         "basic": Plan("basic", "Простой", cfg.price_basic, 30, cfg.basic_filters, cfg.basic_own,
                       delay=cfg.basic_delay, market=False, ai=False, dkp=False),
         "pro": Plan("pro", "PRO", cfg.price_pro, 30, UNLIMITED, UNLIMITED),

@@ -389,6 +389,11 @@ class DB:
     async def known_msgs(self, cid: int) -> set[int]:
         return {r["msg_id"] for r in await self._all("SELECT msg_id FROM posts WHERE channel_id=?", cid)}
 
+    async def recent_posts(self, since: float) -> list:
+        """Объявления за период (без дублей и без цены) — для «что ты пропустил»."""
+        return await self._all("SELECT id, channel_id, at, make, model, year, price, mileage, region FROM posts "
+                               "WHERE at>? AND dup=0 AND price IS NOT NULL ORDER BY at DESC LIMIT 3000", since)
+
     async def add_history_post(self, channel_id: int, msg_id: int, at: float, L, fp: str, ckey: str | None, dup: bool,
                                clean: bool) -> None:
         """Старый пост канала — только для оценки рынка: никому не уходил, в счётчик постов канала не идёт."""

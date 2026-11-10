@@ -212,7 +212,7 @@ async def test_no_plan_then_buy_basic(env):
     """Без тарифа машины не приходят; оплатил «Простой» — приходят 30 дней; повторный «Я оплатил» не продлевает дважды."""
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "приора до 300к", plan=None)
-    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — 490 ₽" in s.texts(USER)[-1]
+    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — бесплатно" in s.texts(USER)[-1]
     assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == []
     await dp.feed_update(bot, msg("💳 Подписка"))
     assert "Подписки нет" in s.texts(USER)[-1] and "Простой — 1390 ₽" in s.texts(USER)[-1] and "PRO — 2490 ₽" in s.texts(USER)[-1]
@@ -234,25 +234,26 @@ async def test_no_plan_then_buy_basic(env):
 
 
 async def test_trial_day_once_and_basic_limits_and_upgrade(env):
-    """Пробный день — 490 ₽ на 24 часа и только один раз; «Простой» — до 3 фильтров; переход на PRO не сжигает дни."""
+    """Пробный день — бесплатно на 24 часа, сразу по кнопке, один раз; в нём 1 фильтр; «Простой» — до 2 фильтров; переход на PRO не сжигает дни."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
-    assert any("1 день за 490 ₽" in t for t in s.texts(USER))
+    assert any("Пробный день — бесплатно" in t for t in s.texts(USER))
     await dp.feed_update(bot, cb("s:pay:trial"))
-    pay = await ctx.db.last_pending(USER)
-    assert (pay["amount"], pay["plan"]) == (490, "trial")
-    ctx.pay.statuses[pay["yk_id"]] = "succeeded"
-    await dp.feed_update(bot, cb("s:check"))
+    assert await ctx.db.last_pending(USER) is None                           # без оплаты
     u = await ctx.db.user(USER)
-    assert u["trial_used"] == 1 and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
+    assert u["trial_used"] == 1 and u["plan"] == "trial" and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
+    assert "Пробный день включён" in s.texts(USER)[-1] and "МСК" in s.texts(USER)[-1] and "Напиши, какую машину ищешь" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
+    await dp.feed_update(bot, msg("солярис до 900к")); await dp.feed_update(bot, cb("f:save"))
+    assert len(await ctx.db.filters(USER)) == 1 and "«Пробный день» — 1 фильтр" in s.texts(USER)[-1]   # в пробном — один фильтр
+    await ctx.db.delete_filter(USER, (await ctx.db.filters(USER))[0]["id"])
     await ctx.db.set_user(USER, paid_until=time.time() - 1)                 # день прошёл
     await dp.feed_update(bot, cb("s:pay:trial"))                            # второй раз — нельзя
     assert "только один раз" in s.texts(USER)[-1]
 
     await ctx.db.set_user(USER, paid_until=time.time() + 10 * 86400, plan="basic")   # «Простой», осталось 10 дней
-    for t in ("камри до 1 млн", "солярис до 900к"):
+    for t in ("солярис до 900к", "приора до 300к", "веста до 1 млн"):
         await dp.feed_update(bot, msg(t)); await dp.feed_update(bot, cb("f:save"))
-    await dp.feed_update(bot, msg("веста до 1 млн")); await dp.feed_update(bot, cb("f:save"))
     assert len(await ctx.db.filters(USER)) == 2 and "до 2 фильтров" in s.texts(USER)[-1]   # третий — только в PRO
 
     await dp.feed_update(bot, cb("s:pay:pro"))
@@ -753,7 +754,7 @@ async def test_offer_with_requisites(env):
         object.__setattr__(ctx.cfg, k, v)
     await dp.feed_update(bot, cb("offer"))
     text = s.texts(USER)[-1]
-    assert "Иванов Иван Иванович, ИНН 123456789012" in text and "ivan@mail.ru" in text and "Пробный день — 490 ₽" in text
+    assert "Иванов Иван Иванович, ИНН 123456789012" in text and "ivan@mail.ru" in text and "Пробный день — бесплатно" in text
     assert "PRO — 2490 ₽" in text and len(text) < 4096
     await dp.feed_update(bot, cb("s:pay:pro"))
     assert "условия оферты — /offer" in s.texts(USER)[-1]
@@ -1502,14 +1503,14 @@ async def test_payments_go_live_to_paylog_channel(env):
     assert reader.client.calls == ["CreateChannelRequest", "EditAdminRequest", "ExportChatInviteRequest"]
     assert ctx.paylog_chat == -1004242 and await ctx.db.get_setting("paylog_link") == "https://t.me/+PayLogInvite"
     await dp.feed_update(bot, msg("/start inst"))
-    for plan in ("trial", "pro"):
+    for plan in ("basic", "pro"):
         await dp.feed_update(bot, cb(f"s:pay:{plan}"))
         pay = await ctx.db.last_pending(USER)
         ctx.pay.statuses[pay["yk_id"]] = "succeeded"
         await dp.feed_update(bot, cb("s:check"))
     log1, log2 = s.texts(ctx.paylog_chat)
-    assert "Оплата +490 ₽</b> · Пробный день" in log1 and "первая оплата" in log1 and "Instagram" in log1 and "@u111" in log1
-    assert "Оплата +2 490 ₽</b> · PRO" in log2 and "2-я оплата" in log2 and "Сегодня: 2 оплаты на 2 980 ₽" in log2
+    assert "Оплата +1 390 ₽</b> · Простой" in log1 and "первая оплата" in log1 and "Instagram" in log1 and "@u111" in log1
+    assert "Оплата +2 490 ₽</b> · PRO" in log2 and "2-я оплата" in log2 and "Сегодня: 2 оплаты на 3 880 ₽" in log2
     await dp.feed_update(bot, msg("/start", ADMIN))
     await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
     assert "Канал оплат (каждая оплата — сразу): https://t.me/+PayLogInvite" in s.texts(ADMIN)[-1]
@@ -1778,3 +1779,34 @@ def test_reader_extras_reads_buttons_and_hidden_links():
     m = NS(entities=[NS(url="https://t.me/seller_pro"), NS()], reply_markup=NS(rows=[NS(buttons=[NS(url="https://wa.me/79161234567"), NS(text="Подробнее")])]))
     assert Reader.extras(m) == "https://t.me/seller_pro https://wa.me/79161234567"
     assert Reader.extras(NS(entities=None, reply_markup=None)) == ""
+
+
+async def test_missed_preview_before_plan(env):
+    """Без тарифа после сохранения фильтра — «что ты пропустил за сутки»: сколько вышло, примеры без контактов, затем тарифы
+    с бесплатным пробным днём (владелец 10.11). Пусто — совет расширить фильтр."""
+    dp, bot, s, ctx = env
+    for t in ("Toyota Camry 2012, 900 000 ₽, Москва, пробег 180 тыс, звоните +7 999 111-22-33", "Toyota Camry 2013, 950 000 ₽, пробег 150 тыс",
+              "Hyundai Solaris 2016, 700 000 ₽"):
+        await process(bot, ctx, post(CH1, t))
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
+    texts = s.texts(USER)
+    preview = next(t for t in texts if "За последние сутки под этот фильтр вышло" in t)
+    assert "вышло 2 машины" in preview and "Toyota Camry" in preview and "900 000 ₽" in preview and "+7 999" not in preview
+    assert "бесплатный пробный день" in texts[-1] and "Пробный день — бесплатно" in str([getattr(m, "reply_markup", None) for m in s.sent if getattr(m, "chat_id", None) == USER and getattr(m, "reply_markup", None)][-1])
+    await dp.feed_update(bot, msg("приора до 100к")); await dp.feed_update(bot, cb("f:save"))
+    assert any("ничего не вышло" in t for t in s.texts(USER))
+
+
+async def test_trial_ends_offers_month_plans(env):
+    """Пробный день кончился — отдельное сообщение: итог дня и «Простой» / PRO на месяц кнопками (без повторного пробного)."""
+    import jobs
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, cb("s:pay:trial"))
+    await ctx.db.set_user(USER, paid_until=time.time() - 60)
+    await jobs.tick(bot, ctx)
+    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Пробный день закончился" in last.text and "Простой — 1390 ₽" in last.text and "PRO — 2490 ₽" in last.text
+    btns = [b.callback_data for row in last.reply_markup.inline_keyboard for b in row]
+    assert btns == ["s:pay:basic", "s:pay:pro"]

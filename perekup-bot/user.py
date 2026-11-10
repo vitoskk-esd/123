@@ -21,7 +21,7 @@ from admin import is_admin, is_admin_id, make_admins_pro, notify_new_user, queue
 from ctx import Ctx
 from db import DAY
 from links import label, parse_link
-from pipeline import seconds, wait_text
+from pipeline import cars_word, missed, seconds, wait_text
 from query import Filter, describe, parse_filter
 
 router = Router(name="user")
@@ -78,7 +78,7 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     if new and not admin:
         await notify_new_user(bot, ctx, msg.from_user, source)
     channels = await ctx.db.channel_count_for(msg.from_user.id)
-    trial = T.WELCOME_TRIAL.format(price=ctx.cfg.price_trial) if ctx.cfg.payments_on else ""
+    trial = T.WELCOME_TRIAL if ctx.cfg.payments_on else ""
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu(admin))
     await send_welcome_photos(bot, ctx, f.id)    # примеры карточек — одни и те же фото из папки welcome/
     if ctx.reader and not ctx.reader.online and admin:
@@ -145,11 +145,23 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         return await cb.answer()
     fid = await ctx.db.add_filter(uid, data["pending_text"], data["pending"])
     await ctx.db.event(uid, "filter")
+    try:                                      # «что ты пропустил» за сутки — по уже собранным объявлениям
+        n, cheap, items = await missed(ctx, Filter.loads(data["pending"]), uid)
+    except Exception as e:
+        log.warning("«что пропустил» не посчитали: %s", e)
+        n, cheap, items = -1, 0, []
     if not plans.current(ctx.cfg, await ctx.db.user(uid)):      # без тарифа машины не придут — сразу говорим
+        await cb.answer()
+        if n > 0:
+            await cb.message.answer(T.MISSED.format(n=n, word=cars_word(n), cheap=T.MISSED_CHEAP.format(k=cheap) if cheap else "",
+                                                    items="\n".join(items)))
+        elif n == 0:
+            await cb.message.answer(T.MISSED_NONE, reply_markup=K.filter_saved(fid))
         await offer_plans(cb.message, ctx, uid, T.NEED_PLAN)
-        return await cb.answer()
+        return
     channels = await ctx.db.channel_count_for(uid)
-    await cb.message.answer(T.FILTER_SAVED.format(channels=channels), reply_markup=K.filter_saved(fid))
+    tail = T.MISSED_ACTIVE.format(n=n, word=cars_word(n)) if n > 0 else ""
+    await cb.message.answer(T.FILTER_SAVED.format(channels=channels) + tail, reply_markup=K.filter_saved(fid))
     await cb.answer()
 
 
@@ -157,7 +169,8 @@ async def filter_limit(ctx: Ctx, uid: int) -> str | None:
     """Текст «упёрся в лимит тарифа» или None. Без тарифа фильтр создать можно — машины пойдут после оплаты."""
     plan = plans.current(ctx.cfg, await ctx.db.user(uid)) or plans.plans(ctx.cfg)["basic"]
     if len(await ctx.db.filters(uid)) >= plan.max_filters:
-        return T.FILTER_LIMIT_PLAN.format(plan=plan.title, n=plan.max_filters)
+        n = plan.max_filters
+        return T.FILTER_LIMIT_PLAN.format(plan=plan.title, n="1 фильтр" if n == 1 else f"до {n} фильтров")
     return None
 
 
@@ -448,6 +461,14 @@ async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
     u = await ctx.db.user(cb.from_user.id)
     if plan.id == "trial" and not can_trial(u):
         await cb.message.answer(T.TRIAL_USED, reply_markup=K.plans(all_plans, False))
+        return await cb.answer()
+    if plan.id == "trial" and not plan.price:            # пробный день бесплатный — включаем сразу, без оплаты
+        until = time.time() + plan.days * 86400
+        await ctx.db.set_user(cb.from_user.id, paid_until=until, plan="trial", trial_used=1)
+        await ctx.db.event(cb.from_user.id, "trial")
+        nf = len(await ctx.db.filters(cb.from_user.id))
+        text = T.TRIAL_ON.format(until=fmt_date(until), first=T.TRIAL_ON_FIRST if nf > 1 else "") + ("" if nf else T.TRIAL_NO_FILTER)
+        await cb.message.answer(text, reply_markup=K.menu())
         return await cb.answer()
     try:
         pid, url = await ctx.pay.create(cb.from_user.id, plan.price, T.PAY_DESCRIPTION.format(plan=plan.title, days=plan.days))

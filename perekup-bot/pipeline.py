@@ -8,6 +8,7 @@
    Нет фото или канал запрещает пересылку — уходит обычная карточка с текстом поста.
 """
 import asyncio
+import dataclasses
 import heapq
 import html
 import random
@@ -317,6 +318,51 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] |
         r.market = market
         r.discount = round((market - L.price) / market * 100)
     return r
+
+
+def cars_word(n: int) -> str:
+    return "машина" if n % 10 == 1 and n % 100 != 11 else "машины" if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14) else "машин"
+
+
+async def missed(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int = 3) -> tuple[int, int, list[str]]:
+    """«Что ты пропустил»: сколько машин под фильтр вышло за последние сутки в каналах человека (общая база + свои), сколько из них
+    дешевле рынка, и 3 примера без контактов и ссылок — показать пользу до оплаты (владелец 10.11). Только уже собранные посты из базы."""
+    now = time.time()
+    off = await ctx.db.off_channels(uid)
+    allowed = {ch["id"]: ch for ch in ctx.channels.values() if (ch.get("base") or ch.get("added_by") == uid) and ch["id"] not in off}
+    rows = await ctx.db.recent_posts(now - hours * 3600)
+    base = dataclasses.replace(f, min_discount=0)       # «ниже рынка» проверим ниже, когда посчитаем рынок
+    hits = []
+    for r in rows:
+        if r["channel_id"] not in allowed:
+            continue
+        L = Listing(text="", make=r["make"], model=r["model"], year=r["year"], price=r["price"], mileage=r["mileage"], region=r["region"])
+        if matches(base, L, None):
+            hits.append((r, L))
+    # оценка рынка — только для подошедших (не больше 80), как в карточке
+    found, cheap = [], 0
+    for r, L in hits[:80]:
+        disc = None
+        if L.make and L.model and L.year:
+            prices = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, r["id"])
+            if len(prices) >= MARKET_MIN:
+                m = median(prices)
+                disc = round((m - L.price) / m * 100)
+        if f.min_discount and (disc is None or disc < f.min_discount or not matches(f, L, disc)):
+            continue
+        cheap += bool(disc is not None and disc >= SHOW_DISCOUNT)
+        found.append((r, L, disc))
+    n = len(found) + max(0, len(hits) - 80) * (not f.min_discount)
+    best = sorted(found, key=lambda x: (-(x[2] if x[2] is not None and x[2] >= SHOW_DISCOUNT else -100), -x[0]["at"]))[:show]
+    d = ctx.dict
+    items = []
+    for r, L, disc in best:
+        mins = int((now - r["at"]) // 60)
+        ago = f"{mins} мин назад" if mins < 60 else f"{mins // 60} ч назад"
+        items.append(T.MISSED_ITEM.format(car=html.escape(d.car_name(L.make, L.model) if L.make else "Машина"), year=f" {L.year}" if L.year else "",
+                                          price=rub(L.price), city=f" · 📍 {html.escape(d.regions.get(L.region, L.region))}" if L.region else "",
+                                          ago=ago, disc=f" · 🔥 −{disc}%" if disc is not None and disc >= SHOW_DISCOUNT else ""))
+    return n, cheap, items
 
 
 HISTORY = 300            # сколько последних постов канала загружаем в оценку рынка при подключении

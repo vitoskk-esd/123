@@ -55,7 +55,15 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
     for u in await ctx.db.users("MAX(trial_until, paid_until)<? AND MAX(trial_until, paid_until)>?", now, now - 2 * DAY):
         end = int(max(u["trial_until"], u["paid_until"]))
         if await ctx.db.mark_once(f"ended:{u['id']}:{end}"):
-            await send(bot, ctx, u["id"], T.ACCESS_ENDED, K.plans(all_plans, not u["trial_used"]))
+            if u["plan"] == "trial":          # после пробного дня — итог дня и «Простой» / PRO на месяц (владелец 10.11)
+                from pipeline import cars_word, wait_text
+                s, b = await ctx.db.user_stats(u["id"], now - 2 * DAY), all_plans["basic"]
+                await send(bot, ctx, u["id"], T.TRIAL_ENDED.format(
+                    n=s["n"], word=cars_word(s["n"]), good=T.TRIAL_ENDED_GOOD.format(k=s["good"]) if s["good"] else "",
+                    basic=b.price, pro=all_plans["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
+                    basic_filters=f"{b.max_filters} фильтр{'а' if 1 < b.max_filters < 5 else 'ов' if b.max_filters >= 5 else ''}"), K.plans(all_plans, False))
+            else:
+                await send(bot, ctx, u["id"], T.ACCESS_ENDED, K.plans(all_plans, not u["trial_used"]))
 
 
 VK_WARN = (800, 1000)        # сообществ ВК: на сколько предупреждаем админа, что пора ускорять опрос

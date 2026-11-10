@@ -79,8 +79,8 @@ def render(basic: Plan, pro: Plan, trial: Plan) -> bytes:
     # пробный день
     box_top = top + 1021
     d.rounded_rectangle((60, box_top, W - 60, box_top + 120), radius=24, fill=CARD)
-    d.text((W // 2, box_top + 42), f"Пробный день — {trial.price} ₽", font=_font(True, 38), fill=ORANGE, anchor="mm")
-    d.text((W // 2, box_top + 88), "всё как в PRO, без ограничений, на 24 часа · один раз", font=f_small, fill=MUTED, anchor="mm")
+    d.text((W // 2, box_top + 42), f"Пробный день — {f'{trial.price} ₽' if trial.price else 'бесплатно'}", font=_font(True, 38), fill=ORANGE, anchor="mm")
+    d.text((W // 2, box_top + 88), "всё как в PRO на 24 часа · 1 фильтр · один раз", font=f_small, fill=MUTED, anchor="mm")
 
     out = BytesIO()
     img.save(out, "PNG", optimize=True)
