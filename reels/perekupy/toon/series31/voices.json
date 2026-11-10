@@ -103,9 +103,9 @@
  },
  "cop": {
   "voice": "Iapetus",
-  "tempo": 1.08,
-  "profile": "A tired Russian district police officer in his 50s; deep, flat, bored voice, dry humor.",
-  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: flat, bored question. Line 2: deadpan, weary, slow and very clear: «У меня таких... Аркадиев» — pronounce «таких Аркадиев» distinctly, then a short pause, then «полрайона»."
+  "tempo": 1.05,
+  "profile": "A calm, stern Russian traffic police inspector at night with a flashlight, official tone.",
+  "notes": "One line: calm, firm, official."
  },
  "stas": {
   "voice": "Schedar",
@@ -244,5 +244,17 @@
   "tempo": 1.2,
   "profile": "Tolyan's tiny inner devil — the same cocky Russian car flipper's voice, but reckless, excited and tempting, adult street comedy.",
   "notes": "One line: fast, excited, tempting, cheeky. The first word is «Бери» (take it) — say it very clearly with a hard rolled R: «бе-РИ», never «беги»."
+ },
+ "ildar": {
+  "voice": "Alnilam",
+  "tempo": 1.08,
+  "profile": "Ildar — a loud, sporty Russian school PE teacher in his 40s, energetic, outraged, then warm and grateful.",
+  "notes": "Line 1: shocked and outraged, loud. Line 2: warm, friendly, inviting."
+ },
+ "kirill": {
+  "voice": "Orus",
+  "tempo": 1.12,
+  "profile": "Kirill — a shifty young Russian scammer in a dark hoodie at a night construction site, fast-talking, overly friendly, nervous underneath.",
+  "notes": "One line: quick, smooth, a bit nervous, pushing to hurry."
  }
 }
