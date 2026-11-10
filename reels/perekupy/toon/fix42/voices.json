@@ -1,0 +1,38 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.15,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used cars. Low calm voice, dry humor, confident.",
+  "notes": "You narrate a standalone comedy episode: Gena chooses his first car, but his family group chat keeps arguing. Deadpan, dry irony; numbers said fully. «Перехват» is the name of a bot."
+ },
+ "gena": {
+  "voice": "Achird",
+  "tempo": 1.17,
+  "profile": "Gena — a kind, tired, slightly nerdy Russian guy of 32 with glasses, choosing his first car while his relatives argue; soft voice that slowly gets decisive.",
+  "notes": "Line 1: tired, to the documentary camera, ironic complaint. Line 2: short, decisive. Line 3: shocked, disbelieving. Line 4: one word, excited, decisive. Line 5: calm, satisfied, final."
+ },
+ "palych": {
+  "voice": "Sadaltager",
+  "tempo": 1.15,
+  "profile": "Palych — Gena's father-in-law, a grumpy Russian pensioner in his 60s in an ushanka, old-school, believes only in Japanese cars; hoarse, bossy, then unexpectedly warm.",
+  "notes": "Line 1: bossy, categorical. Line 2: outraged, shocked; the first word «Нива» is said very clearly, «НИ-ва». Line 3: suddenly soft, a bit embarrassed, friendly request."
+ },
+ "borya": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.17,
+  "profile": "Uncle Borya — a loud, boastful Russian man in his 50s with a gold chain and a cap, loves Mercedes, a bit of a hustler.",
+  "notes": "Line 1: loud, offended, proud. Line 2: caught, sheepish but sly, trying to sell. Line 3: disappointed, whiny."
+ },
+ "vovan": {
+  "voice": "Sadachbia",
+  "tempo": 1.19,
+  "profile": "Vovan — Gena's young brother-in-law of about 25, cheerful, cheeky, loves Lada.",
+  "notes": "Line 1: cheerful, fast. Line 2: triumphant, gloating."
+ },
+ "semen": {
+  "voice": "Gacrux",
+  "tempo": 1.15,
+  "profile": "Semyonych — a calm, sly Russian pigeon keeper in his 60s in a striped vest, warm hoarse voice, dry humor.",
+  "notes": "One line: calm and kind; the last sentence is a deadpan joke about pigeons, said slowly."
+ }
+}
