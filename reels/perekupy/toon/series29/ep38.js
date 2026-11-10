@@ -60,7 +60,7 @@ add("pz", CAR("car2", "camry/camry_side.png", 250, 1220, 720) + hero("perekup", 
 scene("pz2", "pereezd");
 add("pz2", hero("tolyan", "t7", -20, 900, .76, 7)
   + PHONE("paid", 560, 640, 460, `<div style="font-family:Onest;color:#fff;font-size:34px;text-align:center;padding:18px 0"><div style="font-size:76px">✅</div><b>Кредит погашен</b><br><span style="color:#8b93a3;font-size:24px">день 12 · проценты 2 880 ₽</span></div>`)
-  + stamp("m1", "КРЕДИТ — ЭТО ТАЙМЕР", 90, 1100, "#ff3b30", "#fff", 56, 3)
+  + stamp("m1", "КРЕДИТ — ЭТО ТАЙМЕР", 110, 1100, "#ff3b30", "#fff", 46, 3)
   + `<div class="el" id="nx" style="left:60px;right:60px;top:300px;z-index:20;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:22px 26px;color:#fff;font-family:Unbounded;font-weight:900;font-size:44px;line-height:1.25;text-align:center;opacity:0">ЧАСТЬ 7:<br><span style="color:#ffd23f">машина</span>-<span style="color:#ff3b30">двойник</span></div>
   <div class="ctab" id="cta2" style="top:1300px"><div class="cbig">Бот <span>«Перехват»</span><br>— ссылка в шапке</div><div class="csm">пометки «кредит/залог» · ниже рынка · ~1 с</div></div>`);
 
