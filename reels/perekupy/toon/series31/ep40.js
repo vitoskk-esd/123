@@ -59,7 +59,7 @@ add("shk", MK("car1", 300, 1170, 660) + hero("perekup", "il", 620, 860, .8, 7, I
 scene("flash", "shkola");
 add("flash", MK("car2", 300, 1170, 660) + hero("perekup", "ki", 620, 860, .8, 7, KIRILL)
   + `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:12;background:repeating-linear-gradient(0deg, rgba(60,40,10,.06) 0 3px, transparent 3px 7px)"></div>`
-  + `<div class="el" id="fb" style="left:40px;top:470px;z-index:16;font-family:Unbounded;font-weight:900;font-size:76px;color:#f4e3c8;-webkit-text-stroke:11px #3a2a10;paint-order:stroke fill;transform:rotate(-3deg);opacity:0">МЕСЯЦ НАЗАД…</div>`
+  + `<div class="el" id="fb" style="left:110px;top:470px;z-index:16;font-family:Unbounded;font-weight:900;font-size:62px;color:#f4e3c8;-webkit-text-stroke:11px #3a2a10;paint-order:stroke fill;transform:rotate(-3deg);opacity:0">МЕСЯЦ НАЗАД…</div>`
   + `<div class="el" id="flashw" style="left:0;top:0;width:1080px;height:1920px;z-index:15;background:#fff;opacity:0"></div>`
   + `<div class="el" id="cam1" style="left:740px;top:930px;z-index:16;font-size:90px;opacity:0">📸</div>`);
 // 5. стройка ночью: клонер
