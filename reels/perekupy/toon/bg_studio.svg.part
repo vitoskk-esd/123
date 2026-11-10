@@ -1,0 +1,17 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><radialGradient id="stG" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#243a6b"/><stop offset="1" stop-color="#0d1530"/></radialGradient></defs>
+    <rect width="1080" height="1920" fill="url(#stG)"/>
+    <g stroke="#2c4378" stroke-width="2" opacity=".6"><path d="M0 0 V1000"/><path d="M60 0 V1000"/><path d="M120 0 V1000"/><path d="M180 0 V1000"/><path d="M240 0 V1000"/><path d="M300 0 V1000"/><path d="M360 0 V1000"/><path d="M420 0 V1000"/><path d="M480 0 V1000"/><path d="M540 0 V1000"/><path d="M600 0 V1000"/><path d="M660 0 V1000"/><path d="M720 0 V1000"/><path d="M780 0 V1000"/><path d="M840 0 V1000"/><path d="M900 0 V1000"/><path d="M960 0 V1000"/><path d="M1020 0 V1000"/><path d="M0 0 H1080"/><path d="M0 60 H1080"/><path d="M0 120 H1080"/><path d="M0 180 H1080"/><path d="M0 240 H1080"/><path d="M0 300 H1080"/><path d="M0 360 H1080"/><path d="M0 420 H1080"/><path d="M0 480 H1080"/><path d="M0 540 H1080"/><path d="M0 600 H1080"/><path d="M0 660 H1080"/><path d="M0 720 H1080"/><path d="M0 780 H1080"/><path d="M0 840 H1080"/><path d="M0 900 H1080"/><path d="M0 960 H1080"/></g>
+    <!-- радар -->
+    <g opacity=".9"><circle cx="540" cy="560" r="120" fill="none" stroke="#ff7a1a" stroke-width="5" opacity="0.9"/><circle cx="540" cy="560" r="220" fill="none" stroke="#ff7a1a" stroke-width="5" opacity="0.55"/><circle cx="540" cy="560" r="320" fill="none" stroke="#ff7a1a" stroke-width="5" opacity="0.3"/>
+      <path d="M540 560 L540 240" stroke="#ff7a1a" stroke-width="6" opacity=".8"/>
+      <circle cx="650" cy="420" r="10" fill="#ffd23f" style="filter:drop-shadow(0 0 8px #ffd23f)"/><circle cx="380" cy="640" r="10" fill="#ffd23f" style="filter:drop-shadow(0 0 8px #ffd23f)"/><circle cx="760" cy="690" r="10" fill="#ffd23f" style="filter:drop-shadow(0 0 8px #ffd23f)"/><circle cx="470" cy="330" r="10" fill="#ffd23f" style="filter:drop-shadow(0 0 8px #ffd23f)"/></g>
+    <!-- полка с машинками -->
+    <g><rect x="60" y="300" width="220" height="16" fill="#8a5a33" stroke="#000" stroke-width="4"/><rect x="70" y="270" width="54" height="30" rx="10" fill="#c0392b" stroke="#000" stroke-width="4"/><rect x="140" y="270" width="54" height="30" rx="10" fill="#ffd23f" stroke="#000" stroke-width="4"/><rect x="210" y="270" width="54" height="30" rx="10" fill="#2e86de" stroke="#000" stroke-width="4"/></g>
+    <!-- стол с ноутбуком -->
+    <g><rect x="620" y="880" width="420" height="30" fill="#5b3a26" stroke="#000" stroke-width="6"/><path d="M660 910 v90 M1000 910 v90" stroke="#000" stroke-width="10"/>
+      <path d="M720 880 l20 -110 h200 l20 110 z" fill="#2b2f37" stroke="#000" stroke-width="6"/><rect x="752" y="786" width="176" height="80" fill="#ff7a1a" opacity=".85"/></g>
+    <!-- пол -->
+    <rect y="1000" width="1080" height="920" fill="#1b2442"/><path d="M0 1000 H1080" stroke="#ff7a1a" stroke-width="6" opacity=".7"/>
+    <ellipse cx="540" cy="1500" rx="420" ry="60" fill="#ff7a1a" opacity=".08"/>
+  </svg>
