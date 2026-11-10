@@ -37,7 +37,7 @@ add("bal", hero("tolyan", "t", 600, 880, .8, 7)
   + PHONE("ph1", 30, 700, 560, `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div>`
     + CARD("c1", `<span id="c1t">Toyota Camry 2008 · 480 000 ₽</span><br><b style="color:#ff3b30">❗ кредит/залог</b>`)
     + CARD("c2", `<b style="color:#ff7a1a">🔥 −22% к рынку</b><br><b>Toyota Camry 2008 · 500 000 ₽</b><br>⏱ 1 с · ✅ без ограничений`))
-  + stamp("p1", "ЧАСТЬ 6 · ПЕРВАЯ МАШИНА ЗА ПОЛМИЛЛИОНА", 60, 1600, "#ff2da6", "#fff", 32, -3) + stamp("x1", "МИМО", 380, 820, "#ff3b30", "#fff", 50, -8));
+  + stamp("p1", "ЧАСТЬ 6 · МАШИНА ЗА ПОЛМИЛЛИОНА", 60, 1600, "#ff2da6", "#fff", 34, -3) + stamp("x1", "МИМО", 380, 820, "#ff3b30", "#fff", 50, -8));
 // 2. балкон: ангел и чёрт
 scene("bal2", "balkon");
 add("bal2", hero("tolyan", "t2", 330, 880, .8, 7) + MINI("ta", 290, 920, true) + MINI("td", 580, 920, false));
@@ -60,7 +60,7 @@ add("pz", CAR("car2", "camry/camry_side.png", 250, 1220, 720) + hero("perekup", 
 scene("pz2", "pereezd");
 add("pz2", hero("tolyan", "t7", -20, 900, .76, 7)
   + PHONE("paid", 560, 640, 460, `<div style="font-family:Onest;color:#fff;font-size:34px;text-align:center;padding:18px 0"><div style="font-size:76px">✅</div><b>Кредит погашен</b><br><span style="color:#8b93a3;font-size:24px">день 12 · проценты 2 880 ₽</span></div>`)
-  + stamp("m1", "КРЕДИТ — ЭТО ТАЙМЕР", 330, 1080, "#ff3b30", "#fff", 50, 3)
+  + stamp("m1", "КРЕДИТ — ЭТО ТАЙМЕР", 90, 1100, "#ff3b30", "#fff", 56, 3)
   + `<div class="el" id="nx" style="left:60px;right:60px;top:300px;z-index:20;background:#0d0e12;border:6px solid #fff;border-radius:30px;padding:22px 26px;color:#fff;font-family:Unbounded;font-weight:900;font-size:44px;line-height:1.25;text-align:center;opacity:0">ЧАСТЬ 7:<br><span style="color:#ffd23f">машина</span>-<span style="color:#ff3b30">двойник</span></div>
   <div class="ctab" id="cta2" style="top:1300px"><div class="cbig">Бот <span>«Перехват»</span><br>— ссылка в шапке</div><div class="csm">пометки «кредит/залог» · ниже рынка · ~1 с</div></div>`);
 
