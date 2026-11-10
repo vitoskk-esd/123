@@ -10,6 +10,15 @@ import asr
 
 EPS = sys.argv[1:]; V = json.load(open("voices.json")); os.makedirs("vo", exist_ok=True)
 MODEL = os.environ.get("MODEL", "gemini-3.1-flash-tts-preview")
+# TTS=auto (по умолчанию, владелец 10.11): сначала бесплатный ключ Google (10 запросов в сутки, пары голосов), а когда дневная квота кончилась —
+# оставшихся героев дописываем через OpenRouter (та же модель, платно ~$1 за серию, без лимита, один голос на запрос → по одному герою).
+# TTS=gemini — только Google; TTS=openrouter — сразу OpenRouter. Оба ключа подставляет прокси.
+PROVIDER = os.environ.get("TTS", "auto")
+USE_OR = PROVIDER == "openrouter"
+
+
+class Quota(Exception):
+    """Дневная квота бесплатного Google исчерпана."""
 SR = 24000
 norm = lambda s: re.sub(r"[^а-я0-9a-z]", "", s.lower().replace("ё", "е"))
 # для сопоставления слов Whisper со сценарием — с поправкой на аканье: «Талян» = «Толян», «Сереге» = «Серёге»
@@ -35,9 +44,25 @@ cnt = {}
 for _, _, w, t in lines: cnt[w] = cnt.get(w, 0) + len(t)
 # пары: самого «многословного» (обычно Лис) ставим с самым немногословным — запросы выходят ровнее по длине
 order = sorted(cnt, key=lambda w: -cnt[w]); pairs = []
+if USE_OR: pairs, order = [[w] for w in order], []
 while order:
     a = order.pop(0); b = order.pop(-1) if order else None; pairs.append([a] + ([b] if b else []))
 print("пары:", pairs, "→ запросов:", len(pairs))
+
+
+def request_or(who, out, text):
+    """OpenRouter /audio/speech: тот же промпт (профиль, указания режиссёра, реплики), один голос, ответ — PCM 24 кГц моно."""
+    body = {"model": "google/" + MODEL, "voice": V[who[0]]["voice"], "response_format": "pcm", "input": text}
+    for attempt in range(5):
+        rr = subprocess.run(["curl", "-sS", "-m", "600", "-o", out + ".pcm", "-w", "%{http_code}", "-X", "POST", "-H", "Content-Type: application/json",
+                             "https://openrouter.ai/api/v1/audio/speech", "--data-binary", "@-"], input=json.dumps(body, ensure_ascii=False).encode(), capture_output=True)
+        code = rr.stdout.decode().strip()
+        if code == "200" and os.path.getsize(out + ".pcm") > 2000:
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", out + ".pcm", out], check=True); os.remove(out + ".pcm")
+            print(who, out, round(os.path.getsize(out) / 2 / SR, 1), "с (OpenRouter)"); return True
+        err = open(out + ".pcm", "rb").read()[:300] if os.path.exists(out + ".pcm") else rr.stderr[:300]
+        print(who, "OpenRouter", code, err, "— повтор через 20 с"); time.sleep(20)
+    return False
 
 
 def request(who, out):
@@ -47,6 +72,7 @@ def request(who, out):
              f"between lines. Keep a full, loud, clear voice to the very last word of every line — never whisper, mumble or trail off. "
              f"Speak ONLY the transcript, in Russian.\n## TRANSCRIPT")
     text = "\n".join(f"{names[w]}: {t}" for _, _, w, t in lines if w in who)
+    if USE_OR: return request_or(who, out, f"{style}\n\n{text}")
     sc = ({"multiSpeakerVoiceConfig": {"speakerVoiceConfigs": [{"speaker": names[w], "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": V[w]["voice"]}}} for w in who]}}
           if len(who) == 2 else {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": V[who[0]]["voice"]}}})
     body = {"contents": [{"parts": [{"text": f"{style}\n\n{text}"}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
@@ -66,7 +92,7 @@ def request(who, out):
         if "error" in j:
             msg = j["error"].get("message", "")
             if j["error"].get("code") == 429 and "free_tier_requests" in msg and "PerDay" in json.dumps(j):
-                sys.exit("дневная квота основной модели исчерпана")
+                raise Quota()
             print(who, "ошибка", j["error"].get("code"), msg[:120]); time.sleep(75); continue
         pcm = j["pcm"]
         with open(out, "wb") as f:
@@ -104,12 +130,20 @@ def cut(path, who):
 
 
 def main():
-  per, todo = {}, []
-  for k, who in enumerate(pairs):
+  global USE_OR
+  per, todo, queue = {}, [], [list(p) for p in pairs]
+  while queue:
+      who = queue.pop(0)
       out = f"vo/pair_{'_'.join(who)}.wav"
       if not (os.path.exists(out) and os.path.getsize(out) > 1000):
-          if k and todo: time.sleep(70)
-          if not request(who, out): sys.exit(f"не записал {who}")
+          if todo and not USE_OR: time.sleep(70)
+          try:
+              ok = request(who, out)
+          except Quota:
+              if PROVIDER != "auto": sys.exit("дневная квота бесплатного Google исчерпана (TTS=gemini)")
+              print("бесплатный лимит Google на сегодня кончился — дальше пишу через OpenRouter, по одному герою")
+              USE_OR = True; queue = [[w] for w in who] + [[w] for p in queue for w in p]; continue
+          if not ok: sys.exit(f"не записал {who}")
           todo.append(out)
       for w, e, i, seg in cut(out, who): per.setdefault(w, []).append((e, i, seg))
   gap = np.zeros(int(1.2 * SR), np.float32); idx = {}
