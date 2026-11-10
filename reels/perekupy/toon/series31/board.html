@@ -1,0 +1,105 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// МИНИ-СЕРИАЛ «ТОЛЯН: СО СТА ТЫСЯЧ», часть 7 «Машина-двойник». Новые приёмы: «найди 5 отличий» (две фото рядом, кружки),
+// флешбэк в сепии «месяц назад», погоня-гэг (клонер спотыкается о мешки цемента). Фоны новые: kino, shkola, stroyka. Новые герои: физрук Ильдар,
+// клонер Кирилл, инспектор. Бот: две карточки за ночь — один номер, цена вдвое разная (−35% к рынку) — Толян замечает двойника.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 9) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z}">${html}</div>`;
+let CLK = "", CNTV = ""; const clock = (t) => (CLK = t, ""); const CAP = v => (CNTV = v, "");
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const CAR = (img, l, t, w, z = 3, flip = false) => `<img class="el" src="../../kit/img/${img}" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${flip ? "transform:scaleX(-1)" : ""}">`;
+const PHONE = (l, t, inner, w = 520) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const BOT = (body) => `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div><div style="background:#1c1f26;border-radius:22px;padding:16px 20px;margin-top:10px;font-family:Onest;color:#fff;font-size:30px;line-height:1.45">${body}</div>`;
+const SCORE = (a, b) => `<div class="el" style="left:40px;top:${700 + 24}px;z-index:20;font-family:'JetBrains Mono';font-weight:800;font-size:38px;color:#fff;background:#151515;border:5px solid #ff2da6;border-radius:16px;padding:2px 16px;white-space:nowrap">ЖОРА ${a} : ${b} ТОЛЯН</div>`;
+const CASH = (l, t, n = 5) => Array.from({ length: n }, (_, i) => `<div class="el" style="left:${l + i * 26}px;top:${t - i * 10}px;width:150px;height:76px;z-index:8;background:#8fd17a;border:5px solid #151515;border-radius:8px;transform:rotate(${-10 + i * 5}deg)"></div>`).join("");
+const ZHORA = { jacket: "#1d1d1f", pants: "#2b2f37", cap: "#c0392b", mustache: true, chain: true, hair: "#1d1d1f", item: "phone", look: "grin" };
+const ALBUM = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">${[0, 1, 2, 3].map(k => `<div style="height:90px;border-radius:10px;background:${["#7fb2a0", "#9fc3b8", "#6f9f8f", "#8fbfae"][k]};position:relative">${k === 2 ? '<div style="position:absolute;left:30%;top:20%;width:46px;height:46px;border:6px solid #ff3b30;border-radius:50%"></div>' : ""}</div>`).join("")}</div>`;
+const MARKS = (l, t) => [[0, 0], [150, 6]].map(([dx, dy]) => `<div class="el" style="left:${l + dx}px;top:${t + dy}px;width:110px;height:60px;z-index:4;border:5px dashed #ff7a1a;background:rgba(255,255,255,.7);border-radius:6px"></div>`).join("");
+const ILDAR = { jacket: "#1f4fb8", pants: "#1f4fb8", hair: "#1d1d1f", cap: "#fff" };
+const KIRILL = { jacket: "#2b2f37", pants: "#151515", cap: "#151515", beard: true, hair: "#3a2d22", item: "phone", look: "grin" };
+const COP = { police: true, jacket: "#2a3a5a", pants: "#1f2a44", mustache: true };
+const MK = (l, t, w, z = 3) => CAR("markii/markii_cherry.png", l, t, w, z);
+const PLATE = (l, t, w = 150) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:6;background:#fff;border:4px solid #151515;border-radius:6px;text-align:center;font-family:'JetBrains Mono';font-weight:800;font-size:${w / 6}px;color:#151515">О777ОР 69</div>`;
+const RING = (l, t, r = 70) => `<div class="el" style="left:${l - r}px;top:${t - r}px;width:${2 * r}px;height:${2 * r}px;border:8px solid #ff3b30;border-radius:50%;z-index:16;box-shadow:0 0 14px #ff3b30"></div>`;
+const PHOTO = (l, t, label, diff) => `<div class="el" style="left:${l}px;top:${t}px;width:480px;height:360px;z-index:14;background:#e8ecf0;border:10px solid #fff;box-shadow:0 0 0 6px #151515, 0 16px 0 6px rgba(0,0,0,.4);overflow:hidden">`
+  + `<div style="position:absolute;inset:0;background:linear-gradient(#bfe0f5 0 55%,#8d949c 55%)"></div><img src="../../kit/img/markii/markii_cherry.png" style="position:absolute;left:20px;top:110px;width:440px">`
+  + `<div style="position:absolute;left:180px;top:250px;width:90px;background:#fff;border:3px solid #151515;font-family:'JetBrains Mono';font-weight:800;font-size:14px;text-align:center">О777ОР 69</div>`
+  + (diff ? `<div style="position:absolute;left:330px;top:120px;width:40px;height:30px;background:#ffd23f;border:3px solid #151515;transform:rotate(12deg)"></div>` : `<div style="position:absolute;left:300px;top:90px;width:6px;height:60px;background:#151515"></div>`)
+  + `<div style="position:absolute;left:10px;top:10px;background:#151515;color:#fff;font-family:Unbounded;font-weight:900;font-size:22px;padding:4px 10px">${label}</div></div>`;
+const S = [
+ { h: "ТОЛЯН: СО СТА ТЫСЯЧ · 7", tc: "1/7 · 0:00–0:11", bg: "kino", y: 700, els: () => CAP("350 000") + clock("23:12") + ch("tolyan", "t", 620, 880, .78, 6)
+     + PHONE(30, 740, BOT(`<b style="color:#ff7a1a">🔥 −35% к рынку</b><br><b>Toyota Mark II 2002 · 330 000 ₽</b><br>🚘 О777ОР 69`, 26) + BOT(`<b>Toyota Mark II 2002 · 690 000 ₽</b><br>🚘 О777ОР 69 · <span style="color:#ff3b30">тот же номер?!</span>`, 26).replace("ПЕРЕХВАТ · бот", ""), 560)
+     + bub("Так не бывает,<br><em>брат.</em>", 620, 720) + lab("ЧАСТЬ 7 · МАШИНА-ДВОЙНИК", 40, 1330, "#ff2da6", "#fff", 36, -3),
+   vo: "Лис: «Триста пятьдесят тысяч. Ночью бот прислал две одинаковые Марк Два. Номер один и тот же. А цена — вдвое разная». Толян: «Так не бывает, брат».", who: "Лис + Толян",
+   mv: "<b>Новый фон — у кинотеатра ночью</b> (неон «КИНО», афиши, попкорн). Толян вышел с сеанса — на телефоне две карточки бота с одним номером. Капитал 350 000 (итог части 6)." },
+ { h: "НАЙДИ 5 ОТЛИЧИЙ", tc: "2/7 · 0:11–0:20", bg: "kino", y: 700, els: () => CAP("350 000") + `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:12;background:rgba(10,8,20,.7)"></div>`
+     + PHOTO(40, 760, "330 000 ₽", true) + PHOTO(560, 760, "690 000 ₽", false) + RING(370, 905, 40) + RING(860, 885, 40)
+     + `<div class="el" style="left:40px;right:40px;top:1160px;z-index:16;text-align:center;font-family:Unbounded;font-weight:900;font-size:60px;color:#fff;-webkit-text-stroke:10px #151515;paint-order:stroke fill">НАЙДИ 5 ОТЛИЧИЙ</div>`,
+   vo: "Лис: «Номер один. А диски, антенна, скол на бампере — разные. Одна из них — двойник».", who: "Лис",
+   mv: "<b>Приём 1 — «найди 5 отличий»:</b> две фотографии Марка рядом, красные кружки появляются по одному (наклейка, антенна, диски, скол, противотуманка). Зритель ищет вместе с Толяном." },
+ { h: "ШКОЛА № 12 · НАСТОЯЩИЙ ВЛАДЕЛЕЦ", tc: "3/7 · 0:20–0:28", bg: "shkola", y: 700, els: () => CAP("350 000") + MK(300, 1170, 660) + ch("perekup", "il", 620, 860, .8, 6, ILDAR) + ch("tolyan", "t", -20, 900, .76, 6)
+     + bub("Моя машина под окном стоит!<br><em>И номер мой!</em>", 360, 720),
+   vo: "Лис: «Толян позвонил по дорогому объявлению». Ильдар: «Моя машина под окном стоит! И номер мой!»", who: "Лис + Ильдар",
+   mv: "<b>Новый фон — школьный двор</b> (школа № 12, турник, ворота, парковка учителей). <b>Новый герой — физрук Ильдар</b> (синий спортивный костюм, белая кепка) — настоящий владелец." },
+ { h: "ФЛЕШБЭК · МЕСЯЦ НАЗАД", tc: "4/7 · 0:28–0:35", bg: "shkola", y: 700, els: () => MK(300, 1170, 660) + ch("perekup", "ki", 620, 860, .8, 6, KIRILL)
+     + `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:12;backdrop-filter:sepia(1) contrast(1.1) brightness(.9);background:rgba(120,80,30,.12)"></div>`
+     + `<div class="el" style="left:40px;top:740px;z-index:16;font-family:Unbounded;font-weight:900;font-size:56px;color:#f4e3c8;-webkit-text-stroke:9px #3a2a10;paint-order:stroke fill;transform:rotate(-3deg)">МЕСЯЦ НАЗАД…</div>`
+     + `<div class="el" style="left:700px;top:1000px;z-index:16;font-size:90px">📸</div>`,
+   vo: "Лис: «Месяц назад кто-то сфотографировал её номер прямо у школы».", who: "Лис",
+   mv: "<b>Приём 2 — флешбэк в сепии:</b> тот же двор, всё в коричневых тонах, плёночное зерно, надпись «МЕСЯЦ НАЗАД…». Незнакомец в капюшоне фотографирует номер — вспышка 📸." },
+ { h: "СТРОЙКА · НОЧЬ", tc: "5/7 · 0:35–0:45", bg: "stroyka", y: 700, els: () => CAP("350 000") + MK(300, 1170, 660) + PLATE(560, 1360) + ch("perekup", "ki", 620, 860, .8, 6, KIRILL) + ch("tolyan", "t", -20, 900, .76, 6)
+     + bub("Документы в порядке, брат.<br><em>Только наличкой и быстро.</em>", 380, 720),
+   vo: "Кирилл: «Документы в порядке, брат. Только наличкой и быстро». Толян: «Деньги в машине. Сейчас…»", who: "Кирилл + Толян",
+   mv: "<b>Новый фон — стройка ночью</b> (каркас дома, башенный кран, прожектор, бетонные блоки). <b>Новый герой — клонер Кирилл</b> (тёмная толстовка, кепка, борода). Толян тянет время." },
+ { h: "ПОЛИЦИЯ · ПЛЮХ", tc: "6/7 · 0:45–0:55", bg: "stroyka", y: 700, els: () => CAP("350 000") + MK(300, 1170, 660) + ch("perekup", "cp", 620, 860, .8, 6, COP) + ch("perekup", "ki", 160, 1040, .7, 7, { ...KIRILL, look: "o" })
+     + `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:5;background:radial-gradient(circle at 80% 40%, rgba(46,134,222,.35), transparent 50%), radial-gradient(circle at 20% 40%, rgba(255,59,48,.3), transparent 50%)"></div>`
+     + bub("Гражданин,<br><em>документы на машину.</em>", 520, 720) + lab("ПЛЮХ!", 120, 1330, "#ffd23f", "#151515", 60, -6),
+   vo: "Инспектор: «Гражданин, документы на машину». Лис: «Кирилл побежал. Недалеко — до первого мешка с цементом. Двойника искали полгода. Нашли за одну ночь».", who: "Инспектор + Лис",
+   mv: "<b>Приём 3 — погоня-гэг:</b> сине-красные мигалки, инспектор с фонарём, Кирилл бежит и спотыкается о мешки цемента — «ПЛЮХ!». <b>Новый герой — инспектор</b> (форма, усы)." },
+ { h: "ШКОЛА · ПРИГЛАШЕНИЕ + КРЮЧОК", tc: "7/7 · 0:55–1:08", bg: "shkola", y: 700, els: () => CAP("350 000 ±0") + MK(300, 1170, 660) + ch("perekup", "il", 620, 860, .8, 6, { ...ILDAR }) + ch("tolyan", "t", -20, 900, .76, 6)
+     + bub("Брат, у нас вся учительская<br><em>машины меняет. Приходи!</em>", 320, 720)
+     + `<div class="el" style="left:60px;right:60px;top:1250px;z-index:12;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:24px;color:#c0392b;margin-bottom:8px">ЧАСТЬ 8: ШКОЛЬНАЯ ПАРКОВКА</div><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">новые объявления через ~1 с · ниже рынка</div></div>` + FOX(440, 1090, 160),
+   vo: "Ильдар: «Брат, у нас вся учительская машины меняет. Приходи!» Лис: «Толян не заработал ни рубля. Но и не потерял триста тридцать. В восьмой части — школьная парковка. Подпишись, чтобы не пропустить».", who: "Ильдар + Лис",
+   mv: "Снова школьный двор: Ильдар жмёт руку Толяну и зовёт к учителям. Капитал «350 000 ±0». Крючок на часть 8 + финальная карточка." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els(); if (CNTV) document.querySelector(".view").insertAdjacentHTML("beforeend", `<div class="cnt" style="top:auto;bottom:20px;left:auto;right:20px">💸 ${CNTV} ₽</div>`); if (CLK) document.getElementById("h").insertAdjacentHTML("beforebegin", `<span class="clk">${CLK}</span>`);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+const sh = document.getElementById("t-shades"); if (sh) sh.style.display = "";
+["t", "il", "ki", "cp"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
