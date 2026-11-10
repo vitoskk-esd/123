@@ -78,9 +78,11 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     if new and not admin:
         await notify_new_user(bot, ctx, msg.from_user, source)
     channels = await ctx.db.channel_count_for(msg.from_user.id)
-    trial = T.WELCOME_TRIAL if ctx.cfg.payments_on else ""
+    trial = ""                      # о пробном дне — отдельным сообщением-подарком ниже (и только тем, кто его не брал)
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu(admin))
     await send_welcome_photos(bot, ctx, f.id)    # примеры карточек — одни и те же фото из папки welcome/
+    if not admin:
+        await send_gift(msg, ctx, f.id)             # «дарю пробный день» — один раз на аккаунт
     if ctx.reader and not ctx.reader.online and admin:
         await msg.answer(T.NEED_CONNECT)
         return
@@ -150,6 +152,11 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
     except Exception as e:
         log.warning("«что пропустил» не посчитали: %s", e)
         n, cheap, items = -1, 0, []
+    u = await ctx.db.user(uid)
+    if ctx.cfg.payments_on and can_trial(u) and not plans.current(ctx.cfg, u) and not await is_admin_id(ctx, uid):
+        until = await activate_trial(ctx, uid)           # первый фильтр — подаренный пробный день включается сам
+        if until:
+            await cb.message.answer(T.TRIAL_ON.format(until=fmt_date(until), first=""))
     if not plans.current(ctx.cfg, await ctx.db.user(uid)):      # без тарифа машины не придут — сразу говорим
         await cb.answer()
         if n > 0:
@@ -397,7 +404,27 @@ async def show_stats(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None 
 
 # ---------- подписка ----------
 def can_trial(u) -> bool:
-    return not u["trial_used"] and u["paid_until"] <= time.time()
+    now = time.time()
+    return bool(u) and not u["trial_used"] and u["paid_until"] <= now and u["trial_until"] <= now
+
+
+async def activate_trial(ctx: Ctx, uid: int) -> float | None:
+    """Включает пробный день; None — аккаунт его уже брал (один раз на Telegram-аккаунт)."""
+    now = time.time()
+    until = now + plans.plans(ctx.cfg)["trial"].days * DAY
+    if not await ctx.db.take_trial(uid, until, now):
+        return None
+    await ctx.db.event(uid, "trial")
+    return until
+
+
+async def send_gift(msg: Message, ctx: Ctx, uid: int) -> None:
+    """«Дарю тебе пробный день» — один раз на аккаунт и только тем, кто его ещё не брал."""
+    if not ctx.cfg.payments_on or not can_trial(await ctx.db.user(uid)):
+        return
+    if await ctx.db.mark_once(f"gift:{uid}"):
+        hint = T.GIFT_HINT_OLD if await ctx.db.filters(uid) else T.GIFT_HINT_NEW
+        await msg.answer(T.GIFT.format(hint=hint), reply_markup=K.gift())
 
 
 def plans_text(ctx: Ctx, u) -> str:
@@ -420,7 +447,7 @@ async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
     plan = plans.current(ctx.cfg, u)
     status = (T.SUB_FREE if plan is plans.FREE else
               T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
-              if plan else T.SUB_STATUS_NONE)
+              if plan else "")          # нет тарифа — про статус ничего не пишем (владелец 10.11)
     status = (intro + "\n\n" if intro else "") + status
     caption = T.PLANS_CAPTION.format(
         status=status,
@@ -463,9 +490,10 @@ async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
         await cb.message.answer(T.TRIAL_USED, reply_markup=K.plans(all_plans, False))
         return await cb.answer()
     if plan.id == "trial" and not plan.price:            # пробный день бесплатный — включаем сразу, без оплаты
-        until = time.time() + plan.days * 86400
-        await ctx.db.set_user(cb.from_user.id, paid_until=until, plan="trial", trial_used=1)
-        await ctx.db.event(cb.from_user.id, "trial")
+        until = await activate_trial(ctx, cb.from_user.id)
+        if not until:                                    # двойное нажатие / уже брал
+            await cb.message.answer(T.TRIAL_USED, reply_markup=K.plans(all_plans, False))
+            return await cb.answer()
         nf = len(await ctx.db.filters(cb.from_user.id))
         text = T.TRIAL_ON.format(until=fmt_date(until), first=T.TRIAL_ON_FIRST if nf > 1 else "") + ("" if nf else T.TRIAL_NO_FILTER)
         await cb.message.answer(text, reply_markup=K.menu())
@@ -565,5 +593,6 @@ async def free_text(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     """Написал что-то без кнопок — если это похоже на фильтр, предлагаем сохранить."""
     if await ctx.db.user(msg.from_user.id) is None:
         await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, None, None, ctx.cfg.trial_days)
+        await send_gift(msg, ctx, msg.from_user.id)
     if not await show_filter_card(msg, ctx, state, msg.text, T.FREE_TEXT_FILTER):
         await show_help(msg, ctx, state)

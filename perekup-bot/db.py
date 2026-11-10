@@ -163,6 +163,20 @@ class DB:
         assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used"}, fields
         await self._run(f"UPDATE users SET {', '.join(f'{k}=?' for k in fields)} WHERE id=?", *fields.values(), uid)
 
+    async def take_trial(self, uid: int, until: float, now: float) -> bool:
+        """Включает пробный день одной операцией. False — этот Telegram-аккаунт его уже брал (или у него есть доступ):
+        пробный день строго один раз на аккаунт, даже при двойном нажатии."""
+        cur = await self.conn.execute("UPDATE users SET paid_until=?, plan='trial', trial_used=1 "
+                                      "WHERE id=? AND trial_used=0 AND paid_until<=? AND trial_until<=?", (until, uid, now, now))
+        await self.conn.commit()
+        return cur.rowcount == 1
+
+    async def gift_candidates(self, now: float, limit: int = 20) -> list:
+        """Кому ещё не дарили пробный день: не брал его, нет доступа, бота не заблокировал."""
+        return await self._all("SELECT * FROM users WHERE blocked=0 AND trial_used=0 AND paid_until<=? AND trial_until<=? "
+                               "AND NOT EXISTS (SELECT 1 FROM marks WHERE key='gift:'||users.id) ORDER BY created_at LIMIT ?",
+                               now, now, limit)
+
     async def mark_blocked(self, uid: int) -> None:
         await self._run("UPDATE users SET blocked=1 WHERE id=?", uid)
 

@@ -127,12 +127,14 @@ async def env(tmp_path):
         await ctx.db.close()
 
 
-async def make_filter(dp, bot, text, uid=USER, plan="pro"):
-    """Человек с оплаченным тарифом (по умолчанию PRO) создаёт фильтр."""
+async def make_filter(dp, bot, text, uid=USER, plan="pro", trial_used=False):
+    """Человек с оплаченным тарифом (по умолчанию PRO) создаёт фильтр. trial_used — пробный день он уже брал."""
     await dp.feed_update(bot, msg("/start reels", uid))
+    ctx = dp["ctx"]
     if plan:
-        ctx = dp["ctx"]
         await ctx.db.set_user(uid, paid_until=time.time() + 30 * 86400, plan=plan)
+    if trial_used:
+        await ctx.db.set_user(uid, trial_used=1)
     await dp.feed_update(bot, msg(text, uid))
     await dp.feed_update(bot, cb("f:save", uid))
 
@@ -211,11 +213,11 @@ async def test_channels_own_and_disable(env):
 async def test_no_plan_then_buy_basic(env):
     """Без тарифа машины не приходят; оплатил «Простой» — приходят 30 дней; повторный «Я оплатил» не продлевает дважды."""
     dp, bot, s, ctx = env
-    await make_filter(dp, bot, "приора до 300к", plan=None)
-    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — бесплатно" in s.texts(USER)[-1]
+    await make_filter(dp, bot, "приора до 300к", plan=None, trial_used=True)     # пробный день уже брал
+    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — бесплатно" not in s.texts(USER)[-1]
     assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == []
     await dp.feed_update(bot, msg("💳 Подписка"))
-    assert "Подписки нет" in s.texts(USER)[-1] and "Простой — 1390 ₽" in s.texts(USER)[-1] and "PRO — 2490 ₽" in s.texts(USER)[-1]
+    assert "Твой тариф" not in s.texts(USER)[-1] and "Простой — 1390 ₽" in s.texts(USER)[-1] and "PRO — 2490 ₽" in s.texts(USER)[-1]
     assert isinstance(s.sent[-1], SendPhoto)                              # тарифы — картинкой-сравнением
 
     await dp.feed_update(bot, cb("s:pay:basic"))
@@ -237,7 +239,7 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     """Пробный день — бесплатно на 24 часа, сразу по кнопке, один раз; в нём 1 фильтр; «Простой» — до 2 фильтров; переход на PRO не сжигает дни."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
-    assert any("Пробный день — бесплатно" in t for t in s.texts(USER))
+    assert any("Дарю тебе пробный день" in t for t in s.texts(USER))
     await dp.feed_update(bot, cb("s:pay:trial"))
     assert await ctx.db.last_pending(USER) is None                           # без оплаты
     u = await ctx.db.user(USER)
@@ -1791,11 +1793,12 @@ async def test_missed_preview_before_plan(env):
               "Hyundai Solaris 2016, 700 000 ₽"):
         await process(bot, ctx, post(CH1, t))
     await dp.feed_update(bot, msg("/start"))
+    await ctx.db.set_user(USER, trial_used=1)                                # пробный день уже брал — показываем «что пропустил»
     await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
     texts = s.texts(USER)
     preview = next(t for t in texts if "За последние сутки под этот фильтр вышло" in t)
     assert "вышло 2 машины" in preview and "Toyota Camry" in preview and "900 000 ₽" in preview and "+7 999" not in preview
-    assert "бесплатный пробный день" in texts[-1] and "Пробный день — бесплатно" in str([getattr(m, "reply_markup", None) for m in s.sent if getattr(m, "chat_id", None) == USER and getattr(m, "reply_markup", None)][-1])
+    assert "выбери тариф" in texts[-1] and "Простой" in str([getattr(m, "reply_markup", None) for m in s.sent if getattr(m, "chat_id", None) == USER and getattr(m, "reply_markup", None)][-1])
     await dp.feed_update(bot, msg("приора до 100к")); await dp.feed_update(bot, cb("f:save"))
     assert any("ничего не вышло" in t for t in s.texts(USER))
 
@@ -1812,3 +1815,68 @@ async def test_trial_ends_offers_month_plans(env):
     assert "Пробный день закончился" in last.text and "Простой — 1390 ₽" in last.text and "PRO — 2490 ₽" in last.text
     btns = [b.callback_data for row in last.reply_markup.inline_keyboard for b in row]
     assert btns == ["s:pay:basic", "s:pay:pro"]
+
+
+async def test_gift_on_start_and_auto_trial_on_first_filter(env):
+    """После /start — «Дарю тебе пробный день» (один раз); не нажал кнопку — день включается сам на первом фильтре (владелец 10.11)."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    gifts = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER and "Дарю тебе пробный день" in m.text]
+    assert len(gifts) == 1 and "включится сам" in gifts[0].text
+    assert [b.callback_data for row in gifts[0].reply_markup.inline_keyboard for b in row] == ["s:pay:trial"]
+    await dp.feed_update(bot, msg("/start"))                                 # повторный /start — подарок не повторяем
+    assert sum("Дарю тебе пробный день" in t for t in s.texts(USER)) == 1
+    await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
+    u = await ctx.db.user(USER)
+    assert u["plan"] == "trial" and u["trial_used"] == 1 and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
+    assert any("Пробный день включён" in t for t in s.texts(USER)) and "Фильтр сохранён" in s.texts(USER)[-1]
+    assert sum(1 for e in await ctx.db._all("SELECT * FROM events WHERE kind='trial'")) == 1
+    await dp.feed_update(bot, cb("s:pay:trial"))                            # кнопка из подарка после автовключения — уже нельзя
+    assert "только один раз" in s.texts(USER)[-1]
+    await dp.feed_update(bot, msg("💳 Подписка"))                            # в «Подписке» — текущий тариф
+    assert "Твой тариф сейчас: Пробный день" in s.texts(USER)[-1]
+
+
+async def test_trial_once_per_account_even_on_double_click(env):
+    """Двойное нажатие «Включить пробный день» — включается один раз; после окончания второй раз не дают."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, cb("s:pay:trial")); await dp.feed_update(bot, cb("s:pay:trial"))
+    assert len(await ctx.db._all("SELECT * FROM events WHERE kind='trial'")) == 1
+    await ctx.db.set_user(USER, paid_until=time.time() - 60)
+    assert not await ctx.db.take_trial(USER, time.time() + 86400, time.time())
+    await dp.feed_update(bot, msg("приора до 300к")); await dp.feed_update(bot, cb("f:save"))
+    assert (await ctx.db.user(USER))["paid_until"] < time.time()            # первый фильтр тоже не включает второй раз
+
+
+async def test_gift_broadcast_to_old_users(env):
+    """Кто запускал бота раньше и пробный не брал — получает подарок один раз; бравшие и платящие — нет."""
+    import jobs
+    dp, bot, s, ctx = env
+    await ctx.db.add_user(USER, "u", "U", None, None, 0)
+    await ctx.db.add_user(OTHER, "o", "O", None, None, 0)
+    await ctx.db.set_user(OTHER, trial_used=1)                               # уже брал пробный день
+    await make_admins_pro_if_any(ctx)
+    await jobs.tick(bot, ctx)
+    await jobs.tick(bot, ctx)
+    assert sum("Дарю тебе пробный день" in t for t in s.texts(USER)) == 1
+    assert not any("Дарю тебе пробный день" in t for t in s.texts(OTHER))
+    await dp.feed_update(bot, msg("/start"))                                  # и на /start потом не дублируем
+    assert sum("Дарю тебе пробный день" in t for t in s.texts(USER)) == 1
+
+
+async def make_admins_pro_if_any(ctx):
+    from admin import make_admins_pro
+    await make_admins_pro(ctx)
+
+
+async def test_sub_screen_shows_current_plan_only_when_active(env):
+    """«Подписка»: есть тариф — «Твой тариф сейчас: PRO — до …»; нет — про статус ни слова."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    await ctx.db.set_user(USER, trial_used=1)
+    await dp.feed_update(bot, msg("💳 Подписка"))
+    assert "Твой тариф" not in s.texts(USER)[-1] and "Подписки нет" not in s.texts(USER)[-1]
+    await ctx.db.set_user(USER, paid_until=time.time() + 5 * 86400, plan="pro")
+    await dp.feed_update(bot, msg("💳 Подписка"))
+    assert "Твой тариф сейчас: PRO" in s.texts(USER)[-1] and "МСК" in s.texts(USER)[-1]

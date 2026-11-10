@@ -40,6 +40,11 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
             continue
         if until:
             await send(bot, ctx, p["user_id"], T.PAY_OK.format(plan=all_plans[p["plan"] or "basic"].title, until=fmt_date(until)))
+    # подарок «пробный день» тем, кто запускал бота раньше и его не брал — по 20 человек за проход, каждому один раз
+    for u in await ctx.db.gift_candidates(now, 20):
+        if await ctx.db.mark_once(f"gift:{u['id']}"):
+            hint = T.GIFT_HINT_OLD if await ctx.db.filters(u["id"]) else T.GIFT_HINT_NEW
+            await send(bot, ctx, u["id"], T.GIFT.format(hint=hint), K.gift())
     # тариф скоро закончится: пробный день — за 3 часа, месячный — за сутки
     for u in await ctx.db.users("paid_until>? AND paid_until<?", now, now + DAY):
         plan = all_plans.get(u["plan"] or "basic", all_plans["basic"])
