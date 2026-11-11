@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.18,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "You narrate part 9 of a comedy mini-series about Tolyan, a young used-car flipper growing his capital. Deadpan, dry irony; numbers said fully. «Мерседес сто двадцать четыре» is the Mercedes W124, a classic car."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.26,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "Line 1: respectful but excited, revealing the real price. Line 2: cocky, happy, phones are ringing."
+ },
+ "ildar": {
+  "voice": "Alnilam",
+  "tempo": 1.21,
+  "profile": "Ildar — an energetic Russian school PE teacher in his 30s in a tracksuit and a white cap, loud and cheerful, calls everyone «брат».",
+  "notes": "Line 1: loud, amazed, gossiping. Line 2: shocked, shouting across the stadium."
+ },
+ "dir": {
+  "voice": "Schedar",
+  "tempo": 1.16,
+  "profile": "Viktor Andreevich — a polite, formal Russian school headmaster in his 50s in a suit, a bit pompous, official tone.",
+  "notes": "Line 1: formal, a bit embarrassed, slow; the last word «ведро» said with hurt pride. Line 2: formal, touched, official tone, small pause after «Анатолий»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "One line: loud, excited, bragging; «Студент» as a mocking nickname for the young rival; «кабан» is slang for the Mercedes W124."
+ }
+}
