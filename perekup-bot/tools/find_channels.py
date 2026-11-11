@@ -99,6 +99,8 @@ def parse_page(html: str) -> dict | None:
 
 def judge(name: str, p: dict, region_hint: str | None) -> dict:
     j = finder.judge(p["posts"], D, title=p["title"], about=p["desc"], subs=p["subs"], min_subs=MIN_SUBS, min_week=MIN_WEEK)
+    if j["ok"] and not finder.CAR_TITLE.search(f'{p["title"]} {p["desc"]} {name}'):
+        j.update(ok=False, reason="не автомобильный канал")        # телефоны, техника: «цена» есть, машин нет
     if not j["region"]:
         reg = D.guess_region(p["title"], name) or region_hint
         j["region"] = D.regions.get(reg, reg) if reg else ""
@@ -166,16 +168,16 @@ def write(st: dict) -> None:
     for fn, data, extra in (("channels.csv", rows, []), ("rejected.csv", rej, [("reason", "Почему отсеян")])):
         with open(OUT / fn, "w", newline="", encoding="utf-8-sig") as f:
             w = csv.writer(f); w.writerow([c[1] for c in cols + extra])
-            for r in data: w.writerow([("@" + r[k]) if k == "username" else r[k] for k, _ in cols + extra])
+            for r in data: w.writerow([("@" + r[k]) if k == "username" else r.get(k, "") for k, _ in cols + extra])
     from openpyxl import Workbook
     from openpyxl.styles import Font
     wb = Workbook(); ws = wb.active; ws.title = "Каналы"
     ws.append([c[1] for c in cols]); [setattr(c, "font", Font(bold=True)) for c in ws[1]]
-    for r in rows: ws.append([("@" + r[k]) if k == "username" else r[k] for k, _ in cols])
+    for r in rows: ws.append([("@" + r[k]) if k == "username" else r.get(k, "") for k, _ in cols])
     for col, wdt in zip("ABCDEFGHIJK", (24, 34, 36, 22, 12, 10, 10, 10, 10, 80, 12)): ws.column_dimensions[col].width = wdt
     ws.freeze_panes = "A2"; ws.auto_filter.ref = ws.dimensions
     ws2 = wb.create_sheet("Отсеяны"); ws2.append([c[1] for c in cols] + ["Почему отсеян"])
-    for r in rej: ws2.append([("@" + r[k]) if k == "username" else r[k] for k, _ in cols] + [r["reason"]])
+    for r in rej: ws2.append([("@" + r[k]) if k == "username" else r.get(k, "") for k, _ in cols] + [r["reason"]])
     wb.save(OUT / "channels.xlsx")
     print("итог:", len(rows), "подходят,", len(rej), "отсеяно (авто, но не по условиям)")
 
