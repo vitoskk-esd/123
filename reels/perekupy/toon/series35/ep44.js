@@ -55,8 +55,13 @@ add("izba", hero("sv", 600, 880, .78, SAVVA) + hero("fd2", 20, 880, .8, FEDOR)
   + ROOSTER("roo", 690, 470, .8) + stamp("t500", "05:00", 40, 1380, "#151515", "#ff3b30", 64, -2));
 // 3. двор: забор, сосед Митрич, его Прадо
 scene("dvor", "dvor");
-add("dvor", CAR("pr1", "prado/prado_34.png", 470, 700, 580, 2, "clip-path:inset(0 0 152px 0)")
-  + hero("mt", 640, 600, .62, MITRICH, 3, "clip-path:inset(0 0 412px 0)") + hero("fd3", 20, 740, .8, FEDOR)
+// забор — отдельным слоем поверх Митрича и его Прадо: они стоят целиком у себя во дворе, тело видно сквозь щели штакетника (владелец 12.11:
+// «у Митрича пол тела нет» — раньше он был обрезан по линии забора). Рисунок — тот же, что в bg_dvor.
+const FENCE = `<svg class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:4;pointer-events:none" viewBox="0 0 1080 1920">
+  <rect x="0" y="860" width="1080" height="20" fill="#8a5a33" stroke="#000" stroke-width="4"/><rect x="0" y="940" width="1080" height="20" fill="#8a5a33" stroke="#000" stroke-width="4"/>
+  ${Array.from({ length: 32 }, (_, i) => `<path d="M${i * 34} 1000 v-170 l14 -18 l14 18 v170 z" fill="#c9a26b" stroke="#000" stroke-width="4"/>`).join("")}</svg>`;
+add("dvor", CAR("pr1", "prado/prado_34.png", 470, 700, 580, 2)
+  + hero("mt", 640, 534, .62, MITRICH, 3) + FENCE + hero("fd3", 20, 740, .8, FEDOR)
   + stamp("addr", "ул. Лесная, 12 = СОСЕД", 300, 1130, "#ffd23f", "#151515", 44, -3)
   + `<div class="chat" id="miss" style="left:430px;top:1110px">📞 Митричу: <span id="mcnt" style="color:#ff3b30">0</span> пропущенных</div>`
   + `<div class="el hen" id="hen">🐔</div>`);
@@ -73,11 +78,11 @@ const bub = (line, html, l, t, tx, fs) => { const b = bubble(line, html, l, t, t
 bub("f1", "Опять всё<br><em>оборвали.</em>", 40, 720, 128, 48);
 bub("g1", "Фёдор, свежая газета!<br><em>Ну… позавчерашняя.</em>", 380, 700, 380, 38);
 bub("s1", "Дядь Федь, это каменный век.<br><em>Ставлю тебе бота.</em>", 330, 700, 410, 34);
-bub("m1", "Федя, ты чего<br><em>так рано?</em>", 520, 450, 230, 40);
+bub("m1", "Федька, ты чего<br><em>так рано?</em>", 520, 380, 230, 40);
 bub("f2", "Митрич… это ж<br><em>твой Прадо?!</em>", 30, 590, 128, 38);
-bub("m2", "Внук в телеграм выложил. Сказал —<br><em>на столб уже никто не смотрит.</em>", 330, 450, 420, 30);
+bub("m2", "Внук в телеграм выложил. Сказал —<br><em>на столб уже никто не смотрит.</em>", 330, 380, 420, 30);
 bub("f3", "Беру. Скинешь —<br><em>за сено и мёд?</em>", 30, 590, 128, 38);
-bub("m3", "Сено — давай.<br><em>Мёд себе оставь.</em>", 520, 450, 230, 40);
+bub("m3", "Сено — давай.<br><em>Мёд себе оставь.</em>", 520, 380, 230, 40);
 bub("g2", "Фёдор, тут Прадо продают —<br><em>по соседству!</em>", 30, 700, 128, 34);
 bub("f4", "Знаю, Гриша.<br><em>Я на нём.</em>", 600, 700, 270, 44);
 
@@ -133,8 +138,8 @@ window.build = R => {
   // 3. двор: адрес = сосед; голова над забором; торг
   swap("izba", "dvor", SW.dvor);
   slam("#addr", W("l4", "забор"), "impact"); hide("#addr", st.m1 + .2);
-  tl.fromTo("#MT", { y: 200 }, { y: 0, duration: .45, ease: "back.out(1.6)", immediateRender: false }, st.m1 - .6); R.sfx("pop", st.m1 - .5, .6);
-  tl.set("#MT", { y: 200 }, 0);
+  gsap.set("#MT", { opacity: 0 });                                         // выглядывает из-за дома к своей реплике — целиком, без обрезки
+  tl.fromTo("#MT", { opacity: 0, x: 140 }, { opacity: 1, x: 0, duration: .45, ease: "power2.out", immediateRender: false }, st.m1 - .6); R.sfx("pop", st.m1 - .5, .6);
   tl.fromTo("#hen", { x: 0, y: 0, opacity: 1 }, { x: -520, y: -60, duration: 1.1, ease: "power1.inOut", immediateRender: false }, st.f2 + .2); R.sfx("swish", st.f2 + .2, .5);
   R.punch(cam, W("f2", "прадо"), .07);
   tl.fromTo("#miss", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: .3, immediateRender: false }, st.l5);
