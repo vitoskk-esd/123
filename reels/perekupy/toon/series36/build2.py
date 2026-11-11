@@ -1,0 +1,8 @@
+# python3 build2.py ep06 → ep06.html (каркас + фон локации + сценарий; сцена — ep06.js/.css)
+import json, sys
+# фоны всех локаций — для серий со сменой сцен (bgs.js, генерируется)
+json_bgs = {k: open(f"../bg_{k}.svg.part").read() for k in ["city", "night", "garages", "highway", "sto", "winter", "market", "mall", "dealer", "interior", "tireshop", "pit", "ditch", "mreo", "window", "desk", "dacha", "room", "train", "yard", "azs", "dps", "citysign", "shrot", "container", "hood", "flood", "dryroom", "parking", "impound", "stairs", "bank", "cross", "parkade", "numgarage", "expert", "detective", "kitchen", "hq", "minibus", "taxipark", "paintbooth", "clinic", "street", "police", "cafe", "lot", "ferris", "carwash", "sauna", "banya", "port", "flat", "embank", "airfield", "icecross", "zimnik", "box", "metro", "coffee", "kiosk", "shed", "podezd", "vokzal", "barber", "bizpark", "gibdd", "razbor", "pochta", "shaurma", "laundry", "sad", "most", "bilyard", "zhk", "tramvai", "elektrik", "park", "fitnes", "pekarnya", "prospekt", "chastnik", "kampus", "spalnya", "bankomat", "balkon", "stomat", "mangal", "prichal", "pereezd", "aeroport", "gostinaya", "kino", "shkola", "stroyka", "ostanovka", "lift", "golubyatnya", "shkpark", "kabinet", "masterskaya", "uchitelskaya", "derevnya", "dvor", "izba", "kabdir", "garazh", "stadion"]}
+open("bgs.js", "w").write("window.BGS=" + json.dumps(json_bgs, ensure_ascii=False) + ";")
+ID = sys.argv[1]; sp = json.load(open(f"{ID}.json"))
+s = open("base.tpl.html").read().replace("@@BG@@\n", open(f"../bg_{sp['location']}.svg.part").read()).replace("@@ID@@", ID)
+open(f"{ID}.html", "w").write(s.replace("@@EP@@", json.dumps(sp, ensure_ascii=False)))
