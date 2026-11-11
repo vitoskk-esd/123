@@ -68,8 +68,14 @@ def _exclusions(text: str) -> tuple[str, list[str], list[str]]:
     return t, markers, words
 
 
-NUMBER = re.compile(rf"(?P<pre>от|с|до|не старше|не дороже|не больше|бюджет|за|пробег\w*(?: до)?|-|–|—)?\s*"
-                    rf"(?P<num>\d+(?:[.,]\d+)?)\s*(?P<unit>{MLN}|{THS}|₽|руб\w*|р\b|км|km|г\.?|год\w*|\+)?")
+NUMBER = re.compile(rf"(?<![а-яa-z])(?P<pre>от|с|до|не старше|не дороже|не больше|бюджет|за|пробег\w*(?: до)?|-|–|—)?\s*"
+                    rf"(?<![a-zа-я\d])(?P<num>\d+(?:[.,]\d+)?)\s*(?P<unit>{MLN}|{THS}|₽|руб\w*|р\b|км|km|г\.?|год\w*|\+)?")
+
+
+# поколения/кузова, которые пишут голым числом после модели: «камри 40», «прадо 120», «крузак 200» — это не цена (владелец, 11.11)
+GENERATIONS = {"Camry": {30, 35, 40, 45, 50, 55, 70, 75}, "Land Cruiser Prado": {78, 90, 95, 120, 150, 250}, "Land Cruiser": {70, 80, 100, 105, 200, 300},
+               "Lancer": {9, 10}, "Corolla": {120, 150, 180}, "RX": {300, 330, 350, 400, 450}, "Mark II": {90, 100, 110}, "Chaser": {90, 100}}
+MAKE_CODES = {"mercedes": {124, 140, 163, 164, 166, 202, 203, 204, 205, 210, 211, 212, 213, 220, 221, 222, 463}}   # «мерс 124», «мерин 211»
 
 
 def parse_filter(text: str, d: Dictionary) -> Filter:
@@ -93,8 +99,11 @@ def parse_filter(text: str, d: Dictionary) -> Filter:
     years, prices = [], []
     for m in NUMBER.finditer(t):
         pre, num, unit = (m.group("pre") or ""), m.group("num"), (m.group("unit") or "")
-        if re.fullmatch(r"\d{4}", num) and any(num == tok for tok in tokens) and d.find_cars([num]):
-            continue                                   # «2114» — это модель, а не число
+        if (re.fullmatch(r"\d{4}", num) or not pre and not unit) and any(num == tok for tok in tokens) and d.find_cars([num]):
+            continue                                   # «2114», «бмв 525» — это модель, а не число
+        if not pre and not unit and num.isdigit() and (any(int(num) in GENERATIONS.get(md, ()) for _, md in f.cars)
+                                                       or any(int(num) in MAKE_CODES.get(mk, ()) for mk, _ in f.cars)):
+            continue                                   # «камри 40», «прадо 120», «мерс 124» — поколение/кузов
         value = _to_int(num, unit if re.match(rf"{MLN}|{THS}", unit) else "")
         if value is None:
             continue

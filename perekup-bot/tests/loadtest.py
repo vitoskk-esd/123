@@ -3,6 +3,7 @@
 Сеть Telegram подменена: каждый запрос бота «идёт» 60–180 мс, как в жизни. ИИ выключен (у него свои лимиты).
 
     python tests/loadtest.py [постов в секунду] [секунд]      # по умолчанию 10 постов/с 60 с — в разы больше реального потока
+    USERS=30 HISTORY=60000 python tests/loadtest.py 1 120     # 30 человек, база «за месяц» (60 000 старых объявлений), 1 пост/с
 """
 import asyncio
 import random
@@ -30,7 +31,9 @@ from pipeline import RawPost, process
 from test_flow import FakePay, cb, msg
 from words import load_dictionary
 
+import os
 RATE = float(sys.argv[1]) if len(sys.argv) > 1 else 10
+USERS = int(os.environ.get("USERS", 100)); HISTORY = int(os.environ.get("HISTORY", 0))
 SECONDS = int(sys.argv[2]) if len(sys.argv) > 2 else 60
 random.seed(1)
 CARS = [("Toyota Camry", 900, 2600), ("Hyundai Solaris", 500, 1300), ("Kia Rio", 500, 1400), ("Lada Vesta", 600, 1300),
@@ -96,15 +99,27 @@ async def main() -> None:
     dp = build_dispatcher(ctx); dp["ctx"] = ctx; dp.fsm.storage = MemoryStorage()
     net = NetSession(); bot = Bot("1:x", session=net.session)
 
-    # 100 человек: старт, 1–3 фильтра, тарифы
-    users = list(range(10_000, 10_100))
+    # база «в возрасте»: старые объявления (рынок, «что ты пропустил» и дубли считаются по ним)
+    if HISTORY:
+        now = time.time(); rows = []
+        for i in range(HISTORY):
+            car, lo, hi = random.choice(CARS); mk, md = car.split(" ", 1)
+            rows.append((chans_id := 1 + i % 500, i, now - random.uniform(0, 30 * 86400), f"h{i}", f"k{i}", mk.lower(), md.lower(),
+                         random.randint(2008, 2023), random.randint(lo, hi) * 1000, random.randint(20, 280) * 1000, None, 0, 1, "history"))
+        await ctx.db.conn.executemany("INSERT INTO posts (channel_id, msg_id, at, fp, ckey, make, model, year, price, mileage, region, dup, clean, parsed_by) "
+                                      "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+        await ctx.db.conn.commit()
+    # люди: старт, тариф, 1–3 фильтра
+    users = list(range(10_000, 10_000 + USERS))
     t0 = time.perf_counter()
     async def onboard(uid, k):
         await dp.feed_update(bot, msg(f"/start {'inst' if k % 2 else 'threads'}", uid))
-        for f in random.sample(FILTERS, random.randint(1, 3)):
-            await dp.feed_update(bot, msg(f, uid)); await dp.feed_update(bot, cb("f:save", uid))
-        plan = "pro" if k < 60 else "basic" if k < 90 else "trial"
+        plan = "pro" if k < USERS * .6 else "basic" if k < USERS * .9 else "trial"
         await ctx.db.set_user(uid, paid_until=time.time() + 30 * 86400, plan=plan)
+        for f in random.sample(FILTERS, random.randint(1, 3)):
+            await dp.feed_update(bot, msg(f, uid))
+            t = time.perf_counter(); await dp.feed_update(bot, cb("f:save", uid)); save_times.append(time.perf_counter() - t)
+    save_times: list = []
     await asyncio.gather(*(onboard(u, k) for k, u in enumerate(users)))
     print("онбординг готов", flush=True)
     onboard_s = time.perf_counter() - t0
@@ -138,7 +153,10 @@ async def main() -> None:
     sent = sum(len(r.sent) for _, r in results); delayed = sum(len(r.delayed) for _, r in results)
     cars = sum(1 for _, r in results if r.post_id)
     pct = lambda xs, p: xs[min(len(xs) - 1, int(len(xs) * p))] if xs else 0
-    print(f"люди: {len(users)}, фильтров: {filters}, онбординг всех сразу: {onboard_s:.1f} с")
+    print(f"люди: {len(users)}, фильтров: {filters}, онбординг всех сразу: {onboard_s:.1f} с, сохранение фильтра (с «что пропустил»): "
+          f"медиана {statistics.median(save_times) * 1000:.0f} мс, макс {max(save_times) * 1000:.0f} мс; старых объявлений в базе: {HISTORY}")
+    import jobs
+    t = time.perf_counter(); await jobs.tick(bot, ctx); print(f"фоновая проверка тарифов (раз в 30 с): {(time.perf_counter() - t) * 1000:.0f} мс")
     print(f"источников: {len(chans)} (ТГ 300 + ВК 200)")
     print(f"постов: {n_posts} за {flow_s:.0f} с ({RATE:g}/с), машин с ценой: {cars}")
     print(f"доставлено сразу (PRO/пробный): {sent}, отложено «Простому»: {delayed}, всего запросов к Telegram: {net.calls}")

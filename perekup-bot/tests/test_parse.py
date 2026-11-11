@@ -337,3 +337,17 @@ def test_credit_offer_is_not_encumbrance(tail, credit):
 def test_mileage_number_before_word():
     L = parse_post("Citroen C3, 2008\n1.4 AMT\n🟢170.000 ПРОБЕГ🟢\nЦена: 175.000 💰", D)
     assert L.mileage == 170000
+
+
+def test_filter_generation_is_not_price():
+    """Поколение/кузов голым числом — не цена (11.11): «камри 40» раньше становилось «до 40 000 ₽», «прадо 120» — «до 120 000 ₽»."""
+    for text, car in [("камри 40", ["toyota", "Camry"]), ("прадо 120", ["toyota", "Land Cruiser Prado"]), ("крузак 200", ["toyota", "Land Cruiser"]),
+                      ("лансер 10", ["mitsubishi", "Lancer"]), ("мерин w211", ["mercedes", "E-класс"]), ("бэха е39", ["bmw", "5 серии"]),
+                      ("бмв 525", ["bmw", "5 серии"]), ("икс5", ["bmw", "X5"]), ("икс 5", ["bmw", "X5"]), ("оутлендер", ["mitsubishi", "Outlander"])]:
+        f = parse_filter(text, D)
+        assert f.cars == [car] and f.price_max is None and f.price_min is None, (text, f)
+    f = parse_filter("камри 55 от 2015 до 2,5 млн", D)
+    assert (f.price_max, f.year_min) == (2_500_000, 2015)
+    assert parse_filter("приора 250", D).price_max == 250_000          # обычная цена в тысячах — как раньше
+    assert parse_filter("прадо до 3 млн", D).price_max == 3_000_000
+    assert parse_filter("мерс 124 до 500к", D).price_max == 500_000

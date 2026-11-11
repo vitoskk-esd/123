@@ -340,13 +340,16 @@ async def missed(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int = 3) 
         if matches(base, L, None):
             hits.append((r, L))
     # оценка рынка — только для подошедших (не больше 80), как в карточке
-    found, cheap = [], 0
+    found, cheap, mkt = [], 0, {}          # рынок — один раз на модель и год: у подошедших машин они обычно повторяются
     for r, L in hits[:80]:
         disc = None
         if L.make and L.model and L.year:
-            prices = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, r["id"])
-            if len(prices) >= MARKET_MIN:
-                m = median(prices)
+            key = (L.make, L.model, L.year)
+            if key not in mkt:
+                prices = await ctx.db.market_prices(L.make, L.model, L.year, now - MARKET_DAYS * DAY, 0)
+                mkt[key] = median(prices) if len(prices) > MARKET_MIN else None   # > — «без самой машины» осталось бы ≥ MARKET_MIN
+            m = mkt[key]
+            if m:
                 disc = round((m - L.price) / m * 100)
         if f.min_discount and (disc is None or disc < f.min_discount or not matches(f, L, disc)):
             continue

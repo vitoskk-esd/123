@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE INDEX IF NOT EXISTS posts_fp ON posts(fp, at);
 CREATE INDEX IF NOT EXISTS posts_ckey ON posts(ckey, at);
 CREATE INDEX IF NOT EXISTS posts_market ON posts(make, model, year, at);
+CREATE INDEX IF NOT EXISTS posts_at ON posts(at);
 CREATE TABLE IF NOT EXISTS deliveries (
   id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, post_id INTEGER, fp TEXT, ckey TEXT, filter_id INTEGER,
   discount INTEGER, latency_ms INTEGER, at REAL
