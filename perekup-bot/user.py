@@ -121,6 +121,10 @@ async def got_filter(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     if msg.text.startswith("/") or msg.text in MENU:
         await state.clear()
         return await MENU[msg.text](msg, ctx, state) if msg.text in MENU else None
+    from admin import mostly_links
+    if mostly_links(msg.text) and await is_admin(msg, ctx):      # админ вставил ссылки на каналы, а не фильтр
+        await state.clear()
+        return await add_to_base(msg, ctx)
     if not await show_filter_card(msg, ctx, state, msg.text, T.FILTER_CARD):
         await msg.answer(T.FILTER_EMPTY)
 
@@ -328,33 +332,9 @@ def vk_note(ctx: Ctx, text: str) -> str:
 
 
 async def add_to_base(msg: Message, ctx: Ctx) -> None:
-    """Админ присылает каналы через «📢 Каналы» — они сразу идут в общую базу для всех, без лимитов тарифа."""
-    uid = msg.from_user.id
-    replies, queued = [], []
-    for line in [x for x in re.split(r"[\s,]+", msg.text) if x]:
-        link = parse_link(line)
-        if not link:
-            replies.append(T.CHANNEL_BAD.format(link=line[:60]))
-            continue
-        kind, value = link
-        cid, _ = await ctx.db.add_channel(**{kind: value}, base=True, added_by=uid)   # свой канал админа тоже станет общим
-        await ctx.db.set_channel_state(uid, cid, None)
-        ch = await ctx.db.channel(cid)
-        name = ch["title"] or label(kind, value)
-        if ch["status"] == "joined":
-            replies.append(T.CHANNEL_BASE_ADDED.format(name=name))
-        elif ch["status"] == "awaiting":
-            await ctx.db.add_approval_waiter(cid, uid)
-            replies.append(T.CHANNEL_AWAITING.format(name=name))
-        else:
-            if ch["status"] == "failed":
-                await ctx.db._run("UPDATE channels SET status='queued', error=NULL WHERE id=?", cid)
-            await ctx.db.add_waiter(cid, uid)
-            replies.append(T.CHANNEL_BASE_QUEUED.format(name=name))
-            queued.append(cid)
-    await ctx.refresh_channels()
-    wait = (await queue_wait(ctx, queued) if queued else "") + vk_note(ctx, msg.text)
-    await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL_ADMIN, reply_markup=K.menu(True))
+    """Админ присылает каналы через «📢 Каналы» — они сразу идут в общую базу для всех, без лимитов тарифа (итог — одним ответом)."""
+    from admin import add_links_to_base
+    await add_links_to_base(msg, ctx, msg.text, markup=K.menu(True))
 
 
 @router.callback_query(F.data.startswith("c:base:") | F.data.startswith("c:tg:"))
@@ -594,5 +574,8 @@ async def free_text(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     if await ctx.db.user(msg.from_user.id) is None:
         await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, None, None, ctx.cfg.trial_days)
         await send_gift(msg, ctx, msg.from_user.id)
+    from admin import mostly_links
+    if mostly_links(msg.text) and await is_admin(msg, ctx):      # админ просто вставил список ссылок — сразу в базу
+        return await add_to_base(msg, ctx)
     if not await show_filter_card(msg, ctx, state, msg.text, T.FREE_TEXT_FILTER):
         await show_help(msg, ctx, state)

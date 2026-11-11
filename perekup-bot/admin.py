@@ -2,6 +2,7 @@
 import asyncio
 import logging
 import html
+import re
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -71,6 +72,77 @@ async def queue_wait(ctx: Ctx, channel_ids: list[int]) -> str:
     minutes = max(1, round(wait / 60))
     every = f"{interval} с" if interval < 60 else f"{interval / 60:g} мин".replace(".", ",")
     return T.CHANNELS_WAIT.format(minutes=minutes, interval=every)
+
+async def answer_long(msg: Message, text: str, **kw) -> None:
+    """Длинный ответ — частями по строкам: Telegram не принимает сообщения длиннее 4096 символов
+    (из-за этого на список из сотни ссылок бот молчал — владелец 12.11)."""
+    while text:
+        cut = text.rfind("\n", 0, 3800) if len(text) > 3800 else len(text)
+        cut = cut if cut > 0 else min(len(text), 3800)
+        await msg.answer(text[:cut], link_preview_options=LinkPreviewOptions(is_disabled=True), **kw)
+        text = text[cut:].lstrip("\n")
+
+
+def link_tokens(text: str) -> tuple[list, list[str]]:
+    """Ссылки на каналы/группы из текста (без повторов) и куски, которые на ссылку не похожи."""
+    links, bad, seen = [], [], set()
+    for tok in [x for x in re.split(r"[\s,;]+", text or "") if x]:
+        link = parse_link(tok)
+        if not link:
+            bad.append(tok[:60])
+        elif link not in seen:
+            seen.add(link); links.append(link)
+    return links, bad
+
+
+async def add_links_to_base(msg: Message, ctx: Ctx, text: str, region: str | None = None, markup=None) -> None:
+    """Админ присылает ссылки (через /add, «📢 Каналы» или просто сообщением) → в общую базу. Отвечает итогом:
+    сколько взял в работу, какие уже были в базе / в очереди / ждут одобрения, что не понял."""
+    uid = msg.from_user.id
+    links, bad = link_tokens(text)
+    if not links:
+        return await msg.answer("Пришли ссылки на каналы или группы ВК: @канал, t.me/канал, t.me/+приглашение, vk.com/группа"
+                                + (f"\n\nНе понял: {', '.join(bad[:20])}" if bad else ""), reply_markup=markup)
+    taken, retry, ready, in_queue, awaiting, queued_ids = [], [], [], [], [], []
+    for kind, value in links:
+        cid, new = await ctx.db.add_channel(**{kind: value}, region=region, base=True, added_by=uid)
+        await ctx.db.set_channel_state(uid, cid, None)
+        ch = await ctx.db.channel(cid)
+        name = ch["title"] or label(kind, value)
+        if ch["status"] == "joined":
+            ready.append(name)
+        elif ch["status"] == "awaiting":
+            await ctx.db.add_approval_waiter(cid, uid)
+            awaiting.append(name)
+        else:
+            if ch["status"] == "failed":
+                await ctx.db._run("UPDATE channels SET status='queued', error=NULL WHERE id=?", cid)
+            await ctx.db.add_waiter(cid, uid)
+            queued_ids.append(cid)
+            (taken if new else retry if ch["status"] == "failed" else in_queue).append(name)
+    await ctx.refresh_channels()            # уже подключённый свой канал стал общим — посты сразу всем
+    lst = lambda xs: ", ".join(xs)
+    parts = [f"📥 Получил ссылок: <b>{len(links)}</b>."]
+    if taken or retry:
+        parts.append(f"✅ <b>Взял в работу: {len(taken) + len(retry)}</b> — подключаю по одному, потом они будут в общей базе для всех.\n{lst(taken + retry)}")
+    if ready:
+        parts.append(f"♻️ <b>Уже были в базе и работают: {len(ready)}</b> — ничего делать не нужно.\n{lst(ready)}")
+    if in_queue:
+        parts.append(f"⏳ <b>Уже стоят в очереди на подключение: {len(in_queue)}</b> — повторно не добавлял.\n{lst(in_queue)}")
+    if awaiting:
+        parts.append(f"🔐 <b>Ждут одобрения админа канала: {len(awaiting)}</b> — напишу, когда одобрят.\n{lst(awaiting)}")
+    if bad:
+        parts.append(f"❌ <b>Не понял (не ссылка на канал): {len(bad)}</b>\n{lst(bad)}")
+    wait = (await queue_wait(ctx, queued_ids) + "\nХод подключения — в /list.") if queued_ids else ""
+    vk_off = T.VK_OFFLINE if any(k == "vk" for k, _ in links) and not vk_online(ctx) else ""
+    await answer_long(msg, "\n\n".join(parts) + wait + vk_off, reply_markup=markup)
+
+
+def mostly_links(text: str) -> bool:
+    """Сообщение — список ссылок на каналы (а не фильтр «камри до 1 млн»)."""
+    links, bad = link_tokens(text)
+    return bool(links) and len(links) >= len(bad)
+
 
 @router.message(Command("admin"))
 async def admin(msg: Message, ctx: Ctx) -> None:
@@ -361,26 +433,7 @@ async def addbase(msg: Message, command: CommandObject, ctx: Ctx) -> None:
         return
     parts = (command.args or "").split()
     region = parts[-1] if parts and parts[-1] in ctx.dict.regions else None
-    added, bad, queued = [], [], []
-    for p in parts[:-1] if region else parts:
-        link = parse_link(p)
-        if not link:
-            bad.append(p)
-            continue
-        cid, new = await ctx.db.add_channel(**{link[0]: link[1]}, region=region, base=True, added_by=msg.from_user.id)
-        status = (await ctx.db.channel(cid))["status"]
-        if status == "awaiting":                               # заявка у админа канала — напишу, когда одобрит
-            await ctx.db.add_approval_waiter(cid, msg.from_user.id)
-        elif status != "joined":                               # уже подключён — ждать нечего
-            await ctx.db.add_waiter(cid, msg.from_user.id)
-            queued.append(cid)
-        added.append(label(*link) + ("" if new else " (уже был)"))
-    await ctx.refresh_channels()            # уже подключённый свой канал стал общим — посты сразу всем
-    await msg.answer(
-        (f"В очередь на подключение: {len(added)}\n" + "\n".join(added) if added else "Пришли ссылки: /add @канал1 t.me/канал2") +
-        (f"\n\nНе понял: {', '.join(bad)}" if bad else "") +
-        (await queue_wait(ctx, queued) + "\nХод подключения — в /list." if queued else "") +
-        (T.VK_OFFLINE if any(parse_link(p) and parse_link(p)[0] == "vk" for p in parts) and not vk_online(ctx) else ""))
+    await add_links_to_base(msg, ctx, " ".join(parts[:-1] if region else parts), region)
 
 
 @router.message(Command("similar"))

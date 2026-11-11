@@ -867,7 +867,8 @@ async def test_admin_adds_channels_straight_to_base(env):
     assert "общую базу" in s.texts(ADMIN)[-1]
     await dp.feed_update(bot, msg("@my_secret_cars\n@avto_kzn", ADMIN))
     reply = s.texts(ADMIN)[-1]
-    assert "«My Secret Cars» — в общей базе" in reply and "@avto_kzn» — в очереди" in reply and "PRO" not in reply
+    assert "Получил ссылок: <b>2</b>" in reply and "Уже были в базе и работают: 1" in reply and "My Secret Cars" in reply
+    assert "Взял в работу: 1" in reply and "@avto_kzn" in reply and "PRO" not in reply
     r = await process(bot, ctx, post(OWN, "Toyota Camry 2013, 1 200 000 ₽"))
     assert sorted(r.sent) == [USER, ADMIN] and not r.delayed                       # админ всегда PRO — сразу
     assert (await ctx.db.queued_channels())[0]["base"] == 1
@@ -1987,3 +1988,23 @@ async def test_admin_vkfind_table(env):
     wb = load_workbook(io.BytesIO(doc.document.data))
     assert [r[0].value for r in wb["ВКонтакте"].iter_rows(min_row=2)] == ["https://vk.com/g11"]
     assert {r[9].value for r in wb["Отсеяны"].iter_rows(min_row=2)} == {"импорт / под заказ", "посты не каждый день (4 из 7)"}
+
+
+async def test_admin_bulk_links_report(env):
+    """Админ вставляет 300 ссылок просто сообщением (без кнопки и /add) — бот отвечает итогом, частями ≤ 4096 символов:
+    сколько взял в работу, какие уже в базе, какие уже в очереди, что не понял. Раньше длинный ответ Telegram отклонял — бот «молчал»."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    links = [f"https://t.me/new_avto_channel_{i}" for i in range(300)]
+    before = len(s.sent)
+    await dp.feed_update(bot, msg("\n".join(links + ["@avto_msk", "привет"]), ADMIN))
+    out = [m.text for m in s.sent[before:] if isinstance(m, SendMessage)]
+    assert out and all(len(t) <= 4096 for t in out) and len(out) >= 2
+    text = "\n".join(out)
+    assert "Получил ссылок: <b>301</b>" in text and "Взял в работу: 300" in text and "Уже были в базе и работают: 1" in text
+    assert "Не понял (не ссылка на канал): 1" in text and "привет" in text
+    await dp.feed_update(bot, msg("/add t.me/new_avto_channel_5 t.me/new_avto_channel_6", ADMIN))
+    assert "Уже стоят в очереди на подключение: 2" in s.texts(ADMIN)[-1] and "Взял в работу" not in s.texts(ADMIN)[-1]
+    before = len(s.sent)
+    await dp.feed_update(bot, msg("t.me/some_cars_x", USER))                    # обычный человек — не в базу
+    assert not await ctx.db._one("SELECT 1 FROM channels WHERE username='some_cars_x' AND base=1")
