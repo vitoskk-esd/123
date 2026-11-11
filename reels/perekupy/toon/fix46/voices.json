@@ -1,0 +1,14 @@
+{
+ "erik": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.12,
+  "profile": "Erik — a slick Russian car flipper in his 30s pretending to be a private owner, too sweet and smooth, in sunglasses.",
+  "notes": "Line 1: smooth, reassuring, a bit too sweet. Line 2: careless slip of the tongue, fast — he lists colors because he has several cars, then realizes. Line 3: the same slip again, slower and clearly, like a replay. Line 4: dismissive, pushy, fake-friendly «Брат»."
+ },
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.18,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Standalone episode of the rubric «Схемы»: a car flipper pretends to be the owner. Deadpan, dry irony. «ПТС» is said «пэ-тэ-эс». «Перехват» is the name of a bot. Line «Стоп. Перемотаем.» — sudden, playful, like pressing pause."
+ }
+}

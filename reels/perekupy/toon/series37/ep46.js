@@ -49,6 +49,8 @@ add("lot", FIVE.map((f, k) => CAR("s" + k, "hyundai/hyundai.png", -10 + k * 220,
   + CAR("s_one", "hyundai/hyundai.png", 400, 1180, 560, 3) + hero("er", 600, 760, .85, ERIK) + hero("ly2", -10, 800, .8, { ...LYOHA, item: "" })
   + PTS("pts1", 300, 720, 450, ["Иванов", "Ахметов", "ООО «Лизинг»", "Петров", "Сидорова", "Кузин"])
   + stamp("five", "ОДИН ХОЗЯИН — ПЯТЬ МАШИН", 40, 1480, "#ff3b30", "#fff", 44, -3)
+  + stamp("gap", "КУПИЛ 600 → ПРОДАЁТ 790 · +190 000", 30, 1440, "#ffd23f", "#151515", 36, -2)
+  + stamp("dtp", "ИСТОРИЯ АВАРИЙ — ?", 60, 1550, "#ff3b30", "#fff", 40, 2)
   + `<div class="el vhs" id="vhs"></div><div class="el rew" id="rew">⏪ REW</div>`);
 // рассвет: лётчик Максим, ПТС один владелец; финал
 scene("dawn", "ploshchadka");
@@ -64,6 +66,7 @@ bub("y2", "А цвет какой —<br><em>белый?</em>", 40, 600, 380, 44
 bub("e2", "Белый, серый, чёрный —<br><em>вам какой из них?..</em>", 280, 640, 470, 36);
 bub("e3", "…вам какой<br><em>из них?..</em>", 380, 640, 370, 44);
 bub("y3", "Спасибо.<br><em>Я подумаю.</em>", 20, 640, 128, 36);
+bub("e4", "Брат, да какая разница,<br><em>на кого записан?</em>", 420, 600, 420, 32);
 bub("m1", "Лечу в Мурманск.<br><em>В ПТС один владелец — я.</em>", 420, 640, 300, 34);
 bub("y4", "Беру!", 40, 660, 128, 60);
 
@@ -82,7 +85,7 @@ window.build = R => {
   // жёсткие склейки такси ↔ стоянка (монтаж вперемешку), потом свайпы
   const CUT = { lot1: st.e1 - .3, taxi2: st.y2 - .25, lot2: st.e2 - .25, taxi3: st.l4 - .35, dawn: st.m1 - .6 };
   const ends = Object.values(CUT).sort((a, b) => a - b);
-  for (const l of ["y1", "e1", "y2", "e2", "e3", "y3", "m1", "y4"]) {
+  for (const l of ["y1", "e1", "y2", "e2", "e3", "y3", "e4", "m1", "y4"]) {
     const cap = ends.find(x => x > st[l]) ?? 1e9, n = nxt(l);
     pop("#b_" + l, st[l] - .05, Math.min(en[l] + .9, n ? st[n] - .1 : en[l] + 1, cap - .05));
   }
@@ -116,15 +119,19 @@ window.build = R => {
   // 5. отъезд: пять Солярисов
   tl.to(["#s_one"], { opacity: 0, duration: .2 }, st.l2 - .2);
   tl.to("#ER", { x: -220, y: 40, scale: .82 * .82, duration: .5, ease: "power2.inOut" }, st.l2 - .3);
-  FIVE.forEach((_, k) => { tl.fromTo("#s" + k, { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: .25, ease: "back.out(1.6)", immediateRender: false }, W("l2", "солярис") + k * .12); R.sfx("pop", W("l2", "солярис") + k * .12, .4); });
+  FIVE.forEach((_, k) => { tl.fromTo("#s" + k, { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: .25, ease: "back.out(1.6)", immediateRender: false }, st.l2 + .1 + k * .15); R.sfx("pop", st.l2 + .1 + k * .15, .4); });
   slam("#five", W("l2", "пять"), "boom");
   // 6. ПТС-гармошка: Лёха пришёл, строки раскладываются вниз
-  hide("#five", st.l3 - .2); FIVE.forEach((_, k) => hide("#s" + k, st.l3 - .2)); tl.to("#s_one", { opacity: 1, duration: .2 }, st.l3 - .2);
+  hide("#five", st.l3 + .5); FIVE.forEach((_, k) => hide("#s" + k, st.l3 + .5)); tl.to("#s_one", { opacity: 1, duration: .2 }, st.l3 + .5);
   tl.to("#ER", { x: 160, y: 20, scale: .75 / .85 * .85, duration: .4 }, st.l3 - .3);
   tl.fromTo("#LY2", { opacity: 0, x: -200 }, { opacity: 1, x: 0, duration: .4, immediateRender: false }, st.l3 - .3);
   tl.to("#pts1", { opacity: 1, duration: .15 }, W("l3", "птс") - .1);
   [0, 1, 2, 3, 4, 5].forEach(k => { tl.fromTo("#pts1_r" + k, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: .15, immediateRender: false }, W("l3", "шест") + k * .18); R.sfx("tap", W("l3", "шест") + k * .18, .5); });
   slam("#pts1_v", W("l3", "эрик"), "impact");
+  // «какая разница?» — разница в деньгах и в истории машины
+  tl.to("#pts1", { opacity: 0, duration: .2 }, st.l3b);
+  slam("#gap", W("l3b", "600"), "impact"); slam("#dtp", W("l3b", "ездил") - .6, "boom");
+  hide(["#gap", "#dtp"], CUT.taxi3 - .05);
   // 7. такси 03:10: бот
   cut("lot", "taxi", CUT.taxi3);
   tl.set("#d1", { opacity: 0 }, CUT.taxi3).set("#d2", { opacity: 1 }, CUT.taxi3);
