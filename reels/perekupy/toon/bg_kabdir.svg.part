@@ -14,8 +14,12 @@
     <!-- пол и стол директора -->
     <rect y="1000" width="1080" height="920" fill="#8c5f3a"/><path d="M0 1000 H1080" stroke="#000" stroke-width="7"/>
     <g stroke="#7a522b" stroke-width="5"><path d="M0 1070 H1080"/><path d="M0 1150 H1080"/><path d="M0 1230 H1080"/><path d="M0 1310 H1080"/><path d="M0 1390 H1080"/><path d="M0 1470 H1080"/><path d="M0 1550 H1080"/><path d="M0 1630 H1080"/><path d="M0 1710 H1080"/><path d="M0 1790 H1080"/><path d="M0 1870 H1080"/></g>
-    <g><rect x="160" y="1300" width="760" height="50" fill="#5b3a1e" stroke="#000" stroke-width="7"/><rect x="190" y="1290" width="700" height="18" fill="#2f6b3a" stroke="#000" stroke-width="4"/>
-      <rect x="190" y="1350" width="140" height="300" fill="#5b3a1e" stroke="#000" stroke-width="6"/><rect x="750" y="1350" width="140" height="300" fill="#5b3a1e" stroke="#000" stroke-width="6"/>
-      <path d="M260 1290 q0 -40 30 -50 h80 q30 10 30 50 z" fill="#151515" stroke="#000" stroke-width="4"/><circle cx="330" cy="1262" r="18" fill="#e8ecf0" stroke="#000" stroke-width="3"/>
-      <rect x="600" y="1250" width="160" height="40" fill="#fff" stroke="#000" stroke-width="4"/><rect x="620" y="1230" width="120" height="20" fill="#f4efe2" stroke="#000" stroke-width="3"/></g>
+    <!-- стол директора — у стены, на заднем плане (владелец 12.11: «директор стоит прямо на столе»), герои стоят перед ним -->
+    <g><rect x="300" y="900" width="480" height="34" fill="#5b3a1e" stroke="#000" stroke-width="6"/><rect x="318" y="892" width="444" height="12" fill="#2f6b3a" stroke="#000" stroke-width="3"/>
+      <rect x="318" y="934" width="90" height="150" fill="#5b3a1e" stroke="#000" stroke-width="5"/><rect x="672" y="934" width="90" height="150" fill="#5b3a1e" stroke="#000" stroke-width="5"/>
+      <path d="M360 892 q0 -28 22 -34 h56 q22 6 22 34 z" fill="#151515" stroke="#000" stroke-width="3"/><circle cx="410" cy="872" r="12" fill="#e8ecf0" stroke="#000" stroke-width="2"/>
+      <rect x="560" y="862" width="110" height="30" fill="#fff" stroke="#000" stroke-width="3"/><rect x="574" y="848" width="82" height="14" fill="#f4efe2" stroke="#000" stroke-width="2"/>
+      <path d="M520 930 l-30 150 M560 930 l30 150" stroke="none"/></g>
+    <!-- кресло за столом -->
+    <path d="M500 892 v-120 q40 -30 80 0 v120" fill="#3b2a1a" stroke="#000" stroke-width="5"/>
   </svg>

@@ -53,8 +53,10 @@ add("st2", `<div class="el bids" id="bids"><small>ТОРГИ · Mercedes W124</s
 scene("kab2", "kabdir");
 add("kab2", hero("dr3", 600, 840, .82, { ...DIR, look: "grin" }) + tol("t5", 20, 880, .78) + ORDER("ord2", 40, 1220, ["1. Продать отцовский Мерседес — честно.", "2. Купить машину, на которой не стыдно."])
   + PHONE("cping", 300, 1060, 560, BOT(`<b style="color:#ff7a1a">🔥 −8% к рынку</b><br><b>Toyota Camry 2014 · 1 090 000 ₽</b><br>📍 твой город · ⏱ 1 с после публикации`, 28)));
-scene("st3", "stadion");
-add("st3", CAR("cm", "camry/camry.png", 300, 1100, 720, 3) + hero("il2", 20, 860, .8, ILDAR) + tol("t6", 40, 860, .8)
+// финал — задний двор частного дома директора (владелец 12.11: «камри на стадион — нелогично»): Камри заезжает через ворота к гаражу,
+// Толян ждёт у беседки с мангалом — они подружились
+scene("dd", "dvordir");
+add("dd", CAR("cm", "camry/camry.png", 360, 1080, 700, 3) + hero("dr4", 640, 880, .78, { ...DIR, look: "grin" }, 6) + tol("t6", 40, 900, .78)
   + `<div class="ctab" id="cta2" style="top:1330px"><div class="cbig">Бот <span>«Перехват»</span><br>— ссылка в шапке</div><div class="csm">фильтр по всей России · свежие объявления за ~1 с</div></div>`);
 $(".stage").insertAdjacentHTML("beforeend", `<div id="cnt">💰 <span id="cv">440 000</span> ₽ <em id="cd"></em></div>`);
 $("#end h2").innerHTML = E.end;
@@ -66,7 +68,7 @@ bub("t1", "Виктор Андреевич, это не ведро.<br><em>Эт�
 bub("t2", "Звонок за звонком —<br><em>а я ещё чай не допил.</em>", 380, 700, 380, 34);
 bub("z1", "Студент, миллион триста!<br><em>Это ж кабан в идеале!</em>", 380, 700, 410, 34);
 bub("d2", "Анатолий… приказом<br><em>объявляю благодарность.</em>", 330, 680, 380, 34);
-bub("i2", "Брат!<br><em>Директор — на машине!</em>", 40, 700, 200, 42);
+bub("d3", "Двадцать лет пешком ходил.<br><em>Анатолий, заходи — шашлык готов.</em>", 300, 700, 470, 32);
 
 window.build = R => {
   const tl = R.tl, cam = R.camera($("#cam"), { hand: .6 });
@@ -74,15 +76,15 @@ window.build = R => {
   gsap.set(".scn", { opacity: 0 }); gsap.set("#sc_st1", { opacity: 1 });
   const { pop } = common(R, cam);
   const talk = (lv, f) => lv > .28 && !(lv < .55 && f % 3 === 2);
-  const SP = { t1: "tolyan", t2: "tolyan", t3: "tolyan", t4: "tolyan", t5: "tolyan", t6: "tolyan", il1: "ildar", il2: "ildar", dr1: "dir", dr2: "dir", dr3: "dir", zh: "zhora" };
-  const mood = (k, t) => k === "tolyan" && t > st.z1 - .3 && t < st.l4 + 1 ? "o" : k === "ildar" && t > st.i2 - .5 ? "o" : "grin";
+  const SP = { t1: "tolyan", t2: "tolyan", t3: "tolyan", t4: "tolyan", t5: "tolyan", t6: "tolyan", il1: "ildar", dr1: "dir", dr2: "dir", dr3: "dir", dr4: "dir", zh: "zhora" };
+  const mood = (k, t) => k === "tolyan" && t > st.z1 - .3 && t < st.l4 + 1 ? "o" : "grin";
   R.hooks.push(t => { const f = Math.floor(t * 30);
     for (const [p, k] of Object.entries(SP)) if (document.getElementById(p)) mouth(p, talk((LIP[k] || [])[f] || 0, f) ? "talk" : mood(k, t)); });
   window.MUSIC = { style: "toon", bpm: 112, end: R.dur - 1.2 };
   const ids = E.lines.map(l => l.id), nxt = l => ids[ids.indexOf(l) + 1];
-  const SW = { kab: st.d1 - .5, gar: st.l1 - .35, st2: st.l3 - .35, kab2: st.l5 - .35, st3: st.i2 - .6 };
+  const SW = { kab: st.d1 - .5, gar: st.l1 - .35, st2: st.l3 - .35, kab2: st.l5 - .35, dd: st.d3 - 1.6 };
   const ends = Object.values(SW).sort((a, b) => a - b);
-  for (const l of ["i1", "d1", "t1", "t2", "z1", "d2", "i2"]) {
+  for (const l of ["i1", "d1", "t1", "t2", "z1", "d2", "d3"]) {
     const cap = ends.find(x => x > st[l]) ?? 1e9, n = nxt(l);
     pop("#b_" + l, st[l] - .05, Math.min(en[l] + .9, n ? st[n] - .1 : en[l] + 1, cap - .05));
   }
@@ -133,9 +135,11 @@ window.build = R => {
   show("#cping", W("l5", "камр")); hide("#cping", st.d2 - .15);
   slam("#ord2_s2", W("d2", "благодар"), "boom");
   // 6. стадион: директор на машине; итог
-  swap("kab2", "st3", SW.st3);
-  tl.fromTo("#cm", { x: 900 }, { x: 0, duration: .8, ease: "power3.out", immediateRender: false }, SW.st3 + .2); R.sfx("whoosh", SW.st3 + .3, .6);
-  tl.set("#T6", { opacity: 0 }, 0).to("#IL2", { opacity: 0, duration: .2 }, st.end).to("#T6", { opacity: 1, duration: .2 }, st.end);
+  swap("kab2", "dd", SW.dd);
+  // Камри заезжает во двор через ворота и тормозит у гаража; директор выходит из машины к своей реплике
+  tl.fromTo("#cm", { x: 760, y: 260, scale: .8 }, { x: 0, y: 0, scale: 1, duration: 1.2, ease: "power3.out", immediateRender: false }, SW.dd + .2); R.sfx("whoosh", SW.dd + .3, .6);
+  R.sfx("drop", SW.dd + 1.3, .5);
+  tl.fromTo("#DR4", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: .4, ease: "power2.out", immediateRender: false }, st.d3 - .4); gsap.set("#DR4", { opacity: 0 });
   cnt(440000, 570000, W("end", "130"), "+130 000");
   tl.fromTo("#cta2", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, W("end", "подпиш") - .3);
   tl.to("#cnt", { opacity: 0, duration: .2 }, en.end + .1);

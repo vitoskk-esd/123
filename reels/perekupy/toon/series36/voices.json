@@ -15,13 +15,13 @@
   "voice": "Alnilam",
   "tempo": 1.21,
   "profile": "Ildar — an energetic Russian school PE teacher in his 30s in a tracksuit and a white cap, loud and cheerful, calls everyone «брат».",
-  "notes": "Line 1: loud, amazed, gossiping. Line 2: shocked, shouting across the stadium."
+  "notes": "One line: loud, amazed, gossiping."
  },
  "dir": {
   "voice": "Schedar",
   "tempo": 1.16,
   "profile": "Viktor Andreevich — a polite, formal Russian school headmaster in his 50s in a suit, a bit pompous, official tone.",
-  "notes": "Line 1: formal, a bit embarrassed, slow; the last word «ведро» said with hurt pride. Line 2: formal, touched, official tone, small pause after «Анатолий»."
+  "notes": "Line 1: formal, a bit embarrassed, slow; the last word «ведро» said with hurt pride. Line 2: formal, touched, official tone, small pause after «Анатолий». Line 3: warm, happy, relaxed, at home, inviting a friend."
  },
  "zhora": {
   "voice": "Fenrir",
