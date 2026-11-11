@@ -43,7 +43,7 @@ add("kab", hero("dr1", 600, 840, .82, DIR) + tol("t2", 20, 880, .78) + ORDER("or
 scene("gar", "garazh");
 add("gar", CAR("w1", "w124/w124_34.png", 330, 1130, 700, 4) + `<div class="el cover" id="cover"></div>`
   + [0, 1, 2, 3, 4].map(i => `<div class="el dust" id="du${i}" style="left:${300 + i * 110}px;top:${1100 - (i % 2) * 40}px;width:${130 + i * 12}px;height:${96 + i * 8}px"></div>`).join("")
-  + hero("dr2", 20, 870, .8, DIR) + tol("t3", 20, 870, .8, 7) + stamp("years", "1994 · 61 000 КМ · 30 ЛЕТ ПОД ЧЕХЛОМ", 40, 1480, "#ffd23f", "#151515", 36, -2) + CARDS());
+  + hero("dr2", 20, 870, .8, DIR) + tol("t3", 20, 870, .8, 7) + stamp("years", "1994 · 61 000 КМ · 30 ЛЕТ ПОД ЧЕХЛОМ", 90, 1440, "#ffd23f", "#151515", 32, -2) + CARDS());
 // 4. стадион: торги; поворот — Жора
 scene("st2", "stadion");
 add("st2", `<div class="el bids" id="bids"><small>ТОРГИ · Mercedes W124</small>
@@ -112,9 +112,9 @@ window.build = R => {
   slam("#ord_s1", W("d1", "ведро"), "boom"); R.shake(cam, W("d1", "ведро") + .05, .6, .35);
   // 3. гараж: чехол слетает → пыль → цифры; веер объявлений
   swap("kab", "gar", SW.gar);
-  tl.fromTo("#cover", { x: 0, y: 0, rotation: 0 }, { x: 900, y: -300, rotation: 18, duration: .7, ease: "power3.in", immediateRender: false }, st.l1 + .2); R.sfx("swish", st.l1 + .2, .8);
-  tl.fromTo(".dust", { opacity: 0, scale: .4 }, { opacity: .85, scale: 1.4, duration: .6, stagger: .06, ease: "power2.out", immediateRender: false }, st.l1 + .4)
-    .to(".dust", { opacity: 0, y: -120, duration: 1.4, ease: "power1.out" }, st.l1 + 1.1);
+  tl.fromTo("#cover", { x: 0, y: 0, rotation: 0 }, { x: 900, y: -300, rotation: 18, duration: .7, ease: "power3.in", immediateRender: false }, st.l1 + 1.3); R.sfx("swish", st.l1 + 1.3, .8);
+  tl.fromTo(".dust", { opacity: 0, scale: .4 }, { opacity: .85, scale: 1.4, duration: .6, stagger: .06, ease: "power2.out", immediateRender: false }, st.l1 + 1.5)
+    .to(".dust", { opacity: 0, y: -120, duration: 1.4, ease: "power1.out" }, st.l1 + 2.2);
   tl.fromTo(cam, { s: 1 }, { s: 1.12, duration: 3, ease: "power1.inOut", immediateRender: false }, st.l1 + .4).to(cam, { s: 1, duration: .4 }, st.t1 - .3);
   slam("#years", W("l1", "30"), "impact"); hide("#years", st.t1 - .2);
   tl.to("#DR2", { opacity: 0, duration: .2 }, st.t1 - .3).to("#T3", { opacity: 1, duration: .2 }, st.t1 - .3);
@@ -130,7 +130,7 @@ window.build = R => {
   // 5. кабинет: Камри и вторая печать
   swap("st2", "kab2", SW.kab2);
   gsap.set(["#ord2", "#ord2 .or"], { opacity: 1 }); gsap.set("#ord2_s1", { opacity: 1 });
-  show("#cping", W("l5", "камр"));
+  show("#cping", W("l5", "камр")); hide("#cping", st.d2 - .15);
   slam("#ord2_s2", W("d2", "благодар"), "boom");
   // 6. стадион: директор на машине; итог
   swap("kab2", "st3", SW.st3);
