@@ -1,37 +1,37 @@
 {
  "lis": {
   "voice": "Charon",
-  "tempo": 1.12,
+  "tempo": 1.18,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
   "notes": "You narrate part 8 of a comedy mini-series about Tolyan, a young used-car flipper growing his capital from one hundred thousand roubles. This time he deals with school teachers. Deadpan, dry irony; numbers said fully. «Эволюшн» is the Mitsubishi Lancer Evolution."
  },
  "tolyan": {
   "voice": "Algenib",
-  "tempo": 1.2,
+  "tempo": 1.26,
   "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
   "notes": "Line 1: confident, a bit cheeky, showing his phone to a teacher. Line 2: suddenly honest and warm, a little embarrassed."
  },
  "ildar": {
   "voice": "Alnilam",
-  "tempo": 1.15,
+  "tempo": 1.21,
   "profile": "Ildar — an energetic Russian school PE teacher in his 30s in a tracksuit and a white cap, loud and cheerful, calls everyone «брат».",
   "notes": "One line: loud, proud, like a PE teacher at a school assembly."
  },
  "lev": {
   "voice": "Rasalgethi",
-  "tempo": 1.12,
+  "tempo": 1.18,
   "profile": "Lev Markovich — a strict, pedantic Russian maths teacher in his 60s with glasses and a moustache, slow, precise, slightly pompous.",
   "notes": "Line 1: strict teacher calling a student to the blackboard, then very sure of himself. Line 2: after a pause, reluctantly impressed, short and dry, like grading a student."
  },
  "egor": {
   "voice": "Algieba",
-  "tempo": 1.1,
+  "tempo": 1.16,
   "profile": "Egorych — a kind, simple Russian school labour teacher in his 60s in a blue work coat, gruff warm voice, proud of his old car.",
   "notes": "Line 1: proud, simple, patting his old car. Line 2: stunned, touched, disbelieving."
  },
  "dir": {
   "voice": "Schedar",
-  "tempo": 1.1,
+  "tempo": 1.16,
   "profile": "Viktor Andreevich — a polite, formal Russian school headmaster in his 50s in a suit, a bit pompous, official tone.",
   "notes": "One line: formal and polite, a small pause before «коллективная заявка», said officially."
  }

@@ -71,7 +71,7 @@ $("#end h2").innerHTML = E.end;
 
 const bub = (line, html, l, t, tx, fs) => { const b = bubble(line, html, l, t, tx); if (fs) b.style.fontSize = fs + "px"; return b; };
 bub("i1", "Брат, построил всех,<br><em>как на линейке!</em>", 40, 720, 218, 40);
-bub("m1", "Анатолий, к доске.<br><em>Моя Королла — миллион.</em><br>Это аксиома.", 430, 440, 354, 34);
+bub("m1", "Анатолий, к доске.<br><em>Моя Королла — миллион.</em><br>Это аксиома.", 580, 470, 204, 30);
 bub("t1", "Бот говорит — восемьсот двадцать.<br><em>По 31 объявлению.</em>", 30, 545, 184, 32);
 bub("m2", "…Садитесь.<br><em>Пять.</em>", 520, 500, 264, 48);
 bub("e1", "«Пятёрка». Сам перебирал, каждую гайку.<br><em>Сто двадцать — и забирай.</em>", 250, 640, 588, 32);
@@ -124,12 +124,12 @@ window.build = R => {
 
   // 1. парковка
   tl.to("#title", { opacity: 0, y: -50, duration: .25 }, 2.2);
-  tl.fromTo("#cnt", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: .3, immediateRender: false }, .6);
+  tl.fromTo("#cnt", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: .3, immediateRender: false }, 2.4); gsap.set("#cnt", { opacity: 0 });
   R.sfx("ring", W("l0", "больш") - .1, .5); tl.fromTo("#bell", { opacity: 0 }, { opacity: 1, duration: .1, immediateRender: false }, W("l0", "больш") - .1)
     .to("#bell", { rotation: 18, duration: .06, yoyo: true, repeat: 7, ease: "none" }, W("l0", "больш")).to("#bell", { opacity: 0, duration: .15 }, W("l0", "двадц") + .5);
   // 2. линейка: камера едет вдоль ряда к пустому месту директора
   bell("park", "line", SW.line);
-  tl.fromTo(cam, { s: 1.25, x: 260, y: -330 }, { s: 1.25, x: -230, y: -330, duration: W("l1", "пуст") - SW.line, ease: "power1.inOut", immediateRender: false }, SW.line)
+  tl.fromTo(cam, { s: 1.2, x: 200, y: -190 }, { s: 1.2, x: -200, y: -190, duration: W("l1", "пуст") - SW.line, ease: "power1.inOut", immediateRender: false }, SW.line)
     .to(cam, { s: 1, x: 0, y: 0, duration: .5, ease: "power3.out" }, W("l1", "пуст"));
   ["#s1", "#s2", "#s3"].forEach((s, k) => slam(s, W("l1", ["физрук", "математ", "трудов"][k]) + .1, "pop"));
   slam("#q1", W("l1", "директ"), "boom"); R.punch(cam, W("l1", "директ") + .1, .08);
