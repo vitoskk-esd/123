@@ -1244,7 +1244,7 @@ async def test_admin_commands_hidden_from_users(env):
     try:
         await dp.feed_update(bot, msg("/start"))
         before = len(s.sent)
-        for c in ("/vkfind", "/admin", "/add @new_cars vk.com/avto_kzn", "/del @avto_msk", "/list", "/similar", "/tobase",
+        for c in ("/vkfind", "/vkfind 300", "/tgfind 800", "/admin", "/add @new_cars vk.com/avto_kzn", "/del @avto_msk", "/list", "/similar", "/tobase",
                   "/vk vk1.a." + "q" * 60, "/broadcast привет", "/connect"):
             await dp.feed_update(bot, msg(c))
         assert all(m.chat_id == USER for m in s.sent[before:] if hasattr(m, "chat_id"))
