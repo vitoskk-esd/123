@@ -2008,3 +2008,21 @@ async def test_admin_bulk_links_report(env):
     before = len(s.sent)
     await dp.feed_update(bot, msg("t.me/some_cars_x", USER))                    # обычный человек — не в базу
     assert not await ctx.db._one("SELECT 1 FROM channels WHERE username='some_cars_x' AND base=1")
+
+
+async def test_list_shows_queue_pace_and_tg_limit(env):
+    """/list объясняет, почему очередь медленная: темп вступлений, пауза от Telegram и лимит 500 каналов на аккаунт (владелец 12.11)."""
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg("\n".join(f"t.me/queue_cars_{i}" for i in range(470)), ADMIN))
+    assert "500" in "\n".join(s.texts(ADMIN)[-3:])                                   # предупреждение уже при добавлении
+
+    class R:
+        online, join_pause_until = True, time.time() + 3600
+    ctx.reader = R()
+    try:
+        await dp.feed_update(bot, msg("/list", ADMIN))
+    finally:
+        ctx.reader = None
+    text = s.texts(ADMIN)[-1]
+    assert "раз в 90 с" in text and "≈ 11,8 ч" in text and "Telegram попросил паузу" in text and "Premium" in text

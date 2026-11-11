@@ -320,7 +320,13 @@ class DB:
         await self._run("UPDATE channels SET status='failed', error=? WHERE id=?", error[:200], cid)
 
     async def base_channels(self) -> list:
-        return await self._all("SELECT * FROM channels WHERE base=1 ORDER BY title, username")
+        # сначала с названием/@ником, «закрытые» без имени — в конце (раньше они шли первыми и закрывали весь список)
+        return await self._all("SELECT * FROM channels WHERE base=1 ORDER BY (title IS NULL AND username IS NULL), status!='joined', title, username")
+
+    async def tg_load(self) -> int:
+        """Во скольких Telegram-каналах служебный аккаунт состоит или скоро будет (лимит Telegram — 500, с Premium — 1000)."""
+        r = await self._one("SELECT COUNT(*) n FROM channels WHERE vk IS NULL AND vk_id IS NULL AND status IN ('joined','queued','awaiting')")
+        return r["n"] if r else 0
 
     async def own_channels(self, uid: int) -> list:
         return await self._all("SELECT c.* FROM channels c JOIN user_channels uc ON uc.channel_id=c.id "

@@ -308,12 +308,14 @@ class Reader:
                 await c(JoinChannelRequest(entity))
         except errors.FloodWaitError as e:
             log.warning("Telegram просит подождать %s с перед вступлением", e.seconds)
+            self.join_pause_until = time.time() + e.seconds        # видно админу в /list: очередь стоит не просто так
             await asyncio.sleep(e.seconds)
             return
         except errors.InviteRequestSentError:
             return await self._awaiting(row)
         except FATAL as e:
             return await self._failed(row, type(e).__name__.replace("Error", ""))
+        self.join_pause_until = 0.0
         tg_id = utils.get_peer_id(entity)
         await self.ctx.db.channel_joined(row["id"], tg_id, getattr(entity, "title", "") or "",
                                          getattr(entity, "username", None), "main")

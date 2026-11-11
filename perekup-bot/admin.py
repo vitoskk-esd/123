@@ -134,6 +134,7 @@ async def add_links_to_base(msg: Message, ctx: Ctx, text: str, region: str | Non
     if bad:
         parts.append(f"❌ <b>Не понял (не ссылка на канал): {len(bad)}</b>\n{lst(bad)}")
     wait = (await queue_wait(ctx, queued_ids) + "\nХод подключения — в /list.") if queued_ids else ""
+    wait += await queue_status(ctx) if queued_ids else ""
     vk_off = T.VK_OFFLINE if any(k == "vk" for k, _ in links) and not vk_online(ctx) else ""
     await answer_long(msg, "\n\n".join(parts) + wait + vk_off, reply_markup=markup)
 
@@ -609,7 +610,30 @@ async def base_page(ctx: Ctx, page: int) -> tuple[str, object]:
     page = min(page, (len(rows) - 1) // K.PAGE)
     n = lambda st: sum(r["status"] == st for r in rows)
     text = T.ADMIN_BASE.format(n=len(rows), joined=n("joined"), queued=n("queued"), awaiting=n("awaiting"), failed=n("failed"))
-    return text, K.admin_base(rows, page)
+    return text + await queue_status(ctx), K.admin_base(rows, page)
+
+
+TG_LIMIT = 500     # столько каналов Telegram разрешает одному аккаунту (с Premium — 1000)
+
+
+async def queue_status(ctx: Ctx) -> str:
+    """Почему очередь идёт медленно: темп вступлений, пауза от Telegram, лимит каналов на аккаунт (владелец 12.11)."""
+    out = []
+    tg_q = len(await ctx.db.queued_channels("tg"))
+    if tg_q:
+        hours = tg_q * ctx.cfg.join_interval / 3600
+        out.append(f"⏳ Вступаю по одному каналу раз в {ctx.cfg.join_interval} с — очередь из {tg_q} займёт ≈ "
+                   + (f"{hours:.1f} ч".replace(".", ",") if hours >= 1 else f"{max(1, round(hours * 60))} мин") + ".")
+    pause = getattr(ctx.reader, "join_pause_until", 0) if ctx.reader else 0
+    if pause and pause > time.time():
+        out.append("⏸ Telegram попросил паузу на вступления до " + datetime.fromtimestamp(pause, MSK).strftime("%H:%M МСК")
+                   + " (так он ограничивает частые вступления) — потом продолжу сам.")
+    load = await ctx.db.tg_load()
+    if load >= TG_LIMIT - 50:
+        out.append(f"⚠️ Служебный аккаунт уже в {load} каналах Telegram (с очередью). Telegram разрешает одному аккаунту не больше "
+                   f"{TG_LIMIT} (с Telegram Premium — 1000): сверх лимита каналы не подключатся. Нужен Premium на служебный аккаунт "
+                   "или второй служебный аккаунт.")
+    return ("\n\n" + "\n".join(out)) if out else ""
 
 
 @router.message(Command("list"))
