@@ -1,0 +1,109 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ОТДЕЛЬНАЯ СЕРИЯ (не про Толяна, владелец 12.11): «ПРОДАЮ САМ» — рубрика «Схемы»: перекуп под видом собственника.
+// Таксист Лёха хочет свою машину; «Солярис, продаю сам, один хозяин»; по телефону продавец Эрик оговаривается: «вам какой из них?»;
+// на стоянке у него пять одинаковых Солярисов, в ПТС шесть владельцев — Эрика нет. Лёха ставит «Перехват»: ночью на смене — свежий Солярис
+// от настоящего хозяина (лётчик Максим переезжает), в ПТС один владелец.
+// Приёмы (новые): перемотка назад ⏪ на оговорке; пять одинаковых машин; ПТС-гармошка; монтаж вперемешку «такси ↔ стоянка».
+// Бот: развязка — свежее объявление через 1 с, ночью. Фоны новые: taxiin, stoyanka, ploshchadka.
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 15, fs) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z};${fs ? "font-size:" + fs + "px" : ""}">${html}</div>`;
+const CAR = (img, l, t, w, z = 3, extra = "") => `<img class="el" src="../../kit/img/${img}" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const PHONE = (l, t, inner, w = 520, z = 12) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const BOT = (body, fs = 30) => `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div><div style="background:#1c1f26;border-radius:22px;padding:16px 20px;margin-top:10px;font-family:Onest;color:#fff;font-size:${fs}px;line-height:1.42">${body}</div>`;
+const AD = (l, t) => PHONE(l, t, `<div style="background:#fff;border-radius:22px;padding:14px;font-family:Onest;color:#151515"><div style="height:120px;border-radius:14px;background:#cfe3f2;display:flex;align-items:center;justify-content:center"><img src="../../kit/img/hyundai/hyundai.png" style="width:86%"></div>
+  <div style="font-family:Unbounded;font-weight:900;font-size:28px;margin-top:10px">Hyundai Solaris 2017</div><div style="font-family:Unbounded;font-weight:900;font-size:34px">790 000 ₽</div>
+  <div style="font-weight:800;font-size:24px;margin-top:6px">«Продаю сам, один хозяин» 📞</div></div>`, 460);
+// руль и край приборки — поверх водителя: он «сидит» в машине
+const DASH = `<svg class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:9" viewBox="0 0 1080 1920"><path d="M0 1400 Q540 1300 1080 1400 L1080 1920 L0 1920 Z" fill="#23262d" stroke="#000" stroke-width="8"/>
+  <circle cx="540" cy="1420" r="250" fill="none" stroke="#151515" stroke-width="56"/><path d="M540 1420 v170 M360 1440 h-110 M720 1440 h110" stroke="#151515" stroke-width="40"/><circle cx="540" cy="1420" r="64" fill="#2b2f37" stroke="#000" stroke-width="6"/>
+  <rect x="60" y="1460" width="250" height="80" rx="14" fill="#0d0e12" stroke="#3a3d46" stroke-width="5"/><text x="185" y="1513" text-anchor="middle" font-family="JetBrains Mono" font-weight="800" font-size="36" fill="#5ac8fa">CLK</text></svg>`;
+const CLOCK = t => DASH.replace("CLK", t);
+const SOLARISES = (l, t, w = 300) => ["", "filter:brightness(.35)", "filter:grayscale(1) brightness(.75)", "filter:sepia(1) saturate(5) hue-rotate(-30deg) brightness(.85)", "filter:sepia(1) saturate(4) hue-rotate(180deg) brightness(.8)"]
+  .map((f, k) => CAR("hyundai/hyundai.png", l + k * (w - 60), t + (k % 2) * 30, w, 4 + (k % 2), f)).join("");
+const PTS = (l, t, rows, ok) => `<div class="el" style="left:${l}px;top:${t}px;width:540px;z-index:16;font-family:Onest;color:#222;transform:rotate(-2deg)">
+  <div style="background:#c9e2c2;border:6px solid #151515;border-bottom:none;padding:10px 16px;font-family:Unbounded;font-weight:900;font-size:28px">ПТС · владельцы</div>
+  ${rows.map((r, k) => `<div style="background:${k % 2 ? "#e4f0de" : "#d6e9cf"};border:6px solid #151515;border-top:3px dashed #6b8a62;padding:8px 16px;font-weight:800;font-size:26px;transform:skewY(${k % 2 ? 2 : -2}deg)">${k + 1}. ${r}</div>`).join("")}
+  <div style="background:${ok ? "#4cd964" : "#ff3b30"};color:${ok ? "#151515" : "#fff"};border:6px solid #151515;padding:8px 16px;font-family:Unbounded;font-weight:900;font-size:26px">${ok || "Эрика в ПТС — нет"}</div></div>`;
+const VHS = `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:30;background:repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 4px,transparent 4px 10px);mix-blend-mode:screen"></div>
+  <div class="el" style="left:60px;top:740px;z-index:31;font-family:'JetBrains Mono';font-weight:800;font-size:72px;color:#fff;text-shadow:3px 0 #ff2da6,-3px 0 #5ac8fa">⏪ REW</div>`;
+const LYOHA = { jacket: "#ffd23f", pants: "#2b2f37", hair: "#3a2d22", cap: "#151515", item: "phone" };          // таксист Лёха
+const ERIK = { jacket: "#5a2a6a", pants: "#151515", shades: true, chain: true, hair: "#151515", item: "phone" };    // перекуп Эрик
+const MAKSIM = { jacket: "#1f2f5a", pants: "#1f2f5a", police: true, tie: "#151515", hair: "#6b4a2b" };             // лётчик Максим
+const S = [
+ { h: "ТАКСИ · 23:47", tc: "1/9 · 0:00–0:08", bg: "taxiin", y: 640, els: () => ch("perekup", "ly", 330, 700, 1.0, 5, LYOHA) + CLOCK("23:47") + AD(650, 680).replace("width:460px", "width:400px")
+     + bub("Продаю сам, один хозяин…<br><em>Звоню!</em>", 40, 660, 15, 36),
+   vo: "Лёха: «Продаю сам, один хозяин… Звоню!» Лис: «Лёха пять лет возит людей на чужой машине. Хочет свою».", who: "Лёха + Лис",
+   mv: "<b>Отдельная серия, рубрика «Схемы».</b> <b>Новый фон — салон такси ночью</b>: камера на торпедо, смотрит на водителя; за ним заднее стекло с огнями города. Руль и приборка (часы 23:47) — слоем поверх, Лёха «сидит» в машине. <b>Новый герой — таксист Лёха</b> (жёлтая куртка, кепка). В телефоне объявление «Солярис 2017, 790 000, продаю сам, один хозяин»." },
+ { h: "ЗВОНОК · СТОЯНКА", tc: "2/9 · 0:08–0:15", bg: "stoyanka", y: 640, els: () => CAR("hyundai/hyundai.png", 400, 1180, 560, 3) + ch("perekup", "er", 600, 760, .85, 6, ERIK)
+     + bub("Да, сам езжу, один хозяин.<br><em>Машина как родная.</em>", 280, 690, 15, 34),
+   vo: "Эрик: «Да, сам езжу, один хозяин. Машина как родная».", who: "Эрик",
+   mv: "<b>Приём 1 — монтаж вперемешку:</b> такси ↔ стоянка. <b>Новый фон — платная стоянка ночью</b> (будка «ОХРАНА», шлагбаум, прожектор, сетка, «P 24/7»). <b>Новый герой — перекуп Эрик</b> (фиолетовая куртка, очки, цепь). В кадре — одна машина за ним: остальных пока не видно." },
+ { h: "ОГОВОРКА", tc: "3/9 · 0:15–0:22", bg: "stoyanka", y: 640, els: () => CAR("hyundai/hyundai.png", 400, 1180, 560, 3) + ch("perekup", "er", 600, 760, .85, 6, ERIK)
+     + bub("Белый, серый, чёрный —<br><em>вам какой из них?..</em>", 280, 690, 15, 36) + lab("Лёха: «А цвет какой — белый?»", 40, 1450, "#ffd23f", "#151515", 34, -2),
+   vo: "Лёха (в такси): «А цвет какой — белый?» Эрик: «Белый, серый, чёрный — вам какой из них?..»", who: "Лёха + Эрик",
+   mv: "Короткая склейка: Лёха в такси спрашивает про цвет (его кадр — как в 1-м) → Эрик на стоянке оговаривается. Пауза, Эрик замирает." },
+ { h: "⏪ ПЕРЕМОТКА", tc: "4/9 · 0:22–0:28", bg: "stoyanka", y: 640, els: () => CAR("hyundai/hyundai.png", 400, 1180, 560, 3) + ch("perekup", "er", 600, 760, .85, 6, { ...ERIK, look: "o" }) + VHS
+     + bub("…вам какой<br><em>из них?..</em>", 380, 690, 32, 40),
+   vo: "Лис: «Стоп. Перемотаем». (повтор оговорки Эрика) «…вам какой из них?»", who: "Лис + Эрик",
+   mv: "<b>Приём 2 — перемотка назад:</b> картинка дёргается, VHS-полосы, «⏪ REW», звук перемотки — и оговорка проигрывается ещё раз, медленнее. Голос Эрика — тот же кусок записи (без новой озвучки)." },
+ { h: "ПЯТЬ СОЛЯРИСОВ", tc: "5/9 · 0:28–0:35", bg: "stoyanka", y: 640, els: () => SOLARISES(-10, 1250, 280) + ch("perekup", "er", 380, 800, .7, 3, { ...ERIK, look: "grin" })
+     + lab("ОДИН ХОЗЯИН — ПЯТЬ МАШИН", 40, 1460, "#ff3b30", "#fff", 40, -3),
+   vo: "Лис: «Один хозяин. А Солярисов — пять».", who: "Лис",
+   mv: "<b>Приём 3 — пять одинаковых машин:</b> камера отъезжает — на стоянке у Эрика пять Солярисов разных цветов в ряд. Эрик разводит руками." },
+ { h: "ПТС-ГАРМОШКА", tc: "6/9 · 0:35–0:45", bg: "stoyanka", y: 640, els: () => CAR("hyundai/hyundai.png", 440, 1220, 520, 3) + ch("perekup", "er", 760, 780, .75, 6, ERIK) + ch("perekup", "ly", -10, 800, .8, 6, { ...LYOHA, item: "" })
+     + PTS(300, 720, ["Иванов", "Ахметов", "ООО «Лизинг»", "Петров", "Сидорова", "Кузин"]).replace("width:540px", "width:450px") + bub("Спасибо.<br><em>Я подумаю.</em>", 20, 660, 18, 36),
+   vo: "Лис: «В ПТС шесть владельцев. Эрика среди них нет. Это перекуп под видом собственника». Лёха: «Спасибо. Я подумаю».", who: "Лис + Лёха",
+   mv: "<b>Приём 4 — ПТС-гармошка:</b> Лёха просит ПТС — он раскладывается гармошкой вниз, строчка за строчкой, шесть фамилий; в конце красная плашка «Эрика в ПТС — нет»." },
+ { h: "3:10 · НОЧНАЯ СМЕНА", tc: "7/9 · 0:45–0:54", bg: "taxiin", y: 640, els: () => ch("perekup", "ly", 330, 700, 1.0, 5, LYOHA) + CLOCK("03:10")
+     + PHONE(650, 680, BOT(`<b style="color:#ff7a1a">🔥 −9% к рынку</b><br><b>Hyundai Solaris 2018 · 760 000 ₽</b><br>«продаю сам, в ПТС я, переезжаю»<br>⏱ 1 с после публикации`, 24), 410),
+   vo: "Лис: «Лёха поставил „Перехват“. Через ночь, прямо на смене, — Солярис. Через секунду после публикации».", who: "Лис",
+   mv: "Снова салон такси, часы 03:10. Уведомление бота: Солярис 2018, 760 000, −9% к рынку, «продаю сам, в ПТС я, переезжаю». Бот как развязка — успел первым ночью." },
+ { h: "ОДИН ВЛАДЕЛЕЦ — ПО-НАСТОЯЩЕМУ", tc: "8/9 · 0:54–1:03", bg: "ploshchadka", y: 640, els: () => CAR("hyundai/hyundai.png", 360, 1180, 640, 3) + ch("perekup", "mx", 640, 760, .82, 6, MAKSIM) + ch("perekup", "ly", 20, 780, .8, 6, { ...LYOHA, item: "" })
+     + PTS(330, 1250, ["Громов Максим"], "✅ владелец — продавец").replace("width:540px", "width:460px") + bub("Лечу в Мурманск.<br><em>В ПТС один владелец — я.</em>", 420, 680, 15, 34),
+   vo: "Максим: «Лечу в Мурманск. В ПТС один владелец — я». Лёха: «Беру».", who: "Максим + Лёха",
+   mv: "<b>Новый фон — двор с детской площадкой на рассвете.</b> <b>Новый герой — лётчик Максим</b> (тёмно-синяя форма, фуражка). Та же ПТС-гармошка — но одна строчка: «Громов Максим» и зелёная плашка «владелец — продавец». Отсылка к приёму 4." },
+ { h: "ФИНАЛ", tc: "9/9 · 1:03–1:11", bg: "ploshchadka", y: 640, els: () => CAR("hyundai/hyundai.png", 300, 1180, 700, 3) + ch("perekup", "ly", 40, 780, .8, 6, { ...LYOHA, item: "" })
+     + `<div class="el" style="left:60px;right:60px;top:1330px;z-index:18;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">свежие объявления за ~1 с · даже ночью</div></div>`,
+   vo: "Лис: «Один хозяин — это когда в ПТС его фамилия. Подпишись, чтобы не пропустить».", who: "Лис",
+   mv: "Лёха у своего Соляриса — без шашечек. Мораль Лиса + финальная карточка (голос её не читает)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els();
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+["ly", "er", "mx"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+window.READY = true;
+</script></body></html>
