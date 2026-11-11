@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.14,
+  "profile": "Lis — a cool, deadpan, ironic narrator of an adult comedy show about used cars. Low calm voice, dry humor.",
+  "notes": "Standalone village comedy: a farmer looks for a car using paper ads on a pole and a newspaper, always late, until a bot finds one in a second. Deadpan, dry irony; numbers said fully. «Перехват» is the name of a bot. Say «Прадо» as «ПРА-до»."
+ },
+ "fedor": {
+  "voice": "Iapetus",
+  "tempo": 1.12,
+  "profile": "Fyodor — a calm, solid Russian village farmer in his 40s with a beard and a cap, slow deep voice, a bit grumpy, dry humor.",
+  "notes": "Line 1: grumpy, tired sigh at a notice board. Line 2: shocked, disbelieving. Line 3: sly, bargaining. Line 4: calm, satisfied, deadpan punchline."
+ },
+ "grisha": {
+  "voice": "Orus",
+  "tempo": 1.15,
+  "profile": "Grisha — a cheerful, chatty Russian village postman in his 30s on a bicycle, loud, friendly, a bit clueless.",
+  "notes": "Line 1: cheerful, then a little embarrassed. Line 2: excited, proud of the news."
+ },
+ "savva": {
+  "voice": "Umbriel",
+  "tempo": 1.15,
+  "profile": "Savva — a smart, ironic Russian teenager of 17, the farmer's nephew, a bit cheeky, tech-savvy.",
+  "notes": "One line: ironic, cheeky, confident."
+ },
+ "mitrich": {
+  "voice": "Enceladus",
+  "tempo": 1.1,
+  "profile": "Mitrich — an old, kind Russian village neighbour in his 60s in an ushanka, hoarse warm voice, sly and funny.",
+  "notes": "Line 1: surprised, friendly, over the fence early in the morning. Line 2: matter-of-fact, a bit proud of his grandson. Line 3: cheerful, sly bargaining."
+ }
+}
