@@ -34,7 +34,7 @@ const ROOSTER = (id, l, t, s = 1) => `<div class="el" id="${id}" style="left:${l
   <g id="${id}_open" style="display:none"><path d="M86 64 l-26 -8 l4 6 l-4 8 l26 4 z" fill="#ffb02e" stroke="#151515" stroke-width="4"/></g>
   <path d="M90 160 v30 M110 160 v30" stroke="#e3a33a" stroke-width="7"/></svg><div class="kuka" id="${id}_cry">КУ-КА-РЕ-КУ!</div></div>`;
 const PAPER = (id, l, t, w) => `<div class="el paper" id="${id}" style="left:${l}px;top:${t}px;width:${w}px">
-  <div class="ph">СЕЛЬСКАЯ НОВЬ <span>№ 44 · вторник</span></div>
+  <div class="gzh">СЕЛЬСКАЯ НОВЬ <span>№ 44 · вторник</span></div>
   <div class="pb"><div class="lines"></div><div class="adv">ПРОДАМ Toyota Prado 2008, 1 650 000 ₽. Сосновка, ул. Лесная, 12. Митрич<b id="${id}_sold">УЖЕ НЕТ</b></div></div></div>`;
 const FEDOR = { jacket: "#5b6b3a", pants: "#2b2f37", hair: "#6b4a2b", beard: true, cap: "#3b3f46" };
 const SAVVA = { jacket: "#ff7a1a", pants: "#2b2f37", hair: "#d9a441", item: "phone" };
@@ -44,7 +44,7 @@ const GRISHA = { jacket: "#2f6db5", pants: "#2b2f37", hair: "#3a2d22", cap: "#2f
 // 1. улица: столб у магазина, почтальон
 scene("ul", "derevnya");
 add("ul", POLE("pole1", 440, 820) + hero("fd1", 20, 880, .8, FEDOR) + hero("gr1", 600, 870, .8, GRISHA)
-  + `<div class="el paper" id="pp0" style="left:300px;top:1240px;width:520px;opacity:0"><div class="ph">СЕЛЬСКАЯ НОВЬ <span>№ 43</span></div><div class="pb"><div class="lines" style="flex:2"></div></div></div>`
+  + `<div class="el paper" id="pp0" style="left:300px;top:1240px;width:520px;opacity:0"><div class="gzh">СЕЛЬСКАЯ НОВЬ <span>№ 43</span></div><div class="pb"><div class="lines" style="flex:2"></div></div></div>`
   + stamp("pol", "ПОЛГОДА ПОИСКОВ", 40, 1460, "#ff2da6", "#fff", 46, -3) + stamp("gz3", "ГАЗЕТА: +3 ДНЯ", 520, 1580, "#ffd23f", "#151515", 46, 3));
 // 2. изба: племянник ставит бота; ночь, 5:00, петух
 scene("izba", "izba");
@@ -52,13 +52,13 @@ add("izba", hero("sv", 600, 880, .78, SAVVA) + hero("fd2", 20, 880, .8, FEDOR)
   + PHONE("flt", 430, 1180, 560, BOT(`<b>⚙️ Фильтр</b><br>🚙 внедорожник · до 1 800 000 ₽<br>📍 мой район · 🔔 сразу`, 28))
   + `<div class="el" id="night" style="left:0;top:0;width:1080px;height:1920px;z-index:8;background:rgba(10,20,50,.55);opacity:0"></div>`
   + PHONE("ping", 400, 720, 600, BOT(`<b style="color:#ff7a1a">🔥 −12% к рынку</b><br><b>Toyota Prado 2008 · 1 650 000 ₽</b><br>📍 Сосновка, ул. Лесная<br>⏱ 1 с после публикации`, 30))
-  + ROOSTER("roo", 780, 1260, 1.1) + stamp("t500", "05:00", 40, 1380, "#151515", "#ff3b30", 64, -2));
+  + ROOSTER("roo", 690, 470, .8) + stamp("t500", "05:00", 40, 1380, "#151515", "#ff3b30", 64, -2));
 // 3. двор: забор, сосед Митрич, его Прадо
 scene("dvor", "dvor");
 add("dvor", CAR("pr1", "prado/prado_34.png", 470, 700, 580, 2, "clip-path:inset(0 0 152px 0)")
   + hero("mt", 640, 600, .62, MITRICH, 3, "clip-path:inset(0 0 412px 0)") + hero("fd3", 20, 740, .8, FEDOR)
   + stamp("addr", "ул. Лесная, 12 = СОСЕД", 300, 1130, "#ffd23f", "#151515", 44, -3)
-  + `<div class="chat" id="miss" style="left:560px;top:1110px">📞 Митричу: <span id="mcnt" style="color:#ff3b30">0</span> пропущенных</div>`
+  + `<div class="chat" id="miss" style="left:430px;top:1110px">📞 Митричу: <span id="mcnt" style="color:#ff3b30">0</span> пропущенных</div>`
   + `<div class="el hen" id="hen">🐔</div>`);
 // 4. улица через два дня: газета-развязка; 5. финал
 scene("ul2", "derevnya");
@@ -115,16 +115,17 @@ window.build = R => {
   tl.fromTo(cam, { s: 1.18, x: -120, y: 60 }, { s: 1, x: 0, y: 0, duration: 2.2, ease: "power2.out", immediateRender: false }, .2);
   tl.fromTo("#st2_5", { y: 0, rotation: 0, opacity: 1 }, { y: 260, rotation: 40, opacity: 0, duration: .9, ease: "power2.in", immediateRender: false }, st.f1 + .3);
   slam("#pol", W("l0", "полгод"), "pop"); hide("#pol", st.g1 - .3);
-  tl.fromTo("#GR1", { x: 520 }, { x: 0, duration: .7, ease: "power2.out", immediateRender: false }, st.g1 - .9); R.sfx("ring", st.g1 - .8, .4);
+  gsap.set("#GR1", { x: 560 }); gsap.set("#roo", { opacity: 0 });
+  tl.fromTo("#GR1", { x: 560 }, { x: 0, duration: .7, ease: "power2.out", immediateRender: false }, st.g1 - .9); R.sfx("ring", st.g1 - .8, .4);
   tl.fromTo("#pp0", { opacity: 0, y: 80, rotation: 6 }, { opacity: 1, y: 0, rotation: -3, duration: .35, ease: "back.out(1.6)", immediateRender: false }, W("g1", "газет"));
   slam("#gz3", W("l1", "трет"), "impact");
   // 2. изба: фильтр; ночь → 5:00, уведомление, петух — через секунду
   swap("ul", "izba", SW.izba);
   show("#flt", W("l2", "настро")); hide("#flt", st.l3 - .1);
-  tl.to("#night", { opacity: 1, duration: .5 }, st.l3 - .2); tl.to("#SV", { opacity: 0, duration: .3 }, st.l3 - .2);
+  tl.to("#night", { opacity: 1, duration: .5 }, st.l3 - .2); tl.to("#roo", { opacity: 1, duration: .3 }, st.l3); tl.to("#SV", { opacity: 0, duration: .3 }, st.l3 - .2);
   slam("#t500", W("l3", "пять"), "tick");
   show("#ping", W("l3", "прислал")); R.sfx("ping", W("l3", "прислал") + .1, .9); R.punch(cam, W("l3", "прислал") + .1, .06);
-  const kuka = W("l3", "петух") + .2;
+  const kuka = W("l3", "прислал") + 1.1;          // петух — ровно через секунду после уведомления: «опоздал»
   tl.set("#roo_shut", { display: "none" }, kuka).set("#roo_open", { display: "" }, kuka)
     .fromTo("#roo_cry", { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .2, ease: "back.out(3)", immediateRender: false }, kuka);
   R.sfx("riser", kuka - .1, .5); R.shake(cam, kuka + .05, .6, .4);
