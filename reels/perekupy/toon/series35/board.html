@@ -1,0 +1,122 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:96px;display:flex;align-items:center;gap:18px;padding:0 40px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:30px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:26px;color:#fff}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:26px;color:#8b93a3}
+.view{position:absolute;left:0;top:96px;width:1080px;height:820px;overflow:hidden;border-bottom:6px solid #ffd23f}
+.stage{position:absolute;left:0;width:1080px;height:1920px}
+.el{position:absolute}.el svg{width:100%;height:100%;overflow:visible}
+.lab{position:absolute;font-family:Unbounded;font-weight:900;border:6px solid #151515;border-radius:18px;padding:6px 18px;box-shadow:0 8px 0 #151515;white-space:nowrap}
+.bub{position:absolute;background:#0d0e12;border:5px solid #fff;border-radius:30px;padding:16px 24px;font-family:Unbounded;font-weight:800;font-size:36px;line-height:1.12;color:#fff;box-shadow:0 0 0 6px #0d0e12}
+.bub em{font-style:normal;color:#ff3b30}
+.txt{position:absolute;left:40px;right:40px;top:940px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:38px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:22px;color:#ffd23f;font-weight:800;margin-bottom:10px;letter-spacing:1px}
+.txt .mv{margin-top:20px;font-family:Onest;font-size:25px;line-height:1.35;color:#b9bfca}
+.txt .mv b{color:#fff}
+.clk{white-space:nowrap;font-family:"JetBrains Mono";font-weight:800;font-size:34px;color:#ff3b30;border:4px solid #ff3b30;border-radius:10px;padding:0 10px;box-shadow:0 0 14px #ff3b3088}
+.botcard{position:absolute;left:440px;top:660px;width:600px;z-index:9;background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:24px;box-shadow:0 0 80px rgba(120,180,255,.4)}
+.botcard .bh{font-family:Onest;font-weight:700;font-size:26px;color:#8b93a3;margin-bottom:12px}
+.botcard .bb{background:#1c1f26;border-radius:24px;padding:20px 24px;font-family:Onest;color:#fff;font-size:34px;line-height:1.45}
+.cnt{position:absolute;left:40px;top:150px;z-index:20;font-family:"JetBrains Mono";font-weight:800;font-size:40px;color:#fff;background:#151515;border:5px solid #4cd964;border-radius:16px;padding:2px 16px;white-space:nowrap}
+.receipt{position:absolute;left:150px;width:780px;background:#fbfaf6;border:6px solid #151515;box-shadow:0 18px 0 rgba(0,0,0,.35);padding:30px 40px;font-family:"JetBrains Mono";font-weight:800;font-size:32px;color:#222;line-height:1.6;transform:rotate(2deg);z-index:6}
+.receipt h4{margin:0 0 10px;text-align:center;font-family:Unbounded;font-weight:900;font-size:38px}.receipt .row,.receipt .tot{display:flex;justify-content:space-between}.receipt .tot{border-top:5px dashed #222;margin-top:10px;padding-top:8px;font-size:42px;color:#e53935}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Unbounded;font-weight:900;line-height:1}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="view"><div class="stage" id="stage"></div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="bgs.js"></script>
+<script>
+// ОТДЕЛЬНАЯ СЕРИЯ (не про Толяна, владелец 11.11): «СТОЛБ, ГАЗЕТА И БОТ». Фермер Фёдор полгода ищет машину по столбу у магазина и районной газете —
+// всегда опаздывает. Племянник Савва ставит «Перехват». В 5 утра бот присылает Прадо ниже рынка; петух кукарекает на секунду позже. Продавец — сосед
+// Митрич за забором (внук выложил в Telegram). Финал: почтальон приносит газету с тем же объявлением, а Фёдор уже на Прадо.
+// Приёмы (новые): отрывные листочки на столбе (все оборваны); петух-будильник опоздал; разговор через забор; газета-развязка. Бот: скорость против
+// старых способов + развязка «успел первым». Фоны новые: derevnya, dvor, izba. Машина — Прадо (давно не было).
+const el = (html, l, t, w, h, z = 3, extra = "") => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${z};${extra}">${html}</div>`;
+const ch = (kind, p, l, t, s = 1, z = 4, o, extra = "") => el(CHARS[kind](p, o), l, t, 420 * s, 800 * s, z, extra);
+const lab = (text, l, t, bg, fg = "#fff", fs = 46, rot = -3, z = 9) => `<div class="lab" style="left:${l}px;top:${t}px;background:${bg};color:${fg};font-size:${fs}px;transform:rotate(${rot}deg);z-index:${z}">${text}</div>`;
+const bub = (html, l, t, z = 15, fs) => `<div class="bub" style="left:${l}px;top:${t}px;z-index:${z};${fs ? "font-size:" + fs + "px" : ""}">${html}</div>`;
+const FOX = (l, t, w) => `<img class="el" src="../../brand/fox_cut.png" style="left:${l}px;top:${t}px;width:${w}px;z-index:19;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))">`;
+const CAR = (img, l, t, w, z = 3, extra = "") => `<img class="el" src="../../kit/img/${img}" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};${extra}">`;
+const PHONE = (l, t, inner, w = 520, z = 12) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:${z};background:#0d0e12;border:8px solid #2a2d34;border-radius:44px;padding:22px;box-shadow:0 0 70px rgba(120,180,255,.4)">${inner}</div>`;
+const BOT = (body, fs = 30) => `<div style="font-family:Onest;font-weight:700;font-size:24px;color:#8b93a3">ПЕРЕХВАТ · бот</div><div style="background:#1c1f26;border-radius:22px;padding:16px 20px;margin-top:10px;font-family:Onest;color:#fff;font-size:${fs}px;line-height:1.42">${body}</div>`;
+// столб с объявлениями: листки с отрывными «телефончиками» — все оборваны
+const STRIPS = (n, torn) => `<div style="display:flex;gap:3px;margin-top:6px">${Array.from({ length: n }, (_, i) => `<i style="flex:1;height:44px;background:${i < torn ? "transparent" : "#fff"};border:${i < torn ? "2px dashed #8a929b" : "2px solid #151515"};border-top:none"></i>`).join("")}</div>`;
+const POLE = (l, t) => `<div class="el" style="left:${l}px;top:${t}px;width:300px;z-index:5">
+  <div style="position:absolute;left:120px;top:-60px;width:60px;height:760px;background:#6b4a2b;border:6px solid #151515;border-radius:10px"></div>
+  ${[["ПРОДАМ УАЗ", "#fff", -3, 8, 8], ["Продам Ниву, 2010", "#fff8d8", 2, 7, 7], ["КУПЛЮ НАВОЗ", "#e8f4ff", -1, 6, 2]].map(([t, c, r, n, torn], k) =>
+    `<div style="position:relative;margin:${k ? 14 : 0}px 0 0 ${k % 2 ? 20 : 0}px;width:260px;background:${c};border:5px solid #151515;padding:10px 12px 0;transform:rotate(${r}deg);font-family:Caveat;font-weight:700;font-size:40px;color:#222;line-height:1">${t}${STRIPS(n, torn)}</div>`).join("")}</div>`;
+const ROOSTER = (l, t, s = 1, cry = false) => `<div class="el" style="left:${l}px;top:${t}px;width:${200 * s}px;z-index:14"><svg viewBox="0 0 200 200" style="width:100%;overflow:visible">
+  <path d="M60 150 q-40 -60 20 -90 q10 -30 40 -20 q30 10 20 50 q30 -20 50 10 q-10 40 -60 50 z" fill="#c0392b" stroke="#151515" stroke-width="6"/>
+  <path d="M150 100 q30 -40 40 -10 q0 30 -30 30" fill="#2f6db5" stroke="#151515" stroke-width="5"/><path d="M95 40 q5 -25 15 -5 q8 -22 15 0" fill="#ff3b30" stroke="#151515" stroke-width="4"/>
+  <circle cx="110" cy="62" r="5" fill="#151515"/><path d="M${cry ? "86 64 l-26 -6 l26 16" : "86 66 l-18 4 l18 6"} z" fill="#ffb02e" stroke="#151515" stroke-width="4"/>
+  <path d="M90 160 v30 M110 160 v30" stroke="#e3a33a" stroke-width="7"/></svg>
+  ${cry ? `<div style="position:absolute;left:-200px;top:-40px;font-family:Unbounded;font-weight:900;font-size:44px;color:#fff;-webkit-text-stroke:7px #151515;paint-order:stroke fill;transform:rotate(-8deg)">КУ-КА-РЕ-КУ!</div>` : ""}</div>`;
+const PAPER = (l, t, w, sold = false) => `<div class="el" style="left:${l}px;top:${t}px;width:${w}px;z-index:16;background:#efe9da;border:6px solid #151515;box-shadow:0 12px 0 #151515;transform:rotate(-3deg);font-family:Onest;color:#222;padding:14px 18px">
+  <div style="font-family:Unbounded;font-weight:900;font-size:34px;border-bottom:4px double #222;padding-bottom:6px">СЕЛЬСКАЯ НОВЬ <span style="font-size:20px;float:right;margin-top:10px">№ 44 · вторник</span></div>
+  <div style="display:flex;gap:14px;margin-top:10px"><div style="flex:1;height:120px;background:repeating-linear-gradient(#bbb 0 6px,transparent 6px 16px)"></div>
+  <div style="flex:1.2;border:3px solid #222;padding:8px;font-weight:800;font-size:24px;line-height:1.3;position:relative">ПРОДАМ Toyota Prado 2008, 1 650 000 ₽. Сосновка, ул. Лесная, 12. Митрич
+  ${sold ? `<b style="position:absolute;left:-10px;top:30px;transform:rotate(-14deg);font-family:Unbounded;font-weight:900;font-size:42px;color:#d62d20;border:5px solid #d62d20;padding:0 8px;background:rgba(255,255,255,.7)">УЖЕ НЕТ</b>` : ""}</div></div></div>`;
+const FENCECAR = (l, t, w, cut) => CAR("prado/prado_34.png", l, t, w, 2, `clip-path:inset(0 0 ${cut}px 0)`);   // Прадо Митрича за забором (низ скрыт забором)
+const FEDOR = { jacket: "#5b6b3a", pants: "#2b2f37", hair: "#6b4a2b", beard: true, cap: "#3b3f46" };          // фермер Фёдор, 40+
+const SAVVA = { jacket: "#ff7a1a", pants: "#2b2f37", hair: "#d9a441", item: "phone" };                        // племянник Савва, 17
+const MITRICH = { jacket: "#8a6d48", pants: "#3b3f46", hair: "#c9ccd1", mustache: true, ushanka: "#6b6b6b" };  // сосед Митрич
+const GRISHA = { jacket: "#2f6db5", pants: "#2b2f37", hair: "#3a2d22", cap: "#2f6db5", item: "bag" };          // почтальон Гриша
+const S = [
+ { h: "СТОЛБ У МАГАЗИНА", tc: "1/9 · 0:00–0:09", bg: "derevnya", y: 700, els: () => POLE(440, 820) + ch("perekup", "fd", 20, 880, .8, 6, { ...FEDOR, look: "angry" })
+     + bub("Опять всё<br><em>оборвали.</em>", 40, 740, 15, 44) + lab("ПОЛГОДА ПОИСКОВ", 40, 1400, "#ff2da6", "#fff", 40, -3),
+   vo: "Фёдор: «Опять всё оборвали». Лис: «Фёдор полгода ищет машину для хозяйства. По столбу у магазина и районной газете. И всегда опаздывает».", who: "Фёдор + Лис",
+   mv: "<b>Отдельная серия, все герои новые.</b> <b>Новый фон — сельская улица</b> (магазин «ПРОДУКТЫ», колодец, избы с наличниками, лужи). <b>Новый герой — фермер Фёдор</b> (зелёный ватник, кепка, борода). <b>Приём 1 — отрывные листочки на столбе:</b> «ПРОДАМ УАЗ» — все «телефончики» оборваны; «КУПЛЮ НАВОЗ» — висят целые (смешной контраст). Хук — первая реплика." },
+ { h: "ПОЧТАЛЬОН", tc: "2/9 · 0:09–0:17", bg: "derevnya", y: 700, els: () => ch("perekup", "gr", 600, 870, .8, 6, GRISHA) + ch("perekup", "fd", 20, 880, .8, 6, FEDOR)
+     + PAPER(300, 1240, 520) + bub("Фёдор, свежая газета!<br><em>Ну… позавчерашняя.</em>", 420, 720, 15, 36) + lab("ГАЗЕТА: +3 ДНЯ", 40, 1520, "#ffd23f", "#151515", 40, 3),
+   vo: "Гриша: «Фёдор, свежая газета! Ну… позавчерашняя». Лис: «Газета приходит на третий день. А хорошие машины уходят за час».", who: "Гриша + Лис",
+   mv: "<b>Новый герой — почтальон Гриша</b> (синяя форма, кепка, сумка) — въезжает на велосипеде-дребезжалке. Газета «Сельская новь» — плашка «ГАЗЕТА: +3 ДНЯ». Фёдор вздыхает." },
+ { h: "ИЗБА · ПЛЕМЯННИК", tc: "3/9 · 0:17–0:26", bg: "izba", y: 700, els: () => ch("perekup", "sv", 600, 880, .78, 6, SAVVA) + ch("perekup", "fd", 20, 880, .8, 6, FEDOR)
+     + PHONE(430, 1200, BOT(`<b>⚙️ Фильтр</b><br>🚙 внедорожник · до 1 800 000 ₽<br>📍 мой район · 🔔 сразу`, 27), 560)
+     + bub("Дядь Федь, это каменный век.<br><em>Ставлю тебе бота.</em>", 360, 720, 15, 32),
+   vo: "Савва: «Дядь Федь, это каменный век. Ставлю тебе бота». Лис: «Племянник настроил „Перехват“: внедорожник, до миллиона восьмисот, свой район».", who: "Савва + Лис",
+   mv: "<b>Новый фон — изба</b> (печь, окно с наличниками, ходики, стол с самоваром — без ковра). <b>Новый герой — племянник Савва</b> (оранжевая толстовка, телефон). Фильтр в боте — на экране телефона." },
+ { h: "5:00 · ПЕТУХ ОПОЗДАЛ", tc: "4/9 · 0:26–0:35", bg: "izba", y: 700, els: () => ch("perekup", "fd", 20, 880, .8, 6, { ...FEDOR, look: "o" })
+     + PHONE(400, 760, BOT(`<b style="color:#ff7a1a">🔥 −12% к рынку</b><br><b>Toyota Prado 2008 · 1 650 000 ₽</b><br>📍 Сосновка, ул. Лесная<br>⏱ 1 с после публикации`, 28), 600)
+     + ROOSTER(780, 1250, 1.1, true) + lab("05:00", 40, 1360, "#151515", "#ff3b30", 54, -2),
+   vo: "Лис: «В пять утра бот прислал Прадо. Минус двенадцать процентов к рынку. Петух — опоздал на секунду».", who: "Лис",
+   mv: "<b>Приём 2 — петух-будильник опоздал:</b> 05:00, в избе темно (ночная гамма), телефон дзынькает — и только через секунду за окном орёт петух «КУ-КА-РЕ-КУ!». Фёдор подскакивает. Бот — быстрее всех (приём конверсии: скорость против старых способов)." },
+ { h: "АДРЕС — ЗА ЗАБОРОМ", tc: "5/9 · 0:35–0:42", bg: "dvor", y: 440, els: () => FENCECAR(470, 700, 580, 152) + ch("perekup", "mt", 640, 600, .62, 3, MITRICH, "clip-path:inset(0 0 255px 0)")
+     + ch("perekup", "fd", 20, 740, .8, 6, { ...FEDOR, look: "o" }) + lab("ул. Лесная, 12 = СОСЕД", 300, 1130, "#ffd23f", "#151515", 40, -3)
+     + bub("Федя, ты чего<br><em>так рано?</em>", 520, 460, 15, 38),
+   vo: "Лис: «Сосновка, улица Лесная, двенадцать. Это… за забором». Митрич: «Федя, ты чего так рано?»", who: "Лис + Митрич",
+   mv: "<b>Новый фон — двор Фёдора</b> (низкий забор к соседу, дом Митрича «ул. Лесная, 12», стог, курятник, колесо трактора). <b>Приём 3 — разговор через забор:</b> над забором высовывается голова <b>соседа Митрича</b> (ушанка, усы); за забором — его Прадо. Курица перелетает забор." },
+ { h: "ВНУК ВЫЛОЖИЛ", tc: "6/9 · 0:42–0:50", bg: "dvor", y: 440, els: () => FENCECAR(470, 700, 580, 152) + ch("perekup", "mt", 640, 600, .62, 3, MITRICH, "clip-path:inset(0 0 255px 0)")
+     + ch("perekup", "fd", 20, 740, .8, 6, FEDOR) + bub("Митрич… это ж<br><em>твой Прадо?!</em>", 30, 600, 15, 36)
+     + bub("Внук в телеграм выложил. Сказал —<br><em>на столб уже никто не смотрит.</em>", 400, 450, 16, 28),
+   vo: "Фёдор: «Митрич… это ж твой Прадо?!» Митрич: «Внук в телеграм выложил. Сказал — на столб уже никто не смотрит».", who: "Фёдор + Митрич",
+   mv: "Отсылка к столбу из кадра 1. Пузыри — у голов: Фёдор слева внизу, Митрич над забором. (В видео пузыри идут по очереди, не одновременно.)" },
+ { h: "СЕНО — ДАВАЙ", tc: "7/9 · 0:50–0:58", bg: "dvor", y: 440, els: () => FENCECAR(470, 700, 580, 152) + ch("perekup", "mt", 640, 600, .62, 3, { ...MITRICH, look: "grin" }, "clip-path:inset(0 0 255px 0)")
+     + ch("perekup", "fd", 20, 740, .8, 6, { ...FEDOR, look: "grin" }) + bub("Беру. Скинешь —<br><em>за сено и мёд?</em>", 30, 600, 15, 36)
+     + `<div class="el" style="left:560px;top:1110px;z-index:16;background:#17212b;border:5px solid #151515;border-radius:18px;padding:8px 18px;font-family:Onest;font-weight:800;font-size:30px;color:#fff;box-shadow:0 8px 0 #151515">📞 Митричу: <span style="color:#ff3b30">5 пропущенных</span></div>`,
+   vo: "Фёдор: «Беру. Скинешь — за сено и мёд?» Митрич: «Сено — давай. Мёд себе оставь». Лис: «Через час Митричу позвонили ещё пятеро. Поздно».", who: "Фёдор + Митрич + Лис",
+   mv: "Торг через забор — бартер по-деревенски. У Митрича на телефоне растёт «пропущенные: 5» — Фёдор успел первым (бот как развязка)." },
+ { h: "ГАЗЕТА · РАЗВЯЗКА", tc: "8/9 · 0:58–1:07", bg: "derevnya", y: 700, els: () => CAR("prado/prado_34.png", 280, 1090, 640, 3) + ch("perekup", "fd", 760, 880, .8, 6, { ...FEDOR, look: "grin", item: "cash" })
+     + ch("perekup", "gr", 20, 870, .8, 6, GRISHA) + PAPER(40, 1380, 560, true) + bub("Фёдор, тут Прадо продают —<br><em>по соседству!</em>", 30, 720, 15, 32)
+     + bub("Знаю, Гриша.<br><em>Я на нём.</em>", 620, 960, 16, 40),
+   vo: "Лис: «Через два дня Гриша привёз газету». Гриша: «Фёдор, тут Прадо продают — по соседству!» Фёдор: «Знаю, Гриша. Я на нём».", who: "Лис + Гриша + Фёдор",
+   mv: "<b>Приём 4 — газета-развязка:</b> почтальон гордо разворачивает «Сельскую новь» с объявлением Митрича — а Фёдор уже стоит у своего Прадо с ключами. На объявлении штамп «УЖЕ НЕТ»." },
+ { h: "ФИНАЛ", tc: "9/9 · 1:07–1:14", bg: "derevnya", y: 700, els: () => CAR("prado/prado_34.png", 330, 1080, 700, 3)
+     + `<div class="el" style="left:40px;top:760px;z-index:18;display:flex;flex-direction:column;align-items:flex-start;gap:10px;font-family:Unbounded;font-weight:900;font-size:40px;color:#151515">
+        <span style="background:#fff;border:6px solid #151515;border-radius:14px;padding:4px 16px">СТОЛБ — 5 ДНЕЙ</span><span style="background:#fff;border:6px solid #151515;border-radius:14px;padding:4px 16px">ГАЗЕТА — 3 ДНЯ</span>
+        <span style="background:#4cd964;border:6px solid #151515;border-radius:14px;padding:4px 16px">БОТ — 1 СЕКУНДА</span></div>`
+     + `<div class="el" style="left:60px;right:60px;top:1330px;z-index:18;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:22px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center"><div style="font-size:40px;line-height:1.15">Бот <span style="color:#c0392b">«Перехват»</span> — ссылка в шапке</div><div style="margin-top:10px;font-size:26px;font-family:Onest;font-weight:800">свежие объявления за ~1 с · твой город и бюджет</div></div>`,
+   vo: "Лис: «Столб — пять дней. Газета — три. Бот — одна секунда. Подпишись, чтобы не пропустить».", who: "Лис",
+   mv: "Итог-сравнение тремя плашками (появляются по очереди со стуком), финальная карточка (голос её не читает)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const st = document.getElementById("stage"); st.style.top = -sc.y + "px"; st.innerHTML = BGS[sc.bg] + sc.els();
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+["fd", "gr", "sv", "mt"].forEach(p => document.getElementById(p) && mouth(p, "talk"));
+if (n === 4) st.insertAdjacentHTML("beforeend", `<div class="el" style="left:0;top:0;width:1080px;height:1920px;z-index:1;background:rgba(10,20,50,.45)"></div>`);
+window.READY = true;
+</script></body></html>
