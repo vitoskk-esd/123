@@ -409,6 +409,71 @@ class Reader:
             await asyncio.sleep(1)
         return top
 
+    async def tgfind(self, known: set[str], want: int = 800, progress=None) -> tuple[list[dict], list[dict], dict]:
+        """Большой поиск для таблицы (владелец 11.11): публичные Telegram-каналы и группы с продажей Б/У машин по России —
+        3000+ подписчиков, 5+ постов за 7 дней, в постах машины с ценой, без импорта «под заказ». Кандидаты: поиск Telegram по фразам
+        «авто/авторынок/продажа авто + город» + «похожие каналы» у каждого подошедшего. → (подходящие, отсеянные, цифры)"""
+        import finder
+        from telethon.tl.functions.contacts import SearchRequest
+        cand: dict[str, object] = {}
+        qs = finder.queries(words=("авто", "авторынок", "продажа авто"))
+
+        def take(chats):
+            for c in chats:
+                name = (getattr(c, "username", None) or "").lower()
+                if (name and name not in known and name not in cand and (getattr(c, "broadcast", False) or getattr(c, "megagroup", False))
+                        and finder.CAR_TITLE.search(c.title or "") and (getattr(c, "participants_count", None) or 3000) >= 3000):
+                    cand[name] = c
+        for i, q in enumerate(qs):
+            try:
+                take((await self.client(SearchRequest(q=q, limit=100))).chats)
+            except errors.FloodWaitError as e:
+                await asyncio.sleep(e.seconds + 1)
+            except Exception as e:
+                log.info("поиск «%s»: %s", q, e)
+            await asyncio.sleep(1.2)
+            if progress and i and i % 150 == 0:
+                await progress(f"поиск: {i} из {len(qs)} фраз — кандидатов {len(cand)}")
+        stats = {"queries": len(qs), "found": len(cand)}
+        if progress:
+            await progress(f"кандидатов: {len(cand)} — проверяю посты каждого (и «похожие» у подходящих)")
+        ok, rej, done = [], [], set()
+        while len(ok) < want:
+            todo = sorted((n for n in cand if n not in done), key=lambda n: -(getattr(cand[n], "participants_count", 0) or 0))
+            if not todo:
+                break
+            for name in todo[:50]:
+                done.add(name)
+                c = cand[name]
+                try:
+                    msgs = await self.client.get_messages(c, limit=40)
+                    subs = getattr(c, "participants_count", None) or (await self.client.get_participants(c, limit=0)).total
+                except errors.FloodWaitError as e:
+                    await asyncio.sleep(e.seconds + 1)
+                    continue
+                except Exception as e:
+                    log.info("проверка @%s: %s", name, e)
+                    continue
+                posts = [(m.date, m.message or "") for m in msgs if m.date]
+                j = finder.judge(posts, self.ctx.dict, title=c.title or "", subs=subs or 0)
+                row = dict(j, link=f"https://t.me/{c.username}", title=c.title or "")
+                if j["ok"]:
+                    ok.append(row)
+                    try:                                  # «похожие каналы» у подошедшего — свежие кандидаты
+                        take(getattr(await self.client(GetChannelRecommendationsRequest(channel=c)), "chats", []))
+                    except Exception:
+                        pass
+                elif j["car_share"] >= .3:
+                    rej.append(row)
+                await asyncio.sleep(1)
+                if len(ok) >= want:
+                    break
+            if progress:
+                await progress(f"проверено {len(done)} — подходят {len(ok)}")
+        stats.update(checked=len(done), fit=len(ok))
+        ok.sort(key=lambda r: -r["subs"])
+        return ok[:want], rej, stats
+
     async def check_approvals(self) -> None:
         """Одобрил ли админ заявку: по приглашению Telegram отвечает «вы уже участник», по @нику — канал без пометки «вышел».
         Неделю без ответа — сдаёмся и честно говорим об этом."""

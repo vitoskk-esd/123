@@ -105,6 +105,8 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"
         "/similar — найти новые каналы через «похожие каналы» Telegram\n"
         "/vkfind — найти 50 барахолок с авто в ВК (5000+ подписчиков, 3+ поста почти каждый день)\n"
+        "/vkfind 300 — таблица: 300 групп ВК с Б/У машинами (5000+, посты каждый день, без импорта)\n"
+        "/tgfind 800 — таблица: 800 Telegram-каналов с Б/У машинами (3000+, 5+ постов в неделю, без импорта)\n"
         "/del @канал — убрать канал\n/vk — подключить служебную страницу ВКонтакте · /vkcheck — проверить ВК\n/broadcast текст — написать всем")
 
 
@@ -413,13 +415,69 @@ async def similar(msg: Message, ctx: Ctx) -> None:
     task.add_done_callback(ctx.background.discard)
 
 
+async def send_table(msg: Message, rows: list, rej: list, name: str, sheet: str, caption: str) -> None:
+    import finder
+    data = finder.table(rows, rej, sheet)
+    await msg.answer_document(BufferedInputFile(data, name), caption=caption)
+
+
+@router.message(Command("tgfind"))
+async def tgfind(msg: Message, ctx: Ctx, command: CommandObject) -> None:
+    """/tgfind [N] — служебный аккаунт ищет N (по умолчанию 800) Telegram-каналов с продажей Б/У машин по России → таблица .xlsx."""
+    if not await is_admin(msg, ctx):
+        return
+    if not (ctx.reader and ctx.reader.online):
+        return await msg.answer("Служебный аккаунт не подключён — /connect")
+    want = int(command.args) if (command.args or "").strip().isdigit() else 800
+    await msg.answer(f"🔎 Ищу {want} Telegram-каналов с продажей Б/У машин по России: 3000+ подписчиков, 5+ постов за неделю, "
+                     "без импорта «под заказ». Это долго (час-два: Telegram не даёт искать быстро) — буду писать, как идёт, "
+                     "а в конце пришлю таблицу .xlsx.")
+
+    async def run():
+        known = {(r["username"] or "").lower() for r in await ctx.db._all("SELECT username FROM channels WHERE username IS NOT NULL")}
+        try:
+            rows, rej, n = await ctx.reader.tgfind(known, want, progress=lambda t: msg.answer("⏳ " + t))
+        except Exception as e:
+            return await msg.answer(f"Не получилось: {e}")
+        await send_table(msg, rows, rej, "telegram_kanaly.xlsx", "Telegram",
+                         f"✅ Подходят: {len(rows)} (лист «Telegram»), отсеяны с причиной: {len(rej)} (лист «Отсеяны»).\n"
+                         f"Фраз поиска: {n['queries']} → кандидатов: {n['found']} → проверено: {n['checked']}.\n"
+                         "В Google Таблицах: Файл → Импорт → Загрузить.")
+
+    task = asyncio.create_task(run())
+    ctx.background.add(task)
+    task.add_done_callback(ctx.background.discard)
+
+
 @router.message(Command("vkfind"))
-async def vkfind(msg: Message, ctx: Ctx) -> None:
-    """/vkfind — служебная страница ВК ищет барахолки с авто по России и проверяет их активность."""
+async def vkfind(msg: Message, ctx: Ctx, command: CommandObject) -> None:
+    """/vkfind — служебная страница ВК ищет барахолки с авто по России и проверяет их активность.
+    /vkfind N — большой поиск: N групп (5000+ подписчиков, посты каждый день, без импорта) → таблица .xlsx."""
     if not await is_admin(msg, ctx):
         return
     if not vk_online(ctx):
         return await msg.answer("ВКонтакте не подключён — /vk")
+    if (command.args or "").strip().isdigit():
+        want = int(command.args)
+        await msg.answer(f"🔎 Ищу {want} групп ВК с продажей Б/У машин по России: 5000+ подписчиков, посты каждый день, "
+                         "без импорта. Займёт 10–30 минут — в конце пришлю таблицу .xlsx.")
+
+        async def big():
+            known = {r["vk_id"] for r in await ctx.db._all("SELECT vk_id FROM channels WHERE vk_id IS NOT NULL")}
+            try:
+                rows, rej, n = await ctx.vk.find_table(known, want, progress=lambda t: msg.answer("⏳ " + t))
+            except vk.VKError as e:
+                return await msg.answer(f"❌ ВК не дал искать: {e}. Если это «flood control» — попробуй через час-другой.")
+            except Exception as e:
+                return await msg.answer(f"Не получилось: {e}")
+            await send_table(msg, rows, rej, "vk_gruppy.xlsx", "ВКонтакте",
+                             f"✅ Подходят: {len(rows)} (лист «ВКонтакте»), отсеяны с причиной: {len(rej)} (лист «Отсеяны»).\n"
+                             f"Фраз поиска: {n['queries']} → открытых автомобильных групп: {n['found']} → с 5000+ подписчиков: {n['big']}.\n"
+                             "В Google Таблицах: Файл → Импорт → Загрузить.")
+        task = asyncio.create_task(big())
+        ctx.background.add(task)
+        task.add_done_callback(ctx.background.discard)
+        return
     await msg.answer("🔎 Ищу в ВК барахолки с авто по России: 5000+ подписчиков, 3+ поста в день минимум 5 дней из 7, "
                      "в постах — продажа машин. Это займёт 1–3 минуты — пришлю до 50 ссылок сюда.")
 

@@ -438,6 +438,51 @@ class VKReader:
         stats["fit"] = len(out)
         return sorted(out, key=lambda g: (-g["week"], -g["members"]))[:want], stats
 
+    async def find_table(self, known: set[int], want: int = 300, progress=None) -> tuple[list[dict], list[dict], dict]:
+        """Большой поиск для таблицы (владелец 11.11): группы ВК с продажей Б/У машин по всей России — открытые, 5000+ подписчиков,
+        посты каждый день (6–7 дней из 7 прошлых), в постах машины с ценой, без импорта «под заказ». Фразы — «авто/авторынок/…
+        + город» по всем городам словаря бота. → (подходящие, отсеянные с причиной, цифры по шагам)"""
+        import finder
+        from datetime import datetime, timezone
+        qs = finder.queries()
+        found = await self._many("groups.search", [{"q": q, "country_id": 1, "count": 100} for q in qs], 25)
+        ids: dict[int, int] = {}
+        for res in found:
+            for g in (res or {}).get("items", []):
+                if g["id"] not in known and not g.get("is_closed") and CAR_NAME.search(g.get("name", "")):
+                    ids[g["id"]] = ids.get(g["id"], 0) + 1
+        stats = {"queries": len(qs), "answered": sum(r is not None for r in found), "found": len(ids)}
+        if progress:
+            await progress(f"запросов к поиску {len(qs)} → открытых автомобильных групп: {len(ids)} — смотрю подписчиков")
+        groups: list[dict] = []
+        idl = list(ids)
+        for i in range(0, len(idl), 400):
+            res = await self.api.call("groups.getById", group_ids=",".join(map(str, idl[i:i + 400])), fields="members_count,description")
+            groups += res.get("groups", []) if isinstance(res, dict) else res
+        groups = sorted((g for g in groups if (g.get("members_count") or 0) >= FIND_MEMBERS and not g.get("deactivated")),
+                        key=lambda g: -g["members_count"])
+        stats["big"] = len(groups)
+        if progress:
+            await progress(f"с 5000+ подписчиков: {len(groups)} — читаю стены (как часто постят, что продают)")
+        ok, rej = [], []
+        for i in range(0, len(groups), 100):
+            part = groups[i:i + 100]
+            walls = await self._many("wall.get", [{"owner_id": -g["id"], "count": 60} for g in part], 10)
+            for g, res in zip(part, walls):
+                posts = [(datetime.fromtimestamp(it.get("date", 0), timezone.utc), post_text(it)) for it in (res or {}).get("items", [])
+                         if not it.get("is_pinned")]
+                j = finder.judge(posts, self.ctx.dict, title=g.get("name", ""), about=g.get("description", ""), subs=g["members_count"],
+                                 min_subs=FIND_MEMBERS, min_week=7, min_days=6)
+                row = dict(j, link=f"https://vk.com/{g.get('screen_name') or 'club' + str(g['id'])}", title=g.get("name", ""))
+                (ok if j["ok"] else rej).append(row)
+            if progress and i and i % 500 == 0:
+                await progress(f"проверено {i} из {len(groups)} — подходят {len(ok)}")
+            if len(ok) >= want:
+                break
+        stats["fit"] = len(ok)
+        ok.sort(key=lambda r: (-r["days"], -r["subs"]))
+        return ok[:want], [r for r in rej if r["car_share"] >= .3], stats
+
     # ---------- вступление в сообщества ----------
     async def group(self, vk: str) -> dict:
         res = await self.rd.call("groups.getById", group_id=_ref(vk), fields="is_member")

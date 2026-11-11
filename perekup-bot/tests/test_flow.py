@@ -1880,3 +1880,110 @@ async def test_sub_screen_shows_current_plan_only_when_active(env):
     await ctx.db.set_user(USER, paid_until=time.time() + 5 * 86400, plan="pro")
     await dp.feed_update(bot, msg("💳 Подписка"))
     assert "Твой тариф сейчас: PRO" in s.texts(USER)[-1] and "МСК" in s.texts(USER)[-1]
+
+
+# ---------- поиск новых источников в таблицу (владелец 11.11) ----------
+def _posts(n_days, text, per_day=1):
+    from datetime import timedelta, timezone
+    now = datetime.now(timezone.utc)
+    return [(now - timedelta(days=d, hours=i + 1), text) for d in range(n_days) for i in range(per_day)]
+
+
+def test_finder_judge_used_cars_not_import():
+    """Б/У с ценой каждый день — подходит; импорт «под заказ», мало подписчиков, редкие посты и не-объявления — отсеиваются с причиной."""
+    import finder
+    from words import load_dictionary
+    d = load_dictionary(ROOT / "cars.yaml")
+    used = "Продам Toyota Camry 2012, пробег 180 000 км, Казань. Цена 1 200 000 ₽, торг."
+    imp = "Привезём Toyota Camry 2021 из Кореи под заказ, растаможка включена. Цена 2 400 000 ₽."
+    assert finder.judge(_posts(7, used), d, subs=9000)["ok"]
+    assert finder.judge(_posts(7, used), d, subs=9000)["region"] == "Казань"
+    assert finder.judge(_posts(7, imp), d, subs=9000)["reason"] == "импорт / под заказ"
+    assert finder.judge(_posts(7, used), d, subs=1200)["reason"] == "мало подписчиков"
+    assert finder.judge(_posts(3, used), d, subs=9000)["reason"].startswith("постов за неделю")
+    assert finder.judge(_posts(7, "Росстат: продажи новых машин выросли на 12% за месяц"), d, subs=9000)["reason"] == "не объявления о продаже авто"
+    r = finder.judge(_posts(4, used, per_day=3), d, subs=9000, min_subs=5000, min_week=7, min_days=6)
+    assert r["reason"] == "посты не каждый день (4 из 7)"
+    data = finder.table([dict(r, link="https://t.me/x", title="X")], [], "Telegram")
+    assert data[:2] == b"PK"                                                     # .xlsx
+
+
+async def test_admin_tgfind_table(env):
+    """/tgfind 2: поиск Telegram по фразам → проверка постов → таблица .xlsx с подходящими; импорт и уже известные — нет."""
+    import userbot
+    from types import SimpleNamespace
+    from aiogram.methods import SendDocument
+    dp, bot, s, ctx = env
+    used = "Продам Lada Vesta 2019, пробег 60 000 км, Самара. Цена 1 050 000 ₽."
+    imp = "Авто из Японии под заказ: Toyota Prius 2018, растаможка под ключ. Цена 1 500 000 ₽."
+
+    class FindTelethon(SimilarTelethon):
+        async def __call__(self, request):
+            from telethon.tl.types.messages import Chats
+            ch = lambda i, u, t, n: Channel(id=i, title=t, photo=ChatPhotoEmpty(), date=None, access_hash=1, username=u,
+                                            participants_count=n, broadcast=True)
+            if type(request).__name__ == "SearchRequest":
+                return SimpleNamespace(chats=[ch(601, "avto_samara_bu", "Авторынок Самара", 15000), ch(602, "japan_auto", "Авто из Японии", 40000),
+                                              ch(603, "avto_msk", "Уже в базе", 7000), ch(604, "small_avto", "Авто мало", 900)])
+            return Chats(chats=[])
+
+        async def get_messages(self, c, limit=40):
+            text = imp if c.username == "japan_auto" else used
+            return [SimpleNamespace(date=dt, message=t) for dt, t in _posts(7, text)]
+    reader = Reader(bot, ctx, FindTelethon())
+    reader.runner = asyncio.get_running_loop().create_future()
+    ctx.reader = reader
+
+    async def no_sleep(_):
+        pass
+    orig, userbot.asyncio.sleep = userbot.asyncio.sleep, no_sleep
+    try:
+        await dp.feed_update(bot, msg("/tgfind 2", ADMIN))
+        await asyncio.gather(*ctx.background)
+    finally:
+        userbot.asyncio.sleep = orig
+    doc = [m for m in s.sent if isinstance(m, SendDocument)][-1]
+    assert doc.document.filename == "telegram_kanaly.xlsx" and "Подходят: 1" in doc.caption and "отсеяны с причиной: 1" in doc.caption
+    from openpyxl import load_workbook
+    import io
+    wb = load_workbook(io.BytesIO(doc.document.data))
+    links = [r[0].value for r in wb["Telegram"].iter_rows(min_row=2)]
+    assert links == ["https://t.me/avto_samara_bu"] and wb["Отсеяны"]["J2"].value == "импорт / под заказ"
+
+
+async def test_admin_vkfind_table(env):
+    """/vkfind 300: группы ВК 5000+ с постами каждый день и машинами с ценой → таблица; импорт и «через день» — в отсеянных."""
+    from aiogram.methods import SendDocument
+    dp, bot, s, ctx = env
+    day = 86400
+    used = "Продам Hyundai Solaris 2016, пробег 120 000 км, Пермь. Цена 850 000 ₽"
+    def wall(days, text, per_day=2):
+        return [{"id": d * 10 + i, "date": int(time.time()) - d * day - 3600 * (i + 1), "text": text} for d in days for i in range(per_day)]
+
+    class TableVK(FakeVK):
+        async def call(self, method, **p):
+            if method == "groups.search":
+                return {"items": [{"id": 11, "name": "Авторынок Пермь", "is_closed": 0}, {"id": 12, "name": "Авто из Кореи", "is_closed": 0},
+                                  {"id": 13, "name": "Авто барахолка", "is_closed": 0}]}
+            if method == "groups.getById" and "group_ids" in p:
+                return {"groups": [{"id": int(i), "name": f"g{i}", "screen_name": f"g{i}", "members_count": 20000, "description": ""}
+                                   for i in p["group_ids"].split(",")]}
+            if method == "wall.get":
+                return {"items": {11: wall(range(7), used), 12: wall(range(7), "Привезём из Кореи под заказ Kia K5 2022, цена 2 900 000 ₽"),
+                                  13: wall(range(0, 7, 2), used)}[-p["owner_id"]]}
+            return await super().call(method, **p)
+    ctx.vk = VKReader(bot, ctx, make_api=lambda t: TableVK())
+    ctx.vk.api = TableVK()
+    ctx.vk.runner = asyncio.create_task(asyncio.sleep(3600))
+    try:
+        await dp.feed_update(bot, msg("/vkfind 300", ADMIN))
+        await asyncio.gather(*ctx.background)
+    finally:
+        ctx.vk.runner.cancel()
+        ctx.vk = None
+    doc = [m for m in s.sent if isinstance(m, SendDocument)][-1]
+    from openpyxl import load_workbook
+    import io
+    wb = load_workbook(io.BytesIO(doc.document.data))
+    assert [r[0].value for r in wb["ВКонтакте"].iter_rows(min_row=2)] == ["https://vk.com/g11"]
+    assert {r[9].value for r in wb["Отсеяны"].iter_rows(min_row=2)} == {"импорт / под заказ", "посты не каждый день (4 из 7)"}
