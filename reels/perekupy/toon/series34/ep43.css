@@ -329,3 +329,12 @@
 #cnt { left: auto; right: 40px; top: 300px; border-color: #4cd964; }
 #cnt em { font-style: normal; font-size: 38px; }
 #bell { position: absolute; right: 60px; top: 420px; z-index: 56; font-size: 120px; opacity: 0; filter: drop-shadow(0 8px 0 #151515); }
+.choice { left: 40px; top: 1180px; width: 1000px; z-index: 30; display: flex; gap: 24px; opacity: 0; }
+.choice .ch { flex: 1; position: relative; background: #fff; border: 7px solid #151515; border-radius: 26px; padding: 18px 22px; box-shadow: 0 12px 0 #151515; font-family: Onest; font-weight: 800;
+  font-size: 30px; color: #151515; line-height: 1.35; transform-origin: 50% 100%; }
+.choice .ch b { display: block; font-family: Unbounded; font-weight: 900; font-size: 40px; margin-bottom: 8px; }
+.choice .ch span { display: block; } .choice .bad b { color: #c0392b; } .choice .good b { color: #2f8f3a; } .choice .good { border-color: #2f8f3a; }
+.choice .ch i { position: absolute; right: 14px; top: 10px; font-style: normal; font-size: 46px; }
+.rcpt { left: 60px; right: 60px; top: 1050px; z-index: 30; background: #fbfaf6; border: 7px solid #151515; border-radius: 18px; padding: 18px 26px; box-shadow: 0 12px 0 #151515;
+  font-family: Onest; font-weight: 800; font-size: 34px; color: #222; line-height: 1.5; opacity: 0; }
+.rcpt div { display: flex; justify-content: space-between; } .rcpt .rt { display: block; border-top: 4px dashed #222; margin-top: 8px; padding-top: 8px; font-family: Unbounded; font-weight: 900; font-size: 30px; color: #2f6db5; }

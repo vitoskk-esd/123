@@ -51,6 +51,9 @@ add("kab", CHALK("ch1", 120, 370, "Королла 2012<br>= <span class='strk'>1
 scene("mast", "masterskaya");
 add("mast", CAR("c_5b", "vaz2105/vaz2105_34.png", 380, 1050, 600, 3) + hero("eg2", 700, 780, .8, EGOR) + tol("t3", 20, 800, .8)
   + stamp("mk180", "РЫНОК ≈ 180 000", 60, 1420, "#ffd23f", "#151515", 50, -3)
+  + `<div class="el choice" id="choice"><div class="ch bad" id="chA"><b>ЗА 120 000</b><span>+60 000 сразу</span><span>Егорыч обманут</span><span>слух — по всей школе</span><i>❌</i></div>
+      <div class="ch good" id="chB"><b>ЗА 160 000</b><span>+20 000 сразу</span><span>Егорыч доволен</span><span>честное имя</span><i>✅</i></div></div>`
+  + stamp("plus40", "+40 000 ЕГОРЫЧУ СВЕРХУ", 120, 1220, "#4cd964", "#151515", 46, -3)
   + JOURNAL("j2", [["Королла · расчёт", "5"], ["«пятёрка» · честность", "5+"]], 280, 1500));
 // 5. учительская: заявка; 6. расписание = фильтры
 scene("uch", "uchitelskaya");
@@ -65,6 +68,8 @@ add("rasp", `<div class="el tt" id="tt">${[["1 урок · Ларгус до 700
 scene("fin", "shkpark");
 add("fin", CAR("c_evo2", "evo/evo_34.png", 20, 1150, 330, 3) + CAR("c_gr", "granta/granta_34.png", 330, 1150, 330, 3) + tol("t6", 560, 860, .78) + Q("q2", 880, 1090, 170)
   + JOURNAL("j3", [["Королла · расчёт", "5"], ["«пятёрка» · честность", "5+"], ["подбор · 6 машин", "5"]], 40, 620)
+  + `<div class="el rcpt" id="rcpt"><div>Отдал Егорычу сверху <b style="color:#d62d20">−40 000</b></div><div>Вернулось: подбор 6 × 10 000 <b style="color:#2f8f3a">+60 000</b></div>
+      <div class="rt">6 новых клиентов — и директор на очереди</div></div>`
   + `<div class="ctab" id="cta2" style="top:1330px"><div class="cbig">Бот <span>«Перехват»</span><br>— ссылка в шапке</div><div class="csm">сколько фильтров — столько машин · ~1 с</div></div>`);
 $(".stage").insertAdjacentHTML("beforeend", `<div id="cnt">💰 <span id="cv">350 000</span> ₽ <em id="cd"></em></div><div id="bell">🔔</div>`);
 $("#end h2").innerHTML = E.end;
@@ -92,7 +97,7 @@ window.build = R => {
     for (const [p, k] of Object.entries(SP)) if (document.getElementById(p)) mouth(p, talk((LIP[k] || [])[f] || 0, f) ? "talk" : mood(k, t)); });
   window.MUSIC = { style: "toon", bpm: 116, end: R.dur - 1.2 };
   const ids = E.lines.map(l => l.id), nxt = l => ids[ids.indexOf(l) + 1];
-  const SW = { line: st.l1 - .35, kab: st.m1 - .55, mast: W("l2", "мастер") - .3, uch: st.l4 - .4, rasp: st.l5 - .3, fin: st.end - .35 };
+  const SW = { line: st.l1 - .35, kab: st.m1 - .55, mast: W("l2", "мастер") - .3, uch: W("l4", "учител") - .3, rasp: st.l5 - .3, fin: st.end - .35 };
   const ends = Object.values(SW).sort((a, b) => a - b);
   for (const l of ["i1", "m1", "t1", "m2", "e1", "t2", "e2", "d1"]) {
     const cap = ends.find(x => x > st[l]) ?? 1e9, n = nxt(l);
@@ -125,29 +130,35 @@ window.build = R => {
   // 1. парковка
   tl.to("#title", { opacity: 0, y: -50, duration: .25 }, 2.2);
   tl.fromTo("#cnt", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: .3, immediateRender: false }, 2.4); gsap.set("#cnt", { opacity: 0 });
-  R.sfx("ring", W("l0", "больш") - .1, .5); tl.fromTo("#bell", { opacity: 0 }, { opacity: 1, duration: .1, immediateRender: false }, W("l0", "больш") - .1)
-    .to("#bell", { rotation: 18, duration: .06, yoyo: true, repeat: 7, ease: "none" }, W("l0", "больш")).to("#bell", { opacity: 0, duration: .15 }, W("l0", "двадц") + .5);
+  R.sfx("ring", W("l0", "учител") - .1, .5); tl.fromTo("#bell", { opacity: 0 }, { opacity: 1, duration: .1, immediateRender: false }, W("l0", "учител") - .1)
+    .to("#bell", { rotation: 18, duration: .06, yoyo: true, repeat: 7, ease: "none" }, W("l0", "учител")).to("#bell", { opacity: 0, duration: .15 }, en.l0 + .2);
   // 2. линейка: камера едет вдоль ряда к пустому месту директора
   bell("park", "line", SW.line);
   tl.fromTo(cam, { s: 1.2, x: 200, y: -190 }, { s: 1.2, x: -200, y: -190, duration: W("l1", "пуст") - SW.line, ease: "power1.inOut", immediateRender: false }, SW.line)
     .to(cam, { s: 1, x: 0, y: 0, duration: .5, ease: "power3.out" }, W("l1", "пуст"));
-  ["#s1", "#s2", "#s3"].forEach((s, k) => slam(s, W("l1", ["физрук", "математ", "трудов"][k]) + .1, "pop"));
+  ["#s1", "#s2", "#s3"].forEach((s, k) => slam(s, W("l1", ["эвол", "корол", "пятер"][k]) + .1, "pop"));
   slam("#q1", W("l1", "директ"), "boom"); R.punch(cam, W("l1", "директ") + .1, .08);
   // 3. кабинет: мел, бот, «пять»
   bell("line", "kab", SW.kab);
   write("#ch1", st.m1 + .2, 1.6); write("#ch2", W("m1", "аксиом"), .5);
   show("#mkt", st.t1); hide("#mkt", st.m2 + .2);
-  tl.fromTo("#strike", { scaleX: 0 }, { scaleX: 1, duration: .3, ease: "power2.out", immediateRender: false }, W("t1", "восемь")); R.sfx("swish", W("t1", "восемь"), .6);
-  write("#ch3", W("t1", "восемь") + .3, 1.2);
+  tl.fromTo("#strike", { scaleX: 0 }, { scaleX: 1, duration: .3, ease: "power2.out", immediateRender: false }, W("t1", "820")); R.sfx("swish", W("t1", "820"), .6);
+  write("#ch3", W("t1", "820") + .3, 1.2);
   tl.fromTo("#j1", { opacity: 0, y: 80, rotation: -8 }, { opacity: 1, y: 0, rotation: -2, duration: .35, ease: "back.out(1.6)", immediateRender: false }, st.m2 - .3);
   grade("#j1_g0", W("m2", "пять"));
   // 4. мастерская: «пятёрка», рынок, честная цена
   swap("kab", "mast", SW.mast);
-  slam("#mk180", W("l3", "сто"), "impact"); hide("#mk180", st.t2 + .2);
+  slam("#mk180", W("l3", "180"), "impact"); hide("#mk180", st.l3b);
+  tl.fromTo("#choice", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: .35, ease: "back.out(1.6)", immediateRender: false }, st.l3b); R.sfx("swish", st.l3b, .6);
+  tl.fromTo("#chA", { scale: 1 }, { scale: 1.06, duration: .2, yoyo: true, repeat: 1, immediateRender: false }, W("l3b", "заработ"));
+  tl.to("#chA", { opacity: .35, filter: "grayscale(1)", duration: .3 }, W("l3b", "обманеш")); R.sfx("bleep", W("l3b", "обманеш"), .15);
+  tl.fromTo("#chB", { scale: 1 }, { scale: 1.1, duration: .25, ease: "back.out(3)", immediateRender: false }, W("l3b", "узнают") + .2); R.sfx("ping", W("l3b", "узнают") + .2, .8);
+  hide("#choice", st.t2 + .1);
   cnt(350000, 190000, W("t2", "беру"), "−160 000", "#ff3b30");
-  R.punch(cam, W("t2", "шестьд"), .06);
+  R.punch(cam, W("t2", "160"), .06);
   tl.fromTo("#j2", { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: .35, ease: "back.out(1.6)", immediateRender: false }, st.e2 + .2);
   tl.set("#j2_g0", { opacity: 1 }, st.e2 + .2); grade("#j2_g1", en.e2 + .1);
+  slam("#plus40", W("l4", "40"), "impact"); hide("#plus40", SW.uch - .1);
   // 5. учительская: заявка
   bell("mast", "uch", SW.uch);
   tl.from(["#LV3", "#IL3", "#EG3"], { x: 400, opacity: 0, duration: .5, stagger: .12, ease: "power2.out" }, st.l4 + .2); R.sfx("whoosh", st.l4 + .2, .4);
@@ -163,7 +174,11 @@ window.build = R => {
   swap("rasp", "fin", SW.fin);
   tl.fromTo("#j3", { opacity: 0, y: -60 }, { opacity: 1, y: 0, duration: .35, immediateRender: false }, SW.fin + .4);
   tl.set(["#j3_g0", "#j3_g1"], { opacity: 1 }, SW.fin + .4); grade("#j3_g2", W("end", "подбор"));
-  cnt(190000, 400000, W("end", "двест"), "+210 000", "#4cd964"); cnt(400000, 460000, W("end", "четыр"), "+270 000", "#4cd964");
+  tl.fromTo("#rcpt", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: .35, ease: "back.out(1.6)", immediateRender: false }, W("end", "40") - .2); R.sfx("clack", W("end", "40"), .7);
+  tl.fromTo("#rcpt .rt", { opacity: 0 }, { opacity: 1, duration: .2, immediateRender: false }, W("end", "вернул"));
+  hide("#rcpt", W("end", "директ") - .3);
+  cnt(190000, 250000, W("end", "60"), "+60 000", "#4cd964"); cnt(250000, 440000, W("end", "190"), "+190 000", "#4cd964");
+  tl.set("#cd", { textContent: "+90 000", color: "#4cd964" }, W("end", "440"));
   slam("#q2", W("end", "директ"), "boom"); R.punch(cam, W("end", "директ") + .1, .08);
   tl.fromTo("#cta2", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, W("end", "подпиш") - .3);
   tl.to("#cnt", { opacity: 0, duration: .2 }, en.end + .1);
