@@ -1,6 +1,6 @@
 # python cut.py → niva_side.png (сбоку, мордой влево), niva_side_r.png (мордой вправо), niva_34.png (3/4 спереди), niva_34r.png (3/4 сзади):
 # салатовая Нива владельца (10.11, source.webp) без белого фона и серой тени. Фон и тень — нейтрально-серые/белые, заливаем от краёв
-# кадра; диски (тоже серые) внутри чёрных шин и стёкла внутри рамок не достаются. Кайма — срезаем на 1 px.
+# кадра (внизу — и тёмно-серую тень под машиной); диски (тоже серые) внутри чёрных шин и стёкла внутри рамок не достаются. Кайма — срезаем на 1 px.
 import numpy as np
 from PIL import Image
 from scipy import ndimage
@@ -10,6 +10,10 @@ src = np.asarray(Image.open("source.webp").convert("RGB")).astype(int)
 def cut(box, out):
     x0, y0, x1, y1 = box; a = src[y0:y1, x0:x1]
     bg = ((a.max(-1) - a.min(-1)) < 20) & (a.min(-1) > 105)
+    # низ: тень под машиной — серая полоса (~70) отрезала белый зазор под порогом от фона (владелец 11.11: «низ белый»).
+    # Там фоном считаем и тёмно-серое (шины темнее — 0…45); выше ничего не меняем
+    low = np.arange(a.shape[0])[:, None] > .72 * a.shape[0]
+    bg |= low & ((a.max(-1) - a.min(-1)) < 14) & (a.min(-1) > 55)
     lab, _ = ndimage.label(bg)
     edge = set(lab[0]) | set(lab[-1]) | set(lab[:, 0]) | set(lab[:, -1]); edge.discard(0)
     fg = ~np.isin(lab, list(edge))
