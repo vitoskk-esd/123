@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 12 of a comedy mini-series about Tolyan, a student car flipper. You narrate dryly, with irony, like a street documentary. Flashback at the start (two weeks ago). «Си Эл Эс» — Mercedes CLS. Numbers said fully."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.26,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "Line 1: calm, firm, a bit smug — quoting clause seven of their contract. Line 2: softening, friendly, helping his partner."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: sly, greedy whisper-ish confidence. Line 2: outraged. Line 3: guilty, pleading, puppy-dog voice. Line 4: grateful, joking."
+ },
+ "artur": {
+  "voice": "Schedar",
+  "tempo": 1.1,
+  "profile": "Artur — a calm, dry, bearded Russian car buyer in his 40s with glasses and his own paint thickness gauge.",
+  "notes": "Line 1: matter-of-fact, unimpressed, gives a lowball price. Line 2: short, dry: «Вот и зря.»"
+ },
+ "grisha": {
+  "voice": "Alnilam",
+  "tempo": 1.12,
+  "profile": "Grisha — a cheerful Russian car painter in his 30s, simple and kind.",
+  "notes": "One line: cheerful, confident, a craftsman who isn't afraid of body filler."
+ }
+}
