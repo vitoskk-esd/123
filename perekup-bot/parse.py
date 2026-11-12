@@ -204,6 +204,14 @@ def named_makes(lines: list[list[str]], d: Dictionary) -> set[str]:
     return {h.payload[1] for toks in lines for h in d.cars.find(toks) if h.payload[0] == "make" or h.end - h.start > 1}
 
 
+# «приора салон», «руль от приоры», «приора зеркала» — деталь от другой модели, а не продаваемая машина (владелец 12.11: «в продаже 2112 …
+# установлен приора салон» бот назвал Приорой)
+PARTS = set("салон салона салоном зеркала зеркало зеркалами руль руля рулем сиденья сидения кресла панель панели торпеда торпедо "
+            "фары фар оптика бампер бампера диски дисков стекла ручки обшивка обшивки мульти коробка кпп двигатель мотор".split())
+FROM_CAR = {"от", "с", "со", "под"}
+SALE_LEAD = set("в на продаже продажа продам продаю продается продаеться срочно отдам".split())   # «в продаже 2112» — это заголовок
+
+
 def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
     """Какая машина продаётся, если в посте их несколько. Каждое упоминание получает очки:
     + модель (а не только марка), + названа вместе с маркой («Citroen C4»), + стоит в начале строки (заголовок),
@@ -223,8 +231,10 @@ def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
             score = 2.0 if model else 1.0
             if model and (h.end - h.start > 1 or make_before.get(h.start) == make):
                 score += 3                                   # «Citroen C4», «Тойота Королла» — марка прямо перед моделью
-            if h.start <= 1:
-                score += 2                                   # строка начинается с машины — это заголовок
+            if h.start <= 1 or (h.start <= 3 and set(toks[:h.start]) <= SALE_LEAD):
+                score += 2                                   # строка начинается с машины («в продаже 2112») — это заголовок
+            if (h.end < len(toks) and toks[h.end] in PARTS) or (h.start and toks[h.start - 1] in PARTS | FROM_CAR):
+                score -= 4                                   # «приора салон», «руль приора», «от приоры» — деталь
             if any(years[max(0, li - 1):li + 3]):
                 score += 1                                   # рядом год выпуска
             if set(toks[max(0, h.start - 4):h.start]) & COMPARE:
@@ -312,13 +322,24 @@ def credit_is_offer(text: str) -> bool:
     return bool(CREDIT_OFFER.search(t)) and not CREDIT_REAL.search(t)
 
 
+def _bare_number(text: str, d: Dictionary, make: str, model: str) -> bool:
+    """Модель узнана только по числу («520», «2112»), а марка словом не названа — при упоминании квадроцикла или мотоцикла это не машина."""
+    lines = [norm(x).split() for x in clean(text).splitlines()]
+    if make in named_makes(lines, d):
+        return False
+    hits = [(toks, h) for toks in lines for h in d.cars.find(toks) if h.payload[0] == "model" and h.payload[1:3] == (make, model)]
+    return bool(hits) and all(h.end - h.start == 1 and toks[h.start].isdigit() for toks, h in hits)
+
+
 def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> Listing:
     tokens = norm(clean(text)).split()
     L = Listing(text=text, tokens=tokens)
     L.make, L.model = pick_car(text, d)
     kind = vehicle_kind(text)
-    if kind and not L.model:                  # «Honda CBR 600, спортбайк» — мотоцикл, а не машина Honda
-        L.kind, L.title, L.make = kind, vehicle_title(text), None
+    if kind and (not L.model or _bare_number(text, d, L.make, L.model)):
+        # «Honda CBR 600, спортбайк» — мотоцикл, а не машина Honda; «квадроцикл CFMoto 520.L» — не BMW 520 (марка не названа,
+        # модель — голое число); а «Камри 2014, обмен на мотоцикл» — машина
+        L.kind, L.title, L.make, L.model = kind, vehicle_title(text), None, None
     L.price = parse_price(text)
     L.price_unsure = price_unsure(text)
     L.year = parse_year(text)
@@ -391,7 +412,7 @@ KINDS = [
     ("спецтехника", "🏗", re.compile(r"экскаватор|погрузчик|спецтехник|манипулятор|автокран")),
 ]
 KIND_ICON = {k: icon for k, icon, _ in KINDS}
-VEHICLE_BRAND = re.compile(r"\b(ducati|kawasaki|yamaha|honda|suzuki|bmw|ktm|harley[\s-]?davidson|aprilia|triumph|husqvarna|stels|irbis|cfmoto|"
+VEHICLE_BRAND = re.compile(r"\b(ducati|kawasaki|yamaha|honda|suzuki|bmw|ktm|harley[\s-]?davidson|aprilia|triumph|husqvarna|stels|irbis|cf[\s-]?moto|"
                            r"brp|polaris|lifan|racer|vespa|piaggio|минск|урал|иж|ява|нева|каскад|кировец|мтз|беларус)\b([ \t]+[\w-]+){0,2}", re.I)
 
 
@@ -405,7 +426,7 @@ def vehicle_title(text: str) -> str | None:
     m = VEHICLE_BRAND.search(clean(text))
     if not m:
         return None
-    words = [w for w in m.group(0).split() if not re.fullmatch(YEAR, w) and not re.fullmatch(r"\d{4,}", w)]
+    words = [w for w in m.group(0).split() if not re.fullmatch(YEAR, w) and not re.match(r"\d{4,}", w)]   # «2026год» — тоже год
     return " ".join(words)[:40] or None
 
 

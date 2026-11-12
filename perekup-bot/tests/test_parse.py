@@ -271,11 +271,22 @@ def test_price_amount_traps(text, price):
  ("Скутер Yamaha Jog 2019 45 000 р", "скутер", "Yamaha Jog", None),
  ("Продам Fiat Ducato 2015, пробег 200 тыс, 1 500 000 ₽", None, None, "fiat"),
  ("Камри 2014, 1 200 000, обмен на мотоцикл", None, None, "toyota"),
+ # владелец 12.11: «520.L» квадроцикла бот принял за BMW 520
+ ("Новый квадроцикл\n Cf moto 2026год.\ncforce 520.L .\nЦвет любой.\nБумаг нет\nЦена 200.т.р.\nМосква", "квадроцикл", "Cf moto", None),
 ])
+
 def test_vehicle_kinds(text, kind, title, make):
     from parse import sale_verdict
     L = parse_post(text, D)
     assert (L.kind, L.title, L.make) == (kind, title, make) and sale_verdict(text, L) != "not_sale"
+
+
+# владелец 12.11: «в продаже 2112 … установлен приора салон, руль приора, приора зеркала» — продаётся 2112, а не Приора
+def test_parts_from_other_model():
+    L = parse_post("в продаже 2112🚀\n2003 год\n1.6 шеснарь\nДно целое, стаканы, пороги тоже целые.\nУстановлен приора салон, евро карты, "
+                   "мульти руль приора 2 , стоит хорошая музыка, стоят приора зеркала с электроприводом, подогревом\nЦена 155 тыс рублей", D)
+    assert (L.make, L.model, L.price) == ("lada", "2112", 155000)
+    assert parse_post("Продаю приору 2012 года, салон от калины, 300 тыс", D).model == "Priora"
 
 
 def test_city_donetsk_not_moscow():
