@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "You narrate part 11 of a comedy mini-series about Tolyan, a young used-car flipper. Deadpan, dry irony; numbers said fully. «CLS» is the Mercedes CLS, say it as «Си-Эл-Эс». Line «Стоп…» — a dramatic freeze-frame comment. Last line before the cliffhanger: «А Жора тем временем…» — slow, suspicious."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.26,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "Line 1: reluctant agreement, then firm. Line 2: calm, confident, a bit smug. Line 3: ironic, mocking question."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: loud, cocky bet at the bowling alley. Line 2: excited, selling his buddy's car; «CLS» as «Си-Эл-Эс». Line 3: grudging respect, slow. Line 4: a quiet conspiratorial WHISPER on the phone."
+ },
+ "notary": {
+  "voice": "Erinome",
+  "tempo": 1.1,
+  "profile": "A Russian notary woman in her 50s, precise, formal, dry official tone, glasses.",
+  "notes": "One line: formal, reading a contract clause, then a short question."
+ },
+ "vitalik": {
+  "voice": "Umbriel",
+  "tempo": 1.15,
+  "profile": "Vitalik — a slick Russian car tuning guy in his 30s in a tracksuit and cap, overconfident salesman, calls people «пацаны».",
+  "notes": "One line: overconfident, praising his car that is actually repaired."
+ }
+}
