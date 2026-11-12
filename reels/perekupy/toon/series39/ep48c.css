@@ -1,0 +1,10 @@
+/* ep48 «ПЕРЕГОН · 900 км за ночь» — киношный формат (../cine.css) */
+#scene { position: absolute; inset: 0; }
+#scene > .cf { opacity: 0; }
+.cf .bub2 { opacity: 0; }
+#tag span { text-shadow: 0 3px 10px #000; }
+.wr { clip-path: inset(-20% 100% -20% -5%); }
+#clk { position: absolute; left: 60px; top: 290px; z-index: 52; font-family: "JetBrains Mono"; font-weight: 800; font-size: 58px; color: #ff3b30; background: #0d0e12;
+  border: 6px solid #ff3b30; border-radius: 18px; padding: 2px 20px; box-shadow: 0 0 26px rgba(255,59,48,.55), 0 8px 0 #151515; font-variant-numeric: tabular-nums; opacity: 0; }
+.win { position: absolute; overflow: hidden; }
+.win i { position: absolute; height: 6px; border-radius: 3px; }
