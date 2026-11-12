@@ -1,0 +1,116 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props48.js"></script>
+<script>
+// «ПЕРЕГОН · 900 км за ночь» (ep48, отдельная серия, киношный формат). Костя (новый герой, первый перегон) ловит в боте Mark II 2000 года
+// за 790 000 — на 17% ниже рынка, но в Казани, за 900 км. Ночной автобус → продавец Денис поднимает цену («трое звонили») — Костя показывает скрин
+// объявления → договор и ОСАГО на капоте → метель и фура с дальним → кафе 24 часа (тётя Люба, кот Барсик на капоте) → утро, ДПС: инспектор Соколов
+// проверяет документы и спрашивает, где Костя нашёл машину. Приёмы: часы ночи на экране; вид из-за руля; скрин с кругом маркером; кот на капоте.
+// Бот: экран-реквизит (хук) + рычаг торга (скрин объявления с ценой и временем).
+const HP = (p, inner, o = KOSTYA, x = 540, extra = {}) => HOLDPHONE("perekup", p, x, 1960, 1680, o, inner, extra);
+const S = [
+ { h: "22:03 · АВТОБУС", tc: "1/7 · 0:00–0:10",
+   A: { def: () => { const H = HP("k1", BOTCARD48(), KOSTYA, 540, { rim: "#5ab0ff", side: 1 });
+       return { bg: "avtobus", grade: "night", hud: HUDP(1), farBlur: 9, mid: H.mid, lights: H.lights, over: CLOCK("22:03") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "avtobus", grade: "night", hud: HUDP(), over: CLOCK("22:05"),
+       mid: SLEEPER(600, 990, 190) + SLEEPER(850, 1010, 180, "#c0392b") + ch("perekup", "k1b", 330, 1580, 720, KOSTYA, {}, { rim: "#5ab0ff", side: 1 }) + SEAT(100, 1250, 460),
+       lights: glow(330, 1120, 160, "#7fd0ff", .4) + [90, 270, 450, 630, 810, 990].map(x => glow(x, 200, 70, "#5ab0ff", .6)).join("") }), shot: { x: 540, y: 1080, s: 1.05 },
+     bubbles: [{ p: "k1b", html: "Девятьсот километров?<br><em>Уже еду!</em>", fs: 44 }], talk: ["k1b"] },
+   vo: "Лис: «Десять вечера. Костя ловит в боте Марк Два — на сто шестьдесят тысяч ниже рынка. Одна проблема: машина в Казани». Костя: «Девятьсот километров? Уже еду!»", who: "Лис + Костя",
+   mv: "<b>Хук — бот с первой секунды:</b> Костя держит телефон, на экране «Mark II 2000 · 1JZ · 790 000 ₽ · −17% к рынку · Казань · 1 с после публикации». <b>Новый фон — междугородний автобус ночью</b> (кресла с белыми чехлами, синие лампочки, за окнами полосы огней трассы). <b>Приём 1 — часы ночи на экране:</b> 22:03 → 03:00 → 06:40. B — Костя уже в автобусе, спинка кресла перед ним, спящие пассажиры. Новый герой — Костя (первый перегон)." },
+ { h: "КАЗАНЬ · СТОЯНКА", tc: "2/7 · 0:10–0:21",
+   A: { def: () => ({ bg: "gostinica", grade: "night", hud: HUDP(), fx: SNOWFX(120, 5),
+       mid: car(MARK, 420, 1650, 640, { z: 5, sheen: .55 }) + ch("perekup", "dn", 250, 1700, 770, DENIS, { armR: -30 }, { rim: "#ffd27a", side: 1 }) + ch("perekup", "k2", 860, 1740, 740, KOSTYA, {}, { rim: "#ffd27a", side: -1, z: 7 }),
+       lights: glow(805, 525, 120, "#fff6c8", .9) + beam([[770, 530], [840, 530], [1080, 1700], [420, 1700]], "#fff6c8", .22) + glow(540, 290, 300, "#ff5a8a", .25) }), shot: { x: 540, y: 1160, s: 1.12 },
+     bubbles: [{ p: "dn", html: "Тут ещё трое звонили.<br><em>Давай восемьсот пятьдесят.</em>", fs: 40 }], talk: ["dn"] },
+   B: { def: () => { const H = HP("k2p", SCREEN48(), KOSTYA, 540, { rim: "#ffd27a", side: -1, head: -4 });
+       return { bg: "gostinica", grade: "night", hud: HUDP(), farBlur: 9, fx: SNOWFX(80, 7, 1.4), mid: H.mid, lights: H.lights + glow(805, 525, 160, "#fff6c8", .5) }; }, shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "k2p", html: "Ты сам выставил за семьсот девяносто.<br><em>Вот — в 22:03.</em>", fs: 40 }], talk: ["k2p"] },
+   vo: "Денис: «Слушай, тут ещё трое звонили. Давай восемьсот пятьдесят». Костя: «Ты сам выставил за семьсот девяносто. Вот — в двадцать два ноль три».", who: "Денис + Костя",
+   mv: "<b>Новый фон — стоянка у гостиницы «Волжанка» ночью</b> (фасад с неоновой вывеской, фонарь, сугробы, снег). Продавец Денис — новый герой (очки ночью, цепь). <b>Бот — рычаг торга:</b> Костя показывает скрин объявления — цена и время публикации, <b>приём 2:</b> цена обведена маркером «← вот цена!»." },
+ { h: "ДОГОВОР НА КАПОТЕ", tc: "3/7 · 0:21–0:31",
+   A: { def: () => ({ bg: "gostinica", grade: "night", hud: HUDP(), fx: SNOWFX(90, 9),
+       mid: car(MARK, 420, 1650, 640, { z: 5, sheen: .4 }) + ch("perekup", "dn3", 380, 1700, 780, { ...DENIS, item: "cash", look: "angry" }, { head: 6 }, { rim: "#ffd27a", side: 1 }),
+       lights: glow(805, 525, 120, "#fff6c8", .9) + beam([[770, 530], [840, 530], [1080, 1700], [420, 1700]], "#fff6c8", .2) }), shot: { x: 420, y: 1150, s: 1.9, r: -4 },
+     bubbles: [{ p: "dn3", html: "…Ладно.<br><em>Семьсот девяносто.</em>", fs: 52 }], talk: ["dn3"] },
+   B: { def: () => ({ grade: "night", hud: HUDP(1), far: HOOD(), farBlur: 0, fx: SNOWFX(70, 11),
+       over: [["ДКП", 300], ["ОСАГО онлайн", 410], ["10 дней на учёт", 520]].map(([t, y], k) => CHECK(k, t, y).replace("left:560px", "left:90px").replace('class="hand wr"', 'class="hand wr" style2')).join("").replace(/style2 style="/g, 'style="position:absolute;'),
+       lights: glow(540, 300, 500, "#fff6c8", .3) }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Денис: «…Ладно. Семьсот девяносто». Лис: «Ключи, договор купли-продажи, ОСАГО онлайн за пять минут — и можно ехать на старых номерах. На регистрацию — десять дней».", who: "Денис + Лис",
+   mv: "A — Денис крупно, голландский угол, пересчитывает деньги с кислым лицом. <b>B — вставка: капот Mark II сверху</b>: договор с подписью «Костя», телефон «ОСАГО оформлен ✓», ключи; маркером появляются галочки «✓ ДКП · ✓ ОСАГО онлайн · ✓ 10 дней на учёт» — полезный факт для зрителя." },
+ { h: "03:00 · МЕТЕЛЬ", tc: "4/7 · 0:31–0:40",
+   A: { def: () => ({ bg: "metel", grade: "night", hud: HUDP(1), farBlur: 0, fx: SNOWFX(160, 13, 1.2), over: CLOCK("03:00"),
+       mid: "", lights: glow(540, 890, 320, "#fff6d8", .75) + glow(540, 890, 90, "#ffffff", .9) }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "salonmark", grade: "night", hud: HUDP(), fx: SNOWFX(60, 15),
+       mid: ch("perekup", "k4", 420, 1760, 920, { ...KOSTYA, look: "angry" }, { armL: -20, armR: 20 }, { rim: "#fff6d8", side: 1 }) + DASH48,
+       lights: glow(420, 980, 420, "#fff6d8", .55) + glow(700, 700, 300, "#fff6d8", .3) }), shot: { x: 480, y: 1100, s: 1.15 },
+     bubbles: [{ p: "k4", html: "Фура,<br><em>выключи дальний!</em>", fs: 50 }], talk: ["k4"] },
+   vo: "Лис: «Три часа ночи. Метель. До дома — шестьсот километров». Костя: «Так, Марк, не подведи… Фура, выключи дальний!»", who: "Лис + Костя",
+   mv: "<b>Новый фон — вид из-за руля в метель</b> (дворники, «ёлочка» на зеркале, приборы светятся, столбики трассы). <b>Приём 3 — фура с дальним:</b> навстречу растут фары и заливают кадр белым. B — <b>новый фон: салон Mark II</b> (бордовый велюр, заднее стекло в снегу), Костя щурится за рулём, свет фар на лице." },
+ { h: "КАФЕ 24 ЧАСА", tc: "5/7 · 0:40–0:50",
+   A: { def: () => ({ bg: "kafe24", grade: "warm", hud: HUDP(),
+       far: car(MARK, 650, 800, 360, { z: 1 }) + CAT(690, 612, 120),
+       mid: ch("perekup", "ly", 300, 1320, 720, LYUBA, { armR: -40 }, { rim: "#ffd27a", side: 1, noShadow: 1 })
+         + `<div style="left:0;top:940px;width:1080px;height:210px;z-index:7;background:linear-gradient(#8a5a33 0 60px,#6b4422 60px);border-top:7px solid #151515;border-bottom:5px solid #151515"></div>`
+         + `<div style="left:330px;top:890px;width:110px;height:56px;z-index:8;background:#f4f1e8;border:5px solid #151515;border-radius:0 0 50px 50px"></div>`
+         + ch("perekup", "k5", 780, 1760, 760, KOSTYA, {}, { rim: "#ffd27a", side: -1, z: 9 }),
+       lights: glow(720, 210, 160, "#ff3b6a", .45) + glow(330, 860, 120, "#fff2c0", .35) }), shot: { x: 540, y: 1100, s: 1.06 },
+     bubbles: [{ p: "ly", html: "Сынок, ты чего зелёный такой?<br><em>Садись, пельмени горячие.</em>", fs: 38 }], talk: ["ly"] },
+   B: { def: () => ({ bg: "kafe24", grade: "warm", hud: HUDP(),
+       far: car(MARK, 650, 800, 360, { z: 1 }) + CAT(690, 612, 120),
+       mid: ch("perekup", "k5b", 780, 1760, 760, { ...KOSTYA, look: "o" }, { head: -8 }, { rim: "#ffd27a", side: -1, z: 9 }),
+       lights: glow(720, 210, 160, "#ff3b6a", .45) }), shot: { x: 800, y: 900, s: 1.55 },
+     bubbles: [{ p: "k5b", html: "А чей это кот<br><em>на моей машине?</em>", fs: 44 }], talk: ["k5b"] },
+   vo: "Тётя Люба: «Сынок, ты чего зелёный такой? Садись, пельмени горячие». Костя: «А чей это кот на моей машине?» Тётя Люба: «Это Барсик. Капот же тёплый».", who: "Тётя Люба + Костя",
+   mv: "<b>Новый фон — придорожное кафе 24 часа</b> (меню мелом «Пельмени 250», витрина с пирожками, самовар, неон «24», окно в метель). Новая героиня — <b>тётя Люба</b> за стойкой (новый голос). <b>Приём 4 — кот на капоте:</b> в окне видно Mark II, на тёплом капоте спит рыжий Барсик." },
+ { h: "06:40 · ДПС", tc: "6/7 · 0:50–1:03",
+   A: { def: () => ({ bg: "obochina", grade: "dawn", hud: HUDP(), over: CLOCK("06:40", "#ff7a1a"), fx: `<div class="fx">${C.fog(1000, 160, "#fff2dc", .35)}</div>`,
+       mid: car(MARK, 20, 1420, 560, { z: 4, sheen: .5 }) + POLICECAR(640, 1180, 320) + ch("perekup", "in", 760, 1700, 770, INSP, { armL: 30 }, { rim: "#ffe2a0", side: -1 }) + BATON(612, 1440)
+         + ch("perekup", "k6", 330, 1750, 740, KOSTYA, {}, { rim: "#ffe2a0", side: -1, z: 7 }),
+       lights: glow(820, 820, 360, "#fff0c8", .55) }), shot: { x: 540, y: 1200, s: 1.08 },
+     bubbles: [{ p: "in", html: "Инспектор Соколов.<br><em>Номера казанские — а вы?</em>", fs: 40 }], talk: ["in"] },
+   B: { def: () => ({ bg: "obochina", grade: "dawn", hud: HUDP(),
+       mid: POLICECAR(640, 1180, 320) + ch("perekup", "in2", 760, 1700, 770, { ...INSP, look: "o" }, { armL: 30 }, { rim: "#ffe2a0", side: -1 }) + BATON(612, 1440),
+       lights: glow(820, 820, 360, "#fff0c8", .5) }), shot: { x: 760, y: 1140, s: 2.1, r: 3 },
+     bubbles: [{ p: "in2", html: "Я свой за девятьсот брал!<br><em>Где нашёл?</em>", fs: 48 }], talk: ["in2"] },
+   vo: "Инспектор: «Инспектор Соколов. Номера казанские — а вы?» Костя: «Купил вчера. Договор, ОСАГО — всё здесь». Инспектор: «Всё верно. А взяли за сколько?» Костя: «Семьсот девяносто». Инспектор: «Я свой за девятьсот брал! Где нашёл?»", who: "Инспектор + Костя",
+   mv: "<b>Новый фон — обочина трассы на рассвете</b> (снежное поле, лес, розовое небо, отбойник, столб «750», знак «ДОМОЙ 140 · КАЗАНЬ 760»). Новый герой — <b>инспектор Соколов</b> (жезл, машина ДПС). <b>Поворот:</b> проверка документов заканчивается вопросом «Где нашёл?». B — инспектор крупно, удивлён." },
+ { h: "ИТОГ", tc: "7/7 · 1:03–1:12",
+   A: { def: () => { const H = HP("k7", BOTCARD48(), KOSTYA, 430, { rim: "#ffe2a0", side: -1 });
+       return { bg: "obochina", grade: "dawn", hud: HUDP(1), farBlur: 8, mid: H.mid + ch("perekup", "in3", 900, 2300, 1500, { ...INSP, look: "o" }, { head: -14 }, { rim: "#ffe2a0", side: -1, z: 4 }),
+         lights: H.lights + glow(820, 820, 360, "#fff0c8", .4) }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "obochina", grade: "dawn", hud: HUDP(), over: CTA48,
+       mid: car(MARK, 20, 1420, 560, { z: 4, sheen: .6 }) + POLICECAR(640, 1180, 320) + ch("perekup", "in4", 760, 1700, 770, { ...INSP, look: "grin", item: "phone" }, {}, { rim: "#ffe2a0", side: -1 })
+         + ch("perekup", "k7b", 330, 1750, 740, KOSTYA, {}, { rim: "#ffe2a0", side: -1, z: 7 }), lights: glow(820, 820, 360, "#fff0c8", .55) }), shot: { x: 540, y: 1200, s: 1.08 } },
+   vo: "Лис: «Одна ночь дороги — и сто шестьдесят тысяч ниже рынка. А инспектор Соколов теперь тоже ловит машины в боте».", who: "Лис",
+   mv: "A — Костя показывает бот, инспектор заглядывает в телефон через плечо. B — инспектор уже сам с телефоном; финальная карточка «Бот «Перехват» — ссылка в шапке» (голос её не читает)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const def = f.def(); def.bubbles = f.bubbles || []; const el = document.getElementById(id); el.innerHTML = C.frame(def, f.shot);
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
