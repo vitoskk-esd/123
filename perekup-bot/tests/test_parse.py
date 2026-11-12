@@ -313,6 +313,21 @@ def test_channel_region_guess():
     assert g("Корейские авто", "asia_express_auto") is None
 
 
+# владелец 12.11: в названиях групп ВК вместо города — номер региона («38 Авторынок» — Иркутская область)
+@pytest.mark.parametrize("title,nick,want", [
+    ("38 Авторынок", None, "irk"), ("Авторынок 138", None, "irk"), ("38RUS АВТО", None, "irk"), ("Авто 38 регион", None, "irk"),
+    ("АВТО 161RUS", None, "rnd"), ("Тачки 02", None, "ufa"), ("Авто (54)", None, "nsk"), ("Авто 77", None, "msk"), ("Авто 777", None, "msk"),
+    ("Авторынок 23 | Кубань", None, "krd"), ("Продажа авто Иркутск 38", None, "irk"), ("Авто 24", None, "krsk"), ("Авто 80", None, "dnr"),
+    ("Авто", "avto_38", "irk"), ("Авто", "auto138rus", "irk"), ("Авто", "avto_moskva", "msk"),
+    # не код региона: время, проценты, годы, цены, пробег, объём, номера
+    ("Авто 24/7", None, None), ("Авто 24 часа", None, None), ("Авторынок 2024", None, None), ("100 авто", None, None),
+    ("Авто от 150 тыс", None, None), ("Авто до 500 000", None, None), ("Авто за 99", None, None), ("Авто за 100%", None, None),
+    ("Двигатель 1.5", None, None), ("Пробег до 100 км", None, None), ("Магазин № 12", None, None), ("Авторынок", "auto2024", None),
+])
+def test_channel_region_by_plate_code(title, nick, want):
+    assert D.guess_region(title, nick) == want
+
+
 # владелец 08.11: Citroen C3 «Этот авто можно купить в кредит! (Подробности у менеджера)» получил метку «кредит/залог».
 # Способ оплаты (кредит от салона/банка) — не обременение машины.
 @pytest.mark.parametrize("tail,credit", [

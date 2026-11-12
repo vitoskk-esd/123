@@ -1622,6 +1622,19 @@ async def test_city_from_channel_title(env):
     assert USER not in r.sent and OTHER not in r.sent
 
 
+async def test_vk_group_region_code_in_title(env):
+    """Владелец 12.11: группа ВК «38 Авторынок» (номер региона вместо города) — посты без города уходят в фильтр
+    «Иркутская область», а в фильтр «Москва» — нет."""
+    dp, bot, s, ctx = env
+    cid, _ = await ctx.db.add_channel(vk="avtorynok38_x", base=True)
+    await ctx.db.vk_joined(cid, 777038, "38 Авторынок")
+    await ctx.refresh_channels()
+    await make_filter(dp, bot, "Иркутская область до 1 млн", uid=USER)
+    await make_filter(dp, bot, "Москва до 1 млн", uid=OTHER)
+    r = await process(bot, ctx, post(VK_KEY + 777038, "Toyota Corolla 2012\nПробег 160000\nЦена 890 000"))
+    assert USER in r.sent and OTHER not in r.sent and "📍 Иркутск" in s.texts(USER)[-1]
+
+
 async def test_city_learned_from_history(env):
     """Канал без города в названии узнаёт город по своим машинам: 10 постов из Казани → посты без города считаются казанскими."""
     dp, bot, s, ctx = env

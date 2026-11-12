@@ -36,13 +36,21 @@ def norm(text: str) -> str:
     return " ".join(_fix_mixed(w) for w in t.split())
 
 
+ENDING = re.compile(r"[аеёиоуыэюяйь]{0,3}|[аеёиоуыэюяйь]?(м|х|ми|го|му|й)|ам|ям|ах|ях|ами|ями|ом|ем|ой|ей|ою|ею")
+
+
 def _tok_match(alias_tok: str, tok: str) -> bool:
     """Короткие и цифровые — целиком; длинные — с окончанием: «приора» ~ «приору», «москва» ~ «москве»."""
     if len(alias_tok) < 5 or any(ch.isdigit() for ch in alias_tok):
         return tok == alias_tok
     if not CYR.search(alias_tok):           # латиница не склоняется: «ducati» ≠ «ducato»
         return tok == alias_tok or tok == alias_tok + "s"
-    return tok.startswith(alias_tok[:-1]) and len(tok) <= len(alias_tok) + 3
+    if not (tok.startswith(alias_tok[:-1]) and len(tok) <= len(alias_tok) + 3):
+        return False
+    rest = tok[len(alias_tok) - 1:]                     # после основы — только окончание: «москв|е», «солярис|ом», «челн|ах»;
+    if rest.startswith(alias_tok[-1]):                  # «мага|зин» — не «Магас», «камаз|ист» — не «КамАЗ» (владелец 12.11: «Магазин № 12» → Ингушетия)
+        rest = rest[1:]
+    return bool(ENDING.fullmatch(rest))
 
 
 @dataclass(frozen=True)
@@ -127,6 +135,7 @@ class Dictionary:
     places: Finder = field(repr=False, default=None)
     marks: Finder = field(repr=False, default=None)
     latin: dict[str, list[str]] = field(repr=False, default_factory=dict)   # регион → его города латиницей (для ников каналов)
+    codes: dict[int, str] = field(repr=False, default_factory=dict)         # автомобильный код региона → регион (38 → Иркутск)
 
     def car_name(self, make: str | None, model: str | None) -> str:
         if make and model:
@@ -153,9 +162,12 @@ class Dictionary:
         return None
 
     def guess_region(self, title: str | None, username: str | None) -> str | None:
-        """Город канала по названию («АвтоРынок ДНР», «Авто Воронеж») или нику (avto_moskva, AvtoVoronezh, avto_msk)."""
+        """Город канала по названию («АвтоРынок ДНР», «Авто Воронеж») или нику (avto_moskva, AvtoVoronezh, avto_msk);
+        нет названия места — по автомобильному коду региона в названии или нике («38 Авторынок», «Авто 161 RUS», avto138)."""
         if title and (found := self.find_regions(norm(title).split())):
             return found[0]
+        if title and (rid := self.region_by_code(title)):
+            return rid
         if not username:
             return None
         parts = [p for p in re.split(r"[_\d]+|(?<=[a-z])(?=[A-Z])", username) if p]
@@ -164,6 +176,17 @@ class Dictionary:
             for n in names:
                 if n in segs or (len(n) >= 5 and n in flat):
                     return rid
+        return self.region_by_code(username, nick=True)
+
+    def region_by_code(self, text: str, nick: bool = False) -> str | None:
+        """Регион по коду с номерного знака: отдельное число из 2–3 цифр (можно «RUS»/«регион» рядом). Не код — часть
+        большего числа, время и проценты («24/7», «24 часа», «100%»), цены и пробег («850 тыс», «150 000», «100 км»), годы."""
+        for m in (NICK_CODE if nick else TITLE_CODE).finditer(text):
+            tail, head = text[m.end():m.end() + 8].lower(), text[max(0, m.start() - 7):m.start()].lower()
+            if not nick and (NOT_CODE_AFTER.match(tail) or NOT_CODE_BEFORE.search(head)):
+                continue
+            if (rid := self.codes.get(int(m.group(1)))):
+                return rid
         return None
 
     def find_markers(self, tokens: list[str]) -> list[str]:
@@ -172,6 +195,11 @@ class Dictionary:
         return list(dict.fromkeys(h.payload[0] for h in self.marks.find(tokens) if not negated(tokens, h)))
 
 
+# код региона в названии: «38 Авторынок», «Авто 161RUS», «Авторынок | 02», «(138)»; не «2024», не «24/7», не «1.5»
+TITLE_CODE = re.compile(r"(?<![\d.,/:\-+])(\d{2,3})(?![\d.,/:%\-])")
+NICK_CODE = re.compile(r"(?<!\d)(\d{2,3})(?!\d)")
+NOT_CODE_AFTER = re.compile(r"\s*(ч\b|час|мин|сек|тыс|т\.?р|руб|₽|р\b|\$|км|л\.?с|лс|лет|год|г\b|%|шт|000|млн|авто\s*в\s*наличии)")
+NOT_CODE_BEFORE = re.compile(r"(?:^|\s)(от|до|за|по|свыше|№|n)\s*$")       # «авто до 50», «за 99» — цена; «№ 12» — номер
 ORIGIN = ("из", "изо", "с", "со", "до")                          # «из Москвы», «с Питера», «доставка до Казани»
 LOCATIVE = ("е", "и", "ах", "ях")                                 # «в Москве», «в Перми», «в Челнах»
 LOCATIVE_U = ("крыму",)                                           # «в Крыму» — место, хотя на -у
@@ -234,5 +262,6 @@ def load_dictionary(path: Path) -> Dictionary:
     latin = {rid: list(dict.fromkeys(translit(str(a)) for a in r.get("aliases") or [] if " " not in str(a) and len(translit(str(a))) >= 3))
              for rid, r in (data.get("regions") or {}).items()}
     latin["msk"] += ["moscow", "mos"]; latin["spb"] += ["piter", "spb"]; latin["ekb"] += ["yekaterinburg", "ekb"]
+    codes = {int(c): rid for rid, r in (data.get("regions") or {}).items() for c in r.get("codes") or []}
     return Dictionary(makes, models, regions, markers,
-                      cars=Finder(car_phrases), places=Finder(place_phrases), marks=Finder(mark_phrases), latin=latin)
+                      cars=Finder(car_phrases), places=Finder(place_phrases), marks=Finder(mark_phrases), latin=latin, codes=codes)
