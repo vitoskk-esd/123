@@ -2,8 +2,9 @@
 # «все видео, которые мы будем делать, клади в отдельные папки на Яндекс Диск самостоятельно»).
 # Папка — внутри папки приложения (Диск → Приложения → ПЕРЕХВАТ), вложенные создаются сами: «Рилсы/2026-11-12 · ep50 Жизнь одной Эво».
 # Токен (OAuth, доступ cloud_api:disk.app_folder) подставляет прокси окружения в запросы к cloud-api.yandex.net — в коде ключа нет.
-# Сам файл уходит PUT-ом на адрес загрузчика, который выдаёт API (ссылка одноразовая, без токена).
-import json, os, sys, time, urllib.parse, urllib.request
+# Сам файл уходит PUT-ом на адрес загрузчика, который выдаёт API (ссылка одноразовая, без токена) — curl с ограничением скорости:
+# канал до загрузчика ~130 КБ/с, и если отдать файл быстрее, туннель прокси рвётся (12.11: 38 МБ рвались на 37-й секунде; с --limit-rate 200K — 201 за 5 мин).
+import json, os, subprocess, sys, time, urllib.parse, urllib.request
 
 API = "https://cloud-api.yandex.net/v1/disk/resources"
 
@@ -34,8 +35,9 @@ def upload(folder, path, tries=4):
         code, j = call("GET", f"{API}/upload?path={urllib.parse.quote(dst)}&overwrite=true")
         if code != 200:
             raise SystemExit(f"нет ссылки на загрузку {dst}: {code} {j}")
-        with open(path, "rb") as f:
-            code, _ = call(j.get("method", "PUT"), j["href"], data=f.read(), headers={"Content-Type": "application/octet-stream"})
+        r = subprocess.run(["curl", "-sS", "-m", "3600", "-T", path, "--limit-rate", os.environ.get("YD_RATE", "200K"), "-o", "/dev/null",
+                            "-w", "%{http_code}", j["href"]], capture_output=True, text=True)
+        code = int(r.stdout or 0)
         if code in (201, 202):
             return dst
         time.sleep(2 ** (k + 1))
@@ -48,6 +50,10 @@ def share_link(folder):
     call("PUT", f"{API}/publish?path={p}")
     code, j = call("GET", f"{API}?path={p}&fields=public_url")
     return j.get("public_url") if code == 200 else None
+
+
+def remove(path):
+    call("DELETE", f"{API}?path={urllib.parse.quote('app:/' + path.strip('/'))}&permanently=true")
 
 
 if __name__ == "__main__":
