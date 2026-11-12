@@ -111,6 +111,7 @@ class Reader:
         except Exception as e:
             log.warning("не загрузил список каналов: %s", e)
         self.runner = asyncio.create_task(self.run())
+        self.runner.add_done_callback(self._on_stop)
         log.info("служебный аккаунт читает каналы: %d", len(self.ctx.channels))
 
     async def ensure_buffer(self) -> None:
@@ -555,6 +556,23 @@ class Reader:
                     await self.ctx.db.set_history(ch["id"])          # не застреваем на одном канале
                 await asyncio.sleep(3)
             await asyncio.sleep(60)
+
+    def _on_stop(self, task: asyncio.Task) -> None:
+        """Служебный аккаунт перестал читать каналы не по нашей команде (сессию закрыли в «Активных сеансах», бан, обрыв) —
+        пишем админам сразу, а не ждём, пока заметят тишину в /health (владелец 12.11: «возможно случайно сессию закрыл»)."""
+        if task.cancelled() or task is not self.runner:
+            return
+        e = task.exception()
+        revoked = isinstance(e, (errors.AuthKeyUnregisteredError, errors.SessionRevokedError, errors.UserDeactivatedError,
+                                 errors.AuthKeyDuplicatedError, errors.UserDeactivatedBanError))
+        log.warning("служебный аккаунт остановился: %r", e)
+        t = asyncio.get_event_loop().create_task(self._alert(T.READER_REVOKED if revoked else T.READER_STOPPED.format(err=str(e or "соединение закрыто")[:200])))
+        self.tasks.add(t); t.add_done_callback(self.tasks.discard)
+
+    async def _alert(self, text: str) -> None:
+        import admin                                   # admin импортирует userbot — берём лениво
+        for uid in await admin.admin_ids(self.ctx):
+            await notify(self.bot, uid, text)
 
     async def run(self) -> None:
         await asyncio.gather(self.join_loop(), self.poll_loop(), self.mute_all(), self.history_loop(),
