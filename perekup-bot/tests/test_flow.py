@@ -1635,6 +1635,16 @@ async def test_vk_group_region_code_in_title(env):
     assert USER in r.sent and OTHER not in r.sent and "📍 Иркутск" in s.texts(USER)[-1]
 
 
+async def test_city_in_oblast_filter_and_card(env):
+    """Владелец 12.11: фильтр «Иркутская область» ловит пост из Ангарска (город → область по справочнику), в карточке —
+    «📍 Ангарск · Иркутская область»; фильтр «Москва» этот пост не получает."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "Иркутская область до 1 млн", uid=USER)
+    await make_filter(dp, bot, "Москва до 1 млн", uid=OTHER)
+    r = await process(bot, ctx, post(CH2, "Toyota Corolla 2012\nПробег 160000\nЦена 890 000\nг. Ангарск"))
+    assert USER in r.sent and OTHER not in r.sent and "📍 Ангарск · Иркутская область" in s.texts(USER)[-1]
+
+
 async def test_city_learned_from_history(env):
     """Канал без города в названии узнаёт город по своим машинам: 10 постов из Казани → посты без города считаются казанскими."""
     dp, bot, s, ctx = env
@@ -1911,7 +1921,7 @@ def test_finder_judge_used_cars_not_import():
     used = "Продам Toyota Camry 2012, пробег 180 000 км, Казань. Цена 1 200 000 ₽, торг."
     imp = "Привезём Toyota Camry 2021 из Кореи под заказ, растаможка включена. Цена 2 400 000 ₽."
     assert finder.judge(_posts(7, used), d, subs=9000)["ok"]
-    assert finder.judge(_posts(7, used), d, subs=9000)["region"] == "Казань"
+    assert finder.judge(_posts(7, used), d, subs=9000)["region"] == "Татарстан"
     assert finder.judge(_posts(7, imp), d, subs=9000)["reason"] == "импорт / под заказ"
     assert finder.judge(_posts(7, used), d, subs=1200)["reason"] == "мало подписчиков"
     assert finder.judge(_posts(3, used), d, subs=9000)["reason"].startswith("постов за неделю")

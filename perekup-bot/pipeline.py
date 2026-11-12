@@ -209,7 +209,7 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
     if L.mileage:
         info.append(f"🛣 {L.mileage:,} км".replace(",", " "))
     if L.region:
-        info.append(f"📍 {d.regions.get(L.region, L.region)}")
+        info.append(f"📍 {place_label(d, L)}")
     if info:
         lines.append(" · ".join(info))
     if L.accidents is not None:
@@ -257,6 +257,13 @@ def worth_ai(L: Listing, text: str, filters: list[Filter], d, doubt: bool = Fals
     if not (wanted or several):
         return False                        # эту марку никто не ищет — лимит не тратим
     return doubt or several or L.price_unsure or bool(TRICKY.search(text))
+
+
+def place_label(d, L) -> str:
+    """«Ангарск · Иркутская область»; город совпадает с названием региона или не назван — только регион («Москва и МО»)."""
+    region = d.regions.get(L.region, L.region)
+    city = getattr(L, "city", None)
+    return f"{city} · {region}" if city and city.lower().replace("ё", "е") not in region.lower().replace("ё", "е") else region
 
 
 def channel_region(channel: dict) -> str | None:
@@ -363,7 +370,7 @@ async def missed(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int = 3) 
         mins = int((now - r["at"]) // 60)
         ago = f"{mins} мин назад" if mins < 60 else f"{mins // 60} ч назад"
         items.append(T.MISSED_ITEM.format(car=html.escape(d.car_name(L.make, L.model) if L.make else "Машина"), year=f" {L.year}" if L.year else "",
-                                          price=rub(L.price), city=f" · 📍 {html.escape(d.regions.get(L.region, L.region))}" if L.region else "",
+                                          price=rub(L.price), city=f" · 📍 {html.escape(place_label(d, L))}" if L.region else "",
                                           ago=ago, disc=f" · 🔥 −{disc}%" if disc is not None and disc >= SHOW_DISCOUNT else ""))
     return n, cheap, items
 

@@ -29,6 +29,7 @@ class Listing:
     price: int | None = None
     mileage: int | None = None
     region: str | None = None
+    city: str | None = None         # город, если назван («Ангарск»); регион — его область (фильтр «Иркутская область» ловит Ангарск)
     markers: list[str] = field(default_factory=list)
     accidents: int | None = None    # сколько ДТП, если продавец написал; 0 — пишет, что не было
     teaser: bool = False            # анонс «скоро в продаже» — не шлём, ждём, когда выставят
@@ -331,7 +332,9 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
                 and L.year and (L.price or L.mileage)):
             L.make = L.model = None
     # где машина: город из текста (кроме «пригнана из Москвы», «доставка в Москву»), иначе — город канала
-    L.region = d.find_location(tokens) or channel_region
+    L.region, L.city = d.find_place(tokens)
+    if not L.region:
+        L.region = channel_region
     # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)
     for clause in re.split(r"[.,;!?\n]+", clean(text)):
         L.markers += [m for m in d.find_markers(norm(clause).split()) if m not in L.markers]

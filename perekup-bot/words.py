@@ -150,6 +150,10 @@ class Dictionary:
         return list(dict.fromkeys(h.payload[0] for h in self.places.find(tokens)))
 
     def find_location(self, tokens: list[str]) -> str | None:
+        return self.find_place(tokens)[0]
+
+    def find_place(self, tokens: list[str]) -> tuple[str | None, str | None]:
+        """(регион, город) — где машина стоит; город — если назван город (а не «Иркутская область»), иначе None."""
         """Где машина стоит. Первый город текста, кроме «откуда» и «куда»: «пригнана из Москвы», «с Питера», «доставка
         до Москвы», «пригоню в Москву / в Донецк» — это не место продажи. Есть только такие упоминания — не знаем (None)."""
         for h in self.places.find(tokens):
@@ -158,8 +162,10 @@ class Dictionary:
                 continue
             if prev in ("в", "во", "на") and len(tok) > 3 and not tok.endswith(LOCATIVE) and tok not in LOCATIVE_U:
                 continue                                    # «в Москву», «в Донецк» — направление; «в Москве», «в Донецке» — место
-            return h.payload[0]
-        return None
+            if prev in STREET or (h.end < len(tokens) and tokens[h.end] in STREET_AFTER):
+                continue                                    # «ул. Кирова», «пр. Гагарина», «Московское шоссе» — адрес, не город
+            return h.payload[0], (h.payload[1] if len(h.payload) > 1 else None)
+        return None, None
 
     def guess_region(self, title: str | None, username: str | None) -> str | None:
         """Город канала по названию («АвтоРынок ДНР», «Авто Воронеж») или нику (avto_moskva, AvtoVoronezh, avto_msk);
@@ -200,6 +206,9 @@ TITLE_CODE = re.compile(r"(?<![\d.,/:\-+])(\d{2,3})(?![\d.,/:%\-])")
 NICK_CODE = re.compile(r"(?<!\d)(\d{2,3})(?!\d)")
 NOT_CODE_AFTER = re.compile(r"\s*(ч\b|час|мин|сек|тыс|т\.?р|руб|₽|р\b|\$|км|л\.?с|лс|лет|год|г\b|%|шт|000|млн|авто\s*в\s*наличии)")
 NOT_CODE_BEFORE = re.compile(r"(?:^|\s)(от|до|за|по|свыше|№|n)\s*$")       # «авто до 50», «за 99» — цена; «№ 12» — номер
+STREET = {"ул", "улица", "улице", "улицу", "пр", "пр-т", "просп", "проспект", "проспекте", "пер", "переулок", "переулке", "пл", "площадь", "площади",
+          "бульвар", "бульваре", "б-р", "наб", "набережная", "набережной", "мкр", "микрорайон", "проезд", "тупик", "аллея", "тракт", "им", "имени", "станция", "ст", "метро", "м"}
+STREET_AFTER = {"шоссе", "тракт"}                         # «Московское шоссе», «Сибирский тракт»; «Москва, ул. …» — город (запятую norm съедает)
 ORIGIN = ("из", "изо", "с", "со", "до")                          # «из Москвы», «с Питера», «доставка до Казани»
 LOCATIVE = ("е", "и", "ах", "ях")                                 # «в Москве», «в Перми», «в Челнах»
 LOCATIVE_U = ("крыму",)                                           # «в Крыму» — место, хотя на -у
@@ -252,6 +261,10 @@ def load_dictionary(path: Path) -> Dictionary:
                 car_phrases.append((str(alias), ("model", mid, model)))
             car_phrases.append((f"{m['name']} {model}", ("model", mid, model)))
     regions, place_phrases = {}, []
+    cities_path = path.with_name("cities.yaml")          # ~1000 городов России → регион (tools/gen_cities.py); город — раньше алиасов региона,
+    if cities_path.exists():                              # чтобы в карточке был «Ангарск», а не только «Иркутская область»
+        for rid, names in (yaml.safe_load(cities_path.read_text(encoding="utf-8")) or {}).items():
+            place_phrases += [(v, (rid, str(c))) for c in names or [] for v in place_forms(str(c).lower())]
     for rid, r in (data.get("regions") or {}).items():
         regions[rid] = r["name"]
         place_phrases += [(v, (rid,)) for a in r.get("aliases") or [] for v in place_forms(str(a))]

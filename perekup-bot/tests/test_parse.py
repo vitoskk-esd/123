@@ -5,7 +5,7 @@ import pytest
 
 from parse import car_key, fingerprint, parse_post, parse_price
 from query import Filter, describe, matches, parse_filter
-from words import load_dictionary
+from words import load_dictionary, norm
 from tests.samples import POSTS
 
 D = load_dictionary(Path(__file__).resolve().parents[1] / "cars.yaml")
@@ -366,3 +366,25 @@ def test_filter_generation_is_not_price():
     assert parse_filter("приора 250", D).price_max == 250_000          # обычная цена в тысячах — как раньше
     assert parse_filter("прадо до 3 млн", D).price_max == 3_000_000
     assert parse_filter("мерс 124 до 500к", D).price_max == 500_000
+
+
+# владелец 12.11: «научить бот распознавать город и в какой области он находится» — справочник cities.yaml (~970 городов)
+@pytest.mark.parametrize("text,region,city", [
+    ("Продаю, Шелехов", "irk", "Шелехов"), ("Машина в Ангарске", "irk", "Ангарск"), ("Усолье-Сибирское, торг", "irk", "Усолье-Сибирское"),
+    ("г. Тихвин", "spb", "Тихвин"), ("Находится в Новочебоксарске", "chb", None), ("Бузулук, срочно", "orb", "Бузулук"), ("Ростов", "rnd", None),
+    ("Иркутская область", "irk", None), ("Москва, ул. Кирова", "msk", "Москва"),
+    # не город: обычные слова, адреса, имена
+    ("Зимняя резина в подарок", None, None), ("Светлый салон, без запаха", None, None), ("ул. Гагарина, 5", None, None),
+    ("Звонить Артёму", None, None), ("Дно без ржавчины", None, None), ("Магазин запчастей", None, None),
+])
+def test_city_to_region(text, region, city):
+    rid, c = D.find_place(norm(text).split())
+    assert rid == region and (city is None or c == city)
+
+
+def test_filter_by_oblast():
+    f = parse_filter("Иркутская обл до 1 млн", D)
+    assert f.regions == ["irk"] and "📍 Иркутская область" in describe(f, D)
+    assert parse_filter("Ангарск до 1 млн", D).regions == ["irk"]           # город в фильтре — вся его область
+    L = parse_post("Toyota Corolla 2012\nЦена 890 000\nШелехов", D)
+    assert L.region == "irk" and L.city == "Шелехов" and matches(f, L, None)

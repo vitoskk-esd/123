@@ -155,8 +155,9 @@ def apply(L: Listing, r: dict, d: Dictionary) -> Listing:
     if 0 < (r.get("mileage_km") or 0) < 2_000_000:
         L.mileage = r["mileage_km"]
     if r.get("city"):
-        regions = d.find_regions(norm(r["city"]).split())
-        L.region = regions[0] if regions else L.region
+        rid, city = d.find_place(norm(r["city"]).split())
+        if rid:
+            L.region, L.city = rid, city or (L.city if rid == L.region else None)
     L.markers = [m for m in dict.fromkeys(r.get("markers") or []) if m in d.markers]
     if "credit" in L.markers and credit_is_offer(L.text):      # «можно купить в кредит» — способ оплаты, не залог
         L.markers.remove("credit")
