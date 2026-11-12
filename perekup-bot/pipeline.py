@@ -29,7 +29,6 @@ from ctx import Ctx
 import plans
 from db import DAY, DEDUP_DAYS
 from links import channel_name
-import ai
 from parse import PHONE, SOLD, Listing, car_key, fingerprint, looks_like_ad, parse_post, price_options, sale_verdict
 from query import Filter, matches
 
@@ -240,25 +239,6 @@ def card_text(ctx: Ctx, r: Result, channel: dict, filter_text: str, latency_ms: 
     return head + ("\n\n<blockquote expandable>" + html.escape(post) + "</blockquote>" if room > 20 else "")
 
 
-# слова, при которых правила могут ошибиться — тогда пост перепроверяет ИИ
-TRICKY = re.compile(r"скоро|через|анонс|выстав|куплю|обмен|обучен|курс|наставн|розыгрыш|не\s|нет\b|без\b|никак|по цене|дешевле|вместо|как у|"
-                    r"дтп|авари|бит|залог|кредит|вложен|ремонт|такси|дубликат|запчаст|ход", re.I)
-
-
-def worth_ai(L: Listing, text: str, filters: list[Filter], d, doubt: bool = False) -> bool:
-    """ИИ зовём, только если пост может кому-то подойти И правила могли ошибиться (doubt — правила сами
-    не уверены, продажа ли это). Простой пост («Камри 2012, 900 000 ₽, Москва») правила разбирают сами."""
-    if not filters:
-        return False
-    if not (L.is_car and L.price):
-        return looks_like_ad(text)          # правила не поняли пост — пусть посмотрит ИИ
-    wanted = any(not f.cars for f in filters) or (not L.kind and any(mk == L.make for f in filters for mk, _ in f.cars))
-    several = len({mk for mk, _ in d.find_cars(L.tokens)}) > 1     # в посте несколько марок — правила могли выбрать не ту
-    if not (wanted or several):
-        return False                        # эту марку никто не ищет — лимит не тратим
-    return doubt or several or L.price_unsure or bool(TRICKY.search(text))
-
-
 def place_label(d, L) -> str:
     """«Ангарск · Иркутская область»; город совпадает с названием региона или не назван — только регион («Москва и МО»)."""
     region = d.regions.get(L.region, L.region)
@@ -271,9 +251,8 @@ def channel_region(channel: dict) -> str | None:
     return channel.get("region") or channel.get("region_guess")
 
 
-async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None,
-                  ai_filters: list[Filter] | None = None) -> Result:
-    """Разбор (правила + ИИ-проверка), дубль, рынок. Без отправки — удобно и для тестов."""
+async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] | None = None) -> Result:
+    """Разбор по правилам, дубль, рынок. Без отправки — удобно и для тестов. ИИ-проверку владелец убрал 12.11."""
     r = Result()
     L = r.listing = parse_post(raw.text, ctx.dict, channel_region(channel))
     if L.teaser:                            # «скоро в продаже» — купить ещё нельзя, не отвлекаем людей
@@ -282,18 +261,9 @@ async def analyse(ctx: Ctx, raw: RawPost, channel: dict, filters: list[Filter] |
     # продажа ли это вообще — как решил бы человек: «ПРОДАНО», новость, курс, «куплю» не шлём
     r.verdict = sale_verdict(raw.text, L)
     if r.verdict == "not_sale" and (L.is_car and L.price or SOLD.search(raw.text.lower().replace("ё", "е"))):
-        return r                            # правила уверены — ИИ не нужен
-    flt = filters if ai_filters is None else ai_filters
-    checked = None
-    if ctx.cfg.ai_on and flt and worth_ai(L, raw.text, flt, ctx.dict, r.verdict.startswith("check_")):
-        checked = await ai.ask(ctx.dict, raw.text, ctx.cfg.ai_key, ctx.cfg.ai_model)
-        if checked:
-            L = r.listing = ai.apply(L, checked, ctx.dict)
-            if L.teaser:
-                r.teaser = True
-                return r
-    if not checked and r.verdict == "check_not_sale":
-        return r                            # ИИ не ответил, а правила склонялись к «не продажа»
+        return r                            # правила уверены: не продажа
+    if r.verdict == "check_not_sale":
+        return r                            # правила склоняются к «не продажа» — не шлём
     if not L.is_car or not L.price:
         return r
     now = time.time()
@@ -405,16 +375,14 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     rows = await ctx.db.subscribers(channel)
     now = time.time()
     row_plan = {row["fid"]: plans.current(ctx.cfg, row, now) for row in rows}
-    ai_filters = [Filter.loads(row["data"]) for row in rows if row_plan[row["fid"]] and row_plan[row["fid"]].ai]
-    # фото пересылаем сразу, параллельно с ИИ-проверкой, — а не после неё
+    # фото пересылаем сразу, параллельно с разбором, — а не после него
     photo_task = None
     if raw.photo and ctx.buffer_chat and rows:
         quick = parse_post(raw.text, ctx.dict)
         if (quick.is_car or looks_like_ad(raw.text)) and not quick.teaser and sale_verdict(raw.text, quick) != "not_sale":
             photo_task = asyncio.create_task(raw.photo())
             photo_task.add_done_callback(lambda t: t.cancelled() or t.exception())   # ошибку разберём ниже
-    # ИИ-проверку зовём, только если машина может подойти тем, у кого она есть в тарифе (PRO, пробный день)
-    r = await analyse(ctx, raw, channel, [Filter.loads(row["data"]) for row in rows], ai_filters)
+    r = await analyse(ctx, raw, channel, [Filter.loads(row["data"]) for row in rows])
     L = r.listing
     if r.teaser:
         await ctx.db.add_teaser(raw.chat_id, raw.msg_id)   # пришлём, когда анонс отредактируют в продажу

@@ -1,6 +1,6 @@
 """Тарифы. Пробный день — всё как в PRO на 24 часа, один раз на человека. «Простой» — работать можно, но PRO
 заметно выгоднее: машины приходят с задержкой (кто первый позвонил — тот и забрал), 2 фильтра, только общая база
-каналов, без оценки «ниже рынка» и ИИ-проверки. PRO — мгновенно и без ограничений.
+каналов, без оценки «ниже рынка». PRO — мгновенно и без ограничений.
 Цены и лимиты «Простого» — в переменных окружения (PRICE_*, BASIC_FILTERS, BASIC_OWN_CHANNELS, BASIC_DELAY)."""
 import time
 from dataclasses import dataclass
@@ -20,7 +20,6 @@ class Plan:
     max_own: int
     delay: int = 0          # через сколько секунд после публикации приходит машина
     market: bool = True     # оценка «ниже рынка» и фильтр по ней
-    ai: bool = True         # ИИ-проверка поста
     dkp: bool = True        # договор купли-продажи по данным клиента
 
     @property
@@ -33,7 +32,7 @@ def plans(cfg: Config) -> dict[str, Plan]:
         # пробный день — бесплатно (владелец 10.11): как PRO, но один фильтр и без договора купли-продажи; один раз на человека
         "trial": Plan("trial", "Пробный день", 0, 1, 1, UNLIMITED, dkp=False),
         "basic": Plan("basic", "Простой", cfg.price_basic, 30, cfg.basic_filters, cfg.basic_own,
-                      delay=cfg.basic_delay, market=False, ai=False, dkp=False),
+                      delay=cfg.basic_delay, market=False, dkp=False),
         "pro": Plan("pro", "PRO", cfg.price_pro, 30, UNLIMITED, UNLIMITED),
     }
 

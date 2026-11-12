@@ -159,11 +159,9 @@ async def admin(msg: Message, ctx: Ctx) -> None:
     src = "\n".join(f"• {r['source']}: {r['users']} чел., оплатили {r['paid'] or 0}" for r in s["sources"])
     reader = "✅ подключён" if ctx.reader and ctx.reader.online else "❌ не подключён — /connect"
     vk_state = vk_status(ctx)
-    ai_state = "✅ включена" if ctx.cfg.ai_on else "❌ выключена — добавь GEMINI_API_KEY в «Переменные»"
     await msg.answer(
         f"🤖 Служебный аккаунт: {reader}\n"
         f"🟦 ВКонтакте: {vk_state}\n"
-        f"🧠 ИИ-проверка постов: {ai_state}, проверено за сутки: {p['ai'] or 0}\n"
         f"👥 Людей: <b>{s['users']}</b>, с фильтрами: {s['with_filters']}\n{pay}\n\n"
         f"⚡ За сутки: постов {p['n']}, машин с ценой {p['cars'] or 0}, дублей {p['dups'] or 0}\n"
         f"📊 Для оценки «ниже рынка»: {s['market90']} объявлений с ценой за 90 дней "
@@ -304,13 +302,6 @@ async def health(bot: Bot, ctx: Ctx) -> str:
         "впиши SELLER_INN — без него Робокасса не примет магазин")
     add(True if cfg.seller_contact else None, f"контакт для клиентов: {cfg.seller_contact or '—'}", "впиши SELLER_CONTACT (email или телефон)")
     add(True, f"цены: пробный день {cfg.price_trial} ₽, Простой {cfg.price_basic} ₽, PRO {cfg.price_pro} ₽")
-    if cfg.ai_on:
-        import ai
-        r = await ai.ask(ctx.dict, "Продам Toyota Camry 2015, пробег 120 000 км, цена 1 450 000 ₽, Казань", cfg.ai_key, cfg.ai_model)
-        add(bool(r), f"ИИ-проверка ({cfg.ai_model}): " + ("отвечает" if r else "не ответила"),
-            "проверь GEMINI_API_KEY; на бесплатном ключе суточный лимит — при большом потоке нужен платный")
-    else:
-        add(None, "ИИ-проверка выключена", "добавь GEMINI_API_KEY — без неё PRO-фильтры чуть менее точные")
     add(bool(ctx.reader and ctx.reader.online), "служебный аккаунт Telegram: " + ("подключён" if ctx.reader and ctx.reader.online else "не подключён"), "/connect")
     tg = sum(1 for ch in ctx.channels.values() if ch.get("tg_id")); vkn = sum(1 for ch in ctx.channels.values() if ch.get("vk_id"))
     add(tg < 480 or None, f"каналов Telegram: {tg} из 500 на аккаунт", "скоро лимит — нужен второй служебный аккаунт")

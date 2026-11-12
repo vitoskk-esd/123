@@ -1,5 +1,5 @@
 """Договор купли-продажи ТС (тариф PRO): клиент присылает данные одним сообщением — по шаблону «поле: значение»
-или как попало (тогда поля разбирает ИИ), бот собирает договор в Word (поправить) и PDF (распечатать).
+или как попало (поля бот ищет по подписям и шаблонам), бот собирает договор в Word (поправить) и PDF (распечатать).
 Чего нет — в договоре остаются линии, их дописывают от руки. Паспортные данные в базу не пишем: живут только
 в памяти диалога до выдачи файлов."""
 import asyncio
@@ -9,7 +9,6 @@ import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import ai
 
 log = logging.getLogger(__name__)
 MSK = timezone(timedelta(hours=3))
@@ -84,31 +83,8 @@ def clean_price(v: str) -> str:
 SCHEMA = {"type": "object", "properties": {k: {"type": "string"} for k in FIELDS}}
 
 
-def ai_extract(cfg, text: str) -> dict:
-    """Данные написали как попало — пусть ИИ разложит по полям (только то, что есть в тексте)."""
-    prompt = ("Из текста клиента достань данные для договора купли-продажи автомобиля. Заполняй только то, что прямо есть "
-              "в тексте, ничего не выдумывай. Поля: " + "; ".join(f"{k} — {label}" for k, (label, _) in FIELDS.items())
-              + ". Паспорт — серия и номер; «выдан» — кем и когда. Цена — число в рублях.\n\nТекст:\n" + text)
-    body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": SCHEMA, "maxOutputTokens": 900, "temperature": 0}}
-    for m in dict.fromkeys((cfg.ai_model, ai.FALLBACK)):
-        try:
-            r = ai._post(cfg.ai_key, m, body, timeout=20)
-            out = {k: str(v).strip()[:200] for k, v in r.items() if k in FIELDS and str(v).strip()}
-            if "price" in out:
-                out["price"] = clean_price(out["price"])
-            return {k: v for k, v in out.items() if v}
-        except Exception as e:
-            log.info("договор: ИИ не разобрал данные (%s): %s", m, e)
-    return {}
-
-
 async def extract(cfg, text: str) -> dict:
-    found = parse(text)
-    if len(found) < 4 and cfg.ai_on:
-        more = await asyncio.to_thread(ai_extract, cfg, text)
-        found = {**more, **found}
-    return found
+    return parse(text)
 
 
 def summary(d: dict) -> tuple[str, list[str]]:

@@ -45,19 +45,12 @@ class Config:
     support_username: str = ""       # аккаунт поддержки: кнопка «Написать в поддержку» открывает личный чат с ним (можно задать /support в боте)
     join_interval: int = 90          # пауза между вступлениями в каналы, сек — чтобы Telegram не заблокировал аккаунт
     poll_rps: float = 3.0            # сколько каналов в секунду опрашиваем сами (Telegram присылает посты больших каналов с опозданием)
-    ai_key: str = ""                 # ключ Gemini (aistudio.google.com) — ИИ перепроверяет каждый подходящий пост
-    ai_model: str = "gemini-3.1-flash-lite"
     vk_token: str = ""               # ключ служебной страницы ВК; можно не задавать — админ пришлёт его боту в /vk
     vk_service: str = ""             # сервисный ключ приложения ВК: читать открытые сообщества без служебной страницы
     vk_poll: int = 8                 # раз во сколько секунд смотрим ленту служебной страницы ВК (новые посты сообществ)
     vk_wall_rps: float = 1.0         # опрос стен сообществ: запросов в секунду, в каждом — 25 стен (0 — выключить)
     vk_join_interval: int = 120      # пауза между заявками в закрытые сообщества ВК, сек (открытые подключаются сразу)
     vk_app_id: int = 2685278         # приложение, через которое служебная страница выдаёт ключ (/vk)
-    ai_proxy: bool = False           # ключ подставляет прокси (облачная среда разработки) — для проверок без своего ключа
-
-    @property
-    def ai_on(self) -> bool:
-        return bool(self.ai_key) or self.ai_proxy
 
     @property
     def payments_on(self) -> bool:
@@ -90,9 +83,6 @@ def get_config() -> Config:
         seller_contact=e("SELLER_CONTACT", ""),
         support_username=e("SUPPORT_USERNAME", "").strip().lstrip("@"),
         poll_rps=float(e("POLL_RPS", "3")),
-        ai_key=e("GEMINI_API_KEY", ""),
-        ai_model=e("GEMINI_MODEL", "gemini-3.1-flash-lite"),
-        ai_proxy=e("AI_PROXY", "0") == "1",
         vk_token=e("VK_TOKEN", ""),
         vk_service=e("VK_SERVICE_TOKEN", ""),
         vk_poll=int(e("VK_POLL", "8")),

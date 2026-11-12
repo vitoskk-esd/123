@@ -35,7 +35,7 @@ class Listing:
     teaser: bool = False            # анонс «скоро в продаже» — не шлём, ждём, когда выставят
     tokens: list[str] = field(default_factory=list)
     parsed_by: str = "rules"
-    price_unsure: bool = False      # в посте несколько сумм, похожих на цену, — ИИ перепроверит
+    price_unsure: bool = False      # в посте несколько сумм, похожих на цену, — правила не уверены в цене
     kind: str | None = None         # не легковая: «мотоцикл», «скутер», «мотоблок»… (None — автомобиль)
     title: str | None = None        # как назвал продавец: «Ducati Panigale 899»
 
@@ -296,7 +296,7 @@ def is_teaser(text: str) -> bool:
 
 
 def looks_like_ad(text: str) -> bool:
-    """Похоже на объявление о продаже — стоит ли звать ИИ, если правила не нашли машину или цену."""
+    """Похоже на объявление о продаже — если правила не нашли машину или цену."""
     t = text.lower()
     return len(t) > 25 and bool(re.search(r"пробег|км\b|₽|руб|цена|продам|продаю|продается|продаётся|торг|год", t))
 
@@ -432,7 +432,7 @@ def vehicle_title(text: str) -> str | None:
 
 def sale_verdict(text: str, L: Listing) -> str:
     """Продажа машины или нет — как решил бы человек, пролистывая канал.
-    sale / not_sale — правила уверены; check_sale / check_not_sale — пусть посмотрит ИИ (если он недоступен —
+    sale / not_sale — правила уверены; check_sale / check_not_sale — правила не уверены (
     решение после «check_»). Анонсы, проданные машины, «куплю», реклама курсов, новости, услуги — не продажа."""
     t = text.lower().replace("ё", "е")
     if L.teaser or SOLD.search(t):
@@ -451,7 +451,7 @@ def sale_verdict(text: str, L: Listing) -> str:
         if score >= 4:
             return "sale"
         return "check_sale" if score >= 3 or evidence >= 2 else "check_not_sale"
-    if "promo" in against:           # «обучение всего 35 000 ₽»; объявление с подписью «наше обучение» — пусть решит ИИ
+    if "promo" in against:           # «обучение всего 35 000 ₽»; объявление с подписью «наше обучение» — решают остальные признаки
         return "check_sale" if score >= 5 and evidence >= 2 else "not_sale"
     # «выкупим ваш авто», «автоподбор» часто стоят подписью под объявлением
     return "check_sale" if score >= 4 and evidence else "check_not_sale"

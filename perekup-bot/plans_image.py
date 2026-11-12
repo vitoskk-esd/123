@@ -59,7 +59,6 @@ def render(basic: Plan, pro: Plan, trial: Plan) -> bytes:
         ("Свои каналы и группы ВК", own or False, True),
         ("Насколько ниже рынка", basic.market, True),
         ("Фильтр «ниже рынка»", basic.market, True),
-        ("ИИ-проверка поста", basic.ai, True),
         ("Фото, метки, число ДТП", True, True),
         ("Договор купли-продажи", basic.dkp, True),
     ]
