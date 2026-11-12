@@ -23,7 +23,7 @@ const PHONE = (who = "Виталик") => `<svg viewBox="0 0 100 100" style="ove
 const FLASH = (label = "ДВЕ НЕДЕЛИ НАЗАД") => `<div style="position:absolute;inset:0;z-index:57;backdrop-filter:brightness(1.9)"></div><div style="position:absolute;inset:0;z-index:57;background:#c9a06a;mix-blend-mode:multiply;opacity:.3"></div>
   <div style="position:absolute;inset:0;z-index:58;background:radial-gradient(ellipse 70% 60% at 50% 50%,transparent 62%,rgba(20,12,4,.55) 100%)"></div>
   ${Array.from({ length: 7 }, (_, k) => `<div class="scr" style="position:absolute;left:${80 + k * 150 + (k % 3) * 23}px;top:0;width:${k % 2 ? 2 : 3}px;height:1920px;background:rgba(255,246,220,.35);z-index:58"></div>`).join("")}
-  <div style="position:absolute;left:60px;top:400px;z-index:61;font-family:'JetBrains Mono';font-weight:800;font-size:46px;color:#151515;background:#f4e2b8;border:6px solid #151515;padding:6px 20px;transform:rotate(-3deg)">◀◀ ${label}</div>`;
+  <div class="fbl" style="position:absolute;left:60px;top:400px;z-index:61;font-family:'JetBrains Mono';font-weight:800;font-size:46px;color:#151515;background:#f4e2b8;border:6px solid #151515;padding:6px 20px;transform:rotate(-3deg)">◀◀ ${label}</div>`;
 // приём 2 — отрывной календарь крупно: день продажи
 const CAL = (day, id = "cal") => `<div id="${id}" style="position:absolute;left:250px;top:560px;width:580px;z-index:14;transform:rotate(-2deg)">
   <div style="height:120px;background:#c0392b;border:10px solid #151515;border-bottom:none;font-family:Unbounded;font-weight:900;font-size:56px;color:#fff;text-align:center;line-height:120px">НОЯБРЬ</div>

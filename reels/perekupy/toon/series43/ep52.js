@@ -116,6 +116,8 @@ window.build = R => {
   // 1. флешбэк: плёнка «перематывается» назад, деньги из рук в руки
   show("s1", 0); tl.to("#title", { opacity: 0, y: -50, duration: .25 }, 1.8); tl.to("#cnt", { opacity: 1, duration: .3 }, 2.0);
   R.sfx("riser", .1, .35);
+  const FBL = SC.s1.querySelector(".fbl"); gsap.set(FBL, { opacity: 0 });        // плашка флешбэка — после заголовка серии
+  tl.fromTo(FBL, { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: .3, ease: "power3.out", immediateRender: false }, 2.0); R.sfx("swish", 2.0, .4);
   move("s1", { s: 1.16, x: 540 }, 0, en.l0b + .3, "power1.inOut");
   tl.fromTo("#cash1", { x: 420, y: 40 }, { x: 0, y: 0, duration: .5, ease: "power2.out", immediateRender: false }, W("l0b", "миллион") - .3); R.sfx("swish", W("l0b", "миллион") - .3, .6);
   cut("s1", "s1b", st.z1 - .1); move("s1b", { s: 2.05 }, st.z1 - .1, en.z1 - st.z1 + .4, "none"); bub("z1", st.l1 - .45);
@@ -136,7 +138,7 @@ window.build = R => {
   bub("z2", st.a2 - .1); bub("a2", st.z3 - .45);
   // 4. шаурма: «пополам?» — щенячьи глаза → пункт 7
   const SW4 = st.z3 - .4; swap("s3b", "s4", SW4); move("s4", { x: 620, y: 1220, s: 1.3 }, SW4, en.z3 - SW4 + .3, "none"); bub("z3", st.t1 - .15);
-  gsap.set("#pup", { opacity: 0 }); const PUP = W("z3", "попол") - .1;
+  gsap.set("#pup", { opacity: 0 }); const PUP = W("z3", "полам") - .1;
   tl.fromTo("#pup", { opacity: 0, scale: .3, transformOrigin: "813px 1236px" }, { opacity: 1, scale: 1, duration: .25, ease: "back.out(3)", immediateRender: false }, PUP); R.sfx("pop", PUP, .7);
   cut("s4", "s4b", st.t1 - .1); move("s4b", { x: 420, s: 1.2 }, st.t1 - .1, en.t1 - st.t1 + .3, "none"); bub("t1", st.t2 - .45);
   tl.to("#pup2", { opacity: 0, duration: .3 }, W("t1", "тво") - .1);       // «Твоя.» — глаза Жоры гаснут
