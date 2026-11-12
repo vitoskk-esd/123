@@ -1,0 +1,14 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "You narrate the life story of one car — a Mitsubishi Lancer Evolution IX — over 17 years, like a short documentary with dry irony. Calm, warm, slightly nostalgic; numbers said fully. «Лансер Эволюшн» — Mitsubishi Lancer Evolution."
+ },
+ "dima": {
+  "voice": "Enceladus",
+  "tempo": 1.12,
+  "profile": "Dima — a calm, smart Russian car buyer in his 30s, rally fan.",
+  "notes": "Line 1: ironic question, then a calm fact. Line 2: short, satisfied agreement."
+ }
+}

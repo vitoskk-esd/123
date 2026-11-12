@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "You narrate the life story of one car — a Mitsubishi Lancer Evolution IX — over 17 years, like a short documentary with dry irony. Calm, warm, slightly nostalgic; numbers said fully. «Лансер Эволюшн» — Mitsubishi Lancer Evolution."
+ },
+ "gosha": {
+  "voice": "Sadachbia",
+  "tempo": 1.15,
+  "profile": "Gosha — a young Russian amateur racer in his 20s in a red racing jacket and a white cap, excited, cocky.",
+  "notes": "Line 1: proud, passionate about the car. Line 2: guilty, embarrassed, after crashing the car into a snowbank at night."
+ },
+ "semen": {
+  "voice": "Orus",
+  "tempo": 1.1,
+  "profile": "Semyonych — an old Russian garage mechanic in his 60s, mustache and glasses, honest, calm, a master restorer.",
+  "notes": "Line 1: proud, warm, about restoring the car for three winters. Line 2: honest, firm, a bit ashamed of his son; offers a fair price."
+ },
+ "kirill": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.15,
+  "profile": "Kirill — Semyonych's son in his 20s, a slick seller who exaggerates.",
+  "notes": "One line: overconfident sales pitch, lying that the car was never crashed."
+ },
+ "dima": {
+  "voice": "Enceladus",
+  "tempo": 1.12,
+  "profile": "Dima — a calm, smart Russian car buyer in his 30s, rally fan.",
+  "notes": "Line 1: ironic question, then a calm fact. Line 2: short, satisfied agreement."
+ }
+}
