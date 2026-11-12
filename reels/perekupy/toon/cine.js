@@ -99,15 +99,16 @@
     const lights = sc.lights ? `<div class="cl lights" style="transform:${C.layerT(sh, 1)}">${sc.lights}</div>` : "";
     const haze = sc.haze ? `<div class="haze" style="background:${sc.haze}"></div>` : "";
     const bubs = (sc.bubbles || []).map(b => { const [wx, wy] = b.at || C.ANCH[b.p]; const [sx, sy] = C.toScreen(sh, wx, wy);
-      return `<div class="bub2"${b.id ? ` id="b_${b.id}"` : ""} data-wx="${wx}" data-wy="${wy}" data-ax="${sx.toFixed(0)}" data-ay="${sy.toFixed(0)}" style="${b.fs ? `font-size:${b.fs}px;` : ""}">${b.html}</div>`; }).join("");
+      return `<div class="bub2"${b.id ? ` id="b_${b.id}"` : ""}${sc.bx ? ` data-lo="${sc.bx[0]}" data-hi="${sc.bx[1]}"` : ""} data-wx="${wx}" data-wy="${wy}" data-ax="${sx.toFixed(0)}" data-ay="${sy.toFixed(0)}" style="${b.fs ? `font-size:${b.fs}px;` : ""}">${b.html}</div>`; }).join("");
     const hud = sc.hud ? `<div class="tag"><b>ПЕРЕКУПЫ</b><span>${sc.hud.tag}</span></div>${sc.hud.cap ? `<div class="cnt" style="left:60px;right:auto">💰 ${sc.hud.cap} ₽${sc.hud.d ? ` <em>${sc.hud.d}</em>` : ""}</div>` : ""}
       ${sc.hud.lis ? `<div style="position:absolute;right:50px;top:170px;z-index:58;display:flex;gap:14px;align-items:center"><div style="display:flex;gap:6px;align-items:center;height:60px">${[26, 44, 30, 52].map(h => `<i style="width:10px;height:${h}px;background:#ff7a1a;border-radius:5px"></i>`).join("")}</div><img src="../../brand/fox_cut.png" style="width:96px;height:96px;border-radius:50%;border:6px solid #ff7a1a;background:#111"></div>` : ""}` : "";
-    return `<div class="cf"${sc.id ? ` id="${sc.id}"` : ""}>${far}${haze}${mid}${fg}${C.grade(sc.grade)}${lights}<div class="vig"></div>${sc.fx || ""}${sc.over || ""}${bubs}${hud}</div>`;
+    return `<div class="cf${sc.freeze ? " freeze" : ""}"${sc.id ? ` id="${sc.id}"` : ""}>${far}${haze}${mid}${fg}${C.grade(sc.grade)}${lights}<div class="vig"></div>${sc.fx || ""}${sc.over || ""}${bubs}${hud}</div>`;
   };
   // раскладка пузырей после вставки в DOM: центр над головой, в пределах кадра, хвост — на говорящего
   C.place = (b, ax, ay) => {
     const w = b._w ?? (b._w = b.offsetWidth), h = b._h ?? (b._h = b.offsetHeight);
-    const l = Math.max(30, Math.min(1050 - w, ax - w / 2)), t = Math.max(390, ay - h - 70);
+    const lo = +(b.dataset.lo || 30), hi = +(b.dataset.hi || 1050);      // границы кадра (у половинки разделённого экрана — своя полоса)
+    const l = Math.max(lo, Math.min(hi - w, ax - w / 2)), t = Math.max(390, ay - h - 70);
     b.style.left = l + "px"; b.style.top = t + "px"; b.style.setProperty("--tx", Math.max(40, Math.min(w - 110, ax - l - 30)) + "px");
     b.style.setProperty("--sk", (ax - l - 30 > w / 2 ? -30 : 30) + "deg");
   };

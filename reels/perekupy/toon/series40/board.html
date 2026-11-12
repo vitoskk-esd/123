@@ -1,0 +1,122 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props49.js"></script>
+<script>
+// «ТОЛЯН: СО СТА ТЫСЯЧ · 11» — «Партнёры» (киношный формат). Капитал 640 000. Крючок части 10: «Жора предлагает стать партнёрами».
+// Боулинг: «выбью страйк — партнёры 50/50» → нотариус: пункт 7 «машины покупаем только вдвоём» (стоп-кадр в ч/б: «убытки тоже пополам»)
+// → разделённый экран: Жоре друг Виталик предлагает белый CLS «в идеале» за 1 250 000, Толяну бот нашёл такой же за 1 200 000, одна хозяйка
+// → толщиномер на белом: дверь 1200 мкм — шпаклёвка → чёрный CLS из бота: родная краска, куплен 1 200 000, продан 1 380 000 → +180 на двоих, Толяну 90
+// → капитал 730 000; поворот: Жора тайком звонит Виталику «белый ещё продаёшь?». Приёмы (новые): страйк; стоп-кадр в ч/б с пометками; разделённый экран; толщиномер.
+const T = (p, x, foot, h, pose = {}, extra = {}) => ch("tolyan", p, x, foot, h, null, pose, extra);
+const NEON = glow(270, 127, 220, "#ff3bd0", .45) + glow(800, 167, 220, "#5ad0ff", .45) + glow(540, 267, 300, "#ff3bd0", .35);
+const BOWL_L = glow(150, 210, 140, "#ff3bd0", .5) + glow(690, 210, 140, "#ffd23f", .4) + glow(540, 680, 300, "#ff3bd0", .3);
+const BOT49 = () => BOTH("CLS · вся Россия", CARD("Mercedes CLS · 2012 · одна хозяйка", "1 200 000 ₽", "родная краска · твой город", "🔥 −8% к рынку · ⏱ 1 с после публикации"));
+const S = [
+ { h: "БОУЛИНГ · СТРАЙК", tc: "1/6 · 0:00–0:12",
+   A: { def: () => ({ bg: "bowling", grade: "night", hud: HUD49("640 000", "", 1),
+       mid: ch("perekup", "zb", 380, 1700, 780, { ...ZHORA, look: "grin" }, { armR: -150 }, { rim: "#ff3bd0", side: 1 }) + INHAND(380, 1700, 780, -150, 120, BALL, 9)
+         + T("tb", 820, 1740, 740, {}, { rim: "#5ad0ff", side: -1, z: 7 }),
+       lights: BOWL_L }), shot: { x: 560, y: 1160, s: 1.1 },
+     bubbles: [{ p: "zb", html: "Студент, выбью страйк —<br><em>и мы партнёры. 50 на 50!</em>", fs: 40 }], talk: ["zb"] },
+   B: { def: () => ({ bg: "bowling", grade: "night", hud: HUD49("640 000"),
+       mid: PINS(600, 700, 1.3, 1) + T("tb2", 820, 1740, 740, { head: -6 }, { rim: "#ff3bd0", side: -1, z: 7 }),
+       lights: BOWL_L + glow(600, 650, 220, "#ffffff", .35) }), shot: { x: 780, y: 1060, s: 1.8, r: -2 },
+     bubbles: [{ p: "tb2", html: "…Ладно. Но по-честному.<br><em>На бумаге.</em>", fs: 44 }], talk: ["tb2"] },
+   vo: "Лис: «Шестьсот сорок тысяч. Жора зовёт Толяна в боулинг — и ставит условие». Жора: «Студент, выбью страйк — и мы партнёры. Пятьдесят на пятьдесят!» Толян: «…Ладно. Но по-честному. На бумаге».", who: "Лис + Жора + Толян",
+   mv: "<b>Часть 11, капитал 640 000 (итог части 10).</b> <b>Новый фон — боулинг ночью</b> (неоновые дорожки, табло «STRIKE · ТОЛЯН 142 · ЖОРА 138», диванчик, возврат шаров). <b>Приём 1 — страйк:</b> Жора бросает, кегли разлетаются (B — за спиной Толяна, крупно), вспышка табло." },
+ { h: "НОТАРИУС · ПУНКТ 7", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "notarius", grade: "day", hud: HUD49("640 000"),
+       mid: ch("perekup", "nt", 470, 1300, 600, NOTARY, { armR: -40 }, { rim: "#fff2c0", side: 1, z: 4 }) + T("tn", 210, 1760, 760, {}, { rim: "#fff2c0", side: 1, z: 7 })
+         + ch("perekup", "zn", 880, 1740, 760, ZHORA, {}, { rim: "#fff2c0", side: -1, z: 7 }),
+       lights: glow(810, 430, 320, "#fff6d8", .4) + beam([[640, 220], [1000, 220], [900, 1700], [300, 1700]], "#fff6d8", .14) }), shot: { x: 540, y: 1160, s: 1.06 },
+     bubbles: [{ p: "nt", html: "Пункт седьмой: машины<br>покупаете <em>только вдвоём.</em>", fs: 38 }], talk: ["nt"] },
+   B: { def: () => ({ bg: "notarius", grade: "day", hud: HUD49("640 000", "", 1), freeze: 1,
+       mid: ch("perekup", "nt2", 470, 1300, 600, NOTARY, { armR: -40 }, { z: 4 }) + T("tn2", 210, 1760, 760, {}, { z: 7 }) + ch("perekup", "zn2", 880, 1740, 760, ZHORA, {}, { z: 7 }),
+       over: `<div style="position:absolute;inset:0;z-index:60">${CONTRACT(250, 1220, 560)}
+         <div style="position:absolute;left:60px;top:420px;font-family:Unbounded;font-weight:900;font-size:90px;color:#ff3b30;border:10px solid #ff3b30;border-radius:20px;padding:0 24px;transform:rotate(-8deg)">СТОП</div>
+         <div class="hand" style="left:60px;top:590px;font-size:96px;color:#ff3b30;-webkit-text-stroke:3px #151515;transform:rotate(-4deg)">50 / 50 —<br>и убытки тоже!</div></div>` }), shot: { x: 540, y: 1160, s: 1.06 } },
+   vo: "Нотариус: «Пункт седьмой: машины покупаете только вдвоём. Подписываем?» Лис: «Стоп. Пятьдесят на пятьдесят — это не только прибыль. Убытки — тоже пополам».", who: "Нотариус + Лис",
+   mv: "<b>Новый фон — кабинет нотариуса</b> (стеллаж с папками, жалюзи, часы, кулер; стол у стены). Новая героиня — <b>нотариус</b> (новый голос). <b>Приём 2 — стоп-кадр:</b> кадр замирает и уходит в ч/б, поверх — красный штамп «СТОП», договор с обведённым пунктом 7 и пометка маркером «50/50 — и убытки тоже!»." },
+ { h: "РАЗДЕЛЁННЫЙ ЭКРАН", tc: "3/6 · 0:24–0:36",
+   A: { split: () => { const H = HOLDPHONE("tolyan", "tl", 540, 1960, 1680, null, BOT49(), { rim: "#fff2c0", side: 1, head: -4 });
+       return [{ bg: "biblioteka", grade: "day", farBlur: 8, mid: H.mid, lights: H.lights, bx: [300, 780],
+         bubbles: [{ p: "tl", html: "Бот нашёл такой же:<br><em>1 200 000,<br>одна хозяйка.</em>", fs: 32 }] }, { x: 540, y: 980, s: 1.02 },
+         { bg: "neongarazh", grade: "night", bx: [300, 780], mid: car(CLSW, 250, 1640, 700, { z: 4, sheen: .6, refl: 1 }) + ch("perekup", "vg", 420, 1680, 720, VITALIK, { armL: 40 }, { rim: "#ff3bd0", side: 1, z: 5 })
+           + ch("perekup", "zg", 650, 1760, 780, { ...ZHORA, item: "phone" }, {}, { rim: "#5ad0ff", side: -1, z: 7 }), lights: NEON,
+           bubbles: [{ p: "zg", html: "Виталик отдаёт CLS!<br><em>В идеале!<br>1 250 000.</em>", fs: 32 }] }, { x: 560, y: 1200, s: 1.08 }]; }, talk: ["tl", "zg"], hud: HUD49("640 000") },
+   B: { def: () => ({ bg: "neongarazh", grade: "night", hud: HUD49("640 000"),
+       mid: car(CLSW, 250, 1640, 700, { z: 4, sheen: .4, refl: 1 }) + ch("perekup", "vh", 420, 1700, 760, VITALIK, { armL: 150 }, { rim: "#ff3bd0", side: 1, z: 6 })
+         + T("th", 860, 1760, 740, { armR: -60 }, { rim: "#5ad0ff", side: -1, z: 7 }) + INHAND(860, 1760, 740, -60, 90, GAUGE, 9),
+       lights: NEON }), shot: { x: 560, y: 1180, s: 1.08 },
+     bubbles: [{ p: "vh", html: "Пацаны, машина — как с завода!<br><em>Не битая, не крашеная.</em>", fs: 38 }], talk: ["vh"] },
+   vo: "Жора: «Студент, Виталик отдаёт CLS! В идеале! Миллион двести пятьдесят». Толян: «А бот нашёл такой же. Миллион двести. Одна хозяйка». Виталик: «Пацаны, машина — как с завода! Не битая, не крашеная».", who: "Жора + Толян + Виталик",
+   mv: "<b>Приём 3 — разделённый экран:</b> слева <b>новый фон — читальный зал института</b> (Толян-студент держит телефон, в боте «Mercedes CLS 2012 · одна хозяйка · 1 200 000»), справа <b>новый фон — неоновый тюнинг-гараж Виталика</b> (белый CLS, диски на стеллаже, вывеска VITALIK) — Жора на связи. Новый герой — <b>Виталик</b>, друг Жоры (новый голос). B — Толян приехал с толщиномером." },
+ { h: "ТОЛЩИНОМЕР", tc: "4/6 · 0:36–0:46",
+   A: { def: () => ({ grade: "day", hud: HUD49("640 000", "", 1), far: GAUGEINSERT(), farBlur: 0,
+       over: `<div class="hand" style="left:60px;top:430px;z-index:60;font-size:64px;color:#2f6db5;transform:rotate(-5deg)">крыша — 110 ✓</div><div class="hand" style="left:560px;top:1300px;z-index:60;font-size:96px;color:#ff3b30;transform:rotate(-6deg)">шпаклёвка!</div>` }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "neongarazh", grade: "night", hud: HUD49("640 000"),
+       mid: car(CLSW, 250, 1640, 700, { z: 4, sheen: .4, refl: 1 }) + ch("perekup", "vi", 420, 1700, 760, { ...VITALIK, look: "o" }, {}, { rim: "#ff3bd0", side: 1, z: 6 })
+         + T("ti", 860, 1760, 740, { armR: -60, head: -6 }, { rim: "#5ad0ff", side: -1, z: 7 }) + INHAND(860, 1760, 740, -60, 90, GAUGE, 9),
+       lights: NEON }), shot: { x: 760, y: 1120, s: 1.7, r: 2 },
+     bubbles: [{ p: "ti", html: "Виталик, «как с завода» —<br><em>это с какого?</em>", fs: 42 }], talk: ["ti"] },
+   vo: "Лис: «Толщиномер. Крыша — сто десять микрон. Дверь — тысяча двести. Шпаклёвка». Толян: «Виталик, как с завода — это с какого?»", who: "Лис + Толян",
+   mv: "<b>Приём 4 — толщиномер крупно:</b> прибор на двери белого CLS, цифры бегут 110 → 480 → 1200, пометки маркером «крыша — 110 ✓» и «шпаклёвка!». B — Толян крупно, Виталик сзади с круглыми глазами." },
+ { h: "ЧЁРНЫЙ CLS ИЗ БОТА", tc: "5/6 · 0:46–0:58",
+   A: { def: () => ({ bg: "promzona", grade: "dawn", hud: HUD49("640 000"),
+       mid: car(CLSB, 140, 1600, 760, { z: 4, sheen: .5, refl: 1 }) + T("tp", 830, 1760, 740, { armR: -60 }, { rim: "#ffc46a", side: -1, z: 7 }) + INHAND(830, 1760, 740, -60, 90, GAUGE, 9)
+         + `<div class="hand" style="left:180px;top:1080px;z-index:9;font-size:72px;color:#4cd964;-webkit-text-stroke:2px #151515;transform:rotate(-5deg)">105 · 110 · 108 — родная!</div>`,
+       lights: glow(980, 545, 120, "#fff6c8", .6) + glow(700, 700, 420, "#ffb36a", .35) }), shot: { x: 540, y: 1220, s: 1.06 } },
+   B: { def: () => ({ bg: "promzona", grade: "dawn", hud: HUD49("640 000"),
+       mid: car(CLSB, 140, 1600, 760, { z: 4, sheen: .7, refl: 1 }) + C.tag(470, 1250, "ПРОДАНО", "+180 000", -6, 6, "#4cd964") + CASHSPLIT()
+         + ch("perekup", "zp", 300, 1760, 760, { ...ZHORA, look: "grin" }, { armL: 150, armR: -150 }, { rim: "#ffc46a", side: 1, z: 7 }) + T("tq", 830, 1760, 740, {}, { rim: "#ffc46a", side: -1, z: 7 }),
+       lights: glow(700, 700, 420, "#ffb36a", .35) }), shot: { x: 540, y: 1220, s: 1.06 },
+     bubbles: [{ p: "zp", html: "Студент… пункт седьмой —<br><em>гениальный пункт.</em>", fs: 40 }], talk: ["zp"] },
+   vo: "Лис: «А чёрный CLS из бота — родная краска везде. Купили за миллион двести, продали за миллион триста восемьдесят». Жора: «Студент… пункт седьмой — гениальный пункт».", who: "Лис + Жора",
+   mv: "<b>Новый фон — промзона на закате</b> (бетонный забор с граффити, трубы, ангар, лужи с закатом). Толщиномер на чёрном: «105 · 110 · 108 — родная!» зелёным маркером. B — штамп «ПРОДАНО +180 000», две пачки денег — пополам." },
+ { h: "ИТОГ + КРЮЧОК", tc: "6/6 · 0:58–1:12",
+   A: { def: () => ({ bg: "bowling", grade: "night", hud: HUD49("730 000", "+90 000", 1),
+       mid: T("tz", 760, 1500, 560, { armR: -150 }, { rim: "#5ad0ff", side: -1, z: 4 }) + INHAND(760, 1500, 560, -150, 90, BALL, 5)
+         + ch("perekup", "zz", 300, 1760, 780, { ...ZHORA, item: "phone", look: "o" }, { head: 12 }, { rim: "#ff3bd0", side: 1, z: 7 })
+         + `<div class="prop" style="left:-40px;top:1460px;width:520px;height:360px;z-index:9"><svg viewBox="0 0 520 360"><path d="M0 360 V120 q0 -60 60 -60 h400 q60 0 60 60 V360 z" fill="#6a2a8a" stroke="#151515" stroke-width="10"/><path d="M0 200 h520" stroke="#4a1a6a" stroke-width="14"/></svg></div>`,
+       lights: BOWL_L }), shot: { x: 480, y: 1180, s: 1.12 },
+     bubbles: [{ p: "zz", html: "<span style='font-size:28px;color:#8b93a3'>(шёпотом)</span><br>Виталик… белый ещё продаёшь?<br><em>Только тихо.</em>", fs: 36 }], talk: ["zz"] },
+   B: { def: () => ({ bg: "bowling", grade: "night", hud: HUD49("730 000", "+90 000"), over: CTA49
+       + `<div class="hand" style="left:70px;top:520px;z-index:62;font-size:84px;color:#ffd23f;-webkit-text-stroke:3px #151515;transform:rotate(-5deg)">Часть 12:<br>Жора нарушает пункт 7</div>`,
+       mid: T("tz2", 760, 1500, 560, {}, { rim: "#5ad0ff", side: -1, z: 4 }) + ch("perekup", "zz2", 300, 1760, 780, { ...ZHORA, item: "phone", look: "grin" }, { head: 12 }, { rim: "#ff3bd0", side: 1, z: 7 }),
+       lights: BOWL_L }), shot: { x: 480, y: 1180, s: 1.12 } },
+   vo: "Лис: «Сто восемьдесят на двоих — Толяну девяносто. Капитал — семьсот тридцать. А Жора тем временем…» Жора (шёпотом): «Виталик… белый ещё продаёшь? Только тихо». Лис: «В двенадцатой части — Жора нарушает пункт седьмой. Подпишись, чтобы не пропустить».", who: "Лис + Жора",
+   mv: "Счётчик капитала 640 → 730 000 (+90). <b>Поворот:</b> снова боулинг — Толян бросает шар на дальней дорожке, а Жора за диванчиком тайком звонит Виталику. Крючок на часть 12 + финальная карточка (голос её не читает)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
