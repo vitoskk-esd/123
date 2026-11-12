@@ -7,13 +7,3 @@
 #cnt em { font-style: normal; font-size: 38px; color: #4cd964; }
 #tag span { text-shadow: 0 3px 10px #000; }
 .wr { clip-path: inset(-20% 100% -20% -5%); }
-
-/* ep47c — уникализация «Неон»: гамма фонов, пузыри, тег, одежда */
-.cf .far > svg { filter: brightness(.85) contrast(1.12) saturate(1.25) hue-rotate(16deg); }
-.cf .bub2 { background: #101826; color: #fff; border-color: #ffd23f; box-shadow: 0 0 0 7px #101826, 0 18px 40px rgba(0,0,0,.45); }
-.cf .bub2::after { background: #101826; border-color: #ffd23f; }
-.cf .bub2 em { color: #ffd23f; }
-#tag b { background: #ffd23f; }
-
-.cf .char[data-p^="z"] [fill="#1d1d1f"] { fill: #4a2a2a; }
-.cf .char[data-p^="b"] [fill="#7a4a8a"] { fill: #2f6db5; }
