@@ -1,0 +1,103 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props51.js"></script>
+<script>
+// «ТОРГ · ДУЭЛЬ» (ep51, «Простой ролик 2», киношный формат). Вестерн в гаражном кооперативе: Слава приехал за мечтой — BMW E30,
+// продаёт дед Аркадий: «800 тысяч, легенда». Мысли героев — облачками («отдам и за 600» / «больше 700 не дам»), цена на табло падает:
+// ржавые пороги → 760, бот: такие же в городе от 690 → 720. Дуэль взглядов, перекати-поле. Поворот: дед тоже в «Перехвате» — бот вчера прислал ему
+// Славину «пятёрку» за 200; «семьсот — и пятёрку в зачёт». Приёмы (новые): облачка-мысли; дуэль глаз крупно с полосами кадра; табло цены; перекати-поле.
+const P = (p, o, x, foot, h, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, o, pose, extra);
+const BARS = `<div style="position:absolute;left:0;right:0;top:0;height:560px;background:#000;z-index:57"></div><div style="position:absolute;left:0;right:0;bottom:0;height:560px;background:#000;z-index:57"></div>`;
+const NOON_L = glow(540, 160, 260, "#fff6c8", .5);
+const DUEL = (a, b, ao = {}, bo = {}) => P(a, { ...SLAVA, ...ao }, 260, 1500, 560, {}, { rim: "#fff2c0", side: 1 }) + P(b, { ...ARKADY, ...bo }, 820, 1500, 560, {}, { rim: "#fff2c0", side: -1 });
+const GAR = (a, b, ao = {}, bo = {}, apose = {}, bpose = {}) => car(E30, 330, 1600, 700, { z: 4, sheen: .5 }) + P(a, { ...ARKADY, ...ao }, 200, 1720, 760, apose, { rim: "#fff6c8", side: 1, z: 7 })
+  + P(b, { ...SLAVA, ...bo }, 880, 1740, 740, bpose, { rim: "#fff6c8", side: -1, z: 7 });
+const GAR_L = glow(540, 222, 280, "#fff6c8", .55) + beam([[480, 210], [600, 210], [900, 1700], [180, 1700]], "#fff6c8", .16);
+const E30CARDS = () => BOTH("BMW E30 · твой город", [["BMW 3 E30 · 1989", "690 000 ₽", "твой город · 2 дня"], ["BMW 3 E30 · 1990", "720 000 ₽", "твой город · сегодня"], ["BMW 3 E30 · 1988", "740 000 ₽", "твой город · ⏱ 1 с"]].map(c => CARD(...c)).join(""));
+const S = [
+ { h: "ДУЭЛЬ · ПОЛДЕНЬ", tc: "1/7 · 0:00–0:09",
+   A: { def: () => ({ bg: "duelpolden", grade: "day", hud: HUD51(1), mid: DUEL("sa", "ar") + TUMBLE(470, 1400, 120), lights: NOON_L }), shot: { x: 540, y: 1150, s: 1.04 } },
+   B: { def: () => ({ bg: "duelpolden", grade: "day", hud: HUD51(1), over: BARS, mid: DUEL("sa2", "ar2", { look: "flat" }), lights: NOON_L }), shot: { x: 262, y: 1104, s: 7 } },
+   vo: "Лис: «Гаражный кооператив, полдень. Слава приехал за мечтой — BMW тридцатого кузова. Продаёт дед Аркадий».", who: "Лис",
+   mv: "<b>Рубрика «ТОРГ» в стиле вестерна.</b> <b>Новый фон — аллея гаражного кооператива в полдень</b> (ворота в перспективе, пыльная дорога, столб с проводами, тополя). Герои стоят друг против друга, по дороге катится <b>перекати-поле</b>. B — <b>дуэль глаз</b>: глаза Славы во весь кадр, чёрные полосы сверху и снизу. Новые герои — <b>Слава</b> и <b>дед Аркадий</b>." },
+ { h: "ЛЕГЕНДА · 800 000", tc: "2/7 · 0:09–0:20",
+   A: { def: () => ({ bg: "boksarkady", grade: "warm", hud: HUD51(), over: PRICE("800 000"), mid: GAR("ag", "sg", {}, {}, { armR: -80 }), lights: GAR_L }), shot: { x: 540, y: 1200, s: 1.06 },
+     bubbles: [{ p: "ag", html: "Восемьсот тысяч.<br><em>Машина — легенда.</em>", fs: 44 }], talk: ["ag"] },
+   B: { def: () => ({ bg: "boksarkady", grade: "warm", hud: HUD51(), over: PRICE("800 000"), mid: GAR("ag2", "sg2", { look: "grin" }, { look: "flat" }), lights: GAR_L }), shot: { x: 540, y: 1200, s: 1.06 },
+     bubbles: [{ p: "ag2", cls: "think", html: "Отдам<br><em>и за шестьсот…</em>", fs: 40 }, { p: "sg2", cls: "think", html: "Больше семисот<br><em>не дам.</em>", fs: 40 }] },
+   vo: "Дед Аркадий: «Восемьсот тысяч. Машина — легенда». Лис (мысли героев облачками): дед думает «отдам и за шестьсот», Слава — «больше семисот не дам».", who: "Дед Аркадий + Лис",
+   mv: "<b>Новый фон — гараж деда Аркадия</b> (зелёные стены, плакат BMW E30, календарь 1989, мотоцикл «Урал» с коляской, шины). <b>Приём 1 — табло цены</b> «💬 800 000 ₽». <b>Приём 2 — мысли облачками:</b> B — у каждого героя облако с тем, что он думает на самом деле (голос — Лис)." },
+ { h: "ПОРОГИ · 760 000", tc: "3/7 · 0:20–0:29",
+   A: { def: () => ({ bg: "boksarkady", grade: "warm", hud: HUD51(), over: PRICE("760 000"),
+       mid: car(E30S, 140, 1640, 780, { z: 4, sheen: .5 }) + RUST(140, 1640 - 230 * 780 / 719 * .97, 780) + P("sp", SLAVA, 900, 1760, 740, { armL: 80 }, { rim: "#fff6c8", side: -1, z: 7 }), lights: GAR_L }), shot: { x: 560, y: 1260, s: 1.08 },
+     bubbles: [{ p: "sp", html: "Легенда — это мотор.<br><em>А пороги — в рыжиках.</em>", fs: 42 }], talk: ["sp"] },
+   B: { def: () => ({ bg: "boksarkady", grade: "warm", hud: HUD51(), over: PRICE("760 000"),
+       mid: car(E30S, 140, 1640, 780, { z: 4, sheen: .3 }) + RUST(140, 1640 - 230 * 780 / 719 * .97, 780) + `<div class="hand" style="left:280px;top:1440px;z-index:9;font-size:60px;color:#ff3b30;transform:rotate(-5deg)">рыжики!</div>`, lights: GAR_L }), shot: { x: 420, y: 1540, s: 2.4 } },
+   vo: "Слава: «Легенда — это мотор. А пороги — в рыжиках». Табло: 800 000 → 760 000.", who: "Слава",
+   mv: "Слава показывает на пороги — B: крупно ржавые пятна и пометка маркером «рыжики!»; табло цены сбрасывается до 760 000 со щелчком." },
+ { h: "БОТ · 720 000", tc: "4/7 · 0:29–0:40",
+   A: { def: () => { const H = HOLDPHONE("perekup", "sb", 540, 1960, 1680, SLAVA, E30CARDS(), { rim: "#fff6c8", side: 1 });
+       return { bg: "boksarkady", grade: "warm", hud: HUD51(1), farBlur: 9, over: PRICE("760 000"), mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "sb", html: "Такие же в городе —<br><em>от шестисот девяноста.</em>", fs: 42 }], talk: ["sb"] },
+   B: { def: () => ({ bg: "boksarkady", grade: "warm", hud: HUD51(), over: PRICE("720 000"), mid: GAR("aa", "sa3", { look: "angry" }, {}), lights: GAR_L }), shot: { x: 240, y: 1120, s: 2.0, r: -5 },
+     bubbles: [{ p: "aa", html: "Шестьсот девяносто —<br><em>это сарай, а не машина!</em>", fs: 42 }], talk: ["aa"] },
+   vo: "Слава: «Такие же в городе — от шестисот девяноста». Дед Аркадий: «Шестьсот девяносто — это сарай, а не машина!» Табло: 760 000 → 720 000.", who: "Слава + Дед Аркадий",
+   mv: "<b>Бот — рычаг торга:</b> Слава держит телефон, в боте три таких же E30 в его городе: 690 000, 720 000, 740 000. B — дед крупно, голландский угол, возмущается; табло — 720 000." },
+ { h: "ДУЭЛЬ ВЗГЛЯДОВ", tc: "5/7 · 0:40–0:47",
+   A: { split: () => [{ bg: "duelpolden", grade: "day", mid: DUEL("se", "ae", { look: "flat" }, { look: "flat" }), lights: NOON_L, over: BARS }, { x: 262, y: 1104, s: 7 },
+        { bg: "duelpolden", grade: "day", mid: DUEL("se2", "ae2", { look: "flat" }, { look: "flat" }), lights: NOON_L, over: BARS }, { x: 822, y: 1104, s: 7 }], hud: HUD51(1) },
+   B: { def: () => ({ bg: "duelpolden", grade: "day", hud: HUD51(1), over: PRICE("720 000"), mid: DUEL("sw", "aw", { look: "flat" }, { look: "flat" }) + TUMBLE(480, 1420, 140), lights: NOON_L }), shot: { x: 540, y: 1200, s: 1.12 } },
+   vo: "Лис: «Минута тишины. Даже перекати-поле остановилось».", who: "Лис",
+   mv: "<b>Приём 3 — дуэль глаз:</b> разделённый экран, слева глаза Славы, справа — деда, чёрные полосы, свист ветра (звук). B — снова аллея, между ними замирает перекати-поле." },
+ { h: "ПОВОРОТ", tc: "6/7 · 0:47–1:00",
+   A: { def: () => { const H = HOLDPHONE("perekup", "ap", 540, 1960, 1680, ARKADY, BOTH("ВАЗ-2105 · твой город", CARD("ВАЗ-2105 · 2008", "200 000 ₽", "продаёт: Слава", "⏱ 1 с после публикации")), { rim: "#fff6c8", side: 1 });
+       return { bg: "boksarkady", grade: "warm", hud: HUD51(), farBlur: 9, over: PRICE("720 000"), mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "ap", html: "Внучок, я тоже в «Перехвате».<br><em>Твою пятёрку мне бот вчера прислал.</em>", fs: 38 }], talk: ["ap"] },
+   B: { def: () => ({ bg: "boksarkady", grade: "warm", hud: HUD51(), over: PRICE("700 000"), mid: GAR("at", "st", { look: "grin" }, { look: "o" }, { armR: -60 }), lights: GAR_L }), shot: { x: 540, y: 1200, s: 1.06 },
+     bubbles: [{ p: "at", html: "Давай так: семьсот —<br><em>и твою пятёрку в зачёт.</em>", fs: 42 }], talk: ["at"] },
+   vo: "Дед Аркадий: «Внучок, я тоже в “Перехвате”. Твою пятёрку мне бот вчера прислал. Давай так: семьсот — и твою пятёрку в зачёт».", who: "Дед Аркадий",
+   mv: "<b>Поворот:</b> дед достаёт телефон — у него тот же бот, и вчера ему пришло Славино объявление «ВАЗ-2105 · 200 000». B — Слава с открытым ртом; табло — 700 000." },
+ { h: "ПО РУКАМ · ЗАКАТ", tc: "7/7 · 1:00–1:10",
+   A: { def: () => ({ bg: "duelzakat", grade: "dawn", hud: HUD51(), over: PRICE("700 000 + пятёрка"),
+       mid: car(V05, 560, 1380, 440, { z: 3, sheen: .4 }) + car(E30, 60, 1520, 540, { z: 4, sheen: .6 }) + P("sz", SLAVA, 400, 1760, 740, { armR: -70 }, { rim: "#ffc46a", side: 1, z: 7 })
+         + P("az", ARKADY, 700, 1760, 740, { armL: 70 }, { rim: "#ffc46a", side: -1, z: 7 }), lights: glow(540, 820, 360, "#ffd08a", .55) }), shot: { x: 560, y: 1260, s: 1.08 },
+     bubbles: [{ p: "sz", html: "По рукам!", fs: 56 }], talk: ["sz"] },
+   B: { def: () => ({ bg: "duelzakat", grade: "dawn", hud: HUD51(1), over: CTA51,
+       mid: car(V05, 560, 1380, 440, { z: 3, sheen: .4 }) + car(E30, 60, 1520, 540, { z: 4, sheen: .6 }) + P("sz2", SLAVA, 400, 1760, 740, {}, { rim: "#ffc46a", side: 1, z: 7 })
+         + P("az2", ARKADY, 700, 1760, 740, {}, { rim: "#ffc46a", side: -1, z: 7 }), lights: glow(540, 820, 360, "#ffd08a", .55) }), shot: { x: 560, y: 1260, s: 1.08 } },
+   vo: "Слава: «По рукам!» Лис: «Торг — это не война. Это когда оба уезжают довольными».", who: "Слава + Лис",
+   mv: "<b>Новый фон — та же аллея на закате.</b> Рукопожатие; табло — «700 000 + пятёрка». B — финальная карточка «Бот «Перехват» — ссылка в шапке» (голос её не читает)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
