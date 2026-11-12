@@ -53,10 +53,8 @@ boksarkady = HEAD + f'''    <rect width="1080" height="1920" fill="#5f7f5a"/>
     <!-- лампа и луч -->
     <path d="M540 0 V170" stroke="#151515" stroke-width="5"/><path d="M480 170 h120 l-16 40 h-88 z" fill="#c9ced6" stroke="{K}" stroke-width="5"/><circle cx="540" cy="222" r="18" fill="#fff6c8"/>
     <!-- плакат BMW и календарь -->
-    <g transform="rotate(-3 220 360)"><rect x="80" y="220" width="280" height="300" fill="#151515" stroke="{K}" stroke-width="6"/><circle cx="220" cy="330" r="70" fill="#f4f6f8" stroke="#151515" stroke-width="6"/>
-      <path d="M220 260 V400 M150 330 H290" stroke="#151515" stroke-width="4"/><path d="M220 260 A70 70 0 0 1 290 330 H220 Z M220 400 A70 70 0 0 1 150 330 H220 Z" fill="#2f6db5"/>
-      <text x="220" y="470" text-anchor="middle" {F} font-size="34" fill="#f4f6f8">E30</text></g>
-    <g><rect x="780" y="240" width="200" height="240" fill="#fff" stroke="{K}" stroke-width="5"/><rect x="780" y="240" width="200" height="70" fill="#c0392b"/><text x="880" y="290" text-anchor="middle" {F} font-size="30" fill="#fff">1989</text>
+    <g transform="rotate(-3 220 360)"><rect x="80" y="220" width="280" height="300" fill="#151515" stroke="{K}" stroke-width="6"/><ellipse cx="220" cy="330" rx="90" ry="62" fill="none" stroke="#c9ced6" stroke-width="10"/><path d="M190 290 V360 H260" fill="none" stroke="#c9ced6" stroke-width="12" stroke-linecap="round"/><text x="220" y="470" text-anchor="middle" {F} font-size="34" fill="#f4f6f8">LS 400</text></g>
+    <g><rect x="780" y="240" width="200" height="240" fill="#fff" stroke="{K}" stroke-width="5"/><rect x="780" y="240" width="200" height="70" fill="#c0392b"/><text x="880" y="290" text-anchor="middle" {F} font-size="30" fill="#fff">1994</text>
       <path d="M800 340 h160 M800 380 h160 M800 420 h120" stroke="#888" stroke-width="6"/></g>
     <!-- мотоцикл «Урал» с коляской (силуэт) -->
     <g><circle cx="200" cy="1000" r="70" fill="#1d1d1f" stroke="{K}" stroke-width="6"/><circle cx="420" cy="1000" r="70" fill="#1d1d1f" stroke="{K}" stroke-width="6"/>
