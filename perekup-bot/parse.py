@@ -353,7 +353,7 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
                 and L.year and (L.price or L.mileage)):
             L.make = L.model = None
     # где машина: город из текста (кроме «пригнана из Москвы», «доставка в Москву»), иначе — город канала
-    L.region, L.city = d.find_place(tokens)
+    L.region, L.city = d.find_place(tokens, text=clean(text), prefer=channel_region)
     if not L.region:
         L.region = channel_region
     # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)

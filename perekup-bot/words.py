@@ -138,6 +138,7 @@ class Dictionary:
     marks: Finder = field(repr=False, default=None)
     latin: dict[str, list[str]] = field(repr=False, default_factory=dict)   # регион → его города латиницей (для ников каналов)
     codes: dict[int, str] = field(repr=False, default_factory=dict)         # автомобильный код региона → регион (38 → Иркутск)
+    weak: set[str] = field(repr=False, default_factory=set)                 # названия мест, которые бывают и словом (weak_places.yaml)
 
     def car_name(self, make: str | None, model: str | None) -> str:
         if make and model:
@@ -154,20 +155,35 @@ class Dictionary:
     def find_location(self, tokens: list[str]) -> str | None:
         return self.find_place(tokens)[0]
 
-    def find_place(self, tokens: list[str]) -> tuple[str | None, str | None]:
-        """(регион, город) — где машина стоит; город — если назван город (а не «Иркутская область»), иначе None."""
-        """Где машина стоит. Первый город текста, кроме «откуда» и «куда»: «пригнана из Москвы», «с Питера», «доставка
-        до Москвы», «пригоню в Москву / в Донецк» — это не место продажи. Есть только такие упоминания — не знаем (None)."""
-        for h in self.places.find(tokens):
-            prev, tok = (tokens[h.start - 1] if h.start else ""), tokens[h.end - 1]      # падеж видно по последнему слову: «в Нижнем Новгороде»
-            if prev in ORIGIN:
-                continue
-            if prev in ("в", "во", "на") and len(tok) > 3 and not tok.endswith(LOCATIVE) and tok not in LOCATIVE_U:
-                continue                                    # «в Москву», «в Донецк» — направление; «в Москве», «в Донецке» — место
-            if prev in STREET or (h.end < len(tokens) and tokens[h.end] in STREET_AFTER):
-                continue                                    # «ул. Кирова», «пр. Гагарина», «Московское шоссе» — адрес, не город
-            return h.payload[0], (h.payload[1] if len(h.payload) > 1 else None)
-        return None, None
+    def find_place(self, tokens: list[str], text: str | None = None, prefer: str | None = None) -> tuple[str | None, str | None]:
+        """(регион, город) — где машина стоит; город — если назван город (а не «Иркутская область»), иначе None.
+        Смотрим все упоминания мест по фразам текста (строки, запятые), а не первое попавшееся:
+        — «откуда» и «куда» не место продажи: «пригнана из Москвы», «с Питера», «доставка до Москвы», «пригоню в Москву»;
+        — адрес не город: «ул. Кирова», «Московское шоссе»;
+        — надёжное упоминание — когда видно, что это место: «г. Уфа», «Город: Уфа», «в Уфе», «Уфа» отдельной строкой/фразой;
+        — название, которое бывает обычным словом или именем (weak_places.yaml: «Пересвет приборной панели», «продаёт Владимир»,
+          «курган», «шахты»), считаем городом только при надёжном упоминании (владелец 12.11);
+        — из надёжных берём первое, совпадающее с регионом канала (prefer), иначе первое; надёжных нет — так же из остальных."""
+        found = []                                          # (надёжное, регион, город)
+        for seg in (_segments(text) if text is not None else [tokens]):
+            for h in self.places.find(seg):
+                prev, tok = (seg[h.start - 1] if h.start else ""), seg[h.end - 1]       # падеж видно по последнему слову: «в Нижнем Новгороде»
+                if prev in ORIGIN:
+                    continue
+                locative = prev in ("в", "во", "на") and (len(tok) <= 3 or tok.endswith(LOCATIVE) or tok in LOCATIVE_U)
+                if prev in ("в", "во", "на") and not locative:
+                    continue                                # «в Москву», «в Донецк» — направление; «в Москве», «в Донецке» — место
+                if prev in STREET or (h.end < len(seg) and seg[h.end] in STREET_AFTER):
+                    continue                                # «ул. Кирова», «пр. Гагарина», «Московское шоссе» — адрес, не город
+                rest = [t for i, t in enumerate(seg) if not (h.start <= i < h.end) and t not in PLACE_MARK]
+                strong = locative or prev in PLACE_MARK or not rest
+                said = " ".join(seg[h.start:h.end])
+                if not strong and any(said == w or (said.startswith(w) and len(said) - len(w) <= 3) for w in self.weak):
+                    continue                                # «Пересвет приборной панели» — не город
+                found.append((strong, h.payload[0], h.payload[1] if len(h.payload) > 1 else None))
+        pool = [f for f in found if f[0]] or found
+        best = next((f for f in pool if f[1] == prefer), pool[0] if pool else None)
+        return (best[1], best[2]) if best else (None, None)
 
     def guess_region(self, title: str | None, username: str | None) -> str | None:
         """Город канала по названию («АвтоРынок ДНР», «Авто Воронеж») или нику (avto_moskva, AvtoVoronezh, avto_msk);
@@ -211,6 +227,10 @@ NOT_CODE_BEFORE = re.compile(r"(?:^|\s)(от|до|за|по|свыше|№|n)\s*
 STREET = {"ул", "улица", "улице", "улицу", "пр", "пр-т", "просп", "проспект", "проспекте", "пер", "переулок", "переулке", "пл", "площадь", "площади",
           "бульвар", "бульваре", "б-р", "наб", "набережная", "набережной", "мкр", "микрорайон", "проезд", "тупик", "аллея", "тракт", "им", "имени", "станция", "ст", "метро", "м"}
 STREET_AFTER = {"шоссе", "тракт"}                         # «Московское шоссе», «Сибирский тракт»; «Москва, ул. …» — город (запятую norm съедает)
+# слова, после которых название — точно место: «г. Уфа», «Город: Уфа», «пгт Чишмы», «находится в …», «📍 Уфа» (эмодзи norm съедает)
+PLACE_MARK = set("г гор город городе п пос поселок поселке пгт с село селе ст станица станице д дер деревня деревне район районе "
+                 "обл область области край крае респ республика республике местонахождение местоположение нахожусь находится локация "
+                 "регион адрес осмотр".split())
 ORIGIN = ("из", "изо", "с", "со", "до")                          # «из Москвы», «с Питера», «доставка до Казани»
 LOCATIVE = ("е", "и", "ах", "ях", "ом", "ем")                     # «в Москве», «в Перми», «в Челнах», «в Видном»
 LOCATIVE_U = ("крыму",)                                           # «в Крыму» — место, хотя на -у
@@ -228,6 +248,16 @@ WORD_FORMS = {"край": ("край", "крае", "края", "краю"), "о�
               "округ": ("округ", "округе", "округа")}
 
 
+def _segments(text: str) -> list[list[str]]:
+    """Фразы текста для поиска места: строки и куски между запятыми, точками с запятой, скобками, «|», « — »."""
+    out = []
+    for part in re.split(r"[\n,;!?()|•]+|\s[—–-]\s", text):
+        toks = norm(part).split()
+        if toks:
+            out.append(toks)
+    return out
+
+
 def place_forms(alias: str) -> list[str]:
     """Все падежи названия места: «нижний новгород» → «нижнем новгороде» (второе слово склоняет поиск по основе),
     «московская область» → «московской обл», «краснодарский край» → «краснодарском крае». Одно слово склоняет сам поиск."""
@@ -239,8 +269,10 @@ def place_forms(alias: str) -> list[str]:
         if t in WORD_FORMS:
             opts.append(WORD_FORMS[t])
         elif len(t) >= 5 and t[-2:] in ADJ:
-            end = "ый" if t[-2:] == "ий" and t[-3] in "кгхжшчщ" else t[-2:]     # «краснодарский» → «краснодарском», а не «-скем»
-            opts.append(tuple(t[:-2] + e for e in ADJ[end]))
+            if t[-2:] == "ий" and t[-3] in "кгхжшчщ":       # «краснодарский» → «краснодарском», а не «-скем»; сама «-ий» остаётся
+                opts.append((t,) + tuple(t[:-2] + e for e in ("ом", "ого", "ому", "им")))   # (раньше терялась: «Краснодарский край» не находился)
+            else:
+                opts.append(tuple(t[:-2] + e for e in ADJ[t[-2:]]))
         else:
             opts.append((t,))
     out = [""]
@@ -278,5 +310,9 @@ def load_dictionary(path: Path) -> Dictionary:
              for rid, r in (data.get("regions") or {}).items()}
     latin["msk"] += ["moscow", "mos"]; latin["spb"] += ["piter", "spb"]; latin["ekb"] += ["yekaterinburg", "ekb"]
     codes = {int(c): rid for rid, r in (data.get("regions") or {}).items() for c in r.get("codes") or []}
+    weak_path = path.with_name("weak_places.yaml")       # tools/audit_places.py: «Пересвет», «Владимир», «Курган», «Шахты»…
+    weak = set()
+    if weak_path.exists():
+        weak = {str(w) for w in (yaml.safe_load(weak_path.read_text(encoding="utf-8")) or {}).get("weak") or []}
     return Dictionary(makes, models, regions, markers,
-                      cars=Finder(car_phrases), places=Finder(place_phrases), marks=Finder(mark_phrases), latin=latin, codes=codes)
+                      cars=Finder(car_phrases), places=Finder(place_phrases), marks=Finder(mark_phrases), latin=latin, codes=codes, weak=weak)

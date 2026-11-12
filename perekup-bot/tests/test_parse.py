@@ -392,7 +392,7 @@ def test_filter_generation_is_not_price():
     ("Волжский автозавод, бабушкин автомобиль", None, None), ("Нижний Новгород", "nnov", None), ("в Находке", "vvo", None),
 ])
 def test_city_to_region(text, region, city):
-    rid, c = D.find_place(norm(text).split())
+    rid, c = D.find_place(norm(text).split(), text=text)
     assert rid == region and (city is None or c == city)
 
 
@@ -409,3 +409,36 @@ def test_vk_ufa_post_not_moscow():
     t = "Продам ваз 2114, 13 года, по технике все хорошо работает,сигнализация, фаркоп , по кузову на фото видно, документы норм цена 150 т.с.9625441608"
     L = parse_post(t, D, D.guess_region("Авторынок Уфа ВЫКУП АВТО", None))
     assert L.region == "ufa" and L.price == 150000
+
+
+# владелец 12.11: «Пересвет приборной панели … Уфа» бот отправил в «Москва и МО». Названия, которые бывают обычным словом или именем
+# (weak_places.yaml, tools/audit_places.py), — город только при надёжном упоминании; из нескольких мест — надёжное и совпадающее с каналом.
+@pytest.mark.parametrize("text,channel,region,city", [
+    ("‼️Продается ПРИОРА\n2008 года\nПересвет приборной панели,черный потолок,кпп веста\nЦена: 120 до подготовки\nУфа‼️", "ufa", "ufa", "Уфа"),
+    ("‼️Продается ПРИОРА\n2008 года\nПересвет приборной панели,черный потолок\nЦена: 120 до подготовки\nУфа‼️", None, "ufa", "Уфа"),
+    ("Приора 2010, 300 тыс, Пересвет", None, "msk", "Пересвет"),
+    ("Продаёт Владимир, Камри 2015, 1 200 000", None, None, None),
+    ("Камри 2015, г. Владимир, 1 200 000", None, "vld", "Владимир"),
+    ("Камри 2015 в Кургане 900 тыс", "ufa", "kur", "Курган"),
+    ("Камри 2015, Краснодарский край, 900 000", None, "krd", None),
+    ("Солярис 2017, в Краснодарском крае, 1 100 000", None, "krd", None),
+    ("Камри 2015, Горячий Ключ, 900 т.р.", None, "krd", "Горячий Ключ"),
+    ("Солярис 2017 Казань 1 100 000", "ufa", "kzn", "Казань"),
+])
+def test_place_reliable_mention(text, channel, region, city):
+    L = parse_post(text, D, channel)
+    assert (L.region, L.city) == (region, city)
+
+
+def test_every_city_found_in_place_phrases():
+    """Каждый город и регион словаря находится, когда он назван как место: отдельной строкой, «Город: …», «г. …», через запятую."""
+    import yaml
+    base = Path(__file__).resolve().parents[1]
+    items = [(rid, str(c)) for rid, cs in yaml.safe_load((base / "cities.yaml").read_text(encoding="utf-8")).items() for c in cs]
+    items += [(rid, str(a)) for rid, r in yaml.safe_load((base / "cars.yaml").read_text(encoding="utf-8"))["regions"].items()
+              for a in r.get("aliases") or [] if not str(a).isascii()]
+    known = {("psk", "Печоры")}                    # «Печоры» = падеж «Печора» (Коми) — одноимённые формы
+    bad = [(c, t) for rid, c in items if (rid, c) not in known
+           for t in (f"Камри 2015\nЦена 900 000\n{c}", f"Город: {c}\nКамри 2015", f"г. {c}, Камри 2015", f"Камри 2015, {c}, 900 т.р.")
+           if D.find_place(norm(t).split(), text=t)[0] != rid]
+    assert not bad, bad[:20]
