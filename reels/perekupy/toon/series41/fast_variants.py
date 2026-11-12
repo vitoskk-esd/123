@@ -39,3 +39,9 @@ $("#title .b").textContent = {json.dumps(t2, ensure_ascii=False)}; $("#title .b"
                     "-c:v", "libx264", "-preset", "medium", "-crf", "16", "-r", str(FPS), "-c:a", "copy", "-movflags", "+faststart", f"final/perekupy_{vid}.mp4"], check=True)
     for f in (f"head_{vid}.mp4", f"head_{vid}.events.json"): os.path.exists(f) and os.remove(f)
     print(vid, v["name"], "→", f"final/perekupy_{vid}.mp4")
+
+# YD_FOLDER="История Толяна часть 12" (или «Простой ролик 2») — после сборки сразу кладём основное видео и уникализации на Яндекс Диск
+# той же фоновой командой: без отдельных шагов (владелец 12.11: «тратится много лимита на отправку файлов»).
+if os.environ.get("YD_FOLDER"):
+    names = [f"final/perekupy_{BASE}.mp4"] + [f"final/perekupy_{BASE}{k}.mp4" for k in V if len(sys.argv) <= 2 or k in sys.argv[2:]]
+    subprocess.run(["python3", "../../kit/ydisk.py", os.environ["YD_FOLDER"], *[n for n in names if os.path.exists(n)]], check=True)
