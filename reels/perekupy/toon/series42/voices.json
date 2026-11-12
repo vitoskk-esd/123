@@ -1,0 +1,20 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "You narrate a haggling duel in a Russian garage cooperative like a western movie narrator: slow, dramatic, dry irony. «Лексус эл эс четыреста» — Lexus LS 400. Numbers said fully."
+ },
+ "slava": {
+  "voice": "Puck",
+  "tempo": 1.12,
+  "profile": "Slava — a young Russian car buyer in his late 20s, cheeky but polite, confident haggler.",
+  "notes": "Line 1: smug, pointing at rusty sills. Line 2: casual, showing the phone, a calm fact. Line 3: happy, short: «По рукам!»"
+ },
+ "arkady": {
+  "voice": "Algenib",
+  "tempo": 1.05,
+  "profile": "Grandpa Arkady — an old cunning Russian man in his 70s, mustache, glasses and a cap, sells his car in his garage.",
+  "notes": "Line 1: proud, theatrical. Line 2: offended, then grudging concession. Line 3: sly, triumphant, calls the buyer «внучок». Line 4: friendly, deal-making."
+ }
+}
