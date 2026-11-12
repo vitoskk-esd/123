@@ -54,6 +54,17 @@ const HANDPHONE = (l, t, w, inner, rot = -6) => `<div style="position:absolute;l
   <svg viewBox="0 0 100 600" style="position:absolute;left:-40px;top:${w * .55}px;width:90px;overflow:visible">${[0, 150, 300].map(y => `<rect x="0" y="${y}" width="96" height="120" rx="48" fill="#e8b48c" stroke="#151515" stroke-width="10"/><path d="M70 ${y + 30} q16 30 0 60" stroke="#c99b78" stroke-width="8" fill="none"/>`).join("")}</svg>
   <svg viewBox="0 0 140 420" style="position:absolute;left:${w - 70}px;top:${w * .9}px;width:130px;overflow:visible"><path d="M60 0 q70 20 70 120 q0 110 -50 200 l-80 60 v-300 q0 -60 60 -80 z" fill="#e8b48c" stroke="#151515" stroke-width="10" stroke-linejoin="round"/>
     <path d="M58 20 q40 20 36 70" stroke="#c99b78" stroke-width="8" fill="none"/></svg></div>`;
+// герой по пояс держит телефон обеими руками, экран к зрителю (владелец 12.11: «человек держит телефон, на экране — бот»)
+// возвращает { mid, lights }: тело — в mid (под грейдом), телефон, свечение и кисти — в lights (над грейдом)
+const HOLDPHONE = (kind, p, x, foot, h, o, inner, extra = {}) => {
+  const s = h / 740, l = x - 210 * s, t = foot - 740 * s, pl = l + 100 * s, pt = t + 368 * s, pw = 220 * s, ph = 345 * s, k = pw / 560;
+  const hand = (hx) => `<div style="left:${hx - 26 * s}px;top:${t + 488 * s}px;width:${52 * s}px;height:${92 * s}px;z-index:33;background:#e8b48c;border:${7 * s}px solid #151515;border-radius:${30 * s}px"></div>`;
+  return { mid: ch(kind, p, x, foot, h, o, { head: extra.head ?? 0 }, { rim: extra.rim, side: extra.side, noShadow: 1 }),
+    lights: glow(x, t + 260 * s, 240 * s, "#9fd6ff", .35, 31)
+      + `<div style="left:${pl}px;top:${pt}px;width:${pw}px;height:${ph}px;z-index:32;background:#0d0e12;border:${9 * s}px solid #2a2d34;border-radius:${40 * s}px;overflow:hidden;box-shadow:0 0 ${60 * s}px rgba(120,180,255,.55)">
+        <div style="position:absolute;left:0;top:0;width:560px;padding:30px 52px;transform:scale(${k});transform-origin:0 0">${inner}</div></div>`
+      + hand(l + 96 * s) + hand(l + 324 * s) };
+};
 const BOTH = (title, body) => `<div style="font-family:Onest;font-weight:700;font-size:34px;color:#8b93a3">ПЕРЕХВАТ · бот</div>${title ? `<div style="font-family:'JetBrains Mono';font-weight:800;font-size:30px;color:#ffd23f;margin-top:8px">${title}</div>` : ""}${body}`;
 const CARD = (t, p, c, hot) => `<div style="background:#1c1f26;border-radius:26px;padding:18px 22px;margin-top:14px;font-family:Onest;color:#fff">${hot ? `<div style="font-weight:800;font-size:30px;color:#ff7a1a">${hot}</div>` : ""}
   <div style="font-weight:800;font-size:32px">${t}</div><div style="font-family:Unbounded;font-weight:900;font-size:46px;color:#ffd23f">${p}</div><div style="font-size:28px;color:#b9bfca">📍 ${c}</div></div>`;
@@ -139,15 +150,17 @@ const S = [
      lights: glow(880, 300, 380, "#fff3c4", .55) + beam([[820, 260], [980, 300], [700, 1800], [200, 1700]], "#fff6d8", .14) }),
    A: { x: 520, y: 1180, s: 1.12 },
    bA: [{ p: "t", html: "Ставим по рынку.<br><em>Не дороже ни на рубль.</em>", fs: 42 }],
-   B2: () => ({ bg: "zhlotday", grade: "day", hud: HUD("570 000", "", 1), farBlur: 9,
-     far: `<div style="left:0;top:0;width:1080px;height:1920px">${LOTROW(1190) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, sheen: .35 })}</div>`,
-     over: HANDPHONE(190, 460, 680, BOTH("Solaris 2017 · вся Россия", CARD("Hyundai Solaris · 2017", "840 000 ₽", "Тверь") + CARD("Hyundai Solaris · 2017", "860 000 ₽", "Казань") + CARD("Hyundai Solaris · 2018", "880 000 ₽", "Пермь"))) }),
+   B2: () => { const H = HOLDPHONE("tolyan", "t", 540, 1960, 1680, null, BOTH("Solaris 2017 · вся Россия", CARD("Hyundai Solaris · 2017", "840 000 ₽", "Тверь") + CARD("Hyundai Solaris · 2017", "860 000 ₽", "Казань") + CARD("Hyundai Solaris · 2018", "880 000 ₽", "Пермь")), { rim: "#fff2c0", side: 1, head: -4 });
+     return { bg: "zhlotday", grade: "day", hud: HUD("570 000", "", 1), farBlur: 10,
+       far: `<div style="left:0;top:0;width:1080px;height:1920px">${LOTROW(1190) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, sheen: .35 })}</div>`,
+       mid: H.mid, lights: H.lights + glow(880, 300, 380, "#fff3c4", .4) }; },
    SB: { x: 540, y: 960, s: 1 }, bB: [],
    vo: "Толян: «Ставим по рынку. Не дороже ни на рубль». Лис: «Бот показал такие же машины по всей России — от восьмисот сорока. За четыре дня ушли пять из шести».", who: "Толян + Лис",
-   mv: "Утро после дождя — <b>та же площадка днём</b>: солнце, лужи отражают небо, гирлянда погасла. Толян зачёркивает «950» и пишет «850». <b>B</b> — вставка: рука с телефоном крупно, в боте фильтр «Solaris 2017 · вся Россия» — три карточки; площадка за телефоном в размытии (глубина резкости)." },
+   mv: "Утро после дождя — <b>та же площадка днём</b>: солнце, лужи отражают небо, гирлянда погасла. Толян зачёркивает «950» и пишет «850». <b>B</b> — Толян крупно держит телефон экраном к зрителю, в боте фильтр «Solaris 2017 · вся Россия» — три карточки; площадка за ним в размытии (глубина резкости)." },
  { h: "06:00 · ГОНКА", tc: "6/8 · 0:44–0:55", talk: ["zh"],
-   sc: () => ({ bg: "rassvet", grade: "dawn", hud: HUD("570 000", "", 1), farBlur: 12, farFilter: "brightness(.85)",
-     over: HANDPHONE(190, 470, 680, BOTH("⏰ 06:00", CARD("Lada Granta · 2019 · 15 000 км", "520 000 ₽", "ул. Садовая, 7 · хозяйка", "🔥 −19% к рынку · ⏱ 1 с после публикации")), 5) }),
+   sc: () => { const H = HOLDPHONE("perekup", "zh", 540, 1960, 1680, { ...ZHORA, look: "o" }, BOTH("⏰ 06:00", CARD("Lada Granta · 2019 · 15 000 км", "520 000 ₽", "ул. Садовая, 7 · хозяйка", "🔥 −19% к рынку · ⏱ 1 с после публикации") + `<div style="margin-top:16px;background:#2f6db5;border-radius:22px;padding:16px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#fff">📍 Маршрут · 7 мин</div>`), { rim: "#ffe2a0", side: -1, head: 5 });
+     return { bg: "rassvet", grade: "dawn", hud: HUD("570 000", "", 1), farBlur: 10, mid: H.mid, lights: H.lights + glow(700, 720, 420, "#fff2c0", .5),
+       fx: `<div class="fx">${C.fog(1050, 200, "#fff2dc", .35)}</div>` }; },
    A: { x: 540, y: 960, s: 1 },
    bA: [],
    B2: () => ({ bg: "rassvet", grade: "dawn", hud: HUD("570 000"), haze: "linear-gradient(transparent 40%, rgba(255,236,200,.35) 52%, transparent 70%)",
@@ -160,7 +173,7 @@ const S = [
    SB: { x: 560, y: 1200, s: 1.12, r: -2 },
    bB: [{ p: "zh", html: "Я первый?!<br><em>Я двадцать лет<br>вторым приезжал!</em>", fs: 42 }],
    vo: "Лис: «Шесть утра. Толян настроил Жоре бот: Гранта, девятнадцать процентов ниже рынка, хозяйка — бабушка». Жора: «Я первый?! Я двадцать лет вторым приезжал!»", who: "Лис + Жора",
-   mv: "<b>Приём 2 — гонка на рассвете:</b> будильник-уведомление в 6:00 (A — вставка: телефон в руке Жоры, за ним размытый рассвет). <b>Новый фон — частный сектор</b> (дома с резными наличниками, жёлтая газовая труба, колонка, берёза, колея с лужами). <b>B</b> — Мерседес Жоры у калитки, в тумане вдали фары опоздавших перекупов; золотой контровой свет, пылинки в лучах. Новый герой — хозяйка Гранты." },
+   mv: "<b>Приём 2 — гонка на рассвете:</b> уведомление бота в 6:00 (A — Жора у калитки держит телефон, на экране бот: Гранта −19% к рынку; за ним размытый рассвет). <b>Новый фон — частный сектор</b> (дома с резными наличниками, жёлтая газовая труба, колонка, берёза, колея с лужами). <b>B</b> — Мерседес Жоры у калитки, в тумане вдали фары опоздавших перекупов; золотой контровой свет, пылинки в лучах. Новый герой — хозяйка Гранты." },
  { h: "ПРОДАНО", tc: "7/8 · 0:55–1:03", talk: ["zh"],
    sc: () => ({ bg: "zhlotday", grade: "day", hud: HUD("570 000"),
      mid: LOTROW(1190, [0, 1, 2, 3]) + car("granta/granta_34.png", 300, 1560, 520, { z: 4, sheen: .5, refl: 1 }) + C.tag(520, 1360, "640 000", "GRANTA · 2019", -4, 5)
