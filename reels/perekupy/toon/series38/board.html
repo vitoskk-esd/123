@@ -43,7 +43,7 @@ const S = [
    sc: () => ({ bg: "zhlot", grade: "rain", hud: HUD("570 000", "", 1), fx: C.rain(170, 11) + C.lens(4, 6),
      mid: LOTROW(1190, [], 1) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, refl: 1, sheen: .62, dim: .72 }) + C.tag(680, 1490, "950 000", "SOLARIS · 2017", -4, 7)
        + `<div class="hand" style="left:610px;top:1580px;z-index:8;font-size:40px;color:#ff3b30;transform:rotate(-6deg)">стоит 94-й день</div>`
-       + ch("perekup", "zh", 230, 1700, 760, { ...ZHORA, look: "o" }, { armR: -35, head: 7 }, { rim: "#ffc46a", side: 1 }) + UMB(298, 1050, 560),
+       + ch("perekup", "zh", 230, 1700, 760, { ...ZHORA, look: "o" }, { armR: -35, head: 7 }, { rim: "#ffc46a", side: 1 }) + UMB(230, 1700, 760, -35),
      lights: BULBS() }),
    A: { x: 540, y: 1100, s: 1.04 }, B: { x: 760, y: 1560, s: 2.6, r: 3 },
    bA: [{ at: [330, 690], html: "Студент, выручай.<br><em>Шесть машин стоят<br>по три месяца.</em>", fs: 42 }],
@@ -54,7 +54,7 @@ const S = [
    sc: () => ({ bg: "zhlot", grade: "rain", hud: HUD("570 000"), fx: C.rain(170, 12) + C.lens(9, 5),
      mid: LOTROW(1190, [], 1) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, refl: 1, sheen: .5, dim: .72 })
        + ch("tolyan", "t", 520, 1760, 760, null, { armR: -70, head: 4 }, { rim: "#ffc46a", side: -1, z: 7 })
-       + ch("perekup", "zh", 170, 1700, 740, { ...ZHORA, look: "o" }, { armR: -35 }, { rim: "#ffc46a", side: 1 }) + UMB(236, 1060, 540),
+       + ch("perekup", "zh", 170, 1700, 740, { ...ZHORA, look: "o" }, { armR: -35 }, { rim: "#ffc46a", side: 1 }) + UMB(170, 1700, 740, -35, 540),
      lights: BULBS() }),
    A: { x: 470, y: 1180, s: 1.18 }, B: null,
    bA: [{ p: "t", html: "Жора, ты берёшь<br>у перекупов.<br><em>Дороже рынка!</em>", fs: 42 }],

@@ -28,14 +28,14 @@ const SOL = (sheen, dim) => car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, r
 mount("s2", { bg: "zhlot", grade: "rain", fx: C.rain(170, 11) + C.lens(4, 6),
   mid: LOTROW(1190, [], 1) + SOL(.62, .72) + C.tag(680, 1490, "950 000", "SOLARIS · 2017", -4, 7)
     + `<div class="hand wr" id="d94" style="left:610px;top:1580px;z-index:8;font-size:40px;color:#ff3b30;transform:rotate(-6deg)">стоит 94-й день</div>`
-    + ch("perekup", spk("zb", "zhora"), 230, 1700, 760, { ...ZHORA, look: "o" }, { armR: -35, head: 7 }, { rim: "#ffc46a", side: 1 }) + UMB(298, 1050, 560),
+    + ch("perekup", spk("zb", "zhora"), 230, 1700, 760, { ...ZHORA, look: "o" }, { armR: -35, head: 7 }, { rim: "#ffc46a", side: 1 }) + UMB(230, 1700, 760, -35),
   lights: BULBS(), bubbles: [{ id: "z2", at: [330, 690], html: "Шесть машин стоят<br>по три месяца.<br><em>Никто не берёт!</em>", fs: 42 }] }, { x: 540, y: 1100, s: 1.04 });
 
 // ---------- 3. пальцем по стеклу
 mount("s3", { bg: "zhlot", grade: "rain", fx: C.rain(170, 12) + C.lens(9, 5),
   mid: LOTROW(1190, [], 1) + SOL(.5, .72)
     + ch("tolyan", spk("tc", "tolyan"), 520, 1760, 760, null, { armR: -70, head: 4 }, { rim: "#ffc46a", side: -1, z: 7 })
-    + ch("perekup", spk("zc", "zhora"), 170, 1700, 740, { ...ZHORA, look: "o" }, { armR: -35 }, { rim: "#ffc46a", side: 1 }) + UMB(236, 1060, 540),
+    + ch("perekup", spk("zc", "zhora"), 170, 1700, 740, { ...ZHORA, look: "o" }, { armR: -35 }, { rim: "#ffc46a", side: 1 }) + UMB(170, 1700, 740, -35, 540),
   lights: BULBS(), bubbles: [{ id: "t2", p: "tc", html: "Жора, ты берёшь<br>у перекупов.<br><em>Дороже рынка!</em>", fs: 42 }] }, { x: 470, y: 1180, s: 1.18 });
 mount("s3w", { grade: "rain", fx: C.lens(21, 9), far: WINDSHIELD(), farBlur: 0,
   mid: `<div class="hand wr" id="hw0" style="left:150px;top:560px;font-size:150px;color:rgba(20,26,48,.85);transform:rotate(-5deg)">купил 900</div>`

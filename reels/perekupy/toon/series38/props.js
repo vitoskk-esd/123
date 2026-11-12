@@ -4,11 +4,24 @@ const ZHORA = { jacket: "#1d1d1f", pants: "#2b2f37", cap: "#c0392b", mustache: t
 const BABA = { coat: "#7a4a8a", jacket: "#7a4a8a", pants: "#4a3a5a", hair: "#d9d9d9", scarf: "#c0392b", look: "grin" };
 const HUD = (cap, d, lis) => ({ tag: "жора просит о помощи", cap, d, lis });
 // зонт над героем: hand — точка ладони в мире
-const UMB = (x, y, w, z = 8) => `<div class="prop" style="left:${x - w / 2}px;top:${y - w * .62}px;width:${w}px;height:${w * .7}px;z-index:${z}"><svg viewBox="0 0 400 280">
-  <path d="M200 20 V270 q0 10 -14 10 q-12 0 -12 -12" fill="none" stroke="#151515" stroke-width="10" stroke-linecap="round"/>
-  <path d="M10 120 Q200 -70 390 120 q-30 -24 -63 0 q-30 -24 -63 0 q-32 -24 -64 0 q-32 -24 -64 0 q-30 -24 -63 0 q-30 -24 -63 0 z" fill="#7a1f1a" stroke="#151515" stroke-width="7" stroke-linejoin="round"/>
-  <path d="M200 22 Q120 40 73 120 M200 22 Q170 50 137 120 M200 22 Q230 50 264 120 M200 22 Q280 40 327 120" fill="none" stroke="#151515" stroke-width="5"/>
-  <path d="M60 70 Q140 10 220 26" fill="none" stroke="#ff8a7a" stroke-width="7" opacity=".7" stroke-linecap="round"/></svg></div>`;
+// зонт в руке героя (владелец 12.11: «Жора держит зонтик на своей кепке — надо, чтобы держал в руке»):
+// x, foot, h — как у ch() для perekup, arm — поворот правой руки (armR); ручка — в кулаке, купол над головой с наклоном
+const UMB = (x, foot, h, arm = -35, w = 560, z = 8) => {
+  const s = h / 740, l = x - 210 * s, t = foot - 740 * s, A = arm * Math.PI / 180;
+  const hx = l + (292 + 26 * Math.cos(A) - 130 * Math.sin(A)) * s, hy = t + (400 + 26 * Math.sin(A) + 130 * Math.cos(A)) * s;
+  const rim = t + 30 * s, L = hy - rim, rot = -Math.asin(Math.max(-.6, Math.min(.6, (hx - x - 20 * s) / L))) * 180 / Math.PI, k = w / 400;
+  const svg = (zz, inner) => `<svg class="prop" style="left:0;top:0;width:1080px;height:1920px;z-index:${zz};overflow:visible" viewBox="0 0 1080 1920"><g transform="rotate(${rot.toFixed(1)} ${hx.toFixed(0)} ${hy.toFixed(0)})">${inner}</g></svg>`;
+  // древко и купол — за героем (z 5), кулак — поверх (z)
+  return svg(5, `
+    <path d="M${hx} ${rim - 90 * k} V${hy + 36 * s} q0 ${22 * s} ${-18 * s} ${22 * s} q${-16 * s} 0 ${-16 * s} ${-16 * s}" fill="none" stroke="#151515" stroke-width="${12 * s}" stroke-linecap="round"/>
+    <g transform="translate(${hx - w / 2} ${rim - 120 * k}) scale(${k})">
+      <path d="M10 120 Q200 -70 390 120 q-30 -24 -63 0 q-30 -24 -63 0 q-32 -24 -64 0 q-32 -24 -64 0 q-30 -24 -63 0 q-30 -24 -63 0 z" fill="#7a1f1a" stroke="#151515" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M200 22 Q120 40 73 120 M200 22 Q170 50 137 120 M200 22 Q230 50 264 120 M200 22 Q280 40 327 120" fill="none" stroke="#151515" stroke-width="5"/>
+      <path d="M60 70 Q140 10 220 26" fill="none" stroke="#ff8a7a" stroke-width="7" opacity=".7" stroke-linecap="round"/></g>`) + svg(z, `
+    <path d="M${hx} ${hy - 30 * s} V${hy + 36 * s} q0 ${22 * s} ${-18 * s} ${22 * s} q${-16 * s} 0 ${-16 * s} ${-16 * s}" fill="none" stroke="#151515" stroke-width="${12 * s}" stroke-linecap="round"/>
+    <circle cx="${hx}" cy="${hy}" r="${19 * s}" fill="#e8b48c" stroke="#151515" stroke-width="${7 * s}"/>
+    <path d="M${hx - 12 * s} ${hy - 6 * s} h${24 * s} M${hx - 12 * s} ${hy + 6 * s} h${24 * s}" stroke="#151515" stroke-width="${4 * s}" stroke-linecap="round"/>`);
+};
 // гирлянда площадки: те же точки, что в bg_zhlot (горит каждая, кроме i%4==0)
 const BULBS = (night = true) => { let s = "";
   for (const [x0, x1, y, sag] of [[0, 540, 590, 90], [540, 1080, 600, 80]]) for (let i = 1; i < 11; i++) { const t = i / 11, x = x0 + (x1 - x0) * t, yy = y + sag * 4 * t * (1 - t) + 14;

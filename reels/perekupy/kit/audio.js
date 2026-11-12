@@ -10,7 +10,7 @@ const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 let seed = 1; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296 * 2 - 1; };
 
 function Bus() { return { L: new Float32Array(N), R: new Float32Array(N) }; }
-const music = Bus(), sfx = Bus(), verb = Bus();     // verb — посыл в ревербератор
+const music = Bus(), sfx = Bus(), verb = Bus(), verbM = Bus();     // verb — посыл эффектов в ревербератор, verbM — музыки (своя дорожка: иначе хвост музыки попадал в версию «без музыки»)
 const put = (bus, i, v, pan = 0) => { if (i >= 0 && i < N) { bus.L[i] += v * Math.min(1, 1 - pan); bus.R[i] += v * Math.min(1, 1 + pan); } };
 // двухполюсный резонансный фильтр (Чемберлен): lp/bp/hp за один проход
 function SVF() { let lo = 0, bd = 0; return (x, f, q = .7) => { const F = 2 * Math.sin(Math.PI * Math.min(f, SR / 6) / SR); lo += F * bd; const hi = x - lo - bd / q; bd += F * hi; return { lo, bd, hi }; }; }
@@ -102,7 +102,7 @@ function kick(t0, g = 1) { const s = Math.floor(t0 * SR); let ph = 0;
   for (let i = 0; i < SR * .35; i++) { const t = i / SR; ph += TAU * (48 + 120 * Math.exp(-t * 30)) / SR; put(music, s + i, Math.tanh(Math.sin(ph) * 2.5) * env(t, .001, 9) * .6 * g); } }
 function snare(t0, g = 1) { const s = Math.floor(t0 * SR), f = SVF();
   for (let i = 0; i < SR * .25; i++) { const t = i / SR; const v = (f(rnd(), 2200, .8).bd * 1.3 + Math.sin(TAU * 190 * t) * .4) * env(t, .001, 16) * .32 * g;
-    put(music, s + i, v); put(verb, s + i, v * .35); } }
+    put(music, s + i, v); put(verbM, s + i, v * .35); } }
 function hat(t0, g = 1, open = false) { const s = Math.floor(t0 * SR), f = SVF();
   for (let i = 0; i < SR * (open ? .22 : .05); i++) { const t = i / SR; put(music, s + i, f(rnd(), 9000, .7).hi * env(t, .0005, open ? 14 : 75) * .11 * g, .3); } }
 function bass808(t0, m0, len, g = 1, m1 = null) {    // 808 с глиссандо к m1
@@ -113,16 +113,16 @@ function bass808(t0, m0, len, g = 1, m1 = null) {    // 808 с глиссанд�
     put(music, s + i, Math.tanh(Math.sin(ph) * 1.8) * env(t, .004, .9 / len) * Math.min(1, (len - t) * 30) * .42 * g); } }
 function pluck(t0, m, g = 1, pan = 0) { const s = Math.floor(t0 * SR), f = SVF(); let ph = 0;
   for (let i = 0; i < SR * .35; i++) { const t = i / SR; ph += mtof(m) / SR;
-    const v = f(((ph % 1) * 2 - 1), 400 + 3800 * Math.exp(-t * 14), 1.4).lo * env(t, .002, 9) * .16 * g; put(music, s + i, v, pan); put(verb, s + i, v * .45); } }
+    const v = f(((ph % 1) * 2 - 1), 400 + 3800 * Math.exp(-t * 14), 1.4).lo * env(t, .002, 9) * .16 * g; put(music, s + i, v, pan); put(verbM, s + i, v * .45); } }
 function cowbell(t0, m, g = 1) {                      // фонк-ковбелл: два квадрата через полосовой
   const s = Math.floor(t0 * SR), f = SVF(), f0 = mtof(m); let a = 0, b = 0;
   for (let i = 0; i < SR * .32; i++) { const t = i / SR; a += f0 / SR; b += f0 * 1.48 / SR;
     const sq = (a % 1 < .5 ? 1 : -1) + (b % 1 < .5 ? 1 : -1);
-    const v = f(sq, f0 * 1.6, 2.5).bd * env(t, .001, 11) * .2 * g; put(music, s + i, v, -.15); put(verb, s + i, v * .4); } }
+    const v = f(sq, f0 * 1.6, 2.5).bd * env(t, .001, 11) * .2 * g; put(music, s + i, v, -.15); put(verbM, s + i, v * .4); } }
 function pad(a, b, notes, g = 1, bright = .03) { const s = Math.floor(a * SR), len = Math.floor((b - a) * SR), f = SVF(); const ph = new Float64Array(notes.length * 2);
   for (let i = 0; i < len; i++) { const t = i / SR; let v = 0;
     notes.forEach((m, k) => { for (let d = 0; d < 2; d++) { ph[k * 2 + d] += mtof(m) * (d ? 1.005 : .995) / SR; v += (ph[k * 2 + d] % 1) * 2 - 1; } });
-    const o = f(v, 300 + bright * 20000, .8).lo * .05 * g * Math.min(1, t * 2, (len / SR - t) * 2); put(music, s + i, o, .2); put(music, s + i, o * .9, -.2); put(verb, s + i, o * .4); } }
+    const o = f(v, 300 + bright * 20000, .8).lo * .05 * g * Math.min(1, t * 2, (len / SR - t) * 2); put(music, s + i, o, .2); put(music, s + i, o * .9, -.2); put(verbM, s + i, o * .4); } }
 
 if (M.style === "tech") {          // тёмный трэп-грув: бочка, клэп на 3, хэты 1/8 с дробями, 808 по корню, плак-арпеджио
   const roots = [38, 38, 34, 36], arp = [[62, 65, 69, 72], [62, 65, 69, 74], [58, 62, 65, 70], [60, 64, 67, 72]];
@@ -256,7 +256,7 @@ function reverb(src, dst, mix) {
     }
   }
 }
-reverb(verb, sfx, .9);
+reverb(verb, sfx, .9); reverb(verbM, music, .9);
 function write(bus, path) {
   let peak = 1e-9; for (let i = 0; i < N; i++) peak = Math.max(peak, Math.abs(bus.L[i]), Math.abs(bus.R[i]));
   const k = .89 / peak, buf = Buffer.alloc(44 + N * 4);
