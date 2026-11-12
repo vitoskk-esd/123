@@ -4,7 +4,7 @@ const SEMEN = { jacket: "#2f4f8a", pants: "#2f4f8a", hair: "#9a9a9a", mustache: 
 const KIRILL = { jacket: "#e8e4d8", coat: "#d9cdb4", pants: "#3a3f46", hair: "#c9a24a", scarf: "#7a4a8a", look: "grin" };
 const DIMA = { jacket: "#151515", pants: "#2b2f37", cap: "#2f6db5", hair: "#1d1d1f", look: "grin" };
 const EVO = "evo/evo_34.png", EVOR = "evo/evo_34r.png", EVOS = "evo/evo_side.png";
-Object.assign(CINE.SIZES, { [EVO]: [796, 373], [EVOR]: [655, 352], [EVOS]: [766, 251] });
+Object.assign(CINE.SIZES, { [EVO]: [796, 371], [EVOR]: [655, 352], [EVOS]: [766, 251] });
 const HUD50 = (lis) => ({ tag: "жизнь одной эво", lis });
 // одометр вместо капитала: пробег по годам
 const ODO = (km, id = "odo") => `<div id="${id}" style="position:absolute;left:60px;top:290px;z-index:52;font-family:'JetBrains Mono';font-weight:800;font-size:54px;color:#fff;background:#0d0e12;border:6px solid #ff7a1a;border-radius:18px;padding:2px 20px;box-shadow:0 0 26px #ff7a1a66,0 8px 0 #151515;font-variant-numeric:tabular-nums">⏲ <span>${km}</span> км</div>`;
@@ -14,7 +14,7 @@ const YEAR = (y, c = "#ffd23f", id = "yr") => `<div id="${id}" style="position:a
 const SLINGS = (hx, hy, l, t, w) => `<svg class="prop" style="left:0;top:0;width:1080px;height:1920px;z-index:6;overflow:visible" viewBox="0 0 1080 1920">
   <path d="M${hx} 315 V${hy}" stroke="#151515" stroke-width="6"/><path d="M${hx} ${hy} L${l + w * .18} ${t + 40} M${hx} ${hy} L${l + w * .82} ${t + 40}" stroke="#151515" stroke-width="6"/><circle cx="${hx}" cy="${hy}" r="16" fill="#e8a33a" stroke="#151515" stroke-width="5"/></svg>`;
 // следы скорости (трек)
-const SPEED = (y0, y1, n = 14) => Array.from({ length: n }, (_, k) => `<div style="left:${(k * 137) % 1000 - 100}px;top:${y0 + (k * 53) % (y1 - y0)}px;width:${200 + (k % 4) * 90}px;height:8px;border-radius:4px;background:#fff;opacity:.45;z-index:6"></div>`).join("");
+const SPEED = (y0, y1, n = 14) => Array.from({ length: n }, (_, k) => `<div class="spd" style="left:${(k * 137) % 1000 - 100}px;top:${y0 + (k * 53) % (y1 - y0)}px;width:${200 + (k % 4) * 90}px;height:8px;border-radius:4px;background:#fff;opacity:.35;z-index:3"></div>`).join("");
 // разбитая морда: смятый капот, трещины, пар, снег на бампере (поверх evo_34 в координатах машины l, t, w)
 const CRASH = (l, t, w) => { const k = w / 796; return `<svg class="prop" style="left:${l}px;top:${t}px;width:${w}px;height:${373 * k}px;z-index:7;overflow:visible" viewBox="0 0 796 373">
   <!-- капот вздыбился «домиком» -->

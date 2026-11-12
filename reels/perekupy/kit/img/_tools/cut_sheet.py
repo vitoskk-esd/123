@@ -3,6 +3,7 @@
 # «стенка» — тёмные и цветные пиксели (контур, шины, кузов), чуть утолщённые, чтобы закрыть щели в контуре; всё, до чего от края кадра
 # можно дойти, не пересекая стенку, — фон (и белый, и серая тень). Так белая машина (Гранта) не «вытекает» вместе с белым фоном.
 # --shadow-l=N: тень под машиной — нейтральные пиксели светлее N (по умолчанию 60; у CLS тень тёмная — 46).
+# --defringe: убрать светлую кайму по контуру (края — цветом соседнего чёрного контура).
 # --white-holes: замкнутые чисто-белые просветы (между антикрылом и багажником у Эво) — тоже фон.
 import sys
 import numpy as np
@@ -66,5 +67,10 @@ for nm, sl in zip(names, boxes):
     fg = ndimage.binary_erosion(fg, iterations=1)
     ys, xs = np.nonzero(fg)
     alpha = (ndimage.gaussian_filter(fg.astype(float), .6) * 255).clip(0, 255)
+    if "--defringe" in sys.argv:          # светлая кайма по контуру: край (3 px внутрь) берёт самый тёмный цвет соседей — у листов владельца там чёрный контур
+        rim = fg & ~ndimage.binary_erosion(fg, iterations=3)
+        dark = np.dstack([ndimage.minimum_filter(a[..., c], size=5) for c in range(3)])
+        a = a.copy(); a[rim] = dark[rim]
+        alpha = alpha * ndimage.binary_dilation(fg, iterations=1)
     out = np.dstack([a, alpha]).astype(np.uint8)[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
     Image.fromarray(out).save(f"{d}/{name}_{nm}.png"); print(f"{d}/{name}_{nm}.png", out.shape[1], out.shape[0])

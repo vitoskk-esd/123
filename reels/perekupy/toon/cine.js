@@ -9,7 +9,7 @@
     "granta/granta_34.png": [791, 366], "granta/granta_34r.png": [683, 344], "granta/granta_side.png": [777, 266], "vaz2110/vaz2110_34.png": [735, 342],
     "vaz2110/vaz2110_side.png": [749, 252], "camry/camry.png": [1317, 627], "corolla/corolla.png": [1358, 462], "priora/priora_white.png": [1263, 410],
     "priora/priora_black.png": [1263, 410], "vaz2114/vaz2114_white.png": [1006, 332], "markii/markii.png": [983, 467], "niva/niva_34.png": [669, 361],
-    "evo/evo_34.png": [796, 373], "vaz2115/vaz2115.png": [1305, 375], "vaz2105/vaz2105_34.png": [775, 352], "x6/x6_34.png": [745, 356], "prado/prado_34.png": [732, 366],
+    "evo/evo_34.png": [796, 371], "vaz2115/vaz2115.png": [1305, 375], "vaz2105/vaz2105_34.png": [775, 352], "x6/x6_34.png": [745, 356], "prado/prado_34.png": [732, 366],
     "bmw/bmw_34.png": [696, 280], "cls/cls_34.png": [787, 338], "vaz2114t/vaz2114t_34.png": [766, 315], "gelik/gelik_34.png": [456, 314] };
   C.IMG = "../../kit/img/";
   // детерминированный «рандом» для дождя/пылинок
