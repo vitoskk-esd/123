@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "You narrate part 10 of a comedy mini-series about Tolyan, a young used-car flipper growing his capital. Deadpan, dry irony; numbers said fully. «Гранта» is the Lada Granta car."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.26,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "Line 1: woken up at 1 a.m., sleepy and annoyed. Line 2: firm, explaining the mistake in the rain. Line 3: calm, businesslike offer. Line 4: cool, slightly mocking, firm. Line 5: confident, cheerful."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "This time Zhora is defeated and asks for help. Line 1: on the phone at night, tired, humble, quiet. Line 2: desperate, loud. Line 3: bargaining, sharp, one word. Line 4: reluctant, grumbling, gives in. Line 5: shocked and overjoyed. Line 6: grateful, emotional, warm. «Студент» is his nickname for the young rival."
+ },
+ "baba": {
+  "voice": "Gacrux",
+  "tempo": 1.1,
+  "profile": "Babushka — a kind, chatty Russian grandmother in her 70s from a village house, warm, soft, a bit surprised.",
+  "notes": "One line: surprised and pleased at dawn, warm."
+ }
+}

@@ -51,7 +51,7 @@
     return C.shadow(l + w / 2, ground - 4, w * 1.02, h * .22, .95, (o.z || 5) - 1)
       + (o.refl ? `<img class="carw refl" src="${src}" style="left:${l}px;top:${ground - 6}px;width:${w}px;z-index:1;${o.flip ? "transform:scale(-1,-1);" : ""}">` : "")
       + `<div class="carw" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px;z-index:${o.z || 5};${fl}${o.dim ? `filter:brightness(${o.dim})` : ""}">
-          <img src="${src}">${o.sheen != null ? `<div class="sheen" style="-webkit-mask-image:url(${src});mask-image:url(${src});background-position:${o.sheen * 100}% 0"></div>` : ""}</div>` + lights;
+          <img src="${src}">${o.sheen != null ? `<div class="sheen mk-${img.replace(/[\/.]/g, "-")}" style="background-position:${o.sheen * 100}% 0"></div>` : ""}</div>` + lights;
   };
   // ценник/табличка за лобовым стеклом
   C.tag = (x, y, big, small, rot = -4, z = 7, bg = "#ffd23f") => `<div style="left:${x}px;top:${y}px;z-index:${z};transform:rotate(${rot}deg);background:${bg};border:4px solid #151515;border-radius:8px;padding:4px 10px;
@@ -99,17 +99,34 @@
     const lights = sc.lights ? `<div class="cl lights" style="transform:${C.layerT(sh, 1)}">${sc.lights}</div>` : "";
     const haze = sc.haze ? `<div class="haze" style="background:${sc.haze}"></div>` : "";
     const bubs = (sc.bubbles || []).map(b => { const [wx, wy] = b.at || C.ANCH[b.p]; const [sx, sy] = C.toScreen(sh, wx, wy);
-      return `<div class="bub2" data-ax="${sx.toFixed(0)}" data-ay="${sy.toFixed(0)}" style="${b.fs ? `font-size:${b.fs}px;` : ""}">${b.html}</div>`; }).join("");
+      return `<div class="bub2"${b.id ? ` id="b_${b.id}"` : ""} data-wx="${wx}" data-wy="${wy}" data-ax="${sx.toFixed(0)}" data-ay="${sy.toFixed(0)}" style="${b.fs ? `font-size:${b.fs}px;` : ""}">${b.html}</div>`; }).join("");
     const hud = sc.hud ? `<div class="tag"><b>ПЕРЕКУПЫ</b><span>${sc.hud.tag}</span></div>${sc.hud.cap ? `<div class="cnt" style="left:60px;right:auto">💰 ${sc.hud.cap} ₽${sc.hud.d ? ` <em>${sc.hud.d}</em>` : ""}</div>` : ""}
       ${sc.hud.lis ? `<div style="position:absolute;right:50px;top:170px;z-index:58;display:flex;gap:14px;align-items:center"><div style="display:flex;gap:6px;align-items:center;height:60px">${[26, 44, 30, 52].map(h => `<i style="width:10px;height:${h}px;background:#ff7a1a;border-radius:5px"></i>`).join("")}</div><img src="../../brand/fox_cut.png" style="width:96px;height:96px;border-radius:50%;border:6px solid #ff7a1a;background:#111"></div>` : ""}` : "";
     return `<div class="cf"${sc.id ? ` id="${sc.id}"` : ""}>${far}${haze}${mid}${fg}${C.grade(sc.grade)}${lights}<div class="vig"></div>${sc.fx || ""}${sc.over || ""}${bubs}${hud}</div>`;
   };
   // раскладка пузырей после вставки в DOM: центр над головой, в пределах кадра, хвост — на говорящего
-  C.layout = root => root.querySelectorAll(".bub2").forEach(b => {
-    const ax = +b.dataset.ax, ay = +b.dataset.ay, w = b.offsetWidth, h = b.offsetHeight;
+  C.place = (b, ax, ay) => {
+    const w = b._w ?? (b._w = b.offsetWidth), h = b._h ?? (b._h = b.offsetHeight);
     const l = Math.max(30, Math.min(1050 - w, ax - w / 2)), t = Math.max(390, ay - h - 70);
     b.style.left = l + "px"; b.style.top = t + "px"; b.style.setProperty("--tx", Math.max(40, Math.min(w - 110, ax - l - 30)) + "px");
     b.style.setProperty("--sk", (ax - l - 30 > w / 2 ? -30 : 30) + "deg");
-  });
+  };
+  C.layout = root => root.querySelectorAll(".bub2").forEach(b => C.place(b, +b.dataset.ax, +b.dataset.ay));
+  // ---- видео: кадр монтируется один раз, план (el.cam) меняется на каждом кадре; hand — «ручная камера» в пикселях экрана
+  C.mount = (parent, def, sh) => {
+    parent.insertAdjacentHTML("beforeend", C.frame(def, sh)); const el = parent.lastElementChild;
+    el.def = def; el.cam = { r: 0, ...sh }; el.style.opacity = 0;
+    el.L = { far: el.querySelector(".far"), mid: el.querySelector(".mid"), fg: el.querySelector(".fgl"), lights: el.querySelector(".lights") };
+    el.bubs = [...el.querySelectorAll(".bub2")]; return el;
+  };
+  C.apply = (el, hand = [0, 0, 0]) => {
+    const d = el.def, c = el.cam, sh = { x: c.x - hand[0] / c.s, y: c.y - hand[1] / c.s, s: c.s, r: (c.r || 0) + hand[2] };
+    const blur = (d.farBlur ?? 1.2) + Math.max(0, sh.s - 1) * 2.2;
+    el.L.far.style.transform = C.layerT(sh, d.dFar ?? .7, FAR_OVER); el.L.far.style.filter = `blur(${blur.toFixed(1)}px) ${d.farFilter || ""}`;
+    el.L.mid.style.transform = C.layerT(sh, 1);
+    if (el.L.lights) el.L.lights.style.transform = C.layerT(sh, 1);
+    if (el.L.fg) el.L.fg.style.transform = C.layerT(sh, d.dFg ?? 1.4);
+    el.bubs.forEach(b => { const [ax, ay] = C.toScreen(sh, +b.dataset.wx, +b.dataset.wy); C.place(b, ax, ay); });
+  };
   C.mouth = (root, p, kind) => root.querySelectorAll(`[id^="${p}-mouth-"]`).forEach(m => { m.style.display = m.id === `${p}-mouth-${kind}` ? "" : "none"; });
 })();

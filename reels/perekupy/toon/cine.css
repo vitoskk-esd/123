@@ -2,7 +2,7 @@
    Кадр = .cf (1080×1920). Внутри: .cl (слои мира с глубиной data-d) и экранные слои (грейд, виньетка, дождь, пузыри, HUD). */
 .cf { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; background: #0b0c10; }
 .cf .cl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; will-change: transform; }
-.cf .cl > * { position: absolute; }
+.cf .cl > *, .cf .grp > * { position: absolute; }
 .cf .far > svg { position: absolute; left: 0; top: 0; }
 .cf .fgl { filter: blur(7px) brightness(.55) saturate(.8); }
 .cf .haze { position: absolute; inset: 0; pointer-events: none; }
