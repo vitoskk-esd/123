@@ -15,9 +15,9 @@
 .cf .car { display: block; }
 .cf .carw { position: absolute; }
 .cf .carw img { position: absolute; left: 0; top: 0; width: 100%; }
-.cf .carw .sheen { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mix-blend-mode: screen; opacity: .9;
-  background: linear-gradient(105deg, transparent 0 38%, rgba(255,255,255,.55) 44%, rgba(255,255,255,.1) 50%, transparent 56%); background-size: 300% 100%; }
-.cf .refl { position: absolute; left: 0; transform: scaleY(-1); transform-origin: 50% 0; opacity: .2; filter: blur(4px) brightness(.85);
+.cf .carw .sheen { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mix-blend-mode: screen; opacity: .6;
+  background: linear-gradient(105deg, transparent 0 44%, rgba(255,255,255,.45) 47.5%, rgba(255,255,255,.08) 50.5%, transparent 53%); background-size: 300% 100%; }
+.cf .refl { position: absolute; left: 0; transform: scaleY(-1); transform-origin: 50% 50%; opacity: .2; filter: blur(4px) brightness(.85);
   -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.85), transparent 45%); mask-image: linear-gradient(to top, rgba(0,0,0,.85), transparent 45%); }
 /* цветокоррекция: mul — умножение (общий тон), tone — мягкий свет сверху/снизу, vig — виньетка */
 .cf .mul, .cf .tone, .cf .vig { position: absolute; inset: 0; pointer-events: none; }

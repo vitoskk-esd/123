@@ -2,7 +2,7 @@
 const NOTARY = { coat: "#4a3a5a", jacket: "#4a3a5a", pants: "#2b2f37", hair: "#d9a03a", glasses: true, scarf: "#e8e4d8", look: "flat" };
 const VITALIK = { jacket: "#2f6db5", pants: "#2f6db5", cap: "#151515", chain: true, hair: "#1d1d1f", look: "grin" };
 const CLSW = "cls/cls_34.png", CLSB = "cls/cls_34_black.png";
-CINE.SIZES[CLSW] = [788, 340]; CINE.SIZES[CLSB] = [788, 340];
+CINE.SIZES[CLSW] = [787, 338]; CINE.SIZES[CLSB] = [787, 338];
 const HUD49 = (cap, d, lis) => ({ tag: "партнёры", cap, d, lis });
 // предмет в правой руке героя (по повороту руки, как зонт в ep47): html — svg 100×100 с центром-хваткой в (50, 50)
 const INHAND = (x, foot, h, arm, w, html, z = 8, rot = 0) => {
