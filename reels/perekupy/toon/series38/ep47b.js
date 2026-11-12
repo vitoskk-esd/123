@@ -240,25 +240,6 @@ window.build = R => {
   ending(R, en.end + .3);
 };
 
-
-// ── ep47b «Архив»: та же история и озвучка, другая «съёмка» ──
-(() => {
-  const K = {"t1": "ЖОРА", "t2": "ПРОСИТ О ПОМОЩИ", "c1": "#2f4fb8", "c2": "#fbfaf3", "cam": "vpan"};
-  const orig = window.build;
-  window.build = R => {
-    let T = 0; R.hooks.push(t => { T = t; });          // время кадра — до основного хука, который вызывает C.apply
-    // своя камера поверх плана каждой сцены: vpan — медленный проход по вертикали, in — общий наезд, alt — боковой дрейф туда-обратно
-    const ap = C.apply;
-    C.apply = (el, hand) => {
-      const c = el.cam, s0 = c.s, x0 = c.x, y0 = c.y, k = Object.keys(SC).indexOf(Object.keys(SC).find(n => SC[n] === el));
-      if (K.cam === "vpan") { c.y = y0 + Math.sin(T * .35 + k) * 40 / s0; c.s = s0 * 1.04; }
-      else if (K.cam === "in") { c.s = s0 * (1.03 + .03 * Math.sin(T * .2 + k)); }
-      else { c.x = x0 + (k % 2 ? 1 : -1) * Math.sin(T * .3) * 45 / s0; c.s = s0 * 1.05; }
-      ap(el, hand); c.s = s0; c.x = x0; c.y = y0;
-    };
-    orig(R);
-    const tl = R.tl;
-    $("#title .a").textContent = K.t1; $("#title .a").style.cssText = `font-size:110px;background:${K.c1};color:${K.c2}`;
-    const b = $("#title .b"); b.textContent = K.t2; b.style.cssText = `font-size:60px;background:${K.c2};color:${K.c1}`;
-  };
-})();
+// ── ep47b «Архив»: быстрая уникализация — меняется только заставка ──
+$("#title .a").textContent = "ЖОРА"; $("#title .a").style.cssText = "font-size:110px;background:#2f4fb8;color:#fbfaf3";
+$("#title .b").textContent = "ПРОСИТ О ПОМОЩИ"; $("#title .b").style.cssText = "font-size:60px;background:#fbfaf3;color:#2f4fb8";

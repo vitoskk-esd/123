@@ -13,7 +13,8 @@ const [html, mode, a1, a2 = "30", a3 = "1"] = process.argv.slice(2);
   await page.goto("file://" + path.resolve(html));
   await page.waitForFunction(() => window.READY === true, null, { timeout: 30000 });
   await page.evaluate(async () => { await document.fonts.ready; await Promise.all([...document.images].map(i => i.decode().catch(() => {}))); });
-  const dur = await page.evaluate(() => R.dur);
+  // MAXT=<с> — отрендерить только начало ролика (быстрая уникализация: новая заставка + остальное из основного видео)
+  const dur = Math.min(await page.evaluate(() => R.dur), +process.env.MAXT || 1e9);
   if (mode === "events" || mode === "video") {   // звуковая партитура для audio.js
     const ev = await page.evaluate(() => ({ dur: R.dur, events: R.events, music: window.MUSIC || null, lead: window.LEAD || 0, split: window.SPLIT || null }));
     fs.writeFileSync(mode === "events" ? a1 : a1.replace(/\.mp4$/, ".events.json"), JSON.stringify(ev, null, 1));

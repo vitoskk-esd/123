@@ -7,14 +7,3 @@
 #cnt em { font-style: normal; font-size: 38px; color: #4cd964; }
 #tag span { text-shadow: 0 3px 10px #000; }
 .wr { clip-path: inset(-20% 100% -20% -5%); }
-
-/* ep47b — уникализация «Архив»: гамма фонов, пузыри, тег, одежда */
-.cf .far > svg { filter: sepia(.35) saturate(1.1) hue-rotate(-10deg) brightness(.98) contrast(1.06); }
-.cf .bub2 { background: #fbfaf3; color: #151515; border-color: #2f4fb8; box-shadow: 0 0 0 7px #fbfaf3, 0 18px 40px rgba(0,0,0,.45); }
-.cf .bub2::after { background: #fbfaf3; border-color: #2f4fb8; }
-.cf .bub2 em { color: #c0392b; }
-#tag b { background: #2f4fb8; }
-
-.cf .char[data-p^="z"] [fill="#c0392b"] { fill: #2f6db5; }
-.cf .char[data-p^="b"] [fill="#7a4a8a"] { fill: #3a7d5a; }
-.cf .fgl .prop [fill="#c0392b"] { fill: #2f6db5; }
