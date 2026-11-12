@@ -114,7 +114,7 @@ window.build = R => {
   cut("s1", "s1b", st.l0b - .1); move("s1b", { s: 6.4, x: 270 }, st.l0b - .1, en.l0b - st.l0b + .3, "none");
   // 2. гараж: «восемьсот» → мысли
   const SW2 = st.a1 - .4; swap("s1b", "s2", SW2); move("s2", { s: 1.12 }, SW2, en.a1 - SW2 + .3, "none"); bub("a1", st.l1 - .15);
-  tl.fromTo("#pr2", { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, ease: "power4.out", immediateRender: false }, W("a1", "восемь")); R.sfx("impact", W("a1", "восемь"), .5);
+  tl.fromTo("#pr2", { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, ease: "power4.out", immediateRender: false }, W("a1", "8")); R.sfx("impact", W("a1", "8"), .5);
   cut("s2", "s2b", st.l1 - .1); move("s2b", { s: 1.12 }, st.l1 - .1, en.l1 - st.l1 + .3, "none");
   pop("#b_t1", W("l1", "дед") - .05, en.l1 + .4); pop("#b_t2", W("l1", "слава") - .05, en.l1 + .4);
   // 3. пороги → крупно ржавчина, табло 800 → 760
@@ -124,11 +124,11 @@ window.build = R => {
   price("pr3b", "760 000", W("l1b", "минус"));
   // 4. бот → дед: «сарай!», табло 760 → 720
   const SW4 = st.s2 - .4; swap("s3b", "s4", SW4); move("s4", { s: 1.07, y: 1000 }, SW4, en.s2 - SW4, "none");
-  gsap.set("#n4", { opacity: 0 }); const N4 = W("s2", "бот") - .1;
+  gsap.set("#n4", { opacity: 0 }); const N4 = W("s2", "бо") - .1;
   tl.fromTo("#n4", { opacity: 0, y: -50 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(1.8)", immediateRender: false }, N4); R.sfx("ping", N4, .9);
   bub("s2", st.a2 - .15);
   cut("s4", "s4b", st.a2 - .1); R.shake(cam("s4b"), st.a2, 1, .35); move("s4b", { s: 2.15, r: -6 }, st.a2 - .1, en.a2 - st.a2 + .3, "none"); bub("a2", st.l2 - .15);
-  price("pr4b", "720 000", W("a2", "семьсот"));
+  price("pr4b", "720 000", W("a2", "72"));
   // 5. дуэль взглядов → перекати-поле замирает
   const SP = st.l2 - .1; hide("s4b", SP); show("s5l", SP); show("s5r", SP); tl.set("#split", { opacity: 1 }, SP); R.sfx("whoosh", SP, .5);
   move("s5l", { s: 7.6 }, SP, 2.4, "none"); move("s5r", { s: 7.6 }, SP, 2.4, "none");
@@ -141,7 +141,7 @@ window.build = R => {
   tl.fromTo("#n6", { opacity: 0, y: -50 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(1.8)", immediateRender: false }, N6); R.sfx("ping", N6, .9);
   bub("a3", st.a4 - .15);
   cut("s6", "s6b", st.a4 - .1); move("s6b", { s: 1.14 }, st.a4 - .1, en.a4 - st.a4 + .3, "none"); bub("a4", st.s3 - .15);
-  price("pr6b", "700 000", W("a4", "семьсот"));
+  price("pr6b", "700 000", W("a4", "70"));
   // 7. закат: по рукам → финал
   const SW7 = st.s3 - .4; swap("s6b", "s7", SW7); move("s7", { s: 1.14 }, SW7, en.s3 - SW7 + .3, "none"); bub("s3", st.end - .15); R.sfx("clack", st.s3 + .2, .5);
   cut("s7", "s7b", st.end - .1); move("s7b", { s: 1.14, y: 1180 }, st.end - .1, en.end - st.end + .5, "none");
