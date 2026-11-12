@@ -1,0 +1,201 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script>
+<script>
+// «ТОЛЯН: СО СТА ТЫСЯЧ · 10» — «Жора просит о помощи». Первая серия в «киношном» формате (cine.js): параллакс, свет, тени, дождь, крупные планы.
+// Капитал 570 000 (итог части 9). Жора (соперник, купил у директора W124 за 1 300 000) застрял: шесть машин стоят по три месяца —
+// он берёт у других перекупов, уже с наценкой. Толян помогает за 10 000 с каждой проданной: цены по рынку (бот: вся Россия),
+// а покупать — первым: бот присылает Гранту бабушки в 6:00, и Жора впервые приезжает первым. 7 машин × 10 000 = +70 000 → 640 000.
+// Приёмы (новые): звонок в час ночи (свет телефона на лице); расчёт пальцем по запотевшему стеклу; гонка на рассвете.
+const C = CINE, ch = C.ch, car = C.car, glow = C.glow, beam = C.beam;
+const ZHORA = { jacket: "#1d1d1f", pants: "#2b2f37", cap: "#c0392b", mustache: true, chain: true, hair: "#1d1d1f" };
+const BABA = { coat: "#7a4a8a", jacket: "#7a4a8a", pants: "#4a3a5a", hair: "#d9d9d9", scarf: "#c0392b", look: "grin" };
+const HUD = (cap, d, lis) => ({ tag: "жора просит о помощи", cap, d, lis });
+// зонт над героем: hand — точка ладони в мире
+const UMB = (x, y, w, z = 8) => `<div class="prop" style="left:${x - w / 2}px;top:${y - w * .62}px;width:${w}px;height:${w * .7}px;z-index:${z}"><svg viewBox="0 0 400 280">
+  <path d="M200 20 V270 q0 10 -14 10 q-12 0 -12 -12" fill="none" stroke="#151515" stroke-width="10" stroke-linecap="round"/>
+  <path d="M10 120 Q200 -70 390 120 q-30 -24 -63 0 q-30 -24 -63 0 q-32 -24 -64 0 q-32 -24 -64 0 q-30 -24 -63 0 q-30 -24 -63 0 z" fill="#7a1f1a" stroke="#151515" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M200 22 Q120 40 73 120 M200 22 Q170 50 137 120 M200 22 Q230 50 264 120 M200 22 Q280 40 327 120" fill="none" stroke="#151515" stroke-width="5"/>
+  <path d="M60 70 Q140 10 220 26" fill="none" stroke="#ff8a7a" stroke-width="7" opacity=".7" stroke-linecap="round"/></svg></div>`;
+// гирлянда площадки: те же точки, что в bg_zhlot (горит каждая, кроме i%4==0)
+const BULBS = (night = true) => { let s = "";
+  for (const [x0, x1, y, sag] of [[0, 540, 590, 90], [540, 1080, 600, 80]]) for (let i = 1; i < 11; i++) { const t = i / 11, x = x0 + (x1 - x0) * t, yy = y + sag * 4 * t * (1 - t) + 14;
+    if ((i - 1) % 4) s += glow(x, yy, 46, "#ffc46a", .95); }
+  return s + glow(555, 440, 360, "#ff4a3a", .35) + glow(860, 855, 110, "#ffb347", .8); };
+// ряд машин на площадке (задний план) — тусклые, с ценниками
+const LOTROW = (g = 1190, sold = [], night = false) => [["vaz2114/vaz2114_white.png", -60], ["priora/priora_white.png", 250], ["markii/markii.png", 560], ["corolla/corolla.png", 820]]
+  .map(([im, l], k) => car(im, l, g, 380, { z: 3, dim: night ? .62 : .95, refl: 1 }) + (sold.includes(k) ? C.tag(l + 110, g - 120, "ПРОДАНО", "", -8, 4, "#4cd964") : C.tag(l + 140, g - 108, ["620", "540", "790", "910"][k], "", -5, 4))).join("");
+// рука с телефоном (вставка-крупный план)
+const HANDPHONE = (l, t, w, inner, rot = -6) => `<div style="position:absolute;left:${l}px;top:${t}px;width:${w}px;z-index:62;transform:rotate(${rot}deg)">
+  <svg viewBox="0 0 700 900" style="position:absolute;left:${w * .18}px;top:${w * 1.05}px;width:${w * .9}px;overflow:visible">
+    <path d="M120 0 q-40 160 -20 330 l-60 600 h520 l-40 -620 q20 -150 -40 -310 z" fill="#e8b48c" stroke="#151515" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M60 520 l-30 400 h560 l-30 -400 q-250 60 -500 0 z" fill="#1d1d1f" stroke="#151515" stroke-width="12" stroke-linejoin="round"/></svg>
+  <div style="position:relative;background:#0d0e12;border:12px solid #2a2d34;border-radius:64px;padding:34px 30px 60px;box-shadow:0 0 140px rgba(120,180,255,.55)">${inner}</div>
+  <svg viewBox="0 0 100 600" style="position:absolute;left:-40px;top:${w * .55}px;width:90px;overflow:visible">${[0, 150, 300].map(y => `<rect x="0" y="${y}" width="96" height="120" rx="48" fill="#e8b48c" stroke="#151515" stroke-width="10"/><path d="M70 ${y + 30} q16 30 0 60" stroke="#c99b78" stroke-width="8" fill="none"/>`).join("")}</svg>
+  <svg viewBox="0 0 140 420" style="position:absolute;left:${w - 70}px;top:${w * .9}px;width:130px;overflow:visible"><path d="M60 0 q70 20 70 120 q0 110 -50 200 l-80 60 v-300 q0 -60 60 -80 z" fill="#e8b48c" stroke="#151515" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M58 20 q40 20 36 70" stroke="#c99b78" stroke-width="8" fill="none"/></svg></div>`;
+const BOTH = (title, body) => `<div style="font-family:Onest;font-weight:700;font-size:34px;color:#8b93a3">ПЕРЕХВАТ · бот</div>${title ? `<div style="font-family:'JetBrains Mono';font-weight:800;font-size:30px;color:#ffd23f;margin-top:8px">${title}</div>` : ""}${body}`;
+const CARD = (t, p, c, hot) => `<div style="background:#1c1f26;border-radius:26px;padding:18px 22px;margin-top:14px;font-family:Onest;color:#fff">${hot ? `<div style="font-weight:800;font-size:30px;color:#ff7a1a">${hot}</div>` : ""}
+  <div style="font-weight:800;font-size:32px">${t}</div><div style="font-family:Unbounded;font-weight:900;font-size:46px;color:#ffd23f">${p}</div><div style="font-size:28px;color:#b9bfca">📍 ${c}</div></div>`;
+// запотевшее лобовое стекло крупно (вставка): боке гирлянды за стеклом, капли, надписи пальцем
+const WINDSHIELD = () => `<div style="left:0;top:0;width:1080px;height:1920px;background:#141a30"></div>
+  ${[[180, 520, 90, "#ffc46a"], [430, 470, 70, "#ffc46a"], [700, 560, 110, "#ff4a3a"], [920, 480, 80, "#ffc46a"], [300, 900, 60, "#9fc3ff"], [820, 980, 90, "#ffb347"], [560, 760, 50, "#ffc46a"]]
+    .map(([x, y, r, c]) => `<div style="left:${x - r}px;top:${y - r}px;width:${2 * r}px;height:${2 * r}px;border-radius:50%;background:${c};opacity:.55;filter:blur(6px)"></div>`).join("")}
+  <div style="left:0;top:0;width:1080px;height:1920px;background:linear-gradient(170deg,rgba(210,220,235,.62),rgba(180,195,215,.5));backdrop-filter:blur(4px)"></div>
+  <div style="left:-40px;top:1500px;width:1200px;height:500px;background:#0d0f16;border-top:14px solid #151515;transform:rotate(-4deg)"></div>`;
+const FINGER = (x, y) => `<div class="prop" style="left:${x}px;top:${y}px;width:300px;height:420px;z-index:22"><svg viewBox="0 0 300 420">
+  <path d="M40 30 q20 -30 46 -10 l40 150 q40 -20 80 10 q50 40 60 140 l20 120 h-200 l-40 -150 q-20 -40 -10 -80 z" fill="#e8b48c" stroke="#151515" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M120 300 h160 l20 120 h-200 z" fill="#1d1d1f" stroke="#151515" stroke-width="10"/></svg></div>`;
+const STREAK = (x, y, w, h, rot) => `<div style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;transform:rotate(${rot}deg);background:#0f1426;opacity:.35;border-radius:20px;z-index:12"></div>`;
+const OTS_ZHORA = (x, y, w) => `<div class="prop" style="left:${x}px;top:${y}px;width:${w}px;height:${w * 1.1}px;z-index:30"><svg viewBox="0 0 400 440">
+  <path d="M-40 440 q10 -170 140 -200 h200 q130 30 140 200 z" fill="#1d1d1f" stroke="#151515" stroke-width="10"/>
+  <ellipse cx="200" cy="150" rx="110" ry="130" fill="#d9a07a" stroke="#151515" stroke-width="10"/><ellipse cx="88" cy="170" rx="22" ry="34" fill="#d9a07a" stroke="#151515" stroke-width="8"/>
+  <path d="M90 120 q0 -110 110 -110 q110 0 110 110 q-110 -20 -220 0 z" fill="#c0392b" stroke="#151515" stroke-width="10"/><path d="M110 128 q90 -14 180 0 l-6 26 q-84 -14 -168 0 z" fill="#8e2a20" stroke="#151515" stroke-width="6"/>
+  <path d="M150 250 q50 40 100 0" fill="none" stroke="#f5c542" stroke-width="12"/></svg></div>`;
+const CTA = `<div style="position:absolute;left:60px;right:60px;top:1330px;z-index:70;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:26px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center">
+  <div style="font-size:52px;line-height:1.12">Бот <span style="color:#c0392b">«Перехват»</span><br>— ссылка в шапке</div><div style="margin-top:12px;font-size:30px;font-family:Onest;font-weight:800">свежие объявления за ~1 с · вся Россия</div></div>`;
+
+// ---------- сцены: каждая — кадр A и кадр B (планы камеры {x, y, s, r})
+const S = [
+ { h: "01:12 · ЗВОНОК", tc: "1/8 · 0:00–0:08", talk: ["t"],
+   sc: () => ({ bg: "obshaga", grade: "night", hud: HUD("570 000", "", 1),
+     mid: ch("tolyan", "t", 330, 1560, 720, null, { phone: true, head: -6 }, { rim: "#9fc3ff", side: 1 }),
+     lights: beam([[560, 860], [980, 860], [1080, 1800], [380, 1800]], "#9fb6ff", .35, "180deg") + glow(420, 1060, 170, "#7fd0ff", .6) + glow(760, 600, 260, "#6f8cff", .35),
+     fg: `<div class="prop" style="left:760px;top:1500px;width:420px;height:520px"><svg viewBox="0 0 420 520"><path d="M40 0 h320 q20 0 20 20 v260 h-360 v-260 q0 -20 20 -20 z" fill="#5a3a22" stroke="#151515" stroke-width="12"/><path d="M60 40 q120 60 300 -10 v200 h-300 z" fill="#2f6db5"/></svg></div>` }),
+   A: { x: 540, y: 960, s: 1 }, B: { x: 380, y: 1010, s: 2.25, r: -2 },
+   bA: [{ p: "t", html: "Жора?!<br><em>Ты время видел?</em>" }],
+   bB: [{ at: [430, 880], html: "📞 Студент… <em>выручай.</em><br>Я на площадке.", fs: 44 }],
+   vo: "Лис: «Пятьсот семьдесят тысяч. Час ночи. Толяну звонит Жора — тот самый соперник». Толян: «Жора?! Ты время видел?» Жора (в трубке): «Студент… выручай».", who: "Лис + Толян + Жора",
+   mv: "<b>Новый фон — комната в общаге ночью</b> (двухъярусная кровать, окно с дождём и огнями города, плакат «ДРИФТ», записка «Ильдару 500 ₽», лапша на полке). <b>Свет:</b> лунный луч из окна на полу, телефон светит Толяну в лицо голубым, контровой свет по краю. <b>A</b> — общий план с размытым стулом на переднем плане; <b>B</b> — крупно лицо Толяна, фон уходит в размытие." },
+ { h: "ПЛОЩАДКА ПОД ДОЖДЁМ", tc: "2/8 · 0:08–0:17", talk: ["zh"],
+   sc: () => ({ bg: "zhlot", grade: "rain", hud: HUD("570 000", "", 1), fx: C.rain(170, 11) + C.lens(4, 6),
+     mid: LOTROW(1190, [], 1) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, refl: 1, sheen: .62, dim: .72 }) + C.tag(680, 1490, "950 000", "SOLARIS · 2017", -4, 7)
+       + `<div class="hand" style="left:610px;top:1580px;z-index:8;font-size:40px;color:#ff3b30;transform:rotate(-6deg)">стоит 94-й день</div>`
+       + ch("perekup", "zh", 230, 1700, 760, { ...ZHORA, look: "o" }, { armR: -35, head: 7 }, { rim: "#ffc46a", side: 1 }) + UMB(298, 1050, 560),
+     lights: BULBS() }),
+   A: { x: 540, y: 1100, s: 1.04 }, B: { x: 760, y: 1560, s: 2.6, r: 3 },
+   bA: [{ at: [330, 690], html: "Студент, выручай.<br><em>Шесть машин стоят<br>по три месяца.</em>", fs: 42 }],
+   bB: [],
+   vo: "Жора: «Студент, выручай. Шесть машин стоят по три месяца. Никто не берёт». Лис: «Площадка “Авто у Жоры”. Ценники выцвели, звонков нет».", who: "Жора + Лис",
+   mv: "<b>Новый фон — площадка Жоры ночью под дождём</b> (вывеска «АВТО У ЖОРЫ» с перегоревшими лампочками, гирлянда, флажки, вагончик-офис, эстакада с огнями вдали). <b>Живой фон:</b> косой дождь, капли на «объективе», отражения машин и лампочек в мокром асфальте, блик бежит по кузову. <b>A</b> — Жора под зонтом; <b>B</b> — наезд на ценник за стеклом: «стоит 94-й день» маркером." },
+ { h: "ПАЛЬЦЕМ ПО СТЕКЛУ", tc: "3/8 · 0:17–0:26", talk: ["t"],
+   sc: () => ({ bg: "zhlot", grade: "rain", hud: HUD("570 000"), fx: C.rain(170, 12) + C.lens(9, 5),
+     mid: LOTROW(1190, [], 1) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, refl: 1, sheen: .5, dim: .72 })
+       + ch("tolyan", "t", 520, 1760, 760, null, { armR: -70, head: 4 }, { rim: "#ffc46a", side: -1, z: 7 })
+       + ch("perekup", "zh", 170, 1700, 740, { ...ZHORA, look: "o" }, { armR: -35 }, { rim: "#ffc46a", side: 1 }) + UMB(236, 1060, 540),
+     lights: BULBS() }),
+   A: { x: 470, y: 1180, s: 1.18 }, B: null,
+   bA: [{ p: "t", html: "Жора, ты берёшь<br>у перекупов.<br><em>Дороже рынка!</em>", fs: 42 }],
+   B2: () => ({ grade: "rain", hud: HUD("570 000", "", 1), fx: C.lens(21, 9),
+     far: WINDSHIELD(), farBlur: 0,
+     mid: `<div class="hand" style="left:150px;top:560px;font-size:150px;color:rgba(20,26,48,.85);transform:rotate(-5deg)">купил 900</div>`
+       + `<div class="hand" style="left:170px;top:760px;font-size:150px;color:rgba(20,26,48,.85);transform:rotate(-3deg)">рынок 850</div>`
+       + `<div class="hand" style="left:150px;top:990px;font-size:190px;color:#ff3b30;transform:rotate(-4deg)">−50 × 6</div>`
+       + `<svg style="left:110px;top:950px;width:860px;height:330px;overflow:visible" viewBox="0 0 860 330"><path d="M40 170 Q30 30 420 26 Q820 30 820 170 Q810 310 400 300 Q60 300 70 150" fill="none" stroke="#ff3b30" stroke-width="12" stroke-linecap="round"/></svg>`
+       + FINGER(760, 1140) }),
+   SB: { x: 540, y: 960, s: 1 }, bB: [],
+   vo: "Толян: «Жора, ты берёшь у перекупов. Дороже рынка!» Лис: «Каждую машину Жора покупал у другого перекупа — уже с наценкой. Минус пятьдесят тысяч на каждой. Шесть машин — минус триста».", who: "Толян + Лис",
+   mv: "<b>Приём 1 — расчёт пальцем по запотевшему стеклу:</b> Толян пишет на лобовом «купил 900 / рынок 850 / −50 × 6» и обводит. <b>A</b> — двухплановый кадр под дождём; <b>B</b> — вставка-крупный план стекла изнутри: за ним размытые огни гирлянды (боке), капли, рука Толяна дописывает цифры." },
+ { h: "ВАГОНЧИК · СДЕЛКА", tc: "4/8 · 0:26–0:35", talk: ["t"],
+   sc: () => ({ bg: "vagonchik", grade: "warm", hud: HUD("570 000"),
+     mid: ch("tolyan", "t", 700, 1600, 780, null, { armL: 25, head: -4 }, { rim: "#ff9a3c", side: -1 }),
+     lights: glow(140, 1080, 260, "#ff7a1a", .7) + glow(540, 140, 300, "#f4f6e8", .45) + beam([[340, 150], [740, 150], [1000, 1700], [100, 1700]], "#fff6dc", .16)
+       + glow(920, 930, 120, "#ffd27a", .25),
+     fg: OTS_ZHORA(-140, 1180, 640) }),
+   A: { x: 600, y: 1150, s: 1.15 }, B: null,
+   bA: [{ p: "t", html: "Помогу.<br><em>Десять тысяч<br>с каждой проданной.</em>", fs: 42 }],
+   B2: () => ({ bg: "vagonchik", grade: "warm", hud: HUD("570 000"),
+     mid: ch("perekup", "zh", 400, 1640, 800, { ...ZHORA, look: "angry" }, { armR: -20, head: 8 }, { rim: "#ff9a3c", side: 1 }),
+     lights: glow(140, 1080, 260, "#ff7a1a", .75) + glow(540, 140, 300, "#f4f6e8", .4) }),
+   SB: { x: 420, y: 1100, s: 2.05, r: -6 },
+   bB: [{ p: "zh", html: "Пять!" , fs: 70 }],
+   vo: "Толян: «Помогу. Десять тысяч с каждой проданной». Жора: «Пять!» Толян: «Десять. Или стой дальше под дождём». Жора: «…Десять».", who: "Толян + Жора",
+   mv: "<b>Новый фон — вагончик-офис Жоры</b> (вагонка, доска с ключами и ценниками, меловая доска «ДОЛГИ = 810 !!!», календарь с зачёркнутыми днями, обогреватель-«дуйка»). <b>A</b> — кадр «через плечо»: размытый силуэт Жоры на переднем плане, Толян в фокусе; тёплый свет спирали снизу. <b>B</b> — обратная точка: Жора крупно, голландский угол — торгуется." },
+ { h: "ЦЕНЫ ПО РЫНКУ", tc: "5/8 · 0:35–0:44", talk: ["t"],
+   sc: () => ({ bg: "zhlotday", grade: "day", hud: HUD("570 000"),
+     mid: LOTROW(1190) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, refl: 1, sheen: .35 })
+       + C.tag(680, 1490, "850 000", "SOLARIS · 2017", -4, 7) + `<div class="hand" style="left:700px;top:1410px;z-index:8;font-size:54px;color:#c0392b;transform:rotate(-6deg)"><s>950 000</s></div>`
+       + ch("tolyan", "t", 300, 1740, 780, null, { armR: -80 }, { rim: "#fff2c0", side: 1 }),
+     lights: glow(880, 300, 380, "#fff3c4", .55) + beam([[820, 260], [980, 300], [700, 1800], [200, 1700]], "#fff6d8", .14) }),
+   A: { x: 520, y: 1180, s: 1.12 },
+   bA: [{ p: "t", html: "Ставим по рынку.<br><em>Не дороже ни на рубль.</em>", fs: 42 }],
+   B2: () => ({ bg: "zhlotday", grade: "day", hud: HUD("570 000", "", 1), farBlur: 9,
+     far: `<div style="left:0;top:0;width:1080px;height:1920px">${LOTROW(1190) + car("hyundai/hyundai.png", 360, 1720, 820, { z: 5, sheen: .35 })}</div>`,
+     over: HANDPHONE(190, 460, 680, BOTH("Solaris 2017 · вся Россия", CARD("Hyundai Solaris · 2017", "840 000 ₽", "Тверь") + CARD("Hyundai Solaris · 2017", "860 000 ₽", "Казань") + CARD("Hyundai Solaris · 2018", "880 000 ₽", "Пермь"))) }),
+   SB: { x: 540, y: 960, s: 1 }, bB: [],
+   vo: "Толян: «Ставим по рынку. Не дороже ни на рубль». Лис: «Бот показал такие же машины по всей России — от восьмисот сорока. За четыре дня ушли пять из шести».", who: "Толян + Лис",
+   mv: "Утро после дождя — <b>та же площадка днём</b>: солнце, лужи отражают небо, гирлянда погасла. Толян зачёркивает «950» и пишет «850». <b>B</b> — вставка: рука с телефоном крупно, в боте фильтр «Solaris 2017 · вся Россия» — три карточки; площадка за телефоном в размытии (глубина резкости)." },
+ { h: "06:00 · ГОНКА", tc: "6/8 · 0:44–0:55", talk: ["zh"],
+   sc: () => ({ bg: "rassvet", grade: "dawn", hud: HUD("570 000", "", 1), farBlur: 12, farFilter: "brightness(.85)",
+     over: HANDPHONE(190, 470, 680, BOTH("⏰ 06:00", CARD("Lada Granta · 2019 · 15 000 км", "520 000 ₽", "ул. Садовая, 7 · хозяйка", "🔥 −19% к рынку · ⏱ 1 с после публикации")), 5) }),
+   A: { x: 540, y: 960, s: 1 },
+   bA: [],
+   B2: () => ({ bg: "rassvet", grade: "dawn", hud: HUD("570 000"), haze: "linear-gradient(transparent 40%, rgba(255,236,200,.35) 52%, transparent 70%)",
+     fx: `<div class="fx">${C.fog(980, 180, "#fff2dc", .45)}${C.fog(1500, 220, "#fff2dc", .25)}</div>`,
+     mid: car("granta/granta_34.png", 600, 1140, 380, { z: 3, sheen: .4 }) + C.tag(700, 1010, "520 000", "", -3, 4)
+       + glow(170, 1040, 46, "#fff6c8", .95) + glow(250, 1042, 42, "#fff6c8", .95) + glow(390, 1030, 30, "#fff6c8", .8) + glow(440, 1031, 28, "#fff6c8", .8)
+       + car("w124/w124_34.png", -40, 1720, 700, { z: 5, sheen: .55 }) + ch("perekup", "zh", 760, 1720, 760, { ...ZHORA, look: "o" }, { armL: 150, armR: -150 }, { rim: "#ffe2a0", side: -1 })
+       + ch("perekup", "bb", 560, 1180, 420, BABA, {}, { rim: "#ffe2a0", side: -1, z: 4 }) + C.motes(80, 700, 900, 900, 30, 8),
+     lights: glow(700, 720, 420, "#fff2c0", .6) + glow(980, 1300, 200, "#ffd27a", .25) }),
+   SB: { x: 560, y: 1200, s: 1.12, r: -2 },
+   bB: [{ p: "zh", html: "Я первый?!<br><em>Я двадцать лет<br>вторым приезжал!</em>", fs: 42 }],
+   vo: "Лис: «Шесть утра. Толян настроил Жоре бот: Гранта, девятнадцать процентов ниже рынка, хозяйка — бабушка». Жора: «Я первый?! Я двадцать лет вторым приезжал!»", who: "Лис + Жора",
+   mv: "<b>Приём 2 — гонка на рассвете:</b> будильник-уведомление в 6:00 (A — вставка: телефон в руке Жоры, за ним размытый рассвет). <b>Новый фон — частный сектор</b> (дома с резными наличниками, жёлтая газовая труба, колонка, берёза, колея с лужами). <b>B</b> — Мерседес Жоры у калитки, в тумане вдали фары опоздавших перекупов; золотой контровой свет, пылинки в лучах. Новый герой — хозяйка Гранты." },
+ { h: "ПРОДАНО", tc: "7/8 · 0:55–1:03", talk: ["zh"],
+   sc: () => ({ bg: "zhlotday", grade: "day", hud: HUD("570 000"),
+     mid: LOTROW(1190, [0, 1, 2, 3]) + car("granta/granta_34.png", 300, 1560, 520, { z: 4, sheen: .5, refl: 1 }) + C.tag(520, 1360, "640 000", "GRANTA · 2019", -4, 5)
+       + ch("perekup", "zh", 230, 1740, 760, { ...ZHORA, look: "grin" }, { armL: 150, armR: -150 }, { rim: "#fff2c0", side: 1 })
+       + ch("tolyan", "t", 840, 1760, 740, null, {}, { rim: "#fff2c0", side: -1, z: 7 }),
+     lights: glow(880, 300, 380, "#fff3c4", .55) }),
+   A: { x: 560, y: 1180, s: 1.06 },
+   bA: [{ p: "zh", html: "Студент…<br><em>ты мне площадку спас!</em>", fs: 44 }],
+   B2: () => ({ bg: "zhlotday", grade: "day", hud: HUD("570 000"),
+     mid: LOTROW(1190, [0, 1, 2, 3]) + ch("tolyan", "t", 600, 1760, 740, null, { armR: -60 }, { rim: "#fff2c0", side: -1, z: 7 }),
+     over: `<div class="hand" style="left:60px;top:400px;z-index:62;font-size:130px;color:#ffd23f;-webkit-text-stroke:3px #151515;transform:rotate(-6deg)">7 × 10 000 ₽</div>` }),
+   SB: { x: 600, y: 1260, s: 1.9, r: 2 }, bB: [],
+   vo: "Жора: «Студент… ты мне площадку спас!» Лис: «Пять старых машин ушли, Гранту бабушки перепродали через три дня. Семь машин — по десять тысяч Толяну».", who: "Жора + Лис",
+   mv: "<b>Приём 3 — «ПРОДАНО»:</b> штампы падают на ценники по одному (с хлопком), Жора вскидывает руки. <b>B</b> — крупно Толян с золотым зубом и надпись маркером «7 × 10 000»." },
+ { h: "ИТОГ + КРЮЧОК", tc: "8/8 · 1:03–1:12", talk: [],
+   sc: () => ({ bg: "zhlotday", grade: "dawn", hud: HUD("640 000", "+70 000", 1),
+     mid: LOTROW(1190, [0, 1, 2, 3]) + ch("tolyan", "t", 340, 1760, 740, null, {}, { rim: "#ffc46a", side: 1 }) + ch("perekup", "zh", 760, 1740, 740, { ...ZHORA, look: "grin", item: "phone" }, {}, { rim: "#ffc46a", side: -1 }),
+     lights: glow(880, 300, 420, "#ffb36a", .6) }),
+   A: { x: 540, y: 1180, s: 1.08 },
+   bA: [],
+   B2: () => ({ bg: "zhlotday", grade: "dawn", hud: HUD("640 000", "+70 000"), over: CTA,
+     mid: LOTROW(1190, [0, 1, 2, 3]) + ch("tolyan", "t", 340, 1760, 740, null, {}, { rim: "#ffc46a", side: 1 }) + ch("perekup", "zh", 760, 1740, 740, { ...ZHORA, look: "grin", item: "phone" }, {}, { rim: "#ffc46a", side: -1 }),
+     lights: glow(880, 300, 420, "#ffb36a", .6) }),
+   SB: { x: 540, y: 1180, s: 1.08 }, bB: [],
+   vo: "Лис: «Семьдесят тысяч. Капитал — шестьсот сорок. В одиннадцатой части — Жора предлагает Толяну стать партнёрами. Подпишись, чтобы не пропустить».", who: "Лис",
+   mv: "Закат над площадкой; счётчик капитала 570 → 640 000 (+70). Крючок на часть 11. <b>B</b> — финальная карточка (голос её не читает)." },
+];
+
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, def, shot, bubbles) => { def.bubbles = bubbles; const el = document.getElementById(id); el.innerHTML = C.frame(def, shot);
+  (sc.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.sc(), sc.A, sc.bA || []);
+const b = put("B", sc.B2 ? sc.B2() : sc.sc(), sc.B2 ? sc.SB : sc.B, sc.bB || []);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
