@@ -61,4 +61,4 @@ const CTA48 = `<div style="position:absolute;left:60px;right:60px;top:1330px;z-i
 // снег (экранный слой; в видео летит вниз с ветром)
 const SNOWFX = (n = 140, seed = 3, big = 1) => { let s = "", r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < n; i++) { const d = (3 + rnd() * 8) * big; s += `<i style="left:${(rnd() * 1120 - 20).toFixed(0)}px;top:${(rnd() * 1960 - 20).toFixed(0)}px;width:${d.toFixed(1)}px;height:${d.toFixed(1)}px;opacity:${(.45 + rnd() * .5).toFixed(2)}"></i>`; }
-  return `<div class="fx snow">${s}</div>`; };
+  return `<div class="fx snowfx">${s}</div>`; };

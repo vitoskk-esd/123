@@ -47,4 +47,4 @@
 /* рукописные пометки (Caveat) — мел, маркер, палец по запотевшему стеклу */
 .cf .hand { position: absolute; font-family: Caveat; font-weight: 700; line-height: 1; white-space: nowrap; }
 .cf .letterbox { position: absolute; left: 0; right: 0; height: 0; background: #000; z-index: 60; }
-.cf .snow i { position: absolute; border-radius: 50%; background: #fff; }
+.cf .snowfx i { position: absolute; border-radius: 50%; background: #fff; }

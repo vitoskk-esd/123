@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used cars. Low calm voice, dry humor, confident.",
+  "notes": "You narrate a standalone episode about Kostya ferrying a car 900 km overnight. Deadpan, dry irony; numbers said fully. «Марк Два» is the Toyota Mark II. Line about documents: clear, useful, calm."
+ },
+ "kostya": {
+  "voice": "Achird",
+  "tempo": 1.18,
+  "profile": "Kostya — a young Russian guy in his 20s, friendly, nervous but determined, doing his first long car delivery; glasses and a yellow scarf.",
+  "notes": "Line 1: excited, decisive. Line 2: calm, firm, showing proof. Line 3: tired at night, then shouting at a truck. Line 4: surprised, amused. Line 5: polite, confident. Line 6: short, proud."
+ },
+ "denis": {
+  "voice": "Algieba",
+  "tempo": 1.15,
+  "profile": "Denis — a slick Russian car seller in his 30s, sunglasses at night, smooth and pushy.",
+  "notes": "Line 1: pushy, tries to raise the price. Line 2: reluctant, sour, gives in."
+ },
+ "lyuba": {
+  "voice": "Sulafat",
+  "tempo": 1.1,
+  "profile": "Aunt Lyuba — a warm, kind Russian woman in her 50s running a 24-hour roadside café at night, caring and motherly.",
+  "notes": "Line 1: caring, worried. Line 2: laughing softly, about her cat."
+ },
+ "insp": {
+  "voice": "Iapetus",
+  "tempo": 1.12,
+  "profile": "Inspector Sokolov — a Russian traffic police officer in his 40s, strict official tone that turns into genuine curiosity.",
+  "notes": "Line 1: official, strict. Line 2: satisfied, then curious. Line 3: shocked, envious, then eager."
+ }
+}

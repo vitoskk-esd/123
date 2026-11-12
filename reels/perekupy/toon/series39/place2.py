@@ -110,7 +110,18 @@ for who, lines in IDX.items():
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "1", "-i", "-", tmp], input=x.tobytes(), check=True)
     words = asr.words(tmp, "small")
     # BYPAUSE=zhora — режем по паузам между репликами (Whisper растянул «10» в тишину и отдал его следующей реплике)
-    parts = split(x, len(lines)) if who in os.environ.get("BYPAUSE", "").split(",") else split_words(x, words, [t for _, _, t in lines])
+    parts = split(x, len(lines)) if who in os.environ.get("BYPAUSE", "").split(",") else None
+    BP1 = dict((e.split(":") + [""])[:2] for e in os.environ.get("BYPAUSE1", "").split(",") if e)   # BYPAUSE1=denis:1 — склеить части 1 и 2
+    if who in BP1:     # пауза внутри реплики («Ладно… семьсот девяносто») длиннее, чем между репликами:
+        parts = split(x, len(lines) + 1)                     # режем на одну часть больше и склеиваем пару с самым коротким промежутком
+        k = int(BP1[who]) if BP1[who] else min(range(len(parts) - 1), key=lambda i: parts[i + 1][0] - parts[i][1]); parts[k:k + 2] = [(parts[k][0], parts[k + 1][1])]
+    CUT = dict(e.split(":", 1) for e in os.environ.get("CUTAT", "").split(",") if e)   # CUTAT=denis:4.3/9.1 — границы реплик вручную (с), края — до тишины
+    if who in CUT:
+        b = [0] + [int(float(c) * SR) for c in CUT[who].split("/")] + [len(x)]; parts = []
+        for a0, b0 in zip(b, b[1:]):
+            fr = int(.01 * SR); on = [i for i in range(a0, b0 - fr, fr) if np.sqrt(np.mean(x[i:i + fr] ** 2)) > db(-42)]
+            parts.append((max(a0, on[0] - int(.04 * SR)), min(b0, on[-1] + fr + int(.08 * SR))))
+    if parts is None: parts = split_words(x, words, [t for _, _, t in lines])
     for (e, name, want), (a, b) in zip(lines, parts):
         if e != ID: continue
         inside = lambda t0, t1: min(t1, b / SR) - max(t0, a / SR) > .5 * (t1 - t0) or (t0 < b / SR and t1 > a / SR + .05 and t1 - t0 > .3)
