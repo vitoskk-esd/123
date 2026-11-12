@@ -376,6 +376,9 @@ def test_filter_generation_is_not_price():
     # не город: обычные слова, адреса, имена
     ("Зимняя резина в подарок", None, None), ("Светлый салон, без запаха", None, None), ("ул. Гагарина, 5", None, None),
     ("Звонить Артёму", None, None), ("Дно без ржавчины", None, None), ("Магазин запчастей", None, None),
+    ("по кузову на фото видно, документы норм", None, None), ("в Видном", "msk", None),
+    ("Цвет антрацит, щербинка на лобовом", None, None), ("Поменян нижний рычаг", None, None), ("Отличная находка для семьи", None, None),
+    ("Волжский автозавод, бабушкин автомобиль", None, None), ("Нижний Новгород", "nnov", None), ("в Находке", "vvo", None),
 ])
 def test_city_to_region(text, region, city):
     rid, c = D.find_place(norm(text).split())
@@ -388,3 +391,10 @@ def test_filter_by_oblast():
     assert parse_filter("Ангарск до 1 млн", D).regions == ["irk"]           # город в фильтре — вся его область
     L = parse_post("Toyota Corolla 2012\nЦена 890 000\nШелехов", D)
     assert L.region == "irk" and L.city == "Шелехов" and matches(f, L, None)
+
+
+def test_vk_ufa_post_not_moscow():
+    """Скрин владельца 12.11: пост из «Авторынок Уфа ВЫКУП АВТО» без города пришёл с «📍 Москва и МО» — «видно» приняли за Видное."""
+    t = "Продам ваз 2114, 13 года, по технике все хорошо работает,сигнализация, фаркоп , по кузову на фото видно, документы норм цена 150 т.с.9625441608"
+    L = parse_post(t, D, D.guess_region("Авторынок Уфа ВЫКУП АВТО", None))
+    assert L.region == "ufa" and L.price == 150000
