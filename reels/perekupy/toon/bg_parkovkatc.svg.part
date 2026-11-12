@@ -1,0 +1,19 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="ptc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ec9f0"/><stop offset="1" stop-color="#e6f4fb"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#ptc)"/>
+    <ellipse cx="180" cy="213" rx="99" ry="27" fill="#fff" opacity=".85"/><ellipse cx="520" cy="166" rx="94" ry="26" fill="#fff" opacity=".85"/><ellipse cx="880" cy="156" rx="111" ry="29" fill="#fff" opacity=".85"/>
+    <!-- фасад торгового центра -->
+    <rect x="0" y="420" width="1080" height="640" fill="#cfd6de" stroke="#000" stroke-width="6"/>
+    <rect x="0" y="420" width="1080" height="120" fill="#2f6db5"/><text x="540" y="505" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="64" fill="#fff">ТЦ «ГАЛАКТИКА»</text>
+    <rect x="40" y="580" width="150" height="300" fill="#8ec9f0" stroke="#000" stroke-width="5" opacity=".9"/><rect x="250" y="580" width="150" height="300" fill="#8ec9f0" stroke="#000" stroke-width="5" opacity=".9"/><rect x="460" y="580" width="150" height="300" fill="#8ec9f0" stroke="#000" stroke-width="5" opacity=".9"/><rect x="670" y="580" width="150" height="300" fill="#8ec9f0" stroke="#000" stroke-width="5" opacity=".9"/><rect x="880" y="580" width="150" height="300" fill="#8ec9f0" stroke="#000" stroke-width="5" opacity=".9"/>
+    <rect x="430" y="880" width="220" height="180" fill="#1d2a4a" stroke="#000" stroke-width="6"/><path d="M540 880 V1060" stroke="#cfd6de" stroke-width="6"/>
+    <!-- фонари -->
+    <path d="M120 1300 V640" stroke="#5b6670" stroke-width="16"/><path d="M120 650 h60" stroke="#5b6670" stroke-width="12"/><rect x="170" y="640" width="40" height="22" fill="#fff6c8" stroke="#000" stroke-width="4"/><path d="M900 1300 V640" stroke="#5b6670" stroke-width="16"/><path d="M900 650 h60" stroke="#5b6670" stroke-width="12"/><rect x="950" y="640" width="40" height="22" fill="#fff6c8" stroke="#000" stroke-width="4"/>
+    <!-- асфальт и разметка -->
+    <rect y="1060" width="1080" height="860" fill="#6a6f78"/><path d="M0 1060 H1080" stroke="#000" stroke-width="7"/>
+    <path d="M246.0 1080 L-300 1920" stroke="#f4f6f8" stroke-width="10" opacity=".8"/><path d="M414.0 1080 L180 1920" stroke="#f4f6f8" stroke-width="10" opacity=".8"/><path d="M666.0 1080 L900 1920" stroke="#f4f6f8" stroke-width="10" opacity=".8"/><path d="M834.0 1080 L1380 1920" stroke="#f4f6f8" stroke-width="10" opacity=".8"/>
+    <!-- тележки и шлагбаум вдали -->
+    <g transform="translate(720 1110)"><rect width="90" height="54" fill="none" stroke="#c0392b" stroke-width="6"/><path d="M0 54 v20 M90 54 v20" stroke="#151515" stroke-width="5"/><circle cx="10" cy="80" r="7" fill="#151515"/><circle cx="80" cy="80" r="7" fill="#151515"/></g><g transform="translate(800 1110)"><rect width="90" height="54" fill="none" stroke="#c0392b" stroke-width="6"/><path d="M0 54 v20 M90 54 v20" stroke="#151515" stroke-width="5"/><circle cx="10" cy="80" r="7" fill="#151515"/><circle cx="80" cy="80" r="7" fill="#151515"/></g>
+    <path d="M60 1150 H330" stroke="#c0392b" stroke-width="16" stroke-dasharray="40 30"/><rect x="40" y="1120" width="40" height="70" fill="#5b6670"/>
+    <ellipse cx="273" cy="1478" rx="99" ry="9" fill="#5a5f68" opacity=".6"/><ellipse cx="918" cy="1355" rx="112" ry="10" fill="#5a5f68" opacity=".6"/><ellipse cx="441" cy="1608" rx="131" ry="11" fill="#5a5f68" opacity=".6"/><ellipse cx="566" cy="1535" rx="117" ry="10" fill="#5a5f68" opacity=".6"/><ellipse cx="125" cy="1331" rx="62" ry="15" fill="#5a5f68" opacity=".6"/><ellipse cx="437" cy="1695" rx="133" ry="10" fill="#5a5f68" opacity=".6"/><ellipse cx="643" cy="1624" rx="121" ry="15" fill="#5a5f68" opacity=".6"/><ellipse cx="895" cy="1629" rx="116" ry="11" fill="#5a5f68" opacity=".6"/>
+  </svg>
