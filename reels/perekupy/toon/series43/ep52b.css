@@ -1,0 +1,12 @@
+/* ep52 «Толян · 12 — Пункт седьмой» — киношный формат (../cine.css) */
+#scene { position: absolute; inset: 0; }
+#scene > .cf { opacity: 0; }
+.cf .bub2 { opacity: 0; }
+#cnt { position: absolute; left: 60px; top: 290px; font-family: "JetBrains Mono"; font-weight: 800; font-size: 54px; color: #fff; background: #151515; border: 6px solid #4cd964;
+  border-radius: 18px; padding: 4px 20px; box-shadow: 0 8px 0 #000; z-index: 52; white-space: nowrap; font-variant-numeric: tabular-nums; transform-origin: 0 50%; opacity: 0; }
+#cnt em { font-style: normal; font-size: 38px; color: #4cd964; }
+#tag span { text-shadow: 0 3px 10px #000; }
+.wr { clip-path: inset(-20% 100% -20% -5%); }
+#split { position: absolute; inset: 0; opacity: 0; }
+#split > .cf { opacity: 1 !important; clip-path: inset(0 270px 0 270px); }
+#split .divider { position: absolute; left: 532px; top: 0; width: 16px; height: 1920px; background: #fff; box-shadow: 0 0 30px #000; z-index: 5; }
