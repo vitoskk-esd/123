@@ -1836,6 +1836,24 @@ async def test_try_button_after_trial_and_other_plans(env):
     assert "s:pay:trial" not in [b.callback_data for row in photos()[-1].reply_markup.inline_keyboard for b in row]
 
 
+async def test_free_trial_users_can_buy_paid_trial_once(env):
+    """Брал пробный день, когда он был бесплатным, — один раз может купить платный (владелец 13.11); купившим платный — нет."""
+    import jobs
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start")); await dp.feed_update(bot, msg("/start", OTHER))
+    await ctx.db.set_user(USER, trial_used=1)                                 # бесплатный пробный в прошлом
+    await ctx.db.set_user(OTHER, trial_used=1)
+    await ctx.db.add_payment(OTHER, "tp", 490, "trial"); await ctx.db.finish_payment("tp", "succeeded")   # OTHER платил
+    await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
+    assert (await ctx.db.user(USER))["trial_used"] == 0 and (await ctx.db.user(OTHER))["trial_used"] == 1
+    await dp.feed_update(bot, cb("s:try"))
+    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Попробуй «Перехват» целый день — 490 ₽" in last.text
+    await dp.feed_update(bot, cb("s:try", OTHER))
+    photo = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == OTHER][-1]
+    assert photo.caption.startswith("Пробный день ты уже брал") and "Сравни тарифы на картинке" not in photo.caption
+
+
 async def test_trial_once_per_account(env):
     """Пробный день — один раз на аккаунт: take_trial второй раз не проходит; кнопка пробного после этого — «только один раз»."""
     from user import activate_trial

@@ -31,6 +31,8 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
         return
     now = now or time.time()
     all_plans = plans.plans(ctx.cfg)
+    if await ctx.db.mark_once("trial_reset_paid_13_11"):       # один раз: бравшим бесплатный пробный — можно купить платный
+        log.info("пробный день снова доступен: %d", await ctx.db.reset_free_trials())
     # оплатил, но не нажал «Я оплатил» — продлеваем сами
     for p in await ctx.db.pending_payments():
         try:

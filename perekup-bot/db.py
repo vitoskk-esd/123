@@ -517,6 +517,14 @@ class DB:
     async def set_setting(self, key: str, value: str) -> None:
         await self._run("INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)", key, value)
 
+    async def reset_free_trials(self) -> int:
+        """Пробный день снова платный (владелец 13.11): кто брал его бесплатно, может один раз купить платный — снимаем отметку,
+        если оплаченного пробного дня у человека не было."""
+        cur = await self.conn.execute("UPDATE users SET trial_used=0 WHERE trial_used=1 AND id NOT IN "
+                                      "(SELECT user_id FROM payments WHERE plan='trial' AND status='succeeded')")
+        await self.conn.commit()
+        return cur.rowcount
+
     async def mark_once(self, key: str) -> bool:
         """True, если ключа ещё не было (и ставит его): напоминание уходит ровно один раз."""
         cur = await self.conn.execute("INSERT OR IGNORE INTO marks (key, at) VALUES (?,?)", (key, time.time()))

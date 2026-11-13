@@ -434,9 +434,8 @@ async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
     status = (T.SUB_FREE if plan is plans.FREE else
               T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
               if plan else "")          # нет тарифа — про статус ничего не пишем (владелец 10.11)
-    status = (intro + "\n\n" if intro else "") + status
     caption = T.PLANS_CAPTION.format(
-        status=status,
+        status=status, lead=intro or T.PLANS_LEAD,           # своё вступление вместо «Сравни тарифы на картинке» — без двух фраз со стрелками подряд
         trial=T.PLAN_TRIAL_SHORT.format(price=p["trial"].price) if can_trial(u) else "",
         basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
         basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}")
