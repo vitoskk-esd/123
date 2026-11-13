@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 13 of a comedy mini-series about Tolyan, a student car flipper. Dry ironic narrator; on «Очень сильно пахнет ёлочкой» — slow, deadpan. Numbers said fully."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.26,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "Line 1: calm, suspicious, interrogating. Line 2: amused, sarcastic, catching a liar."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: excited, greedy. Line 2: tired, joking, wiser now."
+ },
+ "vitalik": {
+  "voice": "Umbriel",
+  "tempo": 1.15,
+  "profile": "Vitalik — a slick, fast-talking Russian tuning-garage guy in his 30s, a bit of a con man.",
+  "notes": "Line 1: smooth, over-friendly pitch («по-братски», «мамой клянусь»). Line 2: too fast, too loud — obviously lying: «Не топлёная!»"
+ },
+ "misha": {
+  "voice": "Achird",
+  "tempo": 1.05,
+  "profile": "Uncle Misha — a calm, kind Russian village pensioner in his 60s, a fisherman.",
+  "notes": "One line: unhurried, honest, warm («Сынок»)."
+ }
+}
