@@ -44,8 +44,12 @@ def new_filter() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_NEW_FILTER, callback_data="f:new")])
 
 
-def gift() -> InlineKeyboardMarkup:
-    return kb([B(text=T.BTN_GIFT, callback_data="s:pay:trial")])
+def try_button() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_TRY, callback_data="s:try")])
+
+
+def try_offer(price: int) -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_TRY_PAY.format(price=price), callback_data="s:pay:trial")], [B(text=T.BTN_OTHER_PLANS, callback_data="s:plans")])
 
 
 def confirm_filter() -> InlineKeyboardMarkup:

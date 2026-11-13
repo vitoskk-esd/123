@@ -82,7 +82,7 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     await msg.answer(T.WELCOME.format(brand=T.BRAND, channels=channels, trial=trial), reply_markup=K.menu(admin))
     await send_welcome_photos(bot, ctx, f.id)    # примеры карточек — одни и те же фото из папки welcome/
     if not admin:
-        await send_gift(msg, ctx, f.id)             # «дарю пробный день» — один раз на аккаунт
+        await msg.answer(T.TRY_PROMPT, reply_markup=K.try_button())     # «Хочу попробовать» — сразу под фото (владелец 13.11)
     if ctx.reader and not ctx.reader.online and admin:
         await msg.answer(T.NEED_CONNECT)
         return
@@ -157,10 +157,6 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         log.warning("«что пропустил» не посчитали: %s", e)
         n, cheap, items = -1, 0, []
     u = await ctx.db.user(uid)
-    if ctx.cfg.payments_on and can_trial(u) and not plans.current(ctx.cfg, u) and not await is_admin_id(ctx, uid):
-        until = await activate_trial(ctx, uid)           # первый фильтр — подаренный пробный день включается сам
-        if until:
-            await cb.message.answer(T.TRIAL_ON.format(until=fmt_date(until), first=""))
     if not plans.current(ctx.cfg, await ctx.db.user(uid)):      # без тарифа машины не придут — сразу говорим
         await cb.answer()
         if n > 0:
@@ -398,13 +394,22 @@ async def activate_trial(ctx: Ctx, uid: int) -> float | None:
     return until
 
 
-async def send_gift(msg: Message, ctx: Ctx, uid: int) -> None:
-    """«Дарю тебе пробный день» — один раз на аккаунт и только тем, кто его ещё не брал."""
-    if not ctx.cfg.payments_on or not can_trial(await ctx.db.user(uid)):
-        return
-    if await ctx.db.mark_once(f"gift:{uid}"):
-        hint = T.GIFT_HINT_OLD if await ctx.db.filters(uid) else T.GIFT_HINT_NEW
-        await msg.answer(T.GIFT.format(hint=hint), reply_markup=K.gift())
+@router.callback_query(F.data == "s:try")
+async def want_try(cb: CallbackQuery, ctx: Ctx) -> None:
+    """«Хочу попробовать» под фото приветствия: пробный день за 500 ₽ + «Другие тарифы»; уже брал — сразу тарифы."""
+    u = await ctx.db.user(cb.from_user.id)
+    if can_trial(u):
+        await cb.message.answer(T.TRY_OFFER.format(price=plans.plans(ctx.cfg)["trial"].price),
+                                reply_markup=K.try_offer(plans.plans(ctx.cfg)["trial"].price))
+    else:
+        await send_plans(cb.message, ctx, cb.from_user.id, T.TRIAL_USED)
+    await cb.answer()
+
+
+@router.callback_query(F.data == "s:plans")
+async def other_plans(cb: CallbackQuery, ctx: Ctx) -> None:
+    await send_plans(cb.message, ctx, cb.from_user.id)
+    await cb.answer()
 
 
 def plans_text(ctx: Ctx, u) -> str:
@@ -573,7 +578,6 @@ async def free_text(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     """Написал что-то без кнопок — если это похоже на фильтр, предлагаем сохранить."""
     if await ctx.db.user(msg.from_user.id) is None:
         await ctx.db.add_user(msg.from_user.id, msg.from_user.username, msg.from_user.first_name, None, None, ctx.cfg.trial_days)
-        await send_gift(msg, ctx, msg.from_user.id)
     from admin import mostly_links
     if mostly_links(msg.text) and await is_admin(msg, ctx):      # админ просто вставил список ссылок — сразу в базу
         return await add_to_base(msg, ctx)
