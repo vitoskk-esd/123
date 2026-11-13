@@ -442,3 +442,11 @@ def test_every_city_found_in_place_phrases():
            for t in (f"Камри 2015\nЦена 900 000\n{c}", f"Город: {c}\nКамри 2015", f"г. {c}, Камри 2015", f"Камри 2015, {c}, 900 т.р.")
            if D.find_place(norm(t).split(), text=t)[0] != rid]
     assert not bad, bad[:20]
+
+
+def test_car_city_wins_over_channel_city():
+    """Владелец 13.11: Kia Rio «Москва» пришла из групп Уфы, Тюмени, Казани — это верно: 📍 — где машина (по тексту), 📢 — где опубликовано.
+    Город в тексте не назван — машина там, где группа (Уфа ≠ Москва, в московский фильтр не попадёт)."""
+    text = "#Kia #Rio 4 поколение 2021\nГод: 2021\nПробег: 143000\nЦена: 640 000 ₽\nМосква\n+7 916 126-56-64"
+    assert parse_post(text, D, "ufa").region == "msk"
+    assert parse_post(text.replace("Москва\n", ""), D, "ufa").region == "ufa"

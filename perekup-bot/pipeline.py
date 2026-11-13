@@ -406,6 +406,16 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
             continue
         if matches(Filter.loads(row["data"]), L, r.discount):
             targets[uid] = (row["fid"], row["text"], plan)
+            # бронь сразу, до любых await: та же машина из соседнего канала (рассылают в 7 групп за секунды) уже не пройдёт проверку выше
+            ctx.pending |= {k for k in ((uid, fp), (uid, ckey)) if k[1]}
+    held = {k for uid in targets for k in ((uid, fp), (uid, ckey)) if k[1]}     # снимаем бронь, когда отправка записана в базу
+    try:
+        return await _deliver(bot, ctx, raw, channel, r, L, fp, ckey, targets, photo_task)
+    finally:
+        ctx.pending -= {k for k in held if k[0] not in r.delayed}           # «Простой» снимает свою бронь сам, после отложенной отправки
+
+
+async def _deliver(bot: Bot, ctx: Ctx, raw: RawPost, channel: dict, r: Result, L: Listing, fp: str, ckey, targets: dict, photo_task) -> Result:
     recv_ms = int((raw.recv - raw.date) * 1000) if raw.recv else None
     if not targets:
         await ctx.db.finish_post(r.post_id, 0, 0, recv_ms)
@@ -445,7 +455,7 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
 
     async def later(uid: int, fid: int, ftext: str, plan: plans.Plan):
         """«Простой»: машина уходит через задержку тарифа от публикации — PRO успевают первыми."""
-        keys = {(uid, fp), (uid, ckey)}
+        keys = {k for k in ((uid, fp), (uid, ckey)) if k[1]}
         ctx.pending |= keys
         try:
             await asyncio.sleep(max(0.0, raw.date + plan.delay - time.time()))

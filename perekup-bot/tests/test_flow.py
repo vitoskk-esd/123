@@ -2054,3 +2054,17 @@ async def test_list_shows_queue_pace_and_tg_limit(env):
         ctx.reader = None
     text = s.texts(ADMIN)[-1]
     assert "раз в 90 с" in text and "≈ 11,8 ч" in text and "Telegram попросил паузу" in text and "Premium" in text
+
+
+async def test_same_post_in_many_channels_at_once_sent_once(env):
+    """Владелец 13.11: одно объявление разослали в 7 групп за секунды — Kia Rio пришла 7 раз. Посты приходят почти одновременно,
+    проверка «уже отправляли?» шла до записи отправки. Теперь машина бронируется за человеком сразу — карточка одна."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "киа рио до 1,5 млн")
+    text = "#Kia #Rio 4 поколение [рестайлинг] 2021\nГод: 2021\nКПП: автомат\nПробег: 143000\nПовреждения передней части\nЦена: 640 000 ₽\nМосква\n+7 916 126-56-64"
+    rs = await asyncio.gather(process(bot, ctx, post(CH1, text)), process(bot, ctx, post(CH2, text)),
+                              process(bot, ctx, post(CH1, text)), process(bot, ctx, post(CH2, text)))
+    assert sum(len(r.sent) for r in rs) == 1
+    assert sum("Kia Rio 2021" in t for t in s.texts(USER)) == 1
+    later = await process(bot, ctx, post(CH2, text))                       # и позже — тоже не дублируем
+    assert not later.sent
