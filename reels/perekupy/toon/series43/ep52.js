@@ -160,5 +160,6 @@ window.build = R => {
   write("#hook", st.end + .3, .9);
   tl.fromTo("#cta", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, W("end", "подпиш") - .3);
   tl.to("#cnt", { opacity: 0, duration: .2 }, en.end + .1);
+  tl.to("#hook", { opacity: 0, duration: .25 }, en.end + .05);      // владелец 13.11: крючок «Часть 13…» не остаётся на последнем кадре — там только бот
   ending(R, en.end + .3);
 };
