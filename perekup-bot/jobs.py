@@ -40,7 +40,7 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
             continue
         if until:
             await send(bot, ctx, p["user_id"], T.PAY_OK.format(plan=all_plans[p["plan"] or "basic"].title, until=fmt_date(until)))
-    # подарок «бесплатный пробный день» убран (владелец 13.11): пробный день снова платный — 500 ₽
+    # подарок «бесплатный пробный день» убран (владелец 13.11): пробный день снова платный — 490 ₽
     # тариф скоро закончится: пробный день — за 3 часа, месячный — за сутки
     for u in await ctx.db.users("paid_until>? AND paid_until<?", now, now + DAY):
         plan = all_plans.get(u["plan"] or "basic", all_plans["basic"])

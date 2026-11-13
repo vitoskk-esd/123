@@ -29,7 +29,7 @@ class Plan:
 
 def plans(cfg: Config) -> dict[str, Plan]:
     return {
-        # пробный день (владелец 13.11: бесплатный убрали, снова платный — 500 ₽): как PRO, но один фильтр и без договора; один раз на человека
+        # пробный день (владелец 13.11: бесплатный убрали, снова платный — 490 ₽): как PRO, но один фильтр и без договора; один раз на человека
         "trial": Plan("trial", "Пробный день", cfg.price_trial, 1, 1, UNLIMITED, dkp=False),
         "basic": Plan("basic", "Простой", cfg.price_basic, 30, cfg.basic_filters, cfg.basic_own,
                       delay=cfg.basic_delay, market=False, dkp=False),

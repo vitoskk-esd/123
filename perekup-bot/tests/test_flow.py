@@ -236,7 +236,7 @@ async def test_no_plan_then_buy_basic(env):
 
 
 async def test_trial_day_once_and_basic_limits_and_upgrade(env):
-    """Пробный день — 500 ₽ (владелец 13.11): под фото приветствия «Хочу попробовать» → предложение + «Другие тарифы»; после оплаты — 24 часа,
+    """Пробный день — 490 ₽ (владелец 13.11): под фото приветствия «Хочу попробовать» → предложение + «Другие тарифы»; после оплаты — 24 часа,
     один раз; в нём 1 фильтр; «Простой» — до 2 фильтров; переход на PRO не сжигает дни."""
     from user import apply_payment
     dp, bot, s, ctx = env
@@ -246,11 +246,11 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     assert len(tries) == 1 and [b.callback_data for row in tries[0].reply_markup.inline_keyboard for b in row] == ["s:try"]
     await dp.feed_update(bot, cb("s:try"))
     last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
-    assert "Попробуй «Перехват» целый день — 500 ₽" in last.text
+    assert "Попробуй «Перехват» целый день — 490 ₽" in last.text
     assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:plans"]
     await dp.feed_update(bot, cb("s:pay:trial"))
     pay = await ctx.db.last_pending(USER)
-    assert pay and pay["amount"] == 500 and pay["plan"] == "trial" and (await ctx.db.user(USER))["paid_until"] < time.time()   # без оплаты не включается
+    assert pay and pay["amount"] == 490 and pay["plan"] == "trial" and (await ctx.db.user(USER))["paid_until"] < time.time()   # без оплаты не включается
     await apply_payment(ctx, USER, pay["yk_id"], "succeeded")
     u = await ctx.db.user(USER)
     assert u["trial_used"] == 1 and u["plan"] == "trial" and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
@@ -735,7 +735,7 @@ async def test_offer_with_requisites(env):
         object.__setattr__(ctx.cfg, k, v)
     await dp.feed_update(bot, cb("offer"))
     text = s.texts(USER)[-1]
-    assert "Иванов Иван Иванович, ИНН 123456789012" in text and "ivan@mail.ru" in text and "Пробный день — 500 ₽ за 1 день" in text
+    assert "Иванов Иван Иванович, ИНН 123456789012" in text and "ivan@mail.ru" in text and "Пробный день — 490 ₽ за 1 день" in text
     assert "PRO — 2490 ₽" in text and len(text) < 4096
     await dp.feed_update(bot, cb("s:pay:pro"))
     assert "условия оферты — /offer" in s.texts(USER)[-1]
@@ -1826,7 +1826,7 @@ async def test_try_button_after_trial_and_other_plans(env):
     await dp.feed_update(bot, msg("/start"))
     photos = lambda: [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER]
     await dp.feed_update(bot, cb("s:plans"))
-    assert photos() and "Пробный день — 500 ₽" in photos()[-1].caption
+    assert photos() and "Пробный день — 490 ₽" in photos()[-1].caption
     await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
     assert (await ctx.db.user(USER))["paid_until"] < time.time() and not await ctx.db._all("SELECT * FROM events WHERE kind='trial'")
     await ctx.db.set_user(USER, trial_used=1)

@@ -28,7 +28,7 @@ class Config:
     api_id: int = 0                  # служебный аккаунт (my.telegram.org); можно не задавать — бот спросит в /connect
     api_hash: str = ""
     admins: frozenset[int] = frozenset()   # пусто — админом станет первый, кто напишет боту /start
-    price_trial: int = 500           # пробный день: всё как в PRO на 24 часа, один раз (владелец 13.11: снова платный, 500 ₽)
+    price_trial: int = 490           # пробный день: всё как в PRO на 24 часа, один раз (владелец 13.11: снова платный, 490 ₽)
     price_basic: int = 1390          # «Простой» на 30 дней
     price_pro: int = 2490            # PRO на 30 дней, без лимитов
     basic_filters: int = 2           # лимиты «Простого»: фильтры, свои каналы (0 — только общая база), задержка, с
@@ -67,7 +67,7 @@ def get_config() -> Config:
         api_id=int(e("TG_API_ID", "0") or 0),
         api_hash=e("TG_API_HASH", ""),
         admins=frozenset(int(x) for x in e("ADMIN_IDS", "").replace(" ", "").split(",") if x),
-        price_trial=int(e("PRICE_TRIAL", "500")),
+        price_trial=int(e("PRICE_TRIAL", "490")),
         price_basic=int(e("PRICE_BASIC", "1390")),
         price_pro=int(e("PRICE_PRO", "2490")),
         basic_filters=int(e("BASIC_FILTERS", "2")),
