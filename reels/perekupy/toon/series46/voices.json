@@ -1,0 +1,38 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 14 of a comedy mini-series about Tolyan, a student car flipper — the riskiest deal. Tense, dramatic at the start and at «тишина», relief at the end. «Лексус Эн Икс» — Lexus NX, «чек энджин» — Check Engine. Numbers said fully."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.26,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "One line: short, decisive, cool: «Пан. Берём.»"
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: nervous, half-whisper, gambling. Line 2: panic, shouting. Line 3: exhausted relief, laughing."
+ },
+ "arkasha": {
+  "voice": "Sadaltager",
+  "tempo": 1.12,
+  "profile": "Arkasha — a nervous Russian IT guy in his 30s with a beard and glasses, leaving the country in a hurry.",
+  "notes": "One line: hurried, anxious, looking at the clock."
+ },
+ "rinat": {
+  "voice": "Enceladus",
+  "tempo": 1.1,
+  "profile": "Rinat — a calm, experienced Russian auto electrician in his 40s.",
+  "notes": "One line: calm, almost bored, reassuring."
+ },
+ "oleg": {
+  "voice": "Schedar",
+  "tempo": 1.12,
+  "profile": "Oleg — a confident Russian buyer in a suit, in his 30s.",
+  "notes": "One line: excited, decisive, proud he was first."
+ }
+}
