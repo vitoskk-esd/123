@@ -59,7 +59,7 @@ const RYN = (t, z, zpose, extra = "") => car(NIVA, 300, 1620, 600, { z: 4, sheen
   + Z(z, 860, 1780, 740, { look: "grin" }, zpose, { rim: "#fff2c0", side: -1, z: 7 });
 mount("s6", { bg: "rynokavto", grade: "day", mid: RYN("tr", "zr", { armL: 60 }, G("sold", C.tag(420, 1260, "ПРОДАНО", "690 000", -6, 6, "#4cd964"), 6)), lights: RYN_L,
   bubbles: [{ id: "z2", p: "zr", html: "Студент, пункт девятый:<br><em>Виталику больше не звоним.</em>", fs: 40 }] }, { x: 540, y: 1220, s: 1.08 });
-mount("s6b", { bg: "rynokavto", grade: "day", over: CTA54.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), mid: RYN("tr2", "zr2", {}), lights: RYN_L }, { x: 540, y: 1220, s: 1.08 });
+mount("s6b", { bg: "rynokavto", grade: "day", over: CTA54.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), mid: RYN("tr2", "zr2", {}), lights: RYN_L }, { x: 540, y: 1100, s: .96 });   // другой план (общий), а не тот же — без «скачка»
 
 $(".stage").insertAdjacentHTML("beforeend", `<div id="cnt">💰 <span id="cv">730 000</span> ₽ <em id="cd"></em></div>`);
 $("#end h2").innerHTML = E.end;
@@ -152,7 +152,7 @@ window.build = R => {
   gsap.set("#sold", { opacity: 0 }); const SOLD = W("l4", "уш") - .1;
   tl.fromTo("#sold", { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: .18, ease: "power4.out", immediateRender: false, transformOrigin: "520px 1290px" }, SOLD); R.sfx("clack", SOLD, .7);
   bub("z2", st.end - .15);
-  cut("s6", "s6b", st.end - .1); move("s6b", { s: 1.12 }, st.end - .1, en.end - st.end + .6, "none");
+  cut("s6", "s6b", st.end - .1); move("s6b", { s: 1.04, y: 1140 }, st.end - .1, en.end - st.end + .6, "none");
   const CAP = W("end", "кап");
   R.count($("#cv"), CAP + .3, 730000, 815000, .9); tl.set("#cd", { textContent: "+85 000" }, CAP + .3); R.sfx("clack", CAP + .3, .6);
   tl.fromTo("#cnt", { scale: 1.25 }, { scale: 1, duration: .4, ease: "back.out(2)", immediateRender: false }, CAP + .3);
