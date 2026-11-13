@@ -1,0 +1,104 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props56.js"></script>
+<script>
+// «ТОЛЯН: СО СТА ТЫСЯЧ · 15» — «Миллион», ФИНАЛ (киношный формат). Капитал 930 000 → 1 020 000 → покупка Toyota Mark II Tourer V.
+// НОВОЕ НАЧАЛО (вместо плашки серии и «Х тысяч…» над телефоном): холодный старт из будущего в кинорамке — ночь, эстакада, чёрный Mark II,
+// «15 частей назад — 100 000 ₽» → VHS-перемотка на неделю назад: полароиды прошлых сделок, счётчик откатывается к 930 000.
+// → дача: полковник Семёныч продаёт W124 за 430 (рынок 520) → ЗАГС: Артуру из свадебного кортежа бот прислал бочку через секунду, 520
+// → +90, табло прокручивается за миллион, конфетти → фильтр «для себя»: Mark II JZX100 Tourer V за 900 (рынок 1 150) → гараж японщика Макса
+// → ключи, было/стало (часть 1 · 100 000 в конверте | часть 15 · Mark II) → эстакада: «а дальше?» — «два миллиона, брат» → Mark II уезжает, карточка бота.
+// Приёмы (новые): холодный старт в кинорамке; VHS-перемотка с полароидами; миллион (табло + конфетти); было/стало (сепия | цвет).
+const T = (p, x, foot, h, pose = {}, extra = {}) => ch("tolyan", p, x, foot, h, null, pose, extra);
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const ES_L = glow(230, 660, 260, "#ffb84a", .45) + glow(790, 660, 260, "#ffb84a", .45) + glow(540, 1500, 520, "#5a5ad0", .18);
+const DA_L = glow(880, 180, 380, "#fff3c4", .45);
+const ZG_L = glow(820, 200, 380, "#fff6d0", .5);
+const JDM_L = glow(540, 250, 380, "#ff3bd0", .35) + glow(540, 1400, 420, "#ff3bd0", .12);
+const MKL = [[.12, .62, 90], [.4, .64, 90]];
+const S = [
+ { h: "ХОЛОДНЫЙ СТАРТ · ЭСТАКАДА", tc: "1/6 · 0:00–0:11",
+   A: { def: () => ({ bg: "estakada", grade: "night", over: LETTERBOX("15 частей назад — 100 000 ₽", "ТОЛЯН · ФИНАЛ"),
+       mid: car(MK, 40, 1560, 780, { z: 4, sheen: .6, refl: 1, lights: MKL }) + T("tc", 880, 1600, 600, { armR: -30 }, { rim: "#ffb84a", side: -1, z: 7 }) + INHAND(880, 1600, 600, -30, 90, KEYS, 9), lights: ES_L }), shot: { x: 540, y: 1140, s: 1.06 },
+     bubbles: [{ p: "tc", html: "Слышишь,<br><em>как дышит?</em>", fs: 46 }], talk: ["tc"] },
+   B: { def: () => ({ far: REW(), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Лис: «Пятнадцать частей назад у Толяна было сто тысяч рублей. Сегодня ночью он заводит вот это». Толян: «Слышишь, как дышит?» Лис: «Но перемотаем на неделю назад. Девятьсот тридцать тысяч. До миллиона — семьдесят».", who: "Лис + Толян",
+   mv: "<b>Новое начало — без плашки серии и без телефона.</b> Кадр 0: <b>приём 1 — холодный старт в кинорамке</b>: чёрные полосы сверху и снизу, в них «15 частей назад — 100 000 ₽» и «ТОЛЯН · ФИНАЛ»; <b>новый фон — ночная эстакада</b>, вишнёвый Mark II с фарами и отражением, Толян с ключами. Рёв мотора (звук без музыки). B — <b>приём 2 — VHS-перемотка</b>: помехи, «◀◀ ПЕРЕМОТКА −7 ДНЕЙ», полароиды прошлых частей мелькают назад, счётчик откатывается 1 000 000+ → 930 000." },
+ { h: "ДАЧА · W124", tc: "2/6 · 0:11–0:23",
+   A: { def: () => { const H = HOLDPHONE("tolyan", "tn", 540, 1960, 1680, null, W124CARD(), { rim: "#fff2c0", side: 1 });
+       return { bg: "dachakoop", grade: "day", hud: HUD56("930 000", "", 1), farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "dachakoop", grade: "day", hud: HUD56("930 000"),
+       mid: car(W1, 40, 1600, 660, { z: 4, sheen: .6 }) + ch("perekup", "sm", 860, 1770, 740, SEMENYCH, { armR: -50 }, { rim: "#fff2c0", side: -1, z: 7 })
+         + T("td", 560, 1800, 700, { armL: 50 }, { rim: "#fff2c0", side: 1, z: 8 }), lights: DA_L }), shot: { x: 600, y: 1200, s: 1.08 },
+     bubbles: [{ p: "sm", html: "Бочка вечная.<br><em>Отдаю в руки, а не на запчасти.</em>", fs: 38 }], talk: ["sm"] },
+   vo: "Лис: «Бот прислал Мерседес сто двадцать четыре — четыреста тридцать при рынке пятьсот двадцать. Продаёт полковник на даче». Семёныч: «Бочка вечная. Отдаю в руки, а не на запчасти». Толян: «В надёжные руки, товарищ полковник».", who: "Лис + Семёныч + Толян",
+   mv: "<b>Новый фон — дачный кооператив</b> (штакетник, теплица с помидорами, сарай, яблоня, гравийка). A — в боте «Mercedes W124 · 1993 · 430 000 ₽ · рынок ≈ 520 000 · 🔥 −17%». B — <b>новый герой — полковник Семёныч</b> (китель, кепка, седые усы) у бежевой «бочки», Толян жмёт руку." },
+ { h: "ЗАГС · МИЛЛИОН", tc: "3/6 · 0:23–0:36",
+   A: { def: () => ({ bg: "zags", grade: "day", hud: HUD56("930 000"),
+       mid: car(W1, 60, 1600, 660, { z: 4, sheen: .7 }) + WEDDING(60, 1600, 660) + ch("perekup", "ar", 860, 1770, 740, ARTUR, { armR: -60 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: ZG_L }), shot: { x: 580, y: 1200, s: 1.08 },
+     bubbles: [{ p: "ar", html: "Ретро для свадеб — мечта!<br><em>Пятьсот двадцать, беру.</em>", fs: 40 }], talk: ["ar"] },
+   B: { def: () => ({ bg: "zags", grade: "day", over: MILLION(80, 250) + CONFETTI(),
+       mid: T("tz", 300, 1780, 720, { armL: 150, armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + Z("zz", 790, 1790, 740, { look: "grin" }, { armL: 140, armR: -140 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: ZG_L }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "zz", html: "Студент…<br><em>миллион! Ты сделал это!</em>", fs: 44 }], talk: ["zz"] },
+   vo: "Лис: «Толян выставил бочку. Артуру из свадебного кортежа бот прислал её через секунду». Артур: «Ретро для свадеб — мечта! Пятьсот двадцать, беру». Лис: «Плюс девяносто. Капитал Толяна — миллион двадцать тысяч». Жора: «Студент… миллион! Ты сделал это!»", who: "Лис + Артур + Жора",
+   mv: "<b>Новый фон — ЗАГС</b> (колонны, золотые кольца над входом, ступени, клумбы, голуби). <b>Новый герой — Артур</b> (белый костюм, свадебный кортеж); на W124 кольца и бант. B — <b>приём 3 — миллион</b>: золотое табло прокручивается 930 000 → <b>1 020 000</b>, «МИЛЛИОН ЕСТЬ», конфетти падает, Толян и Жора — руки вверх." },
+ { h: "ФИЛЬТР ДЛЯ СЕБЯ · MARK II", tc: "4/6 · 0:36–0:48",
+   A: { def: () => { const H = HOLDPHONE("tolyan", "tm", 540, 1960, 1680, null, MKFILTER(), { rim: "#ff7ae6", side: 1 });
+       return { bg: "jdmgarazh", grade: "night", hud: HUD56("1 020 000", "", 1), farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "jdmgarazh", grade: "night", hud: HUD56("1 020 000"),
+       mid: car(MK, 60, 1640, 760, { z: 4, sheen: .5, lights: MKL }) + ch("perekup", "mx", 880, 1780, 740, MAX, { armR: -60 }, { rim: "#ff7ae6", side: -1, z: 7 }), lights: JDM_L }), shot: { x: 560, y: 1200, s: 1.08 },
+     bubbles: [{ p: "mx", html: "Ты написал первым.<br><em>Девятьсот — и он твой.</em>", fs: 42 }], talk: ["mx"] },
+   vo: "Лис: «И впервые Толян ставит фильтр для себя: Марк Второй, Турер Ви. Бот прислал через секунду — девятьсот тысяч при рынке миллион сто пятьдесят». Макс: «Ты написал первым. Девятьсот — и он твой».", who: "Лис + Макс",
+   mv: "A — в боте «Фильтр: Mark II · JZX100 Tourer V · для себя» и карточка «Toyota Mark II Tourer V · 1999 · 900 000 ₽ · рынок ≈ 1 150 000 · 1JZ-GTE · 🔥 −22%». B — <b>новый фон — гараж японщика</b> (розовый неон «1JZ», плакаты DRIFT/TURBO, стопка колёс, верстак); <b>новый герой — Макс-японщик</b> у вишнёвого Mark II." },
+ { h: "КЛЮЧИ · БЫЛО / СТАЛО", tc: "5/6 · 0:48–0:59",
+   A: { def: () => ({ bg: "jdmgarazh", grade: "night", hud: HUD56("120 000", "−900 000"),
+       mid: ch("perekup", "mk", 300, 1960, 1000, MAX, { armR: -75 }, { rim: "#ff7ae6", side: 1, z: 7 }) + INHAND(300, 1960, 1000, -75, 120, KEYS, 9)
+         + T("tk", 800, 1960, 1000, { armL: 60 }, { rim: "#ff7ae6", side: -1, z: 7 }), lights: JDM_L }), shot: { x: 540, y: 1150, s: 1.1 } },
+   B: { def: () => ({ bg: "garages", grade: "night",
+       over: BA(BAPANE("garages", T("tb1", 290, 1800, 760, { armR: -40 }, { z: 7 }) + INHAND(290, 1800, 760, -40, 130, ENVELOPE, 9) + BIGTAG(40, 1560, "ЧАСТЬ 1", "100 000 ₽", -5)),
+         BAPANE("jdmgarazh", car(MK, 548, 1600, 620, { z: 4, sheen: .5 }) + T("tb2", 950, 1820, 700, { armR: -40 }, { rim: "#ff7ae6", side: -1, z: 7 }) + INHAND(950, 1820, 700, -40, 100, KEYS, 9) + BIGTAG(600, 1600, "ЧАСТЬ 15", "Mark II · 1JZ", 4, "#ff7ae6"))) }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ at: [540, 1080], html: "Жора: «Студент…<br><em>я тебя недооценивал»</em>", fs: 40 }] },
+   vo: "Лис: «Сто тысяч в конверте — и Марк Второй с турбиной. А на счету снова сто двадцать тысяч». Жора: «Студент… я тебя недооценивал».", who: "Лис + Жора",
+   mv: "A — крупно: Макс отдаёт ключи, Толян тянет руку; капитал <b>1 020 000 → 120 000 (−900 000)</b>. B — <b>приём 4 — было / стало</b>: кадр разрезан белой полосой; слева сепия «БЫЛО · ЧАСТЬ 1 · 100 000 ₽» — Толян у гаражей с конвертом; справа цвет «СТАЛО · ЧАСТЬ 15» — Толян с ключами у Mark II. Полоса уезжает влево, «стало» забирает кадр." },
+ { h: "ФИНАЛ · ЭСТАКАДА", tc: "6/6 · 0:59–1:11",
+   A: { def: () => ({ bg: "estakada", grade: "night", hud: HUD56("120 000"),
+       mid: car(MK, 380, 1600, 740, { z: 4, sheen: .4, refl: 1, flip: 1 }) + T("tf", 310, 1780, 720, {}, { rim: "#ffb84a", side: 1, z: 7 }) + Z("zf", 590, 1800, 700, { look: "grin" }, { armR: -60 }, { rim: "#ffb84a", side: 1, z: 7 }), lights: ES_L }), shot: { x: 540, y: 1200, s: 1.08 },
+     bubbles: [{ p: "tf", html: "А дальше —<br><em>два миллиона, брат.</em>", fs: 44 }], talk: ["tf"] },
+   B: { def: () => ({ bg: "estakada", grade: "night", over: CTA56,
+       mid: car(MK, 140, 1500, 820, { z: 4, sheen: .8, refl: 1, lights: MKL }) + SPEED(1050, 1600), lights: ES_L }), shot: { x: 540, y: 1100, s: .98 } },
+   vo: "Толян: «Сто тысяч. Пятнадцать сделок. Один бот». Жора: «Студент, а дальше?» Толян: «А дальше — два миллиона, брат». (Карточку бота голос не читает.)", who: "Толян + Жора",
+   mv: "Снова эстакада, <b>другой план</b>: Mark II развёрнут, Толян и Жора у машины. B — Mark II срывается с места, линии скорости, огни; <b>последний кадр — только карточка бота</b> «Бот «Перехват» — ссылка в шапке», без надписей про части." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>

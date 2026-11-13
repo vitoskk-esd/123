@@ -1,0 +1,19 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="zg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd0f5"/><stop offset="1" stop-color="#eef8fd"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#zg)"/>
+    <!-- фасад -->
+    <rect x="60" y="300" width="960" height="900" fill="#f1e6d2" stroke="#000" stroke-width="6"/>
+    <path d="M30 320 L540 150 L1050 320 Z" fill="#e2d2b6" stroke="#000" stroke-width="6"/>
+    <text x="540" y="290" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="58" fill="#8a5a33">ЗАГС</text>
+    <rect x="150" y="420" width="70" height="680" fill="#fbf6ec" stroke="#000" stroke-width="5"/><rect x="138" y="400" width="94" height="28" fill="#e2d2b6" stroke="#000" stroke-width="4"/><rect x="330" y="420" width="70" height="680" fill="#fbf6ec" stroke="#000" stroke-width="5"/><rect x="318" y="400" width="94" height="28" fill="#e2d2b6" stroke="#000" stroke-width="4"/><rect x="680" y="420" width="70" height="680" fill="#fbf6ec" stroke="#000" stroke-width="5"/><rect x="668" y="400" width="94" height="28" fill="#e2d2b6" stroke="#000" stroke-width="4"/><rect x="860" y="420" width="70" height="680" fill="#fbf6ec" stroke="#000" stroke-width="5"/><rect x="848" y="400" width="94" height="28" fill="#e2d2b6" stroke="#000" stroke-width="4"/>
+    <!-- двери и кольца -->
+    <rect x="440" y="700" width="200" height="400" fill="#6a3a2a" stroke="#000" stroke-width="6"/><path d="M540 700 V1100" stroke="#000" stroke-width="5"/>
+    <circle cx="510" cy="560" r="50" fill="none" stroke="#e6b422" stroke-width="16"/><circle cx="570" cy="560" r="50" fill="none" stroke="#e6b422" stroke-width="16"/>
+    <!-- ступени -->
+    <rect x="300" y="1100" width="480" height="30" fill="#d9d2c4" stroke="#000" stroke-width="4"/><rect x="260" y="1130" width="560" height="30" fill="#d9d2c4" stroke="#000" stroke-width="4"/><rect x="220" y="1160" width="640" height="30" fill="#d9d2c4" stroke="#000" stroke-width="4"/><rect x="180" y="1190" width="720" height="30" fill="#d9d2c4" stroke="#000" stroke-width="4"/>
+    <!-- клумбы -->
+    <rect x="40" y="1140" width="200" height="70" fill="#7a5a3a" stroke="#000" stroke-width="5"/><circle cx="60" cy="1132" r="16" fill="#ff6fae"/><circle cx="92" cy="1132" r="16" fill="#ffd23f"/><circle cx="124" cy="1132" r="16" fill="#ff6fae"/><circle cx="156" cy="1132" r="16" fill="#fff"/><circle cx="188" cy="1132" r="16" fill="#ff6fae"/><circle cx="220" cy="1132" r="16" fill="#ffd23f"/><rect x="840" y="1140" width="200" height="70" fill="#7a5a3a" stroke="#000" stroke-width="5"/><circle cx="860" cy="1132" r="16" fill="#ff6fae"/><circle cx="892" cy="1132" r="16" fill="#ffd23f"/><circle cx="924" cy="1132" r="16" fill="#ff6fae"/><circle cx="956" cy="1132" r="16" fill="#fff"/><circle cx="988" cy="1132" r="16" fill="#ff6fae"/><circle cx="1020" cy="1132" r="16" fill="#ffd23f"/>
+    <!-- площадь -->
+    <rect y="1220" width="1080" height="700" fill="#cfc8b8"/><path d="M0 1280 H1080" stroke="#b9b1a0" stroke-width="3"/><path d="M0 1360 H1080" stroke="#b9b1a0" stroke-width="3"/><path d="M0 1440 H1080" stroke="#b9b1a0" stroke-width="3"/><path d="M0 1520 H1080" stroke="#b9b1a0" stroke-width="3"/><path d="M0 1600 H1080" stroke="#b9b1a0" stroke-width="3"/><path d="M0 1680 H1080" stroke="#b9b1a0" stroke-width="3"/><path d="M0 1760 H1080" stroke="#b9b1a0" stroke-width="3"/><path d="M0 1840 H1080" stroke="#b9b1a0" stroke-width="3"/>
+    <path d="M180 1700 q14 -16 28 0 q-6 10 -14 8 z" fill="#8a929b" stroke="#000" stroke-width="3"/><path d="M240 1740 q14 -16 28 0 q-6 10 -14 8 z" fill="#8a929b" stroke="#000" stroke-width="3"/><path d="M880 1680 q14 -16 28 0 q-6 10 -14 8 z" fill="#8a929b" stroke="#000" stroke-width="3"/>
+  </svg>
