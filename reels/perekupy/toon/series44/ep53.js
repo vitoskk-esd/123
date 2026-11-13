@@ -45,6 +45,7 @@ mount("s3b", { bg: "logovo", grade: "warm", over: CLOCK("08:00:31", "clk2", "#4c
 mount("s4", { grade: "day", far: MAP(), farBlur: 0,
   over: `<div class="hand wr" id="h1" style="left:120px;top:1480px;z-index:60;font-size:64px;color:#c0392b;transform:rotate(-6deg)">дворами!</div><div class="hand wr" id="h2" style="left:520px;top:900px;z-index:60;font-size:56px;color:#2f6db5;transform:rotate(-4deg)">через стройку</div>`
     + CLOCK("08:01", "clk3", "#ffd23f").replace("top:620px", "top:1660px").replace("font-size:150px", "font-size:90px")
+    + `<div id="radioG" style="position:absolute;left:60px;top:430px;z-index:62;background:#0d0e12;border:6px solid #fff;border-radius:34px;padding:20px 28px;font-family:Unbounded;font-weight:800;font-size:40px;color:#fff;opacity:0">ГЕНА (по рации):<br><em style="font-style:normal;color:#ffd23f">Валера, жми! Каждая секунда на счету!</em></div>`
     + `<div id="dot" style="position:absolute;left:126px;top:1626px;width:48px;height:48px;border-radius:50%;background:#2f6db5;border:6px solid #fff;box-shadow:0 0 0 5px #151515;z-index:61"></div>` }, { x: 540, y: 960, s: 1 });
 mount("s4b", { bg: "gorodutro", grade: "dawn", farBlur: 6,
   mid: SPEED(1250, 1560) + G("crew4", car(CREWS, 160, 1560, 820, { z: 5, sheen: .7 }), 5), lights: glow(820, 760, 360, "#fff2c0", .5),
@@ -53,10 +54,13 @@ mount("s4b", { bg: "gorodutro", grade: "dawn", farBlur: 6,
 const DVOR = (d, g, v, gl, extra = "") => car(TARGET, 80, 1600, 640, { z: 4, sheen: .6 }) + P(d, "ded", DED, 470, 1720, 720, { armR: -70 }, { rim: "#fff2c0", side: -1, z: 6 }) + INHAND(470, 1720, 720, -70, 100, KEYS, 9)
   + P(g, "gena", { ...GENA, look: gl }, 900, 1790, 760, {}, { rim: "#fff2c0", side: -1, z: 7 }) + (v ? P(v, "valera", { ...VALERA, look: "o" }, 1060, 1800, 760, {}, { z: 7 }) : "") + extra;
 mount("s5", { bg: "dvorutro", grade: "day", mid: DVOR("dd", "g5", null, "o"), lights: DVOR_L,
-  bubbles: [{ id: "g2", p: "g5", html: "Как?!", fs: 64 }, { id: "d1", p: "dd", html: "Внучки, мне бот прислал объявление<br><em>через секунду. Я тут с 08:01.</em>", fs: 36 }] }, { x: 560, y: 1200, s: 1.08 });
+  bubbles: [{ id: "g2", p: "g5", html: "Как?!<br><em>Как?!</em>", fs: 60 }, { id: "d1", p: "dd", html: "Внучки, мне бот прислал объявление<br><em>через секунду. Я тут с 08:01.</em>", fs: 36 }] }, { x: 560, y: 1200, s: 1.08 });
 mount("s5b", { bg: "dvorutro", grade: "day", freeze: 1,
   over: STAMP("ПЛАН<br>ПРОВАЛЕН", 120, 520) + `<div class="hand wr" id="h3" style="left:70px;top:960px;z-index:64;font-size:66px;color:#ffd23f;-webkit-text-stroke:3px #151515;transform:rotate(-4deg)">сайт: 1 раз в минуту<br>бот: через 1 секунду</div>`,
   mid: DVOR("dd2", "g6", "v6", "o"), lights: "" }, { x: 560, y: 1200, s: 1.08 });
+// 5c. дед крупно: уже пьёт чай с продавцом
+const TEA = `<svg viewBox="0 0 100 100"><path d="M28 30 h44 l-6 58 h-32 z" fill="#ffd27a" fill-opacity=".85" stroke="#151515" stroke-width="5"/><path d="M28 30 h44" stroke="#c9ced6" stroke-width="8"/><path d="M72 44 q16 4 10 22 q-4 8 -14 6" fill="none" stroke="#151515" stroke-width="5"/><path d="M40 20 q6 -10 0 -18 M56 20 q6 -10 0 -18" stroke="#fff" stroke-width="4" fill="none" opacity=".8"/></svg>`;
+mount("s5c", { bg: "dvorutro", grade: "day", mid: car(TARGET, 80, 1600, 640, { z: 4, sheen: .6 }) + P("dt", "ded", DED, 470, 1720, 720, { armR: -70 }, { rim: "#fff2c0", side: -1, z: 6 }) + INHAND(470, 1720, 720, -70, 110, TEA, 9), lights: DVOR_L }, { x: 470, y: 1250, s: 1.7 });
 // 6. план Б → финальная карточка
 mount("s6", { bg: "logovo", grade: "warm",
   over: `<svg viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:59"><path id="x1" d="M130 160 L950 690" stroke="#ff3b30" stroke-width="16" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/><path id="x2" d="M950 160 L130 690" stroke="#ff3b30" stroke-width="16" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>
@@ -122,7 +126,8 @@ window.build = R => {
   // 2. гаджеты
   const SW2 = st.k1 - .4; swap("s1b", "s2", SW2); move("s2", { s: 1.07, y: 1000 }, SW2, en.k1 - SW2, "none"); bub("k1", st.v1 - .15);
   for (let t = st.k1 + .2; t < en.k1; t += .45) { tl.fromTo("#refresh", { scale: .85 }, { scale: 1, duration: .2, ease: "back.out(3)", immediateRender: false }, t); R.sfx("tap", t, .35); }
-  cut("s2", "s2b", st.v1 - .1); move("s2b", { x: 600, s: 1.16 }, st.v1 - .1, en.v1 - st.v1 + .3, "none"); bub("v1", st.l1 - .45);
+  cut("s2", "s2b", st.v1 - .1); move("s2b", { x: 600, s: 1.16 }, st.v1 - .1, en.v1 - st.v1 + .3, "none"); bub("v1", st.l1a - .15);
+  move("s2b", { x: 540, y: 1150, s: 1.0 }, st.l1a - .1, en.l1a - st.l1a + .4, "power1.inOut");      // «что могло пойти не так?» — отъезд
   tl.fromTo("#keys2", { rotation: -8 }, { rotation: 8, duration: .2, yoyo: true, repeat: 5, ease: "sine.inOut", transformOrigin: "860px 1500px", immediateRender: false }, st.v1); R.sfx("clack", st.v1 + .1, .4);
   // 3. часы: 07:59:58 → 07:59:59 → 08:00:00 → (сайт молчит) → 08:00:31 «Вышло!»
   const SW3 = st.l1 - .4; swap("s2b", "s3", SW3); move("s3", { s: 1.18 }, SW3, en.l1 - SW3 + .3, "none");
@@ -133,12 +138,13 @@ window.build = R => {
   // 4. погоня: маршрут рисуется, точка бежит, часы идут → проспект
   const SW4 = st.l2 - .4; swap("s3b", "s4", SW4);
   const route = document.getElementById("route"), Lr = route.getTotalLength(); gsap.set(route, { strokeDasharray: `${Lr} ${Lr}`, strokeDashoffset: Lr });
-  const D4 = en.l2 - st.l2 + .3;
+  const D4 = en.g2b - st.l2 + .1;                 // маршрут рисуется до конца реплики Гены по рации
   tl.to(route, { strokeDashoffset: 0, duration: D4, ease: "none" }, st.l2);
   const pts = [[150, 1650], [150, 1370], [410, 1370], [410, 1070], [670, 1070], [670, 770], [930, 770], [930, 470]];
   pts.slice(1).forEach(([x, y], k) => tl.to("#dot", { left: x - 24, top: y - 24, duration: D4 / 7, ease: "none" }, st.l2 + k * D4 / 7));
   [["08:02", .25], ["08:04", .5], ["08:05", .75]].forEach(([tx, f]) => { tl.set("#clk3", { textContent: tx }, st.l2 + D4 * f); R.sfx("tick", st.l2 + D4 * f, .4); });
   write("#h1", W("l2", "двор") - .1, .5); write("#h2", W("l2", "строй") - .1, .5);
+  tl.fromTo("#radioG", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .25, ease: "back.out(2)", immediateRender: false }, st.g2b - .05).to("#radioG", { opacity: 0, duration: .2 }, en.g2b + .2); R.sfx("bleep", st.g2b - .05, .5);
   cut("s4", "s4b", st.v2 - .3); R.sfx("whoosh", st.v2 - .3, .8);
   tl.fromTo("#crew4", { x: -900 }, { x: 0, duration: .5, ease: "power3.out", immediateRender: false }, st.v2 - .3);
   tl.fromTo("#radio", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .25, ease: "back.out(2)", immediateRender: false }, st.v2 - .05); R.sfx("bleep", st.v2 - .05, .5);
@@ -150,8 +156,9 @@ window.build = R => {
   gsap.set("#stamp", { opacity: 0 }); slam("#stamp", st.l3 + .05, "impact", 2.4);
   write("#h3", W("l3", "бот") - .2, .8);
   move("s5b", { s: 1.12 }, st.l3 - .1, en.l3 - st.l3 + .4, "none");
+  cut("s5b", "s5c", st.l3b - .1); move("s5c", { s: 1.9 }, st.l3b - .1, en.l3b - st.l3b + .4, "none");
   // 6. план Б → карточка бота (последний кадр — только бот)
-  const SW6 = st.g3 - .4; swap("s5b", "s6", SW6); move("s6", { s: 1.16 }, SW6, en.g3 - SW6 + .3, "none");
+  const SW6 = st.g3 - .4; swap("s5c", "s6", SW6); move("s6", { s: 1.16 }, SW6, en.g3 - SW6 + .3, "none");
   tl.to("#x1", { strokeDashoffset: 0, duration: .3, ease: "power2.in" }, SW6 + .5).to("#x2", { strokeDashoffset: 0, duration: .3, ease: "power2.in" }, SW6 + .85); R.sfx("swish", SW6 + .5, .6); R.sfx("swish", SW6 + .85, .6);
   write("#planb", W("g3", "пункт") - .1, .9); bub("g3", st.end - .15);
   cut("s6", "s6b", st.end - .1); move("s6b", { s: 1.1 }, st.end - .1, en.end - st.end + .6, "none");

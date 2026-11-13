@@ -1,0 +1,14 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor.",
+  "notes": "Parody of a heist-movie narrator: introduces the crew like in Ocean's Eleven, tense and dramatic, then dry irony at the end. «Лексус Эн Икс» — Lexus NX."
+ },
+ "gena": {
+  "voice": "Iapetus",
+  "tempo": 1.12,
+  "profile": "Gena — the 'brain' of a three-man crew of Russian car flippers, glasses and a tie, overconfident planner.",
+  "notes": "Line 1: cool, confident heist-plan voice. Line 2: a single shocked «Как?!». Line 3: defeated but decisive, announcing the new plan."
+ }
+}
