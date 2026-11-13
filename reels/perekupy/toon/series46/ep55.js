@@ -132,7 +132,8 @@ window.build = R => {
   // 4. автоэлектрик: код → цена → фары зажглись
   const SW4 = st.l3 - .4; swap("s3b", "s4", SW4); move("s4", { s: 1.07, y: 1000 }, SW4, en.l3 - SW4 + .3, "none");
   gsap.set(["#scan1", "#scan2"], { opacity: 0 });
-  tl.fromTo("#scan1", { opacity: 0 }, { opacity: 1, duration: .15, immediateRender: false }, W("l3", "код") - .1); R.sfx("bleep", W("l3", "код"), .5);
+  tl.fromTo("#scan1", { opacity: 0 }, { opacity: 1, duration: .15, immediateRender: false }, W("l3", "ошиб") - .1); R.sfx("bleep", W("l3", "ошиб"), .5);
+  tl.fromTo("#scan2", { opacity: 0, scale: .8 }, { opacity: 1, scale: 1, duration: .25, ease: "back.out(2)", immediateRender: false }, W("l3", "ошиб") + .6); R.sfx("ping", W("l3", "ошиб") + .6, .6);
   cut("s4", "s4b", st.r1 - .1); move("s4b", { s: 1.14 }, st.r1 - .1, en.r1 - st.r1 + .3, "none"); bub("r1", st.l4 - .15);
   tl.set("#hl .glow", { opacity: .9 }, W("r1", "завод") + .3); R.sfx("ping", W("r1", "завод") + .3, .8);
   // 5. покупатель из бота → продано
