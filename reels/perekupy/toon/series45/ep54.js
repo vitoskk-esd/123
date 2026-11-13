@@ -133,7 +133,7 @@ window.build = R => {
   for (let k = 0; k < 3; k++) tl.to("#lamp", { opacity: .4, duration: .12, yoyo: true, repeat: 1 }, LIE + .3 + k * .3);
   // 4. бот: Краснодар → вода поднимается, фен
   const SW4 = st.l2 - .4; swap("s3b", "s4", SW4); move("s4", { s: 1.07, y: 1000 }, SW4, en.l2 - SW4, "none");
-  gsap.set("#nfl", { opacity: 0 }); const NF = W("l2", "бот") - .1;
+  gsap.set("#nfl", { opacity: 0 }); const NF = W("l2", "показ") - .1;
   tl.fromTo("#nfl", { opacity: 0, y: -50 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(1.8)", immediateRender: false }, NF); R.sfx("ping", NF, .9);
   cut("s4", "s4b", st.t2 - .1); move("s4b", { s: 1.16 }, st.t2 - .1, en.t2 - st.t2 + .5, "none");
   gsap.set(["#water", "#watert"], { opacity: 0 });
