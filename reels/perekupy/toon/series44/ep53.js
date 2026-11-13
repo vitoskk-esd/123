@@ -85,7 +85,9 @@ window.build = R => {
   R.hooks.push(t => {
     const f = Math.floor(t * 30);
     for (const el of Object.values(SC)) {
-      if (!(+el.style.opacity > 0)) continue;
+      const on = +el.style.opacity > 0;
+      el.style.display = on ? "" : "none";          // невидимые сцены не держим в отрисовке (14 сцен × слои 1080×1920 роняли браузер на ~30-й секунде)
+      if (!on) continue;
       const k = el.cam.s > 1.6 ? .55 : 1;
       C.apply(el, [(R.noise(t * .6) * 9 + R.noise(t * 1.7 + 40) * 3) * k, (R.noise(t * .5 + 9) * 10 + R.noise(t * 1.9 + 70) * 3) * k, R.noise(t * .4 + 20) * .3 * k]);
       el.sheens.forEach((s, j) => { s.style.backgroundPosition = `${(130 - ((t * 14 + j * 45) % 160)).toFixed(1)}% 0`; });
