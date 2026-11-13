@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor.",
+  "notes": "Parody of a heist-movie narrator: introduces the crew like in Ocean's Eleven, tense and dramatic, then dry irony at the end. «Лексус Эн Икс» — Lexus NX."
+ },
+ "gena": {
+  "voice": "Iapetus",
+  "tempo": 1.12,
+  "profile": "Gena — the 'brain' of a three-man crew of Russian car flippers, glasses and a tie, overconfident planner.",
+  "notes": "Line 1: cool, confident heist-plan voice. Line 2: a single shocked «Как?!». Line 3: defeated but decisive, announcing the new plan."
+ },
+ "kostik": {
+  "voice": "Puck",
+  "tempo": 1.15,
+  "profile": "Kostik — the young 'tech guy' of the crew, excited nerd.",
+  "notes": "Line 1: proud of his 'technology' (refreshing a website). Line 2: shouting with excitement: «Вышло! Погнали!»"
+ },
+ "valera": {
+  "voice": "Orus",
+  "tempo": 1.1,
+  "profile": "Valera — the crew's driver, cool guy in sunglasses and a cap.",
+  "notes": "Line 1: cool, confident. Line 2: on the radio, triumphant: a district record."
+ },
+ "ded": {
+  "voice": "Rasalgethi",
+  "tempo": 1.05,
+  "profile": "Grandpa Fyodor — a kind, cunning Russian pensioner in his 70s, calm and amused.",
+  "notes": "One line: friendly, unhurried, slightly teasing the young guys («Внучки»)."
+ }
+}
