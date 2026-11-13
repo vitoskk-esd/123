@@ -1854,6 +1854,35 @@ async def test_free_trial_users_can_buy_paid_trial_once(env):
     assert photo.caption.startswith("Пробный день ты уже брал") and "Сравни тарифы на картинке" not in photo.caption
 
 
+async def test_pro_discount_during_trial_and_admin_trial(env):
+    """Зачёт пробного (владелец 13.11): на пробном дне PRO — 1990 вместо 2490 (кнопка, оплата, текст); после — снова 2490.
+    /trial @ник — админ включает пробный день на 24 часа без оплаты, человеку приходит сообщение с кнопкой PRO за 1990."""
+    from user import apply_payment
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, msg("/start"))
+    await ctx.db._run("UPDATE users SET username='estet_23_auto' WHERE id=?", USER)
+    await dp.feed_update(bot, msg("/trial @Estet_23_Auto", ADMIN))
+    u = await ctx.db.user(USER)
+    assert u["plan"] == "trial" and u["trial_used"] == 1 and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
+    assert "пробный день включён" in s.texts(ADMIN)[-1] and "@estet_23_auto" in s.texts(ADMIN)[-1]
+    given = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Тебе включили пробный день" in given.text and "1990 ₽ вместо 2490 ₽" in given.text
+    assert [b.text for row in given.reply_markup.inline_keyboard for b in row] == ["🚀 PRO — 1990 ₽ вместо 2490 ₽"]
+    await dp.feed_update(bot, cb("s:pay:pro"))
+    pay = await ctx.db.last_pending(USER)
+    assert pay["amount"] == 1990 and pay["plan"] == "pro"
+    await apply_payment(ctx, USER, pay["yk_id"], "succeeded")
+    u = await ctx.db.user(USER)
+    assert u["plan"] == "pro" and 30.9 * 86400 < u["paid_until"] - time.time() <= 31 * 86400 + 60    # 30 дней PRO — после остатка пробного
+    await dp.feed_update(bot, cb("s:pay:pro"))                               # уже не на пробном — полная цена
+    assert (await ctx.db.last_pending(USER))["amount"] == 2490
+    await dp.feed_update(bot, msg("/trial @nobody", ADMIN))
+    assert "Не нашёл" in s.texts(ADMIN)[-1]
+    await dp.feed_update(bot, msg("/trial @estet_23_auto", ADMIN))           # уже PRO — не трогаем
+    assert "уже есть тариф «PRO»" in s.texts(ADMIN)[-1]
+
+
 async def test_trial_once_per_account(env):
     """Пробный день — один раз на аккаунт: take_trial второй раз не проходит; кнопка пробного после этого — «только один раз»."""
     from user import activate_trial

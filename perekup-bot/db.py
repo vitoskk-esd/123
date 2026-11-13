@@ -517,6 +517,13 @@ class DB:
     async def set_setting(self, key: str, value: str) -> None:
         await self._run("INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)", key, value)
 
+    async def user_by_name(self, name: str):
+        """Пользователь по @нику (без учёта регистра) или по числовому id."""
+        name = name.strip().lstrip("@")
+        if name.isdigit():
+            return await self.user(int(name))
+        return await self._one("SELECT * FROM users WHERE lower(username)=? ORDER BY last_seen DESC LIMIT 1", name.lower())
+
     async def reset_free_trials(self) -> int:
         """Пробный день снова платный (владелец 13.11): кто брал его бесплатно, может один раз купить платный — снимаем отметку,
         если оплаченного пробного дня у человека не было."""

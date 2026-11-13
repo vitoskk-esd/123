@@ -21,13 +21,29 @@ class Plan:
     delay: int = 0          # через сколько секунд после публикации приходит машина
     market: bool = True     # оценка «ниже рынка» и фильтр по ней
     dkp: bool = True        # договор купли-продажи по данным клиента
+    full: int = 0           # обычная цена, если сейчас действует скидка (PRO во время пробного дня)
 
     @property
     def unlimited(self) -> bool:
         return self.max_filters >= UNLIMITED
 
 
-def plans(cfg: Config) -> dict[str, Plan]:
+def on_trial(user, now: float | None = None) -> bool:
+    """Сейчас идёт оплаченный пробный день."""
+    return bool(user) and user["plan"] == "trial" and user["paid_until"] > (now or time.time())
+
+
+def plans(cfg: Config, user=None, now: float | None = None) -> dict[str, Plan]:
+    """Тарифы; с user — цены для этого человека: во время пробного дня PRO стоит price_pro_trial (1990 вместо 2490 —
+    пробный день засчитывается, владелец 13.11)."""
+    out = _plans(cfg)
+    if user is not None and on_trial(user, now) and cfg.price_pro_trial < cfg.price_pro:
+        from dataclasses import replace
+        out["pro"] = replace(out["pro"], price=cfg.price_pro_trial, full=cfg.price_pro)
+    return out
+
+
+def _plans(cfg: Config) -> dict[str, Plan]:
     return {
         # пробный день (владелец 13.11: бесплатный убрали, снова платный — 490 ₽): как PRO, но один фильтр и без договора; один раз на человека
         "trial": Plan("trial", "Пробный день", cfg.price_trial, 1, 1, UNLIMITED, dkp=False),
@@ -63,7 +79,8 @@ def new_period(cfg: Config, user, plan_id: str, now: float | None = None) -> flo
     new = p[plan_id]
     left = max(0.0, user["paid_until"] - now)
     old = p.get(user["plan"]) if user["plan"] else None
-    if not left or not old or old.id == new.id:
+    if not left or not old or old.id == new.id or old.id == "trial":
+        # остаток пробного дня не пересчитываем по цене (он уже засчитан скидкой на PRO) — новый срок просто идёт после него
         return max(now, user["paid_until"]) + new.days * 86400
     per_day_old, per_day_new = old.price / old.days, new.price / new.days
     return now + new.days * 86400 + left * per_day_old / per_day_new

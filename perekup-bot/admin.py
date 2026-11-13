@@ -724,6 +724,36 @@ async def vk_connect(msg: Message, command: CommandObject, ctx: Ctx) -> None:
     await msg.answer(T.VK_CONNECTED.format(name=name, queued=queued))
 
 
+@router.message(Command("trial"))
+async def give_trial(msg: Message, command: CommandObject, bot: Bot, ctx: Ctx) -> None:
+    """/trial @ник — включить человеку пробный день на 24 часа без оплаты (владелец 13.11). Как оплаченный: 1 фильтр,
+    PRO в этот день со скидкой; отметка «пробный использован» — купить ещё один пробный он уже не сможет."""
+    if not await is_admin(msg, ctx):
+        return
+    import plans
+    from user import fmt_date
+    if not (command.args or "").strip():
+        return await msg.answer(T.ADMIN_TRIAL_USAGE)
+    name = command.args.strip().split()[0]
+    u = await ctx.db.user_by_name(name)
+    if not u:
+        return await msg.answer(T.ADMIN_TRIAL_NOUSER.format(name=html.escape(name)))
+    shown = "@" + u["username"] if u["username"] else str(u["id"])
+    cur = plans.current(ctx.cfg, u)
+    if cur and cur.id not in ("trial", "free"):
+        return await msg.answer(T.ADMIN_TRIAL_ACTIVE.format(name=html.escape(shown), plan=cur.title, until=fmt_date(u["paid_until"])))
+    until = time.time() + plans.plans(ctx.cfg)["trial"].days * 86400
+    await ctx.db.set_user(u["id"], paid_until=until, plan="trial", trial_used=1)
+    await ctx.db.event(u["id"], "trial", "admin")
+    nf = "" if await ctx.db.filters(u["id"]) else T.TRIAL_PAID_NOFILTER
+    try:
+        await bot.send_message(u["id"], T.TRIAL_GIVEN.format(until=fmt_date(until), nofilter=nf, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro),
+                               reply_markup=K.plans(plans.plans(ctx.cfg, await ctx.db.user(u["id"])), False, only="pro"))
+    except Exception as e:
+        log.info("не смог написать %s: %s", u["id"], e)
+    await msg.answer(T.ADMIN_TRIAL_DONE.format(name=html.escape(shown), until=fmt_date(until)))
+
+
 @router.message(Command("broadcast"))
 async def broadcast(msg: Message, command: CommandObject, bot: Bot, ctx: Ctx) -> None:
     """/broadcast текст — или ответь /broadcast на любое сообщение, и бот разошлёт его копию."""

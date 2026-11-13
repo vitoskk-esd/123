@@ -41,7 +41,9 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
             log.info("статус платежа %s: %s", p["yk_id"], e)
             continue
         if until:
-            await send(bot, ctx, p["user_id"], T.PAY_OK.format(plan=all_plans[p["plan"] or "basic"].title, until=fmt_date(until)))
+            from user import paid_message
+            text, markup = await paid_message(ctx, p["user_id"], all_plans[p["plan"] or "basic"], until)
+            await send(bot, ctx, p["user_id"], text, markup)
     # подарок «бесплатный пробный день» убран (владелец 13.11): пробный день снова платный — 490 ₽
     # тариф скоро закончится: пробный день — за 3 часа, месячный — за сутки
     for u in await ctx.db.users("paid_until>? AND paid_until<?", now, now + DAY):
@@ -52,8 +54,9 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
             s = await ctx.db.user_stats(u["id"], now - 30 * DAY)
             when = "Через 3 часа" if plan.id == "trial" else "Завтра"
             # после пробного дня предлагаем «Простой» и PRO, иначе — продлить свой тариф или перейти на PRO
-            buttons = K.plans(all_plans, False) if plan.id == "trial" else K.plans(all_plans, False, only=plan.id)
-            await send(bot, ctx, u["id"], T.ACCESS_ENDS.format(when=when, plan=plan.title, n=s["n"], good=s["good"]), buttons)
+            buttons = K.plans(plans.plans(ctx.cfg, u, now), False) if plan.id == "trial" else K.plans(all_plans, False, only=plan.id)
+            deal = T.TRIAL_ENDS_DEAL.format(pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro) if plan.id == "trial" else ""
+            await send(bot, ctx, u["id"], T.ACCESS_ENDS.format(when=when, plan=plan.title, n=s["n"], good=s["good"]) + deal, buttons)
     # доступ закончился
     for u in await ctx.db.users("MAX(trial_until, paid_until)<? AND MAX(trial_until, paid_until)>?", now, now - 2 * DAY):
         end = int(max(u["trial_until"], u["paid_until"]))

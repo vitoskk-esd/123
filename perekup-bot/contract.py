@@ -33,7 +33,7 @@ async def ask(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = None)
     """Сначала выбор: вписывать паспортные данные в договор или оставить строки для ручного заполнения."""
     uid = uid or msg.from_user.id
     if not await allowed(ctx, uid):
-        return await msg.answer(T.DKP_LOCKED, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
+        return await msg.answer(T.DKP_LOCKED, reply_markup=K.plans(plans.plans(ctx.cfg, await ctx.db.user(uid)), False, only="pro"))
     await state.clear()
     await msg.answer(T.DKP_CHOOSE, reply_markup=K.dkp_choose())
 
@@ -75,7 +75,7 @@ async def send_docs(bot: Bot, chat_id: int, data: dict) -> None:
 async def dkp_choose(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
     await cb.answer()
     if not await allowed(ctx, cb.from_user.id):
-        return await cb.message.answer(T.DKP_LOCKED, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
+        return await cb.message.answer(T.DKP_LOCKED, reply_markup=K.plans(plans.plans(ctx.cfg, await ctx.db.user(cb.from_user.id)), False, only="pro"))
     await ask_data(cb.message, state, cb.data == "dkp:with")
 
 
@@ -83,7 +83,7 @@ async def dkp_choose(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
 async def dkp_btn(cb: CallbackQuery, bot: Bot, ctx: Ctx, state: FSMContext) -> None:
     if not await allowed(ctx, cb.from_user.id):
         await cb.answer()
-        return await cb.message.answer(T.DKP_LOCKED, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
+        return await cb.message.answer(T.DKP_LOCKED, reply_markup=K.plans(plans.plans(ctx.cfg, await ctx.db.user(cb.from_user.id)), False, only="pro"))
     if cb.data == "dkp:reset":
         await cb.answer()
         return await ask(cb.message, ctx, state, cb.from_user.id)

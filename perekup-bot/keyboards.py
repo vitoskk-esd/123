@@ -151,7 +151,8 @@ def plans(all_plans: dict, trial: bool, only: str | None = None) -> InlineKeyboa
     """Кнопки тарифов; trial — показывать ли пробный день; only — одна кнопка (например, «перейти на PRO»)."""
     btn = {"trial": T.BTN_PLAN_TRIAL, "basic": T.BTN_PLAN_BASIC, "pro": T.BTN_PLAN_PRO}
     ids = [only] if only else [p for p in ("trial", "basic", "pro") if p != "trial" or trial]
-    return kb(*[[B(text=btn[p].format(price=all_plans[p].price), callback_data=f"s:pay:{p}")] for p in ids])
+    text = lambda p: (T.BTN_PLAN_PRO_DEAL if all_plans[p].full else btn[p]).format(price=all_plans[p].price, full=all_plans[p].full)
+    return kb(*[[B(text=text(p), callback_data=f"s:pay:{p}")] for p in ids])
 
 
 def pay_link(url: str, price: int) -> InlineKeyboardMarkup:

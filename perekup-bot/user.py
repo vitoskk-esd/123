@@ -99,7 +99,7 @@ async def ask_filter(ev, ctx: Ctx, state: FSMContext) -> None:
     msg = ev.message if isinstance(ev, CallbackQuery) else ev
     limit = await filter_limit(ctx, ev.from_user.id)
     if limit:
-        await msg.answer(limit, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
+        await msg.answer(limit, reply_markup=K.plans(plans.plans(ctx.cfg, await ctx.db.user(ev.from_user.id)), False, only="pro"))
     else:
         await state.set_data({})          # новый фильтр, а не правка старого
         await state.set_state(S.filter)
@@ -144,11 +144,11 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         return await cb.answer()
     limit = await filter_limit(ctx, uid)
     if limit:
-        await cb.message.answer(limit, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
+        await cb.message.answer(limit, reply_markup=K.plans(plans.plans(ctx.cfg, await ctx.db.user(cb.from_user.id)), False, only="pro"))
         return await cb.answer()
     plan = plans.current(ctx.cfg, await ctx.db.user(uid))
     if plan and not plan.market and Filter.loads(data["pending"]).min_discount:
-        await cb.message.answer(T.DISCOUNT_FILTER_PRO, reply_markup=K.plans(plans.plans(ctx.cfg), False, only="pro"))
+        await cb.message.answer(T.DISCOUNT_FILTER_PRO, reply_markup=K.plans(plans.plans(ctx.cfg, await ctx.db.user(cb.from_user.id)), False, only="pro"))
         return await cb.answer()
     fid = await ctx.db.add_filter(uid, data["pending_text"], data["pending"])
     await ctx.db.event(uid, "filter")
@@ -317,7 +317,7 @@ async def got_channel(msg: Message, ctx: Ctx, state: FSMContext) -> None:
             replies.append(T.CHANNEL_QUEUED.format(name=name))
             mine.append(cid)
     wait = (await queue_wait(ctx, mine) if mine else "") + vk_note(ctx, msg.text)
-    markup = K.plans(plans.plans(ctx.cfg), False, only="pro") if upsell else K.menu()
+    markup = K.plans(plans.plans(ctx.cfg, await ctx.db.user(uid)), False, only="pro") if upsell else K.menu()
     await msg.answer("\n".join(replies) + wait or T.ASK_CHANNEL, reply_markup=markup)
 
 
@@ -400,7 +400,7 @@ async def want_try(cb: CallbackQuery, ctx: Ctx) -> None:
     """«Хочу попробовать» под фото приветствия: пробный день за 490 ₽ + «Другие тарифы»; уже брал — сразу тарифы."""
     u = await ctx.db.user(cb.from_user.id)
     if can_trial(u):
-        await cb.message.answer(T.TRY_OFFER.format(price=plans.plans(ctx.cfg)["trial"].price),
+        await cb.message.answer(T.TRY_OFFER.format(price=plans.plans(ctx.cfg)["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro),
                                 reply_markup=K.try_offer(plans.plans(ctx.cfg)["trial"].price))
     else:
         await send_plans(cb.message, ctx, cb.from_user.id, T.TRIAL_USED)
@@ -415,7 +415,7 @@ async def other_plans(cb: CallbackQuery, ctx: Ctx) -> None:
 
 def plans_text(ctx: Ctx, u) -> str:
     p = plans.plans(ctx.cfg)
-    trial = T.PLAN_TRIAL_TEXT.format(price=p["trial"].price) if can_trial(u) else ""
+    trial = T.PLAN_TRIAL_TEXT.format(price=p["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro) if can_trial(u) else ""
     b = p["basic"]
     return T.PLANS.format(trial=trial, basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
                           basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}",
@@ -428,15 +428,17 @@ _plans_photo: dict[tuple, str] = {}     # картинка сравнения т
 async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
     """Картинка «Простой против PRO» + короткая подпись + кнопки тарифов."""
     u = await ctx.db.user(uid)
-    p = plans.plans(ctx.cfg)
+    p = plans.plans(ctx.cfg, u)                   # на пробном дне PRO — со скидкой (зачёт пробного)
     b = p["basic"]
     plan = plans.current(ctx.cfg, u)
     status = (T.SUB_FREE if plan is plans.FREE else
               T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
               if plan else "")          # нет тарифа — про статус ничего не пишем (владелец 10.11)
+    if plans.on_trial(u):
+        status += T.PLAN_TRIAL_DEAL.format(pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro, until=fmt_date(u["paid_until"]))
     caption = T.PLANS_CAPTION.format(
         status=status, lead=intro or T.PLANS_LEAD,           # своё вступление вместо «Сравни тарифы на картинке» — без двух фраз со стрелками подряд
-        trial=T.PLAN_TRIAL_SHORT.format(price=p["trial"].price) if can_trial(u) else "",
+        trial=T.PLAN_TRIAL_SHORT.format(price=p["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro) if can_trial(u) else "",
         basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
         basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}")
     markup = K.plans(p, can_trial(u))
@@ -468,9 +470,9 @@ async def show_sub(msg: Message, ctx: Ctx, state: FSMContext, uid: int | None = 
 async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
     if not ctx.cfg.payments_on:      # тарифы видно (их проверяет Робокасса), но платить пока некуда
         return await cb.answer(T.PAY_SOON, show_alert=True)
-    all_plans = plans.plans(ctx.cfg)
-    plan = all_plans.get(cb.data.split(":")[2] if cb.data.count(":") == 2 else "basic", all_plans["basic"])
     u = await ctx.db.user(cb.from_user.id)
+    all_plans = plans.plans(ctx.cfg, u)           # PRO во время пробного дня — по цене со скидкой
+    plan = all_plans.get(cb.data.split(":")[2] if cb.data.count(":") == 2 else "basic", all_plans["basic"])
     if plan.id == "trial" and not can_trial(u):
         await cb.message.answer(T.TRIAL_USED, reply_markup=K.plans(all_plans, False))
         return await cb.answer()
@@ -496,6 +498,16 @@ async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
     await cb.message.answer(T.PAY_LINK.format(plan=plan.title, price=plan.price, days=plan.days, days_word=days_word) + switch,
                             reply_markup=K.pay_link(url, plan.price))
     await cb.answer()
+
+
+async def paid_message(ctx: Ctx, uid: int, plan, until: float):
+    """Что написать после оплаты: пробный день — когда кончится и что PRO в этот день со скидкой (кнопка); иначе — «оплата прошла»."""
+    if plan.id != "trial":
+        return T.PAY_OK.format(plan=plan.title, until=fmt_date(until)), None
+    nf = "" if await ctx.db.filters(uid) else T.TRIAL_PAID_NOFILTER
+    u = await ctx.db.user(uid)
+    return (T.TRIAL_PAID.format(until=fmt_date(until), nofilter=nf, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro),
+            K.plans(plans.plans(ctx.cfg, u), False, only="pro"))
 
 
 async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str, bot: Bot | None = None) -> float | None:
@@ -526,7 +538,8 @@ async def check(cb: CallbackQuery, ctx: Ctx, bot: Bot) -> None:
     if until:
         plan = plans.plans(ctx.cfg)[p["plan"] or "basic"]
         await cb.message.edit_reply_markup(reply_markup=None)
-        await cb.message.answer(T.PAY_OK.format(plan=plan.title, until=fmt_date(until)))
+        text, markup = await paid_message(ctx, cb.from_user.id, plan, until)
+        await cb.message.answer(text, reply_markup=markup)
         await cb.answer()
     else:
         await cb.answer(T.PAY_FAIL if status == "canceled" else T.PAY_WAIT, show_alert=True)
@@ -558,7 +571,7 @@ def offer_text(cfg) -> str:
     seller = (T.OFFER_SELLER.format(name=f" {cfg.seller_name}" if cfg.seller_name else "", inn=cfg.seller_inn,
                                     contact=cfg.seller_contact + ", " if cfg.seller_contact else "")
               if cfg.seller_inn else T.OFFER_SELLER_EMPTY)
-    return T.OFFER.format(seller=seller, trial=p["trial"].price, basic=p["basic"].price, pro=p["pro"].price,
+    return T.OFFER.format(seller=seller, trial=p["trial"].price, basic=p["basic"].price, pro=p["pro"].price, pro_trial=cfg.price_pro_trial,
                           contact_tail=f" или {cfg.seller_contact}" if cfg.seller_contact else "")
 
 

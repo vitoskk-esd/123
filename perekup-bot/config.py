@@ -31,6 +31,7 @@ class Config:
     price_trial: int = 490           # пробный день: всё как в PRO на 24 часа, один раз (владелец 13.11: снова платный, 490 ₽)
     price_basic: int = 1390          # «Простой» на 30 дней
     price_pro: int = 2490            # PRO на 30 дней, без лимитов
+    price_pro_trial: int = 1990      # PRO, если купить его во время оплаченного пробного дня (зачёт пробного, владелец 13.11)
     basic_filters: int = 2           # лимиты «Простого»: фильтры, свои каналы (0 — только общая база), задержка, с
     basic_own: int = 0
     basic_delay: int = 60
@@ -70,6 +71,7 @@ def get_config() -> Config:
         price_trial=int(e("PRICE_TRIAL", "490")),
         price_basic=int(e("PRICE_BASIC", "1390")),
         price_pro=int(e("PRICE_PRO", "2490")),
+        price_pro_trial=int(e("PRICE_PRO_TRIAL", "1990")),
         basic_filters=int(e("BASIC_FILTERS", "2")),
         basic_own=int(e("BASIC_OWN_CHANNELS", "0")),
         basic_delay=int(e("BASIC_DELAY", "60")),
