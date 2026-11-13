@@ -1,0 +1,99 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props55.js"></script>
+<script>
+// «ТОЛЯН: СО СТА ТЫСЯЧ · 14» — «Ва-банк» (киношный формат). Капитал 815 000. Самая крупная сделка сезона, с риском потерять всё.
+// Ночь на крыше: бот присылает Lexus NX 2016 за 1 600 000 (рынок 2 100 000) — все деньги Толяна и Жоры, «или пан, или пропал» (фишки, штамп ВА-БАНК)
+// → коттеджный посёлок: айтишник Аркаша улетает через 3 часа, машинка считает 1 600 000 → утром NX не заводится: Check Engine, «мы всё потеряли!»
+// → автоэлектрик Ринат: сканер P0340 — датчик за 3 000 ₽ → покупатель Олег: «бот прислал ваш Лексус через секунду» — 1 830 000
+// → +230 на двоих, Толяну +115, капитал 930 000; до миллиона — 70 000, финал в 15-й. Приёмы (новые): ва-банк (фишки и штамп); машинка для денег;
+// приборная панель с Check Engine; экран сканера.
+const T = (p, x, foot, h, pose = {}, extra = {}) => ch("tolyan", p, x, foot, h, null, pose, extra);
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const ROOF_L = glow(830, 230, 260, "#f4f0d8", .35) + glow(540, 1000, 500, "#5a5ad0", .2);
+const KOT_L = glow(880, 200, 360, "#fff3c4", .45);
+const EL_L = glow(780, 190, 300, "#fff6c8", .5) + glow(720, 830, 160, "#5ab0e8", .4);
+const BC_L = glow(540, 700, 480, "#ffb36a", .3);
+const S = [
+ { h: "ВА-БАНК · КРЫША", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("tolyan", "tn", 540, 1960, 1680, null, NXCARD(), { rim: "#9fb0ff", side: 1 });
+       return { bg: "kryshanoch", grade: "night", hud: HUD55("815 000", "", 1), farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "kryshanoch", grade: "night", hud: HUD55("815 000"), over: STAMP("ВА-БАНК", 120, 340, "stamp", -8),
+       mid: T("tr", 260, 1760, 740, {}, { rim: "#9fb0ff", side: 1, z: 7 }) + Z("zr", 820, 1770, 760, { look: "o" }, {}, { rim: "#9fb0ff", side: -1, z: 7 }) + CHIPS(360, 1440), lights: ROOF_L }), shot: { x: 540, y: 1200, s: 1.08 },
+     bubbles: [{ p: "zr", html: "Студент…<br><em>или пан, или пропал.</em>", fs: 46 }], talk: ["zr"] },
+   vo: "Лис: «Восемьсот пятнадцать тысяч. Ночью бот прислал Лексус NX — миллион шестьсот при рынке два сто. Это все деньги Толяна. И все деньги Жоры». Жора: «Студент… или пан, или пропал». Толян: «Пан. Берём».", who: "Лис + Жора + Толян",
+   mv: "<b>Часть 14, капитал 815 000.</b> <b>Новый фон — крыша многоэтажки ночью</b> (огни города, антенны, луна). A — в боте «Lexus NX 200 · 2016 · 1 600 000 ₽ · рынок ≈ 2 100 000 · 🔥 −24%». B — <b>приём 1 — ва-банк:</b> стопки фишек сдвигаются в центр, красный штамп «ВА-БАНК»." },
+ { h: "ПОКУПКА · 1 600 000", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "kottedzh", grade: "day", hud: HUD55("815 000"),
+       mid: car(NX, 60, 1600, 660, { z: 4, sheen: .7 }) + ch("perekup", "ak", 860, 1760, 740, ARKASHA, { armR: -40 }, { rim: "#fff2c0", side: -1, z: 7 }) + INHAND(860, 1760, 740, -40, 140, SUITCASE, 9), lights: KOT_L }), shot: { x: 580, y: 1200, s: 1.08 },
+     bubbles: [{ p: "ak", html: "Улетаю через три часа —<br><em>нужно срочно. Миллион шестьсот.</em>", fs: 38 }], talk: ["ak"] },
+   B: { def: () => ({ bg: "kottedzh", grade: "day", hud: HUD55("815 000", "", 1), farBlur: 8, over: COUNTER(280, 900).replace('<span id="mcount">0</span>', '<span id="mcount">1 600 000</span>'),
+       mid: T("tk", 230, 1780, 720, {}, { rim: "#fff2c0", side: 1, z: 5 }) + Z("zk", 850, 1780, 740, { look: "o" }, {}, { rim: "#fff2c0", side: -1, z: 5 }), lights: KOT_L }), shot: { x: 540, y: 1160, s: 1.04 } },
+   vo: "Аркаша: «Улетаю через три часа — нужно срочно. Миллион шестьсот». Лис: «Машинка досчитала до миллиона шестисот. Деньги ушли — и у Толяна, и у Жоры ноль».", who: "Аркаша + Лис",
+   mv: "<b>Новый фон — коттеджный посёлок</b> (кирпичный забор, ворота, туи, шлагбаум). <b>Новый герой — Аркаша-айтишник</b> с красным чемоданом: улетает. B — <b>приём 2 — машинка для счёта денег:</b> пачка пролистывается, табло бежит до 1 600 000; Толян и Жора за ней." },
+ { h: "CHECK ENGINE", tc: "3/6 · 0:24–0:35",
+   A: { def: () => ({ grade: "day", hud: HUD55("0", "", 1), far: DASH().replace('id="ce" style="left:390px;top:1120px;width:300px;height:200px;text-align:center;opacity:.25"', 'id="ce" style="left:390px;top:1120px;width:300px;height:200px;text-align:center"'), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "bcparking", grade: "dawn", hud: HUD55("0"),
+       mid: car(NX, 60, 1600, 660, { z: 4, sheen: .3 }) + Z("zp", 850, 1780, 760, { look: "o" }, { armL: 150, armR: -150 }, { rim: "#ffb36a", side: -1, z: 7 }) + T("tp", 560, 1770, 720, {}, { rim: "#ffb36a", side: -1, z: 6 }), lights: BC_L }), shot: { x: 640, y: 1160, s: 1.5, r: 3 },
+     bubbles: [{ p: "zp", html: "Студент,<br><em>мы всё потеряли!</em>", fs: 52 }], talk: ["zp"] },
+   vo: "Лис: «Утро. Ключ, стартер — тишина. На панели — Check Engine». Жора: «Студент, мы всё потеряли!»", who: "Лис + Жора",
+   mv: "<b>Приём 3 — приборная панель:</b> тахометр и спидометр на нуле, мигает оранжевый «CHECK ENGINE», подпись «машина не заводится». Счётчик капитала — <b>0</b> (всё в машине). B — <b>новый фон — парковка у БЦ «Горизонт»</b>: Жора в панике, руки вверх, голландский угол." },
+ { h: "АВТОЭЛЕКТРИК · 3 000 ₽", tc: "4/6 · 0:35–0:46",
+   A: { def: () => { const H = HOLDPHONE("perekup", "rs", 540, 1960, 1680, RINAT, SCAN(), { rim: "#5ab0e8", side: 1 });
+       return { bg: "avtoelektrika", grade: "night", hud: HUD55("0"), farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "avtoelektrika", grade: "night", hud: HUD55("0"),
+       mid: car(NX, 160, 1640, 680, { z: 4, sheen: .5 }) + ch("perekup", "rn", 240, 1760, 740, RINAT, { armR: -150 }, { rim: "#5ab0e8", side: 1, z: 7 }) + T("te", 880, 1780, 720, {}, { rim: "#5ab0e8", side: -1, z: 7 }), lights: EL_L }), shot: { x: 560, y: 1200, s: 1.08 },
+     bubbles: [{ p: "rn", html: "Датчик за три тысячи.<br><em>Ерунда. Заводи.</em>", fs: 44 }], talk: ["rn"] },
+   vo: "Лис: «Бокс автоэлектрика. Сканер, код ошибки». Ринат: «Датчик за три тысячи. Ерунда. Заводи».", who: "Лис + Ринат",
+   mv: "<b>Новый фон — бокс автоэлектрика</b> (стенд с проводами, плакат схемы, диагностический стол, подъёмник). <b>Новый герой — автоэлектрик Ринат</b>. A — <b>приём 4 — экран сканера:</b> «P0340 · датчик распредвала» → зелёным «деталь — 3 000 ₽». B — Ринат с поднятой рукой: «заводи»." },
+ { h: "ПОКУПАТЕЛЬ ИЗ БОТА", tc: "5/6 · 0:46–0:57",
+   A: { def: () => { const H = HOLDPHONE("perekup", "ob", 540, 1960, 1680, OLEG, BUYCARD(), { rim: "#ffb36a", side: 1 });
+       return { bg: "bcparking", grade: "dawn", hud: HUD55("0"), farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "ob", html: "Мне бот прислал ваш Лексус<br><em>через секунду. Беру!</em>", fs: 40 }], talk: ["ob"] },
+   B: { def: () => ({ bg: "bcparking", grade: "dawn", hud: HUD55("0"),
+       mid: car(NX, 60, 1600, 660, { z: 4, sheen: .7 }) + C.tag(300, 1260, "ПРОДАНО", "1 830 000", -6, 6, "#4cd964") + ch("perekup", "ol", 600, 1770, 740, OLEG, { armR: -60 }, { rim: "#ffb36a", side: 1, z: 7 })
+         + T("to", 880, 1780, 720, { armL: 60 }, { rim: "#ffb36a", side: -1, z: 7 }), lights: BC_L }), shot: { x: 600, y: 1200, s: 1.08 } },
+   vo: "Лис: «Толян выставил Лексус вечером. Олегу бот прислал объявление через секунду». Олег: «Мне бот прислал ваш Лексус через секунду. Беру!» Лис: «Миллион восемьсот тридцать».", who: "Лис + Олег",
+   mv: "<b>Бот — развязка:</b> новый герой <b>покупатель Олег</b> (галстук), в его боте «Lexus NX 200 · 2016 · 1 830 000 · продаёт: Толян · ⏱ 1 с после публикации». B — рукопожатие у Лексуса, штамп «ПРОДАНО 1 830 000»." },
+ { h: "ИТОГ · КРЫША", tc: "6/6 · 0:57–1:10",
+   A: { def: () => ({ bg: "kryshanoch", grade: "night", hud: HUD55("930 000", "+115 000", 1),
+       mid: T("tf", 300, 1760, 740, {}, { rim: "#9fb0ff", side: 1, z: 7 }) + Z("zf", 780, 1770, 760, { look: "grin" }, { armR: -70 }, { rim: "#9fb0ff", side: -1, z: 7 }), lights: ROOF_L }), shot: { x: 540, y: 1200, s: 1.08 },
+     bubbles: [{ p: "zf", html: "Студент…<br><em>я чуть не поседел.</em>", fs: 46 }], talk: ["zf"] },
+   B: { def: () => ({ bg: "kryshanoch", grade: "night", hud: HUD55("930 000", "+115 000"), over: CTA55,
+       mid: T("tf2", 300, 1760, 740, {}, { rim: "#9fb0ff", side: 1, z: 7 }) + Z("zf2", 780, 1770, 760, { look: "grin" }, {}, { rim: "#9fb0ff", side: -1, z: 7 }), lights: ROOF_L }), shot: { x: 540, y: 1150, s: .98 } },
+   vo: "Лис: «Двести тридцать на двоих. Капитал Толяна — девятьсот тридцать тысяч». Жора: «Студент… я чуть не поседел». Лис: «До миллиона — семьдесят тысяч. Финал — в пятнадцатой части. Подпишись, чтобы не пропустить».", who: "Лис + Жора",
+   mv: "Снова крыша ночью: счётчик капитала 0 → <b>930 000 (+115 000)</b>. Жора выдыхает. B — <b>последний кадр — только карточка бота</b> (про финал — голосом Лиса, без надписи «Часть 15»)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
