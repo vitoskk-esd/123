@@ -91,9 +91,15 @@
     return `<div class="mul" style="background:${G.mul};opacity:${G.ma}"></div><div class="tone" style="background:${G.tone};opacity:${G.ta}"></div>`; };
 
   // ---- кадр целиком (строкой) для плана sh. sc: {bg, far, haze, mid, fg, lights, grade, fx, hud, bubbles: [{p | at:[x,y], html, fs}], id}
+  // фон с уникальными id градиентов в каждой сцене: одинаковые id в нескольких сценах ссылались на градиент первой,
+  // и когда её скрывали (display:none — чтобы Chromium не падал), небо у остальных становилось чёрным (ep54, 13.11)
+  let bgN = 0;
+  C.bgSvg = name => { const n = ++bgN, svg = BGS[name] || "";
+    const ids = [...svg.matchAll(/\bid="([\w-]+)"/g)].map(m => m[1]).filter(i => i !== "bg");
+    return ids.reduce((t, id) => t.replaceAll(`id="${id}"`, `id="${id}_${n}"`).replaceAll(`url(#${id})`, `url(#${id}_${n})`).replaceAll(`href="#${id}"`, `href="#${id}_${n}"`), svg); };
   C.frame = (sc, sh) => {
     const blur = (sc.farBlur ?? 1.2) + Math.max(0, sh.s - 1) * 2.2;
-    const far = `<div class="cl far" style="transform:${C.layerT(sh, sc.dFar ?? .7, FAR_OVER)};filter:blur(${blur.toFixed(1)}px) ${sc.farFilter || ""}">${sc.bg ? BGS[sc.bg] : ""}${sc.far || ""}</div>`;
+    const far = `<div class="cl far" style="transform:${C.layerT(sh, sc.dFar ?? .7, FAR_OVER)};filter:blur(${blur.toFixed(1)}px) ${sc.farFilter || ""}">${sc.bg ? C.bgSvg(sc.bg) : ""}${sc.far || ""}</div>`;
     const mid = `<div class="cl mid" style="transform:${C.layerT(sh, 1)}">${sc.mid || ""}</div>`;
     const fg = sc.fg ? `<div class="cl fgl" style="transform:${C.layerT(sh, sc.dFg ?? 1.4)}">${sc.fg}</div>` : "";
     const lights = sc.lights ? `<div class="cl lights" style="transform:${C.layerT(sh, 1)}">${sc.lights}</div>` : "";
