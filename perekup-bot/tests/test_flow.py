@@ -244,6 +244,7 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     assert not any("Дарю тебе пробный день" in t for t in s.texts(USER))   # бесплатного подарка больше нет
     tries = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER and m.text == T.TRY_PROMPT]
     assert len(tries) == 1 and [b.callback_data for row in tries[0].reply_markup.inline_keyboard for b in row] == ["s:try"]
+    assert T.ASK_FILTER not in s.texts(USER) and s.texts(USER)[-1] == T.TRY_PROMPT    # приветствие кончается «Хочу попробовать» (владелец 13.11)
     await dp.feed_update(bot, cb("s:try"))
     last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
     assert "Попробуй «Перехват» целый день — 490 ₽" in last.text
@@ -1381,7 +1382,7 @@ async def test_admin_notified_of_new_users_and_panel(env):
     всего людей, сегодня по источникам, подписки по тарифам, оплаты."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start", ADMIN))
-    kb = [b.text for row in [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == ADMIN][-2].reply_markup.keyboard for b in row]
+    kb = [b.text for row in [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == ADMIN and hasattr(m.reply_markup, "keyboard")][-1].reply_markup.keyboard for b in row]
     assert T.MENU_ADMIN in kb
     await dp.feed_update(bot, msg("/start inst", USER))
     assert "Новый пользователь" in s.texts(ADMIN)[-1] and "Пришёл из: <b>Instagram</b>" in s.texts(ADMIN)[-1]

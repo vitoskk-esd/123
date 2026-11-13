@@ -86,8 +86,9 @@ async def start(msg: Message, command: CommandObject, ctx: Ctx, state: FSMContex
     if ctx.reader and not ctx.reader.online and admin:
         await msg.answer(T.NEED_CONNECT)
         return
+    # «Напиши, что ищешь…» в приветствии больше не шлём (владелец 13.11): приветствие заканчивается кнопкой «Хочу попробовать».
+    # Тихо ждём фильтр: если человек сам напишет, что ищет, — сразу карточка «Так ищем?».
     if new or not await ctx.db.filters(msg.from_user.id):
-        await msg.answer(T.ASK_FILTER, reply_markup=K.new_filter())
         await state.set_state(S.filter)
 
 
