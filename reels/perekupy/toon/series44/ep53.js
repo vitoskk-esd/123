@@ -23,8 +23,8 @@ const SITE = () => `<div style="font-family:Onest;color:#fff"><div style="font-w
 const DVOR_L = glow(880, 200, 360, "#fff3c4", .45);
 
 // 1. логово: стоп-кадр с карточками ролей → доска → Гена
-mount("s1", { bg: "logovo", grade: "warm", freeze: 1,
-  over: ROLE("ГЕНА", "мозг", 360, 760, -3, "rG") + ROLE("ВАЛЕРА", "водила", 30, 1060, 4, "rV") + ROLE("КОСТИК", "технарь", 640, 1080, -5, "rK"),
+mount("s1", { bg: "logovo", grade: "warm",          // владелец 13.11: начало — в цвете; ч/б только на секунду, когда шлёпается карточка роли
+  over: `<div id="bw" style="position:absolute;inset:0;z-index:56;backdrop-filter:grayscale(1) contrast(1.08);opacity:0"></div>` + ROLE("ГЕНА", "мозг", 360, 760, -3, "rG") + ROLE("ВАЛЕРА", "водила", 30, 1060, 4, "rV") + ROLE("КОСТИК", "технарь", 640, 1080, -5, "rK"),
   mid: CREW3("g1", "v1", "k1"), lights: LAIR_L }, { x: 540, y: 1200, s: 1.04 });
 mount("s1c", { bg: "logovo", grade: "warm", mid: CREW3("g1c", "v1c", "k1c"), lights: LAIR_L }, { x: 540, y: 600, s: 1.7 });
 mount("s1b", { bg: "logovo", grade: "warm", mid: P("g2", "gena", GENA, 760, 1700, 760, { armL: 120 }, { rim: "#fff6c8", side: -1, z: 7 }), lights: LAIR_L,
@@ -119,9 +119,11 @@ window.build = R => {
   const bub = (l, until) => pop("#b_" + l, st[l] - .05, until ?? Math.min(en[l] + .8, nxt(l) ? st[nxt(l)] - .1 : en[l] + 1));
 
   // 1. банда: карточки ролей шлёпаются на стоп-кадре → доска → Гена
-  show("s1", 0); tl.to("#title", { opacity: 0, y: -50, duration: .25 }, 1.8);
+  gsap.set(SC.s1, { opacity: 1 }); SC.s1.style.display = "";          // первый кадр (обложка Instagram) — сразу сцена в цвете + заставка
+  show("s1", 0); tl.to("#title", { opacity: 0, y: -50, duration: .2 }, .85);      // заставка короче — карточки ролей шлёпаются на имена
   gsap.set(["#rG", "#rV", "#rK"], { opacity: 0 });
-  slam("#rG", Math.max(2.0, W("l0", "ген") - .05)); slam("#rV", W("l0", "вал") - .05); slam("#rK", W("l0", "кост") - .05);
+  [["#rG", Math.max(1.05, W("l0", "ген") - .05)], ["#rV", W("l0", "вал") - .05], ["#rK", W("l0", "кост") - .05]].forEach(([sel, at]) => {
+    slam(sel, at); tl.set("#bw", { opacity: 1 }, at).to("#bw", { opacity: 0, duration: .2 }, at + .45); });
   move("s1", { s: 1.1 }, 0, en.l0 + .3, "none");
   cut("s1", "s1c", st.l0b - .1); move("s1c", { s: 1.95, y: 620 }, st.l0b - .1, en.l0b - st.l0b + .3, "none");
   const SW1 = st.g1 - .4; swap("s1c", "s1b", SW1); move("s1b", { s: 1.6, y: 880 }, SW1, en.g1 - SW1 + .3, "none"); bub("g1", st.k1 - .45);
