@@ -1,0 +1,103 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props53.js"></script>
+<script>
+// «ОГРАБЛЕНИЕ ВЕКА» (ep53, «Простой ролик 3», киношный формат). Пародия на фильм про ограбление: банда из трёх перекупов — Гена (мозг), Валера (водила),
+// Костик (технарь) — планирует «увести» самую выгодную машину города: Lexus NX за 1 900 000 при рынке 2 600 000. Доска с нитками, карточки ролей,
+// отсчёт 07:59:58 → 08:00, Костик обновляет сайт, погоня дворами по карте — 08:06, рекорд. Приезжают — а у Лексуса уже дед Фёдор с ключами:
+// «Мне бот прислал через секунду. Я тут с 08:01». Стоп-кадр «ПЛАН ПРОВАЛЕН». Финал: Гена зачёркивает план — «Пункт первый: поставить бот».
+// Приёмы (новые): карточки ролей на стоп-кадре; огромные часы-отсчёт; карта погони с маршрутом; штамп «ПЛАН ПРОВАЛЕН».
+const P = (p, o, x, foot, h, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, o, pose, extra);
+const LAIR_L = glow(540, 172, 320, "#fff6c8", .6) + beam([[490, 176], [590, 176], [960, 1300], [120, 1300]], "#fff6c8", .2) + glow(540, 1500, 520, "#fff6c8", .25);
+const CREW3 = (g, v, k, go = {}, vo = {}, ko = {}, gp = {}, vp = {}, kp = {}) => P(g, { ...GENA, ...go }, 540, 1720, 760, gp, { rim: "#fff6c8", side: 1, z: 7 })
+  + P(v, { ...VALERA, ...vo }, 180, 1780, 760, vp, { rim: "#fff6c8", side: 1, z: 8 }) + P(k, { ...KOSTIK, ...ko }, 900, 1790, 740, kp, { rim: "#fff6c8", side: -1, z: 8 });
+const SITE = () => `<div style="font-family:Onest;color:#fff"><div style="font-weight:800;font-size:34px;color:#8b93a3">авто-сайт · Lexus NX</div>
+  <div style="margin-top:20px;font-family:'JetBrains Mono';font-weight:800;font-size:40px;color:#ffd23f">⟳ обновить</div>
+  <div style="margin-top:24px;background:#1c1f26;border-radius:20px;padding:20px;font-size:30px;color:#8b93a3">Новых объявлений нет<br><span style="font-size:24px">обновление — раз в минуту</span></div></div>`;
+const S = [
+ { h: "ЛОГОВО · БАНДА", tc: "1/6 · 0:00–0:12",
+   A: { def: () => ({ bg: "logovo", grade: "warm", hud: HUD53(1), freeze: 1,
+       over: ROLE("ГЕНА", "мозг", 360, 760, -3) + ROLE("ВАЛЕРА", "водила", 30, 1060, 4) + ROLE("КОСТИК", "технарь", 640, 1080, -5),
+       mid: CREW3("g1", "v1", "k1"), lights: LAIR_L }), shot: { x: 540, y: 1200, s: 1.04 } },
+   B: { def: () => ({ bg: "logovo", grade: "warm", hud: HUD53(),
+       mid: P("g2", GENA, 760, 1700, 760, { armL: 120 }, { rim: "#fff6c8", side: -1, z: 7 }), lights: LAIR_L }), shot: { x: 560, y: 900, s: 1.5 },
+     bubbles: [{ p: "g2", html: "Объявление выйдет в 08:00.<br><em>Мы будем там в 08:07.</em>", fs: 42 }], talk: ["g2"] },
+   vo: "Лис: «Это Гена — мозг. Валера — водила. Костик — технарь. Цель — Лексус NX за миллион девятьсот. Рынок — два шестьсот». Гена: «Объявление выйдет в восемь ноль-ноль. Мы будем там в восемь ноль семь».", who: "Лис + Гена",
+   mv: "<b>Рубрика «ОГРАБЛЕНИЕ ВЕКА» — пародия на фильм про ограбление.</b> <b>Новый фон — логово банды ночью</b> (бетонный ангар, лампа-конус, доска плана с фото, красными нитками и кругом «ЦЕЛЬ · LEXUS NX», «08:00 → 08:07», ящики). <b>Приём 1 — карточки ролей на стоп-кадре</b> (ч/б): «ГЕНА · мозг», «ВАЛЕРА · водила», «КОСТИК · технарь». Все трое — <b>новые герои</b>. B — Гена у доски." },
+ { h: "ГАДЖЕТЫ И РОЛИ", tc: "2/6 · 0:12–0:23",
+   A: { def: () => { const H = HOLDPHONE("perekup", "k2", 540, 1960, 1680, KOSTIK, SITE(), { rim: "#fff6c8", side: 1 });
+       return { bg: "logovo", grade: "warm", hud: HUD53(), farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "k2", html: "Обновляю сайт каждую секунду.<br><em>Палец не устанет.</em>", fs: 38 }], talk: ["k2"] },
+   B: { def: () => ({ bg: "logovo", grade: "warm", hud: HUD53(),
+       mid: car(CREW, 60, 1640, 760, { z: 4, sheen: .5 }) + P("v2", VALERA, 860, 1770, 760, { armR: -60 }, { rim: "#fff6c8", side: -1, z: 7 }) + INHAND(860, 1770, 760, -60, 90, KEYS, 9), lights: LAIR_L }), shot: { x: 560, y: 1220, s: 1.08 },
+     bubbles: [{ p: "v2", html: "Я знаю все дворы.<br><em>Ни одного светофора.</em>", fs: 42 }], talk: ["v2"] },
+   vo: "Костик: «Я обновляю сайт каждую секунду. Палец не устанет». Валера: «Я знаю все дворы. Ни одного светофора».", who: "Костик + Валера",
+   mv: "Гаджеты банды: A — Костик с телефоном, на экране авто-сайт «⟳ обновить · новых объявлений нет · обновление раз в минуту» (палец стучит по экрану). B — Валера с ключами у бежевого Мерседеса W124 — «машина для дела»." },
+ { h: "07:59:58", tc: "3/6 · 0:23–0:32",
+   A: { def: () => ({ bg: "logovo", grade: "warm", hud: HUD53(1), over: CLOCK("07:59:58"), mid: CREW3("g3", "v3", "k3", { look: "o" }, { look: "flat" }, { look: "o" }), lights: LAIR_L }), shot: { x: 540, y: 1260, s: 1.08 } },
+   B: { def: () => ({ bg: "logovo", grade: "warm", hud: HUD53(), over: CLOCK("08:00:31", "clk2", "#4cd964"),
+       mid: P("k3b", { ...KOSTIK, look: "o" }, 540, 1760, 780, { armL: 150, armR: -150 }, { rim: "#fff6c8", side: 1, z: 7 }), lights: LAIR_L }), shot: { x: 540, y: 1100, s: 1.3, r: -4 },
+     bubbles: [{ p: "k3b", html: "ВЫШЛО!<br><em>Погнали!!</em>", fs: 60 }], talk: ["k3b"] },
+   vo: "Лис: «Утро. Семь пятьдесят девять. Тишина». Костик: «Вышло! Погнали!!»", who: "Лис + Костик",
+   mv: "<b>Приём 2 — огромные часы-отсчёт:</b> 07:59:58 → 07:59:59 → 08:00:00 (красные, тикают со звуком), банда замерла. B — Костик вскакивает: часы зелёные 08:00:31 — на сайте объявление появилось только через полминуты." },
+ { h: "ПОГОНЯ ПО КАРТЕ", tc: "4/6 · 0:32–0:43",
+   A: { def: () => ({ grade: "day", hud: HUD53(1), far: MAP(), farBlur: 0,
+       over: `<div class="hand" style="left:120px;top:1480px;z-index:60;font-size:64px;color:#c0392b;transform:rotate(-6deg)">дворами!</div><div class="hand" style="left:520px;top:900px;z-index:60;font-size:56px;color:#2f6db5;transform:rotate(-4deg)">через стройку</div>` + CLOCK("08:03", "clk3", "#ffd23f").replace("top:620px", "top:1660px").replace("font-size:150px", "font-size:90px") }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "gorodutro", grade: "dawn", hud: HUD53(), farBlur: 6,
+       mid: SPEED(1250, 1560) + car(CREWS, 160, 1560, 820, { z: 5, sheen: .7 }), lights: glow(820, 760, 360, "#fff2c0", .5), over: `<div style="position:absolute;left:80px;top:700px;z-index:60;background:#0d0e12;border:6px solid #fff;border-radius:34px;padding:22px 30px;font-family:Unbounded;font-weight:800;font-size:44px;color:#fff">ВАЛЕРА (по рации):<br><em style="font-style:normal;color:#ff3b30">08:06 — рекорд района!</em></div>` }), shot: { x: 540, y: 1300, s: 1.12 } },
+   vo: "Лис: «Шесть минут. Дворами, через стройку, мимо школы». Валера: «Восемь ноль шесть — рекорд района!»", who: "Лис + Валера",
+   mv: "<b>Приём 3 — карта погони:</b> маршрут красным пунктиром рисуется по карте дворов к «✕ ЦЕЛЬ · LEXUS NX», часы 08:03 сверху, пометки маркером «дворами!», «через стройку». B — <b>новый фон — утренний проспект</b> (многоэтажки, светофор, низкое солнце): Мерседес W124 проносится со смазанным фоном, Валера по рации." },
+ { h: "ДЕД ФЁДОР · 08:07", tc: "5/6 · 0:43–0:57",
+   A: { def: () => ({ bg: "dvorutro", grade: "day", hud: HUD53(),
+       mid: car(TARGET, 80, 1600, 640, { z: 4, sheen: .6 }) + P("dd", DED, 470, 1720, 720, { armR: -70 }, { rim: "#fff2c0", side: -1, z: 6 }) + INHAND(470, 1720, 720, -70, 100, KEYS, 9)
+         + P("g5", { ...GENA, look: "o" }, 900, 1790, 760, {}, { rim: "#fff2c0", side: -1, z: 7 }), lights: glow(880, 200, 360, "#fff3c4", .45) }), shot: { x: 560, y: 1200, s: 1.08 },
+     bubbles: [{ p: "dd", html: "Внучки, мне бот прислал объявление<br><em>через секунду. Я тут с 08:01.</em>", fs: 36 }], talk: ["dd"] },
+   B: { def: () => ({ bg: "dvorutro", grade: "day", hud: HUD53(1), freeze: 1,
+       over: STAMP("ПЛАН<br>ПРОВАЛЕН", 120, 520) + `<div class="hand" style="left:70px;top:960px;z-index:64;font-size:66px;color:#ffd23f;-webkit-text-stroke:3px #151515;transform:rotate(-4deg)">сайт: 1 раз в минуту<br>бот: через 1 секунду</div>`,
+       mid: car(TARGET, 80, 1600, 640, { z: 4, sheen: .6 }) + P("dd2", DED, 470, 1720, 720, {}, { z: 6 }) + P("g6", { ...GENA, look: "o" }, 900, 1790, 760, {}, { z: 7 })
+         + P("v6", { ...VALERA, look: "o" }, 1060, 1800, 760, {}, { z: 7 }), lights: "" }), shot: { x: 560, y: 1200, s: 1.08 } },
+   vo: "Гена: «Как?!» Дед Фёдор: «Внучки, мне бот прислал объявление через секунду. Я тут с восьми ноль одной». Лис: «Сайт обновляется раз в минуту. Бот присылает через секунду после публикации».", who: "Гена + Дед + Лис",
+   mv: "<b>Новый фон — двор многоэтажки утром</b> (подъезд №3, лавка, горка, клумба-шина). <b>Поворот:</b> у белого Lexus NX уже стоит <b>новый герой — дед Фёдор</b> с ключами в руке. B — <b>приём 4: стоп-кадр в ч/б + штамп «ПЛАН ПРОВАЛЕН»</b>, пометка маркером «сайт: 1 раз в минуту / бот: через 1 секунду»." },
+ { h: "ПЛАН Б + ФИНАЛ", tc: "6/6 · 0:57–1:09",
+   A: { def: () => ({ bg: "logovo", grade: "warm", hud: HUD53(1),
+       over: `<svg viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:59"><path d="M130 160 L950 690 M950 160 L130 690" stroke="#ff3b30" stroke-width="16" stroke-linecap="round"/></svg>
+       <div class="hand" style="left:430px;top:470px;z-index:60;font-size:72px;color:#ffd23f;-webkit-text-stroke:3px #151515;transform:rotate(-4deg)">ПЛАН Б:<br>1. поставить бот</div>`,
+       mid: P("g7", GENA, 860, 1760, 760, { armL: 120 }, { rim: "#fff6c8", side: -1, z: 7 }), lights: LAIR_L }), shot: { x: 540, y: 1060, s: 1.12 },
+     bubbles: [{ p: "g7", html: "Новый план.<br><em>Пункт первый — поставить бот.</em>", fs: 42 }], talk: ["g7"] },
+   B: { def: () => ({ bg: "logovo", grade: "warm", hud: HUD53(1), over: CTA53, mid: CREW3("g8", "v8", "k8", {}, {}, {}, {}, {}, {}), lights: LAIR_L }), shot: { x: 540, y: 1200, s: 1.04 } },
+   vo: "Гена: «Новый план. Пункт первый — поставить бот». Лис: «Самое быстрое ограбление — когда машина сама приходит к тебе».", who: "Гена + Лис",
+   mv: "Логово: Гена перечёркивает старый план красным крест-накрест и пишет маркером «ПЛАН Б: 1. поставить бот». B — <b>последний кадр — только карточка «Бот «Перехват» — ссылка в шапке»</b> (без «Часть N…»; голос её не читает)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
