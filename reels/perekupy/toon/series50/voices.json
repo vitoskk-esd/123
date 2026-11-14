@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: a car flipper goes on a date with a girl who sells a Camry. Lis is a deadpan ironic narrator. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: businesslike, suspicious, totally unromantic. Line 2: excited haggling, proud. Line 3: crushed, quiet, defeated."
+ },
+ "stas": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.12,
+  "profile": "Stas — an exhausted Russian used-car flipper in his 30s who hasn't slept for three days.",
+  "notes": "Line 1: on the phone, polite and fast, decisive. Line 2: confident, charming."
+ },
+ "vika": {
+  "voice": "Kore",
+  "tempo": 1.12,
+  "profile": "Vika — a confident, charming young Russian woman in her 20s on a date; ironic, clear voice.",
+  "notes": "Line 1: warm, flirty. Line 2: annoyed, ironic. Line 3: apologetic but happy, already leaving."
+ },
+ "waiter": {
+  "voice": "Algieba",
+  "tempo": 1.1,
+  "profile": "A polite, formal Russian restaurant waiter.",
+  "notes": "One line: polite, neutral, a bit too cheerful."
+ }
+}
