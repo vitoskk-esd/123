@@ -40,6 +40,8 @@ class Config:
     rk_pass1: str = ""
     rk_pass2: str = ""
     rk_hash: str = "md5"             # алгоритм подписи — как в технических настройках магазина
+    rk_recurring: str = "off"        # автопродление (рекуррентные платежи Робокассы): off — нет; preview — экраны подписки и отключения
+                                     # видят только админы (скриншоты для Робокассы), списаний нет; on — у всех, с автосписаниями
     seller_name: str = ""            # реквизиты самозанятого для оферты (/offer) — их проверяет Робокасса
     seller_inn: str = ""
     seller_contact: str = ""         # email или телефон для клиентов
@@ -56,6 +58,11 @@ class Config:
     @property
     def payments_on(self) -> bool:
         return bool(self.rk_login and self.rk_pass1 and self.rk_pass2)
+
+    @property
+    def autopay_live(self) -> bool:
+        """Настоящие автосписания: параметр Recurring в ссылке и списания по сроку."""
+        return self.rk_recurring == "on" and self.payments_on
 
 
 def get_config() -> Config:
@@ -80,6 +87,7 @@ def get_config() -> Config:
         rk_pass1=e("ROBOKASSA_PASSWORD1", ""),
         rk_pass2=e("ROBOKASSA_PASSWORD2", ""),
         rk_hash=e("ROBOKASSA_HASH", "md5").lower().replace("-", ""),
+        rk_recurring=e("ROBOKASSA_RECURRING", "off").strip().lower(),
         seller_name=e("SELLER_NAME", ""),
         seller_inn=e("SELLER_INN", ""),
         seller_contact=e("SELLER_CONTACT", ""),

@@ -86,6 +86,9 @@ class DB:
                     "ALTER TABLE users ADD COLUMN lang TEXT",
                     "ALTER TABLE users ADD COLUMN last_seen REAL",
                     "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'",
+                    "ALTER TABLE users ADD COLUMN autorenew INTEGER DEFAULT 0",     # автопродление включено
+                    "ALTER TABLE users ADD COLUMN renew_inv TEXT",                  # материнский счёт Робокассы для автосписаний
+                    "ALTER TABLE users ADD COLUMN renew_plan TEXT",                 # какой тариф продлеваем
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
                     "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
                     "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0",
@@ -161,7 +164,7 @@ class DB:
         return await self._one("SELECT * FROM users WHERE id=?", uid)
 
     async def set_user(self, uid: int, **fields) -> None:
-        assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used"}, fields
+        assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used", "autorenew", "renew_inv", "renew_plan"}, fields
         await self._run(f"UPDATE users SET {', '.join(f'{k}=?' for k in fields)} WHERE id=?", *fields.values(), uid)
 
     async def take_trial(self, uid: int, until: float, now: float) -> bool:
@@ -464,9 +467,10 @@ class DB:
                 "top": [(t["name"], t["n"]) for t in top], "dups": dups["n"]}
 
     # ---------- платежи ----------
-    async def add_payment(self, uid: int, yk_id: str, amount: int, plan: str = "basic") -> int:
-        return await self._run("INSERT INTO payments (user_id, yk_id, amount, plan, created_at) VALUES (?,?,?,?,?)",
-                               uid, yk_id, amount, plan, time.time())
+    async def add_payment(self, uid: int, yk_id: str, amount: int, plan: str = "basic", auto: int = 0) -> int:
+        """auto: 0 — разовая оплата, 1 — первый платёж подписки с автопродлением (материнский), 2 — автосписание."""
+        return await self._run("INSERT INTO payments (user_id, yk_id, amount, plan, auto, created_at) VALUES (?,?,?,?,?,?)",
+                               uid, yk_id, amount, plan, auto, time.time())
 
     async def payment(self, yk_id: str):
         return await self._one("SELECT * FROM payments WHERE yk_id=?", yk_id)

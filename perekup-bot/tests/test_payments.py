@@ -42,3 +42,31 @@ def test_state(xml, status):
 def test_state_error():
     with pytest.raises(RuntimeError):
         parse_state(state(2))
+
+
+async def test_recurring_link_and_charge(monkeypatch):
+    """Первый платёж подписки — с Recurring=true (в подпись не входит); автосписание — POST на /Merchant/Recurring по материнскому счёту."""
+    rk = Robokassa(CFG)
+    inv, url = await rk.create(111, 1390, "x", recurring=True)
+    q = dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query))
+    assert q["Recurring"] == "true" and q["SignatureValue"] == hashlib.md5(f"perekhvat:1390:{inv}:{q['Receipt']}:p1".encode()).hexdigest()
+    sent = {}
+
+    class Resp:
+        def __init__(self, body): self.body = body
+        def read(self): return self.body
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+
+    def fake_open(req, timeout=30):
+        sent["url"], sent["data"] = req.full_url, dict(urllib.parse.parse_qsl(req.data.decode()))
+        return Resp(f"OK{sent['data']['InvoiceID']}".encode())
+    import payments
+    monkeypatch.setattr(payments.urllib.request, "urlopen", fake_open)
+    new = await rk.charge(inv, 1390, "«Перехват»: Простой на 30 дн.")
+    d = sent["data"]
+    assert sent["url"] == "https://auth.robokassa.ru/Merchant/Recurring" and d["PreviousInvoiceID"] == inv and d["InvoiceID"] == new
+    assert d["SignatureValue"] == hashlib.md5(f"perekhvat:1390:{new}:{d['Receipt']}:p1".encode()).hexdigest()
+    monkeypatch.setattr(payments.urllib.request, "urlopen", lambda req, timeout=30: Resp(b"ERROR: recurring is not allowed"))
+    with pytest.raises(RuntimeError):
+        await rk.charge(inv, 1390, "x")

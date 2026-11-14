@@ -75,11 +75,23 @@ class FakeSession(BaseSession):
 class FakePay:
     def __init__(self):
         self.statuses: dict[str, str] = {}
+        self.recurring: dict[str, bool] = {}
+        self.charges: list = []          # (материнский счёт, сумма)
+        self.charge_error = False
 
-    async def create(self, uid, amount, description):
+    async def create(self, uid, amount, description, recurring=False):
         pid = f"pay{next(ids)}"
         self.statuses[pid] = "pending"
+        self.recurring[pid] = recurring
         return pid, f"https://yoomoney.example/{pid}"
+
+    async def charge(self, prev_inv, amount, description):
+        if self.charge_error:
+            raise RuntimeError("отказ")
+        pid = f"auto{next(ids)}"
+        self.statuses[pid] = "pending"
+        self.charges.append((prev_inv, amount))
+        return pid
 
     async def status(self, pid):
         return self.statuses[pid]
@@ -2068,3 +2080,111 @@ async def test_same_post_in_many_channels_at_once_sent_once(env):
     assert sum("Kia Rio 2021" in t for t in s.texts(USER)) == 1
     later = await process(bot, ctx, post(CH2, text))                       # и позже — тоже не дублируем
     assert not later.sent
+
+
+# ---------- подписка с автопродлением (рекуррентные платежи Робокассы, владелец 14.11) ----------
+import dataclasses
+
+
+def last(s):
+    return [m for m in s.sent if isinstance(m, (SendMessage, EditMessageText))][-1]
+
+
+async def test_autopay_preview_only_for_admin(env):
+    """preview: админ видит оформление подписки с галочкой согласия (скриншот для Робокассы), но платёж обычный — без Recurring;
+    обычный пользователь платит по-старому, сразу ссылкой."""
+    dp, bot, s, ctx = env
+    ctx.cfg = dataclasses.replace(ctx.cfg, rk_recurring="preview")
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, cb("s:pay:pro", ADMIN))
+    assert "Подписка «PRO» с автопродлением" in s.texts(ADMIN)[-1] and "Отметь согласие" in s.texts(ADMIN)[-1]
+    assert await ctx.db.last_pending(ADMIN) is None                                  # пока согласия нет — счёта нет
+    kbd = last(s).reply_markup.inline_keyboard
+    assert [b.text for r in kbd for b in r] == [T.BTN_AUTOPAY_AGREE_NO, T.BTN_PAY_ONCE]
+    await dp.feed_update(bot, cb("s:ag:pro:1", ADMIN))
+    assert isinstance(last(s), EditMessageText) and "Ты согласился на автоматические списания 2490 ₽" in last(s).text
+    assert T.BTN_AUTOPAY_PAY.format(price=2490) in [b.text for r in last(s).reply_markup.inline_keyboard for b in r]
+    await dp.feed_update(bot, cb("s:ar:pro", ADMIN))
+    pay = await ctx.db.last_pending(ADMIN)
+    assert pay["plan"] == "pro" and pay["auto"] == 0 and ctx.pay.recurring[pay["yk_id"]] is False   # preview — без автосписаний
+    await dp.feed_update(bot, msg("/autopay", ADMIN))                                # экран отключения — как будто включено
+    assert "Автопродление включено" in s.texts(ADMIN)[-1] and "Отключить" in last(s).reply_markup.inline_keyboard[0][0].text
+    await dp.feed_update(bot, msg("/start"))
+    await ctx.db.set_user(USER, trial_used=1)
+    await dp.feed_update(bot, cb("s:pay:basic"))
+    assert "Нажми кнопку, оплати" in s.texts(USER)[-1] and "автопродлением" not in s.texts(USER)[-1]
+
+
+async def test_autopay_subscribe_renew_and_cancel(env):
+    """on: согласие → первый платёж с Recurring → автопродление включено; напоминание за сутки; за час до конца — автосписание
+    по материнскому счёту, срок +30 дней; отключение — подтверждение, больше не списываем."""
+    dp, bot, s, ctx = env
+    ctx.cfg = dataclasses.replace(ctx.cfg, rk_recurring="on")
+    await dp.feed_update(bot, msg("/start"))
+    await ctx.db.set_user(USER, trial_used=1)
+    await dp.feed_update(bot, cb("s:pay:basic"))
+    await dp.feed_update(bot, cb("s:ag:basic:1"))
+    await dp.feed_update(bot, cb("s:ar:basic"))
+    pay = await ctx.db.last_pending(USER)
+    assert pay["auto"] == 1 and ctx.pay.recurring[pay["yk_id"]] is True
+    assert "1390 ₽ каждые 30 дней автоматически" in s.texts(USER)[-1]
+    ctx.pay.statuses[pay["yk_id"]] = "succeeded"
+    await dp.feed_update(bot, cb("s:check"))
+    u = await ctx.db.user(USER)
+    assert (u["autorenew"], u["renew_inv"], u["renew_plan"]) == (1, pay["yk_id"], "basic")
+    await dp.feed_update(bot, msg("💳 Подписка"))
+    assert "Автопродление включено: следующее списание <b>1390 ₽</b>" in s.texts(USER)[-1]
+    # напоминание за сутки
+    await ctx.db.set_user(USER, paid_until=time.time() + 20 * 3600)
+    await jobs.tick(bot, ctx)
+    assert "Завтра продлим «Простой»: спишем <b>1390 ₽</b>" in s.texts(USER)[-1]
+    # за час до конца — автосписание, один раз
+    end = time.time() + 1800
+    await ctx.db.set_user(USER, paid_until=end)
+    await jobs.tick(bot, ctx)
+    await jobs.tick(bot, ctx)
+    assert ctx.pay.charges == [(pay["yk_id"], 1390)]
+    auto = await ctx.db.last_pending(USER)
+    assert auto["auto"] == 2
+    ctx.pay.statuses[auto["yk_id"]] = "succeeded"
+    await jobs.tick(bot, ctx)
+    u = await ctx.db.user(USER)
+    assert abs(u["paid_until"] - (end + 30 * 86400)) < 5 and "Подписка продлена" in s.texts(USER)[-1]
+    # отключение: «Отключить» → подтверждение → отключено
+    await dp.feed_update(bot, msg("/autopay"))
+    assert "Автопродление включено" in s.texts(USER)[-1]
+    await dp.feed_update(bot, cb("s:aoff"))
+    assert "Отключить автопродление «Простой»?" in s.texts(USER)[-1]
+    await dp.feed_update(bot, cb("s:aoff!"))
+    assert "Автопродление отключено" in s.texts(USER)[-1] and (await ctx.db.user(USER))["autorenew"] == 0
+    await ctx.db.set_user(USER, paid_until=time.time() + 1800)
+    await jobs.tick(bot, ctx)
+    assert len(ctx.pay.charges) == 1                                                   # больше не списываем
+    await dp.feed_update(bot, msg("/autopay"))
+    assert "Автопродление выключено" in s.texts(USER)[-1]
+
+
+async def test_autopay_declined_turns_off_and_offers_manual(env):
+    """Банк отклонил автосписание — автопродление выключаем, пишем человеку и даём кнопку оплатить вручную."""
+    dp, bot, s, ctx = env
+    ctx.cfg = dataclasses.replace(ctx.cfg, rk_recurring="on")
+    await dp.feed_update(bot, msg("/start"))
+    await ctx.db.set_user(USER, paid_until=time.time() + 1800, plan="pro", autorenew=1, renew_inv="m1", renew_plan="pro")
+    await jobs.tick(bot, ctx)
+    auto = await ctx.db.last_pending(USER)
+    ctx.pay.statuses[auto["yk_id"]] = "canceled"
+    await jobs.tick(bot, ctx)
+    assert (await ctx.db.user(USER))["autorenew"] == 0 and "Не получилось списать 2490 ₽ за «PRO»" in s.texts(USER)[-1]
+    ctx.pay.charge_error = True                                                        # Робокасса не приняла запрос
+    await ctx.db.set_user(USER, paid_until=time.time() + 1700, autorenew=1)
+    await jobs.tick(bot, ctx)
+    assert (await ctx.db.user(USER))["autorenew"] == 0
+
+
+async def test_offer_mentions_autopay_only_when_on(env):
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/offer"))
+    assert "Автоматических списаний нет" in s.texts(USER)[-1]
+    ctx.cfg = dataclasses.replace(ctx.cfg, rk_recurring="on")
+    await dp.feed_update(bot, msg("/offer"))
+    assert "с автопродлением — только с явного согласия" in s.texts(USER)[-1] and "/autopay" in s.texts(USER)[-1]

@@ -157,3 +157,20 @@ def plans(all_plans: dict, trial: bool, only: str | None = None) -> InlineKeyboa
 
 def pay_link(url: str, price: int) -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_PAY.format(price=price), url=url)], [B(text=T.BTN_PAID, callback_data="s:check")])
+
+
+def autopay_consent(plan_id: str, price: int, agreed: bool) -> InlineKeyboardMarkup:
+    """Оформление подписки: галочка согласия на автосписания → кнопка оплаты; рядом — разовая оплата без автопродления."""
+    rows = [[B(text=T.BTN_AUTOPAY_AGREE_YES if agreed else T.BTN_AUTOPAY_AGREE_NO, callback_data=f"s:ag:{plan_id}:{int(not agreed)}")]]
+    if agreed:
+        rows.append([B(text=T.BTN_AUTOPAY_PAY.format(price=price), callback_data=f"s:ar:{plan_id}")])
+    rows.append([B(text=T.BTN_PAY_ONCE, callback_data=f"s:a1:{plan_id}")])
+    return kb(*rows)
+
+
+def autopay_manage(on: bool) -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_AUTOPAY_OFF, callback_data="s:aoff")]) if on else kb([B(text=T.BTN_TO_PLANS, callback_data="s:plans")])
+
+
+def autopay_confirm() -> InlineKeyboardMarkup:
+    return kb([B(text=T.BTN_AUTOPAY_OFF_YES, callback_data="s:aoff!"), B(text=T.BTN_AUTOPAY_KEEP, callback_data="s:auto")])

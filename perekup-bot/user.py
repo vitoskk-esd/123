@@ -434,6 +434,9 @@ async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
     status = (T.SUB_FREE if plan is plans.FREE else
               T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
               if plan else "")          # нет тарифа — про статус ничего не пишем (владелец 10.11)
+    if u and u["autorenew"]:
+        rp = plans.plans(ctx.cfg).get(u["renew_plan"] or "basic", plans.plans(ctx.cfg)["basic"])
+        status += T.AUTOPAY_STATUS.format(price=rp.price, date=fmt_date(u["paid_until"]))
     if plans.on_trial(u):
         status += T.PLAN_TRIAL_DEAL.format(pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro, until=fmt_date(u["paid_until"]))
     caption = T.PLANS_CAPTION.format(
@@ -442,6 +445,8 @@ async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
         basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
         basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}")
     markup = K.plans(p, can_trial(u))
+    if await autopay_shown(ctx, uid) or (u and u["autorenew"]):
+        markup.inline_keyboard.append([K.B(text=T.BTN_AUTOPAY_MANAGE, callback_data="s:auto")])
     key = (b, p["pro"], p["trial"])
     try:
         if key not in _plans_photo:
@@ -485,18 +490,113 @@ async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
         text = T.TRIAL_ON.format(until=fmt_date(until), first=T.TRIAL_ON_FIRST if nf > 1 else "") + ("" if nf else T.TRIAL_NO_FILTER)
         await cb.message.answer(text, reply_markup=K.menu())
         return await cb.answer()
+    if plan.id != "trial" and await autopay_shown(ctx, cb.from_user.id):     # месячный тариф — сначала оформление подписки с согласием
+        text, markup = autopay_consent_view(ctx, plan, False)
+        await cb.message.answer(text, reply_markup=markup)
+        return await cb.answer()
+    await send_pay_link(cb, ctx, u, plan)
+    await cb.answer()
+
+
+async def send_pay_link(cb: CallbackQuery, ctx: Ctx, u, plan, auto: bool = False) -> None:
+    """Счёт и ссылка на оплату. auto — первый платёж подписки с автопродлением (Робокасса запомнит карту)."""
+    live = auto and ctx.cfg.autopay_live          # в режиме preview экраны есть, а платёж — обычный, разовый
     try:
-        pid, url = await ctx.pay.create(cb.from_user.id, plan.price, T.PAY_DESCRIPTION.format(plan=plan.title, days=plan.days))
+        pid, url = await ctx.pay.create(cb.from_user.id, plan.price, T.PAY_DESCRIPTION.format(plan=plan.title, days=plan.days), recurring=live)
     except Exception as e:
         log.warning("оплата не создана: %s", e)
         await cb.message.answer(T.PAY_ERROR)
-        return await cb.answer()
-    await ctx.db.add_payment(cb.from_user.id, pid, plan.price, plan.id)
+        return
+    await ctx.db.add_payment(cb.from_user.id, pid, plan.price, plan.id, auto=1 if live else 0)
     current = plans.current(ctx.cfg, u)
     switch = T.PAY_SWITCH.format(old=current.title) if current and current.id not in (plan.id, "free") and u["plan"] else ""
     days_word = "день" if plan.days == 1 else "дней"
-    await cb.message.answer(T.PAY_LINK.format(plan=plan.title, price=plan.price, days=plan.days, days_word=days_word) + switch,
-                            reply_markup=K.pay_link(url, plan.price))
+    text = (T.PAY_LINK_AUTO.format(plan=plan.title, price=plan.price, days=plan.days, next_price=plans.plans(ctx.cfg)[plan.id].price) if auto else
+            T.PAY_LINK.format(plan=plan.title, price=plan.price, days=plan.days, days_word=days_word))
+    await cb.message.answer(text + switch, reply_markup=K.pay_link(url, plan.price))
+
+
+# ---------- подписка с автопродлением: оформление (согласие) и отключение ----------
+async def autopay_shown(ctx: Ctx, uid: int) -> bool:
+    """on — всем; preview — только админу (экраны для скриншотов Робокассе, списаний нет)."""
+    return ctx.cfg.rk_recurring == "on" or (ctx.cfg.rk_recurring == "preview" and await is_admin_id(ctx, uid))
+
+
+def autopay_consent_view(ctx: Ctx, plan, agreed: bool):
+    """Экран оформления подписки: условия, галочка «Согласен на автоматические списания», после неё — кнопка оплаты."""
+    nxt = plans.plans(ctx.cfg)[plan.id].price     # продление — по обычной цене (скидка на PRO в пробный день — только на первый месяц)
+    agree = T.AUTOPAY_AGREE_YES.format(next_price=nxt, days=plan.days) if agreed else T.AUTOPAY_AGREE_NO
+    return (T.AUTOPAY_CONSENT.format(plan=plan.title, price=plan.price, days=plan.days, next_price=nxt, agree=agree),
+            K.autopay_consent(plan.id, plan.price, agreed))
+
+
+async def _user_plan(ctx: Ctx, uid: int, plan_id: str):
+    u = await ctx.db.user(uid)
+    p = plans.plans(ctx.cfg, u)
+    return u, p.get(plan_id if plan_id in ("basic", "pro") else "basic")
+
+
+@router.callback_query(F.data.startswith("s:ag:"))
+async def autopay_agree(cb: CallbackQuery, ctx: Ctx) -> None:
+    _, _, plan_id, flag = cb.data.split(":")
+    _, plan = await _user_plan(ctx, cb.from_user.id, plan_id)
+    text, markup = autopay_consent_view(ctx, plan, flag == "1")
+    try:
+        await cb.message.edit_text(text, reply_markup=markup)
+    except Exception:            # сообщение не изменилось или слишком старое — пришлём заново
+        await cb.message.answer(text, reply_markup=markup)
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("s:ar:") | F.data.startswith("s:a1:"))
+async def autopay_pay(cb: CallbackQuery, ctx: Ctx) -> None:
+    """s:ar — оформить подписку (после согласия), s:a1 — оплатить один раз без автопродления."""
+    if not ctx.cfg.payments_on:
+        return await cb.answer(T.PAY_SOON, show_alert=True)
+    u, plan = await _user_plan(ctx, cb.from_user.id, cb.data.split(":")[2])
+    await send_pay_link(cb, ctx, u, plan, auto=cb.data.startswith("s:ar:"))
+    await cb.answer()
+
+
+def autopay_view(ctx: Ctx, u, uid: int, step: str = "state", admin: bool = False):
+    """Управление автопродлением. step: state — статус и «Отключить», confirm — подтверждение, off — отключено.
+    В режиме preview админ видит экран так, будто автопродление включено (для скриншотов Робокассе)."""
+    on = bool(u and u["autorenew"])
+    demo = not on and ctx.cfg.rk_recurring == "preview" and admin
+    if not (on or demo or step == "off"):
+        return T.AUTOPAY_OFF_STATE, K.autopay_manage(False)
+    all_p = plans.plans(ctx.cfg)
+    pid = (u and u["renew_plan"]) or (u["plan"] if u and u["plan"] in ("basic", "pro") else "pro")
+    p = all_p.get(pid, all_p["pro"])
+    date = fmt_date(u["paid_until"] if u and u["paid_until"] > time.time() else time.time() + p.days * DAY)
+    if step == "confirm":
+        return T.AUTOPAY_CONFIRM.format(plan=p.title, date=date), K.autopay_confirm()
+    if step == "off":
+        return T.AUTOPAY_DISABLED.format(plan=p.title, date=date), K.autopay_manage(False)
+    return T.AUTOPAY_ON.format(plan=p.title, price=p.price, days=p.days, date=date), K.autopay_manage(True)
+
+
+@router.message(Command("autopay"))
+async def autopay_cmd(msg: Message, ctx: Ctx, state: FSMContext) -> None:
+    text, markup = autopay_view(ctx, await ctx.db.user(msg.chat.id), msg.chat.id, admin=await is_admin_id(ctx, msg.chat.id))
+    await msg.answer(text, reply_markup=markup)
+
+
+@router.callback_query(F.data.in_({"s:auto", "s:aoff", "s:aoff!"}))
+async def autopay_manage(cb: CallbackQuery, ctx: Ctx) -> None:
+    uid = cb.from_user.id
+    u = await ctx.db.user(uid)
+    if cb.data == "s:aoff!":
+        if u and u["autorenew"]:
+            await ctx.db.set_user(uid, autorenew=0)
+            await ctx.db.event(uid, "autopay_off", u["renew_plan"])
+        text, markup = autopay_view(ctx, u, uid, "off", admin=await is_admin_id(ctx, uid))
+    else:
+        text, markup = autopay_view(ctx, u, uid, "confirm" if cb.data == "s:aoff" else "state", admin=await is_admin_id(ctx, uid))
+    try:
+        await cb.message.edit_text(text, reply_markup=markup)
+    except Exception:
+        await cb.message.answer(text, reply_markup=markup)
     await cb.answer()
 
 
@@ -522,6 +622,9 @@ async def apply_payment(ctx: Ctx, uid: int, yk_id: str, status: str, bot: Bot | 
     until = plans.new_period(ctx.cfg, u, plan_id)
     await ctx.db.set_user(uid, paid_until=until, plan=plan_id, **({"trial_used": 1} if plan_id == "trial" else {}))
     await ctx.db.event(uid, "paid", plan_id)
+    if p["auto"] == 1:            # первый платёж подписки — запоминаем его: по нему Робокасса будет списывать дальше
+        await ctx.db.set_user(uid, autorenew=1, renew_inv=yk_id, renew_plan=plan_id)
+        await ctx.db.event(uid, "autopay_on", plan_id)
     if bot:
         from admin import paylog
         await paylog(bot, ctx, await ctx.db.user(uid), p, until)
@@ -565,24 +668,24 @@ async def help_cmd(msg: Message, ctx: Ctx, state: FSMContext) -> None:
     await show_help(msg, ctx, state)
 
 
-def offer_text(cfg) -> str:
+def offer_text(cfg, autopay: bool = False) -> str:
     p = plans.plans(cfg)
     # ФИО — по желанию (переменная SELLER_NAME), ИНН — обязательно
     seller = (T.OFFER_SELLER.format(name=f" {cfg.seller_name}" if cfg.seller_name else "", inn=cfg.seller_inn,
                                     contact=cfg.seller_contact + ", " if cfg.seller_contact else "")
               if cfg.seller_inn else T.OFFER_SELLER_EMPTY)
-    return T.OFFER.format(seller=seller, trial=p["trial"].price, basic=p["basic"].price, pro=p["pro"].price, pro_trial=cfg.price_pro_trial,
+    return T.OFFER.format(seller=seller, autopay=T.OFFER_AUTOPAY if autopay else T.OFFER_NO_AUTOPAY, trial=p["trial"].price, basic=p["basic"].price, pro=p["pro"].price, pro_trial=cfg.price_pro_trial,
                           contact_tail=f" или {cfg.seller_contact}" if cfg.seller_contact else "")
 
 
 @router.message(Command("offer"))
 async def offer_cmd(msg: Message, ctx: Ctx) -> None:
-    await msg.answer(offer_text(ctx.cfg))
+    await msg.answer(offer_text(ctx.cfg, await autopay_shown(ctx, msg.chat.id)))
 
 
 @router.callback_query(F.data == "offer")
 async def offer_cb(cb: CallbackQuery, ctx: Ctx) -> None:
-    await cb.message.answer(offer_text(ctx.cfg))
+    await cb.message.answer(offer_text(ctx.cfg, await autopay_shown(ctx, cb.from_user.id)))
     await cb.answer()
 
 
