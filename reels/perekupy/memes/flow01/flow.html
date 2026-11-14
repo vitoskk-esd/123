@@ -1,0 +1,88 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/fonts/fonts.css">
+<style>
+html,body{margin:0;width:1080px;height:1350px;overflow:hidden;background:#0b0c10}
+#bgw{position:absolute;inset:-40px;filter:blur(9px) brightness(.42) saturate(.9)}
+#bgw svg{width:1160px;height:2062px;position:absolute;left:0;top:-300px}
+.n{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-family:Onest;font-weight:800;font-size:31px;letter-spacing:.5px;color:#fff;
+  padding:12px 28px;border:4px solid #fff;border-radius:40px;background:rgba(10,12,16,.72);text-transform:uppercase;z-index:3}
+.car{position:absolute;z-index:3}
+svg#ar{position:absolute;left:0;top:0;width:1080px;height:1350px;z-index:2;overflow:visible}
+#brand{position:absolute;left:0;right:0;bottom:22px;text-align:center;font-family:Onest;font-weight:700;font-size:26px;color:#ffffffaa;z-index:3}
+#brand b{color:#ff8a1a}
+</style></head><body>
+<div id="bgw">  <svg width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs>
+      <linearGradient id="swall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3138"/><stop offset="1" stop-color="#3b434c"/></linearGradient>
+      <linearGradient id="sfloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b525b"/><stop offset="1" stop-color="#2a2f35"/></linearGradient>
+      <radialGradient id="slamp" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#e8f4ff" stop-opacity=".5"/><stop offset="1" stop-color="#e8f4ff" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1080" height="1100" fill="url(#swall)"/>
+    <!-- плитка по низу стены -->
+    <rect x="0" y="820" width="1080" height="280" fill="#d9dde2" stroke="#000" stroke-width="6"/>
+    <g stroke="#aab1ba" stroke-width="4"><path d="M0 820 v280"/><path d="M90 820 v280"/><path d="M180 820 v280"/><path d="M270 820 v280"/><path d="M360 820 v280"/><path d="M450 820 v280"/><path d="M540 820 v280"/><path d="M630 820 v280"/><path d="M720 820 v280"/><path d="M810 820 v280"/><path d="M900 820 v280"/><path d="M990 820 v280"/><path d="M1080 820 v280"/><path d="M0 880 h1080"/><path d="M0 940 h1080"/><path d="M0 1000 h1080"/><path d="M0 1060 h1080"/></g>
+    <!-- лампы дневного света -->
+    <g><rect x="140" y="300" width="300" height="26" rx="10" fill="#f4fbff" stroke="#000" stroke-width="5"/><rect x="640" y="300" width="300" height="26" rx="10" fill="#f4fbff" stroke="#000" stroke-width="5"/>
+       <path d="M290 326 L40 1300 L540 1300 Z M790 326 L540 1300 L1040 1300 Z" fill="url(#slamp)"/></g>
+    <!-- вывеска -->
+    <g><rect x="300" y="420" width="480" height="96" rx="14" fill="#151515" stroke="#000" stroke-width="6"/>
+       <text x="540" y="484" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="40" fill="#ffd23f">СТО «У МИХАЛЫЧА»</text></g>
+    <!-- щит с инструментами -->
+    <rect x="60" y="540" width="400" height="200" rx="10" fill="#5a4632" stroke="#000" stroke-width="6"/><rect x="80" y="560" width="14" height="90" rx="5" fill="#c0392b" stroke="#000" stroke-width="4"/><rect x="126" y="568" width="14" height="107" rx="5" fill="#7f8c8d" stroke="#000" stroke-width="4"/><rect x="172" y="576" width="14" height="124" rx="5" fill="#2c3e50" stroke="#000" stroke-width="4"/><rect x="218" y="560" width="14" height="141" rx="5" fill="#d35400" stroke="#000" stroke-width="4"/><rect x="264" y="568" width="14" height="98" rx="5" fill="#c0392b" stroke="#000" stroke-width="4"/><rect x="310" y="576" width="14" height="115" rx="5" fill="#7f8c8d" stroke="#000" stroke-width="4"/><rect x="356" y="560" width="14" height="132" rx="5" fill="#2c3e50" stroke="#000" stroke-width="4"/><rect x="402" y="568" width="14" height="149" rx="5" fill="#d35400" stroke="#000" stroke-width="4"/>
+    <!-- стопка шин -->
+    <g><ellipse cx="900" cy="1040" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="1040" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="994" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="994" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="948" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="948" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="902" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="902" rx="50" ry="13" fill="#3a3f46"/><ellipse cx="900" cy="856" rx="110" ry="30" fill="#1b1d21" stroke="#000" stroke-width="6"/><ellipse cx="900" cy="856" rx="50" ry="13" fill="#3a3f46"/></g>
+    <!-- пол с маслом -->
+    <rect x="0" y="1060" width="1080" height="860" fill="url(#sfloor)"/>
+    <path d="M0 1060 h1080" stroke="#000" stroke-width="8"/>
+    <g fill="#16181c" opacity=".7"><ellipse cx="420" cy="1420" rx="120" ry="26"/><ellipse cx="760" cy="1620" rx="80" ry="18"/></g>
+    <path d="M140 1880 L380 1100 M940 1880 L700 1100" stroke="#ffd23f" stroke-width="14" stroke-dasharray="40 30" opacity=".8"/>
+  </svg>
+</div>
+<svg id="ar"><defs><marker id="m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#fff"/></marker></defs></svg>
+<div id="nodes"></div>
+<div id="brand">бот <b>«Перехват»</b> находит такие бочки раньше других</div>
+<script>
+const N = {
+ q1:[255,95,"У вас есть деньги?"], goal:[835,95,"Купите"],
+ n1:[110,250,"Нет"], y1:[330,250,"Да"],
+ r3a:[335,395,"Они на ремонт"], r3b:[700,395,"Пригодятся"],
+ q4:[250,555,"У вас есть работа?"], q4b:[760,555,"Вам платят?"],
+ n4:[110,700,"Нет"], y4:[330,700,"Да"], n4b:[660,700,"Нет"], y4b:[880,700,"Да"],
+ q6:[270,860,"У вас есть Приора?"], y6:[630,860,"Да"], sell:[860,860,"Продайте"],
+ lie:[400,1020,"Врёте"], n7:[640,1020,"Нет"],
+ n8:[110,1180,"Нет"], q8:[470,1180,"У вас есть гараж?"], y8:[860,1180,"Да"],
+};
+const box = document.getElementById("nodes");
+for (const [id,[x,y,t]] of Object.entries(N)) box.insertAdjacentHTML("beforeend", `<div class="n" id="${id}" style="left:${x}px;top:${y}px">${t}</div>`);
+const CAR = "../../kit/img/w124/w124_34.png";
+[[590,0],[760,1],[925,0]].forEach(([cx,flip],k)=>box.insertAdjacentHTML("beforeend",`<img class="car" id="c${k+1}" src="${CAR}" style="left:${cx-80}px;top:155px;width:160px;${flip?"transform:scaleX(-1)":""}">`));
+const R = id => document.getElementById(id).getBoundingClientRect();
+const P = (id, side, off=0) => { const r=R(id), g=6;
+  return side=="l"?[r.left-g, r.top+r.height/2+off]: side=="r"?[r.right+g, r.top+r.height/2+off]: side=="t"?[r.left+r.width/2+off, r.top-g]:[r.left+r.width/2+off, r.bottom+g]; };
+// стрелки: [откуда, сторона, куда, сторона, промежуточные точки (x или y берутся от соседей: "H" — горизонталь, "V" — вертикаль)]
+const A = [
+ ["q1","b",-80,"n1","t",0], ["q1","b",80,"y1","t",0],
+ ["y1","r",0,"c1","l",0], ["q1","b",0,"r3a","t",0],
+ ["r3a","r",0,"r3b","l",0], ["r3b","t",0,"c2","b",0],
+ ["n1","b",0,"q4","t",-140],
+ ["q4","b",-140,"n4","t",0], ["q4","b",80,"y4","t",0], ["y4","r",0,"q4b","l",0,"diag"],
+ ["q4b","b",-60,"n4b","t",0], ["q4b","b",90,"y4b","t",0], ["y4b","r",0,"c3","b",30,"lane"],
+ ["n4b","b",0,"q6","t",150,"diag"],
+ ["n4","b",0,"q6","t",-160],
+ ["q6","r",0,"y6","l",0], ["y6","r",0,"sell","l",0], ["sell","r",0,"c3","r",0,"lane2"],
+ ["q6","b",-160,"n8","t",0], ["n8","r",0,"q8","l",0], ["q8","r",0,"y8","l",0], ["y8","t",0,"sell","b",0],
+ ["q8","t",120,"n7","b",0], ["n7","l",0,"lie","r",0], ["lie","b",0,"q8","t",-70],
+];
+window.addEventListener("load", () => document.fonts.ready.then(() => {
+  const svg = document.getElementById("ar");
+  for (const [f,fs,fo,t,ts,to,mode] of A) {
+    let [x1,y1] = P(f,fs,fo), [x2,y2] = P(t,ts,to);
+    if ((fs=="b"||fs=="t") && (ts=="t"||ts=="b") && Math.abs(x1-x2)<160 && !mode) x2 = x1;        // вертикальные — строго вертикально
+    if ((fs=="l"||fs=="r") && (ts=="l"||ts=="r") && !mode) y2 = y1;
+    let d = `M${x1} ${y1} L${x2} ${y2}`;
+    if (mode=="lane") d = `M${x1} ${y1} H${x2} V${y2}`;                                  // вправо, потом вверх к машине
+    if (mode=="lane2") d = `M${x1} ${y1} H${x2 + 40} V${y2} H${x2}`;                      // по правому краю — в бок машине
+    svg.insertAdjacentHTML("beforeend", `<path d="${d}" stroke="#fff" stroke-width="5" fill="none" marker-end="url(#m)" stroke-linejoin="round"/>`);
+  }
+  window.READY = true;
+}));
+</script></body></html>
