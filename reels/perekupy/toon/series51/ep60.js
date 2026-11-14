@@ -72,7 +72,7 @@ mount("s14", { far: DIARY(), farBlur: 0 }, { x: 540, y: 960, s: 1 });
 // 15. у Эво: «а теперь ты меня учи»
 mount("s15", { bg: "shkolnyidvor", grade: "day", farBlur: 3, far: car(EVO, 360, 1330, 680, { z: 2, sheen: .4 }),
   mid: M("mf", 300, 1820, 880, { look: "grin" }, { armR: -70 }, { rim: "#fff6d0", side: 1, z: 7 }) + INHAND(300, 1820, 880, -70, 230, DIARYMINI, 9) + V("vf", 780, 1820, 820, {}, {}, { rim: "#fff6d0", side: -1, z: 7 }), lights: DV_L,
-  bubbles: [{ id: "m6", p: "mf", html: "Пять. А теперь ты меня учи —<br><em>найди мне Эво дешевле рынка!</em>", fs: 42 }] }, { x: 540, y: 1180, s: 1.05 });
+  bubbles: [{ id: "m6", p: "mf", html: "Ставлю пять. А теперь ты меня учи —<br><em>найди мне Эво дешевле рынка!</em>", fs: 42 }] }, { x: 540, y: 1180, s: 1.05 });
 // 16. карточка бота
 mount("s16", { bg: "shkolnyidvor", grade: "day", over: CTA60.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), lights: DV_L }, { x: 540, y: 1000, s: .98 });
 
