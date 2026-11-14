@@ -1,0 +1,96 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props59.js"></script>
+<script>
+// «СВИДАНИЕ: ЖОРА И КАМРИ» (киношный формат, отдельный ролик). Жора идёт на свидание с Викой — в анкете «Продаю Камри 2017».
+// ОБЛОЖКА (кадр 0, правило владельца 14.11): Жора держит телефон с анкетой + плашка «СВИДАНИЕ: / ЖОРА И КАМРИ», как в «Толян 14»; гаснет к ~1,6 с.
+// → ресторан: «расскажи о себе» — «а пробег какой? крашеная?», шкала романтики падает → салфетка: 1 900 000 − торг = 1 750 000 + ужин
+// → «ты со мной или с машиной?» → Стасу бот прислал объявление Вики через секунду → звонок: «еду!» → парковка: деньги на капот, без торга
+// → Жоре — счёт 4 800 ₽ → Стас с Викой уезжают на Камри → финальная фраза Лиса про бот + карточка.
+// Приёмы (новые): анкета знакомств на экране; шкала романтики; салфетка с торгом; деньги на капоте.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const VK = (p, x, foot, h, pose = {}, extra = {}) => ch("vika", p, x, foot, h, null, pose, extra);
+const PR_L = glow(180, 360, 220, "#ffe8a8", .45) + glow(900, 360, 220, "#ffe8a8", .45);
+const RS_L = glow(540, 1290, 260, "#ffb84a", .45) + glow(90, 600, 160, "#ffb84a", .4) + glow(990, 600, 160, "#ffb84a", .4);
+const RP_L = glow(540, 470, 420, "#ff3bd0", .25) + glow(40, 870, 160, "#fff6c8", .5) + glow(1040, 870, 160, "#fff6c8", .5);
+const DATE = (k, vpose = {}, zo = {}, extra = "") => VK("vk" + k, 300, 1650, 760, vpose, { rim: "#ffb84a", side: 1, z: 7 }) + Z("zr" + k, 790, 1660, 760, zo, {}, { rim: "#ffb84a", side: -1, z: 7 }) + RTABLE(9) + extra;
+const S = [
+ { h: "ОБЛОЖКА · ПРИХОЖАЯ → РЕСТОРАН", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("perekup", "zh", 540, 1960, 1680, ZHORA, DATING(), { rim: "#ffe8a8", side: 1 });
+       return { bg: "prihozhaya", grade: "warm", farBlur: 8, mid: H.mid, lights: H.lights, over: TITLE("СВИДАНИЕ:", "ЖОРА И КАМРИ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "restoran", grade: "warm", mid: DATE("a", { armR: -40 }, { look: "grin" }), lights: RS_L }), shot: { x: 540, y: 1180, s: 1.06 },
+     bubbles: [{ p: "vka", html: "Расскажи о себе,<br><em>Жора.</em>", fs: 46 }], talk: ["vka"] },
+   vo: "Лис: «Жора пошёл на свидание. Вика в анкете написала: продаю Камри». Вика: «Расскажи о себе, Жора».", who: "Лис + Вика",
+   mv: "<b>Кадр 0 — обложка как в «Толян 14»</b>: Жора держит телефон, на экране — <b>приём 1: анкета знакомств</b> «Вика, 26 · Продаю Камри 2017 😉 · ищу серьёзного», поверх — плашка «СВИДАНИЕ: / ЖОРА И КАМРИ» (гаснет к 1,6 с). <b>Новый фон — прихожая</b> (зеркало, вешалка, бра). B — <b>новый фон — ресторан</b> (портьеры, окно с городом, свечи); стол со свечой и бокалами, <b>Вика</b> напротив Жоры." },
+ { h: "ШКАЛА РОМАНТИКИ → САЛФЕТКА", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "restoran", grade: "warm", over: LOVEMETER(830, 420, .35), mid: DATE("b", {}, { look: "o" }), lights: RS_L }), shot: { x: 520, y: 1180, s: 1.06 },
+     bubbles: [{ p: "zrb", html: "А пробег какой?<br><em>Крашеная?</em>", fs: 48 }], talk: ["zrb"] },
+   B: { def: () => ({ far: NAPKIN(), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ at: [540, 1500], html: "Торг — сто пятьдесят.<br><em>И ужин за мой счёт!</em>", fs: 44 }] },
+   vo: "Жора: «А пробег какой? Крашеная?» Лис: «Романтика падает. Жора считает на салфетке». Жора: «Миллион девятьсот… торг сто пятьдесят. И ужин за мой счёт!»", who: "Жора + Лис",
+   mv: "A — <b>приём 2 — шкала романтики</b>: столбик из сердец справа падает с каждым вопросом про машину. B — <b>приём 3 — салфетка с торгом</b> крупно: ручкой «Камри 2017 · 1 900 000 · − торг 150 · = 1 750 000 ✔ · + ужин за мой счёт 🍷», строчки появляются по одной." },
+ { h: "«ТЫ СО МНОЙ ИЛИ С МАШИНОЙ?» → БОТ СТАСУ", tc: "3/6 · 0:24–0:37",
+   A: { def: () => ({ bg: "restoran", grade: "warm", over: LOVEMETER(830, 420, .05), mid: VK("vkc", 420, 1880, 1000, { armR: -150 }, { rim: "#ffb84a", side: 1, z: 7 }), lights: RS_L }), shot: { x: 540, y: 1150, s: 1.1 },
+     bubbles: [{ p: "vkc", html: "Жора, ты сейчас со мной<br><em>или с машиной?</em>", fs: 44 }], talk: ["vkc"] },
+   B: { def: () => { const H = HOLDPHONE("perekup", "sp", 540, 1960, 1680, STAS, CAMCARD(), { rim: "#ff7ae6", side: 1 });
+       return { bg: "restoranpark", grade: "night", farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 } },
+   vo: "Вика: «Жора, ты сейчас со мной или с машиной?» Лис: «А объявление Вики уже час висит в сети. Стасу бот прислал его через секунду».", who: "Вика + Лис",
+   mv: "A — Вика крупно, рука ко лбу; шкала романтики — на нуле. B — Стас у ресторана с телефоном: в боте «Toyota Camry · 2017 · 1 900 000 ₽ · рынок ≈ 2 150 000 · 1 хозяйка · 🔥 −12% · ⏱ 1 с после публикации». <b>Новый фон — парковка у ресторана</b> (неон «РЕСТОРАН», фонари, мокрый асфальт)." },
+ { h: "ЗВОНОК → ДЕНЬГИ НА КАПОТ", tc: "4/6 · 0:37–0:50",
+   A: { def: () => ({ bg: "restoran", grade: "warm", mid: DATE("d", { phone: 1 }, { look: "o" }), lights: RS_L }), shot: { x: 540, y: 1180, s: 1.06 },
+     bubbles: [{ p: "vkd", html: "Жора, извини —<br><em>покупатель приехал.</em>", fs: 44 }], talk: ["vkd"] },
+   B: { def: () => ({ bg: "restoranpark", grade: "night",
+       mid: car(CAM, 0, 1640, 740, { z: 4, sheen: .6 }) + `<div class="prop" style="left:330px;top:1330px;width:150px;height:125px;z-index:6;transform:rotate(-8deg)">${MONEY}</div>` + ch("perekup", "sk", 880, 1780, 740, STAS, { armR: -60 }, { rim: "#ff7ae6", side: -1, z: 7 })
+         + VK("vke", 600, 1790, 720, {}, { rim: "#ff7ae6", side: 1, z: 7 }), lights: RP_L }), shot: { x: 560, y: 1200, s: 1.06 },
+     bubbles: [{ p: "sk", html: "Беру без торга.<br><em>Подвезти вас?</em>", fs: 44 }], talk: ["sk"] },
+   vo: "Стас (по телефону): «Добрый вечер! Камри ещё продаётся? Еду!» Вика: «Жора, извини — покупатель приехал». Лис: «Стас приехал через двадцать минут. Деньги — на капот». Стас: «Беру без торга. Подвезти вас?»", who: "Стас + Вика + Лис",
+   mv: "A — Вика говорит по телефону, Жора застыл. B — парковка: белая Камри, <b>приём 4 — пачка денег на капоте</b>, Стас и Вика у машины." },
+ { h: "СЧЁТ → «ОПЯТЬ БОТ»", tc: "5/6 · 0:50–1:00",
+   A: { def: () => ({ bg: "restoran", grade: "warm",
+       mid: Z("zf", 790, 1660, 760, { look: "o" }, {}, { rim: "#ffb84a", side: -1, z: 7 }) + RTABLE(9) + ch("perekup", "wt", 190, 1900, 940, WAITER, { armR: -70 }, { rim: "#ffb84a", side: 1, z: 11 }) + INHAND(190, 1900, 940, -70, 170, BILL, 12), lights: RS_L }), shot: { x: 540, y: 1180, s: 1.06 },
+     bubbles: [{ p: "wt", html: "Ваш счёт —<br><em>четыре восемьсот.</em>", fs: 44 }], talk: ["wt"] },
+   B: { def: () => ({ bg: "restoran", grade: "warm", mid: Z("zg", 540, 1900, 1000, { look: "o" }, { armL: 30 }, { rim: "#ffb84a", side: 1, z: 7 }), lights: RS_L }), shot: { x: 540, y: 1150, s: 1.1 },
+     bubbles: [{ p: "zg", html: "Стас…<br><em>опять бот.</em>", fs: 52 }], talk: ["zg"] },
+   vo: "Официант: «Ваш счёт — четыре восемьсот». Жора: «Стас… опять бот».", who: "Официант + Жора",
+   mv: "A — <b>новый герой — официант</b> со счётом «4 800 ₽», стул Вики пуст. B — Жора крупно, один за столом." },
+ { h: "ФИНАЛ · ПАРКОВКА → БОТ", tc: "6/6 · 1:00–1:10",
+   A: { def: () => ({ bg: "restoranpark", grade: "night", mid: car(CAM, 100, 1600, 820, { z: 4, sheen: .8 }) + SPEEDL(), lights: RP_L }), shot: { x: 540, y: 1150, s: 1 } },
+   B: { def: () => ({ bg: "restoranpark", grade: "night", over: CTA59, lights: RP_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Лис: «Бот «Перехват» присылает объявления через секунду после публикации. Хочешь успевать первым — ссылка в шапке». (Финальная фраза голосом — про бота.)", who: "Лис",
+   mv: "A — Камри с Викой и Стасом уезжает от ресторана, линии скорости. B — <b>последний кадр — только карточка бота</b>. Голос в конце — продающая фраза про бота." },
+];
+function SPEEDL() { return `<div style="position:absolute;inset:0;z-index:9">${Array.from({ length: 12 }, (_, k) => `<div style="position:absolute;left:${(k * 173) % 1000}px;top:${1100 + (k * 97) % 500}px;width:${160 + (k * 53) % 200}px;height:6px;border-radius:3px;background:#ffffffaa"></div>`).join("")}</div>`; }
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
