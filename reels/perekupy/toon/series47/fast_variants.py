@@ -27,8 +27,14 @@ for k, v in V.items():
 // ── {vid} «{v["name"]}»: быстрая уникализация — меняется только заставка ──
 $("#title .a").textContent = {json.dumps(t1, ensure_ascii=False)}; $("#title .a").style.cssText = "font-size:110px;background:{c1};color:{c2}";
 $("#title .b").textContent = {json.dumps(t2, ensure_ascii=False)}; $("#title .b").style.cssText = "font-size:60px;background:{c2};color:{c1}";
+const ORIG = [...document.querySelectorAll("#lbx .lbt, #lbx .lbb")].map(e => e.textContent), HEADT = {HEAD};
 {{ const L = document.querySelector("#lbx"); if (L) {{ const a = L.querySelector(".lbt"), b = L.querySelector(".lbb");   // кинорамка вместо плашки (ep56)
   a.textContent = {json.dumps(t1, ensure_ascii=False)}; b.textContent = {json.dumps(t2, ensure_ascii=False)}; a.style.background = b.style.background = "{c1}"; a.style.color = b.style.color = "{c2}"; }} }}
+{{ const L = document.querySelector("#lbx"); if (L) {{ const B = window.build; window.build = R => {{ B(R);   // до склейки с основным видео (HEAD) рамка возвращается к исходной
+  const bars = [L.querySelector(".lbt"), L.querySelector(".lbb")], col = ["#fff", "#ffd23f"];
+  R.tl.to(bars, {{ opacity: 0, duration: .15 }}, HEADT - .6);
+  bars.forEach((el, i) => R.tl.set(el, {{ textContent: ORIG[i], background: "#000", color: col[i] }}, HEADT - .45));
+  R.tl.to(bars, {{ opacity: 1, duration: .15 }}, HEADT - .4); }}; }} }}
 ''')
     subprocess.run(["python3", "build2.py", vid], check=True, stdout=subprocess.DEVNULL)
     subprocess.run(["node", "../../kit/render.js", f"{vid}.html", "video", f"head_{vid}.mp4", str(FPS), "2"], check=True,
