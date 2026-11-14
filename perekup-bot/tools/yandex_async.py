@@ -49,8 +49,8 @@ def main():
                 log("сеть:", e); time.sleep(5); continue
             if js.get("id"):
                 st["ops"][js["id"]] = [code, q, pg]; break
-            log("Яндекс:", str(js)[:160]); time.sleep(5 * (attempt + 1))
-        time.sleep(.15)
+            log("Яндекс:", str(js)[:160]); time.sleep(3 * (attempt + 1))
+        time.sleep(1.05)                                    # квота Яндекса: 1 отложенный запрос в секунду
         if i % 200 == 0:
             ap.write_text(json.dumps(st, ensure_ascii=False)); log(f"отправлено {i}/{len(todo)}")
     ap.write_text(json.dumps(st, ensure_ascii=False))
