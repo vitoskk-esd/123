@@ -1,0 +1,38 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 15, the FINALE of a comedy mini-series about Tolyan, a student car flipper who grew 100 000 roubles into a million. Opening is cinematic and slow, like a movie trailer; then brisk; warm and proud at the end. «Марк Второй, Турер Ви» — Toyota Mark II Tourer V. Numbers said fully."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.26,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "Lines: «Слышишь, как дышит?» — quiet, proud, almost whispering about the engine. «В надёжные руки, товарищ полковник» — respectful, a little playful. Final lines — calm, confident, cool."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: shouting with joy. Line 2: quiet, sincere, touched. Line 3: curious, grinning."
+ },
+ "semenych": {
+  "voice": "Alnilam",
+  "tempo": 1.08,
+  "profile": "Semyonych — a retired Russian army colonel in his 70s, selling his old Mercedes at the dacha. Strict, low, measured voice.",
+  "notes": "One line: slow, stern, with dignity."
+ },
+ "artur": {
+  "voice": "Achird",
+  "tempo": 1.12,
+  "profile": "Artur — a cheerful Russian wedding car rental owner in his 30s, white suit.",
+  "notes": "One line: excited, fast, delighted."
+ },
+ "max": {
+  "voice": "Puck",
+  "tempo": 1.12,
+  "profile": "Max — a young Russian JDM drift enthusiast in his 20s, relaxed and friendly.",
+  "notes": "One line: laid-back, cool, respectful."
+ }
+}

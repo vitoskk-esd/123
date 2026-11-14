@@ -87,6 +87,20 @@ const S = {
     const s0 = Math.floor(t0 * SR), len = Math.floor(dur * SR);
     for (let i = 0; i < len; i++) put(sfx, s0 + i, Math.sin(TAU * 1000 * i / SR) * .32 * Math.min(1, i / 240, (len - i) / 240));
   },
+  rev(t0, dur) {         // мотор: стартер, холостые, перегазовка рядной «шестёрки» (обороты растут к середине и падают)
+    const s = Math.floor(t0 * SR), len = Math.floor(dur * SR), f = SVF(), f2 = SVF(); let ph = 0;
+    for (let i = 0; i < len; i++) { const t = i / SR, x = t / dur;
+      const rpm = 900 + 4200 * Math.max(0, Math.sin(Math.PI * Math.min(1, Math.max(0, (x - .15) / .7)))) ** 1.5;
+      ph += TAU * (rpm / 60 * 3) / SR;                                   // 6 цилиндров, 4 такта → 3 вспышки на оборот
+      const pulse = Math.max(0, Math.sin(ph)) ** 3, n = f(rnd(), 900 + rpm * .4, 1.5).bd;
+      const v = (Math.tanh((pulse * 1.6 + n * .5) * 2) * .55 + f2(rnd(), 180, 1).lo * .3) * Math.min(1, t * 8, (dur - t) * 3) * .32;
+      put(sfx, s + i, v); put(verb, s + i, v * .15); }
+  },
+  rewind(t0, dur) {      // VHS-перемотка: визгливый плавающий тон + шорох ленты
+    const s = Math.floor(t0 * SR), len = Math.floor(dur * SR), f = SVF(); let ph = 0;
+    for (let i = 0; i < len; i++) { const t = i / SR; ph += TAU * (2400 + 900 * Math.sin(TAU * 3.3 * t) + 600 * t / dur) / SR;
+      const v = (Math.sin(ph) * .05 + f(rnd(), 5000, 1).bd * .12) * Math.min(1, t * 20, (dur - t) * 20); put(sfx, s + i, v, Math.sin(t * 7) * .3); }
+  },
   riser(t0, dur) {
     const s = Math.floor(t0 * SR), len = Math.floor(dur * SR), f = SVF(); let ph = 0;
     for (let i = 0; i < len; i++) { const x = i / len; ph += TAU * (180 + 1500 * x * x) / SR;

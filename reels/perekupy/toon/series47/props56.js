@@ -33,7 +33,7 @@ const REW = () => `<div style="left:0;top:0;width:1080px;height:1920px;backgroun
 // приём 3 — миллион: табло прокручивается за 1 000 000, золото, конфетти
 const MILLION = (x, y, id = "mil") => `<div id="${id}" style="position:absolute;left:${x}px;top:${y}px;z-index:64;width:920px;text-align:center">
   <div style="display:inline-block;padding:10px 34px;border-radius:30px;background:linear-gradient(#ffe27a,#e6b422);border:10px solid #151515;box-shadow:0 14px 0 #151515;font-family:'JetBrains Mono';font-weight:800;font-size:116px;color:#151515"><span id="${id}n">1 020 000</span> ₽</div>
-  <div style="margin-top:24px;font-family:Unbounded;font-weight:900;font-size:60px;color:#fff;-webkit-text-stroke:3px #151515">МИЛЛИОН ЕСТЬ</div></div>`;
+  <div id="${id}t" style="display:inline-block;margin-top:24px;padding:8px 30px;border-radius:20px;background:#151515;font-family:Unbounded;font-weight:900;font-size:60px;color:#fff">МИЛЛИОН ЕСТЬ</div></div>`;
 const CONFETTI = (id = "conf", n = 70, seed = 7) => { let r = seed; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
   return `<div id="${id}" style="position:absolute;inset:0;z-index:30;pointer-events:none">${Array.from({ length: n }, () => {
     const c = ["#ffd23f", "#ff3b30", "#4cd964", "#2f6db5", "#ff6fae", "#fff"][Math.floor(rnd() * 6)];
@@ -42,8 +42,8 @@ const CONFETTI = (id = "conf", n = 70, seed = 7) => { let r = seed; const rnd = 
 const BA = (leftHtml, rightHtml) => `<div class="ba" id="baL" style="position:absolute;inset:0;z-index:20;clip-path:inset(0 540px 0 0);filter:grayscale(1) sepia(.6) contrast(1.05)">${leftHtml}</div>
   <div class="ba" id="baR" style="position:absolute;inset:0;z-index:20;clip-path:inset(0 0 0 540px)">${rightHtml}</div>
   <div id="baD" style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:21"></div>
-  <div style="position:absolute;left:40px;top:300px;z-index:22;font-family:Unbounded;font-weight:900;font-size:56px;color:#fff;background:#151515;padding:6px 22px;border-radius:16px">БЫЛО</div>
-  <div style="position:absolute;left:580px;top:300px;z-index:22;font-family:Unbounded;font-weight:900;font-size:56px;color:#ffd23f;background:#151515;padding:6px 22px;border-radius:16px">СТАЛО</div>`;
+  <div id="lbBylo" style="position:absolute;left:40px;top:300px;z-index:22;font-family:Unbounded;font-weight:900;font-size:56px;color:#fff;background:#151515;padding:6px 22px;border-radius:16px">БЫЛО</div>
+  <div id="lbStalo" style="position:absolute;left:580px;top:300px;z-index:22;font-family:Unbounded;font-weight:900;font-size:56px;color:#ffd23f;background:#151515;padding:6px 22px;border-radius:16px">СТАЛО</div>`;
 const BAPANE = (bg, inner) => `<div class="grp" style="position:absolute;inset:0">${C.bgSvg(bg)}${inner}</div>`;
 // свадебный декор на W124: кольца на крыше и бант на капоте (l, ground, w — как у car)
 const WEDDING = (l, ground, w) => { const h = w * 327 / 746, t = ground - h;
@@ -55,7 +55,7 @@ const SPEED = (y0 = 1100, y1 = 1700, id = "spd") => `<div id="${id}" style="posi
 const W124CARD = () => BOTH("Mercedes · до 500 тыс", `<div id="nwc">${CARD("Mercedes W124 · 1993", "430 000 ₽", "рынок ≈ 520 000 ₽ · 1 хозяин · дача", "🔥 −17% к рынку · ⏱ 1 с после публикации")}</div>`);
 const ARTCARD = () => BOTH("Ретро для свадеб", `<div id="nac">${CARD("Mercedes W124 · 1993", "520 000 ₽", "продаёт: Толян", "⏱ 1 с после публикации")}</div>`);
 const MKFILTER = () => `<div style="font-family:Onest;color:#fff"><div style="font-weight:700;font-size:34px;color:#8b93a3">ПЕРЕХВАТ · бот</div>
-  <div style="margin-top:14px;padding:18px 22px;border-radius:22px;background:#1c1f26;font-weight:800;font-size:34px">Фильтр: <span style="color:#ffd23f">Mark II · JZX100<br>Tourer V</span> · для себя</div>
+  <div id="mkf" style="margin-top:14px;padding:18px 22px;border-radius:22px;background:#1c1f26;font-weight:800;font-size:34px">Фильтр: <span style="color:#ffd23f">Mark II · JZX100<br>Tourer V</span> · для себя</div>
   <div id="nmk">${CARD("Toyota Mark II Tourer V · 1999", "900 000 ₽", "рынок ≈ 1 150 000 ₽ · 1JZ-GTE · ручка", "🔥 −22% к рынку · ⏱ 1 с после публикации")}</div></div>`;
 const CTA56 = `<div style="position:absolute;left:60px;right:60px;top:1330px;z-index:70;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:26px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center">
   <div style="font-size:52px;line-height:1.12">Бот <span style="color:#c0392b">«Перехват»</span><br>— ссылка в шапке</div><div style="margin-top:12px;font-size:30px;font-family:Onest;font-weight:800">объявления по всей России · через ~1 с после публикации</div></div>`;

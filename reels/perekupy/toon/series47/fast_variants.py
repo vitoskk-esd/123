@@ -5,11 +5,11 @@ import json, os, shutil, subprocess, sys
 
 BASE = sys.argv[1]; HEAD = 2.4; FPS = 30; N = int(HEAD * FPS)
 V = {   # заставка (две плашки и цвета) · цвет ffmpeg · зум и сдвиг центра (доли запаса по x, y: 0 — левый/верхний край, .5 — центр)
- "b": dict(name="Архив", t=("ВСЕ ДЕНЬГИ", "НА ОДНУ МАШИНУ", "#2f4fb8", "#fbfaf3"),
+ "b": dict(name="Архив", t=("ОТ 100 000 ДО МИЛЛИОНА", "ФИНАЛ ИСТОРИИ", "#2f4fb8", "#fbfaf3"),
    color="colorchannelmixer=.86:.14:0:0:.08:.86:.06:0:.04:.1:.78:0,eq=contrast=1.05:saturation=1.05", zoom=1.04, at=(.5, .5)),
- "c": dict(name="Неон", t=("ВА-БАНК", "ИЛИ ПРОПАЛ", "#ffd23f", "#151515"),
+ "c": dict(name="Неон", t=("15 СДЕЛОК — МИЛЛИОН", "ЧЕМ ВСЁ ЗАКОНЧИЛОСЬ", "#ffd23f", "#151515"),
    color="eq=contrast=1.1:saturation=1.3:brightness=-0.02,hue=h=12", zoom=1.06, at=(.5, .25)),
- "h": dict(name="Пастель", t=("НЕ ЗАВОДИТСЯ", "ПОСЛЕ ПОКУПКИ", "#ff6fae", "#151515"),
+ "h": dict(name="Пастель", t=("ОН КУПИЛ МЕЧТУ", "ТОЛЯН · ФИНАЛ", "#ff6fae", "#151515"),
    color="colorbalance=rs=.10:gs=-.04:bs=.08:rm=.08:gm=-.03:bm=.06,eq=saturation=.9:brightness=.03", zoom=1.05, at=(.3, .5)),
 }
 PY = os.environ.get("PY", "python3")
@@ -27,6 +27,8 @@ for k, v in V.items():
 // ── {vid} «{v["name"]}»: быстрая уникализация — меняется только заставка ──
 $("#title .a").textContent = {json.dumps(t1, ensure_ascii=False)}; $("#title .a").style.cssText = "font-size:110px;background:{c1};color:{c2}";
 $("#title .b").textContent = {json.dumps(t2, ensure_ascii=False)}; $("#title .b").style.cssText = "font-size:60px;background:{c2};color:{c1}";
+{{ const L = document.querySelector("#lbx"); if (L) {{ const a = L.querySelector(".lbt"), b = L.querySelector(".lbb");   // кинорамка вместо плашки (ep56)
+  a.textContent = {json.dumps(t1, ensure_ascii=False)}; b.textContent = {json.dumps(t2, ensure_ascii=False)}; a.style.background = b.style.background = "{c1}"; a.style.color = b.style.color = "{c2}"; }} }}
 ''')
     subprocess.run(["python3", "build2.py", vid], check=True, stdout=subprocess.DEVNULL)
     subprocess.run(["node", "../../kit/render.js", f"{vid}.html", "video", f"head_{vid}.mp4", str(FPS), "2"], check=True,
