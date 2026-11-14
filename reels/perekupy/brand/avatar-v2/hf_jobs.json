@@ -1,0 +1,51 @@
+{
+ "_": "4 новых варианта аватарки бота «Перехват» (владелец 14.11: «4 разных фото для аватарки в нашем стиле»): та же лиса по ref.jpg, новые сцены — не повторять v1–v7.",
+ "style": "Keep EXACTLY the same fox mascot character from the reference: same orange-and-white fur, sly narrowed eyes and smug grin, black baseball cap, gold chain, same clean vector mascot illustration style with bold dark outlines, flat colors and soft highlights, same orange-and-black brand palette on a dark charcoal background. Square esports-style logo avatar, the fox head and shoulders large in the center, readable at small size. No text, no letters, no numbers, no watermark.",
+ "style_vertical": "",
+ "img_app": "alibaba/qwen-image-3/edit",
+ "designs": [
+  {
+   "id": "a8",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "Variant «Вратарь»: the same fox leaps sideways like a goalkeeper and catches a small flying orange sports car in one paw right in front of the viewer, the other paw stretched out, cap almost flying off, gold chain swinging, confident grin with one eye narrowed; orange speed arcs and a few tiny motion sparks behind; bold orange circular ring badge behind the fox, the car breaks slightly out of the ring. Different pose and composition from the reference. Absolutely no text, letters or numbers anywhere."
+  },
+  {
+   "id": "a9",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "Variant «Ключи»: the same fox, upper body, leans with its elbows on the roof of a glossy black sports car seen from the front three-quarter view, spinning a car key with an orange keychain on one claw, black sunglasses pushed up onto the cap, smug half-smile; warm orange rim light on the fox and the car; bold orange shield-shaped badge outline behind. Different pose and composition from the reference. Absolutely no text, letters or numbers anywhere."
+  },
+  {
+   "id": "a10",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "Variant «Одна секунда»: the same fox presses the button of a big chrome stopwatch held up to the viewer, the stopwatch hand stands just past the top, an orange lightning bolt zigzags behind the fox, the fox grins slyly and winks; dark background with a thin orange octagon badge outline behind; the stopwatch dial has only tick marks, no digits. Different pose and composition from the reference. Absolutely no text, letters or numbers anywhere."
+  },
+  {
+   "id": "a11",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "Variant «Неоновая эмблема»: a minimal bold mascot emblem — the same fox head with black cap and sly narrowed eyes, front view, large in the center, under it a sleek glowing orange neon line silhouette of a car, the whole emblem framed by a thin glowing orange neon circle, like a neon sign on a dark brick wall; very simple shapes, high contrast, perfectly readable as a tiny round avatar. Different pose and composition from the reference. Absolutely no text, letters or numbers anywhere."
+  },
+  {
+   "id": "a8b",
+   "ar": "1:1",
+   "refs": [
+    "reels/perekupy/brand/avatar-v/ref.jpg"
+   ],
+   "prompt": "Variant «Поймал»: the same fox, head and upper body, facing the viewer, has just caught a small glossy orange sports car in one open paw raised at shoulder height, like catching a ball; the other paw gives a thumbs-up; gold chain hangs normally around the neck as one closed loop; sly grin, one eye narrowed; a few orange speed lines behind the car show it was flying fast; bold orange circular ring badge behind the fox. Correct fox anatomy: exactly two arms, chain fully around the neck. Different pose and composition from the reference. Absolutely no text, letters or numbers anywhere."
+  }
+ ],
+ "brand": [],
+ "images": [],
+ "clips": []
+}

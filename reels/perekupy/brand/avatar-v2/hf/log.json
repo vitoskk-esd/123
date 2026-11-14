@@ -1,0 +1,35 @@
+{
+ "_uploads": {
+  "reels/perekupy/brand/avatar-v/ref.jpg": "https://d3snorpfx4xhv8.cloudfront.net/7c5728e8-72e5-40aa-bdaf-8d10659ea1b5/8d2f7e5c-abf0-4f27-a06a-ed16d630a13f.jpeg"
+ },
+ "a8": {
+  "request_id": "01a1da89-5c8f-7274-a09a-7d7ac15d84c2",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 48
+ },
+ "a9": {
+  "request_id": "01a1da8a-19f7-7c08-b58f-030c35f52c54",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 65
+ },
+ "a10": {
+  "request_id": "01a1da8b-1941-7309-a044-2e52020d0ada",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 57
+ },
+ "a11": {
+  "request_id": "01a1da8b-f7c0-73ce-8089-8fc9882f8eb9",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 44
+ },
+ "a8b": {
+  "request_id": "01a1da8c-ffd1-7aca-bb0b-f477e3b92580",
+  "app": "alibaba/qwen-image-3/edit",
+  "status": "completed",
+  "sec": 40
+ }
+}
