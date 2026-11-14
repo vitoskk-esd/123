@@ -75,3 +75,32 @@ def queries(words=("авто", "авторынок", "продажа авто", 
     regs = yaml.safe_load((Path(__file__).with_name("cars.yaml")).read_text(encoding="utf-8"))["regions"]
     cities = [a for r in regs.values() for a in r.get("aliases", [])[:6] if len(a) > 3 and "област" not in a and "край" not in a and not a.isascii()]
     return list(dict.fromkeys(base + [f"{w} {c}" for c in dict.fromkeys(cities) for w in words]))
+
+
+def region_table(rows: list[dict], rejected: list[dict], per: dict[str, int]) -> bytes:
+    """.xlsx для поиска по субъектам: «Сводка» (сколько нашлось в каждом), «Группы» (с колонкой «Субъект»), «Отсеяны»."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill
+    wb = Workbook()
+    s = wb.active; s.title = "Сводка"
+    s.append(["Субъект", "Найдено групп"])
+    for name, n in sorted(per.items(), key=lambda x: -x[1]):
+        s.append([name, n])
+        if n == 0:
+            s.cell(s.max_row, 2).fill = PatternFill("solid", fgColor="FCE4D6")
+    s.append(["Всего", sum(per.values())])
+    s.column_dimensions["A"].width = 40; s.column_dimensions["B"].width = 16
+    cols = [("subject", "Субъект")] + COLS + [("in_base", "Уже в базе бота")]
+    for title, data, extra in (("Группы", rows, []), ("Отсеяны", rejected, [("reason", "Почему отсеян")])):
+        ws = wb.create_sheet(title)
+        ws.append([c[1] for c in cols + extra])
+        for r in data:
+            ws.append([r.get(k, "") for k, _ in cols + extra])
+        for col, w in zip("ABCDEFGHIJKL", (30, 34, 40, 22, 12, 10, 10, 10, 10, 80, 14, 26)):
+            ws.column_dimensions[col].width = w
+        ws.freeze_panes = "A2"; ws.auto_filter.ref = ws.dimensions
+    for ws in wb.worksheets:
+        for c in ws[1]:
+            c.font = Font(bold=True)
+    buf = io.BytesIO(); wb.save(buf)
+    return buf.getvalue()

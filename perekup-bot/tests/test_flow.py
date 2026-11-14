@@ -1278,16 +1278,21 @@ async def test_vkfind_reports_flood_control(env, monkeypatch):
 
 async def test_vk_execute_batches():
     """Пачка запросов собирается в один execute с JSON-параметрами; неудачный вызов внутри → None."""
-    from vk import VK
+    from vk import VK, VKError
     api = VK("t")
     sent = []
+    answer = {"response": [{"items": [1]}, False], "execute_errors": [{"method": "groups.search", "error_code": 100, "error_msg": "x"}]}
     async def fake_call(method, **p):
         sent.append((method, p["code"]))
-        return [{"items": [1]}, False]
-    api.call = fake_call
+        return answer
+    api.call_js = fake_call
     res = await api.many("groups.search", [{"q": "авто казань", "count": 100}, {"q": "x"}])
     assert res == [{"items": [1]}, None] and sent[0][0] == "execute"
     assert sent[0][1] == 'return [API.groups.search({"q": "авто казань", "count": 100}),API.groups.search({"q": "x"})];'
+    # ни один вызов в пачке не прошёл — это не «пусто», а ошибка ВК с текстом (владелец 14.11: /vkfind молчал о причине)
+    answer = {"response": [False, False], "execute_errors": [{"method": "groups.search", "error_code": 5, "error_msg": "User authorization failed"}]}
+    with pytest.raises(VKError, match="User authorization failed"):
+        await api.many("groups.search", [{"q": "a"}, {"q": "b"}])
 
 
 async def test_vk_open_groups_connect_at_once(env):

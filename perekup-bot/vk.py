@@ -37,6 +37,7 @@ ERRORS = {100: "сообщество не найдено", 15: "нет дост�
 
 
 FIND_MEMBERS = 5000
+REG_MEMBERS = 1000             # поиск по субъектам: в небольших регионах барахолки меньше — порог ниже (владелец 14.11)
 FIND_CARS = .25                # доля постов «машина с ценой» — меньше, значит барахолка не про авто
 CAR_NAME = re.compile(r"авто|машин|тачк|рынок|рынк|барахол|перекуп|продаж|купл|бу\b|б/у|cars?\b|auto|avto|drive|колес|тачек|ваз|лада|"
                       r"toyota|тойот|ниже\s+рынка|подбор|пробег", re.I)
@@ -80,13 +81,34 @@ class VK:
             raise VKError(js["error"].get("error_code", 0), js["error"].get("error_msg", ""))
         return js["response"]
 
+    async def call_js(self, method: str, **params) -> dict:
+        """Весь ответ ВК (для execute — вместе с execute_errors: ошибки вызовов внутри пачки)."""
+        async with self.lock:
+            await asyncio.sleep(max(0.0, self.last + 0.34 - time.monotonic()))
+            self.last = time.monotonic()
+        if self.session is None:
+            self.session = aiohttp.ClientSession(trust_env=True, timeout=aiohttp.ClientTimeout(total=20))
+        data = {k: v for k, v in params.items() if v is not None} | {"access_token": self.token, "v": V}
+        async with self.session.post(API + method, data=data) as r:
+            js = await r.json(content_type=None)
+        if "error" in js:
+            raise VKError(js["error"].get("error_code", 0), js["error"].get("error_msg", ""))
+        return js
+
     async def many(self, method: str, plist: list[dict], per: int = 25) -> list:
         """Пачка одинаковых запросов через execute: до 25 вызовов за один запрос к ВК (лимит — 3 запроса в секунду
-        и «flood control» на частые запросы). Неудачный вызов внутри пачки → None."""
+        и «flood control» на частые запросы). Неудачный вызов внутри пачки → None. Если в пачке не прошёл НИ ОДИН вызов —
+        это не «ничего не нашлось», а ошибка (ключ, капча, ограничение метода): поднимаем её с текстом ВК (владелец 14.11:
+        /vkfind писал «ответил ВК на 0» и молчал о причине)."""
         out = []
         for i in range(0, len(plist), per):
             code = "return [" + ",".join(f"API.{method}({json.dumps(p, ensure_ascii=False)})" for p in plist[i:i + per]) + "];"
-            out += [r if r is not False else None for r in await self.call("execute", code=code)]
+            js = await self.call_js("execute", code=code)
+            resp, errs = js.get("response") or [], js.get("execute_errors") or []
+            if resp and all(r is False for r in resp) and errs:
+                e = errs[0]
+                raise VKError(e.get("error_code", 0), f"{e.get('method', method)}: {e.get('error_msg', '')}")
+            out += [r if r is not False else None for r in resp]
         return out
 
     async def close(self) -> None:
@@ -374,13 +396,15 @@ class VKReader:
                     except VKError as e:                # execute недоступен этому ключу — по одному
                         if e.code in FLOOD: raise
                         log.info("пачки ВК недоступны (%s) — читаю по одному", e)
-                out = []
+                out, last = [], None
                 for p in plist:
                     try:
                         out.append(await api.call(method, **p))
                     except VKError as e:
                         if e.code in FLOOD: raise
-                        out.append(None)
+                        out.append(None); last = e
+                if last and all(r is None for r in out):     # ни один запрос не прошёл — честная ошибка, а не «пусто»
+                    raise last
                 return out
             except VKError as e:
                 if e.code not in FLOOD or attempt == 3:
@@ -482,6 +506,62 @@ class VKReader:
         stats["fit"] = len(ok)
         ok.sort(key=lambda r: (-r["days"], -r["subs"]))
         return ok[:want], [r for r in rej if r["car_share"] >= .3], stats
+
+    async def find_regions(self, known: set[int], per_region: int = 100, progress=None) -> tuple[list[dict], list[dict], dict]:
+        """Поиск по субъектам РФ (владелец 14.11: «по 100 сообществ с продажей авто для каждой республики, края, области и АО»):
+        для каждого региона словаря бота — фразы «авто / авторынок / продажа авто / авто с пробегом / барахолка + город региона»,
+        открытые группы с автомобильным названием → от REG_MEMBERS подписчиков → стена: посты на этой неделе, машины с ценой,
+        без импорта. По каждому региону — до per_region лучших. → (подходящие с полем subject, отсеянные, цифры)"""
+        import finder
+        from datetime import datetime, timezone
+        regs = self.ctx.dict.region_aliases if hasattr(self.ctx.dict, "region_aliases") else _regions()
+        words = ("авто", "авторынок", "продажа авто", "авто с пробегом", "барахолка")
+        plan = []                                                # (код региона, фраза)
+        for code, (name, aliases) in regs.items():
+            places = [a for a in aliases if len(a) > 3 and not a.isascii()][:5]
+            plan += [(code, f"{w} {p}") for p in places for w in words]
+        found = await self._many("groups.search", [{"q": q, "country_id": 1, "count": 100} for _, q in plan], 25)
+        where: dict[int, str] = {}
+        for (code, q), res in zip(plan, found):
+            for g in (res or {}).get("items", []):
+                if g.get("is_closed") or not CAR_NAME.search(g.get("name", "")):
+                    continue
+                name = g.get("name", "").lower()
+                if g["id"] not in where or any(a in name for a in regs[code][1][:8] if len(a) > 3):
+                    where[g["id"]] = code                       # город региона в названии группы — точнее, чем просто фраза поиска
+        stats = {"queries": len(plan), "answered": sum(r is not None for r in found), "found": len(where)}
+        if progress:
+            await progress(f"фраз поиска {len(plan)} (ответил ВК на {stats['answered']}) → открытых автомобильных групп: {len(where)} — смотрю подписчиков")
+        groups, idl = [], list(where)
+        for i in range(0, len(idl), 400):
+            res = await self.api.call("groups.getById", group_ids=",".join(map(str, idl[i:i + 400])), fields="members_count,description")
+            groups += res.get("groups", []) if isinstance(res, dict) else res
+        groups = [g for g in groups if (g.get("members_count") or 0) >= REG_MEMBERS and not g.get("deactivated")]
+        stats["big"] = len(groups)
+        if progress:
+            await progress(f"от {REG_MEMBERS} подписчиков: {len(groups)} — читаю стены (как часто постят, что продают). Это самая долгая часть")
+        ok, rej = [], []
+        for i in range(0, len(groups), 100):
+            part = groups[i:i + 100]
+            walls = await self._many("wall.get", [{"owner_id": -g["id"], "count": 40} for g in part], 10)
+            for g, res in zip(part, walls):
+                posts = [(datetime.fromtimestamp(it.get("date", 0), timezone.utc), post_text(it)) for it in (res or {}).get("items", [])
+                         if not it.get("is_pinned")]
+                j = finder.judge(posts, self.ctx.dict, title=g.get("name", ""), about=g.get("description", ""), subs=g["members_count"],
+                                 min_subs=REG_MEMBERS, min_week=3, min_days=0)
+                row = dict(j, link=f"https://vk.com/{g.get('screen_name') or 'club' + str(g['id'])}", title=g.get("name", ""),
+                           subject=regs[where[g["id"]]][0], in_base="да" if g["id"] in known else "")
+                (ok if j["ok"] else rej).append(row)
+            if progress and i and i % 1000 == 0:
+                await progress(f"проверено {i} из {len(groups)} — подходят {len(ok)}")
+        by: dict[str, list] = {}
+        for r in sorted(ok, key=lambda r: (-r["week"], -r["subs"])):
+            if len(by.setdefault(r["subject"], [])) < per_region:
+                by[r["subject"]].append(r)
+        rows = [r for name, _ in regs.values() for r in by.get(name, [])]
+        stats["fit"] = len(rows)
+        stats["per"] = {name: len(by.get(name, [])) for name, _ in regs.values()}
+        return rows, [r for r in rej if r["car_share"] >= .3], stats
 
     # ---------- вступление в сообщества ----------
     async def group(self, vk: str) -> dict:
@@ -645,3 +725,11 @@ class VKReader:
 
     async def run(self) -> None:
         await asyncio.gather(self.join_loop(), self.poll_loop(), self.wall_loop(), self.history_loop())
+
+
+def _regions() -> dict[str, tuple[str, list[str]]]:
+    """Регионы словаря бота (cars.yaml): код → (название, города и другие названия)."""
+    import yaml
+    from pathlib import Path
+    regs = yaml.safe_load((Path(__file__).with_name("cars.yaml")).read_text(encoding="utf-8"))["regions"]
+    return {k: (r.get("name", k), r.get("aliases", [])) for k, r in regs.items()}
