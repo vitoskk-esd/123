@@ -117,7 +117,7 @@ window.build = R => {
   gsap.set(["#title", "#tag", "#cnt"], { opacity: 0 });
   show("s1", 0); move("s1", { s: 1.12, y: 1180 }, 0, st.t0, "none");
   const IGN = W("l0", "вот") - .1;
-  tl.to("#hl1 .glow", { opacity: .95, duration: .12, ease: "none" }, IGN); R.sfx("rev", IGN + .1, 3.4); R.shake(cam("s1"), IGN + .25, .6, .5);
+  tl.to("#hl1 .glow", { opacity: .95, duration: .12, ease: "none" }, IGN); R.sfx("rev", IGN + .1, Math.max(.8, st.t0 - IGN - .15));   // рёв — в паузе до реплики Толяна, не поверх голоса R.shake(cam("s1"), IGN + .25, .6, .5);
   move("s1", { s: 1.3, x: 640, y: 1260 }, st.t0 - .1, en.t0 - st.t0 + .4); bub("t0", st.l1 - .3);
   // VHS-перемотка: помехи, полароиды «назад», счётчик откатывается к 930 000
   const RW = st.l1 - .35;
@@ -169,7 +169,7 @@ window.build = R => {
     .to("#baD", { x: -560, duration: .7, ease: "power3.inOut" }, BS)
     .to("#lbBylo", { opacity: 0, duration: .2 }, BS)
     .to("#lbStalo", { x: -540, duration: .7, ease: "power3.inOut" }, BS)
-  R.sfx("swish", BS, .8); R.sfx("rev", BS + .5, 1.4);
+  R.sfx("swish", BS, .8);
   move("s5", { s: 1.06 }, SW5, BS - SW5 + 1.2, "none");
   const KY = W("l6", "120") - .35; cut("s5", "s5b", KY); tl.to(["#cnt", "#tag"], { opacity: 1, duration: .2 }, KY); move("s5b", { s: 1.2, y: 1120 }, KY, en.z2 - KY + .4, "none");
   tl.fromTo("#keys", { y: 0 }, { y: -26, duration: .25, yoyo: true, repeat: 3, ease: "sine.inOut", immediateRender: false }, KY + .2); R.sfx("tap", KY + .25, .6); R.sfx("tap", KY + .75, .6);
