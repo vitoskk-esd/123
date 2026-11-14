@@ -1,0 +1,97 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props58.js"></script>
+<script>
+// «ЭКСТРАСЕНС» (киношный формат, отдельный ролик). Жора ищет идеальную Весту без бота — с экстрасенсом. Новая машина — Lada Vesta (лист владельца 14.11).
+// НАЧАЛО: хрустальный шар на весь кадр, в тумане проявляется белая Веста, подпись от руки «Жора ищет Весту. Без бота.» (без плашки серии)
+// → салон мага: «вижу белую Весту, одна хозяйка, ниже рынка» → карты таро: «шашечки — к удаче» → автобаза: Веста из такси, 412 000 км
+// → маятник над картой замирает над Тамбовом → 500 км, кафе «Шашлык»: толщиномер 1200 мкм → Стасу бот прислал ту самую Весту через секунду
+// → «я же говорил — белая Веста, просто не вам» → Жора ставит фильтр в боте → шар показывает бота → финальная фраза Лиса про бот + карточка.
+// Приёмы (новые): хрустальный шар с туманом; карты таро с переворотом; маятник над картой; толщиномер со счётчиком.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const MG = (p, x, foot, h, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, MAG, pose, extra) + TURBAN(x, foot, h, (extra.z || 7) + 1);
+const SAL_L = glow(160, 740, 200, "#ffb84a", .45) + glow(940, 740, 200, "#ffb84a", .45) + glow(540, 1260, 260, "#9fd6ff", .35);
+const AB_L = glow(880, 160, 360, "#fff6d0", .45);
+const TT_L = glow(540, 700, 480, "#ffb36a", .3);
+const DV_L = glow(880, 180, 380, "#fff3c4", .45);
+const VEIN = `<img src="../../kit/img/vesta/vesta_side.png" style="position:absolute;left:80px;top:270px;width:540px;opacity:.9;filter:blur(1px) drop-shadow(0 0 20px #ffffff)">`;
+const SALON = (k, mpose = {}, zo = {}) => MG("mg" + k, 300, 1640, 760, mpose, { rim: "#ffb84a", side: 1, z: 7 }) + Z("zs" + k, 790, 1660, 760, zo, {}, { rim: "#ffb84a", side: -1, z: 7 }) + TABLE(9);
+const S = [
+ { h: "ХРУСТАЛЬНЫЙ ШАР · САЛОН МАГА", tc: "1/6 · 0:00–0:12",
+   A: { def: () => ({ far: BALL(VEIN, "ball", "Жора ищет Весту.<br>Без бота."), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "salonmaga", grade: "night", mid: SALON("a", { armL: 120, armR: -120 }, { look: "o" }), lights: SAL_L }), shot: { x: 540, y: 1180, s: 1.06 },
+     bubbles: [{ p: "mga", html: "Вижу… белая Веста…<br><em>одна хозяйка… ниже рынка!</em>", fs: 40 }], talk: ["mga"] },
+   vo: "Лис: «Жора решил найти идеальную Весту. Без бота. С экстрасенсом». Магистр Эдуард: «Вижу… белая Веста… одна хозяйка… и ниже рынка!» Жора: «Где?! Говори, где!»", who: "Лис + Экстрасенс + Жора",
+   mv: "<b>Новое начало — без плашки серии.</b> Кадр 0: <b>приём 1 — хрустальный шар</b> на весь кадр: свечи, золотая подставка, внутри шара клубится туман и проявляется белая Веста; подпись от руки «Жора ищет Весту. Без бота.». B — <b>новый фон — салон мага</b> (бархатные шторы, знаки зодиака, свечи); <b>новый герой — магистр Эдуард</b> в фиолетовом тюрбане с камнем, руки над шаром; Жора напротив." },
+ { h: "КАРТЫ ТАРО → АВТОБАЗА", tc: "2/6 · 0:12–0:26",
+   A: { def: () => ({ far: TAROT(true), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ at: [540, 560], html: "Шашечки — к удаче.<br><em>Езжай на автобазу!</em>", fs: 42 }] },
+   B: { def: () => ({ bg: "avtobaza", grade: "day",
+       mid: car(VE, 20, 1600, 620, { z: 4, sheen: .6 }) + TAXI(20, 1600, 620) + Z("zb", 660, 1790, 720, { look: "o" }, {}, { rim: "#fff6d0", side: 1, z: 7 })
+         + ch("perekup", "ru", 910, 1780, 740, RUSTAM, { armR: -50 }, { rim: "#fff6d0", side: -1, z: 7 }) + TAG(60, 1180, "ПРОБЕГ", "412 000 км", -5, "#ff7a6a"), lights: AB_L }), shot: { x: 560, y: 1200, s: 1.06 },
+     bubbles: [{ p: "ru", html: "Одна хозяйка, брат!<br><em>Фирма!</em>", fs: 44 }], talk: ["ru"] },
+   vo: "Лис: «Магистр раскладывает карты». Эдуард: «Шашечки — к удаче. Езжай на автобазу!» Лис: «Автобаза таксопарка. Веста, одна хозяйка — таксопарк. Пробег — четыреста двенадцать тысяч». Рустам: «Одна хозяйка, брат! Фирма!» Жора: «Это не хозяйка, это конвейер!»", who: "Лис + Эдуард + Рустам + Жора",
+   mv: "A — <b>приём 2 — карты таро</b>: три карты рубашкой вверх на бархате, средняя переворачивается — «ШАШЕЧКИ». B — <b>новый фон — автобаза таксопарка</b> (боксы 07–10, жёлтая полоса, будка диспетчера, шлагбаум); <b>новый герой — Рустам</b> в жёлтой кепке; на крыше Весты шашечки, бирка «ПРОБЕГ 412 000 км»." },
+ { h: "МАЯТНИК → ТАМБОВ", tc: "3/6 · 0:26–0:40",
+   A: { def: () => ({ far: MAP(17), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ at: [540, 470], html: "Маятник говорит —<br><em>Тамбов!</em>", fs: 46 }] },
+   B: { def: () => ({ bg: "trassatambov", grade: "dawn",
+       mid: car(VE, 30, 1620, 640, { z: 4, sheen: .4 }) + ch("perekup", "vl", 870, 1780, 740, VALERA, { armR: -60 }, { rim: "#ffb36a", side: -1, z: 7 }) + GAUGE(110, 1100), lights: TT_L }), shot: { x: 560, y: 1200, s: 1.06 },
+     bubbles: [{ p: "vl", html: "Не бита, не крашена!<br><em>Ну… чуть-чуть.</em>", fs: 42 }], talk: ["vl"] },
+   vo: "Лис: «Второй сеанс. Маятник над картой». Эдуард: «Маятник говорит — Тамбов!» Лис: «Пятьсот километров. Веста у кафе «Шашлык». Толщиномер — тысяча двести микрон». Валера: «Не бита, не крашена! Ну… чуть-чуть».", who: "Лис + Эдуард + Валера",
+   mv: "A — <b>приём 3 — маятник над картой</b>: карта России на пергаменте, точки городов, маятник качается и замирает над Тамбовом — красный круг. B — <b>новый фон — трасса под Тамбовом</b> (указатель «ТАМБОВ 12 км», кафе «Шашлык», поле); <b>новый герой — Валера</b>; <b>приём 4 — толщиномер</b>: цифры бегут до красных 1200 мкм." },
+ { h: "А В ЭТО ВРЕМЯ — СТАС", tc: "4/6 · 0:40–0:52",
+   A: { def: () => { const H = HOLDPHONE("perekup", "sp", 540, 1960, 1680, STAS, VCARD(), { rim: "#fff2c0", side: 1 });
+       return { bg: "dvorutro", grade: "day", farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "dvorutro", grade: "day",
+       mid: car(VE, 40, 1620, 680, { z: 4, sheen: .7 }) + ch("perekup", "sv", 880, 1780, 740, STAS, { armR: -70 }, { rim: "#fff2c0", side: -1, z: 7 }), lights: DV_L }), shot: { x: 560, y: 1200, s: 1.06 },
+     bubbles: [{ p: "sv", html: "Белая, одна хозяйка, ниже рынка.<br><em>Как в гороскопе.</em>", fs: 38 }], talk: ["sv"] },
+   vo: "Лис: «А в это время Стасу бот прислал Весту: одна хозяйка, девятьсот девяносто тысяч, ниже рынка. Через секунду после публикации». Стас: «Белая, одна хозяйка, ниже рынка. Как в гороскопе».", who: "Лис + Стас",
+   mv: "A — Стас держит телефон, в боте «Lada Vesta · 2021 · 990 000 ₽ · рынок ≈ 1 150 000 · 1 хозяйка · 41 000 км · 🔥 −14% · ⏱ 1 с после публикации». B — двор утром: Стас у белой Весты, довольный." },
+ { h: "«Я ЖЕ ГОВОРИЛ» → ФИЛЬТР", tc: "5/6 · 0:52–1:02",
+   A: { def: () => ({ bg: "salonmaga", grade: "night", mid: SALON("b", { armR: -60 }, { look: "o" }), lights: SAL_L }), shot: { x: 540, y: 1180, s: 1.06 },
+     bubbles: [{ p: "mgb", html: "Я же говорил — белая Веста.<br><em>Просто не вам.</em>", fs: 40 }], talk: ["mgb"] },
+   B: { def: () => { const H = HOLDPHONE("perekup", "zp", 540, 1960, 1680, ZHORA, VFILTER(), { rim: "#ffb84a", side: 1 });
+       return { bg: "salonmaga", grade: "night", farBlur: 9, mid: H.mid, lights: H.lights }; }, shot: { x: 540, y: 960, s: 1 } },
+   vo: "Эдуард: «Я же говорил — белая Веста. Просто не вам». Лис: «Бот «Перехват» не гадает: он присылает хорошие машины через секунду после публикации…»", who: "Эдуард + Лис",
+   mv: "A — салон: маг довольный, Жора поник. B — Жора сам ставит фильтр в боте: «Lada Vesta · 1 хозяйка · до 1 млн» → «✅ пришлю через секунду после публикации»." },
+ { h: "ФИНАЛ · ШАР И БОТ", tc: "6/6 · 1:02–1:10",
+   A: { def: () => ({ far: BALL(`<div style="position:absolute;left:150px;top:200px;width:400px">${BOTH("Веста · 1 хозяйка", CARD("Lada Vesta · 2021", "990 000 ₽", "1 хозяйка · ниже рынка", "⏱ 1 с после публикации"))}</div>`, "ball2"), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ far: BALL(VEIN, "ball3"), farBlur: 0, over: CTA58 }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Лис: «…успевай раньше других. Ссылка в шапке». (Финальная фраза голосом — про бота; последний кадр — карточка бота.)", who: "Лис",
+   mv: "A — туман в шаре рассеивается, вместо гадания — карточка бота. B — <b>последний кадр — только карточка бота</b> «Бот «Перехват» — ссылка в шапке» поверх шара с Вестой. <b>Голос в конце — продающая фраза про бота</b> (правило владельца 14.11)." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
