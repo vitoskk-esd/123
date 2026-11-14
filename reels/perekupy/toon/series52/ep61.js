@@ -35,7 +35,7 @@ mount("s3", { bg: "podlyod", farBlur: 0, mid: UNDER() }, { x: 540, y: 960, s: 1 
 // 4. поплавок-уведомление
 { const H = HOLDPHONE("perekup", spk("sb", "stas"), 540, 2090, 1680, STAS_W, PRCARD(), { rim: "#fff6d0", side: 1 });
   mount("s4", { bg: "ozero", grade: "day", farBlur: 8, mid: H.mid, lights: H.lights + OZ_L, over: BOBBER(860, 250),
-    bubbles: [{ id: "s1", at: [300, 700], html: "О, клюёт! Прадо —<br><em>на триста ниже рынка.</em>", fs: 42 }] }, { x: 540, y: 960, s: 1 }); }
+    bubbles: [{ id: "s1", at: [300, 700], html: "О, клюёт! Ленд Крузер —<br><em>на триста ниже рынка.</em>", fs: 42 }] }, { x: 540, y: 960, s: 1 }); }
 // 5. Жора замерзает
 mount("s5", { bg: "ozero", grade: "day", farBlur: 6, mid: Z("zc", 480, 1900, 1000, { look: "flat" }, {}, { rim: "#d8f0ff", side: 1, z: 7 }) + FROST(480, 1900, 1000), over: THERMO(860, 420, -5), lights: OZ_L,
   bubbles: [{ id: "z2", p: "zc", html: "Терпение, студент…<br><em>Сейчас пойдёт…</em>", fs: 46 }] }, { x: 540, y: 1150, s: 1.08 });
@@ -45,7 +45,7 @@ mount("s6", { bg: "ozero", grade: "day", farBlur: 2, mid: ST("sc", 270, 1880, 90
   bubbles: [{ id: "s2", p: "sc", html: "Погоди… продавец —<br><em>в трёхстах метрах от нас.</em>", fs: 42 }] }, { x: 540, y: 1120, s: 1.05 });
 // 7. Палыч на льду
 mount("s7", { bg: "ozero", grade: "day", farBlur: 3, mid: FISHER(PL, "pd", 700, 1800, 860, {}, { rim: "#fff6d0", side: -1, z: 7 }, -30) + ST("sd", 230, 1820, 820, {}, { armR: -100 }, { rim: "#fff6d0", side: 1, z: 7 }), lights: OZ_L,
-  bubbles: [{ id: "s3", p: "sd", html: "Палыч,<br><em>я по объявлению!</em>", fs: 46 }, { id: "p1", p: "pd", html: "Так ты ж с соседней лунки!<br><em>Внучка научила — сфоткал и в интернет!</em>", fs: 36 }] }, { x: 520, y: 1180, s: 1.06 });
+  bubbles: [{ id: "s3", p: "sd", html: "Дед Палыч,<br><em>я по объявлению!</em>", fs: 46 }, { id: "p1", p: "pd", html: "Так ты ж с соседней лунки!<br><em>Внучка научила — сфоткал и в интернет!</em>", fs: 36 }] }, { x: 520, y: 1180, s: 1.06 });
 // 8. база: Прадо, ключи
 mount("s8", { bg: "rybbaza", grade: "day", mid: car(PRADO, 0, 1640, 660, { z: 4, sheen: .5 }) + ST("se", 600, 1800, 800, {}, { armR: -60 }, { rim: "#ffd27a", side: 1, z: 7 }) + PL("pe", 900, 1780, 800, {}, { armL: 40 }, { rim: "#ffd27a", side: -1, z: 7 }), lights: RB_L,
   bubbles: [{ id: "s4", p: "se", html: "Беру<br><em>без торга.</em>", fs: 50 }] }, { x: 540, y: 1200, s: 1.05 });
@@ -141,7 +141,7 @@ window.build = R => {
   bub("z2", st.l2 + .6);
   // 6. продавец — в 300 м
   const SW6 = st.s2 - .3; swap("s5", "s6", SW6); move("s6", { s: 1.12 }, SW6, en.l3 - SW6 + .4, "none"); bub("s2", st.l3 + .3);
-  ping("#m300", W("s2", "300"));
+  ping("#m300", (TT.words.s2 || []).some(w => /^тр[её]х/i.test(w[0])) ? W("s2", "трех") : W("s2", "300"));
   move("s6", { s: 1.6, x: 860, y: 1000 }, W("l3", "с"), 1.2);                       // «с соседней лунки» — наезд на Палыча
   // 7. Палыч на льду
   const SW7 = st.s3 - .3; swap("s6", "s7", SW7); move("s7", { s: 1.12 }, SW7, en.p1 - SW7 + .4, "none"); bub("s3", st.p1 - .1); bub("p1", st.s4 - .3);
