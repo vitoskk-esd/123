@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: an old-school car flipper runs a school and loses an exam to a young student with a bot. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "mihalych": {
+  "voice": "Gacrux",
+  "tempo": 1.12,
+  "profile": "Mihalych — an old-school Russian used-car flipper in his 60s turned teacher, glasses, mustache, tie; gruff, strict, proud, a bit old-fashioned. Low husky voice.",
+  "notes": "Lines: 1 strict teacher dictating; 2 angry, scolding; 3 commanding, starts the exam; 4 on an old phone, hopeful then shocked; 5 deflated; 6 grudging respect, then a funny request."
+ },
+ "vanya": {
+  "voice": "Puck",
+  "tempo": 1.12,
+  "profile": "Vanya — a young, polite, cheerful Russian student in his 20s, a bit cheeky.",
+  "notes": "Line 1: polite question, innocent. Line 2: calm, casual, slightly proud — already done."
+ },
+ "galya": {
+  "voice": "Sulafat",
+  "tempo": 1.1,
+  "profile": "Aunt Galya — a friendly Russian woman in her 50s selling her car, warm, talkative.",
+  "notes": "One line: cheerful, impressed, surprised how fast he called."
+ }
+}

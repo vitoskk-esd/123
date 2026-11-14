@@ -18,7 +18,7 @@ const TITLE = (a, b) => `<div style="position:absolute;left:0;right:0;top:300px;
   <span style="display:inline-block;padding:10px 28px 18px;border:8px solid #151515;border-radius:22px;box-shadow:0 12px 0 #151515;font-size:112px;background:#ff3b30;color:#fff;margin-top:26px;transform:rotate(2deg)">${b}</span></div>`;
 // приём 1 — мел на доске (рукописные строки внутри доски фона bg_klass: 62..1018 × 352..868); id строк — для появления по одной
 const CHALK = (lines, id = "ch") => `<div style="position:absolute;left:100px;top:376px;width:900px;font-family:Caveat;font-weight:700;color:#f2f6ee;text-shadow:0 0 2px #fff8,0 0 1px #fff;line-height:1.02;z-index:3">
-  ${lines.map(([t, fs = 80, c = "#f2f6ee"], k) => `<div id="${id}${k}" style="font-size:${fs}px;color:${c}">${t}</div>`).join("")}</div>`;
+  ${lines.map(([t, fs = 80, c = "#f2f6ee"], k) => `<div id="${id}${k}" style="display:table;font-size:${fs}px;color:${c}">${t}</div>`).join("")}</div>`;
 // парта (поверх ног учеников)
 const DESK = (x, foot, w = 380, z = 9) => `<div style="left:${x - w / 2}px;top:${foot - w * .42}px;width:${w}px;height:${w * .5}px;z-index:${z}"><svg viewBox="0 0 380 190" style="overflow:visible">
   <path d="M0 20 L380 20 L364 54 L16 54 Z" fill="#c98a4a" stroke="#151515" stroke-width="7"/><rect x="26" y="54" width="328" height="110" fill="#3a6a9a" stroke="#151515" stroke-width="7"/>
@@ -50,7 +50,7 @@ const NEWS = (crossed = 0) => `<div style="left:0;top:0;width:1080px;height:1920
             <div style="font-weight:900;font-size:30px;white-space:nowrap">${t}</div><div style="font-size:30px">${d}</div><div style="font-size:31px;font-weight:700">☎ ${p}</div>
             ${g ? `<div style="position:absolute;left:-18px;top:-16px;right:-18px;bottom:-16px;border:7px solid #e0261a;border-radius:50%"></div>` : ""}
             ${g ? `<div id="nx${n}" style="position:absolute;inset:0;opacity:${n < crossed ? 1 : 0}"><svg viewBox="0 0 400 160" preserveAspectRatio="none" style="width:100%;height:100%"><path d="M10 20 L390 140 M390 20 L10 140" stroke="#e0261a" stroke-width="12"/></svg>
-              <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);font-family:Caveat;font-weight:700;font-size:64px;color:#e0261a;background:#f6efdcdd;padding:0 12px;white-space:nowrap">${["продана!", "продана!", "трубку не берут"][n]}</div></div>` : ""}</div>`; }).join("")}
+              <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);font-family:Caveat;font-weight:700;font-size:64px;color:#e0261a;background:#f6efdcdd;padding:0 12px;white-space:nowrap">${"продана!"}</div></div>` : ""}</div>`; }).join("")}
     </div></div>
   <div style="left:880px;top:1380px;width:60px;height:420px;background:linear-gradient(90deg,#c0392b,#e0261a);border:5px solid #151515;border-radius:10px;transform:rotate(24deg)"></div>`;
 // приём 4 — дисковый телефон: аппарат на тумбе + трубка у уха (поза phone у героя — мобильник, здесь своя трубка)

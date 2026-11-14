@@ -101,6 +101,22 @@ const S = {
     for (let i = 0; i < len; i++) { const t = i / SR; ph += TAU * (2400 + 900 * Math.sin(TAU * 3.3 * t) + 600 * t / dur) / SR;
       const v = (Math.sin(ph) * .05 + f(rnd(), 5000, 1).bd * .12) * Math.min(1, t * 20, (dur - t) * 20); put(sfx, s + i, v, Math.sin(t * 7) * .3); }
   },
+  bell(t0, dur) {        // школьный электрозвонок: боёк ~22 удара в секунду по металлической чаше (ep60)
+    const s = Math.floor(t0 * SR), len = Math.floor(dur * SR), P = [[1180, .5], [2950, .3], [4720, .15], [6900, .07]];
+    for (let i = 0; i < len; i++) { const t = i / SR, k = (t * 22) % 1, e = Math.exp(-k * 9) * Math.min(1, t * 30, (dur - t) * 6);
+      let v = 0; for (const [f, a] of P) v += Math.sin(TAU * f * t) * a; v *= e * .16; put(sfx, s + i, v, .1); put(verb, s + i, v * .35); }
+  },
+  chalk(t0, dur) {       // мел по доске: короткие скрипы (прерывистый узкий шум 3–5 кГц) (ep60)
+    const s = Math.floor(t0 * SR), len = Math.floor(dur * SR), f = SVF(); let fc = 3600;
+    for (let i = 0; i < len; i++) { const t = i / SR, seg = (t * 7) % 1; if (i % 2400 === 0) fc = 3000 + 2200 * Math.abs(rnd());
+      const gate = seg < .6 ? Math.min(1, seg * 40, (.6 - seg) * 40) : 0, stick = .6 + .4 * Math.sin(TAU * 140 * t);
+      put(sfx, s + i, f(rnd(), fc, 9).bd * gate * stick * .09 * Math.min(1, (dur - t) * 8), -.15); }
+  },
+  dial(t0, dur) {        // дисковый телефон: завод диска (трещотка) и возврат — щелчки 10 в секунду (ep60)
+    const s = Math.floor(t0 * SR), len = Math.floor(dur * SR), f = SVF();
+    for (let i = 0; i < len; i++) { const t = i / SR, rate = t < .35 ? 34 : 10, k = (t * rate) % 1;
+      put(sfx, s + i, f(rnd(), 2600, 2).bd * Math.exp(-k * 40) * (t < .35 ? .25 : .45), .2); }
+  },
   riser(t0, dur) {
     const s = Math.floor(t0 * SR), len = Math.floor(dur * SR), f = SVF(); let ph = 0;
     for (let i = 0; i < len; i++) { const x = i / len; ph += TAU * (180 + 1500 * x * x) / SR;
