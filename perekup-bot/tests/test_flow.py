@@ -2188,3 +2188,23 @@ async def test_offer_mentions_autopay_only_when_on(env):
     ctx.cfg = dataclasses.replace(ctx.cfg, rk_recurring="on")
     await dp.feed_update(bot, msg("/offer"))
     assert "с автопродлением — только с явного согласия" in s.texts(USER)[-1] and "/autopay" in s.texts(USER)[-1]
+
+
+async def test_panel_shows_trials_bought_this_month(env):
+    """Админ-панель: сколько человек купили пробный день в этом месяце (оплаты с 1-го числа по МСК), на сколько ₽
+    и сколько из них потом взяли «Простой» или PRO; пробные прошлого месяца не считаются."""
+    dp, bot, s, ctx = env
+    from datetime import timezone, timedelta
+    from admin import MSK
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    for uid in (USER, OTHER, 333):
+        await dp.feed_update(bot, msg("/start", uid))
+    month_start = datetime.now(MSK).replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
+    for k, (uid, plan, amount) in enumerate(((USER, "trial", 490), (OTHER, "trial", 490), (USER, "pro", 1990), (333, "trial", 490))):
+        await ctx.db.add_payment(uid, f"m{k}", amount, plan); await ctx.db.finish_payment(f"m{k}", "succeeded")
+    await ctx.db.conn.execute("UPDATE payments SET paid_at=? WHERE yk_id='m3'", (month_start - 3600,))   # 333 — в прошлом месяце
+    await ctx.db.conn.commit()
+    await dp.feed_update(bot, msg(T.MENU_ADMIN, ADMIN))
+    t = s.texts(ADMIN)[-1]
+    month = T.MONTHS_NOM[datetime.now(MSK).month - 1]
+    assert f"Купили пробный день в {month}: 2</b> на 980 ₽ · из них взяли тариф: 1 (50%)" in t

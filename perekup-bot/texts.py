@@ -447,6 +447,7 @@ PANEL = (
     "📅 За 7 дней: {week}{week_src}\n"
     "🔗 За всё время: {all_src}\n"
     "💳 Купили хоть раз: {buyers_src}\n\n"
+    "🎟 <b>Купили пробный день в {month}: {trial_month}</b> на {trial_month_sum} ₽ · из них взяли тариф: {trial_month_up}{trial_month_conv}\n"
     "🔥 <b>На пробном дне прямо сейчас: {trial}</b>\n"
     "   брали всего: {trial_all} · за 7 дней: {trial7} · потом купили тариф: {trial_paid}{trial_conv}\n\n"
     "💳 <b>Платные подписки сейчас: {subs}</b>\n"
@@ -457,6 +458,7 @@ PANEL = (
     "Instagram — <code>{link}?start=inst</code>\nThreads — <code>{link}?start=threads</code>\n"
     "YouTube — <code>{link}?start=youtube</code>\nTikTok — <code>{link}?start=tiktok</code>"
 )
+MONTHS_NOM = ("январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре")
 PANEL_FREE = "\n\n⚠️ Оплата не подключена — сейчас бот бесплатный для всех, подписок нет."
 BTN_NOTIFY_ON = "🔔 Уведомления о новых: вкл — выключить"
 BTN_NOTIFY_OFF = "🔕 Уведомления о новых: выкл — включить"

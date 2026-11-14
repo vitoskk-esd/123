@@ -552,7 +552,7 @@ class DB:
         r = await self._one("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>=?", since)
         return r["n"], r["s"]
 
-    async def panel(self, day_start: float) -> dict:
+    async def panel(self, day_start: float, month_start: float = 0) -> dict:
         """Цифры для админ-панели: люди и откуда пришли (сегодня, 7 дней, всего), действующие подписки по тарифам, оплаты."""
         now = time.time()
         src = lambda since: self._all("SELECT source, COUNT(*) n FROM users WHERE created_at>=? GROUP BY source", since)
@@ -571,6 +571,12 @@ class DB:
             "trial_paid": (await n("SELECT COUNT(*) n FROM users u WHERE trial_used=1 AND EXISTS(SELECT 1 FROM payments p WHERE p.user_id=u.id "
                                    "AND p.status='succeeded' AND p.plan IN ('basic','pro',''))"))["n"],
             "ideas7": (await n("SELECT COUNT(*) n FROM events WHERE kind='idea' AND at>?", now - 7 * DAY))["n"],
+            # купили пробный день в этом месяце (оплаты с 1-го числа по МСК) и сколько из них потом взяли «Простой» или PRO
+            "trial_month": await n("SELECT COUNT(DISTINCT user_id) n, COUNT(*) k, COALESCE(SUM(amount),0) s FROM payments "
+                                   "WHERE status='succeeded' AND plan='trial' AND paid_at>=?", month_start),
+            "trial_month_up": (await n("SELECT COUNT(DISTINCT t.user_id) n FROM payments t WHERE t.status='succeeded' AND t.plan='trial' AND t.paid_at>=? "
+                                       "AND EXISTS(SELECT 1 FROM payments p WHERE p.user_id=t.user_id AND p.status='succeeded' "
+                                       "AND p.plan IN ('basic','pro','') AND p.paid_at>=t.paid_at)", month_start))["n"],
             "paid30": await n("SELECT COUNT(*) n, COALESCE(SUM(amount),0) s FROM payments WHERE status='succeeded' AND paid_at>?", now - 30 * DAY),
             # сколько людей из каждого источника хоть раз заплатили — какая соцсеть приводит покупателей, а не просто зрителей
             "buyers": await self._all("SELECT u.source source, COUNT(DISTINCT p.user_id) n FROM payments p JOIN users u ON u.id=p.user_id "

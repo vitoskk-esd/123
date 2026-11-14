@@ -255,7 +255,9 @@ async def notify_on(ctx: Ctx) -> bool:
 
 async def panel_text(bot: Bot, ctx: Ctx) -> str:
     now = time.time()
-    p = await ctx.db.panel(msk_day_start(now))
+    msk = datetime.fromtimestamp(now, MSK)
+    month_start = msk.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
+    p = await ctx.db.panel(msk_day_start(now), month_start)
     fmt = lambda d: " — " + " · ".join(f"{k} {v}" for k, v in d.items()) if d else ""
     names = {"pro": "PRO", "basic": "Простой", "trial": "Пробный день"}
     subs = {names.get(r["p"], r["p"]): r["n"] for r in p["subs"]}
@@ -270,6 +272,9 @@ async def panel_text(bot: Bot, ctx: Ctx) -> str:
         buyers_src=" · ".join(f"{k} {v}" for k, v in by_source(p["buyers"]).items()) or "—",
         subs=subs.get("PRO", 0) + subs.get("Простой", 0), pro=subs.get("PRO", 0), basic=subs.get("Простой", 0), trial=subs.get("Пробный день", 0),
         trial_all=p["trial_all"], trial7=p["trial7"], trial_paid=p["trial_paid"],
+        month=T.MONTHS_NOM[msk.month - 1], trial_month=p["trial_month"]["n"], trial_month_sum=rub(p["trial_month"]["s"]),
+        trial_month_up=p["trial_month_up"],
+        trial_month_conv=f" ({round(p['trial_month_up'] / p['trial_month']['n'] * 100)}%)" if p["trial_month"]["n"] else "",
         trial_conv=f" ({round(p['trial_paid'] / p['trial_all'] * 100)}%)" if p["trial_all"] else "",
         paid_n=p["paid"]["n"], paid_sum=rub(p["paid"]["s"]), paid30_n=p["paid30"]["n"], paid30_sum=rub(p["paid30"]["s"]),
         free="" if ctx.cfg.payments_on else T.PANEL_FREE, link=f"https://t.me/{me.username}",
