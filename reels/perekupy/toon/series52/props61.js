@@ -43,7 +43,7 @@ const BOBBER = (x, y, id = "bob", w = 170) => `<div id="${id}" style="position:a
 // приём 3 — Жора замерзает: снежная шапка на ушанке, иней, сосульки на усах, термометр
 const FROST = (x, foot, h, id = "frost") => { const s = h / 740, l = x - 210 * s, t = foot - 740 * s;
   return `<div id="${id}" style="position:absolute;left:${l}px;top:${t}px;width:${420 * s}px;height:${800 * s}px;z-index:12"><svg viewBox="0 0 420 800" style="overflow:visible">
-  <path id="${id}s" transform="translate(0 -58) scale(1 1.15)" d="M118 150 q30 -60 92 -62 q62 2 92 62 q-10 -14 -30 -10 q-20 -24 -62 -22 q-42 -2 -62 22 q-20 -4 -30 10 z" fill="#fbfdff" stroke="#9fc2d6" stroke-width="5"/>
+  <path id="${id}s" d="M118 156 Q124 64 210 58 Q296 64 302 156 Q284 132 256 138 Q234 116 210 120 Q186 116 164 138 Q136 132 118 156 Z" fill="#fbfdff" stroke="#9fc2d6" stroke-width="5"/>
   <g id="${id}i">${[176, 196, 222, 244].map((x, k) => `<path d="M${x} 300 l6 ${22 + (k % 2) * 12} l6 ${-22 - (k % 2) * 12} z" fill="#d8f0ff" stroke="#7fb6d6" stroke-width="3"/>`).join("")}
   ${[[140, 380], [280, 420], [180, 520], [260, 600], [150, 640]].map(([a, b]) => `<path d="M${a} ${b} l14 0 M${a + 7} ${b - 7} l0 14 M${a + 2} ${b - 5} l10 10 M${a + 12} ${b - 5} l-10 10" stroke="#e8f6ff" stroke-width="4"/>`).join("")}</g></svg></div>`; };
 const THERMO = (x, y, deg, id = "thermo") => `<div id="${id}" style="position:absolute;left:${x}px;top:${y}px;width:120px;height:420px;z-index:40"><svg viewBox="0 0 120 420">
