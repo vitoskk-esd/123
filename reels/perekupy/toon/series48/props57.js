@@ -53,7 +53,7 @@ const F5 = (x, y, id = "f5") => `<div id="${id}" style="position:absolute;left:$
 // приём 5 — доска улик: пробковая доска, карточки времени на кнопках, красная нить
 const EVIDENCE = () => `<div style="left:0;top:0;width:1080px;height:1920px;background:radial-gradient(circle at 50% 40%,#3a2a1a,#140c06 80%)"></div>
   <div style="left:60px;top:380px;width:960px;height:1180px;background:#b8875a;border:16px solid #5a3820;border-radius:12px;box-shadow:inset 0 0 80px #6b4423"></div>
-  <div style="left:60px;top:240px;width:960px;text-align:center;font-family:Unbounded;font-weight:900;font-size:76px;color:#ffd23f">УЛИКА №1</div>
+  <div style="left:60px;top:250px;width:760px;text-align:center;font-family:Unbounded;font-weight:900;font-size:66px;color:#ffd23f">УЛИКА №1</div>
   ${[["12:00:00", "объявление<br>опубликовано", 150, 470, -4], ["12:00:01", "бот прислал<br>покупателю", 560, 640, 3], ["12:00:40", "звонок<br>бабушке", 170, 900, 2], ["12:20", "парень<br>у калитки", 560, 1150, -3]].map(([t, d, x, y, r], k) =>
     `<div id="ev${k}" style="left:${x}px;top:${y}px;width:370px;padding:20px 24px;background:#fbfaf3;border:6px solid #151515;transform:rotate(${r}deg);box-shadow:0 12px 0 #00000055">
       <div style="position:absolute;left:165px;top:-22px;width:36px;height:36px;border-radius:50%;background:#c0392b;border:5px solid #151515"></div>

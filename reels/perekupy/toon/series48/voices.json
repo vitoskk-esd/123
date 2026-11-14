@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: perekupy sue the bot in court. Lis is a deadpan court reporter. Start mysterious and slow («На бота.» — after a pause, ironic). Calm, dry, numbers said fully."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: outraged, loud, theatrical. Line 2: embarrassed, mumbling, pause after «Ну…». Line 3: suspicious, surprised."
+ },
+ "judge": {
+  "voice": "Iapetus",
+  "tempo": 1.1,
+  "profile": "A Russian judge in his 60s, grey beard and glasses: stern, formal court voice with dry humour.",
+  "notes": "«Встать, суд идёт!» — loud, formal. «То есть бот просто быстрее вас?» — ironic. «Иск отклонить» — formal, final. «А ссылку на бот — секретарю» — quieter, aside. «Камри ищу» — casual, a little embarrassed."
+ },
+ "nina": {
+  "voice": "Gacrux",
+  "tempo": 1.1,
+  "profile": "Baba Nina — a kind talkative Russian village grandmother in her 70s.",
+  "notes": "One line: amazed, warm, lively storytelling."
+ },
+ "stas": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.12,
+  "profile": "Stas — an exhausted Russian used-car flipper in his 30s who hasn't slept for three days.",
+  "notes": "One line: desperate, whiny, angry."
+ }
+}
