@@ -107,14 +107,26 @@ def main():
         if i % 100 == 0:
             save(); log(f"стены: {min(i + 10, len(todo))}/{len(todo)} — подходят {sum(1 for j in st['judged'].values() if j['ok'])}")
     save()
+    # 3б) где стена не пришла (ВК: «response size is too big» на пачку) — перечитать по одной, 20 постов
+    redo = [k for k in cand if st["judged"][k]["week"] == 0 and not st["judged"][k].get("rechecked")]
+    for n, k in enumerate(redo, 1):
+        g = st["info"][k]
+        try:
+            w = call("wall.get", owner_id=-g["id"], count=20)
+        except RuntimeError as e:
+            log("стена", k, e); w = None
+        posts = [(datetime.fromtimestamp(it.get("date", 0), timezone.utc), post_text(it)) for it in (w or {}).get("items", []) if not it.get("is_pinned")]
+        st["judged"][k] = dict(finder.judge(posts, d, title=g["name"], about=g["about"], subs=g["n"], min_subs=members, min_week=3, min_days=0), rechecked=1)
+    if redo:
+        save(); log(f"перечитал стен по одной: {len(redo)}")
     # 4) субъект и таблица
     rows, rej = [], []
     for k in cand:
         g, j = st["info"][k], st["judged"][k]
         low = f"{g['name']} {g['about'][:150]}".lower()
-        code = by_name.get(j.get("region")) or next((c for c, al in alias.items()
-                                                    if any(re.search(r"(?<![а-яё])" + re.escape(a) + r"(?![а-яё])", low) for a in al[:10])), None) \
-            or max(hits[k]["regions"], key=hits[k]["regions"].get)
+        # город в названии группы — надёжнее всего; потом города из объявлений (в репостах бывают чужие); потом фраза поиска
+        code = next((c for c, al in alias.items() if any(re.search(r"(?<![а-яё])" + re.escape(a) + r"(?![а-яё])", low) for a in al[:10])), None) \
+            or by_name.get(j.get("region")) or max(hits[k]["regions"], key=hits[k]["regions"].get)
         row = dict(j, subject=regs[code][0], link=f"https://vk.com/{g['sn'] or 'club' + str(g['id'])}", title=g["name"])
         (rows if j["ok"] else rej).append(row)
     rows.sort(key=lambda r: (r["subject"], -r["week"], -r["subs"]))
