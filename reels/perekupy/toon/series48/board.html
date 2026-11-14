@@ -1,0 +1,97 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props57.js"></script>
+<script>
+// «СУД: ПЕРЕКУПЫ ПРОТИВ БОТА» (киношный формат, отдельный ролик, не про Толяна). Перекупы подали в суд на бота «Перехват»: он забирает лучшие машины.
+// НАЧАЛО: судебный рисунок карандашом (серый штрих на бумаге, подпись от руки) → удар молотка — кадр оживает в цвете: «Встать, суд идёт!»
+// → истец Жора: «объявление выходит — машину уже забрали» → ответчик: телефон с ботом в клетке → свидетель баба Нина: пятёрку купили через минуту
+// (воспоминание на веранде) → свидетель перекуп Стас: три дня жал F5 (воспоминание, счётчик обновлений) → улика №1: 12:00:00 → 12:00:01 бот → звонок
+// → «то есть бот просто быстрее вас?» — «получается, да» → «иск отклонить» … «а ссылку на бот — секретарю. Камри ищу» → карточка бота.
+// Приёмы (новые): судебный рисунок, оживающий в цвет; молоток с ударными кольцами; воспоминание с плёночной кромкой; клавиша F5 со счётчиком; доска улик с красной нитью.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const J = (p, x, foot, h, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, JUDGE, pose, extra);
+const SUD_L = glow(870, 380, 300, "#fff6d0", .35) + glow(540, 260, 220, "#e6b422", .2);
+const VR_L = glow(900, 160, 380, "#fff3c4", .5);
+const KN_L = glow(700, 860, 260, "#9fd6ff", .5) + glow(810, 420, 220, "#ffc46a", .15);
+const COURT = (extra = "") => J("jw", 540, 1060, 700, {}, { z: 6 }) + BENCH(8) + Z("zw", 190, 1700, 760, { look: "o" }, {}, { z: 10 }) + TRIBUNE(190, 1420, 330, 11, "ИСТЕЦ")
+  + KLETKA(650, 1080, 370, 720, V5CARD(), "klw") + extra;
+const S = [
+ { h: "СУДЕБНЫЙ РИСУНОК → СУД ИДЁТ", tc: "1/6 · 0:00–0:09",
+   A: { sketch: 1, def: () => ({ bg: "zalsuda", grade: "day", over: SKETCH() + SKCAP("Перекупы против бота", "зал № 3 · дело № 1"), mid: COURT(), lights: SUD_L }), shot: { x: 540, y: 1100, s: 1.0 } },
+   B: { def: () => ({ bg: "zalsuda", grade: "day", hud: HUD57(), over: RINGS(640, 640),
+       mid: J("jg", 540, 1060, 700, { armR: -120 }, { z: 6 }) + INHAND(540, 1060, 700, -120, 170, GAVEL, 7, -20) + BENCH(8), lights: SUD_L }), shot: { x: 540, y: 760, s: 1.45 },
+     bubbles: [{ p: "jg", html: "Встать, суд идёт!<br><em>Перекупы против бота «Перехват».</em>", fs: 38 }], talk: ["jg"] },
+   vo: "Лис: «Впервые в истории перекупы подали в суд. На бота». Судья: «Встать, суд идёт! Слушается дело: перекупы против бота «Перехват»».", who: "Лис + Судья",
+   mv: "<b>Новое начало — без плашки серии.</b> Кадр 0: <b>приём 1 — судебный рисунок</b>: весь зал суда серым карандашным штрихом на бумаге, подпись от руки «Перекупы против бота · зал № 3 · дело № 1» — это и есть крючок. <b>Новый фон — зал суда</b> (панели, весы, часы, окно с жалюзи, трибуна). B — <b>приём 2 — молоток</b>: удар, ударные кольца, тряска — и рисунок за кадр оживает в цвете." },
+ { h: "ИСТЕЦ И ОТВЕТЧИК", tc: "2/6 · 0:09–0:20",
+   A: { def: () => ({ bg: "zalsuda", grade: "day", hud: HUD57(),
+       mid: Z("zt", 540, 1860, 900, { look: "o" }, { armL: 150, armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + TRIBUNE(540, 1470, 420, 9, "ИСТЕЦ"), lights: SUD_L }), shot: { x: 540, y: 1160, s: 1.04 },
+     bubbles: [{ p: "zt", html: "Ваша честь! Объявление выходит —<br><em>а машину уже забрали!</em>", fs: 40 }], talk: ["zt"] },
+   B: { def: () => ({ bg: "zalsuda", grade: "day", hud: HUD57(), farBlur: 6,
+       mid: KLETKA(250, 820, 580, 1020, V5CARD(), "klc", 380) + C.tag(330, 700, "ОТВЕТЧИК", "бот «Перехват»", -4, 9), lights: SUD_L }), shot: { x: 540, y: 1200, s: 1.05 } },
+   vo: "Жора: «Ваша честь! Объявление выходит — а машину уже забрали! Мы так без работы останемся!» Лис: «Ответчик — бот «Перехват». Явился лично».", who: "Жора + Лис",
+   mv: "A — <b>истец Жора</b> за трибуной, руки вверх. B — <b>ответчик</b>: телефон с ботом на табурете в клетке, на экране «ВАЗ-2105 · 1998 · 120 000 ₽ · рынок ≈ 160 000 · ⏱ 1 с после публикации», бирка «ОТВЕТЧИК». Звук уведомления — «явился лично»." },
+ { h: "СВИДЕТЕЛЬ: БАБА НИНА", tc: "3/6 · 0:20–0:33",
+   A: { def: () => ({ bg: "zalsuda", grade: "day", hud: HUD57(),
+       mid: ch("perekup", "nn", 540, 1860, 880, NINA, { armR: -40 }, { rim: "#fff6d0", side: 1, z: 7 }) + TRIBUNE(540, 1480, 420, 9, "СВИДЕТЕЛЬ"), lights: SUD_L }), shot: { x: 540, y: 1160, s: 1.04 },
+     bubbles: [{ p: "nn", html: "Выложила пятёрку в двенадцать.<br><em>Через минуту: «бабушка, я уже еду!»</em>", fs: 36 }], talk: ["nn"] },
+   B: { def: () => ({ bg: "veranda", grade: "warm", over: MEMORY("12:00 · вспоминает баба Нина"),
+       mid: car(V5, 380, 1640, 640, { z: 4, sheen: .6 }) + ch("perekup", "nf", 250, 1720, 720, NINA, { phone: 1 }, { rim: "#fff2c0", side: 1, z: 7 }), lights: VR_L }), shot: { x: 560, y: 1200, s: 1.06 } },
+   vo: "Нина: «Выложила пятёрку в двенадцать. Через минуту звонит парень: бабушка, я уже еду!» Лис: «Пятёрка, одна хозяйка, сто двадцать тысяч. Парню бот прислал объявление через секунду».", who: "Нина + Лис",
+   mv: "<b>Новый герой — баба Нина</b> (синее пальто, красный шарф) за трибуной «СВИДЕТЕЛЬ». B — <b>приём 3 — воспоминание</b>: тёплая дымка по краям, плёночная кромка слева и справа, подпись от руки «12:00 · вспоминает баба Нина»; <b>новый фон — деревенская веранда</b> (резные наличники, подсолнухи), бежевая «пятёрка», Нина говорит по кнопочному телефону." },
+ { h: "СВИДЕТЕЛЬ: ПЕРЕКУП СТАС", tc: "4/6 · 0:33–0:44",
+   A: { def: () => ({ bg: "zalsuda", grade: "day", hud: HUD57(),
+       mid: ch("perekup", "st", 540, 1860, 880, STAS, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + INHAND(540, 1860, 880, -150, 120, BANDAGE, 8) + TRIBUNE(540, 1480, 420, 9, "СВИДЕТЕЛЬ"), lights: SUD_L }), shot: { x: 540, y: 1160, s: 1.04 },
+     bubbles: [{ p: "st", html: "Я три дня обновлял объявления!<br><em>Палец стёр!</em>", fs: 40 }], talk: ["st"] },
+   B: { def: () => ({ bg: "komnatanoch", grade: "night", over: MEMORY("три дня назад", "mem", "#0b0e1c") + F5(500, 420),
+       mid: ch("perekup", "sf", 300, 1780, 720, STAS, { armR: -60 }, { rim: "#9fd6ff", side: -1, z: 7 }), lights: KN_L }), shot: { x: 540, y: 1160, s: 1.04 } },
+   vo: "Стас: «Я три дня обновлял объявления! Три дня! Палец стёр!» Лис: «Четыре тысячи обновлений. Пятёрку Стас так и не увидел».", who: "Стас + Лис",
+   mv: "<b>Новый герой — перекуп Стас</b> (синяя кепка), поднимает перебинтованный палец. B — воспоминание, <b>новый фон — комната ночью</b> (монитор светит, банки энергетика, окно с городом); <b>приём 4 — клавиша F5</b>: огромная клавиша вдавливается снова и снова, счётчик «обновлено: 4 812 раз», «3 дня без сна»." },
+ { h: "УЛИКА №1", tc: "5/6 · 0:44–0:56",
+   A: { def: () => ({ far: EVIDENCE(), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "zalsuda", grade: "day", hud: HUD57(), mid: COURT(), lights: SUD_L }), shot: { x: 520, y: 1100, s: 1.04 },
+     bubbles: [{ p: "jw", html: "То есть бот<br><em>просто быстрее вас?</em>", fs: 42 }], talk: ["jw"] },
+   vo: "Лис: «Улика номер один. Публикация — двенадцать ноль-ноль. Бот прислал — через секунду. Звонок — через сорок». Судья: «То есть бот просто быстрее вас?» Жора: «Ну… получается, да».", who: "Лис + Судья + Жора",
+   mv: "A — <b>приём 5 — доска улик</b>: пробковая доска, «УЛИКА №1», карточки на красных кнопках появляются по одной: 12:00:00 опубликовано → <b>12:00:01 бот прислал</b> → 12:00:40 звонок → 12:20 парень у калитки, их связывает красная нить. B — общий план зала: судья, Жора за трибуной, клетка с телефоном." },
+ { h: "ПРИГОВОР", tc: "6/6 · 0:56–1:08",
+   A: { def: () => ({ bg: "zalsuda", grade: "day", hud: HUD57(), over: VERDICT(),
+       mid: J("jv", 540, 1060, 700, { armR: -120 }, { z: 6 }) + INHAND(540, 1060, 700, -120, 170, GAVEL, 7, -20) + BENCH(8) + Z("zv", 190, 1700, 760, { look: "o" }, {}, { z: 10 }) + TRIBUNE(190, 1420, 330, 11, "ИСТЕЦ"), lights: SUD_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "jv", html: "А ссылку на бот —<br><em>секретарю. Камри ищу.</em>", fs: 40 }], talk: ["jv"] },
+   B: { def: () => ({ bg: "zalsuda", grade: "day", over: CTA57, mid: COURT(), lights: SUD_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Судья: «Суд постановил: иск отклонить». (удар молотка) Судья, тише: «А ссылку на бот — секретарю». Жора: «Ваша честь, а вам-то зачем?» Судья: «Камри ищу». (Карточку бота голос не читает.)", who: "Судья + Жора",
+   mv: "A — лист решения суда, красный штамп «ИСК ОТКЛОНИТЬ» с ударом молотка; Жора поник. Судья наклоняется: «а ссылку на бот — секретарю», «Камри ищу». B — <b>последний кадр — только карточка бота</b> «Бот «Перехват» — ссылка в шапке»." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
