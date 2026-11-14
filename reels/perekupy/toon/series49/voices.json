@@ -1,0 +1,38 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: a car flipper hires a psychic to find a Lada Vesta. Lis is a deadpan ironic narrator. Last line is a confident, warm advertising pitch for the bot «Перехват», clear and not rushed."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: greedy, excited, impatient. Line 2: outraged, sarcastic."
+ },
+ "stas": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.12,
+  "profile": "Stas — an exhausted Russian used-car flipper in his 30s who hasn't slept for three days.",
+  "notes": "One line: calm, pleased, smug."
+ },
+ "mag": {
+  "voice": "Rasalgethi",
+  "tempo": 1.08,
+  "profile": "Magister Eduard — a theatrical Russian TV-style psychic in his 50s, mysterious, dramatic pauses, low mystical voice.",
+  "notes": "Lines 1–3: mystical, dramatic, slow, with pauses on «…». Last line: smug, a bit mocking."
+ },
+ "rustam": {
+  "voice": "Sadachbia",
+  "tempo": 1.12,
+  "profile": "Rustam — a cheerful Russian taxi-fleet guy selling an ex-taxi car, friendly, fast talker.",
+  "notes": "One line: enthusiastic, salesy."
+ },
+ "valera": {
+  "voice": "Orus",
+  "tempo": 1.1,
+  "profile": "Valera — a sly Russian roadside car seller near Tambov.",
+  "notes": "One line: confident first, then guilty «Ну… чуть-чуть»."
+ }
+}

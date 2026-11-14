@@ -5,11 +5,11 @@ import json, os, shutil, subprocess, sys
 
 BASE = sys.argv[1]; HEAD = 2.4; FPS = 30; N = int(HEAD * FPS)
 V = {   # заставка (две плашки и цвета) · цвет ffmpeg · зум и сдвиг центра (доли запаса по x, y: 0 — левый/верхний край, .5 — центр)
- "b": dict(name="Архив", t=("Бот под судом", "дело № 1 · перекупы против", "#2f4fb8", "#fbfaf3"),
+ "b": dict(name="Архив", t=("Перекуп нанял экстрасенса", "", "#9fd6ff", ""),
    color="colorchannelmixer=.86:.14:0:0:.08:.86:.06:0:.04:.1:.78:0,eq=contrast=1.05:saturation=1.05", zoom=1.04, at=(.5, .5)),
- "c": dict(name="Неон", t=("Перекупы в суде", "кто забирает машины?", "#ffd23f", "#151515"),
+ "c": dict(name="Неон", t=("Веста по гороскопу", "", "#ffd23f", ""),
    color="eq=contrast=1.1:saturation=1.3:brightness=-0.02,hue=h=12", zoom=1.06, at=(.5, .25)),
- "h": dict(name="Пастель", t=("Иск к боту", "слушается дело № 1", "#ff6fae", "#151515"),
+ "h": dict(name="Пастель", t=("Шар покажет Весту?", "", "#ff8fc8", ""),
    color="colorbalance=rs=.10:gs=-.04:bs=.08:rm=.08:gm=-.03:bm=.06,eq=saturation=.9:brightness=.03", zoom=1.05, at=(.3, .5)),
 }
 PY = os.environ.get("PY", "python3")
@@ -30,6 +30,10 @@ $("#title .b").textContent = {json.dumps(t2, ensure_ascii=False)}; $("#title .b"
 const ORIG = [...document.querySelectorAll("#lbx .lbt, #lbx .lbb")].map(e => e.textContent), HEADT = {HEAD};
 {{ const L = document.querySelector("#lbx"); if (L) {{ const a = L.querySelector(".lbt"), b = L.querySelector(".lbb");   // кинорамка вместо плашки (ep56)
   a.textContent = {json.dumps(t1, ensure_ascii=False)}; b.textContent = {json.dumps(t2, ensure_ascii=False)}; a.style.background = b.style.background = "{c1}"; a.style.color = b.style.color = "{c2}"; }} }}
+{{ const K = document.querySelector("#ballc"); if (K) {{ const orig = K.innerHTML, col = K.style.color;   // надпись над хрустальным шаром (ep58)
+  K.innerHTML = {json.dumps(t1, ensure_ascii=False)}; K.style.color = "{c1}";
+  const B = window.build; window.build = R => {{ B(R); R.tl.to(K, {{ opacity: 0, duration: .15 }}, HEADT - .6);
+    R.tl.set(K, {{ innerHTML: orig, color: col }}, HEADT - .45); R.tl.to(K, {{ opacity: 1, duration: .15 }}, HEADT - .4); }}; }} }}
 {{ const K = document.querySelector("#skc"); if (K) {{ const [a, b] = K.children, orig = [a.textContent, b.textContent], bg = K.style.background, col = K.style.color;   // подпись судебного рисунка (ep57)
   a.textContent = {json.dumps(t1, ensure_ascii=False)}; b.textContent = {json.dumps(t2, ensure_ascii=False)}; K.style.background = "{c1}"; K.style.color = "{c2}";
   const B = window.build; window.build = R => {{ B(R); R.tl.to(K, {{ opacity: 0, duration: .15 }}, HEADT - .6);

@@ -30,7 +30,7 @@ const BALL = (inner, id = "ball", cap = "") => `<div style="left:0;top:0;width:1
   ${[[150, 1500], [930, 1480], [80, 1620], [1000, 1640]].map(([x, y], k) => `<div style="left:${x - 18}px;top:${y - 120}px;width:36px;height:${120 + k * 10}px;background:#f1e6d2;border:4px solid #151515"></div>
     <div class="flame" style="left:${x - 14}px;top:${y - 160}px;width:28px;height:44px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;background:radial-gradient(#fff6c8,#ffb84a);box-shadow:0 0 40px #ffb84a"></div>`).join("")}
   <div style="left:330px;top:1196px;width:420px;height:140px;background:linear-gradient(#e6b422,#8a6a1a);border:8px solid #151515;border-radius:30px 30px 60px 60px"></div>
-  ${cap ? `<div id="${id}c" style="left:40px;top:250px;width:1000px;text-align:center;font-family:Caveat;font-weight:700;font-size:96px;line-height:1;color:#ffd27a;text-shadow:0 0 30px #ff8a1a">${cap}</div>` : ""}
+  ${cap ? `<div id="${id}c" style="left:40px;top:318px;width:1000px;text-align:center;font-family:Caveat;font-weight:700;font-size:86px;line-height:1;color:#ffd27a;text-shadow:0 0 30px #ff8a1a">${cap}</div>` : ""}
   <div id="${id}" style="left:190px;top:520px;width:700px;height:700px;border-radius:50%;overflow:hidden;border:10px solid #151515;
     background:radial-gradient(circle at 40% 35%,#d8f0ff,#7ab8e8 45%,#3a5aa8 80%);box-shadow:0 0 140px #9fd6ffaa">
     <div id="${id}f1" style="position:absolute;left:-200px;top:180px;width:1100px;height:340px;border-radius:50%;background:radial-gradient(#ffffffcc,#ffffff00 70%);filter:blur(10px)"></div>
