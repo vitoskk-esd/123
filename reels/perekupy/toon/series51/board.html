@@ -1,0 +1,100 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props60.js"></script>
+<script>
+// «ШКОЛА ПЕРЕКУПОВ: ЭКЗАМЕН ЗА МИНУТУ» (киношный формат, отдельный ролик). Михалыч 30 лет перекупает «по-старому» и открыл курсы:
+// газета, обзвон, рынок в 5 утра. Экзамен: найти Гранту ниже рынка за минуту. Михалыч листает газету и звонит с дискового телефона —
+// «продана!», а новичок Ваня через 13 секунд уже договорился: бот прислал объявление через секунду. Пятёрка в дневник: «а теперь ты меня учи».
+// ОБЛОЖКА (кадр 0, правило владельца 14.11): Ваня держит телефон с ботом + плашка «ШКОЛА: / ЭКЗАМЕН ЗА МИНУТУ»; гаснет к ~1,6 с.
+// Приёмы (новые): мел на доске (строки появляются по одной); школьный звонок + таймер-минута; газета с зачёркиванием «продана»; дисковый телефон; дневник с «5».
+const M = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...MIH, ...o }, pose, extra);
+const V = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...VANYA, ...o }, pose, extra);
+const KL_L = glow(60, 1080, 260, "#fff6d0", .45) + glow(540, 120, 420, "#fff6d0", .3);
+const UC_L = glow(540, 200, 300, "#ffe8a8", .5);
+const DV_L = glow(900, 200, 380, "#fff6d0", .35);
+const PTR = (x, foot, h, arm = -120) => INHAND(x, foot, h, arm, 200, POINTER.replace("L-120 -150", "L200 -170").replace("M-110 -138 L-124 -155", "M190 -160 L206 -176"), 10);
+const DIARYMINI = `<svg viewBox="0 0 120 100" style="overflow:visible"><g transform="rotate(-8 60 50)"><rect x="0" y="10" width="120" height="84" rx="6" fill="#2f5a8a" stroke="#151515" stroke-width="5"/><rect x="8" y="14" width="104" height="76" fill="#fbf8ef" stroke="#151515" stroke-width="3"/><path d="M60 14 V90" stroke="#151515" stroke-width="3"/><text x="86" y="78" text-anchor="middle" font-family="Caveat" font-weight="700" font-size="64" fill="#e0261a">5</text></g></svg>`;
+const S = [
+ { h: "ОБЛОЖКА · КЛАСС → МЕЛ НА ДОСКЕ", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("perekup", "vn", 540, 2090, 1680, VANYA, GRCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "klass", grade: "day", farBlur: 8, mid: H.mid, lights: H.lights + KL_L, over: TITLE("ШКОЛА:", "ЭКЗАМЕН ЗА МИНУТУ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "klass", grade: "day", farBlur: 0, far: CHALK([["Урок 1. Как найти машину", 74, "#ffd9a0"], ["1. Газета"], ["2. Обзвон"], ["3. Рынок в 5 утра"]]),
+       mid: M("ma", 250, 1900, 900, {}, { armR: -120 }, { rim: "#fff6d0", side: 1, z: 7 }) + PTR(250, 1900, 900), lights: KL_L }), shot: { x: 540, y: 1000, s: 1 },
+     bubbles: [{ p: "ma", html: "Записывайте!<br><em>Газета. Обзвон. Рынок в пять утра.</em>", fs: 42 }], talk: ["ma"] },
+   vo: "Лис: «Михалыч перекупает тридцать лет. И открыл курсы». Михалыч: «Записывайте! Газета. Обзвон. Рынок в пять утра».", who: "Лис + Михалыч",
+   mv: "<b>Кадр 0 — обложка</b>: Ваня держит телефон, на экране бот «Lada Granta · 2020 · 615 000 ₽ · рынок ≈ 720 000 · 🔥 −15% · ⏱ 1 с», поверх — плашка «ШКОЛА: / ЭКЗАМЕН ЗА МИНУТУ» (гаснет к 1,6 с). <b>Новый фон — класс</b> (зелёная доска, портреты, часы, глобус). B — <b>приём 1: мел на доске</b>: строки «Урок 1… 1. Газета 2. Обзвон 3. Рынок в 5 утра» выводятся по одной под голос (скрип мела), Михалыч стучит указкой." },
+ { h: "УЧЕНИКИ → «ТЕЛЕФОН — НА ПАРТУ!»", tc: "2/6 · 0:12–0:23",
+   A: { def: () => ({ bg: "klass", grade: "day", farBlur: 3, far: CHALK([["Урок 1. Как найти машину", 74, "#ffd9a0"], ["1. Газета"], ["2. Обзвон"], ["3. Рынок в 5 утра"]], "chb"),
+       mid: ch("perekup", "gs", 190, 1700, 640, GOSHA, {}, { z: 7 }) + DESK(190, 1730, 360) + HANDUP(V("vb", 540, 1700, 640, {}, {}, { z: 7 }), "vb", 540, 1700, 640, VANYA.jacket) + DESK(540, 1730, 360)
+         + ch("perekup", "pt", 890, 1700, 640, PETYA, {}, { z: 7 }) + DESK(890, 1730, 360), lights: KL_L }), shot: { x: 540, y: 1300, s: 1.12 },
+     bubbles: [{ p: "vb", html: "Михал Михалыч,<br><em>а можно через телефон?</em>", fs: 44 }], talk: ["vb"] },
+   B: { def: () => ({ bg: "klass", grade: "day", farBlur: 6, mid: M("mb", 540, 1900, 1000, { look: "angry" }, { armL: 40 }, { rim: "#fff6d0", side: 1, z: 7 }), lights: KL_L }), shot: { x: 540, y: 1150, s: 1.1 },
+     bubbles: [{ p: "mb", html: "Телефон — на парту!<br><em>Экзамен!</em>", fs: 54 }], talk: ["mb"] },
+   vo: "Ваня: «Михал Михалыч, а можно через телефон?» Михалыч: «Телефон — на парту! Мы в своё время по газете искали. Экзамен!»", who: "Ваня + Михалыч",
+   mv: "A — <b>новые герои — ученики за партами</b>: Гоша, Ваня тянет руку, Петя в очках. B — Михалыч крупно, сердитый, грозит пальцем, кадр вздрагивает." },
+ { h: "ЗВОНОК + ТАЙМЕР → ЗАДАНИЕ НА ДОСКЕ", tc: "3/6 · 0:23–0:32",
+   A: { def: () => ({ far: BELLRING(), farBlur: 0, over: TIMER(390, 1060, 60) }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "klass", grade: "day", farBlur: 0, far: CHALK([["ЭКЗАМЕН", 120, "#ffd23f"], ["Найти Гранту"], ["ниже рынка"], ["за 1 минуту!", 92, "#ff9a8a"]], "chc"),
+       mid: M("mc", 250, 1900, 900, {}, { armR: -120 }, { rim: "#fff6d0", side: 1, z: 7 }) + PTR(250, 1900, 900), over: TIMER(780, 1060, 60, "tm1", 250), lights: KL_L }), shot: { x: 540, y: 1000, s: 1 },
+     bubbles: [{ p: "mc", html: "Гранта ниже рынка.<br><em>Время пошло!</em>", fs: 46 }], talk: ["mc"] },
+   vo: "Лис: «Звонок. Экзамен — одна минута». Михалыч: «Найти Гранту ниже рынка. Время пошло!»", who: "Лис + Михалыч",
+   mv: "A — <b>приём 2: школьный звонок + таймер</b>: звонок трясётся (звон), под ним красное кольцо-таймер «0:60» начинает убывать. B — на доске мелом «ЭКЗАМЕН · Найти Гранту ниже рынка · за 1 минуту!», таймер в углу тикает (тиканье под голосом)." },
+ { h: "ДИСКОВЫЙ ТЕЛЕФОН → ГАЗЕТА «ПРОДАНА!»", tc: "4/6 · 0:32–0:46",
+   A: { def: () => ({ bg: "uchitelskaya2", grade: "warm", farBlur: 3,
+       mid: M("md", 470, 1820, 920, { look: "o" }, { armR: -150 }, { rim: "#ffe8a8", side: 1, z: 7 }) + HANDSET2(598, 1180, 548, 1300, 930, 860) + ROTARY(840, 780, 190, 6),
+       over: TIMER(790, 1180, 38, "tm2", 230), lights: UC_L }), shot: { x: 540, y: 1150, s: 1.05 },
+     bubbles: [{ p: "md", html: "Алло! Гранта ещё есть?..<br><em>Продана?!</em>", fs: 46 }], talk: ["md"] },
+   B: { def: () => ({ far: NEWS(2), farBlur: 0, over: TIMER(80, 1640, 24, "tm3", 200) }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Михалыч (в трубку): «Алло! Гранта двадцатого года ещё продаётся?.. Продана?!» Лис: «Газета вышла позавчера. Хорошую машину забирают за час». Михалыч: «И эта продана…»", who: "Михалыч + Лис",
+   mv: "A — <b>новый фон — кабинет Михалыча</b> (вырезки на доске, календарь 1998, стопки газет), <b>приём 3: дисковый телефон</b> — Михалыч крутит диск (треск), трубка у уха; таймер 0:38. B — <b>приём 4: газета «Авто-вестник» крупно</b>: три Гранты обведены красным, на каждую — красный крест «продана!» под голос." },
+ { h: "ВАНЯ: «Я УЖЕ ДОГОВОРИЛСЯ» → ДВОР С ГРАНТОЙ", tc: "5/6 · 0:46–0:58",
+   A: { def: () => { const H = HOLDPHONE("perekup", "ve", 380, 1960, 1250, VANYA, GRCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "klass", grade: "day", farBlur: 5, mid: H.mid + M("me", 860, 1800, 900, { look: "o" }, {}, { z: 5 }), lights: H.lights + KL_L }; }, shot: { x: 560, y: 1080, s: 1.05 },
+     bubbles: [{ p: "ve", html: "Михал Михалыч,<br><em>я уже договорился.</em>", fs: 44 }], talk: ["ve"] },
+   B: { def: () => ({ bg: "shkolnyidvor", grade: "day", mid: car(GR, 20, 1680, 640, { z: 4, sheen: .5 }) + ch("perekup", "gl", 840, 1740, 780, GALYA, {}, { rim: "#fff6d0", side: -1, z: 7 }),
+       over: TIMER(70, 1700, 47, "tm4", 220), lights: DV_L }), shot: { x: 540, y: 1200, s: 1.05 },
+     bubbles: [{ p: "gl", html: "Ты первый позвонил —<br><em>через минуту после объявления!</em>", fs: 40 }], talk: ["gl"] },
+   vo: "Ваня: «Михал Михалыч, я уже договорился. Гранта двадцатого года, шестьсот пятнадцать. Рынок — семьсот двадцать». Тётя Галя: «Ты первый позвонил — через минуту после объявления!»", who: "Ваня + тётя Галя",
+   mv: "A — Ваня с телефоном (в боте та же Гранта, ⏱ 1 с), Михалыч за спиной застыл с открытым ртом. B — <b>новый фон — двор курсов</b> (кирпич, вывеска «КУРСЫ ПЕРЕКУПА», клёны, стоянка), белая Гранта, <b>новая героиня — тётя Галя</b> у машины; таймер остановился на 0:47 — Ване хватило 13 секунд." },
+ { h: "ДНЕВНИК «5» → ФИНАЛ: БОТ", tc: "6/6 · 0:58–1:10",
+   A: { def: () => ({ bg: "klass", grade: "day", farBlur: 4, far: CHALK([["ЭКЗАМЕН", 120, "#ffd23f"], ["Найти Гранту"], ["ниже рынка"], ["за 1 минуту!", 92, "#ff9a8a"]], "chf"),
+       mid: M("mf", 300, 1820, 880, { look: "grin" }, { armR: -70 }, { rim: "#fff6d0", side: 1, z: 7 }) + INHAND(300, 1820, 880, -70, 230, DIARYMINI, 9) + V("vf", 780, 1820, 820, {}, {}, { rim: "#fff6d0", side: -1, z: 7 }), lights: KL_L }), shot: { x: 540, y: 1180, s: 1.05 },
+     bubbles: [{ p: "mf", html: "Пять.<br><em>А теперь — ты меня учи.</em>", fs: 50 }], talk: ["mf"] },
+   B: { def: () => ({ bg: "shkolnyidvor", grade: "day", over: CTA60, lights: DV_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Михалыч: «Пять. А теперь — ты меня учи». Лис: «Бот «Перехват» помогает найти хорошую машину быстрее других — объявление приходит через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Михалыч + Лис",
+   mv: "Перед A — <b>приём 5: дневник крупно</b> (вставка 1,5 с): «Поиск машины · Гранта, 1 мин» — красная «5» выводится ручкой, подпись «Михалыч ✍». A — Михалыч протягивает Ване дневник с пятёркой. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>

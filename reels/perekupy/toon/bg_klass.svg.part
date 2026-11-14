@@ -1,0 +1,23 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#d8c9a0"/>
+    <rect y="0" width="1080" height="120" fill="#efe6cc"/><path d="M0 120 H1080" stroke="#000" stroke-width="5"/>
+    <!-- портреты -->
+    <rect x="120" y="150" width="110" height="140" fill="#fbf6ec" stroke="#6b4423" stroke-width="10"/><circle cx="175" cy="205" r="30" fill="#b9a68a"/><path d="M138 285 q37 -50 74 0" fill="#7a6a55"/><rect x="470" y="150" width="110" height="140" fill="#fbf6ec" stroke="#6b4423" stroke-width="10"/><circle cx="525" cy="205" r="30" fill="#b9a68a"/><path d="M488 285 q37 -50 74 0" fill="#7a6a55"/><rect x="850" y="150" width="110" height="140" fill="#fbf6ec" stroke="#6b4423" stroke-width="10"/><circle cx="905" cy="205" r="30" fill="#b9a68a"/><path d="M868 285 q37 -50 74 0" fill="#7a6a55"/>
+    <!-- часы -->
+    <circle cx="350" cy="220" r="56" fill="#fbf6ec" stroke="#000" stroke-width="7"/><path d="M350 220 V180 M350 220 L380 236" stroke="#000" stroke-width="7" stroke-linecap="round"/>
+    <!-- доска -->
+    <rect x="40" y="330" width="1000" height="560" rx="10" fill="#6b4423" stroke="#000" stroke-width="7"/>
+    <rect x="62" y="352" width="956" height="516" fill="#2f5a3e"/>
+    <path d="M610 474 q65 -10 109 10" stroke="#d7e4da" stroke-width="5" opacity=".12" fill="none"/><path d="M115 756 q89 10 142 -9" stroke="#d7e4da" stroke-width="5" opacity=".12" fill="none"/><path d="M807 400 q60 19 89 9" stroke="#d7e4da" stroke-width="5" opacity=".12" fill="none"/><path d="M808 774 q30 -20 113 6" stroke="#d7e4da" stroke-width="4" opacity=".12" fill="none"/><path d="M740 833 q73 5 140 -4" stroke="#d7e4da" stroke-width="4" opacity=".12" fill="none"/><path d="M794 607 q64 -4 133 -6" stroke="#d7e4da" stroke-width="5" opacity=".12" fill="none"/><path d="M128 786 q61 -10 109 2" stroke="#d7e4da" stroke-width="4" opacity=".12" fill="none"/><path d="M874 648 q72 6 85 -10" stroke="#d7e4da" stroke-width="4" opacity=".12" fill="none"/><path d="M626 614 q68 20 108 4" stroke="#d7e4da" stroke-width="2" opacity=".12" fill="none"/><path d="M890 506 q85 12 89 6" stroke="#d7e4da" stroke-width="4" opacity=".12" fill="none"/><path d="M327 638 q50 -7 98 2" stroke="#d7e4da" stroke-width="3" opacity=".12" fill="none"/><path d="M125 678 q83 10 150 7" stroke="#d7e4da" stroke-width="2" opacity=".12" fill="none"/><path d="M768 461 q44 3 149 -8" stroke="#d7e4da" stroke-width="2" opacity=".12" fill="none"/><path d="M576 468 q82 -4 108 4" stroke="#d7e4da" stroke-width="5" opacity=".12" fill="none"/><path d="M458 652 q81 -5 140 -6" stroke="#d7e4da" stroke-width="3" opacity=".12" fill="none"/><path d="M736 370 q90 -14 107 2" stroke="#d7e4da" stroke-width="5" opacity=".12" fill="none"/>
+    <rect x="62" y="868" width="956" height="22" fill="#8a5a33" stroke="#000" stroke-width="4"/>
+    <rect x="160" y="856" width="40" height="14" rx="4" fill="#fbf6ec"/><rect x="760" y="852" width="90" height="20" rx="4" fill="#c9b48a" stroke="#000" stroke-width="3"/>
+    <!-- окно с жалюзи -->
+    <rect x="-20" y="930" width="160" height="300" fill="#9fd6ff" stroke="#000" stroke-width="6"/>
+    <path d="M-20 950 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 984 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 1018 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 1052 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 1086 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 1120 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 1154 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 1188 H140" stroke="#efe6cc" stroke-width="12"/><path d="M-20 1222 H140" stroke="#efe6cc" stroke-width="12"/>
+    <!-- глобус на шкафу -->
+    <rect x="920" y="1000" width="160" height="240" fill="#8a5a33" stroke="#000" stroke-width="6"/>
+    <circle cx="990" cy="950" r="46" fill="#4aa0d8" stroke="#000" stroke-width="6"/><path d="M968 930 q20 10 10 30 q24 10 30 -10" fill="#6abf69" stroke="#000" stroke-width="3"/><path d="M990 996 v8 M960 1004 h60" stroke="#000" stroke-width="7"/>
+    <!-- пол-линолеум -->
+    <rect y="1240" width="1080" height="680" fill="#a8743f"/><path d="M0 1240 H1080" stroke="#000" stroke-width="7"/>
+    <path d="M0 1310 H1080" stroke="#946433" stroke-width="3"/><path d="M0 1390 H1080" stroke="#946433" stroke-width="3"/><path d="M0 1470 H1080" stroke="#946433" stroke-width="3"/><path d="M0 1550 H1080" stroke="#946433" stroke-width="3"/><path d="M0 1630 H1080" stroke="#946433" stroke-width="3"/><path d="M0 1710 H1080" stroke="#946433" stroke-width="3"/><path d="M0 1790 H1080" stroke="#946433" stroke-width="3"/><path d="M0 1870 H1080" stroke="#946433" stroke-width="3"/>
+  </svg>
