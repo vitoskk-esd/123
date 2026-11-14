@@ -5,7 +5,8 @@ const GOSHA = { jacket: "#8a3a2a", pants: "#2b2f37", hair: "#1d1d1f", cap: "#2f6
 const PETYA = { jacket: "#5a4a8a", pants: "#2b2f37", hair: "#e0c070", glasses: true, look: "flat" };                       // ученик Петя (массовка)
 const GALYA = { coat: "#c06a8a", jacket: "#c06a8a", pants: "#4a3a5a", hair: "#8a4a2a", scarf: "#e6b422", look: "grin" };    // тётя Галя, продаёт Гранту
 const GR = "granta/granta_34.png";
-Object.assign(CINE.SIZES, { [GR]: [791, 366] });
+const EVO = "evo9/evo9_34.png";                                     // жёлтая Эво IX — машина Михалыча (лист владельца 14.11)
+Object.assign(CINE.SIZES, { [GR]: [791, 366], [EVO]: [771, 358] });
 const INHAND = (x, foot, h, arm, w, html, z = 8, rot = 0) => {
   const s = h / 740, l = x - 210 * s, t = foot - 740 * s, A = arm * Math.PI / 180;
   const hx = l + (292 + 26 * Math.cos(A) - 130 * Math.sin(A)) * s, hy = t + (400 + 26 * Math.sin(A) + 130 * Math.cos(A)) * s;
