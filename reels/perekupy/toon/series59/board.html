@@ -1,0 +1,90 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props68.js"></script>
+<script>
+// «АВТОШКОЛА: ТАМАРА ПАВЛОВНА» (киношный формат, отдельный ролик). Интеллигентная инструктор купила учебную «десятку» у Жоры («как новая»):
+// руль отваливается, вторая педаль тормоза ломается на перекрёстке. Тамара Павловна матерится естественно и между делом — и честно кидает
+// по 50 ₽ за слово в копилку. Посылает Жору, находит Элантру через бота — и впервые за урок не ругается. Настоящий мат в озвучке (владелец 15.11), в облачках — со звёздочками.
+// ОБЛОЖКА (кадр 0): Тамара Павловна держит телефон с ботом (Hyundai Elantra 2020 −15%) + плашка «АВТОШКОЛА: / ТАМАРА ПАВЛОВНА».
+// Приёмы (новые): копилка «за мат · 50 ₽» с монетами и суммой; оторванный руль в руках ученика; вставка «вторая педаль»; салон через лобовое стекло.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const T = (p, x, foot, h, pose = {}, extra = {}) => TPC(ch("vika", p, x, foot, h, null, pose, extra));
+const KR = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...KIR, ...o }, pose, extra);
+const AD_L = glow(540, 160, 420, "#fff6d0", .35);
+const PK_L = glow(980, 642, 160, "#ff3b30", .35);
+const UC_L = glow(540, 520, 360, "#cfe8f5", .3);
+const S = [
+ { h: "ОБЛОЖКА · ИНСТРУКТОР С БОТОМ → ПЕРВОЕ ЗАНЯТИЕ", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("vika", "tp", 540, 2090, 1680, null, ELCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "avtodrom", farBlur: 8, mid: TPC(H.mid), lights: H.lights + AD_L, over: TITLE("АВТОШКОЛА:", "ТАМАРА ПАВЛОВНА") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "avtodrom", mid: car(V10, 300, 1560, 640, { z: 5, sheen: .4 }) + USIGN(560, 1290) + T("ta", 190, 1840, 820, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + KR("ka", 900, 1840, 760, {}, { armL: 30 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: AD_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ka", html: "Здравствуйте!<br><em>Я на первое занятие.</em>", fs: 32 }, { p: "ta", html: "Садись, солнышко.<br><em>Зеркала настрой.</em>", fs: 32 }], talk: ["ta"] },
+   vo: "Лис: «Автошкола “Зелёный свет”. Инструктор Тамара Павловна: двадцать лет стажа, интеллигентка в третьем поколении». Кирилл: «Здравствуйте! Я на первое занятие». Тамара Павловна: «Садись, солнышко. Пристегнись, зеркала настрой».", who: "Лис + Кирилл + Тамара Павловна",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новая героиня — инструктор Тамара Павловна</b> (седой пучок, очки на цепочке, сиреневый кардиган) держит телефон: в боте «Hyundai Elantra · 2020 · 1 190 000 ₽ · рынок ≈ 1 400 000 · 🔥 −15% · ⏱ 1 с»; плашка «АВТОШКОЛА: / ТАМАРА ПАВЛОВНА». B — <b>новый фон — автодром</b> (будка «АВТОШКОЛА ЗЕЛЁНЫЙ СВЕТ», эстакада, конусы, учебный светофор); учебная «десятка» со знаком «У»; <b>новый герой — ученик Кирилл</b>." },
+ { h: "«КАК НОВАЯ» ОТ ЖОРЫ → РУЛЬ ОТВАЛИЛСЯ", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "avtodrom", farBlur: 2, mid: car(V10, 260, 1600, 700, { z: 5, sheen: .4 }) + NEWTAG(560, 1330) + Z("za", 180, 1880, 860, { look: "grin" }, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }), lights: AD_L }), shot: { x: 540, y: 1180, s: 1.05 } },
+   B: { def: () => ({ bg: "uchebka", mid: T("tb", 300, 2070, 1250, { armR: -30 }, { rim: "#cfe8f5", side: 1, z: 7 }) + KR("kb", 790, 2070, 1230, { look: "o" }, { armL: -60, armR: -60 }, { rim: "#cfe8f5", side: -1, z: 7 }) + WHEEL(790, 1430, "wh", 300) + DASH(760, "ds", false) + JAR(420, 1190, "jar", 18, "100 ₽"), lights: UC_L }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "kb", html: "А руль так и должен…<br><em>отваливаться?</em>", fs: 30 }, { p: "tb", html: "Ёпт…<br><em>Х*йня вопрос.</em>", fs: 30 }], talk: ["tb"] },
+   vo: "Лис: «Учебную “десятку” Тамара Павловна купила у Жоры. “Как новая”, — сказал Жора». Кирилл: «Тамара Павловна… а руль так и должен… отваливаться?» Тамара Павловна: «Ёпт… Спокойно, Кирюша. Вставь обратно. Ничего страшного, хуйня вопрос».", who: "Лис + Кирилл + Тамара Павловна",
+   mv: "A — флешбэк: Жора с «десяткой» (капот и крыло другого синего — крашеная), на стекле «КАК НОВАЯ!». B — <b>новый фон — салон учебки через лобовое</b> (задний диван, ёлочка, улица в заднем стекле); <b>приём 1: оторванный руль</b> в руках Кирилла; <b>приём 2: копилка «ЗА МАТ · 50 ₽»</b> на торпеде — на каждое её слово падает монета, сумма растёт." },
+ { h: "ВТОРАЯ ПЕДАЛЬ → «ТОРМОЗИ, БЛ*ДЬ!»", tc: "3/6 · 0:24–0:36",
+   A: { def: () => ({ bg: "uchebka", farBlur: 10, mid: PEDAL("pd"), lights: "" }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "uchebka", mid: T("tc", 300, 2070, 1250, { armL: 80, armR: -150 }, { rim: "#ff3b30", side: 1, z: 7 }) + KR("kc", 790, 2070, 1230, { look: "o" }, {}, { rim: "#cfe8f5", side: -1, z: 7 }) + DASH(760, "ds2") + JAR(420, 1190, "jar2", 30, "150 ₽"), lights: UC_L }), shot: { x: 540, y: 1150, s: 1.04, r: -3 },
+     bubbles: [{ p: "tc", html: "Тормози,<br><em>бл*дь, родной!</em>", fs: 30 }, { p: "kc", html: "Я торможу-у-у!", fs: 32 }], talk: ["tc"] },
+   vo: "Лис: «На первом перекрёстке отломилась вторая педаль тормоза». Тамара Павловна: «Тормози! Тормози, блядь, родной, тормози!» Кирилл: «Я торможу-у-у!»", who: "Лис + Тамара Павловна + Кирилл",
+   mv: "A — <b>приём 3: вставка «ВТОРАЯ ПЕДАЛЬ»</b> крупно: сиреневая туфля жмёт педаль — педаль отламывается и летит вниз (хруст). B — паника в салоне: камера трясётся и заваливается, за стеклом мелькает перекрёсток; копилка — 150 ₽." },
+ { h: "«СТО ПЯТЬДЕСЯТ В КОПИЛКУ» → К ЖОРЕ", tc: "4/6 · 0:36–0:48",
+   A: { def: () => ({ bg: "uchebka", farBlur: 2, mid: T("td", 300, 2070, 1250, { armR: -100 }, { rim: "#cfe8f5", side: 1, z: 7 }) + KR("kd", 790, 2070, 1230, { look: "o" }, {}, { z: 7 }) + DASH(760, "ds3") + JAR(420, 1190, "jar3", 34, "150 ₽"), lights: UC_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "td", html: "Так. Сто пятьдесят в копилку.<br><em>А теперь — к Жоре.</em>", fs: 36 }], talk: ["td"] },
+   B: { def: () => ({ bg: "perekrestok", mid: Z("zb", 760, 1840, 860, { look: "grin" }, { armL: 60 }, { rim: "#ffd27a", side: -1, z: 7 }) + T("te", 270, 1840, 860, { armR: -100 }, { rim: "#ffd27a", side: 1, z: 7 }), lights: PK_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "zb", html: "Ну как<br><em>машинка?</em>", fs: 30 }, { p: "te", html: "Жорочка, солнце…<br><em>Иди-ка ты на*уй.</em>", fs: 30 }], talk: ["te"] },
+   vo: "Тамара Павловна (поправляя очки, спокойно): «Так. Сто пятьдесят в копилку. А теперь — к Жоре». Жора: «Тамара Павловна! Ну как машинка, летает?» Тамара Павловна: «Жорочка, солнце моё. Иди-ка ты нахуй со своей машинкой».", who: "Тамара Павловна + Жора",
+   mv: "A — остановились: Тамара Павловна поправляет очки и кладёт три монеты в копилку. B — <b>новый фон — перекрёсток</b> (панельки, светофор, зебра, вывеска «ВЫКУП АВТО · ДОРОГО · ЖОРА»): Жора улыбается; Тамара Павловна посылает его вежливо и с улыбкой." },
+ { h: "БОТ: ЭЛАНТРА НИЖЕ РЫНКА → «НИ РАЗУ НЕ РУГНУЛИСЬ!»", tc: "5/6 · 0:48–1:00",
+   A: { def: () => { const H = HOLDPHONE("vika", "tf", 540, 2000, 1400, null, ELCARD("ecc2"), { rim: "#fff6d0", side: 1 });
+       return { bg: "avtodrom", farBlur: 5, mid: TPC(H.mid), lights: H.lights + AD_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "tf", html: "Элантра, ниже рынка…<br><em>Оху*ть. А так можно было?</em>", fs: 36 }], talk: ["tf"] },
+   B: { def: () => ({ bg: "uchebka", farFilter: "hue-rotate(160deg) saturate(.7) brightness(1.15)", mid: T("tg", 300, 2070, 1250, {}, { rim: "#cfe8f5", side: 1, z: 7 }) + KR("kg", 790, 2070, 1230, { look: "grin" }, {}, { rim: "#cfe8f5", side: -1, z: 7 }) + DASH(760, "ds4") + JAR(420, 1190, "jar4", 0, "0 ₽"), lights: UC_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "kg", html: "Вы сегодня<br><em>ни разу не ругнулись!</em>", fs: 32 }, { p: "tg", html: "Не каркай,<br><em>Кирюша.</em>", fs: 32 }], talk: ["kg"] },
+   vo: "Лис: «Новую машину Тамара Павловна нашла сама — через бота “Перехват”». Тамара Павловна: «Элантра, один хозяин, ниже рынка… Охуеть. А что, так можно было?» Кирилл: «Тамара Павловна, вы сегодня ни разу не ругнулись!» Тамара Павловна: «Не каркай, Кирюша. Поехали».", who: "Лис + Тамара Павловна + Кирилл",
+   mv: "A — Тамара Павловна с телефоном: карточка Элантры в боте. B — салон новой машины (светлый): копилка пустая, «0 ₽» — в ней паутинка; Кирилл в восторге." },
+ { h: "ФИНАЛ: БОТ", tc: "6/6 · 1:00–1:10",
+   A: { def: () => ({ bg: "avtodrom", mid: car(ELN, 140, 1600, 800, { z: 5, sheen: .5, flip: true }) + USIGN(600, 1300) + T("th", 170, 1880, 760, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + KR("kh", 920, 1880, 740, { look: "grin" }, { armL: -150 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: AD_L }), shot: { x: 540, y: 1180, s: 1.04 } },
+   B: { def: () => ({ bg: "avtodrom", over: CTA68, lights: AD_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Лис: «Чтобы ругаться только от восторга, — ищи машину в боте “Перехват”: хорошие варианты ниже рынка приходят через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Лис",
+   mv: "A — белая Элантра со знаком «У» на автодроме, Тамара Павловна и Кирилл довольны. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>

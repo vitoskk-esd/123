@@ -1,0 +1,15 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#3a3d46"/>
+    <!-- потолок -->
+    <path d="M0 0 H1080 V240 Q540 320 0 240 Z" fill="#8a8680"/><circle cx="996" cy="174" r="5" fill="#6a665e"/><circle cx="514" cy="53" r="6" fill="#6a665e"/><circle cx="656" cy="118" r="4" fill="#6a665e"/><circle cx="348" cy="71" r="3" fill="#6a665e"/><circle cx="190" cy="133" r="5" fill="#6a665e"/><circle cx="667" cy="213" r="4" fill="#6a665e"/><circle cx="422" cy="187" r="3" fill="#6a665e"/><circle cx="131" cy="171" r="4" fill="#6a665e"/><circle cx="742" cy="113" r="3" fill="#6a665e"/><circle cx="271" cy="96" r="3" fill="#6a665e"/><circle cx="558" cy="218" r="4" fill="#6a665e"/><circle cx="171" cy="205" r="4" fill="#6a665e"/><circle cx="485" cy="65" r="4" fill="#6a665e"/><circle cx="267" cy="199" r="3" fill="#6a665e"/><circle cx="172" cy="79" r="5" fill="#6a665e"/><circle cx="737" cy="147" r="6" fill="#6a665e"/><circle cx="589" cy="179" r="5" fill="#6a665e"/><circle cx="83" cy="109" r="4" fill="#6a665e"/><circle cx="140" cy="112" r="3" fill="#6a665e"/><circle cx="674" cy="99" r="6" fill="#6a665e"/>
+    <!-- заднее стекло с улицей -->
+    <path d="M190 400 Q540 330 890 400 L840 760 H240 Z" fill="#a8d4f0" stroke="#000" stroke-width="8"/>
+    <path d="M250 640 h120 v-160 h-120 z M700 600 h130 v-200 h-130 z" fill="#cfd8dc" stroke="#000" stroke-width="4" opacity=".9"/><path d="M240 700 H840" stroke="#5f6066" stroke-width="40"/>
+    <!-- задний диван -->
+    <path d="M120 760 H960 Q1000 760 1000 820 V1200 H80 V820 Q80 760 120 760 Z" fill="#4a4f5a" stroke="#000" stroke-width="7"/>
+    <path d="M540 780 V1200" stroke="#33373f" stroke-width="8"/><rect x="200" y="700" width="150" height="90" rx="20" fill="#4a4f5a" stroke="#000" stroke-width="6"/><rect x="730" y="700" width="150" height="90" rx="20" fill="#4a4f5a" stroke="#000" stroke-width="6"/>
+    <!-- стойки салона -->
+    <path d="M0 240 L170 380 L120 1920 H0 Z" fill="#2b2f37" stroke="#000" stroke-width="7"/><path d="M1080 240 L910 380 L960 1920 H1080 Z" fill="#2b2f37" stroke="#000" stroke-width="7"/>
+    <!-- ёлочка-освежитель -->
+    <path d="M540 300 V380" stroke="#151515" stroke-width="4"/><path d="M540 380 l-34 60 h20 l-26 50 h80 l-26 -50 h20 z" fill="#4cd964" stroke="#000" stroke-width="5"/>
+  </svg>
