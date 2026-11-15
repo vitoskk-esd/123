@@ -27,7 +27,7 @@ from userbot import APPROVAL_CHECK, APPROVAL_WAIT, batch_done, notify
 
 log = logging.getLogger(__name__)
 API, V = "https://api.vk.com/method/", "5.199"
-FLOOD = (6, 9)                 # «слишком часто» / «flood control» — ключ рабочий, ВК просит притормозить
+FLOOD = (6, 9, 29)             # «слишком часто» / «flood control» / «rate limit reached» — ключ рабочий, ВК просит притормозить
 WALL_PACK = 25                 # стен за один запрос (execute)
 FLOOD_PAUSE = 60               # на сколько притормаживаем опрос после такого ответа
 # умный опрос стен (владелец 15.11, «сделай пункты 1 и 2 для ВК»): свежий пост за 6 ч — стену читаем каждый круг,
