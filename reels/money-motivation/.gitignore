@@ -7,3 +7,8 @@ src/
 */src/
 lofi_raw.wav
 video.mp4
+refs/*.mp4
+subs.mov
+music_n.wav
+voice.wav
+mix.wav
