@@ -9,7 +9,7 @@ import json, os, re, subprocess, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 C = json.load(open(sys.argv[1])); D = os.path.dirname(os.path.abspath(sys.argv[1])); K = os.path.dirname(os.path.abspath(__file__))
 W, H, FPS = 1080, 1920, 30
-A, B = C["start"], C["end"]; SPEECH = B - A; TAIL = 1.4; DUR = round(SPEECH + TAIL, 2)
+A, B = C["start"], C["end"]; SPEECH = B - A; TAIL = C.get("tail", 1.4); DUR = round(SPEECH + TAIL, 2)
 BW = C.get("style") == "bw"
 FONT = {"sans": "/usr/share/fonts/opentype/inter/InterDisplay-MediumItalic.otf" if C.get("italic") else "/usr/share/fonts/opentype/inter/InterDisplay-Medium.otf",
         "serif": os.path.join(K, "..", "fonts", "CormorantGaramond-SemiBoldItalic.ttf")}[C.get("sub_font", "sans")]
