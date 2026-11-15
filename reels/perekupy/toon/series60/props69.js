@@ -4,8 +4,8 @@ const POLK = { jacket: "#3f5a3a", pants: "#2f3f2a", hair: "#c8c8c8", mustache: t
 // невеста Лена (новая героиня): из «vika» — белое платье, бант → белый
 const LNC = html => html.replaceAll("#8e1f3a", "#fbf6f0").replaceAll("#5c1426", "#e0d6cc").replaceAll("#2c3e66", "#fbf6f0")
   .replaceAll('fill="#ff3b30" stroke="#151515" stroke-width="4" transform="rotate(-20', 'fill="#ffffff" stroke="#151515" stroke-width="4" transform="rotate(-20');
-const W24 = "w124/w124_side.png", CLS = "cls/cls_side_r.png";
-Object.assign(CINE.SIZES, { [W24]: [732, 233], [CLS]: [719, 240] });
+const W24 = "w124/w124_side.png", MZ6 = "mazda6/mazda6_side_r.png";
+Object.assign(CINE.SIZES, { [W24]: [732, 233], [MZ6]: [717, 240] });
 const TITLE = (a, b) => `<div style="position:absolute;left:0;right:0;top:300px;text-align:center;font-family:Unbounded;font-weight:900;line-height:1;letter-spacing:-3px;z-index:50">
   <span style="display:inline-block;padding:10px 28px 18px;border:8px solid #151515;border-radius:22px;box-shadow:0 12px 0 #151515;font-size:82px;background:#ffd23f;color:#151515;transform:rotate(-3deg)">${a}</span><br>
   <span style="display:inline-block;padding:10px 28px 18px;border:8px solid #151515;border-radius:22px;box-shadow:0 12px 0 #151515;font-size:80px;background:#ff3b30;color:#fff;margin-top:26px;transform:rotate(2deg)">${b}</span></div>`;
@@ -45,7 +45,7 @@ const PIP = (inner, id, ring = "#ffd23f", left = 700, top = 1440) => `<div id="$
 const PUSHM = (x, y, id = "pm") => `<div id="${id}" style="position:absolute;left:${x}px;top:${y}px;width:420px;z-index:60;background:#151515;border:6px solid #ffd23f;border-radius:22px;padding:16px 22px;box-shadow:0 8px 0 #000;font-family:Unbounded;font-weight:900;color:#ffd23f">
   <div style="font-size:26px">НЕВЕСТА ТОЛКАЕТ</div><div id="${id}v" style="font-size:64px;color:#fff;line-height:1.1">0 м</div>
   <div style="margin-top:8px;height:22px;border-radius:11px;background:#333;overflow:hidden"><div id="${id}b" style="width:0%;height:100%;background:#ff8fb1"></div></div></div>`;
-// бот у Димы
-const CLSCARD = (id = "mcc") => BOTH("Mercedes · до 2,5 млн", `<div id="${id}">${CARD("Mercedes CLS · 2014", "2 150 000 ₽", "рынок ≈ 2 450 000 ₽ · 1 владелец", "🔥 −12% к рынку · ⏱ 1 с после публикации")}</div>`);
+// бот у Димы: красная Mazda 6 (машина владельца, 15.11)
+const MZCARD = (id = "mcc") => BOTH("Mazda 6 · до 700 тыс.", `<div id="${id}">${CARD("Mazda 6 · 2008", "640 000 ₽", "рынок ≈ 780 000 ₽ · 1 владелец", "🔥 −18% к рынку · ⏱ 1 с после публикации")}</div>`);
 const CTA69 = `<div style="position:absolute;left:60px;right:60px;top:1330px;z-index:70;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:26px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center">
   <div style="font-size:52px;line-height:1.12">Бот <span style="color:#c0392b">«Перехват»</span><br>— ссылка в шапке</div><div style="margin-top:12px;font-size:30px;font-family:Onest;font-weight:800">объявления по всей России · через ~1 с после публикации</div></div>`;
