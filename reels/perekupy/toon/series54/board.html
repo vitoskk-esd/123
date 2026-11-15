@@ -1,0 +1,96 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props63.js"></script>
+<script>
+// «ВИКТОРИНА: ВОПРОС НА МИЛЛИОН» (киношный формат, отдельный ролик; формат викторины — свой, без отсылок к реальным шоу).
+// Жора на телевикторине дошёл до вопроса на миллион: «Где найти Камри ниже рынка?» А — авторынок в 5 утра, Б — газета, В — спросить у тёщи, Г — бот.
+// Жора уверен в «А», берёт 50:50, помощь зала (87% — Г: «зал купили!»), звонок другу — Стас: «Ответ Г. И Камри я уже купил». Жора: «окончательный — А». Неверно.
+// ОБЛОЖКА (кадр 0, владелец 15.11: человек держит телефон с ботом): Стас на кухне с телефоном — в боте Камри −14% + плашка «ВИКТОРИНА: / ВОПРОС НА МИЛЛИОН».
+// Приёмы (новые): табло вопроса с ответами (выбор → верно/неверно); подсказка 50:50 (два ответа гаснут); помощь зала — столбики; звонок другу — сплит-экран с таймером 30 с.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const ST = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...STAS, ...o }, pose, extra);
+const HS = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...HOST, ...o }, pose, extra);
+const KS_L = glow(540, 420, 360, "#ffd23f", .25) + glow(540, 1640, 420, "#5a7aff", .35);
+const KZ_L = glow(540, 200, 400, "#ff3bd0", .25);
+const KH_L = glow(590, 400, 320, "#fff6d0", .45);
+const PST = (html, id, css) => html.replace(`id="${id}" style="`, `id="${id}" style="${css};`);
+const SEL = "background:#ff7a1a !important", OK = "background:#4cd964 !important", BAD = "background:#ff3b30 !important", OFF = "opacity:0 !important";
+const STAGE = (k, hpose = {}, zo = {}, extra = "") => HS("h" + k, 270, 1250, 760, {}, hpose, { rim: "#9fb4ff", side: 1, z: 7 }) + Z("z" + k, 790, 1250, 760, zo, {}, { rim: "#9fb4ff", side: -1, z: 7 }) + PODIUM(790, 1260, 420) + extra;
+const S = [
+ { h: "ОБЛОЖКА · СТАС С БОТОМ → ВОПРОС НА МИЛЛИОН", tc: "1/6 · 0:00–0:11",
+   A: { def: () => { const H = HOLDPHONE("perekup", "sp", 540, 2090, 1680, STAS, STCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "kuhnyastasa", grade: "day", farBlur: 8, mid: H.mid, lights: H.lights + KH_L, over: TITLE("ВИКТОРИНА:", "ВОПРОС НА МИЛЛИОН") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "kvizstudiya", farBlur: 1, mid: STAGE("a", { armR: -60 }, { look: "grin" }), over: BOARD(1360), lights: KS_L }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "ha", html: "Вопрос на миллион:<br><em>где найти Камри ниже рынка?</em>", fs: 38 }], talk: ["ha"] },
+   vo: "Лис: «Жору позвали на телевикторину. Он дошёл до вопроса на миллион». Ведущий: «Где найти Камри ниже рынка?»", who: "Лис + ведущий",
+   mv: "<b>Кадр 0 — обложка (человек с телефоном, как в «Толяне»)</b>: Стас на кухне держит телефон — в боте «Toyota Camry · 2018 · 1 850 000 ₽ · рынок ≈ 2 150 000 · 🔥 −14% · ⏱ 1 с»; плашка «ВИКТОРИНА: / ВОПРОС НА МИЛЛИОН». <b>Новый фон — кухня Стаса</b>. B — <b>новый фон — студия викторины</b> (прожекторы, экран «ВОПРОС НА МИЛЛИОН», светодиодный пол); <b>новый герой — ведущий Аркадий</b> во фраке; Жора за стойкой; <b>приём 1: табло</b> — вопрос и четыре ответа выезжают по одному (тинь-тинь)." },
+ { h: "ВАРИАНТЫ → «ЭТО ПРОСТО!»", tc: "2/6 · 0:11–0:22",
+   A: { def: () => ({ bg: "kvizstudiya", farBlur: 1, mid: STAGE("b", { armR: -100 }, { look: "grin" }), over: BOARD(1360) + LIFELINES(), lights: KS_L }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "hb", html: "А — авторынок, Б — газета,<br><em>В — тёща, Г — бот.</em>", fs: 38 }], talk: ["hb"] },
+   B: { def: () => ({ bg: "kvizstudiya", farBlur: 6, mid: Z("zc", 540, 1900, 1000, { look: "grin" }, { armL: 40 }, { rim: "#9fb4ff", side: 1, z: 7 }) + PODIUM(540, 1910, 640), lights: KS_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "zc", html: "Это просто!<br><em>Авторынок в пять утра!</em>", fs: 48 }], talk: ["zc"] },
+   vo: "Ведущий: «А — авторынок в пять утра. Б — объявление в газете. В — спросить у тёщи. Г — бот, через секунду». Жора: «Это просто! Авторынок в пять утра!» Ведущий: «Уверены? Есть подсказки».", who: "Ведущий + Жора",
+   mv: "A — ведущий зачитывает варианты, каждый ответ подсвечивается под голос; под табло — три подсказки «50:50 · 📞 · 👥». B — Жора крупно за стойкой, самодовольно." },
+ { h: "50:50 → ПОМОЩЬ ЗАЛА", tc: "3/6 · 0:22–0:34",
+   A: { def: () => ({ bg: "kvizstudiya", farBlur: 1, mid: STAGE("d", {}, { look: "o" }), over: PST(PST(BOARD(1360), "a1", OFF), "a2", OFF) + LIFELINES("ll", [0]), lights: KS_L }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "zd", html: "Пятьдесят<br><em>на пятьдесят!</em>", fs: 48 }], talk: ["zd"] },
+   B: { def: () => ({ bg: "kvizzal", farBlur: 1, over: POLL(), mid: Z("ze", 260, 2200, 1000, { look: "angry" }, {}, { rim: "#ff7ae6", side: 1, z: 7 }), lights: KZ_L }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "ze", html: "Зал<br><em>купили!</em>", fs: 56 }], talk: ["ze"] },
+   vo: "Жора: «Пятьдесят на пятьдесят!» Лис: «Остались рынок и бот. Помощь зала: восемьдесят семь процентов — бот». Жора: «Зал купили!»", who: "Жора + Лис",
+   mv: "A — <b>приём 2: подсказка 50:50</b> — «Б» и «В» гаснут с электрическим «бзз», на значке «50:50» красный крест. B — <b>новый фон — трибуны со зрителями</b> (табло «АПЛОДИСМЕНТЫ», пульты): <b>приём 3: помощь зала</b> — столбики растут под барабанную дробь, «Г — 87%» зелёный; Жора снизу кадра возмущён." },
+ { h: "ЗВОНОК ДРУГУ — СПЛИТ-ЭКРАН", tc: "4/6 · 0:34–0:46",
+   A: { split: () => [{ bg: "kvizstudiya", farBlur: 2, mid: Z("zf", 540, 1900, 1000, { look: "o" }, { phone: 1 }, { rim: "#9fb4ff", side: 1, z: 7 }) + PODIUM(540, 1910, 640), lights: KS_L,
+       bubbles: [{ p: "zf", html: "Стас, где Камри<br><em>ниже рынка?</em>", fs: 36 }] }, { x: 540, y: 1100, s: 1.05 },
+       { bg: "kuhnyastasa", grade: "day", farBlur: 2, mid: ST("sf", 540, 1900, 1000, {}, { phone: 1 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: KH_L,
+       bubbles: [{ p: "sf", html: "Ответ Г.<br><em>Камри я уже купил.</em>", fs: 36 }] }, { x: 540, y: 1100, s: 1.05 }], hud: null },
+   B: { def: () => ({ bg: "kvizstudiya", farBlur: 1, mid: STAGE("g", {}, { look: "o" }), over: PST(PST(BOARD(1360), "a1", OFF), "a2", OFF) + LIFELINES("ll", [0, 1, 2]) + CTIMER(430, 760, 0), lights: KS_L }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Ведущий: «Звонок другу. Тридцать секунд». Жора: «Стас, где найти Камри ниже рынка?» Стас: «Ответ Г, Жора. И Камри я уже купил — через секунду после публикации».", who: "Ведущий + Жора + Стас",
+   mv: "A — <b>приём 4: звонок другу — сплит-экран</b>: слева Жора в студии с телефоном, справа Стас на кухне; между ними белая полоса, сверху таймер 30 с (тиканье). B — таймер «0», все подсказки зачёркнуты." },
+ { h: "«ОКОНЧАТЕЛЬНЫЙ ОТВЕТ — А» → НЕВЕРНО", tc: "5/6 · 0:46–0:57",
+   A: { def: () => ({ bg: "kvizstudiya", farBlur: 4, mid: Z("zh", 540, 1900, 1000, { look: "grin" }, { armL: 40 }, { rim: "#9fb4ff", side: 1, z: 7 }) + PODIUM(540, 1910, 640), over: PST(PST(PST(BOARD(1360), "a0", SEL), "a1", OFF), "a2", OFF), lights: KS_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "zh", html: "Окончательный ответ —<br><em>А! Рынок!</em>", fs: 48 }], talk: ["zh"] },
+   B: { def: () => ({ bg: "kvizstudiya", farBlur: 1, mid: STAGE("i", {}, { look: "o" }), over: PST(PST(PST(PST(BOARD(1360), "a0", BAD), "a1", OFF), "a2", OFF), "a3", OK) + `<div style="position:absolute;inset:0;z-index:44;background:radial-gradient(circle,#ff3b3000 40%,#ff3b3066)"></div>`, lights: KS_L }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "hi", html: "Неверно.<br><em>Правильный ответ — Г: бот.</em>", fs: 40 }], talk: ["hi"] },
+   vo: "Жора: «Окончательный ответ — А! Рынок!» Ведущий: «Неверно. Правильный ответ — Г: бот. Камри продали через минуту после публикации».", who: "Жора + ведущий",
+   mv: "A — «А» горит оранжевым (выбор), барабанная дробь. B — «А» краснеет, «Г» загорается зелёным, по краям кадра красная вспышка, гудок «неверно»." },
+ { h: "УТЕШИТЕЛЬНЫЙ ПРИЗ → ФИНАЛ: БОТ", tc: "6/6 · 0:57–1:09",
+   A: { def: () => ({ bg: "kvizstudiya", farBlur: 2, mid: HS("hj", 240, 1820, 860, {}, { armR: -60 }, { rim: "#9fb4ff", side: 1, z: 7 }) + Z("zj", 620, 1820, 880, { look: "o" }, { armR: -70 }, { rim: "#9fb4ff", side: -1, z: 7 }) + INHAND(620, 1820, 880, -70, 200, KETTLE, 9), lights: KS_L }), shot: { x: 540, y: 1180, s: 1.05 },
+     bubbles: [{ p: "zj", html: "Чайник…<br><em>Ну хоть без торга.</em>", fs: 48 }], talk: ["zj"] },
+   B: { def: () => ({ bg: "kvizstudiya", over: CTA63, lights: KS_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Ведущий: «Ваш утешительный приз — чайник!» Жора: «Чайник… Ну хоть без торга». Лис: «Бот «Перехват» — правильный ответ: хорошая машина приходит к тебе раньше других, через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Ведущий + Жора + Лис",
+   mv: "A — ведущий вручает Жоре чайник (фанфары с фальшивой нотой). B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
