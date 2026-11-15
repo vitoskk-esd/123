@@ -1,0 +1,91 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props62.js"></script>
+<script>
+// «ЧЁРНАЯ ПЯТНИЦА: СКИДКИ ОТ ЖОРЫ» (киношный формат, отдельный ролик). Жора узнал про чёрную пятницу: ночью поднял цены вдвое, утром — «−50%».
+// Приходит один покупатель — бухгалтер Марина с калькулятором: «миллион пятьдесят — вчера она стоила столько же». Жора: «курс доллара вырос!»
+// Марина показывает бот: такая же Веста за 920 000, пришла через секунду. «Скидка — это когда нашла раньше всех». Неоновый баннер гаснет.
+// ОБЛОЖКА (кадр 0, владелец 15.11: «как в истории с Толяном — человек держит телефон с ботом»): Марина с телефоном + плашка «ЧЁРНАЯ ПЯТНИЦА: / СКИДКИ ОТ ЖОРЫ».
+// Приёмы (новые): ценник ×2 маркером со звездой «−50%»; «очередь из одного» с перекати-полем; калькулятор с бумажной лентой; неоновый баннер гаснет по буквам.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const MR = (p, x, foot, h, pose = {}, extra = {}) => MRC(ch("vika", p, x, foot, h, null, pose, extra));
+const BF_L = glow(540, 560, 420, "#ff3bd0", .3) + glow(40, 750, 160, "#fff6c8", .5) + glow(600, 750, 160, "#fff6c8", .5);
+const BU_L = glow(200, 560, 380, "#fff2c8", .45);
+const BK_L = glow(760, 700, 300, "#ffe8a8", .5) + glow(770, 340, 220, "#ff3bd0", .3);
+const CALCMINI = `<svg viewBox="0 0 80 100" style="overflow:visible"><rect x="4" y="4" width="72" height="92" rx="10" fill="#2b2f37" stroke="#151515" stroke-width="5"/><rect x="12" y="12" width="56" height="20" rx="4" fill="#b9d4a6"/>${[0, 1, 2].map(j => [0, 1, 2].map(i => `<rect x="${12 + i * 20}" y="${40 + j * 18}" width="14" height="12" rx="3" fill="#e8e6ef"/>`).join("")).join("")}</svg>`;
+const S = [
+ { h: "ОБЛОЖКА · МАРИНА С БОТОМ → «ВСЁ ЗА ПОЛЦЕНЫ!»", tc: "1/6 · 0:00–0:10",
+   A: { def: () => { const H = HOLDPHONE("vika", "mr", 540, 2090, 1680, null, VSCARD(), { rim: "#ffd9b8", side: 1 });
+       return { bg: "bfutro", grade: "dawn", farBlur: 8, mid: MRC(H.mid), lights: H.lights + BU_L, over: TITLE("ЧЁРНАЯ ПЯТНИЦА:", "СКИДКИ ОТ ЖОРЫ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "blackfriday", grade: "", farBlur: 1, far: BANNER(), mid: car(VESTA, -30, 1660, 640, { z: 4, sheen: .5 }) + Z("za", 800, 1780, 860, { look: "grin" }, { armL: -150 }, { rim: "#ff7ae6", side: -1, z: 7 }), lights: BF_L }), shot: { x: 540, y: 1100, s: 1.02 },
+     bubbles: [{ p: "za", html: "Чёрная пятница!<br><em>Всё — за полцены!</em>", fs: 48 }], talk: ["za"] },
+   vo: "Лис: «Жора узнал, что такое чёрная пятница». Жора: «Чёрная пятница! Всё — за полцены!»", who: "Лис + Жора",
+   mv: "<b>Кадр 0 — обложка как в «Толяне»</b>: <b>новая героиня — бухгалтер Марина</b> держит телефон с ботом «Lada Vesta · 2019 · 920 000 ₽ · рынок ≈ 1 080 000 · 🔥 −15% · ⏱ 1 с»; плашка «ЧЁРНАЯ ПЯТНИЦА: / СКИДКИ ОТ ЖОРЫ» (гаснет к 1,6 с). B — <b>новый фон — площадка Жоры ночью</b>, <b>приём 4 (завязка): неоновый баннер</b> «ЧЁРНАЯ ПЯТНИЦА · −50% НА ВСЁ» зажигается по буквам (жужжание неона)." },
+ { h: "НОЧЬЮ ЦЕНЫ ×2 → ЦЕННИК «−50%»", tc: "2/6 · 0:10–0:22",
+   A: { def: () => ({ bg: "budkazhory", grade: "warm", farBlur: 3, mid: Z("zb", 480, 1900, 1000, { look: "grin" }, { armR: -60 }, { rim: "#ffe8a8", side: 1, z: 7 }) + INHAND(480, 1900, 1000, -60, 180, MARKER, 9), lights: BK_L }), shot: { x: 540, y: 1150, s: 1.06 },
+     bubbles: [{ p: "zb", html: "Было миллион пятьдесят —<br><em>стало два сто!</em>", fs: 44 }], talk: ["zb"] },
+   B: { def: () => ({ far: PRICETAG(), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Лис: «Ночью Жора поднял цены в два раза». Жора: «Было миллион пятьдесят — стало два сто. А теперь — минус пятьдесят процентов!»", who: "Лис + Жора",
+   mv: "A — <b>новый фон — будка Жоры</b> (касса, календарь, чайник, неон «−50%» в окне): Жора с маркером, хитрая ухмылка. B — <b>приём 1: ценник крупно</b>: «1 050 000» зачёркивается красным, маркером выводится «2 100 000», сверху шлёпается звезда «−50%» (скрип маркера, шлепок)." },
+ { h: "УТРО: ОЧЕРЕДЬ ИЗ ОДНОГО → МАРИНА", tc: "3/6 · 0:22–0:32",
+   A: { def: () => ({ bg: "bfutro", grade: "dawn", farBlur: 1, mid: MR("mc0", 540, 1520, 420, {}, { z: 6 }) + TUMBLE(700, 1420), lights: BU_L }), shot: { x: 540, y: 1100, s: 1.02 } },
+   B: { def: () => ({ bg: "bfutro", grade: "dawn", farBlur: 6, mid: MR("mc", 520, 1900, 1000, { armR: -60 }, { rim: "#ffd9b8", side: 1, z: 7 }) + INHAND(520, 1900, 1000, -60, 150, CALCMINI, 9), lights: BU_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "mc", html: "Веста со скидкой?<br><em>Я бухгалтер. Я посчитаю.</em>", fs: 44 }], talk: ["mc"] },
+   vo: "Лис: «Утром Жора открыл ворота. Очередь — один человек». Марина: «Здравствуйте. Веста со скидкой? Я бухгалтер. Я посчитаю».", who: "Лис + Марина",
+   mv: "A — <b>новый фон — площадка утром</b> (ворота, «ВХОД», рассвет): <b>приём 2: «очередь из одного»</b> — стойки с лентой, пусто, мимо катится перекати-поле (свист ветра), у ворот одна Марина. B — Марина крупно с калькулятором." },
+ { h: "КАЛЬКУЛЯТОР → «КУРС ДОЛЛАРА ВЫРОС!»", tc: "4/6 · 0:32–0:45",
+   A: { def: () => ({ far: CALC(), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "bfutro", grade: "dawn", farBlur: 3, mid: MR("md", 300, 1820, 860, { armR: -60 }, { rim: "#ffd9b8", side: 1, z: 7 }) + INHAND(300, 1820, 860, -60, 130, CALCMINI, 9) + Z("zd", 790, 1820, 880, { look: "o" }, {}, { rim: "#ffd9b8", side: -1, z: 7 }) + SWEAT(880, 1060), lights: BU_L }), shot: { x: 540, y: 1180, s: 1.05 },
+     bubbles: [{ p: "zd", html: "Это…<br><em>курс доллара вырос!</em>", fs: 48 }], talk: ["zd"] },
+   vo: "Лис: «Марина посчитала». Марина: «Миллион пятьдесят. Вчера она стоила столько же — без скидки». Жора: «Это… курс доллара вырос!»", who: "Лис + Марина + Жора",
+   mv: "A — <b>приём 3: калькулятор крупно</b>: клавиши щёлкают, на дисплее «2100000 × 0,5 = 1050000», из калькулятора ползёт бумажная лента: «2 100 000 · × 0,5 · = 1 050 000 · вчера: 1 050 000» (красной ручкой). B — Марина и Жора, у Жоры капли пота." },
+ { h: "БОТ У МАРИНЫ → «А СКИДКА?»", tc: "5/6 · 0:45–0:58",
+   A: { def: () => { const H = HOLDPHONE("vika", "me", 380, 1960, 1250, null, VSCARD().replace('id="vcc"', 'id="vcc2"'), { rim: "#ffd9b8", side: 1 });
+       return { bg: "bfutro", grade: "dawn", farBlur: 5, mid: MRC(H.mid) + Z("ze", 860, 1800, 900, { look: "o" }, {}, { z: 5 }), lights: H.lights + BU_L }; }, shot: { x: 560, y: 1080, s: 1.05 },
+     bubbles: [{ p: "me", html: "А мне бот прислал такую же —<br><em>девятьсот двадцать.</em>", fs: 40 }], talk: ["me"] },
+   B: { def: () => ({ bg: "bfutro", grade: "dawn", farBlur: 3, mid: Z("zf", 300, 1820, 880, { look: "o" }, { armR: -100 }, { rim: "#ffd9b8", side: 1, z: 7 }) + MR("mf", 820, 1800, 840, {}, { rim: "#ffd9b8", side: -1, z: 7 }), lights: BU_L }), shot: { x: 540, y: 1180, s: 1.05 },
+     bubbles: [{ p: "mf", html: "Скидка — это когда<br><em>нашла раньше всех.</em>", fs: 44 }], talk: ["mf"] },
+   vo: "Марина: «А мне бот вчера прислал такую же. Девятьсот двадцать тысяч — через секунду после публикации». Жора: «Женщина, а как же скидка?!» Марина: «Скидка — это когда нашла раньше всех».", who: "Марина + Жора",
+   mv: "A — Марина показывает телефон: в боте та же Веста за 920 000, ⏱ 1 с; Жора за спиной застыл. B — Жора тянет руку «а скидка?!», Марина уходит." },
+ { h: "БАННЕР ГАСНЕТ → ФИНАЛ: БОТ", tc: "6/6 · 0:58–1:10",
+   A: { def: () => ({ bg: "blackfriday", grade: "", farBlur: 1, far: BANNER("bn2").replace('transform-origin:0 0;', 'transform-origin:0 0;transform:rotate(7deg);').replace(/<span id="bn2c(2|5|9|12)">/g, '<span id="bn2c$1" style="opacity:.12">'),
+       mid: Z("zg", 560, 1860, 960, { look: "o" }, {}, { rim: "#ff7ae6", side: 1, z: 7 }), lights: BF_L }), shot: { x: 540, y: 1150, s: 1.05 },
+     bubbles: [{ p: "zg", html: "Ладно.<br><em>Перенесу на киберпонедельник.</em>", fs: 44 }], talk: ["zg"] },
+   B: { def: () => ({ bg: "blackfriday", grade: "", over: CTA62, lights: BF_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Лис: «Марина нашла Весту раньше всех». Жора: «Ладно. Перенесу на киберпонедельник». Лис: «С ботом «Перехват» скидки каждый день: хорошие машины ниже рынка — через секунду после публикации, раньше всех». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Лис + Жора",
+   mv: "A — <b>приём 4: неоновый баннер гаснет по буквам</b> и съезжает набок («ЧЁ НАЯ П ТНИЦА»), искры, Жора под ним. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
