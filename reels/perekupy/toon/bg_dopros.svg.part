@@ -1,0 +1,13 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#7a8088"/>
+    <path d="M0 80 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 160 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 240 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 320 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 400 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 480 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 560 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 640 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 720 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 800 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 880 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 960 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 1040 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 1120 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 1200 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 1280 H1080" stroke="#6a7078" stroke-width="4"/><path d="M0 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M120 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M240 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M360 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M480 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M600 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M720 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M840 0 V1300" stroke="#6a7078" stroke-width="4"/><path d="M960 0 V1300" stroke="#6a7078" stroke-width="4"/>
+    <!-- зеркало Гезелла -->
+    <rect x="160" y="380" width="760" height="420" fill="#2a3038" stroke="#000" stroke-width="12"/><path d="M200 420 L360 760 M300 420 L460 760" stroke="#5b6670" stroke-width="10" opacity=".5"/>
+    <!-- часы -->
+    <circle cx="900" cy="230" r="70" fill="#f4f0e8" stroke="#000" stroke-width="8"/><path d="M900 230 V180 M900 230 L935 245" stroke="#000" stroke-width="7"/>
+    <!-- дверь -->
+    <rect x="-10" y="560" width="140" height="740" fill="#5b6670" stroke="#000" stroke-width="7"/><rect x="20" y="620" width="80" height="60" fill="#a8c4d8" stroke="#000" stroke-width="4"/>
+    <!-- пол -->
+    <rect y="1300" width="1080" height="620" fill="#4a4f5a"/><path d="M0 1300 H1080" stroke="#000" stroke-width="7"/>
+    <ellipse cx="540" cy="1560" rx="460" ry="120" fill="#fff6d0" opacity=".14"/>
+  </svg>

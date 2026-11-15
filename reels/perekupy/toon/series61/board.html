@@ -1,0 +1,92 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props70.js"></script>
+<script>
+// «ДЕТЕКТИВ: ДЕЛО УТОПЛЕННИЦЫ» (киношный формат, отдельный ролик, БЕЗ мата — владелец 15.11). Нуар-пародия: частный детектив Горохов
+// расследует Камри, которую Жора продал Ольге «не битой, не крашеной»: в салоне пахнет рекой, под лупой — ил и живой карась.
+// Флешбэк: Камри месяц на дне реки. Доска улик — нити ведут к Жоре. Допрос под лампой: «Она сама поплыла!», «Карась — это бонус!».
+// Ольга находит Весту через бота — «Дело закрыто». ОБЛОЖКА (кадр 0): Ольга держит телефон с ботом (Lada Vesta 2021 −10%) + плашка «ДЕТЕКТИВ: / ДЕЛО УТОПЛЕННИЦЫ».
+// Приёмы (новые): лупа с карасём; доска улик с красными нитями; лампа допроса качается; папка «ДЕЛО № 70» с печатью «ЗАКРЫТО»; дождь на окне, жалюзи.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const G = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...GOR, ...o }, pose, extra);
+const O = (p, x, foot, h, pose = {}, extra = {}) => OLC(ch("vika", p, x, foot, h, null, pose, extra));
+const DB_L = glow(780, 1380, 260, "#ffd27a", .45) + glow(710, 470, 160, "#ff4fa0", .3);
+const DP_L = glow(540, 520, 300, "#fff6d0", .45);
+const PR_L = glow(540, 300, 420, "#ffffff", .2);
+const S = [
+ { h: "ОБЛОЖКА · КЛИЕНТКА С БОТОМ → «В САЛОНЕ ПАХНЕТ РЕКОЙ»", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("vika", "op", 540, 2090, 1680, null, VSCARD(), { rim: "#ffd27a", side: 1 });
+       return { bg: "detbyuro", farBlur: 8, mid: OLC(H.mid), lights: H.lights + DB_L, over: TITLE("ДЕТЕКТИВ:", "ДЕЛО УТОПЛЕННИЦЫ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "detbyuro", mid: G("ga", 760, 1700, 900, {}, { armL: 30 }, { rim: "#ffd27a", side: -1, z: 7 }) + DESK(1560) + O("oa", 250, 1880, 860, { armR: -60 }, { rim: "#ff4fa0", side: 1, z: 10 }), lights: DB_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "oa", html: "Купила Камри у Жоры.<br><em>А в салоне пахнет рекой.</em>", fs: 32 }, { p: "ga", html: "Рекой, говорите?<br><em>Интересно.</em>", fs: 32 }], talk: ["oa"] },
+   vo: "Лис: «Частный детектив Горохов. Тридцать лет раскрывает самые тёмные дела. Сегодня — дело Камри». Ольга: «Я купила Камри у Жоры. “Не бита, не крашена”. А в салоне пахнет рекой». Горохов: «Рекой, говорите? Интересно. Едем к машине».", who: "Лис + Ольга + Горохов",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новая героиня — клиентка Ольга</b> (бирюзовое пальто, светлые волосы) держит телефон: в боте «Lada Vesta · 2021 · 870 000 ₽ · рынок ≈ 970 000 · 🔥 −10% · ⏱ 1 с»; плашка «ДЕТЕКТИВ: / ДЕЛО УТОПЛЕННИЦЫ». B — <b>новый фон — контора детектива ночью</b> (дождь по окну, жалюзи, неон «ОТЕЛЬ», вентилятор, шкаф с делами); <b>новый герой — детектив Горохов</b> (бежевый плащ, шляпа-кепи, усы, шарф) за столом с зелёной лампой." },
+ { h: "ЛУПА: ИЛ, ПЕСОК И… КАРАСЬ → «В МАШИНЕ?!»", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "detbyuro", farBlur: 8, mid: G("gb", 300, 2000, 1050, { look: "o" }, { armR: -60 }, { rim: "#ffd27a", side: 1, z: 7 }) + LOUPE(640, 1150, "lp", 300), lights: DB_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "gb", html: "Ил. Песок.<br><em>И… карась. Живой.</em>", fs: 42 }], talk: ["gb"] },
+   B: { def: () => ({ bg: "detbyuro", farBlur: 3, mid: G("gc", 330, 1880, 880, {}, { armR: -150 }, { rim: "#ffd27a", side: 1, z: 7 }) + CARPHAND(380, 860) + O("ob", 820, 1880, 860, { armL: 60 }, { rim: "#ff4fa0", side: -1, z: 7 }), lights: DB_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ob", html: "Карась?!<br><em>В машине?!</em>", fs: 46 }], talk: ["ob"] },
+   vo: "Лис: «Улика номер один — коврик». Горохов: «Ил. Песок. И… карась. Живой». Ольга: «Карась?! В машине?!»", who: "Лис + Горохов + Ольга",
+   mv: "A — <b>приём 1: лупа</b> крупно: в линзе коврик — ил, песок и живой карась (шевелит хвостом). B — Горохов держит карася за хвост, Ольга в шоке." },
+ { h: "ФЛЕШБЭК: МЕСЯЦ НА ДНЕ → ДОСКА УЛИК", tc: "3/6 · 0:24–0:36",
+   A: { def: () => ({ bg: "prichaltuman", farFilter: "sepia(.35)", mid: car(CAMS, 60, 1500, 960, { z: 5, sheen: .3 }) + WATER(1330) + PIP(G("gpip", 160, 800, 900, {}, {}, { noShadow: 1 }), "pip1", "#ffd27a", 700, 1500), lights: PR_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ at: [860, 1530], html: "Ваша Камри не «не бита».<br><em>Она — утопленница.</em>", fs: 38 }], talk: ["gpip"] },
+   B: { def: () => ({ bg: "detbyuro", farBlur: 3, mid: EVID(110, 560) + G("gd", 870, 1900, 900, {}, { armL: 100 }, { rim: "#ffd27a", side: -1, z: 10 }), lights: DB_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "gd", html: "Все нити ведут<br><em>к Жоре.</em>", fs: 42 }], talk: ["gd"] },
+   vo: "Горохов: «Ваша Камри не “не бита”. Она — утопленница». Лис: «Горохов развесил улики на доске. Все нити вели к одному человеку». Горохов: «Жора. Продал Ольге машину, которая месяц жила на дне реки».", who: "Горохов + Лис",
+   mv: "A — <b>новый фон — речной причал в тумане</b> («КУПАТЬСЯ ЗАПРЕЩЕНО», камыш, мостки): флешбэк в сепии — Камри по крышу в воде; Горохов в кружке. B — <b>приём 2: доска улик</b> — фото «КАМРИ», «РЕКА», «КАРАСЬ», «ЖОРА»; красные нити прорисовываются и сходятся на Жоре." },
+ { h: "ДОПРОС: «ОНА САМА ПОПЛЫЛА!» → «КАРАСЬ — ЭТО БОНУС!»", tc: "4/6 · 0:36–0:48",
+   A: { def: () => ({ bg: "dopros", mid: Z("za", 540, 1860, 900, { look: "o" }, { armL: 60, armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + `<div style="position:absolute;left:120px;top:1560px;width:840px;height:400px;z-index:9;background:#3a3d46;border:8px solid #151515"></div>`, over: QLAMP(540), lights: DP_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "za", html: "Я её не топил!<br><em>Она сама поплыла!</em>", fs: 46 }], talk: ["za"] },
+   B: { def: () => ({ bg: "dopros", farBlur: 2, mid: G("ge", 260, 1880, 900, {}, { armR: -100 }, { rim: "#fff6d0", side: 1, z: 7 }) + Z("zb", 820, 1880, 860, { look: "grin" }, { armL: 70 }, { rim: "#fff6d0", side: -1, z: 7 }) + CARPHAND(330, 980, "ch2", 180), over: QLAMP(540, "ql2"), lights: DP_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ge", html: "А карась<br><em>сам сел за руль?</em>", fs: 32 }, { p: "zb", html: "Карась — это бонус!<br><em>Как ароматизатор!</em>", fs: 32 }], talk: ["zb"] },
+   vo: "Лис: «Жору доставили на допрос». Жора: «Я её не топил! Она сама поплыла!» Горохов: «Сама поплыла. А карась сам сел за руль?» Жора: «Карась — это бонус! Как ароматизатор!»", who: "Лис + Жора + Горохов",
+   mv: "A — <b>новый фон — комната допроса</b> (серая плитка, зеркало Гезелла, часы); <b>приём 3: лампа допроса</b> качается над Жорой, конус света ездит по лицу. B — Горохов с карасём в руке, Жора выкручивается." },
+ { h: "БОТ: ВЕСТА НИЖЕ РЫНКА → «ДЕЛО ЗАКРЫТО»", tc: "5/6 · 0:48–1:00",
+   A: { def: () => { const H = HOLDPHONE("vika", "of", 540, 2000, 1400, null, VSCARD("vcc2"), { rim: "#ffd27a", side: 1 });
+       return { bg: "detbyuro", farBlur: 5, mid: OLC(H.mid), lights: H.lights + DB_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "of", html: "Веста, один хозяин,<br><em>ниже рынка. Без карасей.</em>", fs: 38 }], talk: ["of"] },
+   B: { def: () => ({ bg: "detbyuro", farBlur: 3, mid: G("gf", 330, 1700, 900, {}, { armR: -150 }, { rim: "#ffd27a", side: 1, z: 7 }) + DESK(1560) + FOLDER(440, 1380), lights: DB_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "gf", html: "Дело<br><em>закрыто.</em>", fs: 56 }], talk: ["gf"] },
+   vo: "Лис: «Новую машину Ольга нашла через бота “Перехват”». Ольга: «Веста, один хозяин, ниже рынка на сто тысяч. И никаких карасей». Горохов: «Дело закрыто».", who: "Лис + Ольга + Горохов",
+   mv: "A — Ольга с телефоном: Lada Vesta в боте. B — <b>приём 4: папка «ДЕЛО № 70»</b> («Камри-утопленница · подозреваемый: Жора · улика: карась (живой)»), Горохов хлопает печатью «ЗАКРЫТО»." },
+ { h: "ФИНАЛ: ВЕСТА НА ПРИЧАЛЕ → БОТ", tc: "6/6 · 1:00–1:10",
+   A: { def: () => ({ bg: "prichaltuman", mid: SHORE(1420) + car(VES, 330, 1640, 700, { z: 5, sheen: .5 }) + O("oc", 200, 1860, 820, { armR: -150 }, { rim: "#ffffff", side: 1, z: 7 }) + G("gg", 900, 1860, 840, { look: "grin" }, { armL: 30 }, { rim: "#ffffff", side: -1, z: 7 }), lights: PR_L }), shot: { x: 540, y: 1150, s: 1.04 } },
+   B: { def: () => ({ bg: "detbyuro", over: CTA70, lights: DB_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Лис: «Не покупай утопленников: бот “Перехват” присылает хорошие машины ниже рынка через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Лис",
+   mv: "A — Ольга с Вестой у того же причала (туман рассеялся), Горохов приподнимает кепи. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
