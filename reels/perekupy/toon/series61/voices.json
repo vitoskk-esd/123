@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy noir parody: a private detective investigates a used Camry that turned out to have spent a month at the bottom of a river. Deadpan noir narration, like an old detective film. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.18,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: panicked, defensive, quick. Line 2: cheeky, salesman-like, proud of his excuse."
+ },
+ "gor": {
+  "voice": "Orus",
+  "tempo": 1.1,
+  "profile": "Gorokhov — a seasoned Russian private detective in his 50s, film-noir style: low, slow, raspy, dramatic, dead serious about absurd evidence.",
+  "notes": "Every line deadpan and dramatic, with noir pauses. Line 'Ил. Песок. И… карась. Живой.' — slow, each word separate. 'Дело закрыто.' — final, solemn."
+ },
+ "olga": {
+  "voice": "Leda",
+  "tempo": 1.12,
+  "profile": "Olga — a Russian woman around 35, the detective's client, emotional and expressive.",
+  "notes": "Line 1: worried, telling her story. Line 2: shocked, high. Line 3: happy, relieved, a bit ironic."
+ }
+}
