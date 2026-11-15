@@ -1,0 +1,20 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: a car flipper tries to dump his old car on his mother-in-law, but she inspects it like a pro and finds a better car through a bot. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Lines: 1 sweet-talking, overly generous salesman; 2 defensive, whiny; 3 tired, humble request."
+ },
+ "tesha": {
+  "voice": "Kore",
+  "tempo": 1.08,
+  "profile": "Zinaida Petrovna — a strict, sharp, experienced Russian mother-in-law in her 60s, former quality inspector; confident, dry humor, clear diction.",
+  "notes": "Lines: 1 matter-of-fact request; 2 suspicious; 3 verdict, precise and merciless; 4 calm, a little proud; 5 bossy; 6 dry deadpan punchline."
+ }
+}
