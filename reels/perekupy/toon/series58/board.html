@@ -34,7 +34,7 @@ const ST = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x,
 const GV_L = glow(885, 404, 220, "#ffd27a", .5);
 const BX_L = glow(540, 180, 380, "#fff6d0", .45);
 const YM_L = glow(760, 720, 300, "#fff6d0", .35);
-const needle = (html, id, deg) => html.replace(`id="${id}n" style="transform-origin:150px 160px;transform:rotate(-80deg)"`, `id="${id}n" style="transform-origin:150px 160px;transform:rotate(${deg}deg)"`);
+const needle = (html, id, deg) => html.replace(`id="${id}n" transform="rotate(-80 150 160)"`, `id="${id}n" transform="rotate(${deg} 150 160)"`);
 const S = [
  { h: "ОБЛОЖКА · СТАС С БОТОМ → ГСК «МОТОР»", tc: "1/6 · 0:00–0:12",
    A: { def: () => { const H = HOLDPHONE("perekup", "sp", 540, 2090, 1680, STAS, CAMCARD(), { rim: "#fff6d0", side: 1 });

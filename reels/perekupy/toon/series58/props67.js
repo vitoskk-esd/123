@@ -14,7 +14,7 @@ const MATOMETR = (x, y, id = "mm", s = 1) => `<div id="${id}" style="position:ab
   <div style="position:absolute;inset:0;background:#151515;border:6px solid #ffd23f;border-radius:${24 * s}px;box-shadow:0 ${8 * s}px 0 #000"></div>
   <svg viewBox="0 0 300 210" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
     <path d="M50 160 A100 100 0 0 1 110 70" stroke="#4cd964" stroke-width="26" fill="none"/><path d="M110 70 A100 100 0 0 1 190 70" stroke="#ffd23f" stroke-width="26" fill="none"/><path d="M190 70 A100 100 0 0 1 250 160" stroke="#ff3b30" stroke-width="26" fill="none"/>
-    <g id="${id}n" style="transform-origin:150px 160px;transform:rotate(-80deg)"><path d="M150 160 L150 62" stroke="#fff" stroke-width="9" stroke-linecap="round"/></g><circle cx="150" cy="160" r="14" fill="#fff" stroke="#151515" stroke-width="5"/>
+    <g id="${id}n" transform="rotate(-80 150 160)"><path d="M150 160 L150 62" stroke="#fff" stroke-width="9" stroke-linecap="round"/></g><circle cx="150" cy="160" r="14" fill="#fff" stroke="#151515" stroke-width="5"/>
     <text x="150" y="200" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="26" fill="#ffd23f">МАТ-О-МЕТР</text></svg></div>`;
 // приём 2 — толщиномер краски крупно: число #<id>v, вердикт #<id>s
 const GAUGE = (x, y, id = "tq", val = "120", st = "ЗАВОД", col = "#4cd964") => `<div id="${id}" style="position:absolute;left:${x}px;top:${y}px;width:340px;height:500px;z-index:40;transform:rotate(-8deg)">
@@ -40,8 +40,8 @@ const LAMP = (x, y, id = "lp", z = 30) => `<div id="${id}" style="position:absol
 // приём 4 — настенные часы для таймлапса «40 минут молча»: стрелки #<id>m и #<id>h
 const CLOCK = (x, y, id = "ck", r = 120) => `<div style="position:absolute;left:${x}px;top:${y}px;width:${2 * r}px;height:${2 * r}px;z-index:40"><svg viewBox="0 0 240 240" style="overflow:visible">
   <circle cx="120" cy="120" r="112" fill="#fbf6ec" stroke="#151515" stroke-width="10"/>${Array.from({ length: 12 }, (_, k) => `<path d="M120 22 V40" stroke="#151515" stroke-width="7" transform="rotate(${k * 30} 120 120)"/>`).join("")}
-  <g id="${id}h" style="transform-origin:120px 120px;transform:rotate(60deg)"><path d="M120 120 V70" stroke="#151515" stroke-width="12" stroke-linecap="round"/></g>
-  <g id="${id}m" style="transform-origin:120px 120px"><path d="M120 120 V36" stroke="#c0392b" stroke-width="8" stroke-linecap="round"/></g><circle cx="120" cy="120" r="10" fill="#151515"/></svg></div>`;
+  <g id="${id}h" transform="rotate(60 120 120)"><path d="M120 120 V70" stroke="#151515" stroke-width="12" stroke-linecap="round"/></g>
+  <g id="${id}m"><path d="M120 120 V36" stroke="#c0392b" stroke-width="8" stroke-linecap="round"/></g><circle cx="120" cy="120" r="10" fill="#151515"/></svg></div>`;
 // рассада Саныча: ящик со стаканчиками
 const SEEDS = (x, y, id = "sd", z = 12) => `<div id="${id}" style="position:absolute;left:${x}px;top:${y}px;width:300px;height:170px;z-index:${z}"><svg viewBox="0 0 300 170" style="overflow:visible">
   ${[30, 100, 170, 240].map((cx, k) => `<path d="M${cx} 90 q${k % 2 ? 10 : -12} -50 ${k % 2 ? -6 : 8} -80" stroke="#3f8a3a" stroke-width="7" fill="none"/><ellipse cx="${cx + (k % 2 ? -10 : 14)}" cy="${30 + k * 3}" rx="22" ry="11" fill="#4cd964" stroke="#151515" stroke-width="4"/><path d="M${cx - 26} 80 h52 l-8 50 h-36 z" fill="#ff7a1a" stroke="#151515" stroke-width="5"/>`).join("")}

@@ -27,7 +27,7 @@ const YM_L = glow(760, 720, 300, "#fff6d0", .35);
   mount("s1", { bg: "yamaboks", farBlur: 8, mid: H.mid, lights: H.lights + BX_L }, { x: 540, y: 960, s: 1 }); }
 // 2. въезд в ГСК: Гранта Жоры
 mount("s2", { bg: "gskvorota", mid: grp("gr2", car(GRS, 330, 1560, 700, { z: 5, sheen: .4 })) + Z("za", 190, 1820, 820, { look: "grin" }, { armR: -100 }, { rim: "#ffd27a", side: 1, z: 7 }) + G("ga", 870, 1790, 800, {}, { armL: 20 }, { rim: "#ffd27a", side: -1, z: 7 }), lights: GV_L,
-  bubbles: [{ id: "z0", p: "za", html: "Гаврилыч, глянь!<br><em>Взял за четыреста — подарок!</em>", fs: 38 }, { id: "v1", p: "ga", html: "Подарок, б**ть…<br><em>Ну, загоняй на яму.</em>", fs: 40 }] }, { x: 540, y: 1200, s: 1.04 });
+  bubbles: [{ id: "z0", p: "za", html: "Гаврилыч, глянь!<br><em>Взял за четыреста — подарок!</em>", fs: 38 }, { id: "v1", p: "ga", html: "Подарок, б**ть…<br><em>Ну, загоняй на яму.</em>", fs: 40 }] }, { x: 540, y: 1100, s: 1.04 });
 // 3. бокс: Гранта на яме, Гаврилыч в яме, мат-о-метр
 mount("s3", { bg: "yamaboks", mid: car(GRS, 380, 1500, 700, { z: 5, sheen: .4 }) + G("gb", 250, 2010, 960, {}, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + PITFRONT(1610), over: MATOMETR(740, 190, "mm1"), lights: BX_L }, { x: 540, y: 1200, s: 1.04 });
 // 4. вид из ямы: пена в порогах
@@ -41,7 +41,7 @@ mount("s6", { bg: "yamaboks", farBlur: 3, mid: G("gd", 320, 1920, 1000, {}, { ar
   bubbles: [{ id: "v3", p: "gd", html: "Родная? Девятьсот!<br><em>Шпаклёвки на палец, на**й!</em>", fs: 42 }] }, { x: 540, y: 1150, s: 1.04 });
 // 7. Саныч: рассада вянет
 mount("s7", { bg: "gskvorota", farBlur: 2, mid: SN("sa", 620, 1820, 880, {}, { armL: 60 }, { rim: "#ffd27a", side: -1, z: 7 }) + SEEDS(150, 1600), lights: GV_L,
-  bubbles: [{ id: "s0", p: "sa", html: "Гаврилыч, потише!<br><em>У меня рассада вянет!</em>", fs: 44 }] }, { x: 540, y: 1200, s: 1.05 });
+  bubbles: [{ id: "s0", p: "sa", html: "Гаврилыч, потише!<br><em>У меня рассада вянет!</em>", fs: 44 }] }, { x: 540, y: 1100, s: 1.05 });
 // 8. мат-о-метр крупно (Лис)
 mount("s8", { bg: "yamaboks", farBlur: 10, mid: MATOMETR(240, 720, "mm6", 2), lights: BX_L + glow(540, 940, 420, "#ff3b30", .25) }, { x: 540, y: 960, s: 1 });
 // 9. «п*здец на колёсах» + Жора
@@ -49,13 +49,13 @@ mount("s9", { bg: "yamaboks", farBlur: 3, mid: G("ge", 300, 1880, 920, {}, { arm
   bubbles: [{ id: "v4", p: "ge", html: "Одиннадцать косяков, Жора.<br><em>Это п*здец на колёсах.</em>", fs: 38 }, { id: "z2", p: "zc", html: "И что мне<br><em>теперь делать?..</em>", fs: 42 }] }, { x: 540, y: 1180, s: 1.04 });
 // 10. Стас на Камри
 mount("s10", { bg: "gskvorota", mid: grp("cm10", car(CAM, 40, 1600, 900, { z: 5, sheen: .5 })) + ST("sb", 900, 1850, 820, {}, { armL: 60 }, { rim: "#ffd27a", side: -1, z: 7 }) + Z("zd", 170, 1880, 760, { look: "o" }, {}, { z: 8 }), lights: GV_L,
-  bubbles: [{ id: "t1", p: "sb", html: "Гаврилыч, глянь мою Камри.<br><em>Через бота взял — ниже рынка.</em>", fs: 38 }] }, { x: 540, y: 1200, s: 1.04 });
+  bubbles: [{ id: "t1", p: "sb", html: "Гаврилыч, глянь мою Камри.<br><em>Через бота взял — ниже рынка.</em>", fs: 38 }] }, { x: 540, y: 1100, s: 1.04 });
 // 11. 40 минут молча: чистое днище, часы
 mount("s11", { bg: "podyamoy", mid: UNDER(false, "un2") + LAMP(760, 380, "lp2") + CLOCK(40, 1120, "ck", 110) + G("gf", 560, 2080, 1180, { look: "flat" }, {}, { rim: "#fff6d0", side: 1, z: 20 }), over: MATOMETR(740, 190, "mm5"), lights: YM_L,
   bubbles: [{ id: "v5", p: "gf", html: "Стас…<br><em>мне даже материться не на что.</em>", fs: 44 }] }, { x: 540, y: 1100, s: 1.04 });
 // 12. «впервые за сорок лет!» + Жора
 mount("s12", { bg: "gskvorota", farBlur: 2, mid: SN("sc", 290, 1840, 860, { look: "o" }, { armR: -140 }, { rim: "#ffd27a", side: 1, z: 7 }) + SEEDS(40, 1640, "sd2", 9) + Z("ze", 830, 1840, 860, {}, { armL: 50 }, { rim: "#ffd27a", side: -1, z: 7 }), lights: GV_L,
-  bubbles: [{ id: "s1", p: "sc", html: "Впервые<br><em>за сорок лет!</em>", fs: 44 }, { id: "z3", p: "ze", html: "Стас, скинь бота.<br><em>Срочно.</em>", fs: 42 }] }, { x: 540, y: 1200, s: 1.05 });
+  bubbles: [{ id: "s1", p: "sc", html: "Впервые<br><em>за сорок лет!</em>", fs: 44 }, { id: "z3", p: "ze", html: "Стас, скинь бота.<br><em>Срочно.</em>", fs: 42 }] }, { x: 540, y: 1100, s: 1.05 });
 // 13. карточка бота
 mount("s13", { bg: "yamaboks", over: CTA67.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), lights: BX_L }, { x: 540, y: 1000, s: .98 });
 
@@ -103,9 +103,15 @@ window.build = R => {
   const move = (n, to, at, d, ease = "power2.inOut") => tl.to(cam(n), { ...to, duration: d, ease }, at);
   const ids = E.lines.map(l => l.id), nxt = l => ids[ids.indexOf(l) + 1];
   const bub = (l, until) => pop("#b_" + l, st[l] - .05, until ?? Math.min(en[l] + .8, nxt(l) ? st[nxt(l)] - .1 : en[l] + 1));
-  const needle = (id, deg, at, d = .5, ease = "back.out(2)") => tl.to(`#${id}n`, { rotation: deg, duration: d, ease, transformOrigin: "150px 160px" }, at);
-  const jitter = (id, at, d) => tl.fromTo(`#${id}n`, { x: -2 }, { x: 2, duration: .05, yoyo: true, repeat: Math.round(d / .05), ease: "none", immediateRender: false }, at);
-  ["mm1", "mm2", "mm3", "mm4", "mm5", "mm6"].forEach(id => gsap.set(`#${id}n`, { rotation: -80, transformOrigin: "150px 160px" }));
+  // стрелки мат-о-метров и часов: угол в объекте, атрибут transform — в хуке (GSAP путает origin у SVG-групп)
+  const NA = Object.fromEntries(["mm1", "mm2", "mm3", "mm4", "mm5", "mm6"].map(id => [id, { a: -80, j: 0 }])), CKA = { m: 0, h: 60 };
+  const needle = (id, deg, at, d = .5, ease = "back.out(2)") => tl.to(NA[id], { a: deg, duration: d, ease }, at);
+  const jitter = (id, at, d) => tl.fromTo(NA[id], { j: -4 }, { j: 4, duration: .05, yoyo: true, repeat: Math.round(d / .05), ease: "none", immediateRender: false }, at).set(NA[id], { j: 0 }, at + d + .06);
+  R.hooks.push(() => {
+    for (const [id, v] of Object.entries(NA)) document.getElementById(id + "n")?.setAttribute("transform", `rotate(${(v.a + v.j).toFixed(2)} 150 160)`);
+    document.getElementById("ckm")?.setAttribute("transform", `rotate(${CKA.m.toFixed(1)} 120 120)`);
+    document.getElementById("ckh")?.setAttribute("transform", `rotate(${CKA.h.toFixed(1)} 120 120)`);
+  });
 
   // 1. обложка: плашка видна с первого кадра и гаснет к 1,6 с; карточка бота — с кадра 0
   gsap.set(SC.s1, { opacity: 1 }); SC.s1.style.display = "";
@@ -127,7 +133,7 @@ window.build = R => {
   cut("s4", "s5", st.z1 - .2); move("s5", { s: 1.16 }, st.z1 - .2, en.z1 - st.z1 + .4, "none"); bub("z1", st.v3 - .2);
   // 6. толщиномер: 110 → 340 → 900, «ЗАВОД» → «ШПАКЛЁВКА»
   const SW6 = st.v3 - .3; swap("s5", "s6", SW6); move("s6", { s: 1.1 }, SW6, en.v3 - SW6 + .4, "none"); bub("v3", st.s0 - .2);
-  const TQ = W("v3", "толщ"), T9 = W("v3", "девят");
+  const TQ = W("v3", "толщ"), T9 = Math.max(W("v3", "девят"), W("v3", "900"));
   tl.set("#tqv", { textContent: "340" }, TQ + .3).set("#tqv", { textContent: "620" }, (TQ + T9) / 2).set("#tqv", { textContent: "900" }, T9)
     .set("#tqs", { textContent: "ШПАКЛЁВКА", background: "#ff3b30", color: "#fff" }, T9);
   tl.fromTo("#tq", { scale: 1 }, { scale: 1.08, duration: .15, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, T9); R.sfx("bleep", T9, .15);
@@ -150,8 +156,7 @@ window.build = R => {
   // 11. 40 минут молча: часы крутятся, стрелка мат-о-метра на нуле
   const SW11 = st.l4 - .2; swap("s10", "s11", SW11); move("s11", { s: 1.12 }, SW11, en.v5 - SW11 + .5, "none");
   needle("mm5", -86, SW11, .01, "none");
-  tl.fromTo("#ckm", { rotation: 0 }, { rotation: 240, duration: en.l4 - st.l4 + .6, ease: "power1.inOut", transformOrigin: "120px 120px", immediateRender: false }, st.l4)
-    .fromTo("#ckh", { rotation: 60 }, { rotation: 80, duration: en.l4 - st.l4 + .6, ease: "power1.inOut", transformOrigin: "120px 120px", immediateRender: false }, st.l4);
+  tl.to(CKA, { m: 240, h: 80, duration: en.l4 - st.l4 + .6, ease: "power1.inOut" }, st.l4);
   for (let k = 0; k < 6; k++) R.sfx("tick", st.l4 + k * .35, .25);
   bub("v5", st.s1 - .2);
   // 12. «впервые за сорок лет!» → «скинь бота»

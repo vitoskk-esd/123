@@ -7,25 +7,25 @@
  },
  "zhora": {
   "voice": "Fenrir",
-  "tempo": 1.12,
+  "tempo": 1.18,
   "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
   "notes": "Lines: 1 proud, bragging about a bargain; 2 defensive, offended; 3 lost, quiet but clear; 4 urgent, decisive."
  },
  "gav": {
   "voice": "Gacrux",
-  "tempo": 1.1,
+  "tempo": 1.18,
   "profile": "Gavrilych — an old Russian garage mechanic in his 60s, forty years under cars, gruff husky voice, red-faced, swears a lot but in a funny, natural, folksy way. Adult street comedy, uncensored.",
   "notes": "Pronounce every swear word fully, clearly and naturally — do not soften, skip or bleep them. Lines 1–4: growing outrage, loud and juicy; line 5: stunned, quiet, almost tender deadpan after a pause."
  },
  "san": {
   "voice": "Iapetus",
-  "tempo": 1.1,
+  "tempo": 1.18,
   "profile": "Sanych — an elderly neighbour in the garage co-op, retired, grows seedlings, fussy, high nervous voice.",
   "notes": "Line 1: annoyed, shouting across the yard; line 2: amazed, joyful."
  },
  "stas": {
   "voice": "Zubenelgenubi",
-  "tempo": 1.12,
+  "tempo": 1.18,
   "profile": "Stas — a calm, confident young Russian used-car flipper in his 30s, a bit cheeky.",
   "notes": "One line: relaxed, proud, casual."
  }
