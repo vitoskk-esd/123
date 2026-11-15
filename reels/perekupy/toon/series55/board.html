@@ -1,0 +1,91 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props64.js"></script>
+<script>
+// «ТЁЩА: МАШИНА НА ДАЧУ» (киношный формат, отдельный ролик). За ужином тёща Зинаида Петровна просит Жору найти машину на дачу.
+// Жора хочет сбыть ей свою старую Приору «почти даром — за четыреста». Во дворе тёща надевает очки — «рентген»: пробег скручен, пороги в шпаклёвке.
+// В тетрадке у неё всё посчитано, а внук поставил ей бота: Нива 2019 за 590 при рынке 700, пришла через секунду. Через день — дача, Нива, рассада; Жора — грузчиком.
+// ОБЛОЖКА (кадр 0, правило владельца 15.11): тёща держит телефон с ботом + плашка «ТЁЩА: / МАШИНА НА ДАЧУ».
+// Приёмы (новые): «рентген» машины с метками дефектов; блик в очках; тетрадь с расчётами; рассада в багажник.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const TS = (p, x, foot, h, o = {}, pose = {}, extra = {}) => TSC(ch("vika", p, x, foot, h, null, pose, extra));
+const ZL_L = glow(540, 150, 300, "#fff6d0", .5) + glow(910, 860, 160, "#9fd6ff", .3);
+const DV_L = glow(900, 200, 380, "#fff6d0", .3);
+const DA_L = glow(880, 230, 360, "#fff6c8", .45);
+const S = [
+ { h: "ОБЛОЖКА · ТЁЩА С БОТОМ → УЖИН", tc: "1/6 · 0:00–0:11",
+   A: { def: () => { const H = HOLDPHONE("vika", "tp", 540, 2090, 1680, null, NVCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "zalteshi", grade: "warm", farBlur: 8, mid: TSC(H.mid), lights: H.lights + ZL_L, over: TITLE("ТЁЩА:", "МАШИНА НА ДАЧУ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "zalteshi", grade: "warm", mid: TS("ta", 300, 1650, 760, {}, { armR: -40 }, { rim: "#fff6d0", side: 1, z: 7 }) + Z("za", 790, 1660, 760, { look: "grin" }, {}, { rim: "#fff6d0", side: -1, z: 7 }) + DTABLE(9), lights: ZL_L }), shot: { x: 540, y: 1180, s: 1.06 },
+     bubbles: [{ p: "ta", html: "Жора, мне машину<br><em>на дачу надо.</em>", fs: 46 }], talk: ["ta"] },
+   vo: "Лис: «Воскресный ужин у тёщи. Зинаида Петровна решила купить машину». Тёща: «Жора, мне машину на дачу надо».", who: "Лис + тёща",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новая героиня — тёща Зинаида Петровна</b> (рыжая «хна», очки, сливовое пальто) держит телефон: в боте «Lada Niva Legend · 2019 · 590 000 ₽ · рынок ≈ 700 000 · 🔥 −16% · ⏱ 1 с»; плашка «ТЁЩА: / МАШИНА НА ДАЧУ». B — <b>новый фон — зал у тёщи</b> (ковёр на стене, сервант с хрусталём, люстра, телевизор с салфеткой); стол: оливье, селёдка под шубой, компот." },
+ { h: "«МОЯ ПРИОРА — ПОЧТИ ДАРОМ» → ДВОР", tc: "2/6 · 0:11–0:22",
+   A: { def: () => ({ bg: "zalteshi", grade: "warm", farBlur: 6, mid: Z("zb", 540, 1900, 1000, { look: "grin" }, { armL: 40 }, { rim: "#fff6d0", side: 1, z: 7 }), lights: ZL_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "zb", html: "Мама, моя Приора!<br><em>Почти даром — четыреста.</em>", fs: 44 }], talk: ["zb"] },
+   B: { def: () => ({ bg: "dvorteshi", grade: "day", mid: car(PRIORA, -20, 1680, 860, { z: 4, sheen: .5 }) + TS("tc", 880, 1760, 760, {}, { armR: -150 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: DV_L }), shot: { x: 540, y: 1200, s: 1.05 },
+     bubbles: [{ p: "tc", html: "Сейчас<br><em>посмотрим.</em>", fs: 50 }], talk: ["tc"] },
+   vo: "Жора: «Мама, зачем искать? Моя Приора! Почти даром — четыреста». Лис: «Во дворе тёща надела очки». Тёща: «Сейчас посмотрим».", who: "Жора + Лис + тёща",
+   mv: "A — Жора крупно, «щедро». B — <b>новый фон — двор хрущёвки</b> (лавочка, бельё на верёвке, клумба в шине, тополь): белая Приора Жоры, тёща поправляет очки." },
+ { h: "РЕНТГЕН ПРИОРЫ → «СТО ПЯТЬДЕСЯТ»", tc: "3/6 · 0:22–0:34",
+   A: { def: () => ({ far: XRAY(), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "dvorteshi", grade: "day", farBlur: 6, mid: TS("td", 540, 1900, 1000, {}, {}, { rim: "#fff6d0", side: 1, z: 7 }) + GLINT(540, 1900, 1000).replace("opacity:0", "opacity:1"), lights: DV_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "td", html: "Пробег скручен, пороги в шпаклёвке.<br><em>Сто пятьдесят, Жора.</em>", fs: 40 }], talk: ["td"] },
+   vo: "Лис: «Тёща сорок лет работала в техконтроле». Тёща: «Пробег скручен. Пороги в шпаклёвке. Крыло крашеное. Сто пятьдесят, Жора, не больше».", who: "Лис + тёща",
+   mv: "A — <b>приём 1: «рентген»</b>: Приора в негативе на синей сетке, по машине едет светящаяся линия сканирования (писк), красные кружки с метками: «ПРОБЕГ: 380 000 — а не 98 000», «ПОРОГИ — ШПАКЛЁВКА», «КРЫЛО КРАШЕНОЕ», «РЕМЕНЬ ГРМ — 2012 г.». B — <b>приём 2: блик в очках</b> — тёща крупно, линзы вспыхивают (дзынь)." },
+ { h: "ТЕТРАДКА → «МНЕ ВНУК БОТА ПОСТАВИЛ»", tc: "4/6 · 0:34–0:46",
+   A: { def: () => ({ far: NOTEBOOK(), farBlur: 0 }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => { const H = HOLDPHONE("vika", "te", 380, 1960, 1250, null, NVCARD().replace('id="ncc"', 'id="ncc2"'), { rim: "#fff6d0", side: 1 });
+       return { bg: "dvorteshi", grade: "day", farBlur: 5, mid: TSC(H.mid) + Z("ze", 860, 1800, 900, { look: "o" }, {}, { z: 5 }), lights: H.lights + DV_L }; }, shot: { x: 560, y: 1080, s: 1.05 },
+     bubbles: [{ p: "te", html: "Мне внук бота поставил.<br><em>Нива — пятьсот девяносто.</em>", fs: 40 }], talk: ["te"] },
+   vo: "Жора: «Мама, рынок сейчас такой!» Лис: «У тёщи всё записано». Тёща: «Мне внук бота поставил. Нива — пятьсот девяносто, рынок семьсот. Через секунду пришло».", who: "Жора + Лис + тёща",
+   mv: "A — <b>приём 3: тетрадь тёщи</b> в клетку: строки ручкой появляются по одной — «Машина на дачу · Нива 2019 — рынок 700 т. · Приора Жоры — 400? ❌ 150 · Бот: Нива 590 т. ✔ · Экономия: 110 т. → теплица» (скрип ручки). B — тёща показывает телефон, Жора за спиной с открытым ртом." },
+ { h: "ДАЧА: НИВА И РАССАДА", tc: "5/6 · 0:46–0:58",
+   A: { def: () => ({ bg: "dachaogorod", grade: "day", mid: car(NIVA, 20, 1640, 640, { z: 4, sheen: .5 }) + TS("tf", 860, 1760, 760, {}, { armR: -100 }, { rim: "#fff6d0", side: -1, z: 7 }) + Z("zf", 560, 1820, 800, { look: "o" }, { armL: 60, armR: -60 }, { rim: "#fff6d0", side: 1, z: 8 })
+       + `<div class="prop" style="left:465px;top:1440px;width:190px;height:122px;z-index:9">${SEEDBOX()}</div><div class="prop" style="left:475px;top:1345px;width:170px;height:110px;z-index:9">${SEEDBOX()}</div>`, lights: DA_L }), shot: { x: 540, y: 1200, s: 1.05 },
+     bubbles: [{ p: "tf", html: "Жора, аккуратнее!<br><em>Это помидоры!</em>", fs: 46 }], talk: ["tf"] },
+   B: { def: () => ({ bg: "dachaogorod", grade: "day", farBlur: 5, mid: Z("zg", 540, 1900, 1000, { look: "o" }, { armL: 60, armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + `<div class="prop" style="left:390px;top:1420px;width:300px;height:190px;z-index:9">${SEEDBOX()}</div>`, lights: DA_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "zg", html: "Мама…<br><em>а можно мне тоже бота?</em>", fs: 46 }], talk: ["zg"] },
+   vo: "Лис: «Через день тёща уже возила рассаду на Ниве. Жора — грузчиком». Тёща: «Жора, аккуратнее, это помидоры!» Жора: «Мама… а можно мне тоже бота?»", who: "Лис + тёща + Жора",
+   mv: "A — <b>новый фон — дача</b> (грядки, теплица с помидорами, штакетник, подсолнухи, бочка): салатовая Нива тёщи, <b>приём 4: рассада</b> — Жора тащит ящики к багажнику, ящики качаются. B — Жора крупно с ящиком рассады." },
+ { h: "«ВНУКА ПОПРОСИ» → ФИНАЛ: БОТ", tc: "6/6 · 0:58–1:10",
+   A: { def: () => ({ bg: "dachaogorod", grade: "day", farBlur: 3, mid: TS("th", 540, 1900, 1000, {}, { armL: 40 }, { rim: "#fff6d0", side: 1, z: 7 }) + GLINT(540, 1900, 1000, "gl2").replace("opacity:0", "opacity:1"), lights: DA_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "th", html: "Внука<br><em>попроси.</em>", fs: 56 }], talk: ["th"] },
+   B: { def: () => ({ bg: "dachaogorod", grade: "day", over: CTA64, lights: DA_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Тёща: «Внука попроси». Лис: «Бот «Перехват» освоила даже тёща: хорошие машины ниже рынка — через секунду после публикации, раньше перекупов». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Тёща + Лис",
+   mv: "A — тёща крупно, блик в очках. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
