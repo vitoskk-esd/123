@@ -168,11 +168,21 @@ def file_links(name: str, data: bytes) -> str:
     return " ".join(FILE_LINK.findall(text))
 
 
-async def _read_document(bot: Bot, doc) -> bytes:
-    import io
-    buf = io.BytesIO()
-    await bot.download(doc, destination=buf)
-    return buf.getvalue()
+async def _read_document(bot: Bot, doc, tries: int = 3, timeout: int = 90) -> bytes:
+    """Скачать файл из Telegram. По умолчанию aiogram ждёт 30 с и не повторяет — под нагрузкой (2500+ источников)
+    файл в 50 КБ упал с «Request timeout error» (владелец 15.11). Теперь: до 3 попыток по 90 с с паузой."""
+    import asyncio, io
+    err = None
+    for k in range(tries):
+        buf = io.BytesIO()
+        try:
+            await bot.download(doc, destination=buf, timeout=timeout)
+            return buf.getvalue()
+        except Exception as e:          # TelegramNetworkError / TimeoutError — повторяем
+            err = e
+            log.warning("файл %s: попытка %d из %d не удалась: %s", getattr(doc, "file_name", "?"), k + 1, tries, e)
+            await asyncio.sleep(2 + 3 * k)
+    raise err
 
 
 @router.message(F.document)

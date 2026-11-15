@@ -2304,3 +2304,35 @@ async def test_admin_sends_file_with_links(env, monkeypatch):
     n = len(s.texts(USER))
     await dp.feed_update(bot, doc_msg(USER))
     assert not any("ссылок" in t for t in s.texts(USER)[n:]) and len(await ctx.db.queued_channels("vk")) == 2
+
+
+def test_read_document_retries_on_timeout(monkeypatch):
+    """Владелец 15.11: файл со ссылками (53 КБ) — «Не смог прочитать файл: HTTP Client says - Request timeout error».
+    Скачивание повторяется (до 3 раз, по 90 с), первая неудача не роняет загрузку."""
+    import admin
+    monkeypatch.setattr(asyncio, "sleep", lambda *_: _noop())    # без пауз между попытками
+    calls = []
+
+    class FakeBot:
+        async def download(self, doc, destination, timeout):
+            calls.append(timeout)
+            if len(calls) == 1:
+                raise TimeoutError("Request timeout error")
+            destination.write(b"t.me/abc vk.com/club1")
+
+    class Doc:
+        file_name = "links.txt"
+
+    data = asyncio.run(admin._read_document(FakeBot(), Doc()))
+    assert data == b"t.me/abc vk.com/club1" and calls == [90, 90]
+
+    class DeadBot:
+        async def download(self, doc, destination, timeout):
+            raise TimeoutError("Request timeout error")
+
+    with pytest.raises(TimeoutError):
+        asyncio.run(admin._read_document(DeadBot(), Doc()))
+
+
+async def _noop():
+    return None
