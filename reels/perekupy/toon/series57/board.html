@@ -1,0 +1,94 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props66.js"></script>
+<script>
+// «МУЗЕЙ: ПЕРЕКУП ОБЫКНОВЕННЫЙ» (киношный формат, отдельный ролик). 2040 год, школьная экскурсия в музей автоторговли: зал «Как покупали машины раньше».
+// Витрина: газета объявлений, пейджер, дисковый телефон — школьник Тимур: «А зачем? Бот же присылает за секунду!». ВАЗ-2105 «пробег скручивали 4 раза».
+// Главный экспонат — восковой «Перекуп обыкновенный» в диораме «Рынок в 5 утра». Фигура моргает — это живой Жора. «Пацан, а что за бот?» → сигнализация.
+// ОБЛОЖКА (кадр 0, правило владельца 15.11): Тимур держит телефон с ботом (Vesta EV 2037) + плашка «МУЗЕЙ: / ПЕРЕКУП ОБЫКНОВЕННЫЙ».
+// Приёмы (новые): витрина с экспонатами и латунными табличками; восковая фигура моргает и оживает; бархатный канат; сигнализация.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const ZW = (p, x, foot, h, o = {}, pose = {}, extra = {}) => Z(p, x, foot, h, o, pose, { ...extra, style: WAX });
+const K1 = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...KID, ...o }, pose, extra);
+const K2 = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...KID2, ...o }, pose, extra);
+const GD = (p, x, foot, h, pose = {}, extra = {}) => GRC(ch("vika", p, x, foot, h, null, pose, extra));
+const MZ_L = glow(180, 300, 260, "#fff6d0", .35) + glow(540, 300, 300, "#fff6d0", .4) + glow(900, 300, 260, "#fff6d0", .35);
+const DI_L = glow(150, 690, 200, "#ffd27a", .5) + glow(930, 690, 200, "#ffd27a", .5);
+const MV_L = glow(540, 200, 380, "#fff6d0", .3);
+const S = [
+ { h: "ОБЛОЖКА · ШКОЛЬНИК С БОТОМ → ЭКСКУРСИЯ", tc: "1/6 · 0:00–0:11",
+   A: { def: () => { const H = HOLDPHONE("perekup", "kp", 540, 2090, 1680, KID, KDCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "muzeyzal", farBlur: 8, mid: H.mid, lights: H.lights + MZ_L, over: TITLE("МУЗЕЙ:", "ПЕРЕКУП ОБЫКНОВЕННЫЙ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "muzeyvhod", grade: "day", mid: GD("ga", 260, 1760, 820, { armR: -100 }, { rim: "#fff6d0", side: 1, z: 7 }) + K1("ka", 620, 1820, 600, {}, {}, { z: 7 }) + K2("kb", 800, 1830, 580, {}, {}, { z: 7 }) + ch("perekup", "kc", 960, 1840, 560, { jacket: "#7a3aa8", pants: "#2b2f37", hair: "#8a5a33", look: "grin" }, {}, { z: 7 }), lights: MV_L }), shot: { x: 540, y: 1200, s: 1.05 },
+     bubbles: [{ p: "ga", html: "Дети, сегодня зал<br><em>«Как покупали машины раньше».</em>", fs: 40 }], talk: ["ga"] },
+   vo: "Лис: «Две тысячи сороковой год. Школьная экскурсия в музей автоторговли». Экскурсовод: «Дети, сегодня зал “Как покупали машины раньше”».", who: "Лис + экскурсовод",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новый герой — школьник Тимур</b> держит телефон: в боте «Lada Vesta EV · 2037 · 990 000 ₽ · рынок ≈ 1 200 000 · 🔥 −17% · ⏱ 1 с»; плашка «МУЗЕЙ: / ПЕРЕКУП ОБЫКНОВЕННЫЙ». B — <b>новый фон — вход в музей</b> (колонны, баннер «МУЗЕЙ АВТОТОРГОВЛИ», жёлтый автобус «ДЕТИ»); <b>новая героиня — экскурсовод Ирина Сергеевна</b> и школьники." },
+ { h: "ВИТРИНА: ГАЗЕТА, ПЕЙДЖЕР, ТЕЛЕФОН → «А ЗАЧЕМ?»", tc: "2/6 · 0:11–0:22",
+   A: { def: () => ({ bg: "muzeyzal", farBlur: 2, mid: SHOWCASE(20, 980, 820) + PLAQUE(110, 1540, 640, "ПОИСК МАШИНЫ, 2005 г.", "газета · пейджер · проводной телефон") + GD("gb", 975, 1900, 780, { armL: 60 }, { rim: "#fff6d0", side: -1, z: 9 }), lights: MZ_L + glow(540, 1150, 360, "#fff6d0", .45) }), shot: { x: 540, y: 1200, s: 1.05 },
+     bubbles: [{ p: "gb", html: "Машины искали в газете<br><em>и звонили по проводному телефону.</em>", fs: 38 }], talk: ["gb"] },
+   B: { def: () => ({ bg: "muzeyzal", farBlur: 6, mid: K1("kd", 540, 1900, 1000, {}, { armL: 40 }, { rim: "#fff6d0", side: 1, z: 7 }), lights: MZ_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "kd", html: "А зачем?<br><em>Бот же присылает за секунду!</em>", fs: 46 }], talk: ["kd"] },
+   vo: "Экскурсовод: «Машины искали в газете и звонили по проводному телефону». Тимур: «А зачем? Бот же присылает за секунду!»", who: "Экскурсовод + Тимур",
+   mv: "A — <b>новый фон — зал музея</b> (колонны, прожекторы, паркет «ёлочкой», вывеска «КАК ПОКУПАЛИ МАШИНЫ · 1995–2025»); <b>приём 1: витрина</b> под лучом прожектора — газета «ОБЪЯВЛЕНИЯ», пейджер «ПРОДАН», дисковый телефон; латунная табличка. B — Тимур крупно, искренне не понимает." },
+ { h: "ВАЗ-2105 НА ПОДИУМЕ → ДИОРАМА «РЫНОК В 5 УТРА»", tc: "3/6 · 0:22–0:34",
+   A: { def: () => ({ bg: "muzeyzal", farBlur: 2, mid: car(V05, 140, 1600, 800, { z: 4, sheen: .5 }) + `<div style="position:absolute;left:100px;top:1590px;width:880px;height:90px;z-index:3;background:#2b2f37;border:7px solid #151515;border-radius:12px"></div>` + PLAQUE(220, 1720, 640, "МАШИНА ПЕРЕКУПА · ВАЗ-2105", "пробег скручивали 4 раза") + ROPE(110, 970, 1560) + GD("gc", 900, 1880, 760, { armR: -100 }, { rim: "#fff6d0", side: -1, z: 11 }), lights: MZ_L }), shot: { x: 540, y: 1250, s: 1.04 },
+     bubbles: [{ p: "gc", html: "А это — машина перекупа.<br><em>Пробег скручивали четыре раза.</em>", fs: 38 }], talk: ["gc"] },
+   B: { def: () => ({ bg: "diorama", farBlur: 1, mid: ZW("zw", 540, 1700, 900, { look: "flat" }, { armL: 30, armR: -40 }, { z: 7 }) + ROPE(140, 940, 1700) + PLAQUE(190, 1800, 700, "ПЕРЕКУП ОБЫКНОВЕННЫЙ", "вставал в 5 утра · торговался до хрипоты"), lights: DI_L }), shot: { x: 540, y: 1200, s: 1.04 } },
+   vo: "Экскурсовод: «А это — машина перекупа. Пробег скручивали четыре раза». Лис: «Главный экспонат — восковой перекуп обыкновенный. В диораме “Рынок в пять утра”».", who: "Экскурсовод + Лис",
+   mv: "A — бежевая «пятёрка» на подиуме за бархатным канатом, табличка «пробег скручивали 4 раза». B — <b>новый фон — диорама «Рынок в 5 утра»</b> (сумерки, туман, ряды машин, фонари, палатка «ЧАЙ»): <b>восковой Жора</b> (тёплый «восковой» оттенок, застывшая поза) за канатом, табличка «ПЕРЕКУП ОБЫКНОВЕННЫЙ»." },
+ { h: "ФИГУРА МОРГНУЛА → «ПАЦАН, А ЧТО ЗА БОТ?»", tc: "4/6 · 0:34–0:46",
+   A: { def: () => ({ bg: "diorama", farBlur: 2, mid: ZW("zx", 640, 1800, 1000, { look: "flat" }, {}, { z: 6 }) + BLINK(640, 1800, 1000, "bl1").replace("opacity:0", "opacity:1") + K2("ke", 230, 1960, 760, {}, { armR: -110 }, { rim: "#ffd27a", side: 1, z: 9 }), lights: DI_L }), shot: { x: 540, y: 1150, s: 1.06 },
+     bubbles: [{ p: "ke", html: "Он<br><em>моргнул!</em>", fs: 56 }], talk: ["ke"] },
+   B: { def: () => ({ bg: "diorama", farBlur: 4, mid: ZW("zy", 540, 1900, 1000, { look: "o" }, { armR: -70 }, { z: 7 }), lights: DI_L }), shot: { x: 540, y: 1150, s: 1.1 },
+     bubbles: [{ p: "zy", html: "Пацан…<br><em>а что за бот?</em>", fs: 54 }], talk: ["zy"] },
+   vo: "Петя: «Он моргнул!» Лис: «Экспонат оказался живым. Жора работает в музее уже пять лет». Жора: «Пацан… а что за бот?»", who: "Петя + Лис + Жора",
+   mv: "A — <b>приём 2: фигура оживает</b>: крупно восковой Жора — пауза, тишина, веки опускаются и поднимаются (щелчок), школьник Петя показывает пальцем. B — фигура поворачивает голову и говорит (оттенок воска понемногу уходит)." },
+ { h: "БОТ У ТИМУРА → «ЭКСПОНАТЫ РУКАМИ НЕ ТРОГАТЬ!»", tc: "5/6 · 0:46–0:58",
+   A: { def: () => { const H = HOLDPHONE("perekup", "kf", 380, 1960, 1250, KID, KDCARD().replace('id="kcc"', 'id="kcc2"'), { rim: "#ffd27a", side: 1 });
+       return { bg: "diorama", farBlur: 5, mid: H.mid + Z("zz", 860, 1800, 900, { look: "o" }, { armR: -100 }, { z: 5 }) + ROPE(640, 1080, 1560, 6), lights: H.lights + DI_L }; }, shot: { x: 560, y: 1080, s: 1.05 },
+     bubbles: [{ p: "kf", html: "Вот — Веста ниже рынка.<br><em>Через секунду пришла.</em>", fs: 42 }], talk: ["kf"] },
+   B: { def: () => ({ bg: "muzeyzal", farBlur: 3, mid: GD("gg", 300, 1820, 860, { armR: -150 }, { rim: "#ff3b30", side: 1, z: 7 }) + Z("zg", 800, 1820, 880, { look: "o" }, { armL: 60 }, { rim: "#ff3b30", side: -1, z: 7 }) + ROPE(560, 1060, 1500, 9), over: ALARM(475, 330).replace("opacity:0;background", "opacity:1;background"), lights: MZ_L }), shot: { x: 540, y: 1180, s: 1.05 },
+     bubbles: [{ p: "gg", html: "Экспонаты<br><em>руками не трогать!</em>", fs: 48 }], talk: ["gg"] },
+   vo: "Тимур: «Вот — Веста ниже рынка. Через секунду пришла». Лис: «Жора полез через канат». Экскурсовод: «Экспонаты руками не трогать!»", who: "Тимур + Лис + экскурсовод",
+   mv: "A — Тимур показывает телефон, Жора тянется через канат. B — <b>приём 3: сигнализация</b> — красный маячок крутится, края кадра мигают красным (сирена), экскурсовод воздевает руки, Жора перелез через канат." },
+ { h: "«НАДО БЫЛО БОТА ПОСТАВИТЬ» → ФИНАЛ: БОТ", tc: "6/6 · 0:58–1:10",
+   A: { def: () => ({ bg: "muzeyzal", farBlur: 4, mid: Z("zh", 540, 1900, 1000, { look: "o" }, { armL: 40 }, { rim: "#ff3b30", side: 1, z: 7 }), over: ALARM(800, 330, "al2").replace("opacity:0;background", "opacity:.6;background"), lights: MZ_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "zh", html: "Тридцать лет простоял…<br><em>надо было бота поставить.</em>", fs: 42 }], talk: ["zh"] },
+   B: { def: () => ({ bg: "muzeyzal", over: CTA66, lights: MZ_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Жора: «Тридцать лет на рынке простоял… надо было бота поставить». Лис: «Не становись экспонатом: бот «Перехват» присылает хорошие машины ниже рынка через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Жора + Лис",
+   mv: "A — Жора крупно под мигание сигнализации, грустно. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>

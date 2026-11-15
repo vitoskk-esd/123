@@ -1,0 +1,20 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="mv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ccdf2"/><stop offset="1" stop-color="#dff0fa"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#mv)"/>
+    <!-- фронтон и колонны -->
+    <path d="M60 520 L540 300 L1020 520 Z" fill="#f4f0e8" stroke="#000" stroke-width="7"/>
+    <rect x="60" y="520" width="960" height="60" fill="#e0d8c8" stroke="#000" stroke-width="6"/>
+    <rect x="110" y="580" width="70" height="520" fill="#f4f0e8" stroke="#b9b0a0" stroke-width="5"/><rect x="300" y="580" width="70" height="520" fill="#f4f0e8" stroke="#b9b0a0" stroke-width="5"/><rect x="710" y="580" width="70" height="520" fill="#f4f0e8" stroke="#b9b0a0" stroke-width="5"/><rect x="900" y="580" width="70" height="520" fill="#f4f0e8" stroke="#b9b0a0" stroke-width="5"/>
+    <rect x="400" y="640" width="280" height="460" fill="#6b4423" stroke="#000" stroke-width="7"/>
+    <rect x="160" y="400" width="760" height="90" rx="10" fill="#c0392b" stroke="#000" stroke-width="6" transform="translate(0 -20)"/>
+    <text x="540" y="450" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="42" fill="#fff">МУЗЕЙ АВТОТОРГОВЛИ</text>
+    <!-- ступени -->
+    <rect x="100" y="1100" width="880" height="30" fill="#d8d2c4" stroke="#b9b0a0" stroke-width="4"/><rect x="70" y="1130" width="940" height="30" fill="#d8d2c4" stroke="#b9b0a0" stroke-width="4"/><rect x="40" y="1160" width="1000" height="30" fill="#d8d2c4" stroke="#b9b0a0" stroke-width="4"/><rect x="10" y="1190" width="1060" height="30" fill="#d8d2c4" stroke="#b9b0a0" stroke-width="4"/>
+    <!-- деревья -->
+    <path d="M20 1260 V960" stroke="#5a3820" stroke-width="20"/><circle cx="20" cy="900" r="100" fill="#4a8a3a" stroke="#000" stroke-width="6"/><path d="M1060 1260 V960" stroke="#5a3820" stroke-width="20"/><circle cx="1060" cy="900" r="100" fill="#4a8a3a" stroke="#000" stroke-width="6"/>
+    <!-- площадь и автобус -->
+    <rect y="1220" width="1080" height="700" fill="#b8b4ac"/><path d="M0 1220 H1080" stroke="#000" stroke-width="7"/>
+    <rect x="560" y="1300" width="560" height="220" rx="24" fill="#ffd23f" stroke="#000" stroke-width="7"/><rect x="590" y="1330" width="90" height="80" fill="#a8cfe8" stroke="#000" stroke-width="4"/><rect x="700" y="1330" width="90" height="80" fill="#a8cfe8" stroke="#000" stroke-width="4"/><rect x="810" y="1330" width="90" height="80" fill="#a8cfe8" stroke="#000" stroke-width="4"/><rect x="920" y="1330" width="90" height="80" fill="#a8cfe8" stroke="#000" stroke-width="4"/><rect x="1030" y="1330" width="90" height="80" fill="#a8cfe8" stroke="#000" stroke-width="4"/>
+    <text x="820" y="1470" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="38" fill="#151515">ДЕТИ</text>
+    <circle cx="660" cy="1520" r="46" fill="#151515" stroke="#5b6670" stroke-width="12"/><circle cx="1000" cy="1520" r="46" fill="#151515" stroke="#5b6670" stroke-width="12"/>
+  </svg>
