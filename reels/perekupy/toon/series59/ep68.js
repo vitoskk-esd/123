@@ -33,7 +33,7 @@ mount("s2", { bg: "avtodrom", mid: grp("c2", car(V10, 300, 1560, 640, { z: 5, sh
 mount("s3", { bg: "avtodrom", farBlur: 2, farFilter: "sepia(.35)", mid: car(V10, 260, 1600, 700, { z: 5, sheen: .4 }) + NEWTAG(560, 1330) + Z("za", 180, 1880, 860, { look: "grin" }, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }), lights: AD_L }, { x: 540, y: 1180, s: 1.05 });
 // 4. салон: руль в руках
 mount("s4", { bg: "uchebka", mid: CAB("tb", "kb", { armR: -30 }, { armL: -60, armR: -60 }, { look: "o" }) + WHEEL(790, 1430, "wh", 300) + DASH(760, "ds", false) + JAR(420, 1190, "jar", 4, "0 ₽"), lights: UC_L,
-  bubbles: [{ id: "k1", p: "kb", html: "А руль так и должен…<br><em>отваливаться?</em>", fs: 40 }, { id: "t1", p: "tb", html: "Ёпт… Спокойно, Кирюша.<br><em>Х*йня вопрос.</em>", fs: 40 }] }, { x: 540, y: 1150, s: 1.04 });
+  bubbles: [{ id: "k1", p: "kb", html: "А руль так и должен…<br><em>отваливаться?</em>", fs: 40 }, { id: "t1", p: "tb", html: "Ё* твою налево…<br><em>Спокойно. Х*йня вопрос.</em>", fs: 40 }] }, { x: 540, y: 1150, s: 1.04 });
 // 5. вставка: вторая педаль
 mount("s5", { bg: "uchebka", farBlur: 10, mid: PEDAL("pd") }, { x: 540, y: 960, s: 1 });
 // 6. паника: «тормози!»
@@ -124,7 +124,7 @@ window.build = R => {
   const SW4 = st.k1 - .3; swap("s3", "s4", SW4); move("s4", { s: 1.1 }, SW4, en.t1 - SW4 + .4, "none");
   tl.fromTo("#wh", { y: -60, rotation: 0 }, { y: 0, rotation: -14, duration: .5, ease: "bounce.out", immediateRender: false }, Wd("k1", "отвал", .7)); R.sfx("clack", Wd("k1", "отвал", .7), .6);
   bub("k1", st.t1 - .1); bub("t1", st.l2 - .2);
-  coin("jar", 12, "50 ₽", Wd("t1", "еп", .05) + .25); coin("jar", 20, "100 ₽", Wd("t1", "ху", .85) + .3);
+  coin("jar", 12, "50 ₽", Wd("t1", "еб", .05) + .25); coin("jar", 20, "100 ₽", Wd("t1", "ху", .85) + .3);
   // 5. вставка: туфля жмёт педаль — педаль отламывается
   cut("s4", "s5", st.l2 - .2); move("s5", { s: 1.08 }, st.l2 - .2, en.l2 - st.l2 + .4, "none");
   const BR = Wd("l2", "отлом", .4);
