@@ -1,0 +1,20 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: a car flipper doubles prices for Black Friday and gets outsmarted by an accountant with a bot. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Lines: 1 loud showman sales pitch; 2 sly whisper, proud of the trick; 3 nervous excuse; 4 pleading; 5 panicked shout; 6 tired, resigned."
+ },
+ "marina": {
+  "voice": "Despina",
+  "tempo": 1.1,
+  "profile": "Marina — a precise, calm, ironic Russian accountant in her 30s, glasses; polite, dry, very clear diction.",
+  "notes": "Lines: 1 polite, businesslike; 2 calm verdict, slightly ironic; 3 matter-of-fact, confident; 4 calm punchline, a little smile."
+ }
+}
