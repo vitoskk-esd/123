@@ -28,7 +28,7 @@ const MV_L = glow(540, 200, 380, "#fff6d0", .3);
 // 2. вход в музей
 mount("s2", { bg: "muzeyvhod", grade: "day", mid: GD("ga", 260, 1760, 820, { armR: -100 }, { rim: "#fff6d0", side: 1, z: 7 }) + K1("ka", 620, 1820, 600, {}, {}, { z: 7 }) + K2("kb", 800, 1830, 580, {}, {}, { z: 7 })
   + ch("perekup", "kc", 960, 1840, 560, { jacket: "#7a3aa8", pants: "#2b2f37", hair: "#8a5a33", look: "grin" }, {}, { z: 7 }), lights: MV_L,
-  bubbles: [{ id: "g1", p: "ga", html: "Дети, сегодня зал<br><em>«Как покупали машины раньше».</em>", fs: 40 }, { id: "p0", p: "kb", html: "А там что —<br><em>газеты?!</em>", fs: 44 }] }, { x: 540, y: 1200, s: 1.05 });
+  bubbles: [{ id: "g1", p: "ga", html: "Дети, сегодня зал о том,<br><em>как раньше покупали машины.</em>", fs: 40 }, { id: "p0", p: "kb", html: "А там что —<br><em>газеты?!</em>", fs: 44 }] }, { x: 540, y: 1200, s: 1.05 });
 // 3. витрина
 mount("s3", { bg: "muzeyzal", farBlur: 2, mid: SHOWCASE(20, 980, 820) + PLAQUE(110, 1540, 640, "ПОИСК МАШИНЫ, 2005 г.", "газета · пейджер · проводной телефон") + GD("gb", 975, 1900, 780, { armL: 60 }, { rim: "#fff6d0", side: -1, z: 9 }),
   lights: MZ_L + glow(430, 1150, 360, "#fff6d0", .45), bubbles: [{ id: "g2", p: "gb", html: "Машины искали в газете<br><em>и звонили по проводному телефону.</em>", fs: 38 }] }, { x: 540, y: 1200, s: 1.05 });
@@ -57,7 +57,7 @@ mount("s10", { bg: "muzeyzal", farBlur: 3, mid: GD("gg", 300, 1820, 860, { armR:
   over: ALARM(475, 330, "al"), lights: MZ_L, bubbles: [{ id: "g4", p: "gg", html: "Экспонаты<br><em>руками не трогать!</em>", fs: 48 }] }, { x: 540, y: 1180, s: 1.05 });
 // 11. «надо было бота поставить» → «Жора, на место!»
 mount("s11", { bg: "muzeyzal", farBlur: 4, mid: Z("zh", 540, 1900, 1000, { look: "o" }, { armL: 40 }, { rim: "#ff3b30", side: 1, z: 7 }), over: ALARM(800, 330, "al2"), lights: MZ_L,
-  bubbles: [{ id: "z2", p: "zh", html: "Тридцать лет простоял…<br><em>надо было бота поставить.</em>", fs: 42 }] }, { x: 540, y: 1150, s: 1.08 });
+  bubbles: [{ id: "z2", p: "zh", html: "Тридцать лет на рынке простоял…<br><em>надо было бота поставить.</em>", fs: 40 }] }, { x: 540, y: 1150, s: 1.08 });
 mount("s11b", { bg: "muzeyzal", farBlur: 3, mid: GD("gh", 300, 1820, 860, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + ZW("zj", 800, 1820, 880, { look: "flat" }, {}, { z: 7 }) + ROPE(560, 1060, 1500, 9), lights: MZ_L,
   bubbles: [{ id: "g5", p: "gh", html: "Жора, на место!<br><em>Экскурсия не закончена!</em>", fs: 44 }] }, { x: 540, y: 1180, s: 1.05 });
 // 12. карточка бота
