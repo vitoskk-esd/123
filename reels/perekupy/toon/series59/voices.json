@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone adult comedy episode: a refined, intelligent elderly driving instructor swears casually and naturally while teaching. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.18,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "One line: cheerful, cheeky, salesman-like."
+ },
+ "tamara": {
+  "voice": "Kore",
+  "tempo": 1.12,
+  "profile": "Tamara Pavlovna — a refined, intelligent Russian woman in her 60s, driving instructor with 20 years of experience, soft polite teacher's voice, calm and caring. She swears casually and naturally, in the same gentle tone, as if it were ordinary speech — this contrast is the joke. Adult comedy, uncensored.",
+  "notes": "Pronounce every swear word fully, clearly and naturally in the flow of speech — never bleep, soften or skip it, never shout it as a separate word. Line 1: sweet, polite. Line 2: calm, soothing, matter-of-fact. Line 3: panicked shouting. Line 4: calm again, adjusting her glasses. Line 5: sweet smile, polite, then the swear as gentle as a blessing. Line 6: amazed, quietly delighted. Line 7: dry, warm."
+ },
+ "kirill": {
+  "voice": "Achird",
+  "tempo": 1.15,
+  "profile": "Kirill — a nervous, polite young Russian driving student around 18, slightly high voice.",
+  "notes": "Line 1: shy, polite. Line 2: hesitant, scared. Line 3: panicked long yell. Line 4: amazed, cheerful."
+ }
+}
