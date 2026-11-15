@@ -65,7 +65,12 @@ for n in range(int(DUR * FPS)):
     ov.stdin.write(im.tobytes())
 ov.stdin.close(); ov.wait()
 
-subprocess.run(["python3", os.path.join(K, "piano.py"), str(DUR + 0.5), f"{D}/music.wav"], check=True)
+MUSIC = C.get("music")                                 # готовый трек (путь от папки ролика) или своя фортепианная подложка
+if MUSIC:
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(C.get("music_start", 0)), "-i", os.path.join(D, MUSIC), "-t", str(DUR + 0.5),
+                    "-af", "afade=t=in:d=0.4", "-ar", "48000", "-ac", "2", f"{D}/music.wav"], check=True)
+else:
+    subprocess.run(["python3", os.path.join(K, "piano.py"), str(DUR + 0.5), f"{D}/music.wav"], check=True)
 src = os.path.join(D, C["src"]); fy = C.get("focus_y", 0.45)
 # видео: вертикальный кадр с медленным наездом; bw — ч/б, полосы сверху/снизу (видимая часть 1080×1150)
 zoom = f"scale=w='{W}*(1.0+0.07*t/{SPEECH:.2f})':h=-2:eval=frame,crop={W}:{H}"
@@ -81,7 +86,7 @@ else:
 src_a = ["-ss", str(A), "-t", str(SPEECH + 0.3), "-i", src]
 subprocess.run(["ffmpeg", "-v", "error", "-y", *src_a, "-af", f"atrim=duration={SPEECH:.3f},highpass=f=70,acompressor=threshold=-20dB:ratio=2.5,"
                 f"afade=t=out:st={SPEECH-0.15:.3f}:d=0.15,loudnorm=I=-14:TP=-1.5,aresample=48000", "-ac", "2", f"{D}/voice.wav"], check=True)
-subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{D}/music.wav", "-af", f"atrim=duration={DUR},loudnorm=I=-29:TP=-8,aresample=48000,"
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{D}/music.wav", "-af", f"atrim=duration={DUR},loudnorm=I={C.get('music_lufs', -24)}:TP=-6,aresample=48000,"
                 f"afade=t=out:st={DUR-1.2:.2f}:d=1.2", "-ac", "2", f"{D}/music_n.wav"], check=True)
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{D}/voice.wav", "-i", f"{D}/music_n.wav", "-filter_complex",
                 "[0:a][1:a]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.89[a]", "-map", "[a]", f"{D}/mix.wav"], check=True)
