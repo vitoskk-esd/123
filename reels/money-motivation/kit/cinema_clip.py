@@ -20,16 +20,17 @@ words = []
 for line in open(os.path.join(D, C["words"]), encoding="utf-8"):
     p = line.strip().split("\t")
     if len(p) == 2 and A - 0.05 <= float(p[0]) < B: words.append((float(p[0]) - A, p[1]))
-for i, (s, w) in enumerate(C.get("fix", {}).items()): pass
 fix = {int(k): v for k, v in C.get("fix", {}).items()}
-words = [(t, fix.get(i, w)) for i, (t, w) in enumerate(words) if fix.get(i, w) != ""]
+BREAKS = set(C.get("breaks", []))                     # ручная разбивка: индексы (исходные) последних слов фраз
+words = [(t, fix.get(i, w), i) for i, (t, w) in enumerate(words)]
 chunks, cur = [], []
-for i, (t, w) in enumerate(words):
-    cur.append((t, w))
-    nxt = words[i + 1][0] if i + 1 < len(words) else SPEECH
-    if re.search(r"[.,:;!?…—]$", w) or len(cur) >= 3 or nxt - t > 1.1:
-        chunks.append(cur); cur = []
+for k, (t, w, i) in enumerate(words):
+    if w != "": cur.append((t, w))
+    nxt = words[k + 1][0] if k + 1 < len(words) else SPEECH
+    end = (i in BREAKS) if BREAKS else (re.search(r"[.,:;!?…—]$", w) or len(cur) >= 3 or nxt - t > 1.1)
+    if end and cur: chunks.append(cur); cur = []
 if cur: chunks.append(cur)
+words = [(t, w) for t, w, _ in words if w != ""]
 merged = []                                            # слишком короткая фраза (< 0.4 с) — склеиваем со следующей
 for k, ch in enumerate(chunks):
     nxt = chunks[k + 1][0][0] if k + 1 < len(chunks) else SPEECH
@@ -74,7 +75,12 @@ else:
 src = os.path.join(D, C["src"]); fy = C.get("focus_y", 0.45)
 # видео: вертикальный кадр с медленным наездом; bw — ч/б, полосы сверху/снизу (видимая часть 1080×1150)
 zoom = f"scale=w='{W}*(1.0+0.07*t/{SPEECH:.2f})':h=-2:eval=frame,crop={W}:{H}"
-if BW:
+VSRC = C.get("video_src")                              # отдельный видеоряд (голос — из src): горизонтальное видео полосой, как в рилсе DfvTRjFNvlI
+if VSRC:
+    sp = C.get("video_speed", 1.0); band = int(W * 9 / 16) // 2 * 2; top = int(H * 0.47 - band / 2)
+    v = (f"[3:v]setpts=PTS/{sp},fps={FPS},scale={W}:{band}:force_original_aspect_ratio=increase,crop={W}:{band},"
+         f"eq=contrast=1.05:saturation=0.55:brightness=-0.10:gamma=0.75,colorbalance=bs=0.08:bm=0.04:rh=-0.05,vignette=PI/4,pad={W}:{H}:0:{top}:black")
+elif BW:
     vis = 1150; top = int(H * 0.47 - vis / 2)
     v = (f"[0:v]fps={FPS},scale={W}:-2,{zoom},crop={W}:{vis}:0:'min(max(0,{H}*{fy}-{vis}/2),{H}-{vis})',"
          f"hue=s=0,eq=contrast=1.25:brightness=-0.03:gamma=0.92,vignette=PI/4,noise=alls=5:allf=t,"
@@ -92,7 +98,8 @@ subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{D}/voice.wav", "-i", f"{
                 "[0:a][1:a]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.89[a]", "-map", "[a]", f"{D}/mix.wav"], check=True)
 fc = (f"{v},trim=duration={SPEECH:.3f},setpts=PTS-STARTPTS,tpad=stop_mode=add:stop_duration={TAIL}:color=black,"
       f"fade=t=out:st={SPEECH - 0.7:.3f}:d=0.7,format=yuv420p[vb];[vb][1:v]overlay=0:0:format=auto,format=yuv420p[v]")
-subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(A), "-t", str(SPEECH + 0.3), "-i", src, "-i", f"{D}/subs.mov", "-i", f"{D}/mix.wav",
+vin = ["-ss", str(C.get("video_start", 0)), "-i", os.path.join(D, VSRC)] if VSRC else ["-f", "lavfi", "-i", "color=black:s=16x16:d=1"]
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(A), "-t", str(SPEECH + 0.3), "-i", src, "-i", f"{D}/subs.mov", "-i", f"{D}/mix.wav", *vin,
                 "-filter_complex", fc, "-map", "[v]", "-map", "2:a", "-t", str(DUR), "-c:v", "libx264", "-preset", "slow", "-crf", "19",
                 "-maxrate", "12M", "-bufsize", "24M", "-r", str(FPS), "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart",
                 f"{D}/reel.mp4"], check=True)
