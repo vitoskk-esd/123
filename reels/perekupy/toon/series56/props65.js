@@ -16,7 +16,7 @@ const TITLE = (a, b) => `<div style="position:absolute;left:0;right:0;top:300px;
 const SELFIE = `<svg viewBox="0 0 100 100" style="overflow:visible"><path d="M50 60 L50 -40" stroke="#151515" stroke-width="10"/><rect x="22" y="-120" width="56" height="96" rx="10" fill="#151515" stroke="#2a2d34" stroke-width="5"/><circle cx="50" cy="-108" r="5" fill="#3fd0ff"/></svg>`;
 // приём 1 — интерфейс прямого эфира: LIVE, зрители, лайки (экранный слой)
 const LIVE = (viewers, id = "lv", rec = false) => `<div id="${id}" style="position:absolute;inset:0;z-index:48;pointer-events:none">
-  <div style="position:absolute;left:40px;top:250px;display:flex;gap:14px;align-items:center;font-family:Unbounded;font-weight:900">
+  <div style="position:absolute;left:40px;top:300px;display:flex;gap:14px;align-items:center;font-family:Unbounded;font-weight:900">
     <span style="background:#ff3b30;color:#fff;border-radius:12px;padding:6px 18px;font-size:38px">● LIVE</span>
     <span style="background:#000a;color:#fff;border-radius:12px;padding:6px 18px;font-size:38px">👁 <span id="${id}n">${viewers}</span></span></div>
   ${rec ? `<div style="position:absolute;inset:60px 40px 120px;border:0 solid #fff">${["left:0;top:0;border-width:8px 0 0 8px", "right:0;top:0;border-width:8px 8px 0 0", "left:0;bottom:0;border-width:0 0 8px 8px", "right:0;bottom:0;border-width:0 8px 8px 0"].map(c => `<div style="position:absolute;${c};width:90px;height:90px;border-style:solid;border-color:#fff"></div>`).join("")}</div>` : ""}

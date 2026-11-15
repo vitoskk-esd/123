@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: an old-school car flipper starts a live stream to show off, but loses the deal to a viewer with a bot; the fail goes viral. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Lines: 1 loud, cheesy blogger greeting; 2 boastful; 3 excited, then running, out of breath; 4 shocked; 5 embarrassed excuse; 6 tired, resigned."
+ },
+ "stas": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.12,
+  "profile": "Stas — a calm, confident young Russian used-car flipper in his 30s, a bit cheeky.",
+  "notes": "One line: cheerful, teasing, waving to the camera."
+ },
+ "luda": {
+  "voice": "Sulafat",
+  "tempo": 1.1,
+  "profile": "Luda — a friendly, talkative Russian woman in her 40s who just sold her car.",
+  "notes": "One line: surprised but cheerful, a bit apologetic."
+ }
+}
