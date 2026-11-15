@@ -17,7 +17,7 @@ SIZE = 54 if C.get("sub_font", "sans") == "sans" else 62
 
 # слова → фразы по 1–3 слова (рвём на знаках препинания)
 words = []
-for line in open(os.path.join(D, C["words"]), encoding="utf-8"):
+for line in (open(os.path.join(D, C["words"]), encoding="utf-8") if C.get("words") else []):
     p = line.strip().split("\t")
     if len(p) == 2 and A - 0.05 <= float(p[0]) < B: words.append((float(p[0]) - A, p[1]))
 fix = {int(k): v for k, v in C.get("fix", {}).items()}
@@ -42,10 +42,23 @@ for k, ch in enumerate(chunks):
     s = ch[0][0] - 0.04; e = (chunks[k + 1][0][0] - 0.04) if k + 1 < len(chunks) else SPEECH - 0.05
     e = min(e, ch[-1][0] + 1.6)
     subs.append((s, e, re.sub(r"-\s+-?", "", " ".join(w for _, w in ch))))
+if C.get("subs"): subs = [tuple(x) for x in C["subs"]]
 json.dump(subs, open(os.path.join(D, "subs.json"), "w"), ensure_ascii=False, indent=0)
 
 # слой субтитров
+CAPS = C.get("sub_caps", False)
+if CAPS:
+    FONT = "/usr/share/fonts/opentype/inter/InterDisplay-SemiBoldItalic.otf" if C.get("italic") else "/usr/share/fonts/opentype/inter/InterDisplay-SemiBold.otf"
+    SIZE = C.get("sub_size", 36)
 font = ImageFont.truetype(FONT, SIZE)
+TRACK = int(SIZE * C.get("tracking", 0.14)) if CAPS else 0
+def draw_text(d, txt):
+    if CAPS: txt = txt.upper()
+    if not TRACK:
+        d.text((W / 2, SUB_Y), txt, font=font, fill=(255, 255, 255, 255), anchor="mm"); return
+    w = sum(font.getlength(ch) for ch in txt) + TRACK * (len(txt) - 1); x = (W - w) / 2
+    for ch in txt:
+        d.text((x, SUB_Y), ch, font=font, fill=(255, 255, 255, 255), anchor="lm"); x += font.getlength(ch) + TRACK
 SUB_Y = int(H * C.get("sub_y", 0.60))
 ov = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-c:v", "qtrle", f"{D}/subs.mov"], stdin=subprocess.PIPE)
 empty = Image.new("RGBA", (W, H), (0, 0, 0, 0)); cache = {}
@@ -53,7 +66,7 @@ def layer(txt, a):
     key = (txt, round(a, 2))
     if key in cache: return cache[key]
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    d.text((W / 2, SUB_Y), txt, font=font, fill=(255, 255, 255, 255), anchor="mm")
+    draw_text(d, txt)
     sh = im.split()[3].filter(ImageFilter.GaussianBlur(6)).point(lambda v: int(v * 0.85))
     s = Image.new("RGBA", (W, H), (0, 0, 0, 0)); s.putalpha(sh); im = Image.alpha_composite(s, im)
     if a < 1: im.putalpha(im.split()[3].point(lambda v: int(v * a)))
