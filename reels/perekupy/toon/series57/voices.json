@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode in the year 2040: kids at a car-trade museum find that the wax figure of an old car flipper is alive. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Lines: 1 hoarse whisper of a 'statue' coming alive, curious; 2 tired, nostalgic, a bit sad."
+ },
+ "guide": {
+  "voice": "Erinome",
+  "tempo": 1.08,
+  "profile": "Irina Sergeevna — a polite, slightly strict Russian museum guide in her 40s, clear 'excursion' intonation.",
+  "notes": "Lines: 1 welcoming; 2 explaining like history; 3 proud of the exhibit; 4 alarmed, strict shout."
+ },
+ "timur": {
+  "voice": "Puck",
+  "tempo": 1.12,
+  "profile": "Timur — a lively, smart Russian schoolboy about 11 years old, cheerful, surprised by old ways.",
+  "notes": "Lines: 1 genuinely puzzled; 2 friendly, proud, showing a phone."
+ },
+ "petya": {
+  "voice": "Zephyr",
+  "tempo": 1.12,
+  "profile": "Petya — an excited Russian schoolboy about 10 years old, bright voice.",
+  "notes": "Lines: 1 amazed; 2 scared and excited shout."
+ }
+}
