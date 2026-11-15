@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: a stubborn old car flipper on a TV quiz loses the million-question to a bot. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Lines: 1 cocky; 2 confident, smug; 3 loud; 4 indignant; 5 on the phone, hurried; 6 stubborn, loud; 7 tired, deadpan."
+ },
+ "stas": {
+  "voice": "Zubenelgenubi",
+  "tempo": 1.12,
+  "profile": "Stas — a calm, confident young Russian used-car flipper in his 30s, a bit cheeky.",
+  "notes": "One line: on the phone, relaxed, slightly amused."
+ },
+ "host": {
+  "voice": "Orus",
+  "tempo": 1.12,
+  "profile": "Arkady — a smooth, theatrical Russian TV quiz show host in a tuxedo; warm, dramatic pauses, showman intonation.",
+  "notes": "Lines: 1 dramatic question; 2 reading the four options clearly; 3 teasing; 4 announcing; 5 dramatic 'wrong', then cheerful about the consolation prize."
+ }
+}
