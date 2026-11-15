@@ -1,0 +1,94 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props69.js"></script>
+<script>
+// «СВАДЬБА: ТЕСТЬ-ПОЛКОВНИК» (киношный формат, отдельный ролик). Жених Дима взял у Жоры «Мерседес как у министра» для кортежа — он глохнет
+// на третьем светофоре, под капотом провода на скотче. Тесть — полковник в отставке: матерится по-военному, отдаёт приказы на бланке,
+// невеста в платье толкает «Мерседес» и тоже ругается. Жору — «на**й, шагом марш». На годовщину — Mercedes CLS из бота: «Объявляю благодарность».
+// Настоящий мат в озвучке (владелец 15.11), естественный, в облачках — со звёздочками.
+// ОБЛОЖКА (кадр 0): Дима держит телефон с ботом (Mercedes CLS 2014 −12%) + плашка «СВАДЬБА: / ТЕСТЬ-ПОЛКОВНИК».
+// Приёмы (новые): «ПРИКАЗ №…» на бланке с печатью «ИСПОЛНИТЬ»; вставка под капот (провода на скотче) с кружком-говорящим; счётчик «НЕВЕСТА ТОЛКАЕТ»; фата развевается.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const D = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...DIMA, ...o }, pose, extra);
+const P = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...POLK, ...o }, pose, extra) + MEDALS(x, foot, h, (extra.z || 7) + 1);
+const L = (p, x, foot, h, pose = {}, extra = {}) => VEIL(x, foot, h, "vl" + p, (extra.z || 7) - 1) + LNC(ch("vika", p, x, foot, h, null, pose, extra));
+const DB_L = glow(540, 200, 420, "#fff6d0", .3);
+const KZ_L = glow(90, 778, 160, "#4cd964", .3);
+const GV_L = glow(220, 160, 260, "#ffe6a8", .45) + glow(860, 160, 260, "#ffe6a8", .45);
+const S = [
+ { h: "ОБЛОЖКА · ЖЕНИХ С БОТОМ → «МЕРСЕДЕС КАК У МИНИСТРА»", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("perekup", "dp", 540, 2090, 1680, DIMA, CLSCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "dvorbraka", farBlur: 8, mid: H.mid, lights: H.lights + DB_L, over: TITLE("СВАДЬБА:", "ТЕСТЬ-ПОЛКОВНИК") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "dvorbraka", mid: car(W24, 330, 1600, 700, { z: 5, sheen: .4 }) + RINGS(600, 1290) + D("da", 190, 1860, 820, {}, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + P("pa", 890, 1860, 840, {}, { armL: 10 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: DB_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "da", html: "Виктор Степанович,<br><em>как вам машина?</em>", fs: 30 }, { p: "pa", html: "Если не заглохнет —<br><em>с меня ящик.</em>", fs: 30 }], talk: ["pa"] },
+   vo: "Лис: «Свадьба Димы и Лены. Машину для кортежа жених взял у Жоры: “Мерседес, как у министра”». Дима: «Виктор Степанович, ну как вам машина?» Полковник: «Нормальная. Если не заглохнет — с меня ящик».", who: "Лис + Дима + полковник",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новый герой — жених Дима</b> держит телефон: в боте «Mercedes CLS · 2014 · 2 150 000 ₽ · рынок ≈ 2 450 000 · 🔥 −12% · ⏱ 1 с»; плашка «СВАДЬБА: / ТЕСТЬ-ПОЛКОВНИК». B — <b>новый фон — Дворец бракосочетаний</b> (кольца, арка из шаров, красная дорожка, конфетти); бежевый «Мерседес» W124 с кольцами на крыше; <b>новый герой — тесть-полковник Виктор Степанович</b> (китель, медали, седые усы)." },
+ { h: "ЗАГЛОХ НА ТРЕТЬЕМ СВЕТОФОРЕ → «ПРИКАЗ № 1»", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "kortezh", mid: car(W24, 220, 1560, 740, { z: 5, sheen: .4 }) + RINGS(520, 1240) + STEAM(760, 1110), lights: KZ_L }), shot: { x: 540, y: 1180, s: 1.04 } },
+   B: { def: () => ({ bg: "kortezh", farBlur: 3, mid: P("pb", 300, 1900, 980, {}, { armR: -120 }, { rim: "#fff6d0", side: 1, z: 7 }), over: ORDER(470, 1180, "or1", 1, "Отставить панику.<br>Двигатель —<br>к осмотру."), lights: KZ_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "pb", html: "Отставить панику!<br><em>Двигатель, бл*дь, к осмотру!</em>", fs: 38 }], talk: ["pb"] },
+   vo: "Лис: «Заглох он на третьем светофоре». Полковник: «Так. Отставить панику. Двигатель, блядь, к осмотру!»", who: "Лис + полковник",
+   mv: "A — <b>новый фон — проспект</b> (третий светофор, щит «СВАДЕБНЫЙ САЛОН «ЛЕБЕДЬ»», пробка сзади): «Мерседес» с кольцами встал, из-под капота пар, сзади гудят. B — <b>приём 1: «ПРИКАЗ № 1»</b> на бланке, печать «ИСПОЛНИТЬ» хлопает — полковник командует." },
+ { h: "ПОД КАПОТОМ: СКОТЧ → «НЕ РУГАЙСЯ ПРИ ГОСТЯХ!»", tc: "3/6 · 0:24–0:36",
+   A: { def: () => ({ bg: "kortezh", farBlur: 10, mid: ENGINE("eng") + PIP(D("dpip", 160, 800, 900, { look: "o" }, {}, { noShadow: 1 }), "pip1"), lights: "" }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ at: [860, 1470], html: "Тут провода…<br><em>скотчем замотаны.</em>", fs: 38 }], talk: ["dpip"] },
+   B: { def: () => ({ bg: "kortezh", farBlur: 2, mid: P("pc", 230, 1860, 860, {}, { armR: -80 }, { rim: "#fff6d0", side: 1, z: 7 }) + D("db", 560, 1880, 800, { look: "o" }, {}, { z: 6 }) + L("la", 870, 1860, 820, { armL: 60 }, { rim: "#fff6d0", side: -1, z: 8 }), lights: KZ_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "pc", html: "Скотчем. На свадьбу.<br><em>Ё*аный ты в рот.</em>", fs: 30 }, { p: "la", html: "Папа, не ругайся<br><em>при гостях!</em>", fs: 30 }], talk: ["pc"] },
+   vo: "Дима: «Тут… провода скотчем замотаны». Полковник: «Скотчем. На свадьбу. Ёбаный ты в рот, Дмитрий». Лена: «Папа, не ругайся при гостях!»", who: "Дима + полковник + Лена",
+   mv: "A — <b>приём 2: вставка «ПОД КАПОТОМ»</b>: провода, замотанные синим скотчем (6 мест); Дима в кружке в углу. B — <b>новая героиня — невеста Лена</b> (белое платье, фата); все трое в кадре." },
+ { h: "«Я СТАВЛЮ ЗАДАЧУ» → НЕВЕСТА ТОЛКАЕТ «МЕРСЕДЕС»", tc: "4/6 · 0:36–0:48",
+   A: { def: () => ({ bg: "kortezh", farBlur: 4, mid: P("pd", 330, 1900, 1000, {}, { armL: 40 }, { rim: "#fff6d0", side: 1, z: 7 }), over: ORDER(500, 1200, "or2", 2, "Толкать до ЗАГСа.<br>Невесте — тоже.", 3), lights: KZ_L }), shot: { x: 540, y: 1150, s: 1.06 },
+     bubbles: [{ p: "pd", html: "Я не ругаюсь, Леночка.<br><em>Я ставлю задачу.</em>", fs: 40 }], talk: ["pd"] },
+   B: { def: () => ({ bg: "kortezh", mid: car(W24, 380, 1600, 700, { z: 5, sheen: .4 }) + RINGS(660, 1300) + L("lb", 250, 1840, 760, { armR: -70, armL: -70 }, { rim: "#fff6d0", side: 1, z: 8 }) + D("dc", 90, 1860, 780, { look: "o" }, { armR: -70 }, { z: 7 }), over: PUSHM(560, 300).replace('>0 м<', '>340 м<').replace("width:0%", "width:42%"), lights: KZ_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "lb", html: "Дима, толкай сильнее,<br><em>ёпта!</em>", fs: 40 }], talk: ["lb"] },
+   vo: "Полковник: «Я не ругаюсь, Леночка. Я ставлю задачу». Лис: «Невеста в платье толкала “Мерседес” два квартала». Лена: «Дима, толкай сильнее, ёпта!»", who: "Полковник + Лис + Лена",
+   mv: "A — полковник спокойно, «ПРИКАЗ № 2: толкать до ЗАГСа. Невесте — тоже». B — <b>приём 3: счётчик «НЕВЕСТА ТОЛКАЕТ»</b>: метры бегут 0 → 800, розовая полоса растёт; фата развевается, Дима толкает сзади." },
+ { h: "ЖОРА: «ЭТО ВИНТАЖ!» → «ПРИКАЗ № 3» → БОТ", tc: "5/6 · 0:48–1:00",
+   A: { def: () => ({ bg: "kortezh", farBlur: 2, mid: P("pe", 250, 1860, 860, {}, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + Z("za", 840, 1860, 840, { look: "grin" }, { armL: 50 }, { rim: "#fff6d0", side: -1, z: 7 }), over: ORDER(250, 1450, "or3", 3, "Жора — на**й.<br>Шагом марш.", -3), lights: KZ_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "za", html: "Ребята, это не поломка —<br><em>это винтаж!</em>", fs: 30 }, { p: "pe", html: "Слушай приказ.<br><em>Пошёл на**й.</em>", fs: 30 }], talk: ["pe"] },
+   B: { def: () => { const H = HOLDPHONE("perekup", "dd", 540, 2000, 1400, DIMA, CLSCARD("mcc2"), { rim: "#ffe6a8", side: 1 });
+       return { bg: "godovshina", farBlur: 5, mid: H.mid, lights: H.lights + GV_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "dd", html: "Мерседес CLS, один хозяин,<br><em>ниже рынка на триста тысяч.</em>", fs: 36 }], talk: ["dd"] },
+   vo: "Жора: «Ребята, это не поломка — это винтаж!» Полковник: «Жора. Слушай приказ. Пошёл нахуй. Шагом марш». Лис: «Машину на годовщину Дима нашёл через бота “Перехват”». Дима: «Мерседес CLS, один хозяин, ниже рынка на триста тысяч».", who: "Жора + полковник + Лис + Дима",
+   mv: "A — Жора оправдывается, полковник — «ПРИКАЗ № 3: Жора — на**й. Шагом марш» (печать). B — <b>новый фон — банкетный зал «1 ГОД ВМЕСТЕ»</b> (люстры, столы, шары): Дима показывает CLS в боте." },
+ { h: "«ОБЪЯВЛЯЮ БЛАГОДАРНОСТЬ» → ФИНАЛ: БОТ", tc: "6/6 · 1:00–1:12",
+   A: { def: () => ({ bg: "godovshina", mid: D("de", 200, 1860, 800, { look: "grin" }, {}, { rim: "#ffe6a8", side: 1, z: 7 }) + P("pf", 540, 1880, 880, { look: "grin" }, { armR: -150 }, { rim: "#ffe6a8", side: 1, z: 8 }) + L("lc", 880, 1860, 800, {}, { rim: "#ffe6a8", side: -1, z: 7 }), lights: GV_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "pf", html: "Оху*нно. Дмитрий,<br><em>объявляю благодарность!</em>", fs: 40 }], talk: ["pf"] },
+   B: { def: () => ({ bg: "godovshina", over: CTA69, lights: GV_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Полковник: «Охуенно. Дмитрий, объявляю благодарность!» Лис: «Хочешь, чтобы тесть объявил благодарность, — ищи машину в боте “Перехват”: хорошие варианты ниже рынка через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Полковник + Лис",
+   mv: "A — годовщина: полковник довольный, поднимает руку, рядом Дима и Лена. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
