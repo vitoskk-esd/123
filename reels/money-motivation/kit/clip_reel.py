@@ -38,8 +38,11 @@ def phrase_layer(a, b):
     lay = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(lay); maxw = TX1 - TX0; y = TY
     if a:
         f = fit(a, BOLD, 66, maxw); d.text((TX0, y), a, font=f, fill=(255, 255, 255, 255)); y += int(f.size * 1.18)
-    if b:
-        f = fit(b, SERIF, 158, maxw); d.text((TX0 - 4, y - int(f.size * 0.12)), b, font=f, fill=(255, 255, 255, 255))
+    if b:                                             # «|» в акценте — перенос строки (длинное слово по частям)
+        parts = b.split("|"); size = min(fit(p, SERIF, 158, maxw).size for p in parts)
+        f = ImageFont.truetype(SERIF, size)
+        for p in parts:
+            d.text((TX0 - 4, y - int(f.size * 0.12)), p, font=f, fill=(255, 255, 255, 255)); y += int(f.size * 0.92)
     sh = lay.split()[3].filter(ImageFilter.GaussianBlur(10)).point(lambda v: int(v * 0.8))
     shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0)); shadow.putalpha(sh)
     return Image.alpha_composite(shadow, lay)

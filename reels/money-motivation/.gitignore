@@ -3,3 +3,6 @@ broll/
 *.mov
 *_raw.wav
 mask.png
+src/
+*/src/
+lofi_raw.wav
