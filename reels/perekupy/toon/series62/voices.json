@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone adult comedy episode: a tow-truck driver keeps picking up the same broken cars sold by a car flipper. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.18,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "Line 1: over a crackling radio, pleading, fast. Line 2: cheerful, cheeky, short."
+ },
+ "vitya": {
+  "voice": "Algenib",
+  "tempo": 1.12,
+  "profile": "Vitya — a Russian tow-truck driver in his 50s, twenty years on the highway, gravelly tired voice, dry working-class humor. He swears casually and naturally, like ordinary road talk — not shouting, just matter-of-fact. Adult comedy, uncensored.",
+  "notes": "Pronounce every swear word fully, clearly and naturally in the flow of speech — never bleep, soften or skip it. Line 1: tired, annoyed sigh. Line 2: matter-of-fact. Line 3: dry joke, deadpan. Line 4: ironic gratitude. Line 5: bored, amazed, slow."
+ },
+ "pash": {
+  "voice": "Puck",
+  "tempo": 1.15,
+  "profile": "Pashka — a young Russian guy around 22, naive first-time car buyer, nervous and lively.",
+  "notes": "Line 1: panicked. Line 2: hopeful, naive question. Line 3: proud, happy."
+ }
+}
