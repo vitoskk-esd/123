@@ -462,3 +462,13 @@ def test_idiom_and_glued_model_and_weak_city():
     assert parse_post("Продам копейку 1985 г, 120 000", d).model == "2101"
     assert parse_post("отдам за копейку приору 2012, 250 000", d).model == "Priora"
     assert parse_post("г. Короча, приора 2010, 300 т.р.", d).city == "Короча"
+
+
+def test_channel_region_description_beats_nick_code():
+    """Владелец 15.11: канал «АВТОБОСС» (autoboss_138) пишет «лучшие тачки Москвы», а бот ставил «Иркутская область»
+    по коду 138 в нике. Описание сильнее кода; «из Москвы и Питера» — откуда, не город канала."""
+    about = "Находим и предлагаем вам лучшие тачки Москвы, по нереально низким ценам!\n✍🏻Связь: @AUTOBOSS138"
+    assert D.guess_region("АВТОБОСС", "autoboss_138", about, codes=False) == "msk"
+    assert D.guess_region("АВТОБОСС", "autoboss_138", None, codes=False) is None
+    assert D.guess_region("АВТОБОСС", "autoboss_138") == "irk"                 # код — только если ничего другого нет
+    assert D.about_region("Пригоним авто из Москвы и Питера по всей России") is None

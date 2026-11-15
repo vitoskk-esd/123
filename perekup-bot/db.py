@@ -86,6 +86,8 @@ class DB:
                     "ALTER TABLE users ADD COLUMN lang TEXT",
                     "ALTER TABLE users ADD COLUMN last_seen REAL",
                     "ALTER TABLE payments ADD COLUMN plan TEXT DEFAULT 'basic'",
+                    "ALTER TABLE posts ADD COLUMN place_said INTEGER",              # регион назван в тексте поста (не от канала)
+                    "ALTER TABLE channels ADD COLUMN about TEXT",                   # описание канала — по нему город канала
                     "ALTER TABLE users ADD COLUMN autorenew INTEGER DEFAULT 0",     # автопродление включено
                     "ALTER TABLE users ADD COLUMN renew_inv TEXT",                  # материнский счёт Робокассы для автосписаний
                     "ALTER TABLE users ADD COLUMN renew_plan TEXT",                 # какой тариф продлеваем
@@ -252,8 +254,10 @@ class DB:
         await self._run(f"UPDATE channels SET archived=1 WHERE id IN ({','.join('?' * len(ids))})", *ids)
 
     async def learned_regions(self, days: int = 60, min_n: int = 8, share: float = .6) -> dict[int, str]:
-        """Канал → город, где продаётся большинство его машин (по разобранным постам). Нет уверенности — канала нет в ответе."""
-        rows = await self._all("SELECT channel_id, region, COUNT(*) AS n FROM posts WHERE region IS NOT NULL AND at>? "
+        """Канал → город, где продаётся большинство его машин (по разобранным постам). Нет уверенности — канала нет в ответе.
+        Только посты, где город назван в тексте: посту без города бот подставлял город канала — догадка подтверждала сама себя
+        (владелец 15.11: «АВТОБОСС» — «тачки Москвы», ник autoboss_138 → «Иркутская область»)."""
+        rows = await self._all("SELECT channel_id, region, COUNT(*) AS n FROM posts WHERE region IS NOT NULL AND place_said=1 AND at>? "
                                "GROUP BY channel_id, region", time.time() - days * 86400)
         total, best = {}, {}
         for r in rows:
@@ -261,6 +265,9 @@ class DB:
             if r["n"] > best.get(r["channel_id"], ("", 0))[1]:
                 best[r["channel_id"]] = (r["region"], r["n"])
         return {c: reg for c, (reg, n) in best.items() if total[c] >= min_n and n / total[c] >= share}
+
+    async def set_about(self, cid: int, about: str) -> None:
+        await self._run("UPDATE channels SET about=? WHERE id=?", about, cid)
 
     async def joined_channels(self) -> list:
         return await self._all("SELECT * FROM channels WHERE status='joined'")
@@ -398,9 +405,9 @@ class DB:
     async def add_post(self, channel_id: int, msg_id: int, L, fp: str, ckey: str | None, dup: bool, clean: bool) -> int:
         await self._run("UPDATE channels SET posts=posts+1, last_post_at=? WHERE id=?", time.time(), channel_id)
         return await self._run(
-            "INSERT INTO posts (channel_id, msg_id, at, fp, ckey, make, model, year, price, mileage, region, dup, clean, parsed_by) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", channel_id, msg_id, time.time(), fp, ckey, L.make, L.model, L.year,
-            L.price, L.mileage, L.region, int(dup), int(clean), L.parsed_by)
+            "INSERT INTO posts (channel_id, msg_id, at, fp, ckey, make, model, year, price, mileage, region, dup, clean, parsed_by, place_said) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", channel_id, msg_id, time.time(), fp, ckey, L.make, L.model, L.year,
+            L.price, L.mileage, L.region, int(dup), int(clean), L.parsed_by, int(getattr(L, "place_said", False)))
 
     async def history_todo(self, kind: str = "tg") -> list:
         """Подключённые каналы, чью историю ещё не загрузили в оценку рынка."""
@@ -422,9 +429,9 @@ class DB:
                                clean: bool) -> None:
         """Старый пост канала — только для оценки рынка: никому не уходил, в счётчик постов канала не идёт."""
         await self.conn.execute(
-            "INSERT INTO posts (channel_id, msg_id, at, fp, ckey, make, model, year, price, mileage, region, dup, clean, parsed_by) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'history')", (channel_id, msg_id, at, fp, ckey, L.make, L.model, L.year,
-                                                             L.price, L.mileage, L.region, int(dup), int(clean)))
+            "INSERT INTO posts (channel_id, msg_id, at, fp, ckey, make, model, year, price, mileage, region, dup, clean, parsed_by, place_said) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'history',?)", (channel_id, msg_id, at, fp, ckey, L.make, L.model, L.year,
+                                                             L.price, L.mileage, L.region, int(dup), int(clean), int(getattr(L, "place_said", False))))
 
     async def commit(self) -> None:
         await self.conn.commit()

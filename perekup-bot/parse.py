@@ -29,6 +29,7 @@ class Listing:
     price: int | None = None
     mileage: int | None = None
     region: str | None = None
+    place_said: bool = False        # регион взят из текста поста (а не подставлен от канала) — только такие посты учат город канала
     city: str | None = None         # город, если назван («Ангарск»); регион — его область (фильтр «Иркутская область» ловит Ангарск)
     markers: list[str] = field(default_factory=list)
     accidents: int | None = None    # сколько ДТП, если продавец написал; 0 — пишет, что не было
@@ -379,6 +380,7 @@ def parse_post(text: str, d: Dictionary, channel_region: str | None = None) -> L
             L.make = L.model = None
     # где машина: город из текста (кроме «пригнана из Москвы», «доставка в Москву»), иначе — город канала
     L.region, L.city = d.find_place(tokens, text=clean(text), prefer=channel_region)
+    L.place_said = bool(L.region)
     if not L.region:
         L.region = channel_region
     # маркеры — по фразам: отрицание действует только внутри своей фразы («не бит, в кредите» — кредит есть)

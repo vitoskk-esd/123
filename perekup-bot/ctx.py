@@ -36,4 +36,6 @@ class Ctx:
         learned = await self.db.learned_regions()
         for ch in self.channels.values():
             ch["region_guess"] = None if ch.get("region") else (
-                self.dict.guess_region(ch.get("title"), ch.get("username")) or learned.get(ch["id"]))
+                self.dict.guess_region(ch.get("title"), ch.get("username"), ch.get("about"), codes=False)   # название, описание, ник
+                or learned.get(ch["id"])                                                                  # где назван город в постах
+                or self.dict.guess_region(ch.get("title"), ch.get("username")))                          # код региона в нике — последним

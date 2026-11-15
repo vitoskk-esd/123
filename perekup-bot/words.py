@@ -185,22 +185,43 @@ class Dictionary:
         best = next((f for f in pool if f[1] == prefer), pool[0] if pool else None)
         return (best[1], best[2]) if best else (None, None)
 
-    def guess_region(self, title: str | None, username: str | None) -> str | None:
-        """Город канала по названию («АвтоРынок ДНР», «Авто Воронеж») или нику (avto_moskva, AvtoVoronezh, avto_msk);
-        нет названия места — по автомобильному коду региона в названии или нике («38 Авторынок», «Авто 161 RUS», avto138)."""
+    def guess_region(self, title: str | None, username: str | None, about: str | None = None, codes: bool = True) -> str | None:
+        """Город канала по названию («АвтоРынок ДНР», «Авто Воронеж»), по описанию («лучшие тачки Москвы») или нику
+        (avto_moskva, AvtoVoronezh, avto_msk); codes — ещё и по автомобильному коду региона («38 Авторынок», avto138).
+        Код — самый слабый признак: «autoboss_138» с описанием «тачки Москвы» — Москва (владелец 15.11), поэтому
+        ctx.guess_regions спрашивает коды последними, после истории канала."""
         if title and (found := self.find_regions(norm(title).split())):
             return found[0]
+        if about and (found := self.about_region(about)):
+            return found
+        if username:
+            parts = [p for p in re.split(r"[_\d]+|(?<=[a-z])(?=[A-Z])", username) if p]
+            segs, flat = {p.lower() for p in parts}, username.lower()
+            for rid, names in self.latin.items():
+                for n in names:
+                    if n in segs or (len(n) >= 5 and n in flat):
+                        return rid
+        if not codes:
+            return None
         if title and (rid := self.region_by_code(title)):
             return rid
-        if not username:
-            return None
-        parts = [p for p in re.split(r"[_\d]+|(?<=[a-z])(?=[A-Z])", username) if p]
-        segs, flat = {p.lower() for p in parts}, username.lower()
-        for rid, names in self.latin.items():
-            for n in names:
-                if n in segs or (len(n) >= 5 and n in flat):
-                    return rid
-        return self.region_by_code(username, nick=True)
+        return self.region_by_code(username, nick=True) if username else None
+
+    def about_region(self, about: str) -> str | None:
+        """Город из описания канала: первая строка-фраза с городом, а не «доставка по России» и не «пригоним из Москвы».
+        Больше двух разных регионов (сеть, «Москва · Питер · Казань») — не угадываем."""
+        text = re.sub(r"https?://\S+|@\w+", " ", about)
+        found = []
+        for seg in _segments(text):
+            skipped_end = -9
+            for h in self.places.find(seg):
+                prev = seg[h.start - 1] if h.start else ""
+                if prev in ORIGIN or prev in STREET or (prev in ("и", "или") and skipped_end == h.start - 1):
+                    skipped_end = h.end                     # «из Москвы и Питера» — оба «откуда»
+                    continue
+                if h.payload[0] not in found:
+                    found.append(h.payload[0])
+        return found[0] if 1 <= len(found) <= 2 else None
 
     def region_by_code(self, text: str, nick: bool = False) -> str | None:
         """Регион по коду с номерного знака: отдельное число из 2–3 цифр (можно «RUS»/«регион» рядом). Не код — часть

@@ -141,9 +141,33 @@ async def regions(bot: Bot, ctx: Ctx) -> None:
         await ctx.guess_regions()
 
 
+_about_at = 0.0
+
+
+async def abouts(bot: Bot, ctx: Ctx, batch: int = 60) -> None:
+    """Описания каналов Telegram (по ним город канала): раз в 10 минут — до 60 каналов без описания, по одному в 2 с."""
+    global _about_at
+    reader = getattr(ctx, "reader", None)
+    if not reader or not getattr(reader, "online", False) or time.time() - _about_at < 600:
+        return
+    _about_at = time.time()
+    todo = [ch for ch in ctx.channels.values() if ch.get("tg_id") and ch.get("about") is None][:batch]
+    for ch in todo:
+        try:
+            about = await reader.channel_about(ch["tg_id"])
+        except Exception as e:
+            log.info("описание канала %s: %s", ch.get("title"), e)
+            about = ""
+        await ctx.db.set_about(ch["id"], about or "")
+        ch["about"] = about or ""
+        await asyncio.sleep(2)
+    if todo:
+        await ctx.guess_regions()
+
+
 async def loop(bot: Bot, ctx: Ctx) -> None:
     while True:
-        for job in (tick, capacity, regions):
+        for job in (tick, capacity, regions, abouts):
             try:
                 await job(bot, ctx)
             except Exception:
