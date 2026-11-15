@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.23,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone adult comedy episode: a wedding, a broken old Mercedes, and the bride's father — a retired army colonel who swears in military commands. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.18,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "One line: cheerful, cheeky, making excuses."
+ },
+ "polk": {
+  "voice": "Alnilam",
+  "tempo": 1.12,
+  "profile": "Viktor Stepanovich — a retired Russian army colonel in his 60s, the bride's father, deep commanding parade-ground voice, dry and stern. He swears naturally and calmly, like giving orders — the swear words are part of the command. Adult comedy, uncensored.",
+  "notes": "Pronounce every swear word fully, clearly and naturally — never bleep, soften or skip it. Line 1: calm, gruff. Line 2: sharp barked commands. Line 3: icy, slow, disappointed. Line 4: calm, explaining. Line 5: formal military order, deadpan. Line 6: satisfied, solemn, warm."
+ },
+ "dima": {
+  "voice": "Umbriel",
+  "tempo": 1.15,
+  "profile": "Dima — a young Russian groom around 27, nervous, polite, tries hard to impress his father-in-law.",
+  "notes": "Line 1: hopeful. Line 2: scared, hesitant. Line 3: proud, happy."
+ },
+ "lena": {
+  "voice": "Aoede",
+  "tempo": 1.15,
+  "profile": "Lena — a young Russian bride, lively and emotional, in a wedding dress.",
+  "notes": "Pronounce every swear word fully and naturally. Line 1: embarrassed, pleading. Line 2: straining while pushing a car, loud, the swear natural."
+ }
+}
