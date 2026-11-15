@@ -117,10 +117,13 @@ async def capacity(bot: Bot, ctx: Ctx) -> None:
     vk = sum(1 for ch in ctx.channels.values() if ch.get("vk_id"))
     tg = sum(1 for ch in ctx.channels.values() if ch.get("tg_id"))
     rps = ctx.cfg.vk_wall_rps or 1
+    from vk import service_keys
+    keys = max(1, len(service_keys(ctx.cfg.vk_service)))
+    active = ctx.vk.tiers()[0] if getattr(ctx, "vk", None) and hasattr(ctx.vk, "tiers") else vk
     for n in VK_WARN:
         if vk >= n and await ctx.db.mark_once(f"cap:vk:{n}"):
             for uid in await admin_ids(ctx):
-                await send(bot, ctx, uid, T.CAP_VK.format(n=vk, every=round(vk / 25 / rps), at1000=round(1000 / 25 / rps)))
+                await send(bot, ctx, uid, T.CAP_VK.format(n=vk, active=active, keys=keys, every=max(1, round(active / 25 / rps / keys))))
     for n in TG_WARN:
         if tg >= n and await ctx.db.mark_once(f"cap:tg:{n}"):
             for uid in await admin_ids(ctx):

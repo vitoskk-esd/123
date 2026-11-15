@@ -2213,3 +2213,35 @@ async def test_panel_shows_trials_bought_this_month(env):
     t = s.texts(ADMIN)[-1]
     month = T.MONTHS_NOM[datetime.now(MSK).month - 1]
     assert f"Купили пробный день в {month}: 2</b> на 980 ₽ · из них взяли тариф: 1 (50%)" in t
+
+
+def test_vk_service_keys_list():
+    """VK_SERVICE_TOKEN: несколько сервисных ключей через запятую, пробел или с новой строки — без повторов."""
+    from vk import service_keys
+    assert service_keys("") == [] and service_keys("abc") == ["abc"]
+    assert service_keys("k1, k2\nk3;k1") == ["k1", "k2", "k3"]
+
+
+async def test_vk_smart_poll_and_many_keys(env):
+    """Умный опрос: новое и активное сообщество читаем каждый круг, тихое — раз в 10 кругов;
+    стены раскладываются по всем сервисным ключам (каждый читает свою часть)."""
+    dp, bot, s, ctx = env
+    import dataclasses
+    ctx.cfg = dataclasses.replace(ctx.cfg, vk_service="key1,key2", vk_wall_rps=1000)
+    made = []
+    reader = VKReader(bot, ctx, make_api=lambda t: made.append(FakeVK()) or made[-1])
+    reader._make_readers()
+    assert len(reader.readers) == 2 and reader.service is made[0]
+    now = time.time()
+    for g in range(1000, 1060):
+        ctx.channels[VK_KEY + g] = {"vk_id": g, "tg_id": None, "base": 1}
+    reader.fresh.update({g: now - 3600 for g in range(1000, 1030)})          # активные: пост час назад
+    reader.fresh.update({g: now - 10 * 86400 for g in range(1030, 1060)})    # тихие: пост 10 дней назад
+    assert reader.due(1000, 7) and reader.due(1001, 3)
+    assert sum(reader.due(g, 0) for g in range(1030, 1060)) == 3              # тихих — каждое десятое на круге
+    assert reader.tiers() == (30, 0, 30)
+    n = await reader.wall_round(0)
+    assert n == 33 and reader.round_info["keys"] == 2
+    assert made[0].calls and made[1].calls                                     # обе половины прочитаны своими ключами
+    reader.fresh.pop(1000)
+    assert reader.due(1000, 5)                                                 # не читали ещё — читаем сразу

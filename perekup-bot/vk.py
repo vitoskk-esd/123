@@ -30,6 +30,10 @@ API, V = "https://api.vk.com/method/", "5.199"
 FLOOD = (6, 9)                 # «слишком часто» / «flood control» — ключ рабочий, ВК просит притормозить
 WALL_PACK = 25                 # стен за один запрос (execute)
 FLOOD_PAUSE = 60               # на сколько притормаживаем опрос после такого ответа
+# умный опрос стен (владелец 15.11, «сделай пункты 1 и 2 для ВК»): свежий пост за 6 ч — стену читаем каждый круг,
+# за 2 дня — раз в 3 круга, тише — раз в 10. Новое сообщество (ещё не читали) — сразу.
+TIERS = ((6 * 3600, 1), (48 * 3600, 3))
+QUIET_EVERY = 10
 PAUSE_CAPTCHA = 900            # ВК попросил капчу или «слишком часто» — следующее вступление через 15 минут
 MENTION = re.compile(r"\[(?:id|club|public)\d+\|([^\]]*)\]")
 ERRORS = {100: "сообщество не найдено", 15: "нет доступа к сообществу", 203: "нет доступа к сообществу",
@@ -154,6 +158,15 @@ async def _close(api) -> None:
             pass
 
 
+def service_keys(raw: str) -> list[str]:
+    """VK_SERVICE_TOKEN: один ключ или несколько через запятую / пробел / перевод строки (без повторов)."""
+    out = []
+    for k in re.split(r"[\s,;]+", raw or ""):
+        if k and k not in out:
+            out.append(k)
+    return out
+
+
 def _ref(vk: str) -> str:
     return vk[4:] if re.fullmatch(r"club\d+", vk) else vk
 
@@ -163,6 +176,9 @@ class VKReader:
         self.bot, self.ctx, self.make_api = bot, ctx, make_api
         self.api = None                                        # ключ служебной страницы (вступления, лента, поиск)
         self.service = None                                    # сервисный ключ приложения: чтение открытых стен без аккаунта
+        self.readers: list = []                                # все сервисные ключи (VK_SERVICE_TOKEN через запятую) — стены читаем всеми сразу
+        self.fresh: dict[int, float] = {}                      # сообщество → время самого свежего поста на стене (для умного опроса)
+        self.round_info: dict = {}                             # последний круг опроса стен: сколько прочитали, за сколько секунд
         self.name = ""
         self.error = ""                                        # последняя ошибка ключа — видно в /admin
         self.runner: asyncio.Task | None = None
@@ -187,7 +203,8 @@ class VKReader:
         if self.ctx.cfg.vk_token and not env:
             self.error = "в переменной VK_TOKEN нет ключа — вставь адрес со словом access_token целиком"
         if not token and self.ctx.cfg.vk_service:              # только сервисный ключ: читаем открытые сообщества
-            self.service, self.name = self.make_api(self.ctx.cfg.vk_service), "сервисный ключ"
+            self._make_readers()
+            self.name = "сервисный ключ" + (f" ×{len(self.readers)}" if len(self.readers) > 1 else "")
             await self.ctx.refresh_channels()
             self.runner = asyncio.create_task(self.run())
             return True
@@ -234,7 +251,7 @@ class VKReader:
             await self.api.close()
         self.api, self.error = api, ""
         if self.ctx.cfg.vk_service and self.service is None:
-            self.service = self.make_api(self.ctx.cfg.vk_service)
+            self._make_readers()
         self.name = f"{me.get('first_name', '')} {me.get('last_name', '')}".strip() or "служебная страница"
         if self.ctx.cfg.vk_token != token and token_from(self.ctx.cfg.vk_token or "") != token:
             await self.ctx.db.set_setting("vk_token", token)
@@ -243,6 +260,11 @@ class VKReader:
         self.runner = asyncio.create_task(self.run())
         log.info("служебная страница ВК «%s» читает сообщества", self.name)
         return self.name
+
+    def _make_readers(self) -> None:
+        """Сервисные ключи из VK_SERVICE_TOKEN (можно несколько через запятую — у каждого свой лимит ВК 3 запроса/с)."""
+        self.readers = [self.make_api(k) for k in service_keys(self.ctx.cfg.vk_service)]
+        self.service = self.readers[0] if self.readers else None
 
     # ---------- посты ----------
     def groups(self) -> list[int]:
@@ -294,6 +316,9 @@ class VKReader:
         """Стена одного сообщества (items — уже полученные пачкой). Первый опрос только запоминает, где мы, — старое не шлём."""
         if items is None:
             items = (await self.rd.call("wall.get", owner_id=-gid, count=5)).get("items", [])
+        dates = [it.get("date", 0) for it in items if not it.get("is_pinned")] or [it.get("date", 0) for it in items]
+        if dates:
+            self.fresh[gid] = max(self.fresh.get(gid, 0), max(dates))
         if gid not in self.last:
             self.last[gid] = max((it["id"] for it in items), default=0)
             return
@@ -317,30 +342,67 @@ class VKReader:
                 log.info("лента ВК: %s", e)
             await asyncio.sleep(max(1.0, self.ctx.cfg.vk_poll - (time.time() - started)))
 
+    def due(self, gid: int, rnd: int, now: float | None = None) -> bool:
+        """Читать ли стену на этом круге: активные барахолки — каждый круг, тихие — реже (TIERS)."""
+        ts = self.fresh.get(gid)
+        if ts is None:
+            return True
+        age = (now or time.time()) - ts
+        every = next((k for lim, k in TIERS if age < lim), QUIET_EVERY)
+        return (rnd + gid) % every == 0
+
+    def tiers(self) -> tuple[int, int, int]:
+        """Сколько сообществ читаем каждый круг / раз в 3 круга / раз в 10 (для /vkcheck и предупреждения админу)."""
+        now, out = time.time(), [0, 0, 0]
+        for g in self.groups():
+            ts = self.fresh.get(g)
+            age = now - ts if ts is not None else 0
+            out[0 if age < TIERS[0][0] else 1 if age < TIERS[1][0] else 2] += 1
+        return out[0], out[1], out[2]
+
+    async def _wall_worker(self, api, packs: list[list[int]]) -> None:
+        """Пачки стен одним ключом, не чаще VK_WALL_RPS запросов в секунду."""
+        for part in packs:
+            started = time.time()
+            try:
+                res = await self._many("wall.get", [{"owner_id": -g, "count": 5} for g in part], WALL_PACK, api)
+                for g, r in zip(part, res):
+                    if r is not None:
+                        await self.poll_wall(g, r.get("items", []))
+                self.error = ""
+            except VKError as e:
+                self.error = str(e)
+                log.warning("стены ВК: %s", e)
+                if e.code in FLOOD:
+                    await asyncio.sleep(FLOOD_PAUSE)
+            except Exception as e:
+                log.info("стены ВК: %s", e)
+            await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.vk_wall_rps - (time.time() - started)))
+
+    async def wall_round(self, rnd: int) -> int:
+        """Один круг: стены, которые пора читать (умный опрос), пачками по WALL_PACK, разложенные по всем сервисным
+        ключам — каждый ключ читает свою часть параллельно. → сколько сообществ прочитали."""
+        readers = self.readers or ([self.rd] if self.rd is not None else [])
+        todo = [g for g in self.groups() if self.due(g, rnd)]
+        if not readers or not todo:
+            return 0
+        started = time.time()
+        packs = [todo[i:i + WALL_PACK] for i in range(0, len(todo), WALL_PACK)]
+        await asyncio.gather(*(self._wall_worker(api, packs[k::len(readers)]) for k, api in enumerate(readers)))
+        self.round_info = {"read": len(todo), "all": len(self.groups()), "sec": round(time.time() - started, 1), "keys": len(readers)}
+        return len(todo)
+
     async def wall_loop(self) -> None:
-        """Стены всех сообществ по кругу, пачками по WALL_PACK за один запрос (execute). Открытые сообщества так читаются
-        без вступления; при 100 сообществах каждое проверяется раз в ~4 с."""
+        """Стены всех сообществ по кругу (открытые так читаются без вступления). Умный опрос: активные — каждый круг,
+        тихие — реже; несколько сервисных ключей читают параллельно."""
+        rnd = 0
         while True:
-            groups = self.groups()
-            if not groups or self.ctx.cfg.vk_wall_rps <= 0:
+            if not self.groups() or self.ctx.cfg.vk_wall_rps <= 0:
                 await asyncio.sleep(5)
                 continue
-            for i in range(0, len(groups), WALL_PACK):
-                part, started = groups[i:i + WALL_PACK], time.time()
-                try:
-                    res = await self._many("wall.get", [{"owner_id": -g, "count": 5} for g in part], WALL_PACK, self.rd)
-                    for g, r in zip(part, res):
-                        if r is not None:
-                            await self.poll_wall(g, r.get("items", []))
-                    self.error = ""
-                except VKError as e:
-                    self.error = str(e)
-                    log.warning("стены ВК: %s", e)
-                    if e.code in FLOOD:
-                        await asyncio.sleep(FLOOD_PAUSE)
-                except Exception as e:
-                    log.info("стены ВК: %s", e)
-                await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.vk_wall_rps - (time.time() - started)))
+            if not await self.wall_round(rnd):
+                await asyncio.sleep(1)
+            rnd += 1
 
     # ---------- диагностика: /vkcheck ----------
     async def check(self) -> list[str]:
@@ -381,7 +443,10 @@ class VKReader:
                 await self.api.call("newsfeed.get", filters="post", count=1)
                 return ""
             await step("лента страницы", feed())
-        out.append(f"\nВ очереди сообществ: {len(q)}" + (f" · последняя ошибка: {q[0]['error']}" if q and q[0]["error"] else ""))
+        a, m, z = self.tiers()
+        out.append(f"\nКлючей чтения стен: {max(1, len(self.readers))} · каждый круг: {a}, раз в 3 круга: {m}, раз в 10: {z}"
+                   + (f" · последний круг: {self.round_info['read']} стен за {self.round_info['sec']} с" if self.round_info else ""))
+        out.append(f"В очереди сообществ: {len(q)}" + (f" · последняя ошибка: {q[0]['error']}" if q and q[0]["error"] else ""))
         return out
 
     # ---------- поиск новых сообществ ----------
@@ -703,7 +768,7 @@ class VKReader:
         for t in (self.runner, getattr(self, "retry_task", None)):
             if t and not t.done():
                 t.cancel()
-        for api in {id(a): a for a in (self.api, self.service) if a is not None}.values():
+        for api in {id(a): a for a in (self.api, self.service, *self.readers) if a is not None}.values():
             await _close(api)
 
     async def history_loop(self) -> None:
