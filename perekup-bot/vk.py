@@ -34,6 +34,7 @@ FLOOD_PAUSE = 60               # на сколько притормаживае�
 # за 2 дня — раз в 3 круга, тише — раз в 10. Новое сообщество (ещё не читали) — сразу.
 TIERS = ((6 * 3600, 1), (48 * 3600, 3))
 QUIET_EVERY = 10
+WALL_INFLIGHT = 3               # пачек стен в работе одновременно на один ключ (ответ ВК на пачку — 3–5 с)
 PAUSE_CAPTCHA = 900            # ВК попросил капчу или «слишком часто» — следующее вступление через 15 минут
 MENTION = re.compile(r"\[(?:id|club|public)\d+\|([^\]]*)\]")
 ERRORS = {100: "сообщество не найдено", 15: "нет доступа к сообществу", 203: "нет доступа к сообществу",
@@ -361,9 +362,12 @@ class VKReader:
         return out[0], out[1], out[2]
 
     async def _wall_worker(self, api, packs: list[list[int]]) -> None:
-        """Пачки стен одним ключом, не чаще VK_WALL_RPS запросов в секунду."""
-        for part in packs:
-            started = time.time()
+        """Пачки стен одним ключом: новая пачка стартует не чаще VK_WALL_RPS раз в секунду, но ответа на прошлую
+        не ждём — ВК отвечает на пачку из 25 стен по 3–5 с, и последовательно круг из 600 стен шёл 32 с (владелец 15.11,
+        /vkcheck). В работе одновременно до WALL_INFLIGHT пачек на ключ. «Слишком часто» — пауза только этому ключу."""
+        rps, sem, paused = self.ctx.cfg.vk_wall_rps, asyncio.Semaphore(WALL_INFLIGHT), [0.0]
+
+        async def one(part: list[int]) -> None:
             try:
                 res = await self._many("wall.get", [{"owner_id": -g, "count": 5} for g in part], WALL_PACK, api)
                 for g, r in zip(part, res):
@@ -374,10 +378,21 @@ class VKReader:
                 self.error = str(e)
                 log.warning("стены ВК: %s", e)
                 if e.code in FLOOD:
-                    await asyncio.sleep(FLOOD_PAUSE)
+                    paused[0] = time.time() + FLOOD_PAUSE
             except Exception as e:
                 log.info("стены ВК: %s", e)
-            await asyncio.sleep(max(0.0, 1 / self.ctx.cfg.vk_wall_rps - (time.time() - started)))
+            finally:
+                sem.release()
+
+        tasks = []
+        for part in packs:
+            await sem.acquire()
+            if paused[0] > time.time():
+                await asyncio.sleep(paused[0] - time.time())
+            started = time.time()
+            tasks.append(asyncio.create_task(one(part)))
+            await asyncio.sleep(max(0.0, 1 / rps - (time.time() - started)))
+        await asyncio.gather(*tasks)
 
     async def wall_round(self, rnd: int) -> int:
         """Один круг: стены, которые пора читать (умный опрос), пачками по WALL_PACK, разложенные по всем сервисным
@@ -423,8 +438,14 @@ class VKReader:
                 u = (await self.api.call("users.get"))[0]
                 return f"{u.get('first_name', '')} {u.get('last_name', '')}"
             await step("ключ служебной страницы", me())
-        if self.service is not None:
-            await step("сервисный ключ", self.service.call("groups.getById", group_id="1"))
+        if self.readers or self.service is not None:
+            async def keys():
+                ok = 0
+                for api in self.readers or [self.service]:
+                    await api.call("groups.getById", group_id="1")
+                    ok += 1
+                return f"работают все {ok}" if ok > 1 else ""
+            await step("сервисные ключи" if len(self.readers) > 1 else "сервисный ключ", keys())
         async def grp():
             g = await self.group(ref)
             return f"{g.get('name')} · {'открытое' if not g.get('is_closed') else 'закрытое'}"

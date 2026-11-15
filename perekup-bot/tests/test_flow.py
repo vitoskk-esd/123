@@ -2245,3 +2245,23 @@ async def test_vk_smart_poll_and_many_keys(env):
     assert made[0].calls and made[1].calls                                     # обе половины прочитаны своими ключами
     reader.fresh.pop(1000)
     assert reader.due(1000, 5)                                                 # не читали ещё — читаем сразу
+
+
+async def test_vk_wall_packs_overlap_while_vk_answers(env):
+    """ВК отвечает на пачку из 25 стен по несколько секунд — ключ не ждёт ответа, а держит в работе до 3 пачек
+    (круг из 600 стен шёл 32 с при 4 ключах — владелец 15.11)."""
+    dp, bot, s, ctx = env
+    import dataclasses
+    ctx.cfg = dataclasses.replace(ctx.cfg, vk_service="k1", vk_wall_rps=100)
+
+    class SlowVK(FakeVK):
+        async def many(self, method, plist, per=25):
+            await asyncio.sleep(.3)
+            return [{"items": []} for _ in plist]
+    reader = VKReader(bot, ctx, make_api=lambda t: SlowVK())
+    reader._make_readers()
+    for g in range(2000, 2150):                                   # 150 сообществ = 6 пачек
+        ctx.channels[VK_KEY + g] = {"vk_id": g, "tg_id": None, "base": 1}
+    t0 = time.time()
+    assert await reader.wall_round(0) == 150
+    assert time.time() - t0 < 1.0                                  # по очереди было бы 6 × 0,3 = 1,8 с
