@@ -212,6 +212,25 @@ FROM_CAR = {"от", "с", "со", "под"}
 SALE_LEAD = set("в на продаже продажа продам продаю продается продаеться срочно отдам".split())   # «в продаже 2112» — это заголовок
 
 
+IDIOM_SLANG = {"копейки", "копеек", "копейками", "копейкам"}       # «за копейки», «отдам за копейки» — дёшево, а не ВАЗ-2101
+
+
+def _idiom(toks: list[str], h) -> bool:
+    """Прозвище модели, которое здесь — оборот речи: «за копейки», «за копейку», «копеек» (владелец 15.11: Volvo S40
+    «за копейки» бот назвал Lada 2101)."""
+    tok = toks[h.start]
+    return tok in IDIOM_SLANG or (tok.startswith("копе") and h.start > 0 and toks[h.start - 1] == "за")
+
+
+def _glued_model(tok: str, make: str, d: Dictionary) -> str | None:
+    """Модель названной марки, к которой прилипли 1–3 лишние буквы: «Volvo asS40» → S40 (модель — от 3 знаков)."""
+    for (mk, model) in d.models:
+        m = model.lower()
+        if mk == make and len(m) >= 3 and tok != m and tok.endswith(m) and len(tok) - len(m) <= 3 and tok[:-len(m)].isalpha():
+            return model
+    return None
+
+
 def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
     """Какая машина продаётся, если в посте их несколько. Каждое упоминание получает очки:
     + модель (а не только марка), + названа вместе с маркой («Citroen C4»), + стоит в начале строки (заголовок),
@@ -225,6 +244,12 @@ def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
         make_before = {h.end: h.payload[1] for h in hits if h.payload[0] == "make"}   # где кончается название марки
         for h in hits:
             make, model = h.payload[1], (h.payload[2] if h.payload[0] == "model" else None)
+            if h.payload[0] == "make" and h.end < len(toks):
+                glued = _glued_model(toks[h.end], make, d)        # «Volvo asS40» — модель слиплась с лишними буквами
+                if glued:
+                    model = glued
+            if model and _idiom(toks, h):
+                continue                                     # «за копейки», «копейки» — цена, а не ВАЗ-2101 (владелец 15.11)
             short = model and h.end - h.start == 1 and len(toks[h.start]) <= 3
             if short and make not in named and not any(years[max(0, li - 1):li + 3]):
                 continue                                     # «доход х3», «rx» без марки и года — не машина

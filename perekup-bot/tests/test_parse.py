@@ -450,3 +450,15 @@ def test_car_city_wins_over_channel_city():
     text = "#Kia #Rio 4 поколение 2021\nГод: 2021\nПробег: 143000\nЦена: 640 000 ₽\nМосква\n+7 916 126-56-64"
     assert parse_post(text, D, "ufa").region == "msk"
     assert parse_post(text.replace("Москва\n", ""), D, "ufa").region == "ufa"
+
+
+def test_idiom_and_glued_model_and_weak_city():
+    """Владелец 15.11: Volvo S40 «за копейки» («Шведский шлюкс Volvo asS40», «Короче пушка…») бот назвал
+    «Lada 2101 · Короча». «За копейки» — цена, а не ВАЗ-2101; «asS40» — S40 с прилипшими буквами; «Короче» — слово, не город."""
+    d = D
+    r = parse_post("В продажу поступает Бизнес класс за копейки\nШведский шлюкс Volvo asS40\nКороче пушка пепелац, все светит\n"
+                   "Цена подарок, всего: 83 228р\nКонтакт: 89112854627", d)
+    assert (r.make, r.model, r.city, r.price) == ("volvo", "S40", None, 83228)
+    assert parse_post("Продам копейку 1985 г, 120 000", d).model == "2101"
+    assert parse_post("отдам за копейку приору 2012, 250 000", d).model == "Priora"
+    assert parse_post("г. Короча, приора 2010, 300 т.р.", d).city == "Короча"
