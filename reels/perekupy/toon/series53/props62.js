@@ -1,6 +1,6 @@
 // ep62 «Чёрная пятница: скидки от Жоры»: герои и реквизит (базовые помощники — props.js)
-const VESTA = "vesta/vesta_34.png";
-Object.assign(CINE.SIZES, { [VESTA]: [781, 375] });
+const VESTA = "vesta/vesta_34.png", RX7 = "rx7/rx7_34.png";        // RX-7 — гордость Жоры (лист владельца 15.11)
+Object.assign(CINE.SIZES, { [VESTA]: [781, 375], [RX7]: [781, 363] });
 const INHAND = (x, foot, h, arm, w, html, z = 8, rot = 0, id = "") => {
   const s = h / 740, l = x - 210 * s, t = foot - 740 * s, A = arm * Math.PI / 180;
   const hx = l + (292 + 26 * Math.cos(A) - 130 * Math.sin(A)) * s, hy = t + (400 + 26 * Math.sin(A) + 130 * Math.cos(A)) * s;
@@ -45,3 +45,6 @@ const SWEAT = (x, y, id = "sw") => `<div id="${id}" style="position:absolute;lef
 const VSCARD = () => BOTH("Vesta · до 1 млн", `<div id="vcc">${CARD("Lada Vesta · 2019", "920 000 ₽", "рынок ≈ 1 080 000 ₽ · 1 владелец", "🔥 −15% к рынку · ⏱ 1 с после публикации")}</div>`);
 const CTA62 = `<div style="position:absolute;left:60px;right:60px;top:1330px;z-index:70;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:26px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center">
   <div style="font-size:52px;line-height:1.12">Бот <span style="color:#c0392b">«Перехват»</span><br>— ссылка в шапке</div><div style="margin-top:12px;font-size:30px;font-family:Onest;font-weight:800">объявления по всей России · через ~1 с после публикации</div></div>`;
+// упавшая неоновая буква (с баннера — на капот RX-7)
+const NEONCHAR = (x, y, ch = "Я", id = "nch", rot = 24) => `<div class="prop" id="${id}" style="left:${x}px;top:${y}px;width:200px;height:220px;z-index:9;transform:rotate(${rot}deg);font-family:Unbounded;font-weight:900;font-size:170px;line-height:1;color:#ff9ae8;text-shadow:0 0 10px #ff3bd0,0 0 24px #ff3bd0;-webkit-text-stroke:3px #151515">${ch}</div>`;
+const SPARKS = (x, y, id = "spk") => `<div id="${id}" style="position:absolute;left:${x - 120}px;top:${y - 120}px;width:240px;height:240px;z-index:10"><svg viewBox="0 0 240 240">${Array.from({ length: 10 }, (_, k) => { const a = k * Math.PI / 5, r1 = 30, r2 = 90 + (k % 3) * 20; return `<path d="M${120 + r1 * Math.cos(a)} ${120 + r1 * Math.sin(a)} L${120 + r2 * Math.cos(a)} ${120 + r2 * Math.sin(a)}" stroke="#ffd23f" stroke-width="7" stroke-linecap="round"/>`; }).join("")}</svg></div>`;
