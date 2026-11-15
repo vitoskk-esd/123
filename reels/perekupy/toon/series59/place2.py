@@ -95,8 +95,10 @@ def squeeze(seg, keep=.12, cuts=None):
         while j < n and quiet[j] == quiet[i]: j += 1
         chunk = seg[i * fr:j * fr]
         if quiet[i] and 0 < i and j < n and (j - i) * fr > keep * SR:
-            if cuts is not None: cuts.append(((i * fr + int(keep * SR)) / SR, (len(chunk) - int(keep * SR)) / SR))
-            chunk = chunk[:int(keep * SR)]
+            # оставляем половину паузы в начале и половину в конце: тихая согласная перед словом («х» в «хуйня», ep68) живёт в хвосте паузы
+            h = int(keep * SR / 2)
+            if cuts is not None: cuts.append(((i * fr + h) / SR, (len(chunk) - 2 * h) / SR))
+            chunk = np.concatenate([chunk[:h], chunk[-h:]])
         out.append(chunk); i = j
     out.append(seg[n * fr:])
     return np.concatenate(out)
