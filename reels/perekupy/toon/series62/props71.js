@@ -1,8 +1,8 @@
 // ep71 «Эвакуатор: постоянный клиент» (с матом): герои и реквизит (базовые помощники — props.js)
 const VIT = { jacket: "#2b2f37", vest: "#ff7a1a", pants: "#2f4f8a", cap: "#ffd23f", hair: "#7a5a3a", mustache: true, skin: "#eaa286", look: "flat" };   // эвакуаторщик Витя (новый герой)
 const PASH = { jacket: "#c0392b", pants: "#2c3e66", hair: "#e0c070", look: "o" };                                                                    // покупатель Пашка (новый герой)
-const V15 = "vaz2115/vaz2115_c.png", HYC = "hyundai/hyundai_c.png";
-Object.assign(CINE.SIZES, { [V15]: [1305, 375], [HYC]: [1138, 360] });
+const V15 = "vaz2115/vaz2115_c.png", HYC = "hyundai/hyundai_c.png", GEL = "gelik/gelik_side.png";   // Гелик — у дачи Вити (владелец 15.11: «добавь в видео гелик»)
+Object.assign(CINE.SIZES, { [V15]: [1305, 375], [HYC]: [1138, 360], [GEL]: [616, 302] });
 const TITLE = (a, b) => `<div style="position:absolute;left:0;right:0;top:300px;text-align:center;font-family:Unbounded;font-weight:900;line-height:1;letter-spacing:-3px;z-index:50">
   <span style="display:inline-block;padding:10px 28px 18px;border:8px solid #151515;border-radius:22px;box-shadow:0 12px 0 #151515;font-size:80px;background:#ffd23f;color:#151515;transform:rotate(-3deg)">${a}</span><br>
   <span style="display:inline-block;padding:10px 28px 18px;border:8px solid #151515;border-radius:22px;box-shadow:0 12px 0 #151515;font-size:74px;background:#ff3b30;color:#fff;margin-top:26px;transform:rotate(2deg)">${b}</span></div>`;
