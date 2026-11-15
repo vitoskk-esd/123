@@ -30,7 +30,7 @@ mount("s2", { bg: "kabinaevak", mid: V("va", 360, 1960, 1250, {}, { armL: -40, a
   bubbles: [{ id: "z0", at: [850, 600], html: "Витёк, выручай!<br><em>Опять встала!</em>", fs: 40 }, { id: "v0", p: "va", html: "Жора, бл*дь,<br><em>это третий раз за день.</em>", fs: 40 }] }, CAB_SH);
 // 3. 5 км: «БАХ!»
 mount("s3", { bg: "trassa5km", mid: grp("c3", car(V15, 120, 1640, 860, { z: 5, sheen: .4 })) + BANG(0, 1300) + P("pa", 900, 1880, 800, {}, { armL: 60 }, { rim: "#ffe08a", side: -1, z: 7 }), lights: TS_L,
-  bubbles: [{ id: "p0", p: "pa", html: "Дядь Вить, она дымит<br><em>и… стреляет!</em>", fs: 42 }] }, { x: 540, y: 1150, s: 1.04 });
+  bubbles: [{ id: "p0", p: "pa", html: "Дядя Витя, она дымит<br><em>и… стреляет!</em>", fs: 42 }] }, { x: 540, y: 1150, s: 1.04 });
 // 4. погрузка на платформу
 mount("s4", { bg: "trassa5km", mid: TOWTRUCK(40, 1720, 960) + grp("ld", car(V15, 90, 1515, 640, { z: 6, sheen: .4 }), 6) + V("vb", 920, 1900, 820, {}, { armR: -120 }, { rim: "#ffe08a", side: -1, z: 9 }), lights: TS_L,
   bubbles: [{ id: "v1", p: "vb", html: "Ё* твою мать, глушак отвалился.<br><em>Грузим.</em>", fs: 40 }] }, { x: 540, y: 1150, s: 1.04 });
@@ -45,12 +45,12 @@ mount("s7", { bg: "dachavity", mid: car(GEL, 430, 1700, 620, { z: 5, sheen: .5 }
 // 8. бот: Хёндай
 { const H = HOLDPHONE("perekup", spk("pd", "pash"), 540, 2000, 1400, PASH, HYCARD("hcc2"), { rim: "#ffe08a", side: 1 });
   mount("s8", { bg: "trassa5km", farBlur: 5, mid: H.mid, lights: H.lights + TS_L,
-    bubbles: [{ id: "p2", p: "pd", html: "Хёндай, один хозяин, ниже рынка.<br><em>Месяц — ни одной поломки.</em>", fs: 38 }] }, { x: 540, y: 1000, s: 1.02 }); }
+    bubbles: [{ id: "p2", p: "pd", html: "Взял Хёндай: один хозяин, ниже рынка.<br><em>Месяц — ни одной поломки.</em>", fs: 38 }] }, { x: 540, y: 1000, s: 1.02 }); }
 // 9. месяц без вызовов
 mount("s9", { bg: "kabinaevak", mid: V("vf", 360, 1960, 1250, { look: "flat" }, { armL: -40, armR: -40 }, { rim: "#ffe08a", side: 1, z: 7 }) + KDASH(360) + RADIO(780, 1150, "rd2").replace('stroke="#ffd23f" stroke-width="7"', 'stroke="#ffd23f" stroke-width="7" opacity="0"') + TALLY(600, 300, "tl3", 0), lights: KB_L,
   bubbles: [{ id: "v4", p: "vf", html: "Месяц без вызовов.<br><em>Оху*ть. Пойду в такси.</em>", fs: 42 }] }, CAB_SH);
 // 10. Хёндай едет мимо эвакуатора
-mount("s10", { bg: "trassa5km", mid: grp("c10", car(HYC, 180, 1680, 760, { z: 6, sheen: .5, flip: true }), 6) + TOWTRUCK(560, 1300, 520, "tt3", 3), lights: TS_L }, { x: 540, y: 1150, s: 1.04 });
+mount("s10", { bg: "trassa5km", mid: grp("c10", car(HYC, 180, 1680, 760, { z: 6, sheen: .5 }), 6) + TOWTRUCK(20, 1300, 520, "tt3", 3), lights: TS_L }, { x: 540, y: 1150, s: 1.04 });
 // 11. карточка бота
 mount("s11", { bg: "trassa5km", over: CTA71.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), lights: TS_L }, { x: 540, y: 1000, s: .98 });
 
@@ -119,9 +119,10 @@ window.build = R => {
   bub("p0", st.v1 - .2);
   // 4. погрузка: «пятнашка» въезжает на платформу
   const SW4 = st.v1 - .3; swap("s3", "s4", SW4); move("s4", { s: 1.08 }, SW4, en.v1 - SW4 + .5, "none"); bub("v1", st.p1 - .2);
-  tl.fromTo("#ld", { x: 520, y: 200, rotation: 0 }, { x: 0, y: 0, duration: 1.6, ease: "power2.inOut", immediateRender: true }, Wd("v1", "груз", .7) - .2)
-    .to("#ld", { rotation: -5, duration: .4, yoyo: true, repeat: 1, ease: "sine.inOut", transformOrigin: "40% 80%" }, Wd("v1", "груз", .7) + .2);
-  R.sfx("whoosh", Wd("v1", "груз", .7), .5);
+  const LD = SW4 + .5, LDD = Math.max(1.4, en.v1 - LD - .1);   // погрузка — с начала реплики, к её концу машина на платформе
+  tl.fromTo("#ld", { x: 520, y: 200, rotation: 0 }, { x: 0, y: 0, duration: LDD, ease: "power2.inOut", immediateRender: true }, LD)
+    .to("#ld", { rotation: -5, duration: LDD / 4, yoyo: true, repeat: 1, ease: "sine.inOut", transformOrigin: "40% 80%" }, LD + LDD * .35);
+  R.sfx("whoosh", LD + .2, .5);
   // 5. «гарантия — это я»
   const SW5 = st.p1 - .3; swap("s4", "s5", SW5); move("s5", { s: 1.1 }, SW5, en.v2 - SW5 + .4, "none"); bub("p1", st.v2 - .1); bub("v2", st.l2 - .2);
   // 6. ночь: палочки дорисовываются до семи
@@ -136,14 +137,14 @@ window.build = R => {
   bub("v3", st.z1 - .1); bub("z1", st.l3 - .2);
   // 8. бот: Хёндай
   const SW8 = st.l3 - .25; swap("s7", "s8", SW8); move("s8", { s: 1.08 }, SW8, en.p2 - SW8 + .4, "none");
-  tl.fromTo("#hcc2", { scale: 1 }, { scale: 1.07, duration: .15, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, Wd("p2", "хен", .05)); R.sfx("ping", Wd("p2", "хен", .05), .8);
+  tl.fromTo("#hcc2", { scale: 1 }, { scale: 1.07, duration: .15, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, Wd("p2", "хен", .15)); R.sfx("ping", Wd("p2", "хен", .15), .8);
   bub("p2", st.v4 - .2);
   // 9. месяц без вызовов
   const SW9 = st.v4 - .3; swap("s8", "s9", SW9); move("s9", { s: 1.14 }, SW9, en.v4 - SW9 + .5, "none"); bub("v4", st.l4 - .1);
   // 10–11. финальная фраза Лиса: Хёндай едет мимо эвакуатора → карточка
   const SW10 = st.l4 - .2, SW11 = Math.min(st.l4 + 2.2, en.l4 - 2.5);
   swap("s9", "s10", SW10); move("s10", { s: 1.08 }, SW10, SW11 - SW10 + .5, "none");
-  tl.fromTo("#c10", { x: -900 }, { x: 260, duration: SW11 - SW10 + .4, ease: "none", immediateRender: false }, SW10);
+  tl.fromTo("#c10", { x: 420 }, { x: -260, duration: SW11 - SW10 + .4, ease: "none", immediateRender: false }, SW10);
   swap("s10", "s11", SW11); tl.to("#tag", { opacity: 0, duration: .2 }, SW11);
   tl.fromTo("#cta", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, SW11 + .6);
   ending(R, en.l4 + .3);
