@@ -18,7 +18,7 @@ const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", spk(p,
 const D = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", spk(p, "dima"), x, foot, h, { ...DIMA, ...o }, pose, extra);
 const P = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", spk(p, "polk"), x, foot, h, { ...POLK, ...o }, pose, extra) + MEDALS(x, foot, h, (extra.z || 7) + 1);
 const L = (p, x, foot, h, pose = {}, extra = {}) => VEIL(x, foot, h, "vl" + p, (extra.z || 7) - 1) + LNC(ch("vika", spk(p, "lena"), x, foot, h, null, pose, extra));
-const grp = (id, html) => `<div class="grp" id="${id}" style="position:absolute;left:0;top:0;width:1080px;height:1920px">${html}</div>`;
+const grp = (id, html, z = "") => `<div class="grp" id="${id}" style="position:absolute;left:0;top:0;width:1080px;height:1920px${z !== "" ? `;z-index:${z}` : ""}">${html}</div>`;   // z — когда группу двигают (transform даёт свой слой)
 const DB_L = glow(540, 200, 420, "#fff6d0", .3);
 const KZ_L = glow(90, 778, 160, "#4cd964", .3);
 const GV_L = glow(220, 160, 260, "#ffe6a8", .45) + glow(860, 160, 260, "#ffe6a8", .45);
@@ -54,8 +54,8 @@ mount("s9", { bg: "kortezh", farBlur: 2, mid: P("pe", 250, 1860, 860, {}, { armR
   mount("s10", { bg: "godovshina", farBlur: 5, mid: H.mid, lights: H.lights + GV_L,
     bubbles: [{ id: "d2", p: "dd", html: "Мазда шесть, один хозяин,<br><em>ниже рынка на сто сорок тысяч.</em>", fs: 38 }] }, { x: 540, y: 1000, s: 1.02 }); }
 // 11. через год у Дворца: Mazda 6 и «объявляю благодарность»
-mount("s11", { bg: "dvorbraka", mid: grp("c11", car(MZ6, 330, 1700, 740, { z: 8, sheen: .5 }) + RINGS(590, 1370, "rg6", 9)) + D("de", 560, 1640, 660, { look: "grin" }, {}, { rim: "#fff6d0", side: 1, z: 5 }) + L("lc", 860, 1640, 650, {}, { rim: "#fff6d0", side: -1, z: 5 }) + P("pf", 190, 1900, 880, { look: "grin" }, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 10 }), lights: DB_L,
-  bubbles: [{ id: "p5", p: "pf", html: "Оху*нно. Дмитрий,<br><em>объявляю благодарность!</em>", fs: 42 }] }, { x: 540, y: 1150, s: 1.04 });
+mount("s11", { bg: "dvorbraka", mid: grp("c11", car(MZ6, 330, 1700, 740, { z: 8, sheen: .5 }) + RINGS(590, 1370, "rg6", 9), 8) + D("de", 560, 1640, 660, { look: "grin" }, {}, { rim: "#fff6d0", side: 1, z: 5 }) + L("lc", 860, 1640, 650, {}, { rim: "#fff6d0", side: -1, z: 5 }) + P("pf", 190, 1900, 880, { look: "grin" }, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 10 }), lights: DB_L,
+  bubbles: [{ id: "p5", p: "pf", html: "Оху*нно. Дмитрий,<br><em>объявляю благодарность!</em>", fs: 42 }] }, { x: 560, y: 1180, s: 1 });
 // 12. карточка бота
 mount("s12", { bg: "godovshina", over: CTA69.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), lights: GV_L }, { x: 540, y: 1000, s: .98 });
 
@@ -153,10 +153,11 @@ window.build = R => {
   tl.fromTo("#mcc2", { scale: 1 }, { scale: 1.07, duration: .15, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, Wd("d2", "мазд", .05)); R.sfx("ping", Wd("d2", "мазд", .05), .8);
   bub("d2", st.p5 - .2);
   // 11. через год у Дворца: Mazda подъезжает, «объявляю благодарность»
-  const SW11 = st.p5 - .4; swap("s10", "s11", SW11); move("s11", { s: 1.08 }, SW11, en.p5 - SW11 + .4, "none");
+  const SW12 = Math.min(st.l4 + 2.0, en.l4 - 2.5);   // начало финальной фразы — ещё над Маздой
+  const SW11 = st.p5 - .4; swap("s10", "s11", SW11); move("s11", { s: 1.06 }, SW11, SW12 - SW11 + .5, "none");
   tl.fromTo("#c11", { x: -1000 }, { x: 0, duration: 1.0, ease: "power3.out", immediateRender: false }, SW11 + .05); bub("p5", st.l4 - .15);
   // 12. финальная фраза Лиса → карточка
-  const SW12 = st.l4 - .1; swap("s11", "s12", SW12); tl.to("#tag", { opacity: 0, duration: .2 }, SW12);
+   swap("s11", "s12", SW12); tl.to("#tag", { opacity: 0, duration: .2 }, SW12);
   tl.fromTo("#cta", { opacity: 0, y: 80, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: "back.out(1.6)", immediateRender: false }, SW12 + .6);
   ending(R, en.l4 + .3);
 };
