@@ -2044,8 +2044,9 @@ async def test_admin_bulk_links_report(env):
     before = len(s.sent)
     await dp.feed_update(bot, msg("\n".join(links + ["@avto_msk", "привет"]), ADMIN))
     out = [m.text for m in s.sent[before:] if isinstance(m, SendMessage)]
-    assert out and all(len(t) <= 4096 for t in out) and len(out) >= 2
+    assert out and all(len(t) <= 4096 for t in out)
     text = "\n".join(out)
+    assert "и ещё 285" in text                                   # длинный список имён свёрнут (из файла бывают тысячи)
     assert "Получил ссылок: <b>301</b>" in text and "Взял в работу: 300" in text and "Уже были в базе и работают: 1" in text
     assert "Не понял (не ссылка на канал): 1" in text and "привет" in text
     await dp.feed_update(bot, msg("/add t.me/new_avto_channel_5 t.me/new_avto_channel_6", ADMIN))
@@ -2265,3 +2266,41 @@ async def test_vk_wall_packs_overlap_while_vk_answers(env):
     t0 = time.time()
     assert await reader.wall_round(0) == 150
     assert time.time() - t0 < 1.0                                  # по очереди было бы 6 × 0,3 = 1,8 с
+
+
+def test_file_links_txt_and_xlsx():
+    """Владелец 15.11: «сделай, чтобы бот мог читать файлы». .txt — все ссылки; .xlsx — колонка «Ссылка»,
+    а ссылки на примеры постов из соседних колонок не берём."""
+    import io
+    from openpyxl import Workbook
+    from admin import file_links
+    assert file_links("a.txt", "https://vk.com/avto_kzn\nvk.com/club888 @auto_msk\nмусор".encode()).split() == \
+        ["https://vk.com/avto_kzn", "vk.com/club888", "@auto_msk"]
+    wb = Workbook(); ws = wb.active
+    ws.append(["№", "Регион", "Название", "Ссылка", "Пример объявления"])
+    ws.append(["Алтайский край - 2 группы"])
+    ws.append([1, "Алтайский край", "Авторынок", "https://vk.com/avtorinokaltai", "https://vk.com/wall-103091433_5"])
+    ws.append([2, "Алтайский край", "Барахолка", "https://vk.com/avtobarahlo22", "https://vk.com/wall-1_2"])
+    buf = io.BytesIO(); wb.save(buf)
+    assert file_links("t.xlsx", buf.getvalue()).split() == ["https://vk.com/avtorinokaltai", "https://vk.com/avtobarahlo22"]
+
+
+async def test_admin_sends_file_with_links(env, monkeypatch):
+    """Админ присылает файл со ссылками — бот берёт их в работу, как /add; файл от обычного человека не трогает."""
+    dp, bot, s, ctx = env
+    import admin
+    from aiogram.types import Document
+    async def fake_read(b, doc):
+        return b"https://vk.com/avto_kzn\nhttps://vk.com/club888\n"
+    monkeypatch.setattr(admin, "_read_document", fake_read)
+    def doc_msg(uid):
+        return Update(update_id=next(ids), message=Message(message_id=next(ids), date=datetime.now(), chat=Chat(id=uid, type="private"),
+                      from_user=user(uid), document=Document(file_id="f", file_unique_id="u", file_name="vk.txt", file_size=60)))
+    await dp.feed_update(bot, msg("/start", ADMIN))
+    await dp.feed_update(bot, doc_msg(ADMIN))
+    assert "ссылок — 2" in s.texts(ADMIN)[-2] and "Получил ссылок: <b>2</b>" in s.texts(ADMIN)[-1]
+    assert len(await ctx.db.queued_channels("vk")) == 2
+    await dp.feed_update(bot, msg("/start"))
+    n = len(s.texts(USER))
+    await dp.feed_update(bot, doc_msg(USER))
+    assert not any("ссылок" in t for t in s.texts(USER)[n:]) and len(await ctx.db.queued_channels("vk")) == 2

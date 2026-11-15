@@ -121,7 +121,7 @@ async def add_links_to_base(msg: Message, ctx: Ctx, text: str, region: str | Non
             queued_ids.append(cid)
             (taken if new else retry if ch["status"] == "failed" else in_queue).append(name)
     await ctx.refresh_channels()            # уже подключённый свой канал стал общим — посты сразу всем
-    lst = lambda xs: ", ".join(xs)
+    lst = lambda xs: ", ".join(xs) if len(xs) <= 30 else ", ".join(xs[:15]) + f" и ещё {len(xs) - 15}"   # из файла бывают тысячи
     parts = [f"📥 Получил ссылок: <b>{len(links)}</b>."]
     if taken or retry:
         parts.append(f"✅ <b>Взял в работу: {len(taken) + len(retry)}</b> — подключаю по одному, потом они будут в общей базе для всех.\n{lst(taken + retry)}")
@@ -137,6 +137,65 @@ async def add_links_to_base(msg: Message, ctx: Ctx, text: str, region: str | Non
     wait += await queue_status(ctx) if queued_ids else ""
     vk_off = T.VK_OFFLINE if any(k == "vk" for k, _ in links) and not vk_online(ctx) else ""
     await answer_long(msg, "\n\n".join(parts) + wait + vk_off, reply_markup=markup)
+
+
+FILE_LINK = re.compile(r"(?:https?://)?(?:www\.|m\.)?(?:t\.me|telegram\.me|vk\.com|vk\.ru)/[^\s,;\"'<>()\[\]]+|(?<![\w.])@[A-Za-z][A-Za-z0-9_]{4,}")
+
+
+def file_links(name: str, data: bytes) -> str:
+    """Ссылки на каналы и группы ВК из файла (владелец 15.11: «сделай, чтобы бот мог читать файлы»): .txt / .csv — весь
+    текст; .xlsx — на каждом листе колонка с заголовком «Ссылка», а нет такой — все ячейки (в таблицах есть и ссылки
+    на примеры постов — их не берём, если колонка «Ссылка» есть)."""
+    if name.lower().endswith((".xlsx", ".xlsm")):
+        import io
+        from openpyxl import load_workbook
+        wb = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+        cells = []
+        for ws in wb.worksheets:
+            rows = list(ws.iter_rows(values_only=True))
+            col = next(((ri, ci) for ri, row in enumerate(rows[:10]) for ci, c in enumerate(row)
+                        if isinstance(c, str) and c.strip().lower() in ("ссылка", "ссылки", "link", "url")), None)
+            if col:
+                cells += [str(r[col[1]]) for r in rows[col[0] + 1:] if len(r) > col[1] and r[col[1]]]
+            else:
+                cells += [str(c) for r in rows for c in r if c]
+        text = "\n".join(cells)
+    else:
+        try:
+            text = data.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            text = data.decode("cp1251", errors="ignore")
+    return " ".join(FILE_LINK.findall(text))
+
+
+async def _read_document(bot: Bot, doc) -> bytes:
+    import io
+    buf = io.BytesIO()
+    await bot.download(doc, destination=buf)
+    return buf.getvalue()
+
+
+@router.message(F.document)
+async def links_from_file(msg: Message, ctx: Ctx, bot: Bot) -> None:
+    """Админ прислал файл (.txt, .csv, .xlsx) со ссылками — добавить всё в общую базу, как /add.
+    Подпись к файлу — код региона (msk), если весь список из одного города. Не админ — дальше, к другим обработчикам."""
+    from aiogram.dispatcher.event.bases import SkipHandler
+    if not await is_admin_id(ctx, msg.from_user.id):
+        raise SkipHandler()
+    doc = msg.document
+    if not (doc.file_name or "").lower().endswith((".txt", ".csv", ".xlsx", ".xlsm")):
+        return await msg.answer("Пришли файл .txt, .csv или .xlsx — в нём ссылки на каналы или группы ВК.")
+    if (doc.file_size or 0) > 20 * 1024 * 1024:
+        return await msg.answer("Файл больше 20 МБ — Telegram не даёт боту его скачать. Раздели на части.")
+    try:
+        text = file_links(doc.file_name, await _read_document(bot, doc))
+    except Exception as e:
+        return await msg.answer(f"Не смог прочитать файл: {e}")
+    if not text:
+        return await msg.answer("В файле не нашёл ссылок на каналы или группы ВК (t.me/…, @…, vk.com/…).")
+    cap = (msg.caption or "").strip().lower()
+    await msg.answer(f"📄 Читаю «{doc.file_name}»: ссылок — {len(text.split())}. Добавляю в базу…")
+    await add_links_to_base(msg, ctx, text, cap if cap in ctx.dict.regions else None)
 
 
 def mostly_links(text: str) -> bool:
