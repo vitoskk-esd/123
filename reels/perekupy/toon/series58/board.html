@@ -1,0 +1,93 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props67.js"></script>
+<script>
+// «ГАРАЖ: МАСТЕР БЕЗ ЦЕНЗУРЫ» (киношный формат, отдельный ролик). ГСК «Мотор»: Жора купил на рынке Гранту «не бита, не крашена» и пригнал к мастеру Гаврилычу.
+// Гаврилыч сорок лет в гараже и оценивает машины матом (настоящий мат в озвучке — решение владельца 15.11; в облачках — со звёздочками).
+// Яма: пороги из монтажной пены, толщиномер 900 мкм, «мат-о-метр» в красной зоне. Приезжает Стас на Камри из бота — Гаврилыч 40 минут молчит: «мне даже материться не на что».
+// ОБЛОЖКА (кадр 0, правило владельца 15.11): Стас держит телефон с ботом (Camry 2019 −13%) + плашка «ГАРАЖ: / МАСТЕР БЕЗ ЦЕНЗУРЫ».
+// Приёмы (новые): мат-о-метр со стрелкой; вид из смотровой ямы снизу (днище, переноска качается); толщиномер крупно; часы-таймлапс «40 минут молча».
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const G = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...GAV, ...o }, pose, extra);
+const SN = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...SAN, ...o }, pose, extra);
+const ST = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...STAS, ...o }, pose, extra);
+const GV_L = glow(885, 404, 220, "#ffd27a", .5);
+const BX_L = glow(540, 180, 380, "#fff6d0", .45);
+const YM_L = glow(760, 720, 300, "#fff6d0", .35);
+const needle = (html, id, deg) => html.replace(`id="${id}n" style="transform-origin:150px 160px;transform:rotate(-80deg)"`, `id="${id}n" style="transform-origin:150px 160px;transform:rotate(${deg}deg)"`);
+const S = [
+ { h: "ОБЛОЖКА · СТАС С БОТОМ → ГСК «МОТОР»", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("perekup", "sp", 540, 2090, 1680, STAS, CAMCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "yamaboks", farBlur: 8, mid: H.mid, lights: H.lights + BX_L, over: TITLE("ГАРАЖ:", "МАСТЕР БЕЗ ЦЕНЗУРЫ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "gskvorota", mid: car(GRS, 330, 1560, 700, { z: 5, sheen: .4 }) + Z("za", 190, 1820, 820, { look: "grin" }, { armR: -100 }, { rim: "#ffd27a", side: 1, z: 7 }) + G("ga", 870, 1790, 800, {}, { armL: 20 }, { rim: "#ffd27a", side: -1, z: 7 }), lights: GV_L }), shot: { x: 540, y: 1200, s: 1.04 },
+     bubbles: [{ p: "za", html: "Гаврилыч, глянь!<br><em>Взял за четыреста!</em>", fs: 32 }, { p: "ga", html: "Подарок, б**ть…<br><em>Загоняй на яму.</em>", fs: 32 }], talk: ["ga"] },
+   vo: "Лис: «Гаражный кооператив “Мотор”. Жора купил на рынке Гранту: “один хозяин, не бита, не крашена”». Жора: «Гаврилыч, глянь! Взял за четыреста — подарок!» Гаврилыч: «Подарок, бля… Ну, загоняй на яму».", who: "Лис + Жора + Гаврилыч",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: Стас держит телефон, в боте «Toyota Camry · 2019 · 1 790 000 ₽ · рынок ≈ 2 050 000 · 🔥 −13% · ⏱ 1 с»; плашка «ГАРАЖ: / МАСТЕР БЕЗ ЦЕНЗУРЫ». B — <b>новый фон — въезд в ГСК «МОТОР»</b> (шлагбаум, будка, ворота с номерами, фонарь, слякоть); Жора с заниженной Грантой; <b>новый герой — мастер Гаврилыч</b> (телогрейка, кепка, усы, красное лицо)." },
+ { h: "ЯМА → ВИД СНИЗУ: ПОРОГИ ИЗ МОНТАЖНОЙ ПЕНЫ", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "yamaboks", mid: car(GRS, 380, 1500, 700, { z: 5, sheen: .4 }) + G("gb", 250, 2010, 960, {}, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + PITFRONT(1610), over: MATOMETR(740, 190, "mm1"), lights: BX_L }), shot: { x: 540, y: 1200, s: 1.04 } },
+   B: { def: () => ({ bg: "podyamoy", mid: UNDER(true) + LAMP(760, 380) + G("gc", 420, 2080, 1180, { look: "o" }, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 20 }), over: needle(MATOMETR(740, 190, "mm2"), "mm2", 25), lights: YM_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "gc", html: "Ё* твою мать…<br><em>У неё пороги из монтажной пены!</em>", fs: 40 }], talk: ["gc"] },
+   vo: "Лис: «Гаврилыч сорок лет чинит машины. Он не говорит “плохо”. У него свой язык». Гаврилыч: «Ёб твою мать… Жора, у неё пороги из монтажной пены!»", who: "Лис + Гаврилыч",
+   mv: "A — <b>новый фон — бокс Гаврилыча</b> (кафель, щит с ключами, календарь 1998, верстак, смотровая яма с жёлто-чёрным краем); Гаврилыч в яме по пояс; в углу <b>приём 1: «МАТ-О-МЕТР»</b> — стрелка пока в зелёной зоне. B — <b>приём 2: вид из ямы снизу</b> — <b>новый фон</b>: бетонные стены, полка с банками; сверху днище: ржавые дыры, из порогов торчит жёлтая монтажная пена; переноска качается; стрелка мат-о-метра уходит в жёлтую." },
+ { h: "«КРАСКА РОДНАЯ!» → ТОЛЩИНОМЕР 900 МКМ", tc: "3/6 · 0:24–0:36",
+   A: { def: () => ({ bg: "yamaboks", farBlur: 6, mid: Z("zb", 540, 1900, 1000, { look: "o" }, { armL: 50 }, { rim: "#fff6d0", side: 1, z: 7 }), lights: BX_L }), shot: { x: 540, y: 1150, s: 1.08 },
+     bubbles: [{ p: "zb", html: "Да ладно!<br><em>Продавец сказал — краска родная!</em>", fs: 42 }], talk: ["zb"] },
+   B: { def: () => ({ bg: "yamaboks", farBlur: 3, mid: G("gd", 320, 1920, 1000, {}, { armR: -100 }, { rim: "#fff6d0", side: 1, z: 7 }) + GAUGE(680, 1000, "tq", "900", "ШПАКЛЁВКА", "#ff3b30"), over: needle(MATOMETR(740, 190, "mm3"), "mm3", 55), lights: BX_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "gd", html: "Родная? Девятьсот!<br><em>Шпаклёвки на палец, на**й!</em>", fs: 42 }], talk: ["gd"] },
+   vo: "Жора: «Да ладно! Продавец сказал — краска родная!» Гаврилыч: «Родная? Толщиномер показывает девятьсот! Тут шпаклёвки на палец, нахуй!»", who: "Жора + Гаврилыч",
+   mv: "A — Жора крупно, не верит. B — <b>приём 3: толщиномер крупно</b> — цифры бегут 110 → 340 → 900 мкм, плашка меняется «ЗАВОД» → «ШПАКЛЁВКА» (красная); Гаврилыч тычет пальцем; стрелка мат-о-метра — в красной." },
+ { h: "САНЫЧ: «РАССАДА ВЯНЕТ!» → «П*ЗДЕЦ НА КОЛЁСАХ»", tc: "4/6 · 0:36–0:48",
+   A: { def: () => ({ bg: "gskvorota", farBlur: 2, mid: SN("sa", 620, 1820, 880, {}, { armL: 60 }, { rim: "#ffd27a", side: -1, z: 7 }) + SEEDS(150, 1600), lights: GV_L }), shot: { x: 540, y: 1200, s: 1.05 },
+     bubbles: [{ p: "sa", html: "Гаврилыч, потише!<br><em>У меня рассада вянет!</em>", fs: 44 }], talk: ["sa"] },
+   B: { def: () => ({ bg: "yamaboks", farBlur: 3, mid: G("ge", 300, 1880, 920, {}, { armL: 40 }, { rim: "#ff3b30", side: 1, z: 7 }) + Z("zc", 800, 1880, 900, { look: "o" }, {}, { rim: "#fff6d0", side: -1, z: 7 }), over: needle(MATOMETR(390, 160, "mm4", 1), "mm4", 88), lights: BX_L }), shot: { x: 540, y: 1180, s: 1.04 },
+     bubbles: [{ p: "ge", html: "Одиннадцать косяков.<br><em>Это п*здец на колёсах.</em>", fs: 32 }, { p: "zc", html: "И что мне<br><em>теперь делать?..</em>", fs: 32 }], talk: ["ge"] },
+   vo: "Саныч: «Гаврилыч, потише! У меня рассада вянет!» Лис: «Мат-о-метр Гаврилыча впервые за год ушёл в красную зону». Гаврилыч: «Одиннадцать косяков, Жора. Это не машина. Это пиздец на колёсах». Жора: «И что мне теперь делать?..»", who: "Саныч + Лис + Гаврилыч + Жора",
+   mv: "A — <b>новый герой — сосед Саныч</b> (очки, шарф) у соседнего гаража, в руках ящик с рассадой — стебли вянут на глазах. B — мат-о-метр выезжает в центр, стрелка бьётся о край красной зоны (дрожь, искры); Гаврилыч и Жора в кадре." },
+ { h: "СТАС НА КАМРИ ИЗ БОТА → 40 МИНУТ МОЛЧА", tc: "5/6 · 0:48–1:00",
+   A: { def: () => ({ bg: "gskvorota", mid: car(CAM, 40, 1600, 900, { z: 5, sheen: .5 }) + ST("sb", 900, 1850, 820, {}, { armL: 60 }, { rim: "#ffd27a", side: -1, z: 7 }) + Z("zd", 170, 1880, 760, { look: "o" }, {}, { z: 8 }), lights: GV_L }), shot: { x: 540, y: 1200, s: 1.04 },
+     bubbles: [{ p: "sb", html: "Гаврилыч, глянь мою Камри.<br><em>Через бота взял — ниже рынка.</em>", fs: 38 }], talk: ["sb"] },
+   B: { def: () => ({ bg: "podyamoy", mid: UNDER(false) + LAMP(760, 380) + CLOCK(40, 1120, "ck", 110) + G("gf", 560, 2080, 1180, { look: "flat" }, {}, { rim: "#fff6d0", side: 1, z: 20 }), over: needle(MATOMETR(740, 190, "mm5"), "mm5", -86), lights: YM_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "gf", html: "Стас…<br><em>мне даже материться не на что.</em>", fs: 44 }], talk: ["gf"] },
+   vo: "Лис: «И тут к гаражу подъехал Стас». Стас: «Гаврилыч, глянь мою Камри. Через бота взял, ниже рынка». Лис: «Гаврилыч осматривал её сорок минут. Молча». Гаврилыч: «Стас… мне даже материться не на что».", who: "Лис + Стас + Гаврилыч",
+   mv: "A — белая Камри въезжает в ГСК, Стас машет; Жора в кадре смотрит с завистью. B — снова вид из ямы: чистое днище; <b>приём 4: часы-таймлапс</b> — стрелки крутятся (40 минут за 2 секунды), Гаврилыч молча светит переноской; стрелка мат-о-метра лежит на нуле." },
+ { h: "«ВПЕРВЫЕ ЗА СОРОК ЛЕТ!» → ФИНАЛ: БОТ", tc: "6/6 · 1:00–1:12",
+   A: { def: () => ({ bg: "gskvorota", farBlur: 2, mid: SN("sc", 290, 1840, 860, { look: "o" }, { armR: -140 }, { rim: "#ffd27a", side: 1, z: 7 }) + SEEDS(40, 1640, "sd2", 9) + Z("ze", 830, 1840, 860, {}, { armL: 50 }, { rim: "#ffd27a", side: -1, z: 7 }), lights: GV_L }), shot: { x: 540, y: 1200, s: 1.05 },
+     bubbles: [{ p: "sc", html: "Впервые<br><em>за сорок лет!</em>", fs: 32 }, { p: "ze", html: "Скинь бота.<br><em>Срочно.</em>", fs: 34 }], talk: ["ze"] },
+   B: { def: () => ({ bg: "yamaboks", over: CTA67, lights: BX_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Саныч: «Впервые за сорок лет!» Жора: «Стас, скинь бота. Срочно». Лис: «Хочешь, чтобы даже Гаврилыч молчал, — бери машины из бота “Перехват”: хорошие варианты ниже рынка приходят через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Саныч + Жора + Лис",
+   mv: "A — Саныч воздевает руки (рассада снова зеленеет), Жора с телефоном. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
