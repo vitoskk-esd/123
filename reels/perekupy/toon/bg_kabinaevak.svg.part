@@ -1,0 +1,15 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <rect width="1080" height="1920" fill="#2b2f37"/>
+    <!-- лобовое: дорога в сумерках -->
+    <path d="M60 180 H1020 L980 980 H100 Z" fill="#ff9a6a" stroke="#000" stroke-width="10"/>
+    <path d="M100 760 H980 V980 H100 Z" fill="#55565c"/><path d="M540 760 L380 980 M540 760 L700 980" stroke="#f4f0e8" stroke-width="10" stroke-dasharray="40 30"/>
+    <path d="M100 760 Q300 700 540 740 T980 750 V760 H100 Z" fill="#8a7a3a"/>
+    <circle cx="760" cy="560" r="70" fill="#ffe08a" opacity=".85"/>
+    <!-- стойки и козырёк -->
+    <rect x="0" y="0" width="1080" height="180" fill="#3a3d46" stroke="#000" stroke-width="7"/><rect x="140" y="190" width="300" height="80" rx="10" fill="#4a4f5a" stroke="#000" stroke-width="5"/>
+    <!-- иконка и ёлочка -->
+    <rect x="560" y="200" width="70" height="90" fill="#e6c88a" stroke="#000" stroke-width="4"/><path d="M800 180 V260" stroke="#000" stroke-width="4"/><path d="M800 260 l-30 50 h18 l-24 44 h72 l-24 -44 h18 z" fill="#4cd964" stroke="#000" stroke-width="4"/>
+    <!-- торпеда -->
+    <path d="M0 1000 Q540 940 1080 1000 V1920 H0 Z" fill="#1f2228" stroke="#000" stroke-width="8"/>
+    <rect x="420" y="1060" width="240" height="110" rx="12" fill="#151515" stroke="#3a3d46" stroke-width="6"/><rect x="440" y="1080" width="200" height="40" fill="#2f8a4a" opacity=".7"/>
+  </svg>

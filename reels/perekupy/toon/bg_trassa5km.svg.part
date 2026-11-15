@@ -1,0 +1,17 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="ts" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4a8a"/><stop offset=".5" stop-color="#ff8a5a"/><stop offset="1" stop-color="#ffd27a"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#ts)"/>
+    <circle cx="760" cy="880" r="120" fill="#ffe08a" opacity=".9"/>
+    <!-- поля и ЛЭП -->
+    <path d="M0 960 Q300 920 600 950 T1080 940 V1180 H0 Z" fill="#8a7a3a"/>
+    <path d="M180 1000 L150 760 M180 1000 L210 760 M130 780 H230" stroke="#3a3040" stroke-width="7"/><path d="M620 1000 L590 760 M620 1000 L650 760 M570 780 H670" stroke="#3a3040" stroke-width="7"/><path d="M1000 1000 L970 760 M1000 1000 L1030 760 M950 780 H1050" stroke="#3a3040" stroke-width="7"/>
+    <path d="M130 782 Q400 840 570 782 T950 782" stroke="#3a3040" stroke-width="3" fill="none"/>
+    <!-- дорога -->
+    <rect y="1180" width="1080" height="740" fill="#55565c"/><path d="M0 1180 H1080" stroke="#000" stroke-width="7"/>
+    <rect x="-60" y="1520" width="130" height="18" fill="#f4f0e8"/><rect x="170" y="1520" width="130" height="18" fill="#f4f0e8"/><rect x="400" y="1520" width="130" height="18" fill="#f4f0e8"/><rect x="630" y="1520" width="130" height="18" fill="#f4f0e8"/><rect x="860" y="1520" width="130" height="18" fill="#f4f0e8"/>
+    <rect y="1180" width="1080" height="70" fill="#8a7a5a"/>
+    <!-- отбойник -->
+    <path d="M0 1160 H1080" stroke="#c8ccd0" stroke-width="22"/><path d="M40 1160 V1230" stroke="#8a8e94" stroke-width="10"/><path d="M200 1160 V1230" stroke="#8a8e94" stroke-width="10"/><path d="M360 1160 V1230" stroke="#8a8e94" stroke-width="10"/><path d="M520 1160 V1230" stroke="#8a8e94" stroke-width="10"/><path d="M680 1160 V1230" stroke="#8a8e94" stroke-width="10"/><path d="M840 1160 V1230" stroke="#8a8e94" stroke-width="10"/><path d="M1000 1160 V1230" stroke="#8a8e94" stroke-width="10"/>
+    <!-- километровый столбик -->
+    <rect x="70" y="1000" width="90" height="190" fill="#f4f0e8" stroke="#000" stroke-width="6"/><rect x="70" y="1000" width="90" height="60" fill="#000"/><text x="115" y="1130" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="64" fill="#000">5</text><text x="115" y="1046" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="28" fill="#f4f0e8">КМ</text>
+  </svg>

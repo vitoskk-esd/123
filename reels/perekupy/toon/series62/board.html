@@ -1,0 +1,85 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props71.js"></script>
+<script>
+// «ЭВАКУАТОР: ПОСТОЯННЫЙ КЛИЕНТ» (киношный формат, отдельный ролик, с матом — владелец 15.11; в облачках — со звёздочками).
+// Эвакуаторщик Витя: «Жора, бл*дь, это третий раз за день». Жора продал Пашке «пятнашку» — через 5 км «БАХ!», глушак отвалился.
+// «Гарантия, Паша, — это я. Каждые пять километров». Счётчик: 7 вызовов за день. Дача «им. Жоры». Пашка находит Хёндай через бота —
+// месяц без вызовов: «Оху*ть. Пойду в такси». ОБЛОЖКА (кадр 0): Пашка держит телефон с ботом (Hyundai 2019 −13%) + плашка «ЭВАКУАТОР: / ПОСТОЯННЫЙ КЛИЕНТ».
+// Приёмы (новые): эвакуатор с мигалкой и погрузкой на платформу; «БАХ!» глушителя; наклейка-счётчик вызовов с палочками; рация с волнами.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const V = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...VIT, ...o }, pose, extra);
+const P = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...PASH, ...o }, pose, extra);
+const TS_L = glow(760, 880, 300, "#ffe08a", .45);
+const KB_L = glow(760, 560, 260, "#ffe08a", .35);
+const DV_L = glow(540, 400, 420, "#ffd8a0", .3);
+const S = [
+ { h: "ОБЛОЖКА · ПОКУПАТЕЛЬ С БОТОМ → «ТРЕТИЙ РАЗ ЗА ДЕНЬ»", tc: "1/5 · 0:00–0:14",
+   A: { def: () => { const H = HOLDPHONE("perekup", "pp", 540, 2090, 1680, PASH, HYCARD(), { rim: "#ffe08a", side: 1 });
+       return { bg: "trassa5km", farBlur: 8, mid: H.mid, lights: H.lights + TS_L, over: TITLE("ЭВАКУАТОР:", "ПОСТОЯННЫЙ КЛИЕНТ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "kabinaevak", mid: V("va", 360, 1960, 1250, {}, { armL: -40, armR: -40 }, { rim: "#ffe08a", side: 1, z: 7 }) + KDASH(360) + RADIO(780, 1150) + TALLY(600, 300, "tl", 3) + PIP(Z("zpip", 160, 800, 900, { look: "o" }, {}, { noShadow: 1 }), "pip1", "#ffd23f", 690, 560, "#ff9a6a"), lights: KB_L }), shot: { x: 540, y: 1100, s: 1.02 },
+     bubbles: [{ at: [850, 600], html: "Витёк, выручай!<br><em>Опять встала!</em>", fs: 32 }, { p: "va", html: "Жора, бл*дь,<br><em>третий раз за день.</em>", fs: 32 }], talk: ["va"] },
+   vo: "Лис: «Эвакуаторщик Витя. Двадцать лет на трассе. И один постоянный клиент — Жора». Жора (по рации): «Витёк, выручай! Опять встала!» Витя: «Жора, блядь, это третий раз за день».", who: "Лис + Жора + Витя",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новый герой — покупатель Пашка</b> держит телефон: в боте «Hyundai · 2019 · 1 090 000 ₽ · рынок ≈ 1 250 000 · 🔥 −13% · ⏱ 1 с»; плашка «ЭВАКУАТОР: / ПОСТОЯННЫЙ КЛИЕНТ». B — <b>новый фон — кабина эвакуатора</b> (дорога на закате в лобовом, иконка, ёлочка); <b>новый герой — эвакуаторщик Витя</b> (тельняшка, жёлтая кепка, усы) за рулём; Жора в кружке «на рации»; <b>приём: рация</b> с волнами и <b>наклейка «ВЫЗОВЫ: ЖОРА»</b> — три палочки." },
+ { h: "5 КМ: «БАХ!» → «ГЛУШАК ОТВАЛИЛСЯ. ГРУЗИМ»", tc: "2/5 · 0:14–0:28",
+   A: { def: () => ({ bg: "trassa5km", mid: car(V15, 120, 1640, 860, { z: 5, sheen: .4 }) + BANG(0, 1300) + P("pa", 900, 1880, 800, {}, { armL: 60 }, { rim: "#ffe08a", side: -1, z: 7 }), lights: TS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "pa", html: "Дядь Вить, она дымит<br><em>и… стреляет!</em>", fs: 36 }], talk: ["pa"] },
+   B: { def: () => ({ bg: "trassa5km", mid: TOWTRUCK(40, 1720, 960) + car(V15, 90, 1515, 640, { z: 6, sheen: .4 }) + V("vb", 920, 1900, 820, {}, { armR: -120 }, { rim: "#ffe08a", side: -1, z: 9 }), lights: TS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "vb", html: "Ё* твою мать, глушак отвалился.<br><em>Грузим.</em>", fs: 34 }], talk: ["vb"] },
+   vo: "Лис: «Жора продал “пятнашку” Пашке. Пашка проехал пять километров». Пашка: «Дядь Вить, она дымит и… стреляет!» Витя: «Ёб твою мать, глушак отвалился. Грузим».", who: "Лис + Пашка + Витя",
+   mv: "A — <b>новый фон — трасса на закате</b> (поля, ЛЭП, отбойник, километровый столбик «5»): серая «пятнашка» встала, <b>«БАХ!» из глушителя</b> с дымом. B — <b>приём: эвакуатор</b> — «пятнашка» заезжает на платформу, мигалка крутится." },
+ { h: "«ГАРАНТИЯ — ЭТО Я» → 7 ВЫЗОВОВ ЗА ДЕНЬ", tc: "3/5 · 0:28–0:42",
+   A: { def: () => ({ bg: "trassa5km", farBlur: 3, mid: TOWTRUCK(200, 1500, 760, "tt2", 3) + P("pb", 270, 1880, 820, { look: "o" }, { armR: -60 }, { rim: "#ffe08a", side: 1, z: 7 }) + V("vc", 800, 1880, 860, {}, { armL: 50 }, { rim: "#ffe08a", side: -1, z: 7 }), lights: TS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "pb", html: "А гарантия?", fs: 36 }, { p: "vc", html: "Гарантия, Паша, — это я.<br><em>Каждые пять километров.</em>", fs: 32 }], talk: ["vc"] },
+   B: { def: () => ({ bg: "kabinaevak", farFilter: "brightness(.55) hue-rotate(200deg)", mid: V("vd", 360, 1960, 1250, { look: "o" }, { armL: -40, armR: -40 }, { rim: "#a8cfe8", side: 1, z: 7 }) + KDASH(360) + TALLY(330, 360, "tl2", 7).replace("width:380px;height:190px", "width:380px;height:190px;transform:rotate(3deg) scale(1.5)"), lights: "" }), shot: { x: 540, y: 1100, s: 1.02 } },
+   vo: "Пашка: «А гарантия?» Витя: «Гарантия, Паша, — это я. Каждые пять километров». Лис: «К вечеру Витя поставил рекорд: семь вызовов на одну машину».", who: "Пашка + Витя + Лис",
+   mv: "A — Пашка и Витя у эвакуатора. B — ночь в кабине: <b>счётчик вызовов</b> крупно — палочки дорисовываются одна за другой до семи (с зачёркиванием пятёрки)." },
+ { h: "ДАЧА «ИМ. ЖОРЫ» → ПАШКА НАШЁЛ ХЁНДАЙ В БОТЕ", tc: "4/5 · 0:42–0:56",
+   A: { def: () => ({ bg: "dachavity", mid: V("ve", 330, 1880, 900, { look: "grin" }, { armR: -150 }, { rim: "#ffd8a0", side: 1, z: 7 }) + PIP(Z("zpip2", 160, 800, 900, { look: "grin" }, {}, { noShadow: 1 }), "pip2", "#ffd23f", 700, 1440, "#ffb07a"), lights: DV_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ve", html: "Я на твоих тачках дачу достроил.<br><em>Спасибо, на**й.</em>", fs: 32 }, { at: [860, 1470], html: "Обращайся!", fs: 36 }], talk: ["ve"] },
+   B: { def: () => { const H = HOLDPHONE("perekup", "pd", 540, 2000, 1400, PASH, HYCARD("hcc2"), { rim: "#ffe08a", side: 1 });
+       return { bg: "trassa5km", farBlur: 5, mid: H.mid, lights: H.lights + TS_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "pd", html: "Хёндай, один хозяин, ниже рынка.<br><em>Месяц — ни одной поломки.</em>", fs: 34 }], talk: ["pd"] },
+   vo: "Витя: «Жора, я на твоих тачках дачу достроил. Спасибо, нахуй». Жора: «Обращайся!» Лис: «А потом Пашка нашёл машину через бота “Перехват”». Пашка: «Хёндай, один хозяин, ниже рынка. Месяц — ни одной поломки».", who: "Витя + Жора + Лис + Пашка",
+   mv: "A — <b>новый фон — дача Вити</b>: кирпичный дом, табличка «ДАЧА ИМ. ЖОРЫ», баня, грядки; Жора в кружке. B — Пашка с телефоном: белый Хёндай в боте." },
+ { h: "«ОХУ*ТЬ. ПОЙДУ В ТАКСИ» → ФИНАЛ: БОТ", tc: "5/5 · 0:56–1:10",
+   A: { def: () => ({ bg: "kabinaevak", mid: V("vf", 360, 1960, 1250, { look: "flat" }, { armL: -40, armR: -40 }, { rim: "#ffe08a", side: 1, z: 7 }) + KDASH(360) + RADIO(780, 1150).replace('stroke="#ffd23f" stroke-width="7"', 'stroke="#ffd23f" stroke-width="7" opacity="0"') + TALLY(600, 300, "tl3", 0).replace(">0<", ">0<"), lights: KB_L }), shot: { x: 540, y: 1100, s: 1.02 },
+     bubbles: [{ p: "vf", html: "Месяц без вызовов.<br><em>Оху*ть. Пойду в такси.</em>", fs: 36 }], talk: ["vf"] },
+   B: { def: () => ({ bg: "trassa5km", mid: car(HYC, 180, 1680, 760, { z: 6, sheen: .5, flip: true }) + TOWTRUCK(560, 1300, 520, "tt3", 3), lights: TS_L }), shot: { x: 540, y: 1150, s: 1.04 } },
+   vo: "Витя: «Месяц без вызовов. Охуеть. Пойду в такси». Лис: «Хочешь, чтобы эвакуатор тебя забыл, — ищи машину в боте “Перехват”: хорошие варианты ниже рынка через секунду после публикации». Затем — <b>последний кадр: только карточка бота</b>.", who: "Витя + Лис",
+   mv: "A — тишина в кабине: рация молчит, на наклейке «0». B — белый Хёндай Пашки проезжает мимо эвакуатора на обочине; дальше — карточка бота." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
