@@ -1,0 +1,20 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="sa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd0f0"/><stop offset="1" stop-color="#d8eef8"/></linearGradient></defs>
+    <!-- улица за лобовым -->
+    <rect width="1080" height="1920" fill="url(#sa)"/>
+    <rect x="-40" y="298" width="172" height="700" fill="#c9b8a0" stroke="#7a8a9a" stroke-width="4"/><rect x="130" y="332" width="122" height="700" fill="#c9b8a0" stroke="#7a8a9a" stroke-width="4"/><rect x="300" y="366" width="189" height="700" fill="#d8c8a8" stroke="#7a8a9a" stroke-width="4"/><rect x="470" y="339" width="140" height="700" fill="#b8c4d0" stroke="#7a8a9a" stroke-width="4"/><rect x="640" y="371" width="186" height="700" fill="#c9b8a0" stroke="#7a8a9a" stroke-width="4"/><rect x="810" y="412" width="163" height="700" fill="#d8c8a8" stroke="#7a8a9a" stroke-width="4"/><rect x="980" y="378" width="179" height="700" fill="#d8c8a8" stroke="#7a8a9a" stroke-width="4"/>
+    <rect y="900" width="1080" height="300" fill="#8f939b"/>
+    <!-- рамка лобового и стойки -->
+    <path d="M0 0 H1080 V200 Q540 120 0 200 Z" fill="#1d1f26"/><path d="M0 0 L160 0 L40 1200 L0 1200 Z M1080 0 L920 0 L1040 1200 L1080 1200 Z" fill="#1d1f26"/>
+    <!-- зеркало и ёлочка -->
+    <rect x="440" y="150" width="200" height="60" rx="20" fill="#2b2f37" stroke="#151515" stroke-width="6"/><path d="M540 210 V300" stroke="#151515" stroke-width="3"/>
+    <path d="M540 300 l-36 70 h24 l-30 56 h84 l-30 -56 h24 z" fill="#2f9a3a" stroke="#151515" stroke-width="4"/>
+    <!-- приборная панель -->
+    <path d="M0 1100 Q540 980 1080 1100 V1920 H0 Z" fill="#2b2d34" stroke="#151515" stroke-width="7"/>
+    <path d="M0 1140 Q540 1030 1080 1140" stroke="#3a3d46" stroke-width="20" fill="none"/>
+    <!-- руль -->
+    <circle cx="300" cy="1500" r="260" fill="none" stroke="#151515" stroke-width="60"/><circle cx="300" cy="1500" r="260" fill="none" stroke="#3a3d46" stroke-width="44"/>
+    <circle cx="300" cy="1500" r="70" fill="#3a3d46" stroke="#151515" stroke-width="8"/><path d="M60 1500 H230 M370 1500 H540 M300 1570 V1760" stroke="#3a3d46" stroke-width="40"/>
+    <!-- приборы -->
+    <circle cx="240" cy="1200" r="54" fill="#14161c" stroke="#7a8a9a" stroke-width="6"/><path d="M240 1200 l30 -26" stroke="#ff7a1a" stroke-width="6"/><circle cx="360" cy="1200" r="54" fill="#14161c" stroke="#7a8a9a" stroke-width="6"/><path d="M360 1200 l30 -26" stroke="#ff7a1a" stroke-width="6"/>
+  </svg>
