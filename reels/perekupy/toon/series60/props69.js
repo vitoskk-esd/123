@@ -5,7 +5,7 @@ const POLK = { jacket: "#3f5a3a", pants: "#2f3f2a", hair: "#c8c8c8", mustache: t
 const LNC = html => html.replaceAll("#8e1f3a", "#fbf6f0").replaceAll("#5c1426", "#e0d6cc").replaceAll("#2c3e66", "#fbf6f0")
   .replaceAll('fill="#ff3b30" stroke="#151515" stroke-width="4" transform="rotate(-20', 'fill="#ffffff" stroke="#151515" stroke-width="4" transform="rotate(-20');
 const W24 = "w124/w124_side.png", MZ6 = "mazda6/mazda6_side_r.png";
-Object.assign(CINE.SIZES, { [W24]: [732, 233], [MZ6]: [717, 240] });
+Object.assign(CINE.SIZES, { [W24]: [732, 233], [MZ6]: [722, 244] });
 const TITLE = (a, b) => `<div style="position:absolute;left:0;right:0;top:300px;text-align:center;font-family:Unbounded;font-weight:900;line-height:1;letter-spacing:-3px;z-index:50">
   <span style="display:inline-block;padding:10px 28px 18px;border:8px solid #151515;border-radius:22px;box-shadow:0 12px 0 #151515;font-size:82px;background:#ffd23f;color:#151515;transform:rotate(-3deg)">${a}</span><br>
   <span style="display:inline-block;padding:10px 28px 18px;border:8px solid #151515;border-radius:22px;box-shadow:0 12px 0 #151515;font-size:80px;background:#ff3b30;color:#fff;margin-top:26px;transform:rotate(2deg)">${b}</span></div>`;
