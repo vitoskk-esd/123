@@ -88,8 +88,15 @@ else:
 src = os.path.join(D, C["src"]); fy = C.get("focus_y", 0.45)
 # видео: вертикальный кадр с медленным наездом; bw — ч/б, полосы сверху/снизу (видимая часть 1080×1150)
 zoom = f"scale=w='{W}*(1.0+0.07*t/{SPEECH:.2f})':h=-2:eval=frame,crop={W}:{H}"
+BAND = C.get("band")                                  # кадр полосой из самого src: {"crop":[x,y,w,h], "y":0.44, "bw":true}
 VSRC = C.get("video_src")                              # отдельный видеоряд (голос — из src): горизонтальное видео полосой, как в рилсе DfvTRjFNvlI
-if VSRC:
+if BAND:
+    cx, cy, cw, chh = BAND["crop"]; bh = int(W * chh / cw) // 2 * 2; top = int(H * BAND.get("y", 0.44) - bh / 2)
+    look = ("hue=s=0,eq=contrast=1.22:brightness=-0.02:gamma=0.9,vignette=PI/4,noise=alls=9:allf=t" if BAND.get("bw", True)
+            else "eq=contrast=1.08:saturation=0.85:gamma=0.96,vignette=PI/5")
+    v = (f"[0:v]fps={FPS},crop={cw}:{chh}:{cx}:{cy},scale={W}:{bh}:flags=lanczos,"
+         f"scale=w='{W}*(1.0+0.06*t/{SPEECH:.2f})':h=-2:eval=frame,crop={W}:{bh},{look},pad={W}:{H}:0:{top}:black")
+elif VSRC:
     sp = C.get("video_speed", 1.0); band = int(W * 9 / 16) // 2 * 2; top = int(H * 0.47 - band / 2)
     v = (f"[3:v]setpts=PTS/{sp},fps={FPS},scale={W}:{band}:force_original_aspect_ratio=increase,crop={W}:{band},"
          f"eq=contrast=1.05:saturation=0.55:brightness=-0.10:gamma=0.75,colorbalance=bs=0.08:bm=0.04:rh=-0.05,vignette=PI/4,pad={W}:{H}:0:{top}:black")
