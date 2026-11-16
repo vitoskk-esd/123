@@ -248,7 +248,7 @@ async def test_no_plan_then_buy_basic(env):
 
 
 async def test_trial_day_once_and_basic_limits_and_upgrade(env):
-    """Пробный день — 490 ₽ (владелец 13.11): под фото приветствия «Хочу попробовать» → предложение + «Другие тарифы»; после оплаты — 24 часа,
+    """Пробный день — 490 ₽ (владелец 13.11): под фото приветствия «Хочу попробовать» → сразу все тарифы с картинкой (владелец 16.11); после оплаты — 24 часа,
     один раз; в нём 1 фильтр; «Простой» — до 2 фильтров; переход на PRO не сжигает дни."""
     from user import apply_payment
     dp, bot, s, ctx = env
@@ -258,9 +258,9 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     assert len(tries) == 1 and [b.callback_data for row in tries[0].reply_markup.inline_keyboard for b in row] == ["s:try"]
     assert T.ASK_FILTER not in s.texts(USER) and s.texts(USER)[-1] == T.TRY_PROMPT    # приветствие кончается «Хочу попробовать» (владелец 13.11)
     await dp.feed_update(bot, cb("s:try"))
-    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
-    assert "Попробуй «Перехват» целый день — 490 ₽" in last.text
-    assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:plans"]
+    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]           # сразу все тарифы с картинкой (владелец 16.11)
+    assert "Пробный день — 490 ₽" in last.caption
+    assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:pay:basic", "s:pay:pro"]
     await dp.feed_update(bot, cb("s:pay:trial"))
     pay = await ctx.db.last_pending(USER)
     assert pay and pay["amount"] == 490 and pay["plan"] == "trial" and (await ctx.db.user(USER))["paid_until"] < time.time()   # без оплаты не включается
@@ -1864,8 +1864,8 @@ async def test_free_trial_users_can_buy_paid_trial_once(env):
     await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
     assert (await ctx.db.user(USER))["trial_used"] == 0 and (await ctx.db.user(OTHER))["trial_used"] == 1
     await dp.feed_update(bot, cb("s:try"))
-    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
-    assert "Попробуй «Перехват» целый день — 490 ₽" in last.text
+    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
+    assert "s:pay:trial" in [b.callback_data for row in last.reply_markup.inline_keyboard for b in row]
     await dp.feed_update(bot, cb("s:try", OTHER))
     photo = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == OTHER][-1]
     assert photo.caption.startswith("Пробный день ты уже брал") and "Сравни тарифы на картинке" not in photo.caption

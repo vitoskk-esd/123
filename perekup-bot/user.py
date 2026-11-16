@@ -397,13 +397,10 @@ async def activate_trial(ctx: Ctx, uid: int) -> float | None:
 
 @router.callback_query(F.data == "s:try")
 async def want_try(cb: CallbackQuery, ctx: Ctx) -> None:
-    """«Хочу попробовать» под фото приветствия: пробный день за 490 ₽ + «Другие тарифы»; уже брал — сразу тарифы."""
+    """«Хочу попробовать» под фото приветствия → сразу все тарифы: картинка «что в каком тарифе» + кнопки «Пробный день», «Простой», «PRO»
+    (владелец 16.11; раньше — отдельное сообщение только про пробный день и кнопка «Другие тарифы»). Пробный уже брал — тарифы без него."""
     u = await ctx.db.user(cb.from_user.id)
-    if can_trial(u):
-        await cb.message.answer(T.TRY_OFFER.format(price=plans.plans(ctx.cfg)["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro),
-                                reply_markup=K.try_offer(plans.plans(ctx.cfg)["trial"].price))
-    else:
-        await send_plans(cb.message, ctx, cb.from_user.id, T.TRIAL_USED)
+    await send_plans(cb.message, ctx, cb.from_user.id, "" if can_trial(u) else T.TRIAL_USED)
     await cb.answer()
 
 
