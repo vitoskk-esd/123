@@ -1,0 +1,90 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>АРБИТРАЖНИКИ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="propsA01.js"></script>
+<script>
+// «АРБИТРАЖНИКИ» ep01 «ИНФОЦЫГАН: КУРС ЗА 150 000». Новая тема (владелец 16.11): арбитраж трафика на банки, продукт — Телеграм-канал с бесплатным уроком.
+// Стас (новичок) хочет разобраться в арбитраже → гуру Аркадий у арендованного «Гелика» продаёт курс за 150 000 «секрет — сначала оплата» →
+// Арбузов (рассказчик за кадром) бесплатно объясняет на доске «ТЕОРИЯ» → Стас льёт рекламу «на всех», реклама уходит бабе Гале в деревню (−3 000, 0 заявок) →
+// бесплатный урок в Телеграме → заявки и выплата → твист: у Аркадия забрали «Гелик» (аренда кончилась), он просит у Стаса ссылку на урок.
+const KM_L = glow(540, 300, 420, "#cfd8ff", .25) + glow(760, 900, 300, "#9fd6ff", .25);
+const GR_L = glow(540, 620, 480, "#ff4fd8", .3);
+const BD_L = glow(540, 200, 500, "#fff6d0", .3);
+const S = [
+ { h: "ОБЛОЖКА · СТАС С КАНАЛОМ → ГУРУ У «ГЕЛИКА»", tc: "1/6 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("perekup", "sa", 540, 2090, 1680, STAS, TGPOST(), { rim: "#cfd8ff", side: 1 });
+       return { bg: "arbkomnata", farBlur: 8, mid: H.mid, lights: H.lights + KM_L, over: TITLE("ИНФОЦЫГАН:", "КУРС ЗА 150 000") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "gelikarenda", mid: car(GLK, 360, 1500, 720, { z: 5, sheen: .5, refl: 1 }) + G_("ga", 250, 1880, 860, {}, { armR: -150 }, { rim: "#ff8af0", side: 1, z: 7 }) + S_("sb", 860, 1880, 820, { look: "o" }, {}, { rim: "#ff8af0", side: -1, z: 7 }), lights: GR_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ga", html: "Мой курс — <em>150 000.</em><br>Через неделю — на гелике!", fs: 32 }, { p: "sb", html: "А что<br><em>внутри курса?</em>", fs: 32 }], talk: ["ga"] },
+   vo: "Арбузов: «Это Стас. Стас решил разобраться, как зарабатывают на арбитраже трафика». Аркадий: «Арбитраж? Мой курс — сто пятьдесят тысяч. Через неделю будешь на гелике!» Стас: «А что внутри курса?»", who: "Арбузов + Аркадий + Стас",
+   mv: "<b>Кадр 0 — обложка</b>: Стас держит телефон, на экране — <b>Телеграм-канал «🎁 Бесплатный урок: арбитраж трафика на банки»</b> (название канала — пришлите своё), плашка «ИНФОЦЫГАН: / КУРС ЗА 150 000». Бейдж рассказчика — <b>Арбузов</b> (голова-арбуз, красная кепка). B — <b>новый фон</b>: ночная улица у проката «АРЕНДА АВТО» (неон); <b>гуру Аркадий</b> (белый костюм, цепь, очки) у чёрного «Гелика», Стас рядом." },
+ { h: "«СЕКРЕТ! СНАЧАЛА ОПЛАТА» → «ГЕЛИК — В АРЕНДЕ НА ЧАС»", tc: "2/6 · 0:12–0:24",
+   A: { def: () => ({ bg: "gelikarenda", farBlur: 2, mid: car(GLK, 150, 1480, 700, { z: 5, sheen: .4, refl: 1 }) + RENT(330, 1170) + G_("gb", 860, 1880, 880, {}, { armL: 70 }, { rim: "#ff8af0", side: -1, z: 7 }) + S_("sc", 230, 1900, 760, { look: "o" }, {}, { rim: "#ff8af0", side: 1, z: 12 }), lights: GR_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "gb", html: "Секрет!<br><em>Сначала оплата.</em>", fs: 36 }], talk: ["gb"] },
+   B: { def: () => { const H = HOLDPHONE("perekup", "sd", 540, 2000, 1400, STAS, `<div style="font-family:Onest;color:#fff"><div style="font-family:'JetBrains Mono';font-weight:800;font-size:26px;color:#8b93a3">МОЯ КАРТА</div><div style="font-family:Unbounded;font-weight:900;font-size:70px;margin-top:20px">3 000 ₽</div></div>`, { rim: "#ff8af0", side: 1 });
+       return { bg: "gelikarenda", farBlur: 6, mid: H.mid, lights: H.lights + GR_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "sd", html: "Сто пятьдесят тысяч?<br><em>У меня на карте три…</em>", fs: 34 }], talk: ["sd"] },
+   vo: "Аркадий: «Секрет! Сначала оплата». Арбузов: «“Гелик”, кстати, арендованный. На час». Стас: «Сто пятьдесят тысяч? У меня на карте три…»", who: "Аркадий + Арбузов + Стас",
+   mv: "A — на лобовом «Гелика» под слова Арбузова шлёпается табличка <b>«АРЕНДА · 1 ЧАС»</b> (на витрине — «ПОЧАСОВО от 5 000 ₽/ч»). B — Стас смотрит в телефон: «МОЯ КАРТА · 3 000 ₽», вздох." },
+ { h: "ДОСКА «ТЕОРИЯ»: КАК ЭТО РАБОТАЕТ (БЕСПЛАТНО)", tc: "3/6 · 0:24–0:38",
+   A: { def: () => ({ bg: "arbkomnata", farBlur: 3, mid: DOSKA(90, 520, 900, 2) + S_("se", 760, 1900, 760, { look: "o" }, { armR: -40 }, { rim: "#cfd8ff", side: -1, z: 35 }), lights: BD_L }), shot: { x: 540, y: 1100, s: 1.02 },
+     bubbles: [{ p: "se", html: "То есть я просто<br><em>привожу людей?</em>", fs: 32 }], talk: ["se"] },
+   B: { def: () => ({ bg: "arbkomnata", farBlur: 3, mid: DOSKA(90, 520, 900, 4) + S_("sf", 760, 1900, 760, {}, { armR: -150 }, { rim: "#cfd8ff", side: -1, z: 35 }), lights: BD_L }), shot: { x: 540, y: 1100, s: 1.02 } },
+   vo: "Арбузов: «Объясняю бесплатно. Банки платят партнёрам за новых клиентов». Стас: «То есть я просто привожу людей?» Арбузов: «Да. Человек оформил карту по твоей ссылке — банк платит тебе».", who: "Арбузов + Стас",
+   mv: "<b>Доска «ТЕОРИЯ»</b> в комнате Стаса (рукописный маркер): строки появляются под голос — «РЕКЛАМА ↓ КЛИК ПО ССЫЛКЕ ↓ КАРТА ОФОРМЛЕНА ↓ БАНК ПЛАТИТ ТЕБЕ ₽» (последняя — зелёная, с росчерком). Голос Арбузова — бейдж справа сверху, говорит за кадром." },
+ { h: "«ЗАПУСКАЮ НА ВСЕХ!» → РЕКЛАМА УШЛА БАБЕ ГАЛЕ", tc: "4/6 · 0:38–0:50",
+   A: { def: () => ({ bg: "arbkomnata", mid: LAPTOP(650, 800, 380) + S_("sg", 300, 1900, 900, {}, { armR: -120 }, { rim: "#9fd6ff", side: 1, z: 22 }), lights: KM_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "sg", html: "Всё понял!<br><em>Запускаю рекламу. На всех!</em>", fs: 32 }], talk: ["sg"] },
+   B: { def: () => { const H = HOLDPHONE("perekup", "bh", 540, 2050, 1500, GALYA, `<div style="font-family:Onest;color:#fff"><div style="font-family:'JetBrains Mono';font-weight:800;font-size:24px;color:#8b93a3">РЕКЛАМА</div><div style="background:#1c1f26;border-radius:22px;padding:18px;margin-top:10px;font-weight:800;font-size:32px">💳 Оформи карту банка</div></div>`, { rim: "#fff6d0", side: 1 });
+       return { bg: "babkadvor", farBlur: 4, mid: H.mid + PLATOK(540, 2050, 1500, 9), lights: H.lights, over: `<div style="position:absolute;left:70px;right:70px;top:120px;z-index:60;transform:rotate(-2deg);background:#0d0e12;border:8px solid #151515;border-radius:30px;padding:22px">${ADSTATS("−3 000 ₽", "0", 1)}</div>` }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "bh", html: "Внучек, а пирожки<br><em>тут где заказывают?</em>", fs: 34 }], talk: ["bh"] },
+   vo: "Стас: «Всё понял! Запускаю рекламу. На всех!» Баба Галя: «Внучек, а пирожки тут где заказывают?» Арбузов: «Реклама ушла бабушкам. Три тысячи — минус, заявок — ноль».", who: "Стас + Баба Галя + Арбузов",
+   mv: "A — Стас жмёт красную «ЗАПУСТИТЬ» на ноутбуке. B — <b>новый фон — деревенский двор</b> (изба, подсолнухи, куры); <b>новая героиня — баба Галя</b> держит телефон с рекламой карты; поверх — рекламный кабинет: «ВСЕ · 18–99 лет · вся Россия», <b>потрачено −3 000 ₽ · заявок 0</b> (красным)." },
+ { h: "БЕСПЛАТНЫЙ УРОК → ЗАЯВКИ → ГУРУ БЕЗ «ГЕЛИКА»", tc: "5/6 · 0:50–1:02",
+   A: { def: () => { const H = HOLDPHONE("perekup", "si", 540, 2000, 1400, STAS, TGPOST("tg2") + NOTIFS(2), { rim: "#cfd8ff", side: 1 });
+       return { bg: "arbkomnata", farBlur: 6, mid: H.mid, lights: H.lights + KM_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "si", html: "Есть первая заявка!<br><em>И ещё одна!</em>", fs: 34 }], talk: ["si"] },
+   B: { def: () => ({ bg: "gelikarenda", mid: RENT(230, 1740, "АРЕНДА ЗАКОНЧИЛАСЬ", "rt2", 20) + G_("gj", 300, 1880, 860, { look: "o" }, { armL: -30 }, { rim: "#ff8af0", side: 1, z: 7 }) + S_("sj", 800, 1880, 840, {}, { armL: 60 }, { rim: "#ff8af0", side: -1, z: 7 }), lights: GR_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "gj", html: "Стас!<br><em>А ты где научился?</em>", fs: 34 }, { p: "sj", html: "Бесплатный урок<br><em>в Телеграме.</em>", fs: 34 }], talk: ["gj"] },
+   vo: "Стас: «Ладно… гляну тот бесплатный урок». Арбузов: «В уроке — какой оффер выбрать и кому показывать рекламу». Стас: «Есть первая заявка! И ещё одна!» Аркадий: «Стас! А ты где научился?» Стас: «Бесплатный урок в Телеграме».", who: "Стас + Арбузов + Аркадий",
+   mv: "A — телефон Стаса: урок в канале, под ним всплывают уведомления <b>«Новая заявка · карта оформлена · +1 200 ₽»</b> (цифры — пример). B — <b>твист</b>: «Гелика» нет, на асфальте табличка «АРЕНДА ЗАКОНЧИЛАСЬ», Аркадий пешком, в белом костюме под неоном." },
+ { h: "«…А ССЫЛКУ СКИНЕШЬ?» → ФИНАЛ: БЕСПЛАТНЫЙ УРОК", tc: "6/6 · 1:02–1:12",
+   A: { def: () => ({ bg: "gelikarenda", mid: G_("gk", 540, 1900, 1000, { look: "o" }, { armR: -150 }, { rim: "#ff8af0", side: 1, z: 7 }), lights: GR_L }), shot: { x: 540, y: 1150, s: 1.06 },
+     bubbles: [{ p: "gk", html: "…А ссылку<br><em>скинешь?</em>", fs: 40 }], talk: ["gk"] },
+   B: { def: () => ({ bg: "arbkomnata", over: CTAA, lights: KM_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Аркадий: «…А ссылку скинешь?» Арбузов: «Бесплатный урок по арбитражу трафика на банки — в моём Телеграм-канале. Ссылка в шапке». (Финальная фраза голосом — про канал; карточку голос не читает.)", who: "Аркадий + Арбузов",
+   mv: "A — Аркадий крупно, растерянный, тянет руку с телефоном. B — <b>последний кадр — только карточка</b>: Арбузов + «Бесплатный урок по арбитражу на банки · Телеграм-канал · ссылка в шапке»." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>

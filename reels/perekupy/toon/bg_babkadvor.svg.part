@@ -1,0 +1,22 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="dv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc7f0"/><stop offset="1" stop-color="#e4f5fb"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#dv)"/>
+    <circle cx="880" cy="230" r="80" fill="#ffe27a"/>
+    <!-- изба -->
+    <path d="M140 640 L420 380 L700 640 Z" fill="#7a3a24" stroke="#000" stroke-width="9" stroke-linejoin="round"/>
+    <rect x="170" y="640" width="500" height="520" fill="#a8683a" stroke="#000" stroke-width="9"/>
+    <path d="M170 690 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 740 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 790 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 840 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 890 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 940 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 990 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 1040 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 1090 H670" stroke="#7a4a24" stroke-width="5"/><path d="M170 1140 H670" stroke="#7a4a24" stroke-width="5"/>
+    <rect x="250" y="760" width="150" height="180" fill="#9fd6ff" stroke="#000" stroke-width="8"/><path d="M325 760 V940 M250 850 H400" stroke="#000" stroke-width="6"/>
+    <path d="M230 760 q95 -50 190 0 l-10 -20 q-85 -40 -170 0 z M230 944 h190" fill="#fbfaf3" stroke="#000" stroke-width="6"/>
+    <rect x="470" y="800" width="130" height="360" fill="#5a3218" stroke="#000" stroke-width="8"/><circle cx="580" cy="990" r="8" fill="#f5c542"/>
+    <!-- антенна -->
+    <path d="M520 470 V330 M480 360 H560 M490 390 H550" stroke="#000" stroke-width="6"/>
+    <!-- забор -->
+    <path d="M680 1260 V1010 l25 -30 l25 30 V1260 z" fill="#c9a26a" stroke="#000" stroke-width="6"/><path d="M740 1260 V1010 l25 -30 l25 30 V1260 z" fill="#c9a26a" stroke="#000" stroke-width="6"/><path d="M800 1260 V1010 l25 -30 l25 30 V1260 z" fill="#c9a26a" stroke="#000" stroke-width="6"/><path d="M860 1260 V1010 l25 -30 l25 30 V1260 z" fill="#c9a26a" stroke="#000" stroke-width="6"/><path d="M920 1260 V1010 l25 -30 l25 30 V1260 z" fill="#c9a26a" stroke="#000" stroke-width="6"/><path d="M980 1260 V1010 l25 -30 l25 30 V1260 z" fill="#c9a26a" stroke="#000" stroke-width="6"/><path d="M1040 1260 V1010 l25 -30 l25 30 V1260 z" fill="#c9a26a" stroke="#000" stroke-width="6"/>
+    <!-- подсолнухи -->
+    <path d="M730 1260 V860" stroke="#2f7a2f" stroke-width="10"/><circle cx="730" cy="860" r="44" fill="#ffd23f" stroke="#000" stroke-width="6"/><circle cx="730" cy="860" r="20" fill="#6a3a14"/><path d="M840 1260 V820" stroke="#2f7a2f" stroke-width="10"/><circle cx="840" cy="820" r="44" fill="#ffd23f" stroke="#000" stroke-width="6"/><circle cx="840" cy="820" r="20" fill="#6a3a14"/><path d="M950 1260 V880" stroke="#2f7a2f" stroke-width="10"/><circle cx="950" cy="880" r="44" fill="#ffd23f" stroke="#000" stroke-width="6"/><circle cx="950" cy="880" r="20" fill="#6a3a14"/>
+    <!-- земля, тропинка, куры -->
+    <rect y="1180" width="1080" height="740" fill="#8bbf5a"/><path d="M0 1180 H1080" stroke="#000" stroke-width="7"/>
+    <path d="M440 1180 Q520 1500 380 1920 H760 Q640 1500 600 1180 Z" fill="#d9b884"/>
+    <g transform="translate(180 1700)"><ellipse cx="0" cy="0" rx="34" ry="26" fill="#fbfaf3" stroke="#000" stroke-width="5"/><circle cx="28" cy="-24" r="14" fill="#fbfaf3" stroke="#000" stroke-width="5"/><path d="M28 -40 l6 -10 l6 10 z" fill="#e0302a"/><path d="M42 -24 l12 4 l-12 4 z" fill="#ffb03a"/></g><g transform="translate(880 1640)"><ellipse cx="0" cy="0" rx="34" ry="26" fill="#fbfaf3" stroke="#000" stroke-width="5"/><circle cx="28" cy="-24" r="14" fill="#fbfaf3" stroke="#000" stroke-width="5"/><path d="M28 -40 l6 -10 l6 10 z" fill="#e0302a"/><path d="M42 -24 l12 4 l-12 4 z" fill="#ffb03a"/></g><g transform="translate(960 1780)"><ellipse cx="0" cy="0" rx="34" ry="26" fill="#fbfaf3" stroke="#000" stroke-width="5"/><circle cx="28" cy="-24" r="14" fill="#fbfaf3" stroke="#000" stroke-width="5"/><path d="M28 -40 l6 -10 l6 10 z" fill="#e0302a"/><path d="M42 -24 l12 4 l-12 4 z" fill="#ffb03a"/></g>
+  </svg>
