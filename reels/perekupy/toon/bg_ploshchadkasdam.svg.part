@@ -1,0 +1,19 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="s9fc8e8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc8e8"/><stop offset="1" stop-color="#e6f0f4"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#s9fc8e8)"/>
+    <path d="M0 900 L0 873 L90 866 L180 840 L270 875 L360 830 L450 835 L540 875 L630 873 L720 860 L810 826 L900 861 L990 850 L1080 849  V1210 H0 Z" fill="#8aa080"/>
+    <rect x="660" y="760" width="360" height="160" fill="#fff" stroke="#000" stroke-width="7" transform="rotate(2 840 840)"/>
+    <text x="840" y="840" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="58" fill="#c0392b" transform="rotate(2 840 840)">СДАЁТСЯ</text>
+    <text x="840" y="890" text-anchor="middle" font-family="Onest" font-weight="800" font-size="30" fill="#151515" transform="rotate(2 840 840)">8-9••-•••-••-••</text>
+    <!-- навес бывшей АЗС -->
+    <rect x="80" y="560" width="920" height="90" fill="#d8d4cc" stroke="#000" stroke-width="7"/><rect x="80" y="630" width="920" height="20" fill="#c0392b"/>
+    <rect x="200" y="650" width="44" height="560" fill="#9aa0a6" stroke="#000" stroke-width="6"/><rect x="836" y="650" width="44" height="560" fill="#9aa0a6" stroke="#000" stroke-width="6"/>
+    <rect x="380" y="1150" width="120" height="60" fill="#7f858b" stroke="#000" stroke-width="5"/><rect x="580" y="1150" width="120" height="60" fill="#7f858b" stroke="#000" stroke-width="5"/>
+    <!-- будка оператора -->
+    <rect x="-20" y="900" width="170" height="310" fill="#e8e0cc" stroke="#000" stroke-width="6"/><rect x="20" y="960" width="90" height="90" fill="#7aa8c8" stroke="#000" stroke-width="5"/>
+    <!-- асфальт с трещинами и бурьян -->
+    <rect y="1210" width="1080" height="710" fill="#6f747b"/><path d="M0 1210 H1080" stroke="#000" stroke-width="6"/>
+    <path d="M688 1857 l32 46 l15 44" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M858 1301 l-5 54 l-4 48" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M1077 1872 l38 41 l12 37" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M471 1407 l-20 59 l36 25" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M166 1856 l20 42 l-5 37" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M1044 1776 l-55 21 l16 21" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M280 1744 l5 54 l27 43" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M389 1364 l-21 50 l-36 30" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M70 1842 l27 22 l-15 39" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M645 1613 l-25 26 l-14 25" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M1025 1310 l-42 43 l-14 44" stroke="#4a4e54" stroke-width="5" fill="none"/><path d="M264 1435 l29 35 l-36 44" stroke="#4a4e54" stroke-width="5" fill="none"/>
+    <path d="M150 1215 q-10 -50 6 -80 M160 1215 q4 -60 22 -70 M170 1215 q14 -40 34 -46" stroke="#6a8a3a" stroke-width="6" fill="none"/><path d="M300 1215 q-10 -50 6 -80 M310 1215 q4 -60 22 -70 M320 1215 q14 -40 34 -46" stroke="#6a8a3a" stroke-width="6" fill="none"/><path d="M760 1215 q-10 -50 6 -80 M770 1215 q4 -60 22 -70 M780 1215 q14 -40 34 -46" stroke="#6a8a3a" stroke-width="6" fill="none"/><path d="M960 1215 q-10 -50 6 -80 M970 1215 q4 -60 22 -70 M980 1215 q14 -40 34 -46" stroke="#6a8a3a" stroke-width="6" fill="none"/>
+    
+  </svg>

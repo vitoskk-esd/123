@@ -1,0 +1,82 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props77.js"></script>
+<script>
+// «ТОЛЯН · 16: СВОЙ АВТОСАЛОН» (ep77) — продолжение мини-сериала «со ста тысяч», часть 16, без мата. После финала «со ста тысяч» (Марк II, «а дальше — два миллиона»)
+// цель — свой автосалон: Римма Захаровна сдаёт бывшую АЗС, условие — 10 машин за 8 недель, иначе площадка Жоры.
+// Денег после аренды почти нет → бот приносит «пятёрку» деда Палыча → Толян берёт её на комиссию (без вложений) → 1/10. Крючок: баннер «ЖОРА МОТОРС».
+const T = (p, x, foot, h, pose = {}, extra = {}) => ch("tolyan", p, x, foot, h, {}, pose, extra);
+const RI = (p, x, foot, h, pose = {}, extra = {}) => RIM(ch("vika", p, x, foot, h, null, pose, extra));
+const PA = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...PAL, ...o }, pose, extra);
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const DL = glow(540, 300, 480, "#ffffff", .22), GL = glow(540, 262, 420, "#fff2b0", .35), VL = glow(540, 520, 520, "#ffd9a0", .3);
+const S = [
+ { h: "ОБЛОЖКА → ФЛЕШБЭК: ФИНАЛ 15-Й ЧАСТИ", tc: "1/5 · 0:00–0:10",
+   A: { def: () => { const H = HOLDPHONE("tolyan", "ta", 540, 2090, 1680, {}, V05CARD(), { rim: "#ffffff", side: 1 });
+       return { bg: "ploshchadkasdam", farBlur: 8, mid: H.mid, lights: H.lights + DL, over: TITLE("ТОЛЯН · 16:", "СВОЙ АВТОСАЛОН") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "ploshchadkasdam", over: FLASH() }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Лис: «В прошлой части Толян дошёл до миллиона и купил Марк Второй. И пообещал: дальше — два миллиона. На перепродаже столько не заработать. Нужен свой автосалон».", who: "Лис",
+   mv: "<b>Продолжение мини-сериала «Толян: со ста тысяч»</b> — нумерация частей идёт дальше: это <b>часть 16</b> (сезон «Свой автосалон»). A — <b>кадр 0</b>: Толян с телефоном — в боте «ВАЗ-2105 · 1998 · 31 000 км · 160 000 ₽ · −24%» + плашка «ТОЛЯН · 16: СВОЙ АВТОСАЛОН». B — <b>приём: флешбэк</b> — настоящий кадр из финала 15-й части («А дальше — два миллиона, брат») в сепии, в рамке «ЧАСТЬ 15 · ФИНАЛ»; капитал — те же 120 000 ₽, что остались после покупки Марка." },
+ { h: "«СВОЙ САЛОН, БРАТ» → РИММА ЗАХАРОВНА", tc: "2/5 · 0:10–0:24",
+   A: { def: () => ({ bg: "ploshchadkasdam", mid: car(MK2, 380, 1640, 660, { z: 5, sheen: .5 }) + T("tb", 230, 1880, 880, { armR: -100 }, { rim: "#fff", side: 1, z: 7 }), over: CNT77("120 000", 0), lights: DL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "tb", html: "Свой салон, брат.<br><em>С вывеской.</em>", fs: 46 }], talk: ["tb"] },
+   B: { def: () => ({ bg: "ploshchadkasdam", mid: RI("ra", 760, 1880, 820, { armR: -40 }, { rim: "#fff", side: -1, z: 7 }) + T("tc", 240, 1900, 840, {}, { rim: "#fff", side: 1, z: 7 }), lights: DL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ra", html: "Сто тысяч в месяц. Через восемь недель —<br><em>десять машин. Нет — площадка Жоры.</em>", fs: 32 }], talk: ["ra"] },
+   vo: "Толян: «Свой салон, брат. С вывеской». Лис: «Бывшая заправка на выезде из города. Хозяйка — Римма Захаровна». Римма: «Сто тысяч в месяц. И через восемь недель здесь стоят десять машин. Нет машин — площадка Жоры».", who: "Толян + Лис + Римма",
+   mv: "A — <b>новый фон — бывшая АЗС «СДАЁТСЯ»</b> (навес без колонок, будка, бурьян); Толян на <b>том самом вишнёвом Марке II</b>; <b>новый счётчик сезона</b>: 💰 120 000 ₽ · 🚗 0/10 на площадке. B — <b>новая героиня — Римма Захаровна</b>, хозяйка площадки (серый костюм, рыжее каре, строгий голос)." },
+ { h: "ДОГОВОР: 10 МАШИН ЗА 8 НЕДЕЛЬ → «ПЯТЁРКА» ДЕДА ПАЛЫЧА", tc: "3/5 · 0:24–0:40",
+   A: { def: () => ({ bg: "ploshchadkasdam", over: LEASE() + CNT77("20 000", 0) + PIPS(T("td", 160, 640, 640, {}, { z: 2 }), "td", "pp1", "#ffd23f", 700, 1560) }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "td", html: "Десять так десять.", fs: 44 }], talk: ["td"], after: el => { el.querySelector("#hl").style.width = "100%"; el.querySelector("#hl2").style.width = "100%"; } },
+   B: { def: () => ({ bg: "garazhpalycha", mid: car(V05, 330, 1620, 700, { z: 5 }) + TARP(330, 1630, 700) + PA("pa", 200, 1880, 820, {}, { armR: -60 }, { rim: "#fff2b0", side: 1, z: 9 }), lights: GL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "pa", html: "Перекупам не отдам.<br><em>Они её на запчасти распилят.</em>", fs: 38 }], talk: ["pa"] },
+   vo: "Толян: «Десять так десять». Лис: «Аренда съела почти всё: на счету двадцать тысяч. Бот прислал “пятёрку” девяносто восьмого года: тридцать одна тысяча пробега, сто шестьдесят при рынке двести десять. Продаёт дед Палыч». Палыч: «Перекупам не отдам. Они её на запчасти распилят».", who: "Толян + Лис + Палыч",
+   mv: "A — <b>приём: договор крупно, маркер выделяет пункты</b> «10 автомобилей за 8 недель» и «иначе — Г. Жоре»; счётчик 120 000 → 20 000 ₽. Между A и B — бот в руках у Толяна (карточка «пятёрки» пульсирует). B — <b>новый фон — гараж деда Палыча</b> (календарь 1998, вымпел «Лучший водитель», банки); <b>новый герой — дед Палыч</b>; машина под брезентом." },
+ { h: "БРЕЗЕНТ — ДОЛОЙ → «Я НЕ ПЕРЕКУП. Я — АВТОСАЛОН»", tc: "4/5 · 0:40–0:54",
+   A: { def: () => ({ bg: "garazhpalycha", mid: car(V05, 330, 1620, 700, { z: 5, sheen: .6 }) + PA("pb", 160, 1880, 780, { look: "o" }, {}, { z: 9 }) + T("tf", 900, 1900, 840, { armL: -120 }, { rim: "#fff2b0", side: -1, z: 9 }), lights: GL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "tf", html: "Я не перекуп, отец.<br><em>Я — автосалон.</em>", fs: 42 }], talk: ["tf"] },
+   B: { def: () => ({ bg: "garazhpalycha", farBlur: 3, mid: PA("pc", 300, 1940, 960, {}, { armR: -40 }, { rim: "#fff2b0", side: 1, z: 7 }) + T("tg", 800, 1960, 980, { armL: -40 }, { rim: "#fff2b0", side: -1, z: 7 }), lights: GL }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "tg", html: "Деньги — когда продам. Ставим на комиссию:<br><em>витрина, мойка, лучшее место.</em>", fs: 32 }], talk: ["tg"] },
+   vo: "<i>(Толян сдёргивает брезент — «пятёрка» как новая)</i> Толян: «Я не перекуп, отец. Я — автосалон». Палыч: «Салон? А деньги где?» Толян: «Деньги — когда продам. Ставим её на комиссию: витрина, мойка, лучшее место».", who: "Толян + Палыч",
+   mv: "A — <b>приём: брезент сдёргивают</b> — «пятёрка» блестит, у деда открывается рот. B — договариваются: машина — на площадку, деньги деду — после продажи. Отсылка к прошлому сезону: «я не перекуп» — так Толян никогда о себе не говорил." },
+ { h: "ПЕРВАЯ МАШИНА: 1/10 → «ЖОРА МОТОРС» ЧЕРЕЗ ДОРОГУ", tc: "5/5 · 0:54–1:10",
+   A: { def: () => ({ bg: "ploshchadkavecher", mid: car(V05, 300, 1640, 720, { z: 5, sheen: .5 }) + KOMIS(560, 1330) + RI("rb", 170, 1900, 780, { armL: -30 }, { rim: "#ffd9a0", side: 1, z: 7 }), over: CNT77("20 000", 1), lights: VL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "rb", html: "Одна.<br><em>Осталось девять, Анатолий.</em>", fs: 40 }], talk: ["rb"] },
+   B: { def: () => ({ bg: "ploshchadkavecher", mid: ZBANNER() + Z("za", 820, 1900, 820, {}, { armR: -150 }, { rim: "#ffd9a0", side: -1, z: 7 }), lights: VL }), shot: { x: 640, y: 1050, s: 1.06 },
+     bubbles: [{ p: "za", html: "Студент, салон — это не гараж.<br><em>Посмотрим, кто первым.</em>", fs: 36 }], talk: ["za"] },
+   vo: "Лис: «Первая машина на площадке Толяна — и ни рубля вложений». Римма: «Одна. Осталось девять, Анатолий». Лис: «А через дорогу в тот же вечер повесили баннер». Жора: «Студент, салон — это не гараж. Посмотрим, кто первым». Лис: «Хочешь, чтобы хорошие машины находили тебя раньше других, — бот “Перехват”, ссылка в шапке». <i>(финальная карточка бота)</i>", who: "Лис + Римма + Жора",
+   mv: "A — <b>новый фон — площадка вечером</b>: гирлянда, самодельная вывеска «АВТОСАЛОН ТОЛЯНА», «пятёрка» с табличкой «КОМИССИЯ · 195 000 ₽»; счётчик 🚗 1/10. B — <b>приём: баннер разворачивается</b> на щите через дорогу — «ЖОРА МОТОРС · СКОРО ОТКРЫТИЕ». Жора — снова «Студент», как весь прошлый сезон. Крючок на часть 17 — голосом Лиса до финальной карточки; последний кадр — только бот." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); if (f.after) f.after(el); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
