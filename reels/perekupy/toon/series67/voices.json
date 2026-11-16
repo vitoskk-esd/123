@@ -1,0 +1,20 @@
+{
+ "tol": {
+  "voice": "Algenib",
+  "tempo": 1.18,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice. Adult street comedy sketch, not for kids.",
+  "notes": "Comedy sketch, no narrator. He finds two living rust spots dressed as soldiers moving into his freshly bought car. Mostly speaks without swearing; the few swear words are comedic punches — pronounce them fully and clearly, never bleep. Line 1: stunned, then rude. Line 2: indignant. Line 3: proud, boasting about the bot, fast and clear. Line 4: smug. Line 5: firm, final, punchy. Line 6: shocked, offended. Line 7: shouting, commanding. Line 8: quiet, defeated, exhausted."
+ },
+ "rzh": {
+  "voice": "Alnilam",
+  "tempo": 1.1,
+  "profile": "Rzhavy — a living rust spot, an old-school Russian army sergeant: deep, firm, unhurried, self-confident, deadpan humor.",
+  "notes": "Line 1: impressed, casual, inspecting the car. Line 2: loud military greeting, proud. Line 3: dry joke. Line 4: calm, philosophical. Line 5: satisfied, settling in."
+ },
+ "ryz": {
+  "voice": "Puck",
+  "tempo": 1.08,
+  "profile": "Ryzhik — a young living rust spot, a cheerful naive army private, quick and upbeat.",
+  "notes": "Line 1: sniffing, ironic. Line 2: matter-of-fact, polite. Line 3: puzzled, cheeky. Line 4: casual reveal, amused. Line 5: sweet, cheeky, from hiding."
+ }
+}
