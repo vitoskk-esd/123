@@ -29,7 +29,7 @@ def _wait(sec: int) -> str:
     return f"через {sec // 60} мин" if sec >= 60 and sec % 60 == 0 else f"через {sec} с"
 
 
-def render(basic: Plan, pro: Plan, trial: Plan | None = None) -> bytes:
+def render(basic: Plan, pro: Plan, trial: Plan) -> bytes:
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
     f_title, f_head, f_price = _font(True, 58), _font(True, 44), _font(True, 34)
@@ -75,10 +75,6 @@ def render(basic: Plan, pro: Plan, trial: Plan | None = None) -> bytes:
                 d.text((cx, y), str(val), font=f_cell, fill=accent if cx == col_pro else MUTED, anchor="mm")
         y += 86
 
-    if trial is None:              # пробный день больше не предлагаем (владелец 16.11) — картинка без плашки внизу
-        out = BytesIO()
-        img.crop((0, 0, W, top + 1021)).save(out, "PNG", optimize=True)
-        return out.getvalue()
     # пробный день
     box_top = top + 1021
     d.rounded_rectangle((60, box_top, W - 60, box_top + 120), radius=24, fill=CARD)

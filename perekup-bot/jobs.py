@@ -97,7 +97,7 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
                     basic=b.price, pro=all_plans["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
                     basic_filters=f"{b.max_filters} фильтр{'а' if 1 < b.max_filters < 5 else 'ов' if b.max_filters >= 5 else ''}"), K.plans(all_plans, False))
             else:
-                await send(bot, ctx, u["id"], T.ACCESS_ENDED, K.plans(all_plans, False))
+                await send(bot, ctx, u["id"], T.ACCESS_ENDED, K.plans(all_plans, not u["trial_used"]))
 
 
 async def autopay_failed(bot: Bot, ctx: Ctx, uid: int, plan) -> None:

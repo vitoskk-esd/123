@@ -44,16 +44,6 @@ def new_filter() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_NEW_FILTER, callback_data="f:new")])
 
 
-def free_start() -> InlineKeyboardMarkup:
-    """Пробный режим включён — сразу к фильтру."""
-    return kb([B(text=T.BTN_FREE_FILTER, callback_data="f:new")])
-
-
-def to_plans() -> InlineKeyboardMarkup:
-    """Пробные объявления кончились — к тарифам «Простой» и PRO."""
-    return kb([B(text=T.BTN_TO_PLANS, callback_data="s:plans")])
-
-
 def try_button() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_TRY, callback_data="s:try")])
 

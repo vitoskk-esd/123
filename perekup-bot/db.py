@@ -91,8 +91,6 @@ class DB:
                     "ALTER TABLE users ADD COLUMN autorenew INTEGER DEFAULT 0",     # автопродление включено
                     "ALTER TABLE users ADD COLUMN renew_inv TEXT",                  # материнский счёт Робокассы для автосписаний
                     "ALTER TABLE users ADD COLUMN renew_plan TEXT",                 # какой тариф продлеваем
-                    "ALTER TABLE users ADD COLUMN free_left INTEGER DEFAULT 0",     # сколько бесплатных объявлений осталось (пробный режим)
-                    "ALTER TABLE users ADD COLUMN free_cheap_left INTEGER DEFAULT 0",   # из них — сколько ещё машин ниже рынка
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
                     "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
                     "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0",
@@ -168,7 +166,7 @@ class DB:
         return await self._one("SELECT * FROM users WHERE id=?", uid)
 
     async def set_user(self, uid: int, **fields) -> None:
-        assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used", "autorenew", "renew_inv", "renew_plan", "free_left", "free_cheap_left"}, fields
+        assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used", "autorenew", "renew_inv", "renew_plan"}, fields
         await self._run(f"UPDATE users SET {', '.join(f'{k}=?' for k in fields)} WHERE id=?", *fields.values(), uid)
 
     async def take_trial(self, uid: int, until: float, now: float) -> bool:
@@ -178,36 +176,6 @@ class DB:
                                       "WHERE id=? AND trial_used=0 AND paid_until<=? AND trial_until<=?", (until, uid, now, now))
         await self.conn.commit()
         return cur.rowcount == 1
-
-    async def take_free(self, uid: int, n: int, now: float, cheap: int = 0) -> bool:
-        """Включает пробный режим одной операцией: n любых машин + cheap машин ниже рынка, как в PRO. False — аккаунт уже пробовал
-        (бесплатные объявления или пробный день) или у него есть доступ. Строго один раз на Telegram-аккаунт."""
-        cur = await self.conn.execute("UPDATE users SET free_left=?, free_cheap_left=?, trial_used=1 "
-                                      "WHERE id=? AND trial_used=0 AND paid_until<=? AND trial_until<=?", (n, cheap, uid, now, now))
-        await self.conn.commit()
-        return cur.rowcount == 1
-
-    async def use_free(self, uid: int, cheap: bool = False) -> tuple[str, int, int] | None:
-        """Списывает бесплатное объявление. Машина ниже рынка идёт в счёт «ниже рынка», пока они не кончились, потом — в счёт обычных;
-        обычная — только в счёт обычных. Возвращает (какой счётчик списан: "cheap"/"plain", осталось обычных, осталось ниже рынка)
-        или None — эта машина бесплатно уже не положена (владелец 16.11: «5 простых и 3 по низу рынка»)."""
-        kind = None
-        if cheap:
-            cur = await self.conn.execute("UPDATE users SET free_cheap_left=free_cheap_left-1 WHERE id=? AND free_cheap_left>0", (uid,))
-            kind = "cheap" if cur.rowcount == 1 else None
-        if kind is None:
-            cur = await self.conn.execute("UPDATE users SET free_left=free_left-1 WHERE id=? AND free_left>0", (uid,))
-            kind = "plain" if cur.rowcount == 1 else None
-        await self.conn.commit()
-        if kind is None:
-            return None
-        row = await self._one("SELECT free_left, free_cheap_left FROM users WHERE id=?", uid)
-        return kind, row["free_left"], row["free_cheap_left"]
-
-    async def refund_free(self, uid: int, kind: str = "plain") -> None:
-        """Объявление не дошло (Telegram не принял) — возвращаем его в тот же счётчик."""
-        col = "free_cheap_left" if kind == "cheap" else "free_left"
-        await self._run(f"UPDATE users SET {col}={col}+1 WHERE id=?", uid)
 
     async def gift_candidates(self, now: float, limit: int = 20) -> list:
         """Кому ещё не дарили пробный день: не брал его, нет доступа, бота не заблокировал."""

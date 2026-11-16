@@ -169,8 +169,6 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         return
     channels = await ctx.db.channel_count_for(uid)
     tail = T.MISSED_ACTIVE.format(n=n, word=cars_word(n)) if n > 0 else ""
-    if plans.current(ctx.cfg, u) is plans.FREE_TRIAL:
-        tail += T.FREE_FILTER_SAVED.format(n=plans.free_left(u), k=plans.free_cheap_left(u))
     await cb.message.answer(T.FILTER_SAVED.format(channels=channels) + tail, reply_markup=K.filter_saved(fid))
     await cb.answer()
 
@@ -399,23 +397,10 @@ async def activate_trial(ctx: Ctx, uid: int) -> float | None:
 
 @router.callback_query(F.data == "s:try")
 async def want_try(cb: CallbackQuery, ctx: Ctx) -> None:
-    """«Хочу попробовать» под фото приветствия (владелец 16.11, второй вариант): новому человеку — FREE_POSTS бесплатных объявлений
-    как в PRO и кнопка «Написать фильтр»; кончились — сообщение и тарифы «Простой» и PRO (платный пробный день больше не предлагаем).
-    Аккаунт уже пробовал или есть доступ — сразу тарифы."""
-    uid = cb.from_user.id
-    u = await ctx.db.user(uid)
-    n, k = ctx.cfg.free_posts, ctx.cfg.free_cheap
-    if ctx.cfg.payments_on and can_trial(u) and await ctx.db.take_free(uid, n, time.time(), k):
-        await ctx.db.event(uid, "free_trial")
-        has_filter = bool(await ctx.db.filters(uid))
-        await cb.message.answer(T.FREE_ON.format(total=n + k, n=n, k=k) + (T.FREE_HAS_FILTER if has_filter else ""),
-                                reply_markup=None if has_filter else K.free_start())
-        return await cb.answer()
-    if ctx.cfg.payments_on and plans.current(ctx.cfg, u) is plans.FREE_TRIAL:     # пробный режим уже идёт — напоминаем, сколько осталось
-        n, k = plans.free_left(u), plans.free_cheap_left(u)
-        await cb.message.answer(T.FREE_ON.format(total=n + k, n=n, k=k), reply_markup=K.free_start())
-        return await cb.answer()
-    await send_plans(cb.message, ctx, uid, T.FREE_USED if ctx.cfg.payments_on and not plans.current(ctx.cfg, u) else "")
+    """«Хочу попробовать» под фото приветствия → сразу все тарифы: картинка «что в каком тарифе» + кнопки «Пробный день», «Простой», «PRO»
+    (владелец 16.11; раньше — отдельное сообщение только про пробный день и кнопка «Другие тарифы»). Пробный уже брал — тарифы без него."""
+    u = await ctx.db.user(cb.from_user.id)
+    await send_plans(cb.message, ctx, cb.from_user.id, "" if can_trial(u) else T.TRIAL_USED)
     await cb.answer()
 
 
@@ -427,7 +412,7 @@ async def other_plans(cb: CallbackQuery, ctx: Ctx) -> None:
 
 def plans_text(ctx: Ctx, u) -> str:
     p = plans.plans(ctx.cfg)
-    trial = ""                  # платный пробный день больше не предлагаем — вместо него бесплатные объявления (владелец 16.11)
+    trial = T.PLAN_TRIAL_TEXT.format(price=p["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro) if can_trial(u) else ""
     b = p["basic"]
     return T.PLANS.format(trial=trial, basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
                           basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}",
@@ -453,18 +438,18 @@ async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
         status += T.PLAN_TRIAL_DEAL.format(pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro, until=fmt_date(u["paid_until"]))
     caption = T.PLANS_CAPTION.format(
         status=status, lead=intro or T.PLANS_LEAD,           # своё вступление вместо «Сравни тарифы на картинке» — без двух фраз со стрелками подряд
-        trial="",                    # в тарифах только «Простой» и PRO (владелец 16.11: «пробный нужно убрать»)
+        trial=T.PLAN_TRIAL_SHORT.format(price=p["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro) if can_trial(u) else "",
         basic=b.price, pro=p["pro"].price, delay=wait_text(b.delay) if b.delay else "0 с",
         basic_filters=f"{b.max_filters} {'фильтр' if b.max_filters == 1 else 'фильтра' if b.max_filters < 5 else 'фильтров'}")
-    markup = K.plans(p, False)
+    markup = K.plans(p, can_trial(u))
     if await autopay_shown(ctx, uid) or (u and u["autorenew"]):
         markup.inline_keyboard.append([K.B(text=T.BTN_AUTOPAY_MANAGE, callback_data="s:auto")])
-    key = (b, p["pro"])
+    key = (b, p["pro"], p["trial"])
     try:
         if key not in _plans_photo:
             from aiogram.types import BufferedInputFile
             import plans_image
-            photo = BufferedInputFile(plans_image.render(b, p["pro"]), "plans.png")
+            photo = BufferedInputFile(plans_image.render(b, p["pro"], p["trial"]), "plans.png")
         else:
             photo = _plans_photo[key]
         sent = await msg.answer_photo(photo, caption=caption, reply_markup=markup)
@@ -490,9 +475,6 @@ async def pay(cb: CallbackQuery, ctx: Ctx) -> None:
     u = await ctx.db.user(cb.from_user.id)
     all_plans = plans.plans(ctx.cfg, u)           # PRO во время пробного дня — по цене со скидкой
     plan = all_plans.get(cb.data.split(":")[2] if cb.data.count(":") == 2 else "basic", all_plans["basic"])
-    if plan.id == "trial":           # старая кнопка пробного дня (в давних сообщениях) — пробный день больше не продаём
-        await send_plans(cb.message, ctx, cb.from_user.id)
-        return await cb.answer()
     if plan.id == "trial" and not can_trial(u):
         await cb.message.answer(T.TRIAL_USED, reply_markup=K.plans(all_plans, False))
         return await cb.answer()
