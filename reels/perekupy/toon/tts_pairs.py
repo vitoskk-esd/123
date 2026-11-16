@@ -124,7 +124,11 @@ def cut(path, who):
     cuts = []
     for k in range(1, len(mine)):
         i0, j0 = last[k - 1], first[k]; assert i0 < j0, f"{who}: реплики {mine[k - 1][1]} и {mine[k][1]} перепутаны"
-        m = max(range(i0, j0), key=lambda m: words[m + 1][1] - words[m][2]); cuts.append((words[m][2] + words[m + 1][1]) / 2)
+        # нераспознанные слова между репликами: слово, похожее на первое слово следующей реплики, режем к ней («Ху-е-ть» ↔ «Охуеть»)
+        nxt = [loose(w) for w in mine[k][3].split() if norm(w)][0]; prv = [loose(w) for w in mine[k - 1][3].split() if norm(w)][-1]
+        r = lambda a, b: difflib.SequenceMatcher(None, a, b).ratio()
+        lim = next((q for q in range(i0 + 1, j0) if r(got[q], nxt) > max(r(got[q], prv), .5)), j0)
+        m = max(range(i0, lim), key=lambda m: words[m + 1][1] - words[m][2]); cuts.append((words[m][2] + words[m + 1][1]) / 2)
     b = [0.0] + cuts + [len(x) / SR]
     return [(w, e, i, x[int(b[k] * SR):int(b[k + 1] * SR)]) for k, (e, i, w, t) in enumerate(mine)]
 

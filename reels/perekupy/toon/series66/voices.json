@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.06,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone adult comedy episode in a Russian village: an old man's 'beast' Niva from a car flipper gets stuck in a puddle. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "ego": {
+  "voice": "Enceladus",
+  "tempo": 1.05,
+  "profile": "Egorych — an old Russian village grandpa in his 70s, slow, raspy, folksy, sly humor. He swears casually and naturally like an old villager — calm, not shouting. Adult comedy, uncensored.",
+  "notes": "Pronounce every swear word fully, clearly and naturally in the flow of speech — never bleep, soften or skip it. Line 1: confident. Line 2: stunned, slow. Line 3: tired, resigned. Line 4: dry. Line 5: quiet threat. Line 6: amazed, slow, delighted."
+ },
+ "art": {
+  "voice": "Achird",
+  "tempo": 1.1,
+  "profile": "Artyom — a young Russian grandson around 20, helpful, cheerful, a bit of a city guy.",
+  "notes": "Line 1: helpful suggestion. Line 2: excited, proud."
+ },
+ "mit": {
+  "voice": "Algenib",
+  "tempo": 1.05,
+  "profile": "Mityai — a rural Russian tractor driver in his 40s, rough, sarcastic, confident. He swears naturally in the flow of speech. Adult comedy, uncensored.",
+  "notes": "Pronounce every swear word fully and naturally — never bleep. Line 1: mocking, amazed. Line 2: proud, commanding."
+ }
+}
