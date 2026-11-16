@@ -34,5 +34,7 @@ const PIP = (inner, id, ring = "#ffd23f", left = 700, top = 1440, bgc = "#2b2f37
 const PIPS = (inner, p, id, ring, left, top) => { const out = PIP(inner, id, ring, left, top); CINE.ANCH[p] = [left + 160, top + 30, .8]; return out; };
 // приём: флешбэк — кадр из финала прошлого сезона (ep56, «А дальше — два миллиона, брат») в сепии, с плёночной рамкой
 const FLASH = (id = "fb") => `<div id="${id}" style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:40;background:#1a140c;overflow:hidden">
-  <img src="fb_finale.jpg" style="position:absolute;left:60px;top:200px;width:960px;height:1707px;filter:sepia(.8) brightness(1.45) contrast(1.1);border:14px solid #f4ead2;box-shadow:0 20px 60px #000;transform:rotate(-1.5deg)">
+  <img src="fb_finale.jpg" style="position:absolute;left:60px;top:200px;width:960px;height:1707px;filter:sepia(.75) brightness(1.9) contrast(1.05);border:14px solid #f4ead2;box-shadow:0 20px 60px #000;transform:rotate(-1.5deg)">
   <div style="position:absolute;left:0;right:0;top:120px;text-align:center"><span style="font-family:Unbounded;font-weight:900;font-size:52px;color:#151515;background:#f4ead2;border:6px solid #151515;padding:6px 26px 12px;transform:rotate(-3deg);display:inline-block">ЧАСТЬ 15 · ФИНАЛ</span></div></div>`;
+// самодельная вывеска на навесе (в слое сцены, а не в фоне: фон уводит параллакс под счётчик)
+const SIGN77 = (x = 300, y = 590, z = 3, sc = 1) => `<div style="position:absolute;left:${x}px;top:${y}px;z-index:${z};transform-origin:0 0;scale:${sc};background:#ffd23f;border:8px solid #151515;box-shadow:0 10px 0 #151515;padding:8px 26px 12px;font-family:Unbounded;font-weight:900;font-size:44px;color:#151515;transform:rotate(-2deg);white-space:nowrap">АВТОСАЛОН ТОЛЯНА</div>`;

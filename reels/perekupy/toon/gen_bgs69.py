@@ -1,7 +1,7 @@
 # python3 gen_bgs69.py → фоны для ep77 «Толян: свой автосалон · 1» (мини-сериал, без мата):
 # bg_ploshchadkasdam (бывшая АЗС на выезде из города днём: навес без колонок, баннер «СДАЁТСЯ», бурьян, трещины, будка оператора),
 # bg_garazhpalycha (гараж деда Палыча: машина под брезентом, полки с банками, календарь 1998, вымпел, лампа),
-# bg_ploshchadkavecher (та же площадка вечером: гирлянда, самодельная вывеска «АВТОСАЛОН ТОЛЯНА», через дорогу — здание с пустым щитом)
+# bg_ploshchadkavecher (та же площадка вечером: гирлянда (вывеска «АВТОСАЛОН ТОЛЯНА» — реквизит SIGN77 в props77.js), через дорогу — здание с пустым щитом)
 import random
 K = "#000"
 HEAD = '  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">\n'
@@ -39,9 +39,7 @@ vecher = lot("#2a2f5a", "#e88a5a", "#4f545b", extra_far=f'''
     <rect x="580" y="600" width="440" height="110" fill="#f4f0e8" stroke="{K}" stroke-width="6"/><path d="M620 710 V760 M980 710 V760" stroke="{K}" stroke-width="8"/>''',
     extra_near=f'''
     <!-- гирлянда и самодельная вывеска Толяна -->
-    <path d="M80 560 Q540 640 1000 560" stroke="#151515" stroke-width="4" fill="none"/>{"".join(f'<circle cx="{80 + k * 46}" cy="{560 + 80 * (1 - ((k * 46 - 460) / 460) ** 2)}" r="9" fill="{("#ffd23f", "#ff6b6b", "#7fd0ff")[k % 3]}"/>' for k in range(21))}
-    <rect x="240" y="420" width="600" height="120" fill="#ffd23f" stroke="{K}" stroke-width="8" transform="rotate(-2 540 480)"/>
-    <text x="540" y="500" text-anchor="middle" {F} font-size="54" fill="#151515" transform="rotate(-2 540 480)">АВТОСАЛОН ТОЛЯНА</text>''')
+    <path d="M80 560 Q540 640 1000 560" stroke="#151515" stroke-width="4" fill="none"/>{"".join(f'<circle cx="{80 + k * 46}" cy="{560 + 80 * (1 - ((k * 46 - 460) / 460) ** 2)}" r="9" fill="{("#ffd23f", "#ff6b6b", "#7fd0ff")[k % 3]}"/>' for k in range(21))}''')
 
 random.seed(333)
 palych = HEAD + f'''    <rect width="1080" height="1920" fill="#6a5a4a"/>

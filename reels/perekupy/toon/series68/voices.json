@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.12,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 16 of a comedy mini-series about Tolyan, the first episode of a new season: after earning a million, he now wants his own car dealership. Brisk, ironic narration; the opening line recalls the previous finale like a 'previously on' recap. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.15,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "No swearing. Line 1: dreamy, proud. Line 2: confident, short. Line 3: firm, proud, a new self-image. Line 4: persuasive salesman, quick and charming."
+ },
+ "rimma": {
+  "voice": "Kore",
+  "tempo": 1.08,
+  "profile": "Rimma Zakharovna — a strict, businesslike Russian woman in her 50s who owns a former gas station lot; cool, precise, a little ironic, always calls Tolyan by his full name «Анатолий».",
+  "notes": "Line 1: dictating contract terms, firm and slow. Line 2: dry, ironic, counting."
+ },
+ "palych": {
+  "voice": "Iapetus",
+  "tempo": 1.05,
+  "profile": "Palych — an old Russian grandpa in his 70s, retired driver, owner of a perfectly kept old Lada; grumpy, suspicious of car flippers, kind underneath.",
+  "notes": "Line 1: grumpy, protective of his car. Line 2: suspicious, squinting."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "No swearing. One line: mocking, competitive, grinning — he has just opened a rival dealership across the road."
+ }
+}
