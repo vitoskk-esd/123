@@ -1,0 +1,88 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>АРБИТРАЖНИКИ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="../charsA.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="propsA03.js"></script>
+<script>
+// «АРБИТРАЖНИКИ» ep03 «НИКИТА: РОЛИК → 12 ЗАЯВОК» (новая тема 16.11): друзья кончились → Никита снимает короткое видео про бонус банка новым клиентам →
+// мама: «ты опять с лампой разговариваешь?» → 40 000 просмотров → незнакомцы в метро идут по ссылке в шапке → как банк узнаёт клиента: партнёрская метка →
+// 12 заявок → 18 000 ₽ (пример) → мама: «а меня научишь?» → финал в стиле Телеграма. Без значка Арбузова. Новые фоны: domstudiya, metrovagon, eskalator.
+const fix = h => h.replaceAll('style="left:', 'style="position:absolute;left:');
+const DS_L = glow(200, 820, 300, "#fffbe0", .45) + glow(800, 420, 300, "#ffb070", .25);
+const MV_L = glow(540, 200, 520, "#ffffff", .25);
+const ES_L = glow(540, 300, 520, "#fff6c8", .25);
+const STAT = (y = 700) => `<div style="position:absolute;left:0;right:0;top:${y}px;text-align:center;z-index:45"><span style="display:inline-block;background:#0d0e12;color:#fff;border:7px solid #151515;border-radius:30px;box-shadow:0 10px 0 #151515;padding:14px 30px;font-family:Unbounded;font-weight:900;font-size:46px">👁 40 000 · <span style="color:#4cd964">✅ 12 заявок</span></span></div>`;
+const REELNIK = fix(`<div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,#fffbe0 0,#7a5a8a 35%,#2a1e30 80%)"></div>` + N_("rn", 540, 2150, 1500, {}, { armR: -120 }, { z: 5 }));
+const S = [
+ { h: "ОБЛОЖКА → «СНИМУ РОЛИК!»", tc: "1/6 · 0:00–0:10",
+   A: { def: () => ({ bg: "domstudiya", mid: TRIPOD(240, 1180) + N_("na", 650, 2010, 1040, {}, { armR: -120 }, { rim: "#fffbe0", side: -1, z: 8 }), lights: DS_L, over: TITLE("НИКИТА:", "РОЛИК → 12 ЗАЯВОК", 62) + STAT(720) }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "domstudiya", mid: TRIPOD(240, 1180) + N_("nb", 720, 1900, 900, {}, { armR: -150 }, { rim: "#fffbe0", side: -1, z: 8 }), lights: DS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "nb", html: "Значит, сниму ролик.<br><em>Пусть сами находят ссылку!</em>", fs: 32 }], talk: ["nb"] },
+   vo: "Арбузов: «Друзья у Никиты закончились. Но людей, которым нужна выгодная карта, — миллионы». Никита: «Значит, сниму ролик. Пусть сами находят ссылку!»", who: "Арбузов + Никита",
+   mv: "<b>Новая обложка</b>: домашняя студия (кольцевая лампа, штатив с телефоном «REC», гирлянда), Никита перед камерой, плашка «НИКИТА: / РОЛИК → 12 ЗАЯВОК» и чёрная плашка-итог «👁 40 000 · ✅ 12 заявок». B — <b>новый фон: комната-студия</b>; Никита у штатива. <b>Значка Арбузова справа вверху нет</b> — голос за кадром." },
+ { h: "РОЛИК НИКИТЫ → МАМА: «С ЛАМПОЙ РАЗГОВАРИВАЕШЬ?»", tc: "2/6 · 0:10–0:22",
+   A: { def: () => ({ bg: "domstudiya", over: REELS(REELNIK).replace('<span id="rlv">0</span>', '<span id="rlv">1 240</span>') }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "domstudiya", mid: TRIPOD(380, 1180) + M_("ma", 150, 1900, 860, { armL: 20 }, { rim: "#fffbe0", side: 1, z: 7 }) + N_("nc", 870, 1900, 860, { look: "o" }, { armL: 60 }, { rim: "#fffbe0", side: -1, z: 8 }), lights: DS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ma", html: "Опять с лампой<br><em>разговариваешь?</em>", fs: 30 }, { p: "nc", html: "Мам, я работаю!<br><em>Это лампа такая!</em>", fs: 30 }], talk: ["ma"] },
+   vo: "Арбузов: «Никита рассказал в коротком видео, какой банк дарит бонус новым клиентам». Мама: «Никита, ты опять с лампой разговариваешь?» Никита: «Мам, я работаю! Это кольцевая лампа».", who: "Арбузов + мама + Никита",
+   mv: "A — <b>приём: интерфейс короткого видео на весь кадр</b>: ролик Никиты (лайки, комменты, «Какой банк дарит бонус новым клиентам 🎁 · Ссылка — в шапке профиля 👆», счётчик 👁). B — <b>новая героиня — мама Никиты</b> (кардиган) заглядывает в комнату." },
+ { h: "40 000 ПРОСМОТРОВ → НЕЗНАКОМЦЫ В МЕТРО", tc: "3/6 · 0:22–0:34",
+   A: { def: () => ({ bg: "eskalator", farBlur: 2, over: VIEWS(760), lights: ES_L }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => { const H1 = HOLDPHONE("vika", "oa", 270, 1960, 1040, null, `<div style="font-family:Onest;color:#fff"><div style="height:300px;border-radius:24px;background:radial-gradient(circle at 40% 40%,#ffd27a,#7a5a8a 60%,#2a1e30);display:flex;align-items:center;justify-content:center;font-size:120px">▶</div><div style="font-weight:800;font-size:46px;line-height:1.2;margin-top:18px">🎁 Бонус новым клиентам</div><div style="font-weight:800;font-size:42px;color:#ffd23f;margin-top:8px">ссылка в шапке 👆</div></div>`, { rim: "#ffffff", side: 1 });
+       const H2 = HOLDPHONE("perekup", "ab", 820, 1960, 1040, ARTEM, `<div style="font-family:Onest;color:#fff"><div style="height:300px;border-radius:24px;background:radial-gradient(circle at 40% 40%,#ffd27a,#7a5a8a 60%,#2a1e30);display:flex;align-items:center;justify-content:center;font-size:120px">▶</div><div style="font-weight:800;font-size:46px;line-height:1.2;margin-top:18px">nikita.arb</div><div style="font-weight:800;font-size:42px;color:#4cd964;margin-top:8px">▶ Оформить карту</div></div>`, { rim: "#ffffff", side: -1 });
+       return { bg: "metrovagon", farBlur: 3, mid: OLYA(H1.mid) + H2.mid, lights: OLYA(H1.lights) + H2.lights + MV_L }; }, shot: { x: 540, y: 1100, s: 1.02 },
+     bubbles: [{ p: "oa", html: "О, бонус новым!<br><em>Мне нужна карта.</em>", fs: 30 }, { p: "ab", html: "Ссылка в шапке.<br><em>Оформлю!</em>", fs: 30 }], talk: ["oa"] },
+   vo: "Арбузов: «Через день ролик набрал сорок тысяч просмотров». Оля: «О, бонус новым клиентам. Мне как раз нужна карта!» Артём: «Ссылка в шапке профиля. Оформлю, пока акция идёт».", who: "Арбузов + Оля + Артём",
+   mv: "A — <b>новый фон: эскалатор метро</b> (люди с телефонами), <b>приём: счётчик просмотров</b> бежит 0 → 40 000. B — <b>новый фон: вагон метро</b> (сиденья, поручни, схема линий): <b>новые герои Оля и Артём</b> держат телефоны с роликом Никиты." },
+ { h: "КАК БАНК УЗНАЁТ КЛИЕНТА → 12 ЗАЯВОК", tc: "4/6 · 0:34–0:46",
+   A: { def: () => ({ bg: "domstudiya", farBlur: 6, mid: TRACK(560) + N_("nd", 540, 1990, 880, {}, { armR: -150 }, { rim: "#fffbe0", side: 1, z: 8 }), lights: DS_L }), shot: { x: 540, y: 1100, s: 1.02 } },
+   B: { def: () => { const H = HOLDPHONE("nikita", "ne", 540, 2000, 1400, {}, LEADS(4), { rim: "#fffbe0", side: 1 });
+       return { bg: "domstudiya", farBlur: 6, mid: H.mid, lights: H.lights + DS_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "ne", html: "Двенадцать заявок!<br><em>И никого не уговаривал!</em>", fs: 34 }], talk: ["ne"] },
+   vo: "Арбузов: «Как банк понимает, что клиент от Никиты? В ссылке — его партнёрская метка». Никита: «Двенадцать заявок! И это я даже никого не уговаривал».", who: "Арбузов + Никита",
+   mv: "A — <b>приём: схема метки</b>: «🔗 ссылка…?partner=<b>nikita</b>» → «🏦 БАНК» → «✓ клиент от Никиты» появляются по очереди. B — телефон Никиты: партнёрский кабинет, уведомления «Новая заявка · из ролика» сыплются, счётчик заявок 1 → 12." },
+ { h: "12 × 1 500 = 18 000 ₽ → МАМА: «СКОЛЬКО?!»", tc: "5/6 · 0:46–0:56",
+   A: { def: () => ({ bg: "domstudiya", farBlur: 6, mid: CALC(600) + N_("nf", 540, 1990, 860, {}, { armR: -150 }, { rim: "#fffbe0", side: 1, z: 8 }), lights: DS_L }), shot: { x: 540, y: 1100, s: 1.02 } },
+   B: { def: () => ({ bg: "domstudiya", mid: M_("mb", 300, 1900, 900, { armL: 150, armR: -150 }, { rim: "#fffbe0", side: 1, z: 8 }) + N_("ng", 820, 1900, 860, {}, { armL: 30 }, { rim: "#fffbe0", side: -1, z: 7 }), lights: DS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "mb", html: "Сколько?! Никита…<br><em>а меня научишь?</em>", fs: 34 }], talk: ["mb"] },
+   vo: "Арбузов: «Двенадцать новых клиентов — восемнадцать тысяч выплаты от банка». Мама: «Сколько?! Никита… а меня научишь?»", who: "Арбузов + мама",
+   mv: "A — <b>карточка-расчёт</b>: «12 клиентов × 1 500 ₽» → «= 18 000 ₽» (мелко: «цифры — пример»). B — мама всплёскивает руками." },
+ { h: "«МАМ, УРОК БЕСПЛАТНЫЙ» → ФИНАЛ (ТЕЛЕГРАМ)", tc: "6/6 · 0:56–1:06",
+   A: { def: () => ({ bg: "domstudiya", mid: M_("mc", 300, 1900, 860, {}, { rim: "#fffbe0", side: 1, z: 7 }) + N_("nh", 780, 1900, 900, {}, { armL: 60 }, { rim: "#fffbe0", side: -1, z: 8 }), lights: DS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "nh", html: "Мам, урок бесплатный.<br><em>Ссылку скину!</em>", fs: 36 }], talk: ["nh"] },
+   B: { def: () => ({ bg: "domstudiya", over: ENDTG() + ENDNIK() }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Никита: «Мам, урок бесплатный. Ссылку скину». Арбузов: «Хочешь так же — бесплатный урок по арбитражу на банки в Телеграм-канале. Ссылка в шапке профиля».", who: "Никита + Арбузов",
+   mv: "A — Никита приобнимает маму. B — <b>финал в стиле Телеграма</b> (как во 2-й версии прошлого ролика): «БЕСПЛАТНЫЙ УРОК по арбитражу на банки», телефон со страницей канала, палец жмёт «▶ СМОТРЕТЬ УРОК», «↑ Ссылка — в шапке профиля»." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
