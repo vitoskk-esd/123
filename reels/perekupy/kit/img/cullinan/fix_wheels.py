@@ -10,7 +10,13 @@ yy, xx = np.mgrid[:h, :w]
 yl = np.interp(xx, [p[0] for p in line], [p[1] for p in line])
 lum = im[..., :3].mean(-1)
 d = np.full((h, w), 9.0)
-for cx, cy, rx, ry in wheels: d = np.minimum(d, np.sqrt(((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2))
+# шина в 3/4 — не плоский эллипс диска: у неё есть толщина (протектор). (cx, cy, rx, ry, dx, dy) — эллипс «протягиваем» на (dx, dy)
+# (владелец 16.11: «у передних левых колёс нет объёма» — эллипс по диску срезал боковину и протектор)
+for wh in wheels:
+    cx, cy, rx, ry = wh[:4]; dx, dy = (wh[4], wh[5]) if len(wh) > 4 else (0, 0)
+    for k in range(9):
+        ex, ey = cx + dx * k / 8, cy + dy * k / 8
+        d = np.minimum(d, np.sqrt(((xx - ex) / rx) ** 2 + ((yy - ey) / ry) ** 2))
 below = yy > yl
 kill = below & ((d >= 1) | ((d > .97) & (lum > 110)))
 for x0, y0, x1, y1 in white_boxes: kill |= (xx >= x0) & (xx < x1) & (yy >= y0) & (yy < y1) & (lum > 170)
