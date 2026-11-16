@@ -54,6 +54,17 @@ def _plans(cfg: Config) -> dict[str, Plan]:
 
 
 FREE = Plan("free", "Бесплатно", 0, 0, UNLIMITED, UNLIMITED)   # пока оплата не подключена — всё бесплатно и без лимитов
+# пробный режим (владелец 16.11): новому человеку после «Хочу попробовать» — FREE_POSTS бесплатных объявлений, приходят как в PRO
+# (мгновенно, оценка рынка, свои каналы); кончились — сообщение и только тарифы «Простой» и PRO. Платный пробный день больше не предлагаем.
+FREE_TRIAL = Plan("freetrial", "Пробные объявления", 0, 0, UNLIMITED, UNLIMITED, dkp=False)
+
+
+def free_left(user) -> int:
+    """Сколько бесплатных объявлений осталось (0 — пробный режим не включён или кончился)."""
+    try:
+        return int(user["free_left"] or 0)
+    except (KeyError, IndexError, TypeError):
+        return 0
 
 
 def current(cfg: Config, user, now: float | None = None) -> Plan | None:
@@ -67,6 +78,8 @@ def current(cfg: Config, user, now: float | None = None) -> Plan | None:
         return plans(cfg).get(user["plan"] or "basic", plans(cfg)["basic"])
     if user and user["trial_until"] > now:      # бесплатные дни из прошлых версий бота
         return plans(cfg)["pro"]
+    if user and free_left(user) > 0:            # пробный режим: бесплатные объявления как в PRO
+        return FREE_TRIAL
     return None
 
 

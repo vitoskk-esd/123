@@ -247,33 +247,42 @@ async def test_no_plan_then_buy_basic(env):
     assert r.sent == [] and r.delayed == [USER]                            # «Простой» — с задержкой
 
 
-async def test_trial_day_once_and_basic_limits_and_upgrade(env):
-    """Пробный день — 490 ₽ (владелец 13.11): под фото приветствия «Хочу попробовать» → сразу все тарифы с картинкой (владелец 16.11); после оплаты — 24 часа,
-    один раз; в нём 1 фильтр; «Простой» — до 2 фильтров; переход на PRO не сжигает дни."""
-    from user import apply_payment
+async def test_free_posts_like_pro_then_plans_and_basic_upgrade(env):
+    """Владелец 16.11: «Хочу попробовать» → 5 объявлений бесплатно, приходят как в PRO (мгновенно, с оценкой рынка); пятое — последнее:
+    «Пробные объявления закончились» и кнопка к тарифам; в тарифах только «Простой» и PRO (платный пробный день убран).
+    Второй раз бесплатные не включаются. «Простой» — до 2 фильтров; переход на PRO не сжигает дни."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
-    assert not any("Дарю тебе пробный день" in t for t in s.texts(USER))   # бесплатного подарка больше нет
     tries = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER and m.text == T.TRY_PROMPT]
     assert len(tries) == 1 and [b.callback_data for row in tries[0].reply_markup.inline_keyboard for b in row] == ["s:try"]
-    assert T.ASK_FILTER not in s.texts(USER) and s.texts(USER)[-1] == T.TRY_PROMPT    # приветствие кончается «Хочу попробовать» (владелец 13.11)
     await dp.feed_update(bot, cb("s:try"))
-    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]           # сразу все тарифы с картинкой (владелец 16.11)
-    assert "Пробный день — 490 ₽" in last.caption
-    assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:pay:basic", "s:pay:pro"]
-    await dp.feed_update(bot, cb("s:pay:trial"))
-    pay = await ctx.db.last_pending(USER)
-    assert pay and pay["amount"] == 490 and pay["plan"] == "trial" and (await ctx.db.user(USER))["paid_until"] < time.time()   # без оплаты не включается
-    await apply_payment(ctx, USER, pay["yk_id"], "succeeded")
+    on = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "5 объявлений бесплатно" in on.text and "как в PRO" in on.text
+    assert [b.callback_data for row in on.reply_markup.inline_keyboard for b in row] == ["f:new"]
     u = await ctx.db.user(USER)
-    assert u["trial_used"] == 1 and u["plan"] == "trial" and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
-    await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
-    await dp.feed_update(bot, msg("солярис до 900к")); await dp.feed_update(bot, cb("f:save"))
-    assert len(await ctx.db.filters(USER)) == 1 and "«Пробный день» — 1 фильтр" in s.texts(USER)[-1]   # в пробном — один фильтр
+    assert u["free_left"] == 5 and u["trial_used"] == 1 and u["paid_until"] < time.time()
+    await dp.feed_update(bot, cb("f:new"))
+    await dp.feed_update(bot, msg("приора до 400к")); await dp.feed_update(bot, cb("f:save"))
+    assert "Бесплатных объявлений осталось: <b>5</b>" in s.texts(USER)[-1]
+    for k in range(5):                                                   # как в PRO: сразу, без задержки «Простого»
+        r = await process(bot, ctx, post(CH1, f"Приора {2008 + k}, {250 + k * 10} 000 руб"))
+        assert r.sent == [USER] and r.delayed == []
+    assert (await ctx.db.user(USER))["free_left"] == 0
+    over = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Пробные объявления закончились" in over.text
+    assert [b.callback_data for row in over.reply_markup.inline_keyboard for b in row] == ["s:plans"]
+    assert (await process(bot, ctx, post(CH1, "Приора 2014, 330 000 руб"))).sent == []      # шестая — уже не бесплатно
+    await dp.feed_update(bot, cb("s:plans"))
+    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
+    assert "Пробный день" not in last.caption
+    assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row] == ["s:pay:basic", "s:pay:pro"]
+    await dp.feed_update(bot, cb("s:try"))                                # второй раз бесплатные не включаются — тарифы
+    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
+    assert last.caption.startswith("Бесплатные объявления на этом аккаунте уже использованы")
+    assert (await ctx.db.user(USER))["free_left"] == 0
+    await dp.feed_update(bot, cb("s:pay:trial"))                          # старая кнопка пробного дня — просто тарифы, без оплаты
+    assert not await ctx.db.last_pending(USER)
     await ctx.db.delete_filter(USER, (await ctx.db.filters(USER))[0]["id"])
-    await ctx.db.set_user(USER, paid_until=time.time() - 1)                 # день прошёл
-    await dp.feed_update(bot, cb("s:pay:trial"))                            # второй раз — нельзя
-    assert "только один раз" in s.texts(USER)[-1]
 
     await ctx.db.set_user(USER, paid_until=time.time() + 10 * 86400, plan="basic")   # «Простой», осталось 10 дней
     for t in ("солярис до 900к", "приора до 300к", "веста до 1 млн"):
@@ -288,8 +297,6 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     u = await ctx.db.user(USER)
     days = (u["paid_until"] - time.time()) / 86400
     assert u["plan"] == "pro" and 35.4 < days < 35.7                        # 30 дней PRO + 10 дней «Простого» ≈ 5,58 дня PRO
-    await dp.feed_update(bot, msg("веста до 1 млн")); await dp.feed_update(bot, cb("f:save"))
-    assert len(await ctx.db.filters(USER)) == 3                             # в PRO лимита нет
 
 
 async def test_basic_plan_extra_filters_do_not_deliver(env):
@@ -1839,36 +1846,35 @@ async def test_trial_ends_offers_month_plans(env):
 
 
 async def test_try_button_after_trial_and_other_plans(env):
-    """Пробный уже брал — «Хочу попробовать» сразу показывает тарифы; «Другие тарифы» — картинка тарифов с кнопками; первый фильтр пробный не включает."""
+    """Уже пробовал — «Хочу попробовать» сразу показывает тарифы «Простой» и PRO; «Другие тарифы» — картинка без пробного дня;
+    фильтр без тарифа бесплатные объявления не включает."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
     photos = lambda: [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER]
     await dp.feed_update(bot, cb("s:plans"))
-    assert photos() and "Пробный день — 490 ₽" in photos()[-1].caption
+    assert photos() and "Пробный день" not in photos()[-1].caption
     await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
-    assert (await ctx.db.user(USER))["paid_until"] < time.time() and not await ctx.db._all("SELECT * FROM events WHERE kind='trial'")
+    assert (await ctx.db.user(USER))["free_left"] == 0 and not await ctx.db._all("SELECT * FROM events WHERE kind IN ('trial','free_trial')")
     await ctx.db.set_user(USER, trial_used=1)
     await dp.feed_update(bot, cb("s:try"))
-    assert "только один раз" in photos()[-1].caption
-    assert "s:pay:trial" not in [b.callback_data for row in photos()[-1].reply_markup.inline_keyboard for b in row]
+    assert "уже использованы" in photos()[-1].caption
+    assert [b.callback_data for row in photos()[-1].reply_markup.inline_keyboard for b in row] == ["s:pay:basic", "s:pay:pro"]
 
 
-async def test_free_trial_users_can_buy_paid_trial_once(env):
-    """Брал пробный день, когда он был бесплатным, — один раз может купить платный (владелец 13.11); купившим платный — нет."""
-    import jobs
+async def test_free_posts_once_and_refund_when_not_delivered(env):
+    """Бесплатные объявления — один раз на аккаунт, даже при двойном нажатии; брал пробный день раньше — бесплатных нет;
+    объявление, которое Telegram не принял, возвращается в счётчик."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start")); await dp.feed_update(bot, msg("/start", OTHER))
-    await ctx.db.set_user(USER, trial_used=1)                                 # бесплатный пробный в прошлом
-    await ctx.db.set_user(OTHER, trial_used=1)
-    await ctx.db.add_payment(OTHER, "tp", 490, "trial"); await ctx.db.finish_payment("tp", "succeeded")   # OTHER платил
-    await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
-    assert (await ctx.db.user(USER))["trial_used"] == 0 and (await ctx.db.user(OTHER))["trial_used"] == 1
-    await dp.feed_update(bot, cb("s:try"))
-    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
-    assert "s:pay:trial" in [b.callback_data for row in last.reply_markup.inline_keyboard for b in row]
+    assert await ctx.db.take_free(USER, 5, time.time()) and not await ctx.db.take_free(USER, 5, time.time())
+    await ctx.db.set_user(OTHER, trial_used=1)                                 # пробный день был раньше
     await dp.feed_update(bot, cb("s:try", OTHER))
-    photo = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == OTHER][-1]
-    assert photo.caption.startswith("Пробный день ты уже брал") and "Сравни тарифы на картинке" not in photo.caption
+    assert (await ctx.db.user(OTHER))["free_left"] == 0
+    assert await ctx.db.use_free(USER) == 4
+    await ctx.db.refund_free(USER)
+    assert (await ctx.db.user(USER))["free_left"] == 5
+    await ctx.db.set_user(USER, free_left=1)
+    assert await ctx.db.use_free(USER) == 0 and await ctx.db.use_free(USER) is None
 
 
 async def test_pro_discount_during_trial_and_admin_trial(env):
@@ -1901,14 +1907,14 @@ async def test_pro_discount_during_trial_and_admin_trial(env):
 
 
 async def test_trial_once_per_account(env):
-    """Пробный день — один раз на аккаунт: take_trial второй раз не проходит; кнопка пробного после этого — «только один раз»."""
+    """Старый пробный день — один раз на аккаунт: take_trial второй раз не проходит; кнопка пробного из старых сообщений — тарифы без оплаты."""
     from user import activate_trial
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
     assert await activate_trial(ctx, USER) and not await activate_trial(ctx, USER)
     await ctx.db.set_user(USER, paid_until=time.time() - 60)
     await dp.feed_update(bot, cb("s:pay:trial"))
-    assert "только один раз" in s.texts(USER)[-1]
+    assert not await ctx.db.last_pending(USER) and isinstance([m for m in s.sent if not isinstance(m, AnswerCallbackQuery)][-1], SendPhoto)
 
 
 async def make_admins_pro_if_any(ctx):

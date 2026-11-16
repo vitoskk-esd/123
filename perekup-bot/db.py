@@ -91,6 +91,7 @@ class DB:
                     "ALTER TABLE users ADD COLUMN autorenew INTEGER DEFAULT 0",     # автопродление включено
                     "ALTER TABLE users ADD COLUMN renew_inv TEXT",                  # материнский счёт Робокассы для автосписаний
                     "ALTER TABLE users ADD COLUMN renew_plan TEXT",                 # какой тариф продлеваем
+                    "ALTER TABLE users ADD COLUMN free_left INTEGER DEFAULT 0",     # сколько бесплатных объявлений осталось (пробный режим)
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
                     "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
                     "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0",
@@ -166,7 +167,7 @@ class DB:
         return await self._one("SELECT * FROM users WHERE id=?", uid)
 
     async def set_user(self, uid: int, **fields) -> None:
-        assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used", "autorenew", "renew_inv", "renew_plan"}, fields
+        assert set(fields) <= {"trial_until", "paid_until", "plan", "trial_used", "autorenew", "renew_inv", "renew_plan", "free_left"}, fields
         await self._run(f"UPDATE users SET {', '.join(f'{k}=?' for k in fields)} WHERE id=?", *fields.values(), uid)
 
     async def take_trial(self, uid: int, until: float, now: float) -> bool:
@@ -176,6 +177,26 @@ class DB:
                                       "WHERE id=? AND trial_used=0 AND paid_until<=? AND trial_until<=?", (until, uid, now, now))
         await self.conn.commit()
         return cur.rowcount == 1
+
+    async def take_free(self, uid: int, n: int, now: float) -> bool:
+        """Включает пробный режим — n бесплатных объявлений как в PRO — одной операцией. False — аккаунт уже пробовал
+        (бесплатные объявления или пробный день) или у него есть доступ. Строго один раз на Telegram-аккаунт."""
+        cur = await self.conn.execute("UPDATE users SET free_left=?, trial_used=1 "
+                                      "WHERE id=? AND trial_used=0 AND paid_until<=? AND trial_until<=?", (n, uid, now, now))
+        await self.conn.commit()
+        return cur.rowcount == 1
+
+    async def use_free(self, uid: int) -> int | None:
+        """Списывает одно бесплатное объявление; возвращает, сколько осталось, или None — бесплатные кончились."""
+        cur = await self.conn.execute("UPDATE users SET free_left=free_left-1 WHERE id=? AND free_left>0", (uid,))
+        await self.conn.commit()
+        if cur.rowcount != 1:
+            return None
+        return (await self._one("SELECT free_left FROM users WHERE id=?", uid))["free_left"]
+
+    async def refund_free(self, uid: int) -> None:
+        """Объявление не дошло (Telegram не принял) — возвращаем его в счётчик."""
+        await self._run("UPDATE users SET free_left=free_left+1 WHERE id=?", uid)
 
     async def gift_candidates(self, now: float, limit: int = 20) -> list:
         """Кому ещё не дарили пробный день: не брал его, нет доступа, бота не заблокировал."""
