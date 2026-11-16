@@ -1,7 +1,7 @@
 // «АРБИТРАЖНИКИ» ep02 «НИКИТА: ДРУЗЬЯ → +5 000 ₽» (киношный формат ../cine.js). Сцены — как в утверждённой раскадровке board.html (16.11).
 // ОБЛОЖКА: схема денег + Никита с купюрами + плашка → коворкинг: урок → схема оживает → футбол: «у кого нет карты?» → выгода друзьям →
 // Катя по видеозвонку → чат «Оформил ✅» ×5 → Лёша: «где мои 500?» → выплата +7 500 ₽ → расчёт → пиццерия «все в плюсе» → карточка урока.
-$("#title .a").textContent = E.rubric; $("#title .b").textContent = E.subtitle; $("#title .a").style.fontSize = "66px"; $("#tag span").textContent = "друзья → выплата";
+$("#title .a").textContent = E.rubric; $("#title .b").textContent = E.subtitle; $("#title .a").style.fontSize = "66px"; $("#title .b").style.fontSize = "70px"; $("#title .b").style.whiteSpace = "nowrap"; $("#tag span").textContent = "друзья → выплата";
 document.querySelector("#cam > svg#bg")?.remove();
 const W = (line, pre, n = 0) => {
   const norm = s => s.toLowerCase().replace(/ё/g, "е").replace(/[^а-я0-9a-z]/g, "");
@@ -123,11 +123,12 @@ window.build = R => {
   bub("k0", st.n3 - .1); bub("n3", st.l2 - .15);
   // 7. чат на весь экран: «Оформил ✅» один за другим
   cut("s6", "s7", st.l2 - .1);
+  tl.to("#tag", { opacity: 0, duration: .15 }, st.l2 - .1);
   const C7 = SC.s7; for (let k = 0; k < 7; k++) tl.set(C7.querySelector("#ch" + k), { opacity: 0 }, 0);
   popIn(C7.querySelector("#ch0"), st.l2 - .05); popIn(C7.querySelector("#ch1"), st.l2 + .35);
   const span = Math.max(1.6, en.l2 - st.l2 + .6); for (let k = 2; k < 7; k++) popIn(C7.querySelector("#ch" + k), st.l2 + .8 + (k - 2) * span / 5, "pop");
   // 8. Лёша и Никита
-  const SW8 = Math.max(st.a0 - .25, st.l2 + .8 + span + .2); swap("s7", "s8", SW8); move("s8", { s: 1.08 }, SW8, en.n4 - SW8 + .3, "none"); bub("a0", st.n4 - .1); bub("n4", st.l3 - .2);
+  const SW8 = Math.max(st.a0 - .25, st.l2 + .8 + span + .2); swap("s7", "s8", SW8); tl.to("#tag", { opacity: 1, duration: .2 }, SW8 + .3); move("s8", { s: 1.08 }, SW8, en.n4 - SW8 + .3, "none"); bub("a0", st.n4 - .1); bub("n4", st.l3 - .2);
   // 9. выплата: счётчик 0 → 7 500 ₽
   const SW9 = st.l3 - .3; swap("s8", "s9", SW9); move("s9", { s: 1.08 }, SW9, en.l3 - SW9 + .4, "none");
   const PV = { v: 0 }, PT = Wd("l3", "заплат", .4);

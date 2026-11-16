@@ -10,3 +10,9 @@
 #split { position: absolute; inset: 0; opacity: 0; }
 #split > .cf { opacity: 1 !important; clip-path: inset(0 270px 0 270px); }
 #split .divider { position: absolute; left: 532px; top: 0; width: 16px; height: 1920px; background: #fff; box-shadow: 0 0 30px #000; z-index: 5; }
+
+/* финальный экран — без Арбузова (владелец 16.11: «убери Арбузова, он там не нужен») */
+#end .fox { display: none; }
+#end h2 { top: 640px; }
+#end p { top: 960px; }
+#end .logo { top: 1160px; }
