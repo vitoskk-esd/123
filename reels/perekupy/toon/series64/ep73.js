@@ -46,7 +46,7 @@ mount("s7", { bg: "testdraiv", farBlur: 2, mid: G("gb", 300, 1880, 880, { look: 
   mount("s8", { bg: "testdraiv", farBlur: 5, mid: H.mid, lights: H.lights + TD_L,
     bubbles: [{ id: "g2", p: "gd", html: "Взял Мазду: один хозяин, ниже рынка.<br><em>Без шпаклёвки и без фена.</em>", fs: 34 }] }, { x: 540, y: 1000, s: 1.02 }); }
 // 9. Мазда на тарелке, «АПЛОДИСМЕНТЫ»
-mount("s9", { bg: "kulinarzal", mid: PLATE(1540) + car(MZ6, 190, 1650, 700, { z: 5, sheen: .5 }) + M("mc", 120, 1900, 760, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + G("gc", 980, 1900, 740, { look: "grin" }, { armL: -150 }, { rim: "#fff6d0", side: -1, z: 7 }), over: APPL(), lights: KZ_L,
+mount("s9", { bg: "kulinarzal", mid: PLATE(1540) + car(MZ6, 190, 1650, 700, { z: 5, sheen: .5 }) + M("mc", 120, 1900, 760, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + G("gc", 980, 1900, 740, { look: "grin" }, { armL: -150 }, { rim: "#fff6d0", side: -1, z: 7 }), over: APPL().replace("top:180px", "top:360px"), lights: KZ_L,
   bubbles: [{ id: "m3", p: "mc", html: "Вот это —<br><em>блюдо от шефа!</em>", fs: 44 }] }, { x: 540, y: 1150, s: 1.04 });
 // 10. карточка бота
 mount("s10", { bg: "kulinarshow", over: CTA73.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), lights: KS_L }, { x: 540, y: 1000, s: .98 });
