@@ -85,3 +85,26 @@ const TABLE = (x, y, w = 760, z = 24) => `<div style="position:absolute;left:${x
   <rect x="0" y="0" width="${w}" height="46" rx="10" fill="#b8763a" stroke="#151515" stroke-width="8"/><rect x="0" y="40" width="${w}" height="26" fill="#8a5428" stroke="#151515" stroke-width="7"/>
   <path d="M60 66 V420 M${w - 60} 66 V420" stroke="#151515" stroke-width="22"/><path d="M60 66 V420 M${w - 60} 66 V420" stroke="#5a3418" stroke-width="12"/>
   <rect x="${w * .62}" y="-70" width="44" height="74" rx="8" fill="#ffd23f" stroke="#151515" stroke-width="6"/><rect x="${w * .74}" y="-58" width="40" height="62" rx="8" fill="#e8e4f0" stroke="#151515" stroke-width="6"/></svg></div>`;
+// финал v2 (владелец 16.11: «замени кадр в конце… чтобы отличался от версии перекупов»): экран в стиле Телеграма —
+// голубой градиент с бумажными самолётиками, крупно «БЕСПЛАТНЫЙ УРОК», телефон со страницей канала и кнопкой «Смотреть урок» (палец жмёт),
+// плашка «ссылка — в шапке профиля» со стрелкой; Никита сбоку показывает на телефон. Без Арбузова.
+const PLANE = (x, y, s = 1, r = 0, o = .18) => `<svg viewBox="0 0 100 100" style="position:absolute;left:${x}px;top:${y}px;width:${100 * s}px;opacity:${o};transform:rotate(${r}deg)"><path d="M6 46 L94 10 L70 90 L48 62 Z M48 62 L94 10 L36 56 Z" fill="#fff"/></svg>`;
+const ENDTG = (id = "etg") => `<div id="${id}" style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:65;background:linear-gradient(165deg,#36b6f0 0%,#1f86d6 55%,#1563b0 100%);overflow:hidden">
+  ${[[60, 140, 1.6, -12], [820, 90, 1.2, 18], [900, 760, 2, -20], [40, 980, 1.3, 25], [760, 1560, 1.7, -8], [120, 1660, 1.1, 14], [480, 60, .9, 30]].map(a => PLANE(...a)).join("")}
+  <div id="${id}t" style="position:absolute;left:0;right:0;top:170px;text-align:center;font-family:Unbounded;font-weight:900;color:#fff;letter-spacing:-2px">
+    <div style="font-size:88px;line-height:1;text-shadow:0 8px 0 rgba(0,0,0,.25)">БЕСПЛАТНЫЙ<br>УРОК</div>
+    <div style="display:inline-block;margin-top:24px;font-size:44px;background:#ffd23f;color:#151515;padding:8px 26px;border-radius:18px;border:6px solid #151515;transform:rotate(-2deg)">по арбитражу на банки</div></div>
+  <div id="${id}p" style="position:absolute;left:330px;top:600px;width:580px;height:900px;background:#0e1621;border:16px solid #151515;border-radius:70px;box-shadow:0 30px 60px rgba(0,0,0,.35);overflow:hidden;font-family:Onest;color:#fff">
+    <div style="height:150px;background:#17212b;display:flex;align-items:center;gap:18px;padding:0 28px">
+      <div style="width:96px;height:96px;border-radius:50%;background:#2aabee;display:flex;align-items:center;justify-content:center;font-size:52px">🏦</div>
+      <div><div style="font-weight:800;font-size:36px">Арбитраж на банки</div><div style="font-size:26px;color:#6ab3f3">канал · Telegram</div></div></div>
+    <div style="margin:26px 24px 0;background:#182533;border-radius:28px;padding:24px 26px">
+      <div style="font-size:24px;color:#6ab3f3;font-weight:700">📌 Закреплено</div>
+      <div style="font-weight:800;font-size:38px;line-height:1.2;margin-top:8px">🎁 Бесплатный урок:<br>как банки платят<br>за новых клиентов</div>
+      <div style="font-size:27px;color:#b9c4cf;margin-top:12px;line-height:1.3">оффер · ссылка · первая выплата</div></div>
+    <div id="${id}b" style="position:absolute;left:24px;right:24px;bottom:60px;background:#2aabee;border-radius:26px;text-align:center;padding:28px 0;font-weight:900;font-size:40px;font-family:Unbounded">▶ СМОТРЕТЬ УРОК</div>
+    <svg id="${id}f" viewBox="0 0 120 160" style="position:absolute;left:4px;bottom:-34px;width:150px;overflow:visible"><path d="M40 20 q0 -20 18 -20 q18 0 18 20 v50 q30 -6 34 20 l6 60 h-90 l-14 -50 q-6 -20 12 -24 l16 4 z" fill="#f3cdb0" stroke="#151515" stroke-width="7" stroke-linejoin="round"/></svg></div>
+  <div id="${id}l" style="position:absolute;left:360px;right:40px;top:1570px;text-align:center;background:#fbfaf3;border:8px solid #151515;border-radius:40px;box-shadow:0 12px 0 #151515;padding:22px 0;font-family:Unbounded;font-weight:900;font-size:40px;line-height:1.2;color:#151515">
+    <span id="${id}a" style="display:inline-block;color:#1f86d6">↑</span> Ссылка — в шапке профиля</div></div>`;
+// Никита на финале (поверх ENDTG): внизу слева, правая рука показывает на телефон
+const ENDNIK = (p = "nz") => `<div style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:66;pointer-events:none">${N_(p, 190, 1990, 760, {}, { armR: -135 }, { rim: "#9fd6ff", side: 1, z: 66 }).replaceAll('style="left:', 'style="position:absolute;left:')}</div>`;

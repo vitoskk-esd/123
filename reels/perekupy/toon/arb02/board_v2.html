@@ -1,0 +1,89 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>АРБИТРАЖНИКИ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="../charsA.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="propsA02.js"></script>
+<script>
+// «АРБИТРАЖНИКИ» ep02 «НИКИТА: ДРУЗЬЯ → +5 000 ₽» (владелец 16.11): Никита прошёл бесплатный урок в ТГ-канале → понял, что банк платит партнёру
+// за нового клиента → позвал друзей с футбола: ссылка + выгода (бонус банка новым клиентам + 500 ₽ от Никиты с выплаты) → групповой чат «Оформил ✅» ×5 →
+// выплата банка 7 500 ₽ → расчёт: друзьям 2 500, Никите 5 000 → пиццерия «все в плюсе». Новая обложка (схема денег), новые фоны, новые приёмы монтажа.
+const KV_L = glow(540, 980, 420, "#fff2b0", .35) + glow(540, 240, 380, "#2ff5c4", .18);
+const FT_L = glow(540, 520, 520, "#ffb070", .3);
+const PZ_L = glow(330, 860, 360, "#ff7a1a", .35) + glow(540, 200, 520, "#ffd36a", .2);
+const S = [
+ { h: "ОБЛОЖКА → НИКИТА И БЕСПЛАТНЫЙ УРОК", tc: "1/6 · 0:00–0:10",
+   A: { def: () => ({ bg: "minifutbol", farBlur: 5, mid: FLOW(700) + N_("na", 540, 2010, 1040, { cash: 1 }, { armR: -125, armL: 10 }, { rim: "#ffd27a", side: 1, z: 8 })
+       + D_("da", 130, 1990, 700, { look: "grin" }, { armR: -150 }, { rim: "#ffd27a", side: 1, z: 6, dim: .9 }) + K_("ka", 950, 1990, 700, { armL: 150 }, { rim: "#ffd27a", side: -1, z: 6, dim: .9 }),
+       lights: FT_L, over: TITLE("НИКИТА:", "ДРУЗЬЯ → +5 000 ₽") }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "kovorking", mid: LAPTOP(70, 880, 460, TGPOST()) + N_("nb", 800, 1900, 860, { look: "o" }, { armL: 60 }, { rim: "#2ff5c4", side: -1, z: 22 }), lights: KV_L }), shot: { x: 540, y: 1120, s: 1.04 },
+     bubbles: [{ p: "nb", html: "А у меня полно<br><em>друзей без карты!</em>", fs: 30 }], talk: ["nb"] },
+   vo: "Арбузов: «Это Никита. Он посмотрел бесплатный урок про арбитраж на банки — и кое-что понял». Никита: «Банк платит партнёру за каждого нового клиента. А у меня полно друзей без этой карты!»", who: "Арбузов + Никита",
+   mv: "<b>Новая обложка (кадр 0)</b>: футбольная коробка на закате; сверху плашка «НИКИТА: / ДРУЗЬЯ → +5 000 ₽», под ней <b>схема денег</b> «🏦 БАНК —+1 500 ₽→ 😎 НИКИТА —+500→ 👥 ДРУГ», Никита крупно с веером купюр, по бокам ликуют друзья. B — <b>новый фон: ночной коворкинг</b> (неон COWORK, лампы, растения): Никита у ноутбука, на экране — урок в Телеграм-канале." },
+ { h: "КАК ЭТО РАБОТАЕТ → ДРУЗЬЯ НА ФУТБОЛЕ", tc: "2/6 · 0:10–0:22",
+   A: { def: () => ({ bg: "kovorking", farBlur: 6, mid: FLOW(560) + N_("nc", 540, 1960, 900, {}, { armR: -150 }, { rim: "#2ff5c4", side: -1, z: 8 }), lights: KV_L }), shot: { x: 540, y: 1100, s: 1.02 } },
+   B: { def: () => ({ bg: "minifutbol", mid: N_("nd", 540, 1880, 860, {}, { armR: -150, armL: 40 }, { rim: "#ffd27a", side: 1, z: 8 }) + D_("dd", 170, 1900, 820, {}, {}, { rim: "#ffd27a", side: 1, z: 7 }) + L_("ld", 910, 1900, 820, {}, {}, { rim: "#ffd27a", side: -1, z: 7 }), lights: FT_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "nd", html: "Пацаны, у кого нет<br><em>карты этого банка?</em>", fs: 32 }, { p: "dd", html: "У меня нет.<br><em>А мне-то что?</em>", fs: 30 }], talk: ["nd"] },
+   vo: "Арбузов: «Всё просто: друг оформил карту по ссылке Никиты — банк платит Никите». Никита: «Пацаны, у кого нет карты этого банка?» Дима: «У меня нет. А мне-то что с этого?»", who: "Арбузов + Никита + Дима",
+   mv: "A — <b>приём: оживающая схема</b> над Никитой: «БАНК» → зелёная стрелка «+1 500 ₽» → «НИКИТА» → голубая «+500» → «ДРУГ», узлы и стрелки появляются под слова Арбузова. B — <b>новый фон: футбольная коробка</b> (сетка, ворота, прожекторы, закат над панельками): новые герои <b>Дима</b> (кепка, красная куртка) и <b>Лёша</b> (очки)." },
+ { h: "ВЫГОДА ДРУЗЬЯМ → КАТЯ НА СВЯЗИ", tc: "3/6 · 0:22–0:34",
+   A: { def: () => ({ bg: "minifutbol", farBlur: 2, mid: N_("ne", 700, 1900, 900, {}, { armL: 60, armR: -100 }, { rim: "#ffd27a", side: -1, z: 8 }) + D_("de", 260, 1900, 840, { look: "grin" }, {}, { rim: "#ffd27a", side: 1, z: 7 })
+       + NODE(120, 560, 360, "🎁", "БОНУС БАНКА", "новым клиентам", "#fbfaf3", "bn") + NODE(600, 560, 360, "🤝", "+500 ₽", "от Никиты", "#ffd23f", "pl"), lights: FT_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ne", html: "Банк даёт новым бонус.<br><em>И 500 ₽ от меня!</em>", fs: 32 }], talk: ["ne"] },
+   B: { def: () => ({ bg: "minifutbol", farBlur: 3, mid: N_("nf", 300, 1900, 900, { item: "phone" }, {}, { rim: "#ffd27a", side: 1, z: 8 }),
+       over: PIP(820, 820, 180, `<div style="position:absolute;left:0;top:0;width:360px;height:360px">${K_("kf", 180, 920, 1040, {}, { noShadow: 1 })}</div>`), lights: FT_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ at: [820, 630], html: "А мне можно? Хотела<br><em>кэшбэк на продукты!</em>", fs: 28 }, { p: "nf", html: "Конечно!<br><em>Ссылку кинул в чат.</em>", fs: 30 }], talk: ["kf"] },
+   vo: "Никита: «Банк даёт новым клиентам бонус. И пятьсот рублей от меня — с моей выплаты». Катя (по видеосвязи): «А мне можно? Я как раз хотела кэшбэк на продукты». Никита: «Конечно! Ссылку кинул в чат».", who: "Никита + Катя",
+   mv: "A — над головами две карточки выгоды: <b>«🎁 БОНУС БАНКА · новым клиентам»</b> и <b>«🤝 +500 ₽ · от Никиты»</b>, Дима довольно кивает. B — <b>приём: видеозвонок</b> — <b>новая героиня Катя</b> (фиолетовый бомбер) в кружке видеосвязи, Никита говорит с ней по телефону." },
+ { h: "ЧАТ «ДРУЗЬЯ ⚽» → «ГДЕ МОИ 500?»", tc: "4/6 · 0:34–0:46",
+   A: { def: () => ({ bg: "kovorking", over: CHAT(7) }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "minifutbol", farBlur: 2, mid: L_("lg", 210, 1900, 860, { item: "phone" }, {}, { rim: "#ffd27a", side: 1, z: 8 }) + N_("ng", 870, 1900, 860, {}, { armL: 60 }, { rim: "#ffd27a", side: -1, z: 8 }), lights: FT_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "lg", html: "Оформил, купил.<br><em>Где мои пятьсот?</em>", fs: 27 }, { p: "ng", html: "Ждём выплату —<br><em>сразу переведу.</em>", fs: 27 }], talk: ["lg"] },
+   vo: "Арбузов: «За вечер карты оформили пятеро друзей». Лёша: «Оформил, покупку сделал. Где мои пятьсот?» Никита: «Ждём выплату от банка — и сразу переведу».", who: "Арбузов + Лёша + Никита",
+   mv: "A — <b>приём: экран чата на весь кадр</b>: сообщение Никиты со ссылкой-приглашением и объяснением выгоды, ниже один за другим всплывают «Оформил ✅» от Димы, Кати, Лёши, Сани, Миши (звук уведомления на каждое). B — Лёша с телефоном у сетки, Никита успокаивает." },
+ { h: "ВЫПЛАТА +7 500 ₽ → РАСЧЁТ", tc: "5/6 · 0:46–0:58",
+   A: { def: () => { const H = HOLDPHONE("nikita", "nh", 540, 2000, 1400, {}, PAYOUT(), { rim: "#2ff5c4", side: 1 });
+       return { bg: "kovorking", farBlur: 6, mid: H.mid, lights: H.lights + KV_L }; }, shot: { x: 540, y: 1000, s: 1.02 } },
+   B: { def: () => ({ bg: "kovorking", farBlur: 6, mid: MATH(520) + N_("ni", 540, 1980, 900, { look: "grin" }, { armR: -150 }, { rim: "#2ff5c4", side: 1, z: 8 }), lights: KV_L }), shot: { x: 540, y: 1050, s: 1.02 },
+     bubbles: [{ p: "ni", html: "Каждому по пятьсот.<br><em>Мне — пять тысяч.</em>", fs: 34 }], talk: ["ni"] },
+   vo: "Арбузов: «Через несколько дней банк заплатил Никите семь с половиной тысяч». Никита: «Каждому по пятьсот — две с половиной. Мне остаётся пять тысяч».", who: "Арбузов + Никита",
+   mv: "A — телефон Никиты: <b>«ПАРТНЁРСКИЙ КАБИНЕТ · новых клиентов 5 · выплата партнёру +7 500 ₽»</b> (счётчик бежит 0 → 7 500). B — <b>приём: карточка-расчёт</b> строками: «5 друзей × 1 500 ₽ = 7 500 ₽» → «друзьям 5 × 500 ₽ = −2 500 ₽» → «Никите: 5 000 ₽» (мелко: «цифры — пример»)." },
+ { h: "ПИЦЦЕРИЯ: «ВСЕ В ПЛЮСЕ!» → ФИНАЛ", tc: "6/6 · 0:58–1:12",
+   A: { def: () => ({ bg: "pizzeria", mid: TABLE(150, 1610, 780) + PIZZA(330, 1520, 380, "pz", 27) + D_("dj", 150, 1900, 800, { look: "o" }, { armR: -100 }, { rim: "#ffb070", side: 1, z: 7 }) + K_("kj", 610, 1880, 780, {}, { rim: "#ffb070", side: 1, z: 7 })
+       + N_("nj", 900, 1900, 840, { look: "grin" }, { armL: 150 }, { rim: "#ffb070", side: -1, z: 7 }), lights: PZ_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "dj", html: "Ты что,<br><em>заработал на нас?</em>", fs: 27 }, { p: "kj", html: "И что?<br><em>Все в плюсе!</em>", fs: 30 }], talk: ["kj"] },
+   B: { def: () => ({ bg: "pizzeria", over: ENDTG() + ENDNIK()}), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Дима: «Подожди… ты что, заработал на нас?» Катя: «И что? Мне бонус, тебе пятьсот, Никите выплата — все в плюсе!» Никита: «Пицца за мой счёт!» Арбузов: «Хочешь так же — бесплатный урок по арбитражу на банки в Телеграм-канале. Ссылка в шапке».", who: "Дима + Катя + Никита + Арбузов",
+   mv: "A — <b>новый фон: пиццерия</b> (кирпич, дровяная печь с огнём, меловое меню): друзья за столом с пиццей, Никита поднимает руку «Пицца за мой счёт!». B — <b>новый финал (не как у «Перекупов»)</b>: экран в стиле Телеграма, телефон со страницей канала, палец жмёт «▶ СМОТРЕТЬ УРОК», плашка «↑ Ссылка — в шапке профиля», Никита показывает на телефон. Значок Арбузова в видео убран." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
