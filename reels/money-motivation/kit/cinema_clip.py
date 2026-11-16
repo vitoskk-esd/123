@@ -105,6 +105,19 @@ else:
 src_a = ["-ss", str(A), "-t", str(SPEECH + 0.3), "-i", src]
 subprocess.run(["ffmpeg", "-v", "error", "-y", *src_a, "-af", f"atrim=duration={SPEECH:.3f},highpass=f=70,acompressor=threshold=-20dB:ratio=2.5,"
                 f"afade=t=out:st={SPEECH-0.15:.3f}:d=0.15,loudnorm=I=-14:TP=-1.5,aresample=48000", "-ac", "2", f"{D}/voice.wav"], check=True)
+DUB = C.get("dub")                                    # закадровый перевод: [{"file","from","to","at"}]; оригинал тише, под репликами — ещё тише
+if DUB:
+    ins, parts = [], []
+    for k, p in enumerate(DUB):
+        ins += ["-i", os.path.join(D, p["file"])]
+        parts.append(f"[{k + 1}:a]atrim={p['from']:.3f}:{p['to']:.3f},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,"
+                     f"adelay={int(p['at'] * 1000)}|{int(p['at'] * 1000)}[d{k}]")
+    under = "+".join(f"between(t,{p['at'] - 0.1:.2f},{p['at'] + p['to'] - p['from'] + 0.1:.2f})" for p in DUB)
+    g0, g1 = C.get("orig_gain", 0.55), C.get("orig_under", 0.16)
+    fc_d = ";".join(parts) + ";" + "".join(f"[d{k}]" for k in range(len(DUB))) + f"amix=inputs={len(DUB)}:duration=longest:normalize=0,loudnorm=I=-14:TP=-1.5,aresample=48000[ru];" \
+           f"[0:a]volume='if({under},{g1},{g0})':eval=frame[or];[or][ru]amix=inputs=2:duration=longest:normalize=0,apad=whole_dur={DUR}[o]"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{D}/voice.wav", *ins, "-filter_complex", fc_d, "-map", "[o]", "-t", str(DUR), f"{D}/voice_dub.wav"], check=True)
+    os.replace(f"{D}/voice_dub.wav", f"{D}/voice.wav")
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{D}/music.wav", "-af", f"atrim=duration={DUR},loudnorm=I={C.get('music_lufs', -24)}:TP=-6,aresample=48000,"
                 f"afade=t=out:st={DUR-1.2:.2f}:d=1.2", "-ac", "2", f"{D}/music_n.wav"], check=True)
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", f"{D}/voice.wav", "-i", f"{D}/music_n.wav", "-filter_complex",
