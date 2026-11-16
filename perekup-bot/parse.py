@@ -15,7 +15,7 @@ URL = re.compile(r"https?://\S+|t\.me/\S+|@\w+")
 PHONE = re.compile(r"(?:\+7|(?<!\d)8)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}(?!\d)|(?<!\d)\d{10,11}(?!\d)")
 NUM = r"\d{1,3}(?:[ .  ]\d{3})+|\d+(?:[.,]\d+)?"
 FOREIGN = re.compile(r"^\s*(тг|тенге|₸|\$|usd|долл|€|eur|евро|сом|byn|бел\.? ?руб|грн|uah|сум)", re.I)
-MLN = r"(?:млн|миллион\w*|лям\w*|kk|кк)"
+MLN = r"(?:млн|миллион\w*|лям\w*|лимон\w*|🍋|kk|кк)"   # «1.760🍋», «2 лимона» — миллионы (владелец 16.11)
 THS = r"(?:тыс\w*\.?|т\.?\s?р\.?|тр\b|k\b|к\b|т\b)"
 CUR = r"(?:₽|руб\w*\.?|р\.?(?!\w)|rub)"
 
@@ -60,6 +60,8 @@ def _to_int(num: str, unit: str = "") -> int | None:
         except ValueError:
             return None
     u = unit.lower()
+    if re.match(MLN, u) and re.fullmatch(r"\d{1,2}\.\d{3}", s):     # «1.760🍋», «1.250 млн» — точка дробная: 1,76 млн, а не 1760 млн
+        value = float(s)
     if re.match(MLN, u):
         value *= 1_000_000
     elif u and re.match(THS, u) and value < 10_000:     # «55.000т» — уже полные рубли, не 55 млн
@@ -84,6 +86,7 @@ NOT_PRICE_BEFORE = re.compile(
     r"|кредит|залог|остат|платеж|взнос|ремонт|замен|поменя|обслуж|\bто\b|диагност|покраск|запчаст|комплект\s+резин"
     r"|зазор|выгод|эконом|разниц|марж|навар|прибыл|заработ|оценк|авито|дром|авто\.?ру|старт|средн|аналог|конкурент"
     r"|предложени|ниже|выше|минус")
+MILEAGE_AFTER = re.compile(r"\s*(?:(?:родно\w*|реальн\w*|честн\w*|оригинальн\w*|подтвержд\w*|по\s+\w+)\s+)?(?:пробег|пробега|одометр)")
 MILEAGE_BEFORE = re.compile(r"пробег|одометр|одо\b|щит[оке]|приборк|по\s+базе|в\s+базе|по\s+автотек|пробежал|наезд")
 STRONG_PRICE = re.compile(r"(?:мо[яю]|наш[аиу]|финальн\w*|итогов\w*|окончательн\w*|реальн\w*)\s+цен|цен[аы]\s+(?:всего|лишь|только|сегодня|сейчас)"
                           r"|(?:отда[юм]|продаю|продам|забрать|заберет\w*|забирай\w*)\s+(?:\w+\s+)?за\b|ценник")
@@ -107,6 +110,8 @@ def price_candidates(text: str) -> list[tuple[int, int]]:
             continue
         if re.match(r"\s*(км|km|т\.?\s?км|тыс\.?\s?км)", t[m.end("num"):m.end("num") + 10]) or MILEAGE_BEFORE.search(clause):
             continue
+        if MILEAGE_AFTER.match(t[m.end("num"):m.end("num") + 30]) and not (STRONG_PRICE.search(clause) or m.group("label") or LABEL_PRICE.search(clause)):
+            continue                # «230.000 родной пробег» — пробег, а не цена (владелец 16.11: Lexus ES за «230 000»)
         value = _to_int(num, unit)
         if value is None:
             continue
