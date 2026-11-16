@@ -5,7 +5,7 @@ const NIKITA = { jacket: "#2f8f3a", pants: "#2b2f37", hair: "#c9a26a", look: "gr
 const DIMA = { jacket: "#e0302a", pants: "#1d1d1f", hair: "#2b1a14", cap: "#151515", look: "o" };
 const LESHA = { jacket: "#ffb03a", pants: "#2b2f37", hair: "#5a3a1a", glasses: true, look: "grin" };
 const KATYA = html => html.replaceAll("#8e1f3a", "#7a4ad8").replaceAll("#5c1426", "#4e2a9a").replaceAll("#2b1a14", "#e0a050");
-const N_ = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...NIKITA, ...o }, pose, extra);
+const N_ = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("nikita", p, x, foot, h, { ...o }, pose, extra);   // Никита — свой персонаж по фото владельца (../charsA.js)
 const D_ = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...DIMA, ...o }, pose, extra);
 const L_ = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...LESHA, ...o }, pose, extra);
 const K_ = (p, x, foot, h, pose = {}, extra = {}) => KATYA(ch("vika", p, x, foot, h, null, pose, extra));

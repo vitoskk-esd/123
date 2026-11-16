@@ -19,7 +19,7 @@ html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden
 <div class="arrow">→</div>
 <div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
 <div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
-<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script><script src="../charsA.js"></script>
 <script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="propsA02.js"></script>
 <script>
 // «АРБИТРАЖНИКИ» ep02 «НИКИТА: ДРУЗЬЯ → +5 000 ₽» (владелец 16.11): Никита прошёл бесплатный урок в ТГ-канале → понял, что банк платит партнёру
@@ -30,7 +30,7 @@ const FT_L = glow(540, 520, 520, "#ffb070", .3);
 const PZ_L = glow(330, 860, 360, "#ff7a1a", .35) + glow(540, 200, 520, "#ffd36a", .2);
 const S = [
  { h: "ОБЛОЖКА → НИКИТА И БЕСПЛАТНЫЙ УРОК", tc: "1/6 · 0:00–0:10",
-   A: { def: () => ({ bg: "minifutbol", farBlur: 5, mid: FLOW(700) + N_("na", 540, 2010, 1040, { item: "cash" }, { armL: -140 }, { rim: "#ffd27a", side: 1, z: 8 })
+   A: { def: () => ({ bg: "minifutbol", farBlur: 5, mid: FLOW(700) + N_("na", 540, 2010, 1040, { cash: 1 }, { armR: -125, armL: 10 }, { rim: "#ffd27a", side: 1, z: 8 })
        + D_("da", 130, 1990, 700, { look: "grin" }, { armR: -150 }, { rim: "#ffd27a", side: 1, z: 6, dim: .9 }) + K_("ka", 950, 1990, 700, { armL: 150 }, { rim: "#ffd27a", side: -1, z: 6, dim: .9 }),
        lights: FT_L, over: TITLE("НИКИТА:", "ДРУЗЬЯ → +5 000 ₽") }), shot: { x: 540, y: 960, s: 1 } },
    B: { def: () => ({ bg: "kovorking", mid: LAPTOP(70, 880, 460, TGPOST()) + N_("nb", 800, 1900, 860, { look: "o" }, { armL: 60 }, { rim: "#2ff5c4", side: -1, z: 22 }), lights: KV_L }), shot: { x: 540, y: 1120, s: 1.04 },
@@ -59,7 +59,7 @@ const S = [
    vo: "Арбузов: «За вечер карты оформили пятеро друзей». Лёша: «Оформил, покупку сделал. Где мои пятьсот?» Никита: «Ждём выплату от банка — и сразу переведу».", who: "Арбузов + Лёша + Никита",
    mv: "A — <b>приём: экран чата на весь кадр</b>: сообщение Никиты со ссылкой-приглашением и объяснением выгоды, ниже один за другим всплывают «Оформил ✅» от Димы, Кати, Лёши, Сани, Миши (звук уведомления на каждое). B — Лёша с телефоном у сетки, Никита успокаивает." },
  { h: "ВЫПЛАТА +7 500 ₽ → РАСЧЁТ", tc: "5/6 · 0:46–0:58",
-   A: { def: () => { const H = HOLDPHONE("perekup", "nh", 540, 2000, 1400, NIKITA, PAYOUT(), { rim: "#2ff5c4", side: 1 });
+   A: { def: () => { const H = HOLDPHONE("nikita", "nh", 540, 2000, 1400, {}, PAYOUT(), { rim: "#2ff5c4", side: 1 });
        return { bg: "kovorking", farBlur: 6, mid: H.mid, lights: H.lights + KV_L }; }, shot: { x: 540, y: 1000, s: 1.02 } },
    B: { def: () => ({ bg: "kovorking", farBlur: 6, mid: MATH(520) + N_("ni", 540, 1980, 900, { look: "grin" }, { armR: -150 }, { rim: "#2ff5c4", side: 1, z: 8 }), lights: KV_L }), shot: { x: 540, y: 1050, s: 1.02 },
      bubbles: [{ p: "ni", html: "Каждому по пятьсот.<br><em>Мне — пять тысяч.</em>", fs: 34 }], talk: ["ni"] },
