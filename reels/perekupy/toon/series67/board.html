@@ -1,0 +1,83 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props76.js"></script>
+<script>
+// «РЖАВЧИНА: ЗАСЕЛЯЕМСЯ» (ep76) — сценка БЕЗ рассказчика по референсу владельца 16.11 (тараканы заселяются в квартиру), с матом.
+// Толян вчера купил Камри через бота; в гараж приходят две Ржавчины-бойца с клетчатыми сумками: «нас к тебе прикомандировали».
+// Бот — в середине (Толян показывает, где взял машину); в конце рекламы нет — финал-панчлайн «ВЕСНА: мы вернулись».
+// Приёмы (новые): вставки-гэги на весь экран (кнопка «ЖОПА 🔥», ёлочка 2019, предписание с печатью «ЗАСЕЛИТЬ», антикор-«граница», толщиномер 1200 мкм, титр «ВЕСНА»), PIP говорящего на вставке, линия антикором на полу, Ржавчина выглядывает из арки.
+const T = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("tolyan", p, x, foot, h, o, pose, extra);
+const RZ = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("rzha", p, x, foot, h, { ...RZH, ...o }, pose, extra);
+const RY = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("rzha", p, x, foot, h, { ...RYZ, ...o }, pose, extra);
+const GL = glow(540, 160, 520, "#fff6c8", .3);
+const S = [
+ { h: "ОБЛОЖКА → «ПОДОГРЕВ ЖОПЫ ЕСТЬ»", tc: "1/5 · 0:00–0:10",
+   A: { def: () => ({ bg: "garazhtolyana", mid: car(CAMRY, 330, 1560, 740, { z: 5, sheen: .4 }) + RZ("ra", 200, 1820, 760, {}, { armR: 20 }, { rim: "#fff", side: 1, z: 7 }) + BAG(250, 1830, 230, "b1") + RY("ya", 980, 1860, 600, {}, { armL: -20 }, { rim: "#fff", side: -1, z: 7 }) + BAG(820, 1870, 190, "b2"), lights: GL, over: TITLE("РЖАВЧИНА:", "ЗАСЕЛЯЕМСЯ") }), shot: { x: 540, y: 1050, s: 1 } },
+   B: { def: () => ({ bg: "salontolyana", mid: RZ("rb", 820, 2120, 1000, {}, { armL: 30 }, { z: 6 }) + RY("yb", 260, 2160, 820, {}, {}, { z: 6 }), lights: GL }), shot: { x: 540, y: 1150, s: 1 },
+     bubbles: [{ p: "rb", html: "О, у него тут и подогрев<br><em>ж*пы есть, бл*. Богато.</em>", fs: 32 }], talk: ["rb"] },
+   vo: "Ржавый: «О, у него тут и подогрев жопы есть, бля. Богато живёт». <b>Вставка: кнопка подогрева с наклейкой «ЖОПА 🔥».</b> Рыжик: «И ёлочка с девятнадцатого года висит. Ни хуя уже не пахнет». <b>Вставка: ёлочка «ВАНИЛЬ 2019» в пыли.</b>", who: "Ржавый + Рыжик (рассказчика нет)",
+   mv: "<b>Новый формат — сценка без рассказчика</b>, как в референсе: только диалог, склейка каждые 1,5–2,5 с, между репликами — вставки-гэги на весь экран. A — <b>кадр 0</b>: <b>новый фон — гараж Толяна</b> (плитка, стеллаж с колёсами, верстак, плакат-пасхалка «КРЕДИТ · 47 платежей осталось»), белая Камри; <b>новые герои — Ржавчина</b>: сержант Ржавый (каска, усы) и рядовой Рыжик (пилотка, тельняшка) с клетчатыми сумками + плашка. B — <b>новый фон — салон Камри</b>: Ржавчина уже сидит в креслах." },
+ { h: "«ВЫ КТО, Н*ХУЙ?» → «ЗДРАВИЯ ЖЕЛАЕМ!»", tc: "2/5 · 0:10–0:20",
+   A: { def: () => ({ bg: "garazhtolyana", mid: car(CAMRY, -120, 1560, 740, { z: 5, sheen: .4 }) + RY("yc", 300, 1500, 360, { look: "o" }, {}, { z: 4 }) + T("ta", 800, 1900, 900, {}, { armL: 40, armR: -40 }, { rim: "#fff", side: -1, z: 8 }), lights: GL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ta", html: "Э, бл*! Вы кто<br><em>такие, н*хуй?</em>", fs: 40 }], talk: ["ta"] },
+   B: { def: () => ({ bg: "garazhtolyana", mid: car(CAMRY, 300, 1520, 700, { z: 4, sheen: .4 }) + RZ("rc", 330, 1880, 860, {}, { armR: -150 }, { rim: "#fff", side: 1, z: 7 }) + BAG(380, 1890, 230, "b3") + RY("yd", 790, 1880, 680, {}, { armR: -150 }, { rim: "#fff", side: -1, z: 7 }) + BAG(640, 1890, 190, "b4"), lights: GL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "rc", html: "Здравия желаем!<br><em>Ржавчина. Заселяемся.</em>", fs: 40 }], talk: ["rc"] },
+   vo: "Толян: «Э, бля! Вы кто такие, нахуй?» Ржавый: «Здравия желаем! Ржавчина. Заселяемся». Толян: «Куда вы заселяетесь? Я её вчера купил!»", who: "Толян + Ржавый",
+   mv: "A — Толян в воротах гаража, Рыжик испуганно выглядывает из-за Камри. B — оба бойца отдают честь, сумки у ног." },
+ { h: "ПРЕДПИСАНИЕ «ЗАСЕЛИТЬ» → ТОЛЯН: «Я ЕЁ ЧЕРЕЗ БОТА ВЗЯЛ»", tc: "3/5 · 0:20–0:32",
+   A: { def: () => ({ bg: "garazhtolyana", over: ORDER() + PIPS(RY("ye", 160, 640, 640, {}, {}, { z: 2 }), "ye", "pp1", "#ff7a1a", 700, 1500) }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "ye", html: "Так поэтому и заселяемся.<br><em>Нас к тебе прикомандировали.</em>", fs: 36 }], talk: ["ye"] },
+   B: { def: () => { const H = HOLDPHONE("tolyan", "tb", 540, 2040, 1450, {}, CMCARD(), { rim: "#fff6c8", side: 1 });
+       return { bg: "garazhtolyana", farBlur: 6, mid: H.mid, lights: H.lights + GL }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "tb", html: "Я её через бота «Перехват» взял:<br><em>через секунду и ниже рынка!</em>", fs: 34 }], talk: ["tb"] },
+   vo: "Рыжик: «Так поэтому и заселяемся. Нас к тебе прикомандировали». <b>Вставка: «ПРЕДПИСАНИЕ № 47-РЖ: Ржавчина — 2 ед. Направить: арки, пороги новой машины Толяна. Хозяину не сообщать» — печать «ЗАСЕЛИТЬ» падает со стуком.</b> Толян: «Какое, нахуй, предписание? Я её через бота “Перехват” взял: через секунду после объявления и ниже рынка!» Ржавый: «Вот и мы через секунду. Ты — в объявление, мы — в пороги».", who: "Рыжик + Толян + Ржавый",
+   mv: "A — <b>приём: вставка-документ</b> на весь экран, говорящий Рыжик — в кружке. B — <b>бот в середине ролика (одна реплика)</b>: Толян показывает телефон — в боте «Toyota Camry · 2019 · 2 190 000 ₽ · рынок ≈ 2 400 000 · 🔥 −9% · ⏱ 1 с». Ответ Ржавого сразу обыгрывает скорость бота — реклама внутри шутки." },
+ { h: "АНТИКОР — «ГРАНИЦА» → «СЪ*БАЛИ ОТСЮДА»", tc: "4/5 · 0:32–0:46",
+   A: { def: () => ({ bg: "garazhtolyana", over: ANTIKOR() + PIPS(T("tc", 160, 640, 640, {}, {}, { z: 2 }), "tc", "pp2", "#ffd23f", 700, 1500) }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "tc", html: "Хер вам.<br><em>У меня антикор есть.</em>", fs: 40 }], talk: ["tc"] },
+   B: { def: () => ({ bg: "garazhtolyana", mid: car(CAMRY, 300, 1480, 680, { z: 3, sheen: .4 }) + RZ("rd", 330, 1640, 620, { angry: true }, {}, { z: 5 }) + RY("yf", 700, 1640, 500, { look: "o" }, {}, { z: 5 }) + SPRAYLINE(80, 1000, 1700) + T("td", 300, 1960, 860, {}, { armR: -100 }, { rim: "#fff", side: 1, z: 9 }), lights: GL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "td", html: "Всё. Граница.<br><em>Съ*бали отсюда.</em>", fs: 40 }], talk: ["td"] },
+   vo: "Толян: «Хер вам. У меня антикор есть». <b>Вставка: баллон «АНТИКОР — граница от ржавчины» в блёстках, как в рекламе.</b> Рыжик: «Чё за антикор, бля? Ты чё, нахуй, химик?» Толян: «Всё. Граница. Съебали отсюда». Ржавый: «Это у тебя в голове граница. Мы перешагнём».", who: "Толян + Рыжик + Ржавый",
+   mv: "A — <b>вставка-«реклама» антикора</b> (глянцевый баллон, искры), Толян в кружке. B — <b>приём: линия на полу</b> — Толян проводит антикором черту перед Ржавчиной; Ржавый перешагивает её одной ногой." },
+ { h: "ТОЛЩИНОМЕР 1200 МКМ → «ВЕСНА: МЫ ВЕРНУЛИСЬ»", tc: "5/5 · 0:46–1:02",
+   A: { def: () => ({ bg: "garazhtolyana", over: GAUGE76() + PIPS(RY("yg", 160, 640, 640, {}, {}, { z: 2 }), "yg", "pp3", "#ff7a1a", 60, 1580) }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "yg", html: "Да тут до нас уже<br><em>шпаклёвка живёт. Пятый год.</em>", fs: 36 }], talk: ["yg"] },
+   B: { def: () => ({ bg: "garazhtolyana", farBlur: 6, mid: CARBODY(4) + RY("yh", 780, 1330, 520, {}, { armR: -150 }, { z: 6 }) + RZ("re", 960, 1300, 560, {}, {}, { z: 5 }) + WHEELFG(8) + PIP(T("te", 160, 640, 640, {}, { armL: -150 }, { z: 2 }), "pp4", "#ffd23f", 60, 300), lights: GL }), shot: { x: 540, y: 1100, s: 1 },
+     bubbles: [{ p: "yh", html: "Здравия желаем.<br><em>Мы вернулись.</em>", fs: 40 }], talk: ["yh"] },
+   vo: "Рыжик: «Да тут до нас уже шпаклёвка живёт. Пятый год». <b>Вставка: толщиномер на пороге — «1200 мкм · ШПАКЛЁВКА».</b> Толян: «Чего, бля?! А продавец говорил: не бита, не крашена!» Ржавый: «Ну всё, соседи. Заносим вещи, Рыжик». Толян: «Не можете вы! Пошли нахуй отсюда!» <i>(уходят с сумками)</i> <b>Титр «ВЕСНА».</b> Рыжик (из арки): «Здравия желаем. Мы вернулись». Толян: «Да ёб твою мать…»", who: "Рыжик + Толян + Ржавый",
+   mv: "A — <b>вставка: толщиномер</b> (поворот для перекупов: машина уже крашеная). B — <b>новый фон — гаражи весной</b> (ворота № 47, сосульки, талый снег) — туда Ржавчина уходит с сумками; после титра «ВЕСНА» — низ Камри крупно: Ржавчина выглядывает из-за колеса, Толян в кружке хватается за голову. <b>Финал — панчлайн, без рекламы бота и без концовки-призыва.</b>" },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
