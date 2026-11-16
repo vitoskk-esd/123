@@ -472,3 +472,15 @@ def test_channel_region_description_beats_nick_code():
     assert D.guess_region("АВТОБОСС", "autoboss_138", None, codes=False) is None
     assert D.guess_region("АВТОБОСС", "autoboss_138") == "irk"                 # код — только если ничего другого нет
     assert D.about_region("Пригоним авто из Москвы и Питера по всей России") is None
+
+
+def test_chassis_code_and_exchange_target():
+    """Владелец 16.11: «Продам Рест е34 … Обмен только на приору седан. 1995 год. М50б20» бот назвал «Lada Priora 1995».
+    «е34» — код кузова BMW 5 серии (не отбрасываем как короткое слово); «обмен на приору» — не продаваемая машина."""
+    text = ("Продам Рест е34.\nЦена 288 000 торг .\nОбмен только на приору седан .\n1995 год .\nМ50б20 .\n"
+            "Широкая морда ,Гур ,кондер ,электро люк.\nДвигатель без проблем ,работает ровно ,не дымит ,не троит .")
+    r = parse_post(text, D)
+    assert (r.make, r.model, r.price) == ("bmw", "5 серии", 288000)
+    assert parse_post("Мерседес w124, 1993 г., 350 000", D).model is not None
+    only_exchange = parse_post("Продам велосипед. Рассмотрю обмен на приору, 30 000", D)
+    assert only_exchange.model != "Priora"

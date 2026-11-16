@@ -213,6 +213,9 @@ FROM_CAR = {"от", "с", "со", "под"}
 SALE_LEAD = set("в на продаже продажа продам продаю продается продаеться срочно отдам".split())   # «в продаже 2112» — это заголовок
 
 
+# код кузова: «е34», «e39», «w124», «w210», «f10», «g30», «jzx100» (владелец 16.11: «Продам Рест е34 … обмен только на приору»
+# бот назвал Lada Priora 1995 — «е34» отбросил как короткое слово без марки и года рядом)
+CHASSIS = re.compile(r"^(?:[eе]\d{2}|[wв]\d{3}|[fg]\d{2}|jzx\d{2,3})$")
 IDIOM_SLANG = {"копейки", "копеек", "копейками", "копейкам"}       # «за копейки», «отдам за копейки» — дёшево, а не ВАЗ-2101
 
 
@@ -252,7 +255,8 @@ def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
             if model and _idiom(toks, h):
                 continue                                     # «за копейки», «копейки» — цена, а не ВАЗ-2101 (владелец 15.11)
             short = model and h.end - h.start == 1 and len(toks[h.start]) <= 3
-            if short and make not in named and not any(years[max(0, li - 1):li + 3]):
+            chassis = bool(model and CHASSIS.match(toks[h.start]))   # «е34», «w124», «f10» — код кузова сам указывает на машину
+            if short and not chassis and make not in named and not any(years[max(0, li - 1):li + 3]):
                 continue                                     # «доход х3», «rx» без марки и года — не машина
             score = 2.0 if model else 1.0
             if model and (h.end - h.start > 1 or make_before.get(h.start) == make):
@@ -268,6 +272,8 @@ def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
             score -= li * 0.05                               # при прочих равных — что раньше
             if score > best_score:
                 best, best_score = (make, model), score
+    if best_score < 0:
+        return (None, None)      # все упоминания — сравнение или обмен («обмен только на приору»): лучше «машина не распознана», чем чужая модель
     return best
 
 
