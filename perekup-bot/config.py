@@ -36,6 +36,7 @@ class Config:
     basic_own: int = 0
     basic_delay: int = 60
     free_posts: int = 5              # бесплатные объявления новому человеку после «Хочу попробовать» — приходят как в PRO (владелец 16.11)
+    free_cheap: int = 3              # + столько машин ниже рынка; доступ кончается, когда пришли и те и другие (владелец 16.11)
     trial_days: int = 0              # бесплатных дней при первом запуске (теперь пробный день платный)
     rk_login: str = ""               # Робокасса; пока не заполнено — бот работает бесплатно для всех (тестовый режим)
     rk_pass1: str = ""
@@ -85,6 +86,7 @@ def get_config() -> Config:
         basic_delay=int(e("BASIC_DELAY", "60")),
         trial_days=int(e("TRIAL_DAYS", "0")),
         free_posts=int(e("FREE_POSTS", "5")),
+        free_cheap=int(e("FREE_CHEAP", "3")),
         rk_login=e("ROBOKASSA_LOGIN", ""),
         rk_pass1=e("ROBOKASSA_PASSWORD1", ""),
         rk_pass2=e("ROBOKASSA_PASSWORD2", ""),

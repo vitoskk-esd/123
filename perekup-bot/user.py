@@ -169,8 +169,8 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         return
     channels = await ctx.db.channel_count_for(uid)
     tail = T.MISSED_ACTIVE.format(n=n, word=cars_word(n)) if n > 0 else ""
-    if plans.free_left(u) > 0 and plans.current(ctx.cfg, u) is plans.FREE_TRIAL:
-        tail += T.FREE_FILTER_SAVED.format(left=plans.free_left(u))
+    if plans.current(ctx.cfg, u) is plans.FREE_TRIAL:
+        tail += T.FREE_FILTER_SAVED.format(n=plans.free_left(u), k=plans.free_cheap_left(u))
     await cb.message.answer(T.FILTER_SAVED.format(channels=channels) + tail, reply_markup=K.filter_saved(fid))
     await cb.answer()
 
@@ -404,14 +404,16 @@ async def want_try(cb: CallbackQuery, ctx: Ctx) -> None:
     Аккаунт уже пробовал или есть доступ — сразу тарифы."""
     uid = cb.from_user.id
     u = await ctx.db.user(uid)
-    if ctx.cfg.payments_on and can_trial(u) and await ctx.db.take_free(uid, ctx.cfg.free_posts, time.time()):
+    n, k = ctx.cfg.free_posts, ctx.cfg.free_cheap
+    if ctx.cfg.payments_on and can_trial(u) and await ctx.db.take_free(uid, n, time.time(), k):
         await ctx.db.event(uid, "free_trial")
         has_filter = bool(await ctx.db.filters(uid))
-        await cb.message.answer(T.FREE_ON.format(n=ctx.cfg.free_posts) + (T.FREE_HAS_FILTER if has_filter else ""),
+        await cb.message.answer(T.FREE_ON.format(total=n + k, n=n, k=k) + (T.FREE_HAS_FILTER if has_filter else ""),
                                 reply_markup=None if has_filter else K.free_start())
         return await cb.answer()
-    if ctx.cfg.payments_on and plans.free_left(u) > 0:      # пробный режим уже идёт — напоминаем, сколько осталось
-        await cb.message.answer(T.FREE_ON.format(n=plans.free_left(u)), reply_markup=K.free_start())
+    if ctx.cfg.payments_on and plans.current(ctx.cfg, u) is plans.FREE_TRIAL:     # пробный режим уже идёт — напоминаем, сколько осталось
+        n, k = plans.free_left(u), plans.free_cheap_left(u)
+        await cb.message.answer(T.FREE_ON.format(total=n + k, n=n, k=k), reply_markup=K.free_start())
         return await cb.answer()
     await send_plans(cb.message, ctx, uid, T.FREE_USED if ctx.cfg.payments_on and not plans.current(ctx.cfg, u) else "")
     await cb.answer()

@@ -248,8 +248,9 @@ async def test_no_plan_then_buy_basic(env):
 
 
 async def test_free_posts_like_pro_then_plans_and_basic_upgrade(env):
-    """Владелец 16.11: «Хочу попробовать» → 5 объявлений бесплатно, приходят как в PRO (мгновенно, с оценкой рынка); пятое — последнее:
-    «Пробные объявления закончились» и кнопка к тарифам; в тарифах только «Простой» и PRO (платный пробный день убран).
+    """Владелец 16.11: «Хочу попробовать» → бесплатно 5 любых машин и 3 ниже рынка, приходят как в PRO (мгновенно, с оценкой рынка).
+    Обычные кончились — дальше бесплатно только «ниже рынка»; пришли и те и другие — «Пробные объявления закончились» и кнопка к тарифам;
+    в тарифах только «Простой» и PRO (платный пробный день убран).
     Второй раз бесплатные не включаются. «Простой» — до 2 фильтров; переход на PRO не сжигает дни."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start"))
@@ -257,21 +258,29 @@ async def test_free_posts_like_pro_then_plans_and_basic_upgrade(env):
     assert len(tries) == 1 and [b.callback_data for row in tries[0].reply_markup.inline_keyboard for b in row] == ["s:try"]
     await dp.feed_update(bot, cb("s:try"))
     on = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
-    assert "5 объявлений бесплатно" in on.text and "как в PRO" in on.text
+    assert "8 объявлений бесплатно" in on.text and "5 любых машин" in on.text and "3 машины <b>ниже рынка</b>" in on.text and "как в PRO" in on.text
     assert [b.callback_data for row in on.reply_markup.inline_keyboard for b in row] == ["f:new"]
     u = await ctx.db.user(USER)
-    assert u["free_left"] == 5 and u["trial_used"] == 1 and u["paid_until"] < time.time()
+    assert (u["free_left"], u["free_cheap_left"], u["trial_used"]) == (5, 3, 1) and u["paid_until"] < time.time()
     await dp.feed_update(bot, cb("f:new"))
     await dp.feed_update(bot, msg("приора до 400к")); await dp.feed_update(bot, cb("f:save"))
-    assert "Бесплатных объявлений осталось: <b>5</b>" in s.texts(USER)[-1]
+    assert "Бесплатно осталось: <b>5</b> любых машин и <b>3</b> ниже рынка" in s.texts(USER)[-1]
     for k in range(5):                                                   # как в PRO: сразу, без задержки «Простого»
-        r = await process(bot, ctx, post(CH1, f"Приора {2008 + k}, {250 + k * 10} 000 руб"))
-        assert r.sent == [USER] and r.delayed == []
-    assert (await ctx.db.user(USER))["free_left"] == 0
+        r = await process(bot, ctx, post(CH1, f"Приора {2005 + k}, {250 + k * 10} 000 руб"))
+        assert r.sent == [USER] and r.delayed == [] and r.discount is None
+    u = await ctx.db.user(USER)
+    assert (u["free_left"], u["free_cheap_left"]) == (0, 3) and "Осталось ещё <b>3</b> машины <b>ниже рынка</b>" in s.texts(USER)[-1]
+    assert (await process(bot, ctx, post(CH1, "Приора 2010, 300 000 руб"))).sent == []      # обычная шестая — уже не бесплатно
+    for k in range(6):                                                   # рынок «Приоры 2015» ≈ 480 000 — фильтру не подходит, учит цену
+        assert (await process(bot, ctx, post(CH2, f"Lada Priora 2015, {470 + k * 5} 000 ₽, пробег {90 + k} тыс"))).sent == []
+    for k in range(3):                                                   # ниже рынка — приходят, пока не наберётся три
+        r = await process(bot, ctx, post(CH1, f"Приора 2015, {300 + k * 20} 000 руб"))
+        assert r.sent == [USER] and r.discount >= 5
+    assert (await ctx.db.user(USER))["free_cheap_left"] == 0
     over = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
-    assert "Пробные объявления закончились" in over.text
+    assert "Пробные объявления закончились" in over.text and "8 машин, из них 3 ниже рынка" in over.text
     assert [b.callback_data for row in over.reply_markup.inline_keyboard for b in row] == ["s:plans"]
-    assert (await process(bot, ctx, post(CH1, "Приора 2014, 330 000 руб"))).sent == []      # шестая — уже не бесплатно
+    assert (await process(bot, ctx, post(CH1, "Приора 2015, 280 000 руб"))).sent == []      # и ниже рынка больше не бесплатно
     await dp.feed_update(bot, cb("s:plans"))
     last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
     assert "Пробный день" not in last.caption
@@ -1866,15 +1875,19 @@ async def test_free_posts_once_and_refund_when_not_delivered(env):
     объявление, которое Telegram не принял, возвращается в счётчик."""
     dp, bot, s, ctx = env
     await dp.feed_update(bot, msg("/start")); await dp.feed_update(bot, msg("/start", OTHER))
-    assert await ctx.db.take_free(USER, 5, time.time()) and not await ctx.db.take_free(USER, 5, time.time())
+    assert await ctx.db.take_free(USER, 5, time.time(), 3) and not await ctx.db.take_free(USER, 5, time.time(), 3)
     await ctx.db.set_user(OTHER, trial_used=1)                                 # пробный день был раньше
     await dp.feed_update(bot, cb("s:try", OTHER))
     assert (await ctx.db.user(OTHER))["free_left"] == 0
-    assert await ctx.db.use_free(USER) == 4
-    await ctx.db.refund_free(USER)
-    assert (await ctx.db.user(USER))["free_left"] == 5
-    await ctx.db.set_user(USER, free_left=1)
-    assert await ctx.db.use_free(USER) == 0 and await ctx.db.use_free(USER) is None
+    assert await ctx.db.use_free(USER) == ("plain", 4, 3)
+    await ctx.db.refund_free(USER, "plain")
+    assert await ctx.db.use_free(USER, cheap=True) == ("cheap", 5, 2)          # ниже рынка — в свой счётчик
+    await ctx.db.refund_free(USER, "cheap")
+    await ctx.db.set_user(USER, free_left=0)
+    assert await ctx.db.use_free(USER) is None                                 # обычные кончились — обычная машина не бесплатна
+    assert await ctx.db.use_free(USER, cheap=True) == ("cheap", 0, 2)
+    await ctx.db.set_user(USER, free_left=1, free_cheap_left=0)
+    assert await ctx.db.use_free(USER, cheap=True) == ("plain", 0, 0)          # «ниже рынка» набраны — дешёвая идёт в счёт обычных
 
 
 async def test_pro_discount_during_trial_and_admin_trial(env):

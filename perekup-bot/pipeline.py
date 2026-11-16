@@ -395,7 +395,8 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     # кому подходит: первый подходящий фильтр каждого человека; кому эта машина уже уходила — пропускаем
     already = await ctx.db.delivered_to(fp, ckey, time.time() - DEDUP_DAYS * DAY)
     targets: dict[int, tuple] = {}
-    free_last: dict[int, bool] = {}          # пробный режим: кому списали бесплатное объявление; True — оно было последним
+    free_last: dict[int, tuple] = {}         # пробный режим: кому списали бесплатное объявление — (счётчик, осталось обычных, ниже рынка)
+    cheap = r.discount is not None and r.discount >= SHOW_DISCOUNT          # «ниже рынка» — как на карточке
     for row in rows:
         uid = row["id"]
         if uid in targets or uid in already or (uid, fp) in ctx.pending or (uid, ckey) in ctx.pending:
@@ -410,12 +411,12 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
             # бронь сразу, до любых await: та же машина из соседнего канала (рассылают в 7 групп за секунды) уже не пройдёт проверку выше
             ctx.pending |= {k for k in ((uid, fp), (uid, ckey)) if k[1]}
             if plan.id == plans.FREE_TRIAL.id:           # пробный режим: списываем бесплатное объявление (атомарно — не больше FREE_POSTS)
-                left = await ctx.db.use_free(uid)
-                if left is None:
+                used = await ctx.db.use_free(uid, cheap)
+                if used is None:                        # обычные кончились, а эта машина не ниже рынка — ждём «ниже рынка»
                     del targets[uid]
                     ctx.pending -= {k for k in ((uid, fp), (uid, ckey)) if k[1]}
                     continue
-                free_last[uid] = left == 0
+                free_last[uid] = used
     held = {k for uid in targets for k in ((uid, fp), (uid, ckey)) if k[1]}     # снимаем бронь, когда отправка записана в базу
     try:
         return await _deliver(bot, ctx, raw, channel, r, L, fp, ckey, targets, photo_task, free_last)
@@ -499,10 +500,14 @@ async def _deliver(bot: Bot, ctx: Ctx, raw: RawPost, channel: dict, r: Result, L
 
 
 async def _free_after(bot: Bot, ctx: Ctx, r: Result, free_last: dict) -> None:
-    """Пробный режим: не дошло — возвращаем объявление; дошло последнее бесплатное — «пробные закончились» и кнопка к тарифам."""
-    for uid, last in free_last.items():
+    """Пробный режим: не дошло — возвращаем объявление; обычные кончились, а «ниже рынка» ещё нет — говорим, что ждём их;
+    пришли и те и другие — «пробные закончились» и кнопка к тарифам."""
+    for uid, (kind, plain, cheap) in free_last.items():
         if uid not in r.sent:
-            await ctx.db.refund_free(uid)
-        elif last:
+            await ctx.db.refund_free(uid, kind)
+        elif plain == 0 and cheap == 0:
             await ctx.db.event(uid, "free_over")
-            await _send(lambda uid=uid: bot.send_message(uid, T.FREE_OVER.format(n=ctx.cfg.free_posts), reply_markup=K.to_plans()), uid, ctx)
+            text = T.FREE_OVER.format(n=ctx.cfg.free_posts + ctx.cfg.free_cheap, k=ctx.cfg.free_cheap)
+            await _send(lambda uid=uid, text=text: bot.send_message(uid, text, reply_markup=K.to_plans()), uid, ctx)
+        elif kind == "plain" and plain == 0:
+            await _send(lambda uid=uid, cheap=cheap: bot.send_message(uid, T.FREE_PLAIN_DONE.format(k=cheap)), uid, ctx)

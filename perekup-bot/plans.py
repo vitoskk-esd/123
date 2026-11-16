@@ -59,12 +59,21 @@ FREE = Plan("free", "Бесплатно", 0, 0, UNLIMITED, UNLIMITED)   # пок
 FREE_TRIAL = Plan("freetrial", "Пробные объявления", 0, 0, UNLIMITED, UNLIMITED, dkp=False)
 
 
-def free_left(user) -> int:
-    """Сколько бесплатных объявлений осталось (0 — пробный режим не включён или кончился)."""
+def _col(user, key: str) -> int:
     try:
-        return int(user["free_left"] or 0)
+        return int(user[key] or 0)
     except (KeyError, IndexError, TypeError):
         return 0
+
+
+def free_left(user) -> int:
+    """Сколько обычных бесплатных объявлений осталось."""
+    return _col(user, "free_left")
+
+
+def free_cheap_left(user) -> int:
+    """Сколько бесплатных машин ниже рынка осталось."""
+    return _col(user, "free_cheap_left")
 
 
 def current(cfg: Config, user, now: float | None = None) -> Plan | None:
@@ -78,7 +87,7 @@ def current(cfg: Config, user, now: float | None = None) -> Plan | None:
         return plans(cfg).get(user["plan"] or "basic", plans(cfg)["basic"])
     if user and user["trial_until"] > now:      # бесплатные дни из прошлых версий бота
         return plans(cfg)["pro"]
-    if user and free_left(user) > 0:            # пробный режим: бесплатные объявления как в PRO
+    if user and (free_left(user) > 0 or free_cheap_left(user) > 0):     # пробный режим: бесплатные объявления как в PRO
         return FREE_TRIAL
     return None
 
