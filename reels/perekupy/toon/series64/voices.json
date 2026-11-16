@@ -1,0 +1,26 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.2,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "A standalone comedy episode: a TV cooking-show parody where a car flipper 'cooks' a wrecked car for sale. Deadpan ironic narration like a TV announcer. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "He is a TV chef: theatrical, proud, enthusiastic like a celebrity cook presenting a recipe. Last line: quick, cheeky excuse."
+ },
+ "margo": {
+  "voice": "Callirrhoe",
+  "tempo": 1.1,
+  "profile": "Margo — a bubbly Russian TV cooking-show host, bright, cheerful, slightly exaggerated TV intonation.",
+  "notes": "Every line bright and upbeat like live TV. Last line: delighted, triumphant."
+ },
+ "gleb": {
+  "voice": "Rasalgethi",
+  "tempo": 1.12,
+  "profile": "Gleb — a Russian guy around 30, a buyer with glasses, eager then shocked, a bit nerdy.",
+  "notes": "Line 1: eager. Line 2: shocked, panicked. Line 3: calm, satisfied, proud."
+ }
+}
