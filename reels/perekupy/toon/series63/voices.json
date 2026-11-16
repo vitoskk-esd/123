@@ -1,25 +1,25 @@
 {
  "lis": {
   "voice": "Charon",
-  "tempo": 1.23,
+  "tempo": 1.14,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
   "notes": "A standalone adult comedy episode: first snow, a tire shop, a car with four different tires sold by a car flipper. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
  },
  "zhora": {
   "voice": "Fenrir",
-  "tempo": 1.18,
+  "tempo": 1.08,
   "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
   "notes": "One line: cheerful, cheeky, salesman-like."
  },
  "kol": {
   "voice": "Algieba",
-  "tempo": 1.12,
+  "tempo": 1.0,
   "profile": "Kolyan — a Russian tire-shop mechanic in his 40s, busy on the first-snow rush day, tired, sarcastic, rough working voice. He swears casually and naturally, like ordinary work talk — not shouting. Adult comedy, uncensored.",
   "notes": "Pronounce every swear word fully, clearly and naturally in the flow of speech — never bleep, soften or skip it. Line 1: brisk, busy. Line 2: dry sarcasm. Line 3: listing tires slowly with growing disbelief, then the swear as a resigned sigh. Line 4: deadpan joke. Line 5: flat, unimpressed. Line 6: genuinely amazed, slow."
  },
  "nas": {
   "voice": "Despina",
-  "tempo": 1.12,
+  "tempo": 1.0,
   "profile": "Nastya — a young Russian woman around 25, first car owner, polite, slightly naive, warm voice.",
   "notes": "Line 1: trusting. Line 2: shy, hopeful. Line 3: proud and happy."
  }
