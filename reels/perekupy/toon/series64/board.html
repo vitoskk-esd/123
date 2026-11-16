@@ -1,0 +1,85 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props73.js"></script>
+<script>
+// «КУЛИНАРНОЕ ШОУ: БЛЮДО ОТ ЖОРЫ» (киношный формат, отдельный ролик, БЕЗ мата). Пародия на кулинарное ТВ-шоу «Вкусно и дёшево»:
+// шеф Жора «готовит» битую «десятку» на продажу: два ведра шпаклёвки, щепотка полироли, пробег — убавить в три раза; 40 минут под феном.
+// Покупатель Глеб на тест-драйве: бампер отвалился, дверь — в руках. «Это подача! Ресторанная!» Глеб находит Mazda 6 через бота —
+// машина на гигантской тарелке, табло «АПЛОДИСМЕНТЫ». ОБЛОЖКА (кадр 0): Глеб держит телефон с ботом (Mazda 6 −18%) + плашка «КУЛИНАРНОЕ ШОУ: / БЛЮДО ОТ ЖОРЫ».
+// Приёмы (новые): банки-ингредиенты; духовка с машиной и таймером 40:00; машина разваливается (бампер, дверь в руках); ТВ-плашка «В ЭФИРЕ»; табло аплодисментов; машина на тарелке.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra) + CHEFHAT(x, foot, h, "", (extra.z || 7) + 1);
+const M = (p, x, foot, h, pose = {}, extra = {}) => MGC(ch("vika", p, x, foot, h, null, pose, extra));
+const G = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...GLEB, ...o }, pose, extra);
+const KS_L = glow(540, 300, 420, "#fff6d0", .35);
+const KZ_L = glow(540, 120, 420, "#fff6d0", .3);
+const TD_L = glow(540, 300, 420, "#ffffff", .2);
+const S = [
+ { h: "ОБЛОЖКА · ПОКУПАТЕЛЬ С БОТОМ → «ЧТО У НАС В МЕНЮ?»", tc: "1/5 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("perekup", "gp", 540, 2090, 1680, GLEB, MZCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "kulinarshow", farBlur: 8, mid: H.mid, lights: H.lights + KS_L, over: TITLE("КУЛИНАРНОЕ ШОУ:", "БЛЮДО ОТ ЖОРЫ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "kulinarshow", mid: M("ma", 260, 1860, 860, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + Z("za", 790, 1860, 880, { look: "grin" }, { armL: 60 }, { rim: "#fff6d0", side: -1, z: 7 }), over: LOWER3("ШЕФ ЖОРА", "«Десятка по-перекупски»"), lights: KS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ma", html: "Жора, что у нас<br><em>сегодня в меню?</em>", fs: 30 }, { p: "za", html: "Битая «десятка»<br><em>по-перекупски!</em>", fs: 30 }], talk: ["za"] },
+   vo: "Лис: «Кулинарное шоу “Вкусно и дёшево”. Сегодня шеф Жора готовит машину на продажу». Марго: «Жора, что у нас сегодня в меню?» Жора: «Битая “десятка” по-перекупски! Берём кузов после ДТП…»", who: "Лис + Марго + Жора",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новый герой — покупатель Глеб</b> (фиолетовая куртка, очки) держит телефон: в боте «Mazda 6 · 2008 · 640 000 ₽ · рынок ≈ 780 000 · 🔥 −18% · ⏱ 1 с»; плашка «КУЛИНАРНОЕ ШОУ: / БЛЮДО ОТ ЖОРЫ». B — <b>новый фон — ТВ-кухня</b> (плитка, вытяжка, логотип «ВКУСНО И ДЁШЕВО», «В ЭФИРЕ»); <b>новая героиня — ведущая Марго</b> (красное платье); Жора в поварском колпаке; <b>приём: ТВ-плашка «● В ЭФИРЕ · ШЕФ ЖОРА»</b>." },
+ { h: "ИНГРЕДИЕНТЫ → 40 МИНУТ ПОД ФЕНОМ", tc: "2/5 · 0:12–0:26",
+   A: { def: () => ({ bg: "kulinarshow", farBlur: 2, mid: Z("zb", 540, 1880, 880, { look: "grin" }, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + INGRED(20, 1180, "ig1", "ШПАКЛЁВКА", "2 ведра", "#c8ccd0", -6) + INGRED(760, 1180, "ig2", "ПОЛИРОЛЬ", "щепотка", "#ffd23f", 5) + INGRED(390, 1430, "ig3", "ПРОБЕГ", "÷ 3", "#ff7a1a", -2, 9), lights: KS_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "zb", html: "Два ведра шпаклёвки, полироль<br><em>и пробег — убавить в три раза!</em>", fs: 34 }], talk: ["zb"] },
+   B: { def: () => ({ bg: "kulinarshow", farBlur: 4, mid: OVEN(160, 900) + M("mb", 880, 1900, 820, { armL: 40 }, { rim: "#ffb04a", side: -1, z: 22 }), lights: KS_L + glow(540, 1250, 360, "#ff9a4a", .4) }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "mb", html: "Выглядит аппетитно!<br><em>Кто попробует?</em>", fs: 38 }], talk: ["mb"] },
+   vo: "Марго: «А что добавляем?» Жора: «Два ведра шпаклёвки, щепотку полироли и пробег — убавить в три раза!» Лис: «Блюдо запекали сорок минут под феном». Марго: «Выглядит аппетитно! Кто попробует?»", who: "Марго + Жора + Лис",
+   mv: "A — <b>приём 1: ингредиенты</b>: банки «ШПАКЛЁВКА · 2 ведра», «ПОЛИРОЛЬ · щепотка», «ПРОБЕГ · ÷ 3» выпрыгивают на стол под слова Жоры. B — <b>приём 2: духовка</b> — в окошке «десятка», таймер бежит 40:00 → 00:00, жар; Марго облизывается." },
+ { h: "ГЛЕБ: «БЕРУ!» → ТЕСТ-ДРАЙВ: ОТВАЛИЛСЯ БАМПЕР", tc: "3/5 · 0:26–0:40",
+   A: { def: () => ({ bg: "kulinarzal", mid: G("ga", 280, 1880, 860, {}, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + Z("zc", 800, 1880, 860, { look: "grin" }, { armL: 60 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: KZ_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ga", html: "Беру! А можно<br><em>тест-драйв?</em>", fs: 32 }, { p: "zc", html: "Только аккуратно —<br><em>оно ещё горячее.</em>", fs: 32 }], talk: ["zc"] },
+   B: { def: () => ({ bg: "testdraiv", mid: car(V10, 180, 1640, 760, { z: 5, sheen: .4 }) + BUMPER(820, 1600) , lights: TD_L }), shot: { x: 540, y: 1150, s: 1.04 } },
+   vo: "Лис: «Пробовать пришёл покупатель Глеб». Глеб: «Беру! А можно тест-драйв?» Жора: «Конечно! Только аккуратно — оно ещё горячее». Лис: «Через сто метров блюдо развалилось».", who: "Лис + Глеб + Жора",
+   mv: "A — <b>новый фон — студия общим планом</b> (трибуны со зрителями-силуэтами, софиты, камеры, табло «АПЛОДИСМЕНТЫ»): Глеб выходит на сцену. B — <b>новый фон — улица для тест-драйва</b> (дома, знак «20», лежачий полицейский): «десятка» подпрыгивает на лежачем — <b>приём 3: отваливается бампер</b>." },
+ { h: "ДВЕРЬ В РУКАХ: «ЭТО ПОДАЧА!» → БОТ: MAZDA 6", tc: "4/5 · 0:40–0:54",
+   A: { def: () => ({ bg: "testdraiv", farBlur: 2, mid: G("gb", 300, 1880, 880, { look: "o" }, { armL: -40, armR: -40 }, { rim: "#ffffff", side: 1, z: 7 }) + DOORP(150, 1400) + Z("zd", 820, 1880, 860, { look: "grin" }, { armL: 60 }, { rim: "#ffffff", side: -1, z: 7 }), lights: TD_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "gb", html: "Жора! У меня<br><em>дверь в руках!</em>", fs: 32 }, { p: "zd", html: "Это подача!<br><em>Ресторанная!</em>", fs: 32 }], talk: ["zd"] },
+   B: { def: () => { const H = HOLDPHONE("perekup", "gd", 540, 2000, 1400, GLEB, MZCARD("mcc2"), { rim: "#ffffff", side: 1 });
+       return { bg: "testdraiv", farBlur: 5, mid: H.mid, lights: H.lights + TD_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "gd", html: "Мазда, один хозяин, ниже рынка.<br><em>Без шпаклёвки и без фена.</em>", fs: 34 }], talk: ["gd"] },
+   vo: "Глеб: «Жора! У меня дверь в руках!» Жора: «Это подача! Ресторанная!» Лис: «Нормальную машину Глеб нашёл через бота “Перехват”». Глеб: «Мазда, один хозяин, ниже рынка. Без шпаклёвки и без фена».", who: "Глеб + Жора + Лис",
+   mv: "A — Глеб стоит с оторванной синей дверью, Жора в колпаке разводит руками. B — Глеб с телефоном: красная Mazda 6 в боте." },
+ { h: "«ВОТ ЭТО — БЛЮДО ОТ ШЕФА!» → ФИНАЛ: БОТ", tc: "5/5 · 0:54–1:08",
+   A: { def: () => ({ bg: "kulinarzal", mid: PLATE(1540) + car(MZ6, 190, 1650, 700, { z: 5, sheen: .5 }) + M("mc", 120, 1900, 760, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + G("gc", 980, 1900, 740, { look: "grin" }, { armL: -150 }, { rim: "#fff6d0", side: -1, z: 7 }), over: APPL().replace("opacity:0", "opacity:1"), lights: KZ_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "mc", html: "Вот это —<br><em>блюдо от шефа!</em>", fs: 40 }], talk: ["mc"] },
+   B: { def: () => ({ bg: "kulinarshow", over: CTA73, lights: KS_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Марго: «Вот это — блюдо от шефа!» Лис: «Не ешь блюда от перекупов: бот “Перехват” присылает хорошие машины ниже рынка через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Марго + Лис",
+   mv: "A — <b>приём 4: машина на гигантской тарелке</b> (с зеленью) посреди студии, табло «АПЛОДИСМЕНТЫ» загорается, Марго и Глеб ликуют. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
