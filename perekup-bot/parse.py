@@ -217,6 +217,10 @@ SALE_LEAD = set("в на продаже продажа продам продаю
 # бот назвал Lada Priora 1995 — «е34» отбросил как короткое слово без марки и года рядом)
 CHASSIS = re.compile(r"^(?:[eе]\d{2}|[wв]\d{3}|[fg]\d{2}|jzx\d{2,3})$")
 IDIOM_SLANG = {"копейки", "копеек", "копейками", "копейкам"}       # «за копейки», «отдам за копейки» — дёшево, а не ВАЗ-2101
+# название модели, которое рядом со словами про выхлоп — это тюнинг-глушитель, а не машина: «16 клап, Стингер вся трасса» — прямоток
+# «Stinger» на ВАЗ-2111 (владелец 16.11: бот назвал Kia Stinger за 65 000 ₽)
+EXHAUST = set("трасса трассу трассой выхлоп выхлопа выхлопом выхлопная выхлопную глушитель глушителя глушак глушаком прямоток прямотоком "
+              "резонатор паук паука банка банку насадка насадкой".split())
 
 
 def _idiom(toks: list[str], h) -> bool:
@@ -254,6 +258,8 @@ def pick_car(text: str, d: Dictionary) -> tuple[str | None, str | None]:
                     model = glued
             if model and _idiom(toks, h):
                 continue                                     # «за копейки», «копейки» — цена, а не ВАЗ-2101 (владелец 15.11)
+            if model and h.payload[0] == "model" and make_before.get(h.start) != make and set(toks[max(0, h.start - 2):h.end + 3]) & EXHAUST:
+                continue                                     # «стингер вся трасса», «выхлоп Стингер» — глушитель, а не Kia Stinger
             short = model and h.end - h.start == 1 and len(toks[h.start]) <= 3
             chassis = bool(model and CHASSIS.match(toks[h.start]))   # «е34», «w124», «f10» — код кузова сам указывает на машину
             if short and not chassis and make not in named and not any(years[max(0, li - 1):li + 3]):

@@ -484,3 +484,13 @@ def test_chassis_code_and_exchange_target():
     assert parse_post("Мерседес w124, 1993 г., 350 000", D).model is not None
     only_exchange = parse_post("Продам велосипед. Рассмотрю обмен на приору, 30 000", D)
     assert only_exchange.model != "Priora"
+
+
+def test_exhaust_brand_is_not_a_car():
+    """Владелец 16.11: «Продам 65 тысяч 16 клап Стингер вся трасса гбо стоит» (фото ВАЗ-2111) бот назвал Kia Stinger.
+    «Стингер вся трасса» — прямоток Stinger; модель рядом со словами про выхлоп не берём (если марка не названа)."""
+    r = parse_post("Продам 65 тысяч\n16 клап Стингер вся трасса гбо стоит\nПисать в лс", D)
+    assert r.model != "Stinger" and r.price == 65000
+    assert parse_post("Ваз 2111, 2006 г., выхлоп Стингер, 120 000", D).model == "2111"
+    assert parse_post("Kia Stinger 2018, 2 400 000, родной выхлоп", D).model == "Stinger"
+    assert parse_post("Продаю Киа Стингер 2019 г., 2 500 000", D).model == "Stinger"
