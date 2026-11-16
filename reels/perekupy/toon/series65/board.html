@@ -1,0 +1,95 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props74.js"></script>
+<script>
+// «ФУТБОЛ: МАТЧ ЗА КАМРИ» (киношный формат, отдельный ролик, БЕЗ мата). Финал сезона «Перехват» против «Перекупов» — разыгрывается Камри ниже рынка.
+// Комментатор Вадим: «Объявление вышло! Мяч в игре!» Стасу бот прислал машину через секунду — «Гол! 1:0!». Жора увидел через 40 минут — «Поздно, продано!».
+// Жора пытается продать свою Камри — судья: «Проверим на VAR»: повтор — пробег скручен с 300 000 до 80 000 → красная карточка. «Это не я! Одометр сам!»
+// Стас: «Камри, один хозяин, ниже рынка на двести тысяч». 2:0. ОБЛОЖКА (кадр 0): Стас держит телефон с ботом + плашка «ФУТБОЛ: / МАТЧ ЗА КАМРИ».
+// Приёмы (новые): табло со счётом (цифры перелистываются); мяч в сетку; видеоповтор VAR — одометр крутится назад; судейские карточки; гарнитура комментатора.
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const V = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...VAD, ...o }, pose, extra) + HEADSET(x, foot, h, (extra.z || 7) + 1);
+const RF = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...REF, ...o }, pose, extra);
+const ST = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...STAS, ...o }, pose, extra);
+const PIP = (inner, id, ring = "#ffd23f", left = 700, top = 1440, bgc = "#3a3d52") => `<div id="${id}" class="grp" style="position:absolute;left:${left}px;top:${top}px;width:320px;height:320px;border-radius:50%;overflow:hidden;border:9px solid ${ring};z-index:45;background:${bgc};box-shadow:0 10px 30px #0008">${inner}</div>`;
+const FP_L = glow(120, 120, 260, "#fff6d0", .4) + glow(960, 120, 260, "#fff6d0", .4);
+const KM_L = glow(540, 500, 420, "#2f6db5", .2);
+const VR_L = glow(540, 900, 520, "#2f6db5", .3);
+const sb = (a, b, id = "sb", x = 160, y = 180, w = 760) => SCOREB(x, y, id, w).replace(`id="${id}a">0<`, `id="${id}a">${a}<`).replace(`id="${id}b">0<`, `id="${id}b">${b}<`);
+const S = [
+ { h: "ОБЛОЖКА · СТАС С БОТОМ → «МЯЧ В ИГРЕ!»", tc: "1/6 · 0:00–0:10",
+   A: { def: () => { const H = HOLDPHONE("perekup", "sp", 540, 2090, 1680, STAS, CAMCARD(), { rim: "#fff6d0", side: 1 });
+       return { bg: "futbolpole", farBlur: 8, mid: H.mid, lights: H.lights + FP_L, over: TITLE("ФУТБОЛ:", "МАТЧ ЗА КАМРИ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "kommentatorka", mid: V("va", 540, 2000, 1150, {}, { armR: -120 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(0, 0, "sb1", 160, 260) + LOWER3("ФИНАЛ СЕЗОНА", "«Перехват» — «Перекупы» · разыгрывается Камри"), lights: KM_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "va", html: "Объявление вышло!<br><em>Мяч в игре!</em>", fs: 46 }], talk: ["va"] },
+   vo: "Лис: «Финал сезона: “Перехват” против “Перекупов”. Разыгрывается Камри — ниже рынка». Вадим: «Объявление вышло! Мяч в игре!»", who: "Лис + Вадим",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: Стас держит телефон — в боте «Toyota Camry · 2018 · 1 950 000 ₽ · рынок ≈ 2 150 000 · 🔥 −9% · ⏱ 1 с»; плашка «ФУТБОЛ: / МАТЧ ЗА КАМРИ». B — <b>новый фон — комментаторская кабина</b> (окно на поле, мониторы, шарфы); <b>новый герой — комментатор Вадим</b> в гарнитуре; <b>приём: табло «ПЕРЕХВАТ 0:0 ПЕРЕКУПЫ»</b> и плашка «● ПРЯМОЙ ЭФИР»." },
+ { h: "СТАС ЗА СЕКУНДУ → «ГОЛ! ОДИН — НОЛЬ!»", tc: "2/6 · 0:10–0:21",
+   A: { def: () => ({ bg: "futbolpole", mid: ST("sa", 260, 1880, 880, {}, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + BALL(500, 900), over: sb(1, 0, "sb2"), lights: FP_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "sa", html: "Уже звоню<br><em>продавцу!</em>", fs: 46 }], talk: ["sa"] },
+   B: { def: () => ({ bg: "kommentatorka", mid: V("vb", 540, 2000, 1150, { look: "o" }, { armL: -150, armR: -150 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(1, 0, "sb3", 160, 260), lights: KM_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "vb", html: "Го-о-ол! Один — ноль!<br><em>Стас уже договорился!</em>", fs: 40 }], talk: ["vb"] },
+   vo: "Лис: «Стасу бот прислал машину через секунду». Стас: «Уже звоню продавцу!» Вадим: «Го-о-ол! Один — ноль! Стас уже договорился о просмотре!»", who: "Лис + Стас + Вадим",
+   mv: "A — <b>новый фон — ночной стадион</b> (трибуны, прожекторы, газон в полоску): Стас звонит, <b>мяч влетает в сетку</b>; табло перелистывается на 1:0. B — Вадим кричит «Го-о-ол!», руки вверх." },
+ { h: "ЖОРА ЧЕРЕЗ 40 МИНУТ → «ПОЗДНО, ПРОДАНО!»", tc: "3/6 · 0:21–0:32",
+   A: { def: () => ({ bg: "futbolpole", farBlur: 2, mid: Z("za", 540, 1880, 900, { look: "o" }, { armL: 60, armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }), over: sb(1, 0, "sb4"), lights: FP_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "za", html: "Камри моя!<br><em>Беру, не глядя!</em>", fs: 46 }], talk: ["za"] },
+   B: { def: () => ({ bg: "kommentatorka", mid: V("vc", 540, 2000, 1150, {}, { armR: -60 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(1, 0, "sb5", 160, 260), lights: KM_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "vc", html: "Поздно, Жора!<br><em>Продано!</em>", fs: 50 }], talk: ["vc"] },
+   vo: "Лис: «Жора увидел объявление через сорок минут». Жора: «Камри моя! Беру, не глядя!» Вадим: «Поздно, Жора! Продано!»", who: "Лис + Жора + Вадим",
+   mv: "A — Жора выбегает на поле запыхавшийся. B — Вадим разводит руками." },
+ { h: "ЖОРА ПРОДАЁТ СВОЮ КАМРИ → VAR: ПРОБЕГ СКРУЧЕН", tc: "4/6 · 0:32–0:45",
+   A: { def: () => ({ bg: "futbolpole", mid: car(CAM3, 300, 1640, 760, { z: 5, sheen: .5 }) + Z("zb", 200, 1880, 860, { look: "grin" }, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + RF("ra", 880, 1880, 860, {}, { armL: 60 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: FP_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ra", html: "Стоп!<br><em>Проверим на VAR.</em>", fs: 46 }], talk: ["ra"] },
+   B: { def: () => ({ bg: "varkomnata", mid: VARMON(110, 640).replace(">300 000<", ">80 000<") + PIP(V("vpip", 160, 800, 900, { look: "o" }, {}, { noShadow: 1 }), "pip1", "#ffd23f", 380, 1460), lights: VR_L }), shot: { x: 540, y: 1100, s: 1.02 },
+     bubbles: [{ at: [540, 1480], html: "Пробег скручен<br><em>с трёхсот тысяч до восьмидесяти!</em>", fs: 36 }], talk: ["vpip"] },
+   vo: "Лис: «Тогда Жора решил продать свою Камри — со скрученным пробегом». Судья: «Стоп! Проверим на VAR». Вадим: «Повтор показывает: пробег скручен с трёхсот тысяч до восьмидесяти!»", who: "Лис + судья + Вадим",
+   mv: "A — Жора у своей белой Камри, <b>новый герой — судья</b> (жёлтая форма, свисток) останавливает игру. B — <b>новый фон — комната VAR</b> (стена мониторов, синий свет); <b>приём: видеоповтор</b> — одометр крутится назад 300 000 → 80 000 в замедлении; Вадим в кружке." },
+ { h: "КРАСНАЯ КАРТОЧКА → СТАС: КАМРИ НИЖЕ РЫНКА", tc: "5/6 · 0:45–0:58",
+   A: { def: () => ({ bg: "futbolpole", farBlur: 2, mid: RF("rb", 300, 1880, 900, {}, { armR: -170 }, { rim: "#fff6d0", side: 1, z: 7 }) + REFCARD(250, 860) + Z("zc", 800, 1880, 860, { look: "o" }, { armL: 70 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: FP_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "rb", html: "Жора —<br><em>красная карточка!</em>", fs: 32 }, { p: "zc", html: "Это не я!<br><em>Это одометр сам!</em>", fs: 32 }], talk: ["zc"] },
+   B: { def: () => ({ bg: "futbolpole", mid: car(CAMS, 60, 1640, 900, { z: 5, sheen: .5 }) + ST("sb", 900, 1880, 820, { look: "grin" }, { armL: -150 }, { rim: "#fff6d0", side: -1, z: 7 }), over: sb(2, 0, "sb6"), lights: FP_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "sb", html: "Камри, один хозяин,<br><em>ниже рынка на 200 тысяч!</em>", fs: 34 }], talk: ["sb"] },
+   vo: "Судья: «Жора — красная карточка! Удаление!» Жора: «Это не я! Это одометр сам!» Стас: «Камри, один хозяин, ниже рынка на двести тысяч. Спасибо, бот!»", who: "Судья + Жора + Стас",
+   mv: "A — <b>приём: судейская карточка</b> — красная взлетает над головой судьи, Жора оправдывается. B — Стас у своей Камри из бота, табло 2:0." },
+ { h: "«ДВА — НОЛЬ В ПОЛЬЗУ БОТА!» → ФИНАЛ: БОТ", tc: "6/6 · 0:58–1:10",
+   A: { def: () => ({ bg: "kommentatorka", mid: V("vd", 540, 2000, 1150, { look: "grin" }, { armL: -150, armR: -150 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(2, 0, "sb7", 160, 260), lights: KM_L }), shot: { x: 540, y: 1100, s: 1.04 },
+     bubbles: [{ p: "vd", html: "Два — ноль в пользу бота!<br><em>Какой матч!</em>", fs: 42 }], talk: ["vd"] },
+   B: { def: () => ({ bg: "futbolpole", over: CTA74, lights: FP_L }), shot: { x: 540, y: 1000, s: .98 } },
+   vo: "Вадим: «Два — ноль в пользу бота! Какой матч!» Лис: «Играй за команду “Перехвата”: бот присылает хорошие машины ниже рынка через секунду после публикации». (Финальная фраза голосом — про бота; карточку голос не читает.)", who: "Вадим + Лис",
+   mv: "A — Вадим ликует, табло 2:0. B — <b>последний кадр — только карточка бота</b>." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
