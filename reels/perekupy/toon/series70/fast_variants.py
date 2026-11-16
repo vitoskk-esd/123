@@ -5,11 +5,11 @@ import json, os, shutil, subprocess, sys
 
 BASE = sys.argv[1]; HEAD = 2.4; FPS = 30; N = int(HEAD * FPS)
 V = {   # заставка (две плашки и цвета) · цвет ffmpeg · зум и сдвиг центра
- "b": dict(name="Архив", t=("ТОЛЯН · 17:", "ЛЁХА НА РОЛЛС-РОЙСЕ", "#2f6db5", "#fbfaf3"),
+ "b": dict(name="Архив", t=("ТОЛЯН · 18:", "ДЕД НА ЗАДНЕМ СИДЕНЬЕ", "#2f6db5", "#fbfaf3"),
    color="colorchannelmixer=.86:.14:0:0:.08:.86:.06:0:.04:.1:.78:0,eq=contrast=1.05:saturation=1.05", zoom=1.04, at=(.5, .5)),
- "c": dict(name="Неон", t=("ТОЛЯН · 17:", "ЭКЗАМЕН ЗА 40 СЕКУНД", "#ffd23f", "#151515"),
+ "c": dict(name="Неон", t=("ТОЛЯН · 18:", "СДЕЛКА С ОГУРЦАМИ", "#ffd23f", "#151515"),
    color="eq=contrast=1.1:saturation=1.3:brightness=-0.02,hue=h=12", zoom=1.06, at=(.5, .25)),
- "h": dict(name="Пастель", t=("ТОЛЯН · 17:", "МОСКВА-СИТИ", "#ff6fae", "#151515"),
+ "h": dict(name="Пастель", t=("ТОЛЯН · 18:", "ЖОРА В БИНОКЛЬ", "#ff6fae", "#151515"),
    color="colorbalance=rs=.10:gs=-.04:bs=.08:rm=.08:gm=-.03:bm=.06,eq=saturation=.9:brightness=.03", zoom=1.05, at=(.3, .5)),
 }
 PY = os.environ.get("PY", "python3")

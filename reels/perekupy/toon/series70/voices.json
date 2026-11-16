@@ -1,0 +1,44 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.1,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 18 of a comedy mini-series about Tolyan building his own car dealership: first buyer, a grandpa on the test drive, a deal with a jar of pickles. Brisk, ironic narration. Last line: a confident, warm advertising pitch for the bot «Перехват»."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.12,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "No swearing. Line 1: calm, confident, a little smug. Line 2: excited, quick, on a video call."
+ },
+ "palych": {
+  "voice": "Iapetus",
+  "tempo": 1.05,
+  "profile": "Palych — an old Russian grandpa in his 70s, retired driver, owner of a perfectly kept old Lada; grumpy, suspicious of car flippers, kind underneath.",
+  "notes": "No swearing. Line 1: protective, firm. Line 2: loud, bossy, from the back seat, comic. Line 3: sly bargaining, generous."
+ },
+ "rimma": {
+  "voice": "Kore",
+  "tempo": 1.08,
+  "profile": "Rimma Zakharovna — a strict, businesslike Russian woman in her 50s who owns a former gas station lot; cool, precise, a little ironic, always calls Tolyan by his full name «Анатолий».",
+  "notes": "One line: dry, ironic, counting cars."
+ },
+ "leha": {
+  "voice": "Orus",
+  "tempo": 1.05,
+  "profile": "Lyokha — the most serious car dealer in Moscow: bald, tattooed, leather jacket, drives a Rolls-Royce. Low, heavy, calm, unhurried voice; speaks in short confident sentences like a mentor; dry humor.",
+  "notes": "No swearing. One line on a video call from his Rolls-Royce: calm, decisive, business-like."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.12,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "No swearing. One line: watching through binoculars, jealous, quiet and sly, then a threatening grin."
+ },
+ "gosha": {
+  "voice": "Umbriel",
+  "tempo": 1.08,
+  "profile": "Gosha — a young Russian IT guy in his late 20s buying his first car: polite, a bit nervous, then excited.",
+  "notes": "Line 1: polite, hopeful. Line 2: excited but trying to bargain. Line 3: happy, quick."
+ }
+}

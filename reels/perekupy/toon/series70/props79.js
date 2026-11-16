@@ -21,9 +21,12 @@ const CNT77 = (money, cars) => `<div id="cnt77" style="position:absolute;left:40
 const SIGN77 = (x = 300, y = 590, z = 3, sc = 1) => `<div style="position:absolute;left:${x}px;top:${y}px;z-index:${z};transform-origin:0 0;scale:${sc};background:#ffd23f;border:8px solid #151515;box-shadow:0 10px 0 #151515;padding:8px 26px 12px;font-family:Unbounded;font-weight:900;font-size:44px;color:#151515;transform:rotate(-2deg);white-space:nowrap">АВТОСАЛОН ТОЛЯНА</div>`;
 const ZBANNER = (id = "zb", z = 3) => `<div id="${id}" style="position:absolute;left:580px;top:600px;width:440px;height:110px;z-index:${z};transform-origin:50% 0;background:#c0392b;border:6px solid #151515;box-sizing:border-box;font-family:Unbounded;font-weight:900;color:#fff;text-align:center;line-height:1.05;padding-top:10px">
   <div style="font-size:38px">ЖОРА МОТОРС</div><div style="font-size:24px;color:#ffd23f">СКОРО ОТКРЫТИЕ</div></div>`;
-// дождь поверх сцены: косые струи (#rain — сдвигаем фон, чтобы капли падали)
-const RAIN = (id = "rain", z = 30) => `<div id="${id}" style="position:absolute;left:-200px;top:-400px;width:1480px;height:2720px;z-index:${z};pointer-events:none;opacity:.35;
-  background-image:repeating-linear-gradient(105deg, transparent 0 22px, rgba(220,232,240,.55) 22px 25px, transparent 25px 64px);transform:translateY(0)"></div>`;
+// дождь поверх сцены: короткие косые штрихи, два одинаковых листа друг над другом — в хуке едут вниз (класс .rainfx)
+const RAIN = (id = "rain", z = 30) => { let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const tile = Array.from({ length: 170 }, () => { const x = rnd() * 1180 - 50, y = rnd() * 1920, l = 40 + rnd() * 50;
+    return `<path d="M${x.toFixed(0)} ${y.toFixed(0)} l${(-l * .27).toFixed(0)} ${l.toFixed(0)}" stroke="#dfe8f0" stroke-width="${(2 + rnd() * 2).toFixed(1)}" stroke-linecap="round"/>`; }).join("");
+  return `<div id="${id}" class="rainfx" style="position:absolute;left:0;top:-1920px;width:1080px;height:3840px;z-index:${z};pointer-events:none;opacity:.5">
+    <svg viewBox="0 0 1080 3840" style="width:100%;height:100%"><g>${tile}</g><g transform="translate(0 1920)">${tile}</g></svg></div>`; };
 // торпеда «пятёрки» на переднем плане поверх героев (вид из салона назад)
 const DASH05 = (z = 20) => `<svg style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:${z}" viewBox="0 0 1080 1920">
   <path d="M-20 1620 Q540 1540 1100 1620 V1940 H-20 Z" fill="#3a2e28" stroke="#000" stroke-width="8"/><path d="M-20 1620 Q540 1540 1100 1620" stroke="#5a4a40" stroke-width="18" fill="none"/>
@@ -43,8 +46,8 @@ const SPLIT2 = (lbg, lhtml, rbg, rhtml) => {
     <div style="position:absolute;left:527px;top:0;width:26px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:5"></div></div>`; };
 // приём: вид в бинокль (Жора подглядывает) — два круга, остальное чёрное
 const BINO = () => `<svg style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:45;pointer-events:none" viewBox="0 0 1080 1920">
-  <defs><mask id="bm"><rect width="1080" height="1920" fill="#fff"/><circle cx="340" cy="960" r="330" fill="#000"/><circle cx="740" cy="960" r="330" fill="#000"/></mask></defs>
-  <rect width="1080" height="1920" fill="#000" mask="url(#bm)"/><circle cx="340" cy="960" r="330" fill="none" stroke="#151515" stroke-width="24"/><circle cx="740" cy="960" r="330" fill="none" stroke="#151515" stroke-width="24"/></svg>`;
+  <defs><mask id="bm"><rect width="1080" height="1920" fill="#fff"/><circle cx="320" cy="900" r="390" fill="#000"/><circle cx="760" cy="900" r="390" fill="#000"/></mask></defs>
+  <rect width="1080" height="1920" fill="#000" mask="url(#bm)"/><circle cx="320" cy="900" r="390" fill="none" stroke="#151515" stroke-width="26"/><circle cx="760" cy="900" r="390" fill="none" stroke="#151515" stroke-width="26"/></svg>`;
 // телефон крупно: две карточки бота подряд
 const TWOCARDS = () => `<div style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:40;background:radial-gradient(circle at 50% 40%,#3a4a5e,#121722)">
   <div style="position:absolute;left:230px;top:300px;width:620px;height:1320px;border-radius:72px;background:#0d0e12;border:14px solid #2a2d34;box-shadow:0 30px 80px #000c;overflow:hidden">
