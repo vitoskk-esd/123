@@ -7,7 +7,7 @@
   const K = "#151515";
   CHARS.nikita = (p, o = {}) => {
     const hr = "#8a5528", hl = "#b9793c", sk = "#f3cdb0", sd = "#dcae8c", sw = "#9cc3dc", swd = "#7ea6c2";
-    let s = CHARS.perekup(p, { jacket: sw, pants: "#3a4250", hair: hr, skin: sk, look: o.look || "grin" });
+    let s = CHARS.perekup(p, { jacket: sw, pants: "#3a4250", hair: hr, skin: sk, look: o.look || "grin", item: o.item });
     // 1) шевелюра сзади (за лицом и ушами): широкая пышная масса
     const back = `<path d="M100 262 q-30 -8 -26 -44 q-26 -18 -10 -50 q-18 -34 12 -58 q-2 -40 40 -52 q16 -34 58 -30 q30 -26 66 -8 q40 -8 60 26 q42 6 46 48 q30 26 14 60 q20 30 -6 56 q6 34 -26 44 q-10 -34 -26 -56 l-176 0 q-16 26 -26 64 z" fill="${hr}" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>
       <path d="M86 176 q-14 -14 -6 -30 M104 112 q-6 -18 8 -28 M330 120 q10 -16 -2 -30 M346 190 q14 -14 6 -32" fill="none" stroke="${hl}" stroke-width="6" stroke-linecap="round"/>`;
@@ -35,6 +35,9 @@
        <path d="M210 352 v32" stroke="#d8dde2" stroke-width="5"/>${[140, 160, 180, 240, 260, 280].map(x => `<path d="M${x} 400 v150" stroke="${swd}" stroke-width="4" opacity=".7"/>`).join("")}`);
     // 8) веер купюр в правой кисти (кисть — у (318, 530))
     if (o.cash) s = s.replace(new RegExp(`(<g id="${p}-armR"[^>]*>)`), `$1<g transform="translate(318 540)">${[-28, -6, 16].map(a => `<g transform="rotate(${a})"><rect x="-26" y="-96" width="52" height="96" rx="6" fill="#8fd17a" stroke="${K}" stroke-width="5"/><circle cx="0" cy="-48" r="13" fill="none" stroke="#3f7a32" stroke-width="4"/></g>`).join("")}</g>`);
+    // 9) телефон у уха: рука поверх пышной шевелюры (иначе волосы прячут телефон и кисть)
+    if (o.item === "phone") { const m = s.match(new RegExp(`<g id="${p}-armR"[\\s\\S]*?</g>(?=\\s*<g id="${p}-head")`));
+      if (m) s = s.replace(m[0], "").replace(/<\/svg>\s*$/, m[0] + "</svg>"); }
     return s;
   };
 })();

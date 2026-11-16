@@ -78,6 +78,10 @@ const PIZZA = (x, y, w = 320, id = "pz", z = 26) => `<div id="${id}" style="posi
   ${[[130, 40], [210, 100], [70, 70]].map(([a, b]) => `<ellipse cx="${a}" cy="${b}" rx="14" ry="8" fill="#ffe27a"/>`).join("")}</svg></div>`;
 // финальная карточка (последний кадр — только она)
 const CTAA = `<div style="position:absolute;left:60px;right:60px;top:1260px;z-index:70;background:#ffd23f;border:8px solid #151515;border-radius:34px;padding:26px 30px;box-shadow:0 14px 0 #151515;font-family:Unbounded;font-weight:900;color:#151515;text-align:center">
-  <img src="../../brand/arbuz_cut.png" style="width:150px;height:150px;border-radius:50%;border:7px solid #151515;margin-top:-110px;background:#0f1210">
-  <div style="font-size:48px;line-height:1.12;margin-top:6px">Бесплатный урок<br><span style="color:#c0392b">по арбитражу на банки</span></div>
+  <div style="font-size:48px;line-height:1.12">Бесплатный урок<br><span style="color:#c0392b">по арбитражу на банки</span></div>
   <div style="margin-top:12px;font-size:32px;font-family:Onest;font-weight:800">Телеграм-канал · ссылка в шапке</div></div>`;
+// стол пиццерии (передний план; герои — за ним): столешница + ножки; верх столешницы — y
+const TABLE = (x, y, w = 760, z = 24) => `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:420px;z-index:${z}"><svg viewBox="0 0 ${w} 420" style="overflow:visible">
+  <rect x="0" y="0" width="${w}" height="46" rx="10" fill="#b8763a" stroke="#151515" stroke-width="8"/><rect x="0" y="40" width="${w}" height="26" fill="#8a5428" stroke="#151515" stroke-width="7"/>
+  <path d="M60 66 V420 M${w - 60} 66 V420" stroke="#151515" stroke-width="22"/><path d="M60 66 V420 M${w - 60} 66 V420" stroke="#5a3418" stroke-width="12"/>
+  <rect x="${w * .62}" y="-70" width="44" height="74" rx="8" fill="#ffd23f" stroke="#151515" stroke-width="6"/><rect x="${w * .74}" y="-58" width="40" height="62" rx="8" fill="#e8e4f0" stroke="#151515" stroke-width="6"/></svg></div>`;
