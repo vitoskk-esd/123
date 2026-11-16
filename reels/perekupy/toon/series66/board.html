@@ -1,0 +1,86 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props75.js"></script>
+<script>
+// «ДЕРЕВНЯ: ЗВЕРЬ, А НЕ МАШИНА» (киношный формат, отдельный ролик, с матом — владелец 15.11; в облачках — со звёздочками).
+// д. Грязево: дед Егорыч купил у Жоры «Ниву» — «зверь, а не машина». Застрял в первой луже по самые двери («Еб*ть-копать…»), раздатка молчит.
+// Тракторист Митяй: «Ты где этот п*здец купил?» — «Зверь — это я на тракторе». Тянут — бампер остаётся на тросе, «Нива» в луже. «Ну, Жора… мать твою».
+// Внук находит Прадо через бота: «Оху*ть. Вот это зверь». ОБЛОЖКА (кадр 0): внук Артём держит телефон с ботом + плашка «ДЕРЕВНЯ: / ЗВЕРЬ, А НЕ МАШИНА».
+// Приёмы (новые): грязь поднимается по двери, брызги; глубиномер лужи «ПО ДВЕРИ»; трактор с тросом — бампер отрывается; куры разбегаются.
+const E2 = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...EGO, ...o }, pose, extra);
+const A = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ART, ...o }, pose, extra);
+const M = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...MIT, ...o }, pose, extra);
+const SG_L = glow(540, 300, 420, "#ffffff", .2);
+const LG_L = glow(540, 250, 460, "#ffffff", .15);
+const DV_L = glow(540, 300, 420, "#fff6d0", .25);
+const S = [
+ { h: "ОБЛОЖКА · ВНУК С БОТОМ → «ПРОВЕРИМ ТВОЕГО ЗВЕРЯ»", tc: "1/5 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("perekup", "ap", 540, 2090, 1680, ART, PRCARD(), { rim: "#ffffff", side: 1 });
+       return { bg: "selogryaz", farBlur: 8, mid: H.mid, lights: H.lights + SG_L, over: TITLE("ДЕРЕВНЯ:", "ЗВЕРЬ, А НЕ МАШИНА") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "selogryaz", mid: car(NIVA, 330, 1600, 640, { z: 5, sheen: .4 }) + E2("ea", 190, 1880, 860, {}, { armR: -60 }, { rim: "#ffffff", side: 1, z: 7 }) + HENS(640, 1700), lights: SG_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ea", html: "Ну, проверим<br><em>твоего зверя.</em>", fs: 46 }], talk: ["ea"] },
+   vo: "Лис: «Деревня Грязево. Дед Егорыч купил у Жоры “Ниву” — “зверь, а не машина, пройдёт везде”». Егорыч: «Ну, проверим твоего зверя».", who: "Лис + Егорыч",
+   mv: "<b>Кадр 0 — обложка с телефоном</b>: <b>новый герой — внук Артём</b> держит телефон: в боте «Toyota Land Cruiser Prado · 2017 · 3 290 000 ₽ · рынок ≈ 3 600 000 · 🔥 −9% · ⏱ 1 с»; плашка «ДЕРЕВНЯ: / ЗВЕРЬ, А НЕ МАШИНА». B — <b>новый фон — деревенская улица</b> (избы с наличниками, колодец, берёзы, вывеска «д. ГРЯЗЕВО», колея); <b>новый герой — дед Егорыч</b> (ватник, кепка, усы) у зелёной «Нивы»; <b>приём: куры</b> разбегаются из-под колёс." },
+ { h: "ПЕРВАЯ ЛУЖА: ПО САМЫЕ ДВЕРИ", tc: "2/5 · 0:12–0:26",
+   A: { def: () => ({ bg: "lugkoleya", mid: car(NIVS, 200, 1640, 700, { z: 5, sheen: .3 }) + MUD(1480) + SPLASH(100, 1300) + SPLASH(700, 1320, "sp2"), lights: LG_L }), shot: { x: 540, y: 1150, s: 1.04 } },
+   B: { def: () => ({ bg: "lugkoleya", farBlur: 2, mid: E2("eb", 210, 1900, 880, { look: "o" }, { armL: 40, armR: -60 }, { rim: "#ffffff", side: 1, z: 7 }) + A("aa", 880, 1900, 780, {}, { armL: 50 }, { rim: "#ffffff", side: -1, z: 7 }) + MUD(1640, "md2", 9) + DEPTH(400, 1020), lights: LG_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "eb", html: "Еб*ть-копать…<br><em>По самые двери.</em>", fs: 32 }, { p: "aa", html: "Дед, а полный<br><em>привод включить?</em>", fs: 32 }], talk: ["eb"] },
+   vo: "Лис: «Зверь застрял в первой же луже». Егорыч: «Ебать-копать… По самые двери». Артём: «Дед, а полный привод включить?»", who: "Лис + Егорыч + Артём",
+   mv: "A — <b>новый фон — полевая дорога с огромной лужей</b> (поле, лес вдали, ЛЭП): <b>приём: грязь поднимается</b> по двери «Нивы», брызги. B — <b>приём: глубиномер лужи</b> — стрелка доходит до «ПО ДВЕРИ»; дед и внук стоят в грязи по колено." },
+ { h: "«РАЗДАТКА МОЛЧИТ» → ТРАКТОРИСТ МИТЯЙ", tc: "3/5 · 0:26–0:40",
+   A: { def: () => ({ bg: "lugkoleya", farBlur: 4, mid: E2("ec", 540, 1960, 1050, {}, { armR: -100 }, { rim: "#ffffff", side: 1, z: 7 }) + MUD(1700, "md3", 9), lights: LG_L }), shot: { x: 540, y: 1100, s: 1.06 },
+     bubbles: [{ p: "ec", html: "Включил.<br><em>А раздатка, с*ка, молчит.</em>", fs: 42 }], talk: ["ec"] },
+   B: { def: () => ({ bg: "lugkoleya", farBlur: 2, mid: TRACTOR(470, 1640, 600) + M("ma", 330, 1900, 860, {}, { armR: -100 }, { rim: "#ffffff", side: 1, z: 8 }) + E2("ed", 120, 1920, 780, {}, {}, { z: 8 }) + MUD(1700, "md4", 9), lights: LG_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ma", html: "Ты где этот<br><em>п*здец купил?</em>", fs: 30 }, { p: "ed", html: "У Жоры.<br><em>Зверь!</em>", fs: 30 }], talk: ["ma"] },
+   vo: "Егорыч: «Включил. А раздатка, сука, молчит». Лис: «Вытаскивать приехал тракторист Митяй». Митяй: «Егорыч, ты где этот пиздец купил?» Егорыч: «У Жоры. Сказал — зверь».", who: "Егорыч + Лис + Митяй",
+   mv: "A — дед крупно, обречённо. B — <b>новый герой — тракторист Митяй</b> (тельняшка, оранжевая кепка) у красного трактора «МТЗ»." },
+ { h: "ТРОС → БАМПЕР НА ТРАКТОРЕ, «НИВА» В ЛУЖЕ", tc: "4/5 · 0:40–0:52",
+   A: { def: () => ({ bg: "lugkoleya", mid: car(NIVS, 10, 1640, 500, { z: 5, sheen: .3 }) + MUD(1520) + TRACTOR(640, 1640, 440, "tr2") + TOWROPE(500, 1520, 700, 1560) + M("mb", 900, 1900, 740, {}, { armL: -120 }, { rim: "#ffffff", side: -1, z: 10 }), lights: LG_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "mb", html: "Зверь — это я на тракторе.<br><em>Цепляй!</em>", fs: 36 }], talk: ["mb"] },
+   B: { def: () => ({ bg: "lugkoleya", mid: car(NIVS, 10, 1640, 500, { z: 5, sheen: .3 }) + MUD(1520) + TRACTOR(700, 1640, 440, "tr3") + TOWROPE(640, 1530, 760, 1560, "rp2") + NBUMP(500, 1500) + E2("ee", 440, 1920, 820, { look: "flat" }, { armR: -150 }, { rim: "#ffffff", side: 1, z: 10 }), lights: LG_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ee", html: "Ну, Жора…<br><em>найду я тебя, мать твою.</em>", fs: 38 }], talk: ["ee"] },
+   vo: "Митяй: «Зверь — это я на тракторе. Цепляй!» Лис: «Бампер остался на тракторе. “Нива” — в луже». Егорыч: «Ну, Жора… найду я тебя, мать твою».", who: "Митяй + Лис + Егорыч",
+   mv: "A — <b>приём: трактор с тросом</b> тянет «Ниву» из лужи. B — трактор уезжает с бампером на тросе, «Нива» осталась в грязи; дед грозит кулаком." },
+ { h: "БОТ: ПРАДО → «ВОТ ЭТО ЗВЕРЬ» → ФИНАЛ", tc: "5/5 · 0:52–1:08",
+   A: { def: () => { const H = HOLDPHONE("perekup", "ad", 540, 2000, 1400, ART, PRCARD("pcc2"), { rim: "#fff6d0", side: 1 });
+       return { bg: "dvoregorych", farBlur: 5, mid: H.mid, lights: H.lights + DV_L }; }, shot: { x: 540, y: 1000, s: 1.02 },
+     bubbles: [{ p: "ad", html: "Дед, Прадо: полный привод,<br><em>один хозяин, ниже рынка!</em>", fs: 36 }], talk: ["ad"] },
+   B: { def: () => ({ bg: "dvoregorych", mid: car(PRADO, 240, 1680, 680, { z: 5, sheen: .5 }) + E2("ef", 160, 1900, 820, { look: "o" }, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + A("ab", 940, 1900, 760, {}, {}, { rim: "#fff6d0", side: -1, z: 7 }) + HENS(380, 1760, "hn2"), lights: DV_L }), shot: { x: 540, y: 1150, s: 1.04 },
+     bubbles: [{ p: "ef", html: "Оху*ть.<br><em>Вот это зверь.</em>", fs: 46 }], talk: ["ef"] },
+   vo: "Лис: «Внук нашёл деду машину через бота “Перехват”». Артём: «Дед, Ленд Крузер Прадо: полный привод, один хозяин, ниже рынка!» Егорыч: «Охуеть. Вот это зверь». Лис: «Хочешь зверя, а не “зверя от Жоры”, — ищи машину в боте “Перехват”: хорошие варианты ниже рынка через секунду после публикации». Затем — <b>последний кадр: только карточка бота</b>.", who: "Лис + Артём + Егорыч",
+   mv: "A — <b>новый фон — двор деда</b> (крыльцо избы, поленница, бельё, будка): внук с телефоном — Прадо в боте. B — белый Прадо во дворе, дед в восторге, куры; дальше — карточка бота." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
