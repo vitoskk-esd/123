@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Sadaltager",
+  "tempo": 1.15,
+  "profile": "Arbuzov — a cool, friendly, slightly sly narrator of an animated comedy show about young guys who earn money with bank partner programs (traffic arbitrage). Confident, warm, clear, a little ironic.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Explanations: simple, clear, friendly, like a smart older friend. Last line: confident, warm, clear call to action about the free lesson in the Telegram channel."
+ },
+ "nikita": {
+  "voice": "Achird",
+  "tempo": 1.12,
+  "profile": "Nikita — a cheerful, smart Russian guy around 20, curly hair, open wide smile, energetic and friendly, a little proud of figuring things out.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Excited discovery, then friendly persuasion, then calm confidence, then happy and generous ('Пицца за мой счёт!')."
+ },
+ "mama": {
+  "voice": "Autonoe",
+  "tempo": 1.08,
+  "profile": "Nikita's mom — a warm, slightly sarcastic Russian woman in her late 40s, caring, a bit old-fashioned, funny.",
+  "notes": "Each line is separate, with a clear 1-second pause between lines. Line 1: teasing, puzzled. Line 2: shocked ('Сколько?!'), then sweet, curious, asking to learn."
+ },
+ "olya": {
+  "voice": "Despina",
+  "tempo": 1.1,
+  "profile": "Olya — a young Russian woman in her 20s on the metro, lively, practical.",
+  "notes": "Pleasantly surprised, quick."
+ },
+ "artem": {
+  "voice": "Puck",
+  "tempo": 1.1,
+  "profile": "Artem — a young Russian guy in his 20s in a red cap on the metro, casual, decisive.",
+  "notes": "Casual, decisive, a bit hurried."
+ }
+}
