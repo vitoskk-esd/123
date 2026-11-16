@@ -22,30 +22,30 @@ const grp = (id, html, z = "") => `<div class="grp" id="${id}" style="position:a
 const FP_L = glow(120, 120, 260, "#fff6d0", .4) + glow(960, 120, 260, "#fff6d0", .4);
 const KM_L = glow(540, 500, 420, "#2f6db5", .2);
 const VR_L = glow(540, 900, 520, "#2f6db5", .3);
-const sb = (a, b, id, x = 160, y = 180, w = 760) => SCOREB(x, y, id, w).replace(`id="${id}a">0<`, `id="${id}a">${a}<`).replace(`id="${id}b">0<`, `id="${id}b">${b}<`);
+const sb = (a, b, id, x = 160, y = 340, w = 760) => SCOREB(x, y, id, w).replace(`id="${id}a">0<`, `id="${id}a">${a}<`).replace(`id="${id}b">0<`, `id="${id}b">${b}<`);
 const CAB_SH = { x: 540, y: 1100, s: 1.04 };
 
 // 1. обложка: Стас с ботом
 { const H = HOLDPHONE("perekup", spk("sp", "stas"), 540, 2090, 1680, STAS, CAMCARD(), { rim: "#fff6d0", side: 1 });
   mount("s1", { bg: "futbolpole", farBlur: 8, mid: H.mid, lights: H.lights + FP_L }, { x: 540, y: 960, s: 1 }); }
 // 2. кабина: «мяч в игре!»
-mount("s2", { bg: "kommentatorka", mid: V("va", 540, 2000, 1150, {}, { armR: -120 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(0, 0, "sb1", 160, 260) + LOWER3("ФИНАЛ СЕЗОНА", "«Перехват» — «Перекупы» · разыгрывается Камри"), lights: KM_L,
+mount("s2", { bg: "kommentatorka", mid: V("va", 540, 2000, 1150, {}, { armR: -120 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(0, 0, "sb1", 160, 330) + LOWER3("ФИНАЛ СЕЗОНА", "«Перехват» — «Перекупы» · разыгрывается Камри"), lights: KM_L,
   bubbles: [{ id: "k0", p: "va", html: "Объявление вышло!<br><em>Мяч в игре!</em>", fs: 48 }] }, CAB_SH);
 // 3. Стас звонит — мяч в сетку
 mount("s3", { bg: "futbolpole", mid: ST("sa", 260, 1880, 880, {}, { armR: -150 }, { rim: "#fff6d0", side: 1, z: 7 }) + BALL(800, 1600), over: sb(0, 0, "sb2"), lights: FP_L,
   bubbles: [{ id: "s0", p: "sa", html: "Уже звоню<br><em>продавцу!</em>", fs: 48 }] }, { x: 540, y: 1150, s: 1.04 });
 // 4. «гол! 1:0»
-mount("s4", { bg: "kommentatorka", mid: V("vb", 540, 2000, 1150, { look: "o" }, { armL: -150, armR: -150 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(0, 0, "sb3", 160, 260), lights: KM_L,
-  bubbles: [{ id: "k1", p: "vb", html: "Го-о-ол! Один — ноль!<br><em>Стас уже договорился!</em>", fs: 42 }] }, CAB_SH);
+mount("s4", { bg: "kommentatorka", mid: V("vb", 540, 2000, 1150, { look: "o" }, { armL: -150, armR: -150 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(0, 0, "sb3", 160, 330), lights: KM_L,
+  bubbles: [{ id: "k1", p: "vb", html: "Гол! Один — ноль!<br><em>Стас уже договорился!</em>", fs: 42 }] }, CAB_SH);
 // 5. Жора через 40 минут
 mount("s5", { bg: "futbolpole", farBlur: 2, mid: grp("zr", Z("za", 540, 1880, 900, { look: "o" }, { armL: 60, armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 })), over: sb(1, 0, "sb4"), lights: FP_L,
   bubbles: [{ id: "z0", p: "za", html: "Камри моя!<br><em>Беру, не глядя!</em>", fs: 48 }] }, { x: 540, y: 1150, s: 1.04 });
 // 6. «поздно, продано!»
-mount("s6", { bg: "kommentatorka", mid: V("vc", 540, 2000, 1150, {}, { armR: -60 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(1, 0, "sb5", 160, 260), lights: KM_L,
+mount("s6", { bg: "kommentatorka", mid: V("vc", 540, 2000, 1150, {}, { armR: -60 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(1, 0, "sb5", 160, 330), lights: KM_L,
   bubbles: [{ id: "k2", p: "vc", html: "Поздно, Жора!<br><em>Продано!</em>", fs: 52 }] }, CAB_SH);
 // 7. Жора продаёт свою Камри — судья: VAR
 mount("s7", { bg: "futbolpole", mid: car(CAM3, 300, 1640, 760, { z: 5, sheen: .5 }) + Z("zb", 200, 1880, 860, { look: "grin" }, { armR: -60 }, { rim: "#fff6d0", side: 1, z: 7 }) + RF("ra", 880, 1880, 860, {}, { armL: 60 }, { rim: "#fff6d0", side: -1, z: 7 }), lights: FP_L,
-  bubbles: [{ id: "r0", p: "ra", html: "Стоп!<br><em>Проверим на VAR.</em>", fs: 48 }] }, { x: 540, y: 1150, s: 1.04 });
+  bubbles: [{ id: "r0", p: "ra", html: "Стоп, игра!<br><em>Смотрим повтор!</em>", fs: 48 }] }, { x: 540, y: 1150, s: 1.04 });
 // 8. VAR: одометр назад
 mount("s8", { bg: "varkomnata", mid: VARMON(110, 640) + PIP(V("vpip", 160, 800, 900, { look: "o" }, {}, { noShadow: 1 }), "pip1", "#ffd23f", 380, 1460), lights: VR_L,
   bubbles: [{ id: "k3", at: [540, 1480], html: "Пробег скручен<br><em>с трёхсот тысяч до восьмидесяти!</em>", fs: 38 }] }, { x: 540, y: 1100, s: 1.02 });
@@ -56,7 +56,7 @@ mount("s9", { bg: "futbolpole", farBlur: 2, mid: RF("rb", 300, 1880, 900, {}, { 
 mount("s10", { bg: "futbolpole", mid: car(CAMS, 60, 1640, 900, { z: 5, sheen: .5 }) + ST("sb", 900, 1880, 820, { look: "grin" }, { armL: -150 }, { rim: "#fff6d0", side: -1, z: 7 }), over: sb(1, 0, "sb6"), lights: FP_L,
   bubbles: [{ id: "s1", p: "sb", html: "Камри, один хозяин,<br><em>ниже рынка на 200 тысяч!</em>", fs: 40 }] }, { x: 540, y: 1150, s: 1.04 });
 // 11. «два — ноль в пользу бота!»
-mount("s11", { bg: "kommentatorka", mid: V("vd", 540, 2000, 1150, { look: "grin" }, { armL: -150, armR: -150 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(2, 0, "sb7", 160, 260), lights: KM_L,
+mount("s11", { bg: "kommentatorka", mid: V("vd", 540, 2000, 1150, { look: "grin" }, { armL: -150, armR: -150 }, { rim: "#2f6db5", side: 1, z: 7 }), over: sb(2, 0, "sb7", 160, 330), lights: KM_L,
   bubbles: [{ id: "k4", p: "vd", html: "Два — ноль в пользу бота!<br><em>Какой матч!</em>", fs: 44 }] }, CAB_SH);
 // 12. карточка бота
 mount("s12", { bg: "futbolpole", over: CTA74.replace('<div style="position:absolute;', '<div id="cta" style="opacity:0;position:absolute;'), lights: FP_L }, { x: 540, y: 1000, s: .98 });

@@ -1,31 +1,31 @@
 {
  "lis": {
   "voice": "Charon",
-  "tempo": 1.2,
+  "tempo": 1.12,
   "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
   "notes": "A standalone comedy episode parodying a live football broadcast: the bot team vs the car-flipper team fight for a Camry. Deadpan ironic narration. Last line — a confident, warm, clear advertising pitch for the bot «Перехват»."
  },
  "zhora": {
   "voice": "Fenrir",
-  "tempo": 1.15,
+  "tempo": 1.05,
   "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
   "notes": "Line 1: out of breath, greedy, rushing. Line 2: panicked excuse."
  },
  "vad": {
   "voice": "Sadachbia",
-  "tempo": 1.12,
+  "tempo": 1.0,
   "profile": "Vadim — an energetic Russian football TV commentator, loud, emotional, fast, with classic commentator excitement.",
-  "notes": "Every line like live football commentary. The goal line: a long excited «Го-о-ол!». Last line: ecstatic."
+  "notes": "Every line like live football commentary, loud and emotional. The goal line starts with a short sharp shout «Гол!» — do NOT stretch the vowel. Leave a clear pause between lines. Last line: ecstatic."
  },
  "ref": {
   "voice": "Schedar",
-  "tempo": 1.1,
+  "tempo": 1.0,
   "profile": "The referee — a strict Russian football referee, short sharp commanding phrases.",
   "notes": "Line 1: whistle-sharp stop. Line 2: formal, decisive."
  },
  "stas": {
   "voice": "Zubenelgenubi",
-  "tempo": 1.12,
+  "tempo": 1.0,
   "profile": "Stas — a calm, confident young Russian used-car flipper in his 30s, a bit cheeky.",
   "notes": "Line 1: quick, confident. Line 2: proud, happy."
  }
