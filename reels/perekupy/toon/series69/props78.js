@@ -21,19 +21,19 @@ const ROUTE = () => `<div style="position:absolute;left:0;top:0;width:1080px;hei
   <path d="M120 300 q300 -60 500 40 t300 120" stroke="#7ab8d8" stroke-width="18" fill="none"/>
   <path id="route" d="M230 1480 C 330 1200, 760 1220, 700 940 S 560 640, 820 520" stroke="#c0392b" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="1400" stroke-dashoffset="0"/>
   <circle cx="230" cy="1480" r="26" fill="#ffd23f" stroke="#151515" stroke-width="7"/><circle cx="820" cy="520" r="34" fill="#c0392b" stroke="#151515" stroke-width="8"/>
-  <text x="230" y="1560" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="40" fill="#151515">ПЛОЩАДКА ТОЛЯНА</text>
+  <text x="330" y="1560" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="40" fill="#151515">ПЛОЩАДКА ТОЛЯНА</text>
   <text x="820" y="460" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="64" fill="#151515">МОСКВА</text></svg>
   <div id="rcar" style="position:absolute;left:200px;top:1440px;width:70px;height:70px;font-size:62px;line-height:70px;text-align:center">🚗</div></div>`;
 // приём: стеклянная доска, маркер пишет (строки #wb1..#wb3 — clip-path слева направо)
-const BOARD78 = (x = 620, y = 520) => `<div style="position:absolute;left:${x}px;top:${y}px;width:420px;height:600px;z-index:4;background:rgba(232,242,244,.88);border:7px solid #151515;box-shadow:12px 14px 0 #0004;font-family:'Caveat','Comic Sans MS',cursive;color:#1f4fb8;padding:30px 24px;box-sizing:border-box;line-height:1.05">
-  <div id="wb1" style="font-size:66px;clip-path:inset(0 100% 0 0)">СТОИТ =<br><span style="color:#c0392b">склад</span></div>
-  <div id="wb2" style="font-size:66px;margin-top:26px;clip-path:inset(0 100% 0 0)">КРУТИТСЯ =<br><span style="color:#2f8a3a">салон</span></div>
+const BOARD78 = (x = 560, y = 500) => `<div style="position:absolute;left:${x}px;top:${y}px;width:420px;height:600px;z-index:4;background:rgba(232,242,244,.88);border:7px solid #151515;box-shadow:12px 14px 0 #0004;font-family:'Caveat','Comic Sans MS',cursive;color:#1f4fb8;padding:30px 24px;box-sizing:border-box;line-height:1.05">
+  <div id="wb1" style="font-size:58px;clip-path:inset(0 100% 0 0)">СТОИТ =<br><span style="color:#c0392b">склад</span></div>
+  <div id="wb2" style="font-size:58px;margin-top:26px;clip-path:inset(0 100% 0 0)">КРУТИТСЯ =<br><span style="color:#2f8a3a">салон</span></div>
   <div id="wb3" style="font-size:52px;margin-top:30px;clip-path:inset(0 100% 0 0)">→ чужие деньги</div></div>`;
 // приём: экзамен на время — телефон с ботом + секундомер (#sw — текст секунд)
 const EXAM = () => `<div style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:40;background:radial-gradient(circle at 50% 40%,#2a3a5e,#0d1222)">
-  <div style="position:absolute;left:250px;top:480px;width:580px;height:1060px;border-radius:70px;background:#0d0e12;border:14px solid #2a2d34;box-shadow:0 30px 80px #000c;overflow:hidden">
+  <div style="position:absolute;left:300px;top:640px;width:520px;height:880px;border-radius:64px;background:#0d0e12;border:14px solid #2a2d34;box-shadow:0 30px 80px #000c;overflow:hidden">
     <div style="position:absolute;left:0;top:0;width:560px;padding:40px 40px;transform:scale(.93);transform-origin:0 0">${SOLCARD("scc2")}</div></div>
-  <div style="position:absolute;left:330px;top:250px;width:420px;height:150px;border-radius:30px;background:#151515;border:8px solid #ffd23f;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:800;font-size:92px;color:#ffd23f">⏱ <span id="sw" style="margin-left:18px">00:00</span></div></div>`;
+  <div style="position:absolute;left:330px;top:440px;width:420px;height:150px;border-radius:30px;background:#151515;border:8px solid #ffd23f;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:800;font-size:92px;color:#ffd23f">⏱ <span id="sw" style="margin-left:18px">00:00</span></div></div>`;
 // приём-поворот: фото на стене — «2009: Лёха и молодой Жора» (герои рисуются внутри рамки, в сепии)
 const PHOTO = inner => (inner = inner.replaceAll('style="left:', 'style="position:absolute;left:'), `<div style="position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:40;background:#3a2e28">
   <div style="position:absolute;left:150px;top:420px;width:780px;height:960px;background:#f4ead2;border:18px solid #8a6a3a;box-shadow:0 24px 60px #000a;transform:rotate(-2deg);overflow:hidden">

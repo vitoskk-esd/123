@@ -1,0 +1,20 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.1,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 17 of a comedy mini-series about Tolyan building his own car dealership. He travels to Moscow to learn from the most serious car flipper. Brisk, ironic narration; a little awe at Moscow City. Last line: a quick twist, then a confident, warm advertising pitch for the bot «Перехват»."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.12,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "No swearing. Line 1: determined. Line 2: honest, a bit lost. Line 3: curious, pointing at a photo."
+ },
+ "leha": {
+  "voice": "Orus",
+  "tempo": 1.05,
+  "profile": "Lyokha — the most serious car dealer in Moscow: bald, tattooed, leather jacket, drives a Rolls-Royce. Low, heavy, calm, unhurried voice; speaks in short confident sentences like a mentor; dry humor.",
+  "notes": "No swearing. Line 1: busy, cool. Line 2: teaching, slow and weighty. Line 3: brisk order, then 'Время пошло' with a smirk. Line 4: genuinely surprised, then decisive business offer. Line 5: amused, nostalgic, a little sly."
+ }
+}
