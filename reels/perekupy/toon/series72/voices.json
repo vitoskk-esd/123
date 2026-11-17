@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.04,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 20 of a comedy mini-series about Tolyan building his own car dealership: the rival Zhora sets a trap — a too-cheap Camry sold by his nephew Vadik. Brisk, ironic narration with comic timing. Last line: a confident, warm advertising pitch for the bot «Перехват»."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.06,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "No swearing. Line 1: suspicious, amused. Line 2: dry joke. Line 3: calm, firm, smug. Line 4: cheerful, mocking. Line 5: short, confident."
+ },
+ "leha": {
+  "voice": "Orus",
+  "tempo": 1.05,
+  "profile": "Lyokha — the most serious car dealer in Moscow: bald, tattooed, leather jacket, drives a Rolls-Royce. Low, heavy, calm, unhurried voice; speaks in short confident sentences like a mentor; dry humor.",
+  "notes": "No swearing. One line on a video call: calm, decisive, mentor-like warning."
+ },
+ "vadik": {
+  "voice": "Puck",
+  "tempo": 1.08,
+  "profile": "Vadik — Zhora's young nephew in his early 20s, a clumsy wannabe car hustler in a red cap; fast, pushy, nervous, bad liar. Adult street comedy.",
+  "notes": "No swearing. Line 1: pushy, rushing the buyer. Line 2: caught off guard, awkward lie. Line 3: panicking, shouting into the phone."
+ },
+ "rimma": {
+  "voice": "Kore",
+  "tempo": 1.0,
+  "profile": "Rimma Zakharovna — a strict, businesslike Russian woman in her 50s who owns a former gas station lot; cool, precise, a little ironic, always calls Tolyan by his full name «Анатолий».",
+  "notes": "One line: dry, strict, a deadline."
+ }
+}
