@@ -158,11 +158,11 @@ window.build = R => {
   tl.fromTo("#crc2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(2)", immediateRender: true }, C1 - .2); R.sfx("ping", C1 - .2, .7);
   tl.fromTo("#prc2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(2)", immediateRender: true }, C2 - .2); R.sfx("ping", C2 - .2, .7);
   // 11. площадка ночью: машины заезжают, 10/10, конфетти, Римма
-  const SW11 = Wd("l3", "двадцат", .6) - .3; swap("s7", SW11); cnt(true, SW11 + .3); push("s7", SW11, en.r0 - SW11 + .6, { s: 1.07 });
+  const SW11 = (W("l3", "23") ?? Wd("l3", "двадцат", .6)) - .3; swap("s7", SW11); cnt(true, SW11 + .3); push("s7", SW11, en.r0 - SW11 + .6, { s: 1.07 });
   gsap.set("#rg", { opacity: 0 });
   tl.fromTo("#cg2", { x: 1100 }, { x: 0, duration: 1.0, ease: "power3.out", immediateRender: true }, SW11 + .2);
   tl.fromTo("#cg3", { x: -1100 }, { x: 0, duration: 1.0, ease: "power3.out", immediateRender: true }, SW11 + .6); R.sfx("whoosh", SW11 + .2, .4); R.sfx("whoosh", SW11 + .6, .4);
-  const TEN = Wd("l3", "десять", .9); tl.set("#cc", { textContent: "10" }, TEN); bump("#cnt77", TEN); R.sfx("clack", TEN, .8);
+  const TEN = (W("l3", "10") ?? Wd("l3", "десять", .9)); tl.set("#cc", { textContent: "10" }, TEN); bump("#cnt77", TEN); R.sfx("clack", TEN, .8);
   tl.fromTo("#cf", { opacity: 0, scale: .3 }, { opacity: 1, scale: 1, duration: .5, ease: "power2.out", immediateRender: true }, TEN + .1);
   tl.to("#cf", { y: 300, opacity: 0, duration: 2.6, ease: "power1.in" }, TEN + .6); R.sfx("boom", TEN + .1, .5);
   tl.to("#rg", { opacity: 1, duration: .3 }, st.r0 - .5); bub("r0", st.z2 - .1);
