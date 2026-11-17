@@ -2473,3 +2473,70 @@ async def test_offer_shows_real_car_photo_below_market(env):
     for bad in ("+7 999", "@seller_cars", "avto_msk", "Avto Msk", "t.me", "150 000"):
         assert bad not in cp.caption
     assert "Пробный день — 490 ₽" in cp.caption and [b.callback_data for row in cp.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:plans"]
+
+
+async def test_daily_deal_three_times_every_other_day_then_weekly_summary(env):
+    """Владелец 17.11: тем, кто пользовался ботом и ничего не купил, — «вариант дня» с фото машины ниже рынка: 3 раза, день через день
+    (есть фильтр — под фильтр, нет — по Москве), через неделю — напоминание со сводкой за неделю с фото. Без контактов и канала."""
+    dp, bot, s, ctx = env
+    ctx.buffer_chat = -100777
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, cb("s:try"))
+    await dp.feed_update(bot, msg("камри до 1,4 млн")); await dp.feed_update(bot, cb("f:save"))
+    await dp.feed_update(bot, msg("/start", OTHER))                          # без фильтра — варианты по Москве
+    ctx.tease[USER] = [0, 0.0, True]                                         # тизеры тут не проверяем
+    for k in range(6):                                                       # рынок Камри 2012 ≈ 1,5 млн
+        await process(bot, ctx, post(CH2, f"Toyota Camry 2012, цена {1450 + k * 20} 000 ₽, пробег {150 + k} тыс"))
+    for price, ph, km in (("1 250", 4242, 170), ("1 200", 4343, 181), ("1 300", 4444, 192)):
+        raw = post(CH1, f"Toyota Camry 2012, {price} 000 ₽, пробег {km} тыс, Москва, +7 999 111-22-{km}, пишите @seller_cars")
+        async def photo(ph=ph):
+            return ph
+        raw.photo = photo
+        await process(bot, ctx, raw)
+    base = jobs._msk_day(time.time())
+    at = lambda dd, h=13: (base + dd) * 86400 - 3 * 3600 + h * 3600
+
+    async def run(dd, h=13):
+        before = len(s.sent)
+        await jobs.daily_deals(bot, ctx, at(dd, h))
+        return [m for m in s.sent[before:] if isinstance(m, CopyMessage)]
+
+    assert await run(1, 3) == []                                             # ночью по Москве не шлём
+    got = await run(1)
+    assert sorted(m.chat_id for m in got) == [USER, OTHER]
+    first = {m.chat_id: m for m in got}
+    assert first[USER].message_id == 4343 and "под твой фильтр" in first[USER].caption and "по Москве" in first[OTHER].caption
+    assert "Toyota Camry 2012 — 1 200 000 ₽" in first[USER].caption and "−18%" in first[USER].caption and "рынок ≈ 1 470 000 ₽" in first[USER].caption
+    for m in got:
+        assert m.from_chat_id == -100777 and [b.callback_data for row in m.reply_markup.inline_keyboard for b in row] == ["s:offer", "s:mute"]
+        for bad in ("+7 999", "@seller_cars", "avto_msk", "Avto Msk", "perekup", "t.me"):
+            assert bad not in m.caption
+    assert await run(1, 18) == [] and await run(2) == []                     # в тот же день и назавтра — ничего
+    second = await run(3)
+    assert len(second) == 2 and {m.message_id for m in second if m.chat_id == USER} == {4242}   # другая машина
+    assert len(await run(5)) == 2                                            # третий раз
+    for dd in range(6, 12):
+        assert await run(dd) == []                                           # неделя тишины
+    week = [m for m in await run(12) if m.chat_id == USER]
+    assert [m.message_id for m in week] == [4343, 4242, 4444]
+    assert "Неделя под твой фильтр: 3 машины ниже рынка" in week[0].caption and week[0].reply_markup is None
+    assert week[-1].reply_markup is not None and "Подключись" in week[-1].caption
+    assert await run(13) == [] and await run(19) == [] and await run(30) == []   # дальше — не дёргаем
+
+
+async def test_daily_deal_not_for_payers_and_muted(env):
+    dp, bot, s, ctx = env
+    ctx.buffer_chat = -100777
+    await make_filter(dp, bot, "камри до 1,4 млн")                           # оплатил PRO — ему «вариант дня» не нужен
+    await ctx.db.set_user(USER, paid_until=time.time() - 86400)             # даже когда тариф кончился: он уже покупал
+    await dp.feed_update(bot, msg("/start", OTHER)); await dp.feed_update(bot, cb("s:mute", OTHER))
+    for k in range(6):
+        await process(bot, ctx, post(CH1, f"Toyota Camry 2012, цена {1450 + k * 20} 000 ₽, Москва"))
+    raw = post(CH1, "Toyota Camry 2012, 1 200 000 ₽, Москва")
+    async def photo():
+        return 4343
+    raw.photo = photo
+    await process(bot, ctx, raw)
+    before = len(s.sent)
+    await jobs.daily_deals(bot, ctx, (jobs._msk_day(time.time()) + 1) * 86400 + 10 * 3600)
+    assert not [m for m in s.sent[before:] if isinstance(m, CopyMessage)]

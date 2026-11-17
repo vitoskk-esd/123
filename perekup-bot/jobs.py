@@ -1,6 +1,7 @@
 """Фон раз в 30 секунд: проверка платежей и напоминания «пробный период / доступ заканчивается».
 Каждое напоминание уходит один раз — отметка в таблице marks. Без Робокассы (тестовый режим) ничего не делает."""
 import asyncio
+import html
 import logging
 import time
 
@@ -12,6 +13,7 @@ import plans
 import texts as T
 from ctx import Ctx
 from db import DAY
+from pipeline import rub
 from user import apply_payment, fmt_date
 
 log = logging.getLogger(__name__)
@@ -33,6 +35,7 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
     all_plans = plans.plans(ctx.cfg)
     await ctx.db.mark_once("funnel_v1")                        # с этого момента считаем воронку в /admin
     await lead_digests(bot, ctx, now)
+    await daily_deals(bot, ctx, now)
     if await ctx.db.mark_once("trial_reset_paid_13_11"):       # один раз: бравшим бесплатный пробный — можно купить платный
         log.info("пробный день снова доступен: %d", await ctx.db.reset_free_trials())
     # оплатил, но не нажал «Я оплатил» — продлеваем сами
@@ -102,6 +105,88 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
                     basic_filters=f"{b.max_filters} фильтр{'а' if 1 < b.max_filters < 5 else 'ов' if b.max_filters >= 5 else ''}"), K.plans(all_plans, False))
             else:
                 await send(bot, ctx, u["id"], T.ACCESS_ENDED, K.plans(all_plans, not u["trial_used"]))
+
+
+DEAL_HOURS = (12, 21)        # «вариант дня» — днём по Москве, не ночью
+DEAL_TIMES = 3               # владелец 17.11: «вариант дня» — 3 раза, день через день (сегодня, послезавтра, ещё через день)…
+DEAL_GAP = 2                 # …через столько календарных дней
+WEEK_AFTER = 7               # …а через неделю после третьего — напоминание и сводка за неделю с фото
+WEEK_SHOW = 3                # столько машин в недельной сводке
+DEAL_QUIET = 12 * 3600       # если за последние 12 часов уже был тизер или сводка — сегодня не шлём
+MOSCOW = ["msk"]
+
+
+def _msk_day(t: float) -> int:
+    return int((t + 3 * 3600) // DAY)
+
+
+async def daily_deals(bot: Bot, ctx: Ctx, now: float) -> None:
+    """«Вариант дня» (владелец 17.11): тем, кто пользовался ботом, но ничего не купил, — фото самой выгодной машины ниже рынка за сутки
+    и продающая подпись; 3 раза, день через день. Через неделю после третьего — напоминание со сводкой лучших машин за неделю (с фото).
+    Есть фильтр — машины под фильтр, нет — по Москве. Фото копируем из служебного канала с нашей подписью: без текста продавца,
+    контактов и названия канала. Не нашлось машины с фото и правдоподобной скидкой (5…40 %) — пробуем на следующий день."""
+    from pipeline import cars_word, missed_full
+    from query import Filter
+    if not ctx.buffer_chat or not DEAL_HOURS[0] <= time.gmtime(now + 3 * 3600).tm_hour < DEAL_HOURS[1]:
+        return
+    today, cache = _msk_day(now), {}
+
+    async def find(uid: int, hours: int) -> tuple[list, str]:
+        fs = [f for f in await ctx.db.filters(uid) if f["active"]]
+        if fs:
+            return (await missed_full(ctx, Filter.loads(fs[0]["data"]), uid, hours))["deals"], T.DAILY_MINE
+        if hours not in cache:                                   # общая база по Москве — одна на всех без фильтра
+            cache[hours] = (await missed_full(ctx, Filter(regions=MOSCOW), 0, hours))["deals"]
+        return cache[hours], T.DAILY_MSK
+
+    def caption(dl: dict) -> str:
+        return T.DAILY_CAR.format(car=html.escape(dl["car"]), price=rub(dl["price"]), market=rub(dl["market"]), diff=rub(dl["diff"]), d=dl["disc"],
+                                  info=html.escape(dl["info"]) + "\n" if dl["info"] else "")
+
+    async def copy(uid: int, dl: dict, text: str, markup=None) -> bool:
+        try:
+            await bot.copy_message(uid, ctx.buffer_chat, dl["photo"], caption=text, reply_markup=markup)
+            return True
+        except TelegramForbiddenError:
+            await ctx.db.mark_blocked(uid)
+        except Exception as e:
+            log.warning("вариант дня %s не отправлен: %s", uid, e)
+        return False
+
+    for u in await ctx.db.cold_users(now, now - 20 * 3600):
+        uid = u["id"]
+        n, last = await ctx.db.event_state(uid, ("daily",))
+        if n < DEAL_TIMES:
+            due = not n or today - _msk_day(last) >= DEAL_GAP
+        else:
+            due = today - _msk_day(last) >= WEEK_AFTER and not await ctx.db.has_mark(f"weekly:{uid}")
+        if not due or now - (await ctx.db.event_state(uid, ("teaser", "digest")))[1] < DEAL_QUIET:
+            continue
+        if not await ctx.db.mark_once(f"daily:{uid}:{today}"):           # одна попытка в день, даже если машины не нашлось
+            continue
+        if n < DEAL_TIMES:
+            deals, where = await find(uid, 24)
+            seen = {int(x) for x in (await ctx.db.event_metas(uid, "daily")) if x.isdigit()}
+            dl = next((x for x in deals if x["photo"] and x["post_id"] not in seen), None)
+            if not dl or not await copy(uid, dl, T.DAILY_DEAL.format(where=where, car=caption(dl)), K.unlock(mute=True)):
+                continue
+            await ctx.db.event(uid, "daily", str(dl["post_id"]), now)
+            await ctx.db.event(uid, "missed_shown", str(dl["post_id"]), now)      # после оплаты пришлём на неё ссылку
+        else:
+            deals, where = await find(uid, 7 * 24)
+            top = [x for x in deals if x["photo"]][:WEEK_SHOW]
+            if not top:
+                continue
+            await ctx.db.mark_once(f"weekly:{uid}")
+            total = len(deals)
+            for k, dl in enumerate(top):                                     # фото по одному: у каждого своя подпись, кнопка — под последним
+                head = T.WEEKLY_HEAD.format(where=where, n=total, word=cars_word(total)) if k == 0 else ""
+                tail = T.WEEKLY_TAIL if k == len(top) - 1 else ""
+                if not await copy(uid, dl, head + caption(dl) + tail, K.unlock(mute=True) if tail else None):
+                    break
+                await ctx.db.event(uid, "missed_shown", str(dl["post_id"]), now)
+            await ctx.db.event(uid, "weekly", ",".join(str(x["post_id"]) for x in top), now)
+        await asyncio.sleep(0.05)                                            # не упираемся в лимиты Telegram
 
 
 async def lead_digests(bot: Bot, ctx: Ctx, now: float) -> None:

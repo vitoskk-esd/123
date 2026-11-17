@@ -503,8 +503,8 @@ class DB:
         return (await self._one("SELECT COUNT(*) n FROM payments WHERE user_id=? AND status='succeeded'", uid))["n"]
 
     # ---------- события и отметки ----------
-    async def event(self, uid: int, kind: str, meta: str | None = None) -> None:
-        await self._run("INSERT INTO events (user_id, kind, meta, at) VALUES (?,?,?,?)", uid, kind, meta, time.time())
+    async def event(self, uid: int, kind: str, meta: str | None = None, at: float | None = None) -> None:
+        await self._run("INSERT INTO events (user_id, kind, meta, at) VALUES (?,?,?,?)", uid, kind, meta, at or time.time())
 
     async def add_support_link(self, admin_id: int, msg_id: int, user_id: int) -> None:
         await self._run("INSERT OR REPLACE INTO support (admin_id, msg_id, user_id, at) VALUES (?,?,?,?)",
@@ -560,6 +560,22 @@ class DB:
         row = await self._one("SELECT COUNT(*) n, COALESCE(MAX(at), 0) last FROM events WHERE user_id=? AND kind='teaser'", uid)
         return row["n"], row["last"]
 
+    async def event_state(self, uid: int, kinds: tuple) -> tuple[int, float]:
+        """Сколько событий этих видов у человека и когда последнее."""
+        row = await self._one(f"SELECT COUNT(*) n, COALESCE(MAX(at), 0) last FROM events WHERE user_id=? AND kind IN ({','.join('?' * len(kinds))})",
+                              uid, *kinds)
+        return row["n"], row["last"]
+
+    async def event_metas(self, uid: int, kind: str) -> list[str]:
+        return [r["meta"] or "" for r in await self._all("SELECT meta FROM events WHERE user_id=? AND kind=?", uid, kind)]
+
+    async def cold_users(self, now: float, before: float) -> list:
+        """Пользовались ботом (пришли раньше before), но ничего не купили и сейчас без доступа; не отписались от напоминаний."""
+        return await self._all(
+            "SELECT u.* FROM users u WHERE u.blocked=0 AND u.paid_until=0 AND u.trial_until<=? AND u.created_at<? "
+            "AND COALESCE(u.plan,'')!='admin' AND NOT EXISTS (SELECT 1 FROM marks m WHERE m.key='nopush:'||u.id) "
+            "AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.user_id=u.id AND p.status='succeeded')", now, before)
+
     async def leads(self, now: float, since: float) -> list:
         """Люди без доступа с активным фильтром, сохранившие первый фильтр после since и не отписавшиеся от напоминаний."""
         return await self._all(
@@ -590,7 +606,7 @@ class DB:
             "users": (await self._one(f"SELECT COUNT(*) n FROM users u WHERE {who}", since))["n"],
             "tried": (await step(["try"]))["n"], "filt": (await step(["filter"]))["n"],
             "offer": (await step(["offer", "pay_link"]))["n"], "pay": (await step(["pay_link"]))["n"], "paid": (await step(["paid"]))["n"],
-            "teasers": (await total("teaser"))["n"], "digests": (await total("digest"))["n"], "mutes": (await total("mute"))["n"],
+            "teasers": (await total("teaser"))["n"], "dailies": (await total("daily"))["n"], "weeklies": (await total("weekly"))["n"], "digests": (await total("digest"))["n"], "mutes": (await total("mute"))["n"],
         }
 
     async def mark_once(self, key: str) -> bool:

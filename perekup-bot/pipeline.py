@@ -352,20 +352,20 @@ async def missed_full(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int 
         items.append(T.MISSED_ITEM.format(car=html.escape(d.car_name(L.make, L.model) if L.make else "Машина"), year=f" {L.year}" if L.year else "",
                                           price=rub(L.price), city=f" · 📍 {html.escape(place_label(d, L))}" if L.region else "",
                                           ago=ago, disc=f" · 🔥 −{disc}%" if disc is not None and disc >= SHOW_DISCOUNT else ""))
-    deal = None
     # пример для оффера (владелец 17.11): настоящая машина ниже рынка, лучше — с фото; правдоподобная скидка 5…40 %
-    ok = [x for x in found if x[2] is not None and SHOW_DISCOUNT <= x[2] <= DEAL_MAX and x[3]]
-    pick = max(ok, key=lambda x: (bool(x[0]["photo"]), x[2]), default=None)
-    if pick:
-        r, L, disc, market = pick
+    ok = sorted((x for x in found if x[2] is not None and SHOW_DISCOUNT <= x[2] <= DEAL_MAX and x[3]), key=lambda x: (bool(x[0]["photo"]), x[2]), reverse=True)
+    deals = []
+    for r, L, disc, market in ok:
         market = int(round(market, -4))                     # рынок — до десятков тысяч: это оценка, а не точная цифра
-        if market > L.price:
-            info = [f"🛣 {L.mileage:,} км".replace(",", " ")] if L.mileage else []
-            if L.region:
-                info.append(f"📍 {place_label(d, L)}")
-            deal = {"car": d.car_name(L.make, L.model) + (f" {L.year}" if L.year else ""), "price": L.price, "market": market, "diff": market - L.price,
-                    "disc": disc, "photo": r["photo"], "post_id": r["id"], "info": " · ".join(info)}
-    return {"n": n, "cheap": cheap, "items": items, "ids": [r["id"] for r, *_ in best], "deal": deal}
+        if market <= L.price:
+            continue
+        info = [f"🛣 {L.mileage:,} км".replace(",", " ")] if L.mileage else []
+        if L.region:
+            info.append(f"📍 {place_label(d, L)}")
+        deals.append({"car": d.car_name(L.make, L.model) + (f" {L.year}" if L.year else ""), "price": L.price, "market": market, "diff": market - L.price,
+                      "disc": disc, "photo": r["photo"], "post_id": r["id"], "info": " · ".join(info)})
+    deal = deals[0] if deals else None
+    return {"n": n, "cheap": cheap, "items": items, "ids": [r["id"] for r, *_ in best], "deal": deal, "deals": deals}
 
 
 HISTORY = 300            # сколько последних постов канала загружаем в оценку рынка при подключении
