@@ -145,7 +145,7 @@ window.build = R => {
   // 8. бот: две настоящие карточки
   const SW8 = st.l3 - .3; swap("i4", SW8);
   tl.fromTo("#pp1", { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .28, ease: "back.out(2)", immediateRender: true }, SW8 + .1);
-  const C1 = Wd("l3", "пятнаш", .45), C2 = Wd("l3", "хенд", .55);
+  const C1 = Wd("l3", "пятнаш", .45), C2 = Wd("l3", "хен", .55);
   tl.fromTo("#v5c2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(2)", immediateRender: true }, C1 - .2); R.sfx("ping", C1 - .2, .7);
   tl.fromTo("#elc2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(2)", immediateRender: true }, C2 - .2); R.sfx("ping", C2 - .2, .7);
   // 9. машины на площадке: 5 → 7/10

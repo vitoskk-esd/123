@@ -34,8 +34,8 @@ random.seed(372)
 gsk = HEAD + f"""    <defs><linearGradient id="gzsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2a52"/><stop offset="1" stop-color="#b86a5a"/></linearGradient></defs>
     <rect width="1080" height="1920" fill="url(#gzsky)"/>
     <!-- табличка -->
-    <rect x="330" y="430" width="420" height="100" fill="#2f6db5" stroke="{K}" stroke-width="6"/><text x="540" y="497" text-anchor="middle" {F} font-size="40" fill="#fff">ГСК «ЗАВОДСКОЙ»</text>
-    <path d="M390 530 V620 M690 530 V620" stroke="#4a4e54" stroke-width="10"/>
+    <rect x="330" y="508" width="420" height="92" fill="#2f6db5" stroke="{K}" stroke-width="6"/><text x="540" y="569" text-anchor="middle" {F} font-size="40" fill="#fff">ГСК «ЗАВОДСКОЙ»</text>
+    
     <!-- ряд гаражей -->
     <rect x="-20" y="620" width="1120" height="600" fill="#8a8478" stroke="{K}" stroke-width="7"/><rect x="-20" y="600" width="1120" height="40" fill="#5a5a5a" stroke="{K}" stroke-width="6"/>
     {"".join(f'<rect x="{x}" y="700" width="230" height="520" fill="{c}" stroke="{K}" stroke-width="6"/><text x="{x + 115}" y="760" text-anchor="middle" {F} font-size="34" fill="#f4f0e8">{n}</text>' for x, c, n in ((10, "#5a6a7a", 12), (270, "#7a5a4a", 13), (790, "#4a6a5a", 15)))}
