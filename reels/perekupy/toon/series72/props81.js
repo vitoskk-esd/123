@@ -51,7 +51,7 @@ const MOUSETRAP = () => `<div style="position:absolute;left:0;top:0;width:1080px
       <path d="M570 1300 h20 v110 h-14 v-14 h-10 z" fill="#c4c8ce" stroke="#151515" stroke-width="6"/>
       <path d="M630 1190 q-10 -40 -40 -125" stroke="#151515" stroke-width="5" fill="none"/>
       <g transform="rotate(8 675 1010)"><rect x="560" y="960" width="230" height="100" rx="14" fill="#fff8e1" stroke="#151515" stroke-width="7"/><circle cx="582" cy="1010" r="10" fill="#151515"/>
-      <text x="680" y="1028" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="40" fill="#c0392b">790 000</text></g>
+      <text x="680" y="1028" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="34" fill="#c0392b">790 000</text></g>
     </g>
   </svg>
   <svg id="trapbar" viewBox="0 0 1080 1920" style="position:absolute;inset:0;transform-origin:540px 1300px">
