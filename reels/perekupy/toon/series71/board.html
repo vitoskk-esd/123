@@ -1,0 +1,84 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props80.js"></script>
+<script>
+// «ТОЛЯН · 19: ОТКРЫТИЕ У ЖОРЫ» (ep80) — сезон «Свой автосалон», без мата. «Сюрприз» Жоры из 18-й: громкое открытие «ЖОРА МОТОРС»
+// через дорогу, «дешевле, чем у студента, −10%» — покупатели уходят. Римма давит: пятая неделя, три машины. Толян ставит в боте «ниже рынка 15%+»
+// → две машины (Веста, Лексус LS 400) → 5/10. Поворот: на открытие приезжают Митяй на тракторе и дед Егорыч с «Нивой» из «Деревни» —
+// «Жора, это ты мне “зверя” продал?» — толпа смеётся и идёт к Толяну. Крючок: Жора — «Ладно, студент. Тогда по-другому».
+const T = (p, x, foot, h, pose = {}, extra = {}) => ch("tolyan", p, x, foot, h, {}, pose, extra);
+const RI = (p, x, foot, h, pose = {}, extra = {}) => RIM(ch("vika", p, x, foot, h, null, pose, extra));
+const SN = (p, x, foot, h, pose = {}, extra = {}) => SNZ(ch("vika", p, x, foot, h, null, pose, extra));
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const E2 = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...EGO, ...o }, pose, extra);
+const M = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...MIT, ...o }, pose, extra);
+const SL = glow(540, 300, 520, "#fff4d0", .25), OL = glow(540, 400, 520, "#ffffff", .2);
+const S = [
+ { h: "ОБЛОЖКА → ОТКРЫТИЕ «ЖОРА МОТОРС»", tc: "1/5 · 0:00–0:14",
+   A: { def: () => { const H = HOLDPHONE("tolyan", "ta", 540, 2090, 1680, {}, VESCARD(), { rim: "#ffffff", side: 1 });
+       return { bg: "ploshchadkasolnce", farBlur: 8, mid: H.mid, lights: H.lights + SL, over: TITLE("ТОЛЯН · 19:", "ОТКРЫТИЕ У ЖОРЫ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "otkrytiezhory", mid: ZB2() + Z("za", 520, 1920, 760, {}, { armR: -60 }, { rim: "#fff", side: 1, z: 9 }) + MIC(733, 1624) + SN("sa", 880, 1900, 700, { armL: -100 }, { rim: "#fff", side: -1, z: 8 }), over: CONFETTI(), lights: OL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "za", html: "Всё на десять процентов дешевле,<br><em>чем через дорогу!</em>", fs: 36 }], talk: ["za"] },
+   vo: "Лис: «Сюрприз Жоры оказался громким». Снежана: «Встречайте! Открытие “Жора Моторс”!» Жора: «Всё на десять процентов дешевле, чем через дорогу!»", who: "Лис + Снежана + Жора",
+   mv: "A — <b>кадр 0</b>: Толян с телефоном — в боте «Lada Vesta · 2019 · 690 000 ₽ · −18%» + плашка «ТОЛЯН · 19: ОТКРЫТИЕ У ЖОРЫ». B — <b>новый фон — «ЖОРА МОТОРС» в день открытия</b> (стеклянный фасад, флажки, красная дорожка, колонки); <b>новая героиня — ведущая Снежана</b>; Жора с микрофоном; <b>приёмы: растяжка «ДЕШЕВЛЕ, ЧЕМ У СТУДЕНТА! −10%» разворачивается, конфетти</b>." },
+ { h: "ТОЛПА УХОДИТ К ЖОРЕ → РИММА: «ПЯТАЯ НЕДЕЛЯ, ТРИ МАШИНЫ»", tc: "2/5 · 0:14–0:28",
+   A: { def: () => ({ bg: "dvasalona", mid: CROWD(420, 1560, 6) + T("tb", 160, 1880, 640, { armR: -40 }, { rim: "#fff", side: 1, z: 9 }), over: CNT77("45 000", 3), lights: OL }), shot: { x: 540, y: 1150, s: 1.02 } },
+   B: { def: () => ({ bg: "ploshchadkasolnce", mid: SIGN77(250, 605, 3, .7) + T("tc", 260, 1900, 860, {}, { rim: "#fff", side: 1, z: 7 }) + RI("ra", 800, 1900, 820, { armL: -40 }, { rim: "#fff", side: -1, z: 7 }), lights: SL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ra", html: "Пятая неделя, Анатолий. Три машины.<br><em>А покупатели — у Жоры.</em>", fs: 34 }], talk: ["ra"] },
+   vo: "Лис: «Покупатели пошли через дорогу». Римма: «Пятая неделя, Анатолий. Три машины. А покупатели — у Жоры».", who: "Лис + Римма",
+   mv: "A — <b>новый фон — общий план «два салона»</b>: слева навес Толяна, справа «ЖОРА МОТОРС» с шарами, между ними дорога с зеброй; <b>приём: толпа переходит дорогу</b> к Жоре, Толян один под навесом. B — <b>новый фон — площадка Толяна солнечным утром</b> (табличка «ОТКРЫТО» на будке); Римма давит сроком." },
+ { h: "БОТ: «НИЖЕ РЫНКА 15%+» → ВЕСТА И ЛЕКСУС: 5/10", tc: "3/5 · 0:28–0:42",
+   A: { def: () => ({ bg: "ploshchadkasolnce", over: TWOCARDS2() + PIPS(T("td", 160, 640, 640, {}, { z: 2 }), "td", "pp1", "#ffd23f", 60, 1580) }), shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "td", html: "Ниже рынка на пятнадцать —<br><em>беру всё.</em>", fs: 40 }], talk: ["td"] },
+   B: { def: () => ({ bg: "ploshchadkasolnce", mid: SIGN77(250, 605, 3, .7) + car(VES, -60, 1620, 620, { z: 5, sheen: .5 }) + car(LEX, 460, 1720, 640, { z: 6, sheen: .5 }), over: CNT77("45 000", 5), lights: SL }), shot: { x: 540, y: 1150, s: 1.02 } },
+   vo: "Толян: «Ниже рынка на пятнадцать — беру всё». Лис: «Бот прислал две: Весту и старый Лексус. Деньги Лёхи, прибыль пополам. Пять машин из десяти».", who: "Толян + Лис",
+   mv: "A — телефон крупно: две карточки бота — «Lada Vesta 2019 · 690 000 при рынке 840 000 · −18%» и «Lexus LS 400 1996 · 420 000 при рынке 520 000 · −19%»; Толян в кружке. B — Веста и Лексус на площадке, счётчик 🚗 3 → 5/10." },
+ { h: "ПОВОРОТ: ТРАКТОР С «НИВОЙ» НА КРАСНОЙ ДОРОЖКЕ", tc: "4/5 · 0:42–0:58",
+   A: { def: () => ({ bg: "otkrytiezhory", mid: TRACTOR(560, 1700, 520, "tr1") + TOWROPE(440, 1560, 600, 1600) + car(NIVS, -60, 1700, 520, { z: 5 }) + E2("ea", 200, 1920, 760, {}, { armR: -150 }, { rim: "#fff", side: 1, z: 9 }) + Z("zb", 900, 1920, 720, { look: "o" }, {}, { rim: "#fff", side: -1, z: 9 }), lights: OL }), shot: { x: 540, y: 1180, s: 1.02 },
+     bubbles: [{ p: "ea", html: "Жора! Это ты мне<br><em>«зверя» продал?</em>", fs: 42 }], talk: ["ea"] },
+   B: { def: () => ({ bg: "otkrytiezhory", farBlur: 2, mid: M("ma", 380, 1920, 860, {}, { armR: -100 }, { rim: "#fff", side: 1, z: 8 }) + NBUMP(560, 1380, "nb2", 10) + CROWD(620, 1700, 4, "crowd2", 6, 110), over: LAUGH(200, 520), lights: OL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ma", html: "А это — ваш бампер.<br><em>С доставкой.</em>", fs: 42 }], talk: ["ma"] },
+   vo: "Лис: «И тут на красную дорожку въехал трактор». Егорыч: «Жора! Это ты мне “зверя” продал?» Митяй: «А это — ваш бампер. С доставкой». <i>(толпа хохочет)</i>", who: "Лис + Егорыч + Митяй",
+   mv: "A — <b>отсылка-награда к серии «Деревня»</b>: тракторист Митяй тащит на тросе ту самую «Ниву» по красной дорожке Жоры, дед Егорыч требует ответа, у Жоры открыт рот. B — Митяй вручает бампер, <b>приём: «ХА-ХА-ХА!» над толпой</b>." },
+ { h: "ТОЛПА ИДЁТ К ТОЛЯНУ → «ЛАДНО, СТУДЕНТ. ТОГДА ПО-ДРУГОМУ»", tc: "5/5 · 0:58–1:12",
+   A: { def: () => ({ bg: "dvasalona", mid: CROWD(160, 1640, 6, "crowd3") + T("te", 140, 1880, 700, { armR: -150 }, { rim: "#fff", side: 1, z: 9 }), over: CNT77("45 000", 5), lights: OL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "te", html: "Добро пожаловать!<br><em>У нас без сюрпризов.</em>", fs: 42 }], talk: ["te"] },
+   B: { def: () => ({ bg: "otkrytiezhory", farBlur: 6, mid: Z("zc", 540, 2150, 1500, { look: "flat" }, { armR: -60 }, { rim: "#fff", side: 1, z: 8 }), lights: OL }), shot: { x: 540, y: 1000, s: 1.04 },
+     bubbles: [{ p: "zc", html: "Ладно, студент.<br><em>Тогда по-другому.</em>", fs: 48 }], talk: ["zc"] },
+   vo: "Лис: «Покупатели пошли обратно — через дорогу». Толян: «Добро пожаловать! У нас без сюрпризов». Жора: «Ладно, студент. Тогда по-другому». Лис: «Хочешь находить машины ниже рынка раньше конкурентов — бот “Перехват”, ссылка в шапке». <i>(финальная карточка бота)</i>", who: "Лис + Толян + Жора",
+   mv: "A — толпа переходит дорогу обратно, к Толяну. B — Жора крупно, со злостью; крючок на 20-ю — его голосом. Последний кадр — только бот." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); if (f.after) f.after(el); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>

@@ -1,0 +1,16 @@
+  <svg id="bg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0">
+    <defs><linearGradient id="dssky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd0ec"/><stop offset="1" stop-color="#eef6f8"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#dssky)"/>
+    <!-- слева: навес бывшей АЗС (площадка Толяна) -->
+    <rect x="-20" y="620" width="440" height="70" fill="#d8d4cc" stroke="#000" stroke-width="7"/><rect x="-20" y="676" width="440" height="14" fill="#c0392b"/>
+    <rect x="40" y="690" width="30" height="430" fill="#9aa0a6" stroke="#000" stroke-width="5"/><rect x="340" y="690" width="30" height="430" fill="#9aa0a6" stroke="#000" stroke-width="5"/>
+    <!-- справа: «ЖОРА МОТОРС» с шарами -->
+    <rect x="560" y="560" width="540" height="560" fill="#3a3f52" stroke="#000" stroke-width="7"/><rect x="590" y="590" width="470" height="100" fill="#c0392b" stroke="#000" stroke-width="6"/>
+    <text x="825" y="660" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="50" fill="#fff">ЖОРА МОТОРС</text>
+    <rect x="600" y="730" width="140" height="330" fill="#8fb4d4" stroke="#000" stroke-width="6"/><rect x="760" y="730" width="140" height="330" fill="#8fb4d4" stroke="#000" stroke-width="6"/><rect x="920" y="730" width="140" height="330" fill="#8fb4d4" stroke="#000" stroke-width="6"/>
+    <path d="M580 1120 V580" stroke="#151515" stroke-width="2"/><ellipse cx="580" cy="520" rx="26" ry="32" fill="#ff3b30" stroke="#000" stroke-width="4"/><path d="M612 1120 V530" stroke="#151515" stroke-width="2"/><ellipse cx="612" cy="470" rx="26" ry="32" fill="#ffd23f" stroke="#000" stroke-width="4"/><path d="M1060 1120 V560" stroke="#151515" stroke-width="2"/><ellipse cx="1060" cy="500" rx="26" ry="32" fill="#2f6db5" stroke="#000" stroke-width="4"/><path d="M1030 1120 V510" stroke="#151515" stroke-width="2"/><ellipse cx="1030" cy="450" rx="26" ry="32" fill="#ff6fae" stroke="#000" stroke-width="4"/><path d="M548 1120 V530" stroke="#151515" stroke-width="2"/><ellipse cx="548" cy="470" rx="26" ry="32" fill="#4cd964" stroke="#000" stroke-width="4"/>
+    <!-- дорога с зеброй -->
+    <rect y="1120" width="1080" height="800" fill="#6f747b"/><path d="M0 1120 H1080" stroke="#000" stroke-width="6"/>
+    <rect y="1120" width="1080" height="40" fill="#b8b2a4"/><rect x="140" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/><rect x="260" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/><rect x="380" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/><rect x="500" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/><rect x="620" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/><rect x="740" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/><rect x="860" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/><rect x="980" y="1420" width="70" height="220" fill="#f4f0e8" opacity=".9" transform="skewX(-12)"/>
+    <rect y="1880" width="1080" height="40" fill="#b8b2a4"/>
+  </svg>
