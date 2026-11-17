@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Caveat;font-weight:700;src:url(fonts/caveat-cyrillic-700.woff2) format("woff2");unicode-range:U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Caveat;font-weight:700;src:url(fonts/caveat-latin-700.woff2) format("woff2")}
+@font-face{font-family:Manrope;font-weight:800;src:url(fonts/manrope-cyr-800.woff2) format("woff2");unicode-range:U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Manrope;font-weight:800;src:url(fonts/manrope-lat-800.woff2) format("woff2")}
+@font-face{font-family:Manrope;font-weight:700;src:url(fonts/manrope-cyr-700.woff2) format("woff2");unicode-range:U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Manrope;font-weight:700;src:url(fonts/manrope-lat-700.woff2) format("woff2")}
+@font-face{font-family:Oswald;font-weight:700;src:url(fonts/oswald-cyr-700.woff2) format("woff2");unicode-range:U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Oswald;font-weight:700;src:url(fonts/oswald-lat-700.woff2) format("woff2")}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#efe9dc}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Manrope;color:#1b1b1b;background:#efe9dc}
+#world{position:absolute;left:0;top:0;width:4200px;height:6400px;transform-origin:0 0;
+ background-color:#f8f5ec;background-image:linear-gradient(rgba(70,120,200,.20) 2px,transparent 2px),linear-gradient(90deg,rgba(70,120,200,.20) 2px,transparent 2px);background-size:50px 50px}
+.margin{position:absolute;top:0;height:6400px;width:4px;background:rgba(226,65,47,.55)}
+#paper{position:absolute;inset:0;z-index:65;pointer-events:none;opacity:.35;mix-blend-mode:multiply;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .42  0 0 0 .35 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+#vig{position:absolute;inset:0;z-index:66;pointer-events:none;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 60%,rgba(90,70,40,.22) 100%)}
+.el{position:absolute;transform:translate(-50%,-50%);display:none;z-index:5}
+.el.full{transform:none;width:1080px;height:1920px;z-index:4}
+.el svg{display:block}
+.stk{filter:drop-shadow(5px 0 0 #fff) drop-shadow(-5px 0 0 #fff) drop-shadow(0 5px 0 #fff) drop-shadow(0 -5px 0 #fff) drop-shadow(0 10px 12px rgba(60,40,20,.28))}
+.tape{position:absolute;left:50%;top:-22px;width:150px;height:44px;background:rgba(247,214,96,.78);box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.hand{font-family:Caveat;font-weight:700;white-space:nowrap;line-height:1}
+.stamp{font-family:Oswald;font-weight:700;white-space:nowrap;letter-spacing:.04em;border:7px solid;border-radius:14px;padding:6px 26px;text-transform:uppercase;opacity:.92;
+ -webkit-mask-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.35' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.6'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+.note{border-radius:22px;padding:28px 32px;box-sizing:border-box}
+.notif{width:900px;display:flex;gap:22px;align-items:center;background:rgba(255,255,255,.96);border-radius:34px;padding:22px 28px;box-shadow:0 14px 40px rgba(0,0,0,.22);box-sizing:border-box}
+.notif .ap{width:84px;height:84px;border-radius:20px;background:#21a35a;color:#fff;font:800 50px Manrope;display:flex;align-items:center;justify-content:center}
+.notif .nt{display:flex;justify-content:space-between;font:800 34px Manrope}.notif .nt span{font:700 28px Manrope;color:#8a8a8a}
+.notif .nx{font:700 34px Manrope;color:#333;margin-top:4px}
+.hl{background:linear-gradient(transparent 52%,#ffe14d 52%,#ffe14d 92%,transparent 92%)}
+#nik{position:absolute;z-index:68;transform-origin:50% 100%}
+#nik .pz{display:none}
+#sub{position:absolute;left:0;right:0;top:1195px;text-align:center;z-index:69}
+#sub span{display:inline-block;max-width:940px;font:800 54px/1.2 Manrope;color:#1b1b1b;padding:10px 24px;border-radius:16px;background:rgba(255,255,255,.88);box-shadow:0 6px 20px rgba(60,40,20,.15)}
+#sub b{font-weight:800;background:linear-gradient(transparent 50%,#ffe14d 50%,#ffe14d 90%,transparent 90%)}
+</style></head><body>
+<div id="stage"><div id="world"></div><div id="sub"></div><div id="paper"></div><div id="vig"></div></div>
+<script src="engine.js"></script><script src="notebook.js"></script>
+</body></html>
