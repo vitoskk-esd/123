@@ -32,3 +32,6 @@ youtube/03-banks-pay-you/voice/words.json
 ads/alfa-01/out/
 .env.local
 tools/.tg_chat
+
+# чужие ролики-референсы (скачаны для разбора, в репозиторий не кладём)
+reels/money-motivation/refs/
