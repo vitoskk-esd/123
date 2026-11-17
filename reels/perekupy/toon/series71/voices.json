@@ -1,0 +1,44 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.04,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 19 of a comedy mini-series about Tolyan building his own car dealership: the rival Zhora opens a dealership across the road, then a tractor crashes his opening. Brisk, ironic narration with comic timing. Last line: a confident, warm advertising pitch for the bot «Перехват»."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.06,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "No swearing. Line 1: determined, cool. Line 2: warm, welcoming, a bit smug."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.04,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "No swearing. Line 1: loud showman into a microphone, triumphant. Line 2: flustered, making excuses in front of a crowd, comic. Line 3: quiet, angry, threatening."
+ },
+ "rimma": {
+  "voice": "Kore",
+  "tempo": 1.0,
+  "profile": "Rimma Zakharovna — a strict, businesslike Russian woman in her 50s who owns a former gas station lot; cool, precise, a little ironic, always calls Tolyan by his full name «Анатолий».",
+  "notes": "One line: dry, strict, counting weeks and cars."
+ },
+ "snezhana": {
+  "voice": "Laomedeia",
+  "tempo": 1.08,
+  "profile": "Snezhana — a cheerful young event host with a microphone at a car dealership opening, bright and loud, like a party MC.",
+  "notes": "Line 1: excited party-MC announcement. Line 2: shy, sly, switching sides — asking to join the rival."
+ },
+ "ego": {
+  "voice": "Enceladus",
+  "tempo": 1.05,
+  "profile": "Egorych — an old Russian village grandpa in his 70s, slow, raspy, folksy, sly humor. He swears casually and naturally like an old villager — calm, not shouting. Adult comedy, uncensored.",
+  "notes": "No swearing. One line: an old grandpa, furious and loud, calling out a swindler in front of a crowd."
+ },
+ "mit": {
+  "voice": "Sadaltager",
+  "tempo": 1.05,
+  "profile": "Mityai — a rural Russian tractor driver in his 40s, rough, sarcastic, confident. He swears naturally in the flow of speech. Adult comedy, uncensored.",
+  "notes": "No swearing. One line: deadpan, mocking, proud, handing over a car bumper."
+ }
+}
