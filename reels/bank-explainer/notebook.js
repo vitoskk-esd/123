@@ -104,7 +104,7 @@ function mountNB(EP, wordTimes, mouth) {
     d.style.zIndex = e.z || (e.hud ? 70 : 5);
     (e.hud ? stage : world).appendChild(d);
     if (e.a === "draw") e.paths = [...d.querySelectorAll(".dr")].map(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; return [p, L]; }), e.heads = [...d.querySelectorAll(".hd")];
-    if (e.a === "count") e.num = d.querySelector(".num");
+    if (e.count) e.num = d.querySelector(".num");
   });
   // Никита-ведущий (HUD, левый нижний угол): позы по сценам
   const NK = EP.nikita, nk = document.createElement("div"); nk.id = "nik"; nk.style.cssText = `left:${NK.x}px;top:${NK.y}px`;
@@ -112,7 +112,11 @@ function mountNB(EP, wordTimes, mouth) {
   nk.innerHTML = poses.map(p => `<div class="pz stk" data-p="${p}">${CH.nikita({ pose: p, w: NK.w })}</div>`).join(""); stage.appendChild(nk);
   const pz = NK.poses.map(([si, w, p]) => [TL.T[si].wt[Math.min(w, TL.T[si].wt.length - 1)], p]).sort((a, b) => a[0] - b[0]);
   const sub = document.getElementById("sub");
+  const shakes = TL.els.filter(e => e.shake).map(e => [e.at + (e.a === "stamp" ? .2 : .05), e.shake]);
+  const heroEnd = NK.hero ? TL.T[NK.hero.until[0]].wt[NK.hero.until[1]] : -1;
   window.setT = t => {
+    let sh = 0; for (const [st, a] of shakes) if (t >= st && t < st + .35) sh += a * (1 - (t - st) / .35);
+    stage.style.transform = sh ? `translate(${(Math.sin(t * 97) * 9 * sh).toFixed(1)}px,${(Math.cos(t * 83) * 9 * sh).toFixed(1)}px) scale(${1 + .015 * Math.min(1, sh)})` : "none";
     // камера
     let c = cams[0].c, prev = c;
     for (const ck of cams) if (t >= ck.t) { const r = ease.io(cl((t - ck.t) / .8)); const a = prev; c = [a[0] + (ck.c[0] - a[0]) * r, a[1] + (ck.c[1] - a[1]) * r, (a[2] || 1) + ((ck.c[2] || 1) - (a[2] || 1)) * r, (a[3] || 0) + ((ck.c[3] || 0) - (a[3] || 0)) * r]; prev = ck.c; }
@@ -135,7 +139,7 @@ function mountNB(EP, wordTimes, mouth) {
       else if (e.a === "stamp") { sc = 1.9 - .9 * ease.out(p); op = cl(p * 2.5); if (p >= 1) { const k = cl((t - e.at - dur) / .18); dx = Math.sin(k * 30) * 6 * (1 - k); } }
       else if (e.a === "write") d.firstElementChild.style.clipPath = `inset(-40px calc(${((1 - p) * 100).toFixed(1)}% - ${(60 * p).toFixed(0)}px) -40px -40px)`;
       else if (e.a === "draw") { const r = ease.io(cl((t - e.at) / (e.dur || .55))); e.paths.forEach(([pp, L]) => pp.style.strokeDashoffset = L * (1 - r)); e.heads.forEach(h => h.style.opacity = r > .92 ? 1 : 0); }
-      if (e.a === "count" && e.count) { const cc = e.count, r = ease.out(cl((t - e.at) / (cc.d || .9))); e.num.innerHTML = (cc.pre || "") + fmt(cc.from + (cc.to - cc.from) * r).split(/\D+/).join('<span style="display:inline-block;width:.2em"></span>') + (cc.post || ""); }
+      if (e.count && e.num) { const cc = e.count; let v; if (cc.steps) { let pv = cc.from, cv = cc.from, st = e.at; for (const [sd, sv] of cc.steps) if (t >= e.at + sd) { pv = cv; cv = sv; st = e.at + sd; } v = pv + (cv - pv) * ease.out(cl((t - st) / .18)); } else v = cc.from + (cc.to - cc.from) * ease.out(cl((t - e.at) / (cc.d || .9))); e.num.innerHTML = (cc.pre || "") + fmt(v).split(/\D+/).join('<span style="display:inline-block;width:.2em"></span>') + (cc.post || ""); }
       if (e.bob) dy += Math.sin(t * 2.2 + e.x * .01) * 4;
       if (q > 0) { op *= 1 - q; if (e.hud) dy -= 60 * q; else sc *= 1 - .1 * q; }
       d.style.opacity = op;
@@ -144,11 +148,14 @@ function mountNB(EP, wordTimes, mouth) {
       d.style.transform = `translate(-50%,-50%) translate(${dx}px,${dy}px) scale(${s * sc}) rotate(${rot}deg)`;
     }
     // Никита: поза, дыхание, моргание, рот по громкости голоса (mouth[кадр] 0..1)
-    let pose = "idle"; for (const [pt, p] of pz) if (t >= pt) pose = p;
+    let pose = NK.hero ? NK.poses[0][2] : "idle"; for (const [pt, p] of pz) if (t >= pt) pose = p;
     nk.querySelectorAll(".pz").forEach(n => n.style.display = n.dataset.p === pose ? "block" : "none");
-    const enter = ease.out(cl((t - .05) / .6));
-    nk.style.transform = `translate(-50%,0) translateY(${(1 - enter) * 500 + Math.sin(t * 2) * 5}px) rotate(${Math.sin(t * 1.1) * 1.2}deg)`;
-    const bl = (t % 3.7) < .11; nk.querySelectorAll(".blink").forEach(b => b.style.transform = bl ? "scaleY(.12)" : "none");
+    const enter = NK.hero ? 1 : ease.out(cl((t - .05) / .6));
+    let nx = NK.x, ny = NK.y, ns = 1;
+    if (NK.hero) { const r = ease.io(cl((t - heroEnd) / .7)); nx = NK.hero.x + (NK.x - NK.hero.x) * r; ny = NK.hero.y + (NK.y - NK.hero.y) * r; ns = NK.hero.s + (1 - NK.hero.s) * r; }
+    nk.style.left = nx + "px"; nk.style.top = ny + "px";
+    nk.style.transform = `translate(-50%,0) translateY(${(1 - enter) * 500 + Math.sin(t * 2) * 5}px) scale(${ns}) rotate(${Math.sin(t * 1.1) * 1.2}deg)`;
+    const bl = ((t + 1.6) % 3.7) < .11; nk.querySelectorAll(".blink").forEach(b => b.style.transform = bl ? "scaleY(.12)" : "none");
     const lv = mouth ? (mouth[Math.round(t * 30)] || 0) : -1;
     const m = lv < 0 ? "m-grin" : lv > .55 ? "m-open" : lv > .18 ? "m-mid" : "m-grin";
     nk.querySelectorAll(".m-grin,.m-open,.m-mid").forEach(g => g.style.display = g.classList.contains(m) ? "inline" : "none");
