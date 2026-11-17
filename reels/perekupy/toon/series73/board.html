@@ -1,0 +1,89 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props82.js"></script>
+<script>
+// «ТОЛЯН · 21: КТО ПЕРВЫЙ» (ep82) — сезон «Свой автосалон», без мата. Неделя до срока, на площадке 7/10. Бот присылает «Мазду» блогера ниже рынка —
+// звонят двое: у Толяна «ВЫЗОВ…», у Жоры «ЗАНЯТО». Блогер Кирилл снимает Толяна для канала: «как ты так быстро?» — «бот прислал через секунду».
+// Жора опоздал; блогер узнаёт его — «тот самый, с трактором, миллион просмотров». В воскресенье в 23:58 — «Королла» и «Приора»: 10/10,
+// Римма: «договор ваш». Крючок: Жора ночью у ноутбука — «Миллион просмотров… Ну, студент, держись».
+const T = (p, x, foot, h, pose = {}, extra = {}, o = {}) => ch("tolyan", p, x, foot, h, o, pose, extra);
+const RI = (p, x, foot, h, pose = {}, extra = {}) => RIM(ch("vika", p, x, foot, h, null, pose, extra));
+const K = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...KIRILL, ...o }, pose, extra);
+const Z = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHORA, ...o }, pose, extra);
+const SL = glow(540, 300, 520, "#fff4d0", .25), LL = glow(880, 760, 520, "#fff6d0", .3), ZL = glow(760, 1200, 480, "#ffd98a", .3), NL = glow(540, 760, 560, "#ffd98a", .18);
+const C1 = [["auto_max", "это же Толян с площадки!"], ["marina_v", "как так быстро? 😳"], ["dimon77", "перекуп в кадре 🔥"]];
+const C2 = [["vitya_k", "через секунду?! что за бот"], ["auto_max", "мне такой надо"], ["lena.cars", "🔥🔥🔥"]];
+const C3 = [["dimon77", "ЗВЕРЬ 😂😂"], ["vitya_k", "дед с трактором легенда"], ["marina_v", "Жора, гарантия кончилась?"]];
+const S = [
+ { h: "ОБЛОЖКА → ДЕДЛАЙН: 6 ДНЕЙ, 7/10", tc: "1/5 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("tolyan", "ta", 540, 2090, 1680, {}, MAZCARD(), { rim: "#ffffff", side: 1 });
+       return { bg: "ploshchadkasolnce", farBlur: 8, mid: H.mid, lights: H.lights + SL, over: TITLE("ТОЛЯН · 21:", "КТО ПЕРВЫЙ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "ploshchadkasolnce", over: FLIPCLOCK("6") + CNT77("45 000", 7) }), shot: { x: 540, y: 960, s: 1 } },
+   vo: "Лис: «Неделя. Три машины. Или площадка уходит Жоре. В понедельник бот прислал “Мазду” блогера — на семнадцать процентов ниже рынка».", who: "Лис",
+   mv: "A — <b>кадр 0</b>: Толян с телефоном — в боте «Mazda 6 · 2016 · от блогера · 1 160 000 ₽ · −17%» + плашка «ТОЛЯН · 21: КТО ПЕРВЫЙ». B — <b>приём: перекидной таймер</b> «6 ДНЕЙ ДО ВОСКРЕСЕНЬЯ» (цифра переворачивается 7 → 6), счётчик 💰 45 000 · 🚗 7/10." },
+ { h: "ЗВОНЯТ ДВОЕ: «ВЫЗОВ…» / «ЗАНЯТО» → БЛОГЕР БЕРЁТ ТРУБКУ", tc: "2/5 · 0:12–0:24",
+   A: { def: () => { const o = SPLIT2("ploshchadkasolnce", T("tb", 540, 1950, 980, { armR: -150 }, { rim: "#fff", side: 1, z: 7 }, { item: "phone" }) + STAMP("📞 ВЫЗОВ…", "#2e9e4a", 290, 330, "stA"),
+       "ofiszhorynoch", Z("za", 540, 1950, 980, { item: "phone", look: "o" }, { armR: -150 }, { rim: "#ffd98a", side: -1, z: 7 }) + STAMP("ЗАНЯТО", "#d0302a", 330, 330, "stB", 6));
+       CINE.ANCH.za[0] = 813; return { bg: "ploshchadkasolnce", over: o }; }, shot: { x: 540, y: 960, s: 1 },
+     bubbles: [{ p: "za", html: "Занято?! Кто ему<br><em>звонит раньше меня?</em>", fs: 34 }], talk: ["za"] },
+   B: { def: () => ({ bg: "loftblogera", mid: K("ka", 540, 1900, 900, { item: "phone" }, { armR: -150 }, { rim: "#ffd6f6", side: 1, z: 7 }), lights: LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ka", html: "Алло! Свободна. Приезжайте —<br><em>только я вас сниму для канала!</em>", fs: 34 }], talk: ["ka"] },
+   vo: "Лис: «Звонили двое». Жора: «Занято?! Кто ему звонит раньше меня?» Кирилл: «Алло! Свободна. Приезжайте — только я вас сниму для канала!»", who: "Лис + Жора + Кирилл",
+   mv: "A — <b>приём: разделённый экран со штампами</b>: Толян — зелёный «📞 ВЫЗОВ…», Жора в своём кабинете — красный «ЗАНЯТО». B — <b>новый фон — студия автоблогера</b> (кирпич, неон «KIRILL DRIVE», кольцевая лампа, софтбокс, полка с моделями машин); <b>новый герой — блогер Кирилл</b>: оранжевое худи, осветлённые волосы, борода, тёмные очки." },
+ { h: "СТРИМ: «БРАТ, КАК ТЫ ТАК БЫСТРО?» — «БОТ ПРИСЛАЛ ЧЕРЕЗ СЕКУНДУ»", tc: "3/5 · 0:24–0:37",
+   A: { def: () => ({ bg: "loftblogera", mid: car(MAZ, -40, 1700, 700, { z: 4, sheen: .4 }) + T("tc", 300, 1910, 860, {}, { rim: "#ffd6f6", side: 1, z: 8 }) + K("kb", 800, 1910, 880, {}, { armL: -120 }, { rim: "#ffd6f6", side: -1, z: 8 }), over: STREAM(C1), lights: LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "kb", html: "Друзья, у нас перекуп!<br><em>Брат, как ты так быстро?</em>", fs: 36 }], talk: ["kb"] },
+   B: { def: () => ({ bg: "loftblogera", mid: car(MAZ, -40, 1700, 700, { z: 4, sheen: .4 }) + T("td", 300, 1910, 860, { armR: -110 }, { rim: "#ffd6f6", side: 1, z: 8 }, { item: "phone" }) + K("kc", 800, 1910, 880, { look: "o" }, {}, { rim: "#ffd6f6", side: -1, z: 8 }), over: STREAM(C2, "18 900", "st2"), lights: LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "td", html: "Бот прислал через секунду<br><em>после публикации.</em>", fs: 36 }], talk: ["td"] },
+   vo: "Кирилл: «Друзья, у нас перекуп! Брат, как ты так быстро?» Толян: «Бот прислал через секунду после публикации».", who: "Кирилл + Толян",
+   mv: "A — <b>приём: интерфейс стрима поверх кадра</b>: «● REC», «👁 12 400», летящие сердечки, комментарии зрителей всплывают снизу; красная «Мазда» в студии. B — Толян показывает телефон, у Кирилла открыт рот; комментарии: «через секунду?! что за бот», зрители растут 12 400 → 18 900." },
+ { h: "ЖОРА ОПОЗДАЛ: «ТОТ САМЫЙ, С ТРАКТОРОМ!»", tc: "4/5 · 0:37–0:49",
+   A: { def: () => ({ bg: "loftblogera", mid: K("kd", 300, 1910, 880, {}, {}, { rim: "#ffd6f6", side: 1, z: 8 }) + Z("zb", 800, 1910, 860, { look: "flat" }, { armR: -100 }, { rim: "#ffd6f6", side: -1, z: 8 }), over: STREAM(C1.slice(0, 1), "21 300", "st3"), lights: LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "zb", html: "Я тоже звонил!", fs: 48 }], talk: ["zb"] },
+   B: { def: () => ({ bg: "loftblogera", mid: K("ke", 300, 1910, 880, {}, { armR: -150 }, { rim: "#ffd6f6", side: 1, z: 8 }) + Z("zc", 800, 1910, 860, { look: "o" }, {}, { rim: "#ffd6f6", side: -1, z: 8 }), over: STREAM(C3, "34 700", "st4") + VIEWS("1 000 000", 250, 280), lights: LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ke", html: "А вы тот самый, с трактором?<br><em>Миллион просмотров!</em>", fs: 36 }], talk: ["ke"] },
+   vo: "Лис: «Через полчаса приехал Жора». Жора: «Я тоже звонил!» Кирилл: «А вы тот самый, с трактором? У меня это видео — миллион просмотров!»", who: "Лис + Жора + Кирилл",
+   mv: "A — Жора влетает в студию, стрим продолжается. B — <b>приём: счётчик просмотров «👁 1 000 000» слэмом</b>, комментарии «ЗВЕРЬ 😂😂», «дед с трактором легенда» — отсылка к серии «Открытие у Жоры»; у Жоры отвисает челюсть." },
+ { h: "ВОСКРЕСЕНЬЕ, 23:58 — 10/10 → ЖОРА: «НУ, СТУДЕНТ, ДЕРЖИСЬ»", tc: "5/5 · 0:49–1:08",
+   A: { def: () => ({ bg: "ploshchadkanoch", mid: car(MAZ, -60, 1560, 560, { z: 4, sheen: .4 }) + car(COR, 440, 1600, 660, { z: 5, sheen: .4 }) + car(PRI, 120, 1800, 640, { z: 6, sheen: .4 }) + RI("ra", 900, 1910, 760, { armL: -60 }, { rim: "#ffd98a", side: -1, z: 8 }),
+       over: CNT77("45 000", 10) + CONFETTI(), lights: NL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ra", html: "Десять машин.<br><em>Договор ваш, Анатолий.</em>", fs: 38 }], talk: ["ra"] },
+   B: { def: () => ({ bg: "ofiszhorynoch", mid: Z("zd", 540, 2150, 1500, { look: "flat" }, { armR: -60 }, { rim: "#9fd6ff", side: 1, z: 8 }), lights: ZL + glow(540, 1500, 420, "#9fd6ff", .35) }), shot: { x: 540, y: 1000, s: 1.04 },
+     bubbles: [{ p: "zd", html: "Миллион просмотров…<br><em>Ну, студент, держись.</em>", fs: 48 }], talk: ["zd"] },
+   vo: "Лис: «А в воскресенье бот прислал ещё две: “Короллу” и “Приору”. В двадцать три пятьдесят восемь — десять из десяти». Римма: «Десять машин. Договор ваш, Анатолий». Жора: «Миллион просмотров… Ну, студент, держись». Лис: «Хочешь звонить продавцу первым — бот “Перехват”, ссылка в шапке». <i>(финальная карточка бота)</i>", who: "Лис + Римма + Жора + Лис",
+   mv: "A — <b>новый фон — площадка ночью</b> (гирлянда под навесом, луна, часы на столбе «23:58»); Мазда, Королла и Приора; <b>счётчик 🚗 → 10/10, конфетти</b>; Римма вручает договор. B — <b>новый фон — кабинет Жоры ночью</b> (вывеска «ЖОРА МОТОРС» в окне наоборот, кубок «2009»); Жора у ноутбука, лицо в синем свете экрана — крючок на 22-ю. Последний кадр — только бот." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); if (f.after) f.after(el); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
