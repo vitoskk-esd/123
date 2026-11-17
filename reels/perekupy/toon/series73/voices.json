@@ -1,0 +1,32 @@
+{
+ "lis": {
+  "voice": "Charon",
+  "tempo": 1.04,
+  "profile": "Lis — a cool, deadpan, ironic street narrator of an adult comedy show about used-car flippers. Low calm voice, dry humor, confident.",
+  "notes": "Part 21 of a comedy mini-series about Tolyan building his own car dealership: a race to call a seller first, a car blogger's live stream, the deadline met at 23:58. Brisk, ironic narration with comic timing. Last line: a confident, warm advertising pitch for the bot «Перехват»."
+ },
+ "tolyan": {
+  "voice": "Algenib",
+  "tempo": 1.06,
+  "profile": "Tolyan — a cocky Russian used-car flipper (perekup) in his 30s, street swagger, deep raspy voice, show-off, calls everyone «брат». Adult street comedy.",
+  "notes": "No swearing. Line 1: calm, cool, a little proud, on camera. Line 2: friendly mocking advice to a rival."
+ },
+ "zhora": {
+  "voice": "Fenrir",
+  "tempo": 1.04,
+  "profile": "Zhora — a brash, cocky veteran Russian used-car flipper in his 50s, leather jacket, mustache, gold chain; loud, fast, mocking, calls the young rival «студент». Adult street comedy.",
+  "notes": "No swearing. Line 1: furious, shouting at a busy phone line. Line 2: out of breath, indignant. Line 3: quiet, slow, menacing, at night."
+ },
+ "kirill": {
+  "voice": "Sadachbia",
+  "tempo": 1.08,
+  "profile": "Kirill — a young, hyper-energetic Russian car blogger in his mid-20s, streams everything, loud and enthusiastic like a YouTuber talking to his audience. Adult street comedy.",
+  "notes": "No swearing. Line 1: cheerful on the phone. Line 2: hyped, addressing stream viewers. Line 3: amazed. Line 4: delighted, recognizing a meme star."
+ },
+ "rimma": {
+  "voice": "Kore",
+  "tempo": 1.0,
+  "profile": "Rimma Zakharovna — a strict, businesslike Russian woman in her 50s who owns a former gas station lot; cool, precise, a little ironic, always calls Tolyan by his full name «Анатолий».",
+  "notes": "One line: dry, strict, but with a hint of respect — the deal is done."
+ }
+}
