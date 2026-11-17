@@ -37,6 +37,7 @@ NOT_CLEAN = {"damaged", "parts", "notrun"}      # такие цены не ид�
 MARKET_DAYS = 90         # цены за сколько дней берём для оценки рынка
 MARKET_MIN = 5           # меньше объявлений — оценку не показываем, чтобы не врать
 SHOW_DISCOUNT = 5        # «ниже рынка» пишем от 5%
+DEAL_MAX = 40            # пример «ниже рынка» в оффере — не больше −40 %: «−50 %» и больше похожи на ошибку и отпугивают
 IMPLAUSIBLE = 55         # дешевле рынка больше чем на 55% — почти всегда взяли не ту сумму («зазор 200к», «вложено 150к»)
 CAPTION_MAX = 1024       # лимит Telegram на подпись к фото
 PHOTO_TIMEOUT = 3        # сколько ждём пересылку фото; дольше — шлём без фото, скорость важнее
@@ -335,6 +336,8 @@ async def missed_full(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int 
             m = mkt[key]
             if m:
                 disc = round((m - L.price) / m * 100)
+                if disc > IMPLAUSIBLE:           # «−89% к рынку» — почти всегда не та сумма (залог, пробег): «ниже рынка» не пишем, как в карточке
+                    disc = None
         if f.min_discount and (disc is None or disc < f.min_discount or not matches(f, L, disc)):
             continue
         cheap += bool(disc is not None and disc >= SHOW_DISCOUNT)
@@ -350,11 +353,18 @@ async def missed_full(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int 
                                           price=rub(L.price), city=f" · 📍 {html.escape(place_label(d, L))}" if L.region else "",
                                           ago=ago, disc=f" · 🔥 −{disc}%" if disc is not None and disc >= SHOW_DISCOUNT else ""))
     deal = None
-    if best and best[0][2] is not None and best[0][2] >= SHOW_DISCOUNT and best[0][3]:
-        r, L, disc, market = best[0]
+    # пример для оффера (владелец 17.11): настоящая машина ниже рынка, лучше — с фото; правдоподобная скидка 5…40 %
+    ok = [x for x in found if x[2] is not None and SHOW_DISCOUNT <= x[2] <= DEAL_MAX and x[3]]
+    pick = max(ok, key=lambda x: (bool(x[0]["photo"]), x[2]), default=None)
+    if pick:
+        r, L, disc, market = pick
         market = int(round(market, -4))                     # рынок — до десятков тысяч: это оценка, а не точная цифра
         if market > L.price:
-            deal = {"car": d.car_name(L.make, L.model) + (f" {L.year}" if L.year else ""), "price": L.price, "market": market, "diff": market - L.price}
+            info = [f"🛣 {L.mileage:,} км".replace(",", " ")] if L.mileage else []
+            if L.region:
+                info.append(f"📍 {place_label(d, L)}")
+            deal = {"car": d.car_name(L.make, L.model) + (f" {L.year}" if L.year else ""), "price": L.price, "market": market, "diff": market - L.price,
+                    "disc": disc, "photo": r["photo"], "post_id": r["id"], "info": " · ".join(info)}
     return {"n": n, "cheap": cheap, "items": items, "ids": [r["id"] for r, *_ in best], "deal": deal}
 
 
@@ -486,6 +496,13 @@ async def _deliver(bot: Bot, ctx: Ctx, raw: RawPost, channel: dict, r: Result, L
     recv_ms = int((raw.recv - raw.date) * 1000) if raw.recv else None
     if not targets:
         await ctx.db.finish_post(r.post_id, 0, 0, recv_ms)
+        if photo_task:                       # фото — в базу: пример с фото для оффера неоплатившим (владелец 17.11)
+            try:
+                photo = await asyncio.wait_for(photo_task, PHOTO_TIMEOUT)
+                if photo:
+                    await ctx.db.set_post_photo(r.post_id, photo)
+            except Exception as e:
+                log.info("фото не переслано: %s", e)
         return r
 
     url = post_url(channel, raw.msg_id)
@@ -505,6 +522,8 @@ async def _deliver(bot: Bot, ctx: Ctx, raw: RawPost, channel: dict, r: Result, L
             photo_id = await asyncio.wait_for(photo_task, PHOTO_TIMEOUT)
         except Exception as e:     # канал запретил пересылку, сеть — шлём без фото
             log.info("фото не переслано: %s", e)
+        if photo_id:
+            await ctx.db.set_post_photo(r.post_id, photo_id)
     done: list[tuple] = []
 
     def message(uid: int, fid: int, ftext: str, plan: plans.Plan):

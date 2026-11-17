@@ -2446,3 +2446,30 @@ async def test_new_user_never_gets_subscription_ended(env):
     await ctx.db.set_user(OTHER, paid_until=time.time() - 60, plan="basic")
     await jobs.tick(bot, ctx)
     assert any("Подписка закончилась" in t for t in s.texts(OTHER))
+
+
+async def test_offer_shows_real_car_photo_below_market(env):
+    """Владелец 17.11: в оффере — настоящая машина по фильтру с фото из поста (копией из служебного канала, с нашей подписью: без текста
+    продавца, контактов и канала) и обязательно ниже рынка; «−89% к рынку» (залог вместо цены) примером не бывает."""
+    dp, bot, s, ctx = env
+    ctx.buffer_chat = -100777
+    async def photo():
+        return 4242
+    await dp.feed_update(bot, msg("/start"))
+    await dp.feed_update(bot, cb("s:try"))
+    await dp.feed_update(bot, msg("камри до 1,4 млн")); await dp.feed_update(bot, cb("f:save"))
+    ctx.tease[USER] = [0, 0.0, True]                                      # тизеры тут не проверяем
+    for k in range(6):                                                    # рынок Камри 2012 ≈ 1,5 млн
+        await process(bot, ctx, post(CH2, f"Toyota Camry 2012, цена {1450 + k * 20} 000 ₽, пробег {150 + k} тыс"))
+    await process(bot, ctx, post(CH1, "Toyota Camry 2012, 150 000 ₽ залог, пробег 160 тыс"))     # «−90%» — не пример
+    raw = post(CH1, "Toyota Camry 2012, 1 250 000 ₽, пробег 170 тыс, Москва, +7 999 111-22-33, пишите @seller_cars")
+    raw.photo = photo
+    await process(bot, ctx, raw)
+    await dp.feed_update(bot, cb("s:offer"))
+    cp = [m for m in s.sent if isinstance(m, CopyMessage) and m.chat_id == USER][-1]
+    assert (cp.from_chat_id, cp.message_id) == (-100777, 4242)            # фото того самого поста
+    assert "Toyota Camry 2012 — 1 250 000 ₽" in cp.caption and "рынок ≈ 1 490 000 ₽" in cp.caption and "−16%" in cp.caption
+    assert "160 000 км" not in cp.caption and "170 000 км" in cp.caption and "Москва" in cp.caption
+    for bad in ("+7 999", "@seller_cars", "avto_msk", "Avto Msk", "t.me", "150 000"):
+        assert bad not in cp.caption
+    assert "Пробный день — 490 ₽" in cp.caption and [b.callback_data for row in cp.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:plans"]

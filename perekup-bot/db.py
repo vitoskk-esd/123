@@ -91,6 +91,7 @@ class DB:
                     "ALTER TABLE users ADD COLUMN autorenew INTEGER DEFAULT 0",     # автопродление включено
                     "ALTER TABLE users ADD COLUMN renew_inv TEXT",                  # материнский счёт Робокассы для автосписаний
                     "ALTER TABLE users ADD COLUMN renew_plan TEXT",                 # какой тариф продлеваем
+                    "ALTER TABLE posts ADD COLUMN photo INTEGER",                   # фото машины в служебном канале (номер сообщения) — для примера в оффере
                     "ALTER TABLE channels ADD COLUMN awaiting_at REAL",
                     "ALTER TABLE channels ADD COLUMN muted INTEGER DEFAULT 0",
                     "ALTER TABLE channels ADD COLUMN archived INTEGER DEFAULT 0",
@@ -422,7 +423,7 @@ class DB:
 
     async def recent_posts(self, since: float) -> list:
         """Объявления за период (без дублей и без цены) — для «что ты пропустил»."""
-        return await self._all("SELECT id, channel_id, at, make, model, year, price, mileage, region FROM posts "
+        return await self._all("SELECT id, channel_id, at, make, model, year, price, mileage, region, photo FROM posts "
                                "WHERE at>? AND dup=0 AND price IS NOT NULL ORDER BY at DESC LIMIT 3000", since)
 
     async def add_history_post(self, channel_id: int, msg_id: int, at: float, L, fp: str, ckey: str | None, dup: bool,
@@ -435,6 +436,9 @@ class DB:
 
     async def commit(self) -> None:
         await self.conn.commit()
+
+    async def set_post_photo(self, post_id: int, photo: int) -> None:
+        await self._run("UPDATE posts SET photo=? WHERE id=?", photo, post_id)
 
     async def finish_post(self, post_id: int, latency_ms: int, matched: int, recv_ms: int | None = None) -> None:
         await self._run("UPDATE posts SET latency_ms=?, matched=?, recv_ms=? WHERE id=?", latency_ms, matched, recv_ms, post_id)

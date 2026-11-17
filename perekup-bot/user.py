@@ -426,22 +426,35 @@ async def send_offer(msg: Message, ctx: Ctx, uid: int) -> None:
     if not can_trial(u):
         return await send_plans(msg, ctx, uid, T.TRIAL_USED if not plans.current(ctx.cfg, u) else "")
     await ctx.db.event(uid, "offer")
-    example = ""
+    example, photo = "", None
     fs = [f for f in await ctx.db.filters(uid) if f["active"]]
     if fs:
         try:
             m = await missed_full(ctx, Filter.loads(fs[0]["data"]), uid)
             if m["deal"]:
                 dl = m["deal"]
-                example = T.SALE_EXAMPLE.format(car=html.escape(dl["car"]), price=rub(dl["price"]), market=rub(dl["market"]), diff=rub(dl["diff"]))
+                photo = dl["photo"] if ctx.buffer_chat else None
+                example = (T.SALE_DEAL if photo else T.SALE_EXAMPLE).format(
+                    car=html.escape(dl["car"]), price=rub(dl["price"]), market=rub(dl["market"]), diff=rub(dl["diff"]), d=dl["disc"],
+                    info=html.escape(dl["info"]) + "\n" if dl["info"] else "")
+                await ctx.db.event(uid, "missed_shown", str(dl["post_id"]))      # после оплаты пришлём на неё ссылку
             elif m["n"] > 0:
                 example = T.SALE_COUNT.format(n=m["n"], word=cars_word(m["n"]))
         except Exception as e:
             log.warning("пример для оффера не посчитали: %s", e)
     opened = T.SALE_OPENED if await opened_items(ctx, uid) else ""
     p = plans.plans(ctx.cfg)
-    await msg.answer(T.SALE_OFFER.format(example=example, opened=opened, price=p["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro),
-                     reply_markup=K.try_offer(p["trial"].price))
+    text = T.SALE_OFFER.format(example=example, opened=opened, price=p["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro)
+    if photo:
+        # настоящее фото машины из поста — копией из служебного канала, с нашей подписью: без текста продавца, контактов и названия канала
+        try:
+            return await msg.bot.copy_message(msg.chat.id, ctx.buffer_chat, photo, caption=text, reply_markup=K.try_offer(p["trial"].price))
+        except Exception as e:
+            log.warning("фото для оффера не скопировалось: %s", e)
+            text = T.SALE_OFFER.format(example=T.SALE_EXAMPLE.format(car=html.escape(dl["car"]), price=rub(dl["price"]), market=rub(dl["market"]),
+                                       diff=rub(dl["diff"]), d=dl["disc"], info=""), opened=opened, price=p["trial"].price,
+                                       pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro)
+    await msg.answer(text, reply_markup=K.try_offer(p["trial"].price))
 
 
 @router.callback_query(F.data == "s:offer")
