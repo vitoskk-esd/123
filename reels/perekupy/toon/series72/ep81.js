@@ -33,7 +33,7 @@ mount("s2", { bg: "utrotolyana", mid: T("tb", 400, 1900, 900, { armR: -110 }, { 
 { const o = SPLIT2("utrotolyana", T("tc", 540, 1950, 980, { armR: -150 }, { rim: "#fff", side: 1, z: 7 }), "rollssalon", L("la", 540, 1950, 980, {}, { armL: -40 }, { rim: "#bfc8ff", side: -1, z: 7 }));
   CINE.ANCH.la = [813, CINE.ANCH.la[1], CINE.ANCH.la[2]]; CINE.ANCH.tc = [267, CINE.ANCH.tc[1], CINE.ANCH.tc[2]];
   mount("i1", { bg: "utrotolyana", over: o,
-    bubbles: [{ id: "x0", p: "la", html: "Слишком дёшево —<br><em>значит, мышеловка.</em>", fs: 34 }, { id: "x0b", p: "la", html: "Езжай, но денег<br><em>с собой не бери.</em>", fs: 34 },
+    bubbles: [{ id: "x0", p: "la", html: "Бесплатный сыр —<br><em>только в мышеловке.</em>", fs: 34 }, { id: "x0b", p: "la", html: "Езжай, но денег<br><em>с собой не бери.</em>", fs: 34 },
               { id: "t1", p: "tc", html: "Понял. Еду<br><em>с пустыми карманами.</em>", fs: 34 }] }, { x: 540, y: 960, s: 1 }); }
 // 4. вставка: мышеловка с ключом от «Тойоты»
 mount("i2", { bg: "utrotolyana", over: MOUSETRAP() }, { x: 540, y: 960, s: 1 });
@@ -119,7 +119,7 @@ window.build = R => {
   cut("s2", st.t0 - .2); cnt(true, st.t0); push("s2", st.t0 - .2, en.t0 - st.t0 + .5, { s: 1.08 }); bub("t0", st.x0 - .1);
   // 3. видеосвязь с Лёхой → мышеловка → обратно
   const SW3 = st.x0 - .3; swap("i1", SW3); cnt(false, SW3);
-  const TRAP = Wd("x0", "мышелов", .4), BACK = Wd("x0", "езжай", .55);
+  const TRAP = Wd("x0", "мышелов", .45), BACK = Wd("x0", "езжай", .55);
   bub("x0", TRAP - .35);
   cut("i2", TRAP - .35); push("i2", TRAP - .35, BACK - TRAP + .4, { s: 1.06 });
   tl.fromTo("#trapbar", { scaleY: 1 }, { scaleY: -.22, duration: .12, ease: "power4.in", immediateRender: false }, TRAP + .15);
@@ -145,7 +145,7 @@ window.build = R => {
   // 8. бот: две настоящие карточки
   const SW8 = st.l3 - .3; swap("i4", SW8);
   tl.fromTo("#pp1", { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .28, ease: "back.out(2)", immediateRender: true }, SW8 + .1);
-  const C1 = Wd("l3", "пятнаш", .45), C2 = Wd("l3", "элантр", .55);
+  const C1 = Wd("l3", "пятнаш", .45), C2 = Wd("l3", "хенд", .55);
   tl.fromTo("#v5c2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(2)", immediateRender: true }, C1 - .2); R.sfx("ping", C1 - .2, .7);
   tl.fromTo("#elc2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .3, ease: "back.out(2)", immediateRender: true }, C2 - .2); R.sfx("ping", C2 - .2, .7);
   // 9. машины на площадке: 5 → 7/10
