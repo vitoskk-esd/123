@@ -60,6 +60,11 @@ const S = {
     const s = Math.floor(t0 * SR), f = SVF(); const pan = rnd() * .5;
     for (let i = 0; i < SR * .04; i++) { const t = i / SR; put(sfx, s + i, (f(rnd(), 2200, 3).bd * 1.2 + Math.sin(TAU * 180 * t) * .5) * Math.exp(-t * 110) * .4 * g, pan); }
   },
+  buzz(t0, g) {          // вибрация телефона: моторчик ~170 Гц, два коротких импульса (bank-explainer)
+    [0, .16].forEach(d => { const s = Math.floor((t0 + d) * SR), f = SVF(); let ph = 0;
+      for (let i = 0; i < SR * .12; i++) { const t = i / SR; ph += TAU * (165 + 10 * Math.sin(TAU * 31 * t)) / SR;
+        const sq = Math.tanh(Math.sin(ph) * 3) + .25 * f(rnd(), 900, 1).bd; put(sfx, s + i, sq * Math.min(1, t / .006, (.12 - t) / .01) * .22 * g); } });
+  },
   ping(t0, g) {          // уведомление: два колокольчика
     [[0, 88], [.11, 93]].forEach(([d, m]) => { const s = Math.floor((t0 + d) * SR), f0 = mtof(m);
       for (let i = 0; i < SR * .9; i++) { const t = i / SR; const v = (Math.sin(TAU * f0 * t) + .35 * Math.sin(TAU * f0 * 2.76 * t) * Math.exp(-t * 9)) * env(t, .002, 5) * .26 * g;
