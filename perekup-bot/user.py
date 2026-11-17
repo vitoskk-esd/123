@@ -21,7 +21,7 @@ from admin import is_admin, is_admin_id, make_admins_pro, notify_new_user, queue
 from ctx import Ctx
 from db import DAY
 from links import label, parse_link
-from pipeline import cars_word, missed, seconds, wait_text
+from pipeline import cars_word, is_private, join_url, missed, missed_full, post_url, rub, seconds, wait_text
 from query import Filter, describe, parse_filter
 
 router = Router(name="user")
@@ -152,20 +152,25 @@ async def save_filter(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
         return await cb.answer()
     fid = await ctx.db.add_filter(uid, data["pending_text"], data["pending"])
     await ctx.db.event(uid, "filter")
+    ids: list = []
     try:                                      # «что ты пропустил» за сутки — по уже собранным объявлениям
-        n, cheap, items = await missed(ctx, Filter.loads(data["pending"]), uid)
+        m = await missed_full(ctx, Filter.loads(data["pending"]), uid)
+        n, cheap, items, ids = m["n"], m["cheap"], m["items"], m["ids"]
     except Exception as e:
         log.warning("«что пропустил» не посчитали: %s", e)
         n, cheap, items = -1, 0, []
     u = await ctx.db.user(uid)
     if not plans.current(ctx.cfg, await ctx.db.user(uid)):      # без тарифа машины не придут — сразу говорим
         await cb.answer()
+        # воронка (владелец 17.11): сначала польза — «что ты пропустил» с кнопкой «Получать такие машины сразу» → оффер; тарифы тут не шлём
         if n > 0:
             await cb.message.answer(T.MISSED.format(n=n, word=cars_word(n), cheap=T.MISSED_CHEAP.format(k=cheap) if cheap else "",
-                                                    items="\n".join(items)))
+                                                    items="\n".join(items)), reply_markup=K.unlock(fid))
+            await ctx.db.event(uid, "missed_shown", ",".join(str(i) for i in ids))
         elif n == 0:
-            await cb.message.answer(T.MISSED_NONE, reply_markup=K.filter_saved(fid))
-        await offer_plans(cb.message, ctx, uid, T.NEED_PLAN)
+            await cb.message.answer(T.MISSED_NONE_LEAD, reply_markup=K.unlock(fid))
+        else:
+            await send_offer(cb.message, ctx, uid)
         return
     channels = await ctx.db.channel_count_for(uid)
     tail = T.MISSED_ACTIVE.format(n=n, word=cars_word(n)) if n > 0 else ""
@@ -396,12 +401,92 @@ async def activate_trial(ctx: Ctx, uid: int) -> float | None:
 
 
 @router.callback_query(F.data == "s:try")
-async def want_try(cb: CallbackQuery, ctx: Ctx) -> None:
-    """«Хочу попробовать» под фото приветствия → сразу все тарифы: картинка «что в каком тарифе» + кнопки «Пробный день», «Простой», «PRO»
-    (владелец 16.11; раньше — отдельное сообщение только про пробный день и кнопка «Другие тарифы»). Пробный уже брал — тарифы без него."""
-    u = await ctx.db.user(cb.from_user.id)
-    await send_plans(cb.message, ctx, cb.from_user.id, "" if can_trial(u) else T.TRIAL_USED)
+async def want_try(cb: CallbackQuery, ctx: Ctx, state: FSMContext) -> None:
+    """«Хочу попробовать» под фото приветствия. Воронка (владелец 17.11): сначала польза, потом цена — у человека без тарифа спрашиваем
+    фильтр («какую машину ищешь?»), после него покажем «что ты пропустил» и оффер. Фильтр уже есть — сразу оффер.
+    Тариф уже есть или оплата не подключена — как раньше, все тарифы с картинкой."""
+    uid = cb.from_user.id
+    u = await ctx.db.user(uid)
+    await ctx.db.event(uid, "try")
+    if not ctx.cfg.payments_on or plans.current(ctx.cfg, u):
+        await send_plans(cb.message, ctx, uid)
+    elif await ctx.db.filters(uid):
+        await send_offer(cb.message, ctx, uid)
+    else:
+        await state.set_data({})
+        await state.set_state(S.filter)
+        await cb.message.answer(T.TRY_ASK)
     await cb.answer()
+
+
+async def send_offer(msg: Message, ctx: Ctx, uid: int) -> None:
+    """Оффер с одной главной кнопкой (владелец 17.11): пробный день + арифметика на примере из фильтра человека («цена … при рынке …,
+    разница …») и «Все тарифы» второй кнопкой. Пробный день уже брал — сразу тарифы на месяц."""
+    u = await ctx.db.user(uid)
+    if not can_trial(u):
+        return await send_plans(msg, ctx, uid, T.TRIAL_USED if not plans.current(ctx.cfg, u) else "")
+    await ctx.db.event(uid, "offer")
+    example = ""
+    fs = [f for f in await ctx.db.filters(uid) if f["active"]]
+    if fs:
+        try:
+            m = await missed_full(ctx, Filter.loads(fs[0]["data"]), uid)
+            if m["deal"]:
+                dl = m["deal"]
+                example = T.SALE_EXAMPLE.format(car=html.escape(dl["car"]), price=rub(dl["price"]), market=rub(dl["market"]), diff=rub(dl["diff"]))
+            elif m["n"] > 0:
+                example = T.SALE_COUNT.format(n=m["n"], word=cars_word(m["n"]))
+        except Exception as e:
+            log.warning("пример для оффера не посчитали: %s", e)
+    opened = T.SALE_OPENED if await opened_items(ctx, uid) else ""
+    p = plans.plans(ctx.cfg)
+    await msg.answer(T.SALE_OFFER.format(example=example, opened=opened, price=p["trial"].price, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro),
+                     reply_markup=K.try_offer(p["trial"].price))
+
+
+@router.callback_query(F.data == "s:offer")
+async def open_offer(cb: CallbackQuery, ctx: Ctx) -> None:
+    await send_offer(cb.message, ctx, cb.from_user.id)
+    await cb.answer()
+
+
+@router.callback_query(F.data == "s:mute")
+async def mute_pushes(cb: CallbackQuery, ctx: Ctx) -> None:
+    """«Не присылать» под тизером или сводкой: больше никаких напоминаний неоплатившему."""
+    uid = cb.from_user.id
+    if await ctx.db.mark_once(f"nopush:{uid}"):
+        await ctx.db.event(uid, "mute")
+    ctx.tease.setdefault(uid, [0, 0.0, True])[2] = True
+    try:
+        await cb.message.edit_reply_markup(reply_markup=None)
+    except Exception:
+        pass
+    await cb.message.answer(T.MUTED)
+    await cb.answer()
+
+
+async def opened_text(ctx: Ctx, uid: int) -> str:
+    """После первой оплаты — ссылки на машины, которые человек видел до неё (тизеры и примеры «что пропустил»): кнопка «Открыть» не обманывает."""
+    items = await opened_items(ctx, uid)
+    if not items or not await ctx.db.mark_once(f"opened:{uid}"):
+        return ""
+    return T.OPENED.format(items="\n".join(items))
+
+
+async def opened_items(ctx: Ctx, uid: int) -> list[str]:
+    """Строки со ссылками на виденные до оплаты машины (за 3 дня). Закрытый канал — со ссылкой «вступить»; без приглашения — пропускаем."""
+    by_id = {ch["id"]: ch for ch in ctx.channels.values()}
+    items = []
+    for r in await ctx.db.shown_posts(uid, time.time() - 3 * DAY):
+        ch = by_id.get(r["channel_id"])
+        url = post_url(ch, r["msg_id"]) if ch else None
+        join = join_url(ch) if ch and is_private(ch) else None
+        if not url or (is_private(ch) and not join):
+            continue
+        items.append(T.OPENED_ITEM.format(url=url, car=html.escape(ctx.dict.car_name(r["make"], r["model"]) if r["make"] else "Машина"),
+                                          year=f" {r['year']}" if r["year"] else "", price=rub(r["price"]))
+                     + (T.OPENED_JOIN.format(url=join) if join else ""))
+    return items
 
 
 @router.callback_query(F.data == "s:plans")
@@ -428,6 +513,8 @@ async def send_plans(msg: Message, ctx: Ctx, uid: int, intro: str = "") -> None:
     p = plans.plans(ctx.cfg, u)                   # на пробном дне PRO — со скидкой (зачёт пробного)
     b = p["basic"]
     plan = plans.current(ctx.cfg, u)
+    if ctx.cfg.payments_on and not plan:
+        await ctx.db.event(uid, "offer")          # счётчик воронки: человек без тарифа увидел цены
     status = (T.SUB_FREE if plan is plans.FREE else
               T.SUB_STATUS_ACTIVE.format(plan=plan.title, until=fmt_date(max(u["paid_until"], u["trial_until"])))
               if plan else "")          # нет тарифа — про статус ничего не пишем (владелец 10.11)
@@ -505,6 +592,7 @@ async def send_pay_link(cb: CallbackQuery, ctx: Ctx, u, plan, auto: bool = False
         await cb.message.answer(T.PAY_ERROR)
         return
     await ctx.db.add_payment(cb.from_user.id, pid, plan.price, plan.id, auto=1 if live else 0)
+    await ctx.db.event(cb.from_user.id, "pay_link", plan.id)       # счётчик воронки: открыл оплату
     current = plans.current(ctx.cfg, u)
     switch = T.PAY_SWITCH.format(old=current.title) if current and current.id not in (plan.id, "free") and u["plan"] else ""
     days_word = "день" if plan.days == 1 else "дней"
@@ -599,11 +687,12 @@ async def autopay_manage(cb: CallbackQuery, ctx: Ctx) -> None:
 
 async def paid_message(ctx: Ctx, uid: int, plan, until: float):
     """Что написать после оплаты: пробный день — когда кончится и что PRO в этот день со скидкой (кнопка); иначе — «оплата прошла»."""
+    opened = await opened_text(ctx, uid)        # ссылки на машины из тизеров и «что пропустил» — один раз, после первой оплаты
     if plan.id != "trial":
-        return T.PAY_OK.format(plan=plan.title, until=fmt_date(until)), None
+        return T.PAY_OK.format(plan=plan.title, until=fmt_date(until)) + opened, None
     nf = "" if await ctx.db.filters(uid) else T.TRIAL_PAID_NOFILTER
     u = await ctx.db.user(uid)
-    return (T.TRIAL_PAID.format(until=fmt_date(until), nofilter=nf, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro),
+    return (T.TRIAL_PAID.format(until=fmt_date(until), nofilter=nf, pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro) + opened,
             K.plans(plans.plans(ctx.cfg, u), False, only="pro"))
 
 

@@ -18,6 +18,7 @@ class Ctx:
     reader: object = None                                      # userbot.Reader
     vk: object = None                                          # vk.VKReader
     pending: set = field(default_factory=set)                 # (человек, пост) в очереди «Простого» — не дублировать
+    tease: dict = field(default_factory=dict)                 # человек без тарифа → [сколько тизеров слали, когда последний, отписался]
     background: set = field(default_factory=set)              # отложенные отправки
     paylog_chat: int = 0                                       # закрытый канал «оплаты» для админа (id для бота), 0 — нет
     buffer_chat: int = 0                                       # закрытый канал с фото машин (id для бота), 0 — без фото

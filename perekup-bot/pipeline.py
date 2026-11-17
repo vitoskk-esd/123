@@ -304,6 +304,13 @@ def cars_word(n: int) -> str:
 async def missed(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int = 3) -> tuple[int, int, list[str]]:
     """«Что ты пропустил»: сколько машин под фильтр вышло за последние сутки в каналах человека (общая база + свои), сколько из них
     дешевле рынка, и 3 примера без контактов и ссылок — показать пользу до оплаты (владелец 10.11). Только уже собранные посты из базы."""
+    m = await missed_full(ctx, f, uid, hours, show)
+    return m["n"], m["cheap"], m["items"]
+
+
+async def missed_full(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int = 3) -> dict:
+    """То же, что missed, но подробно: n, cheap, items (строки примеров), ids (номера показанных объявлений — после оплаты пришлём
+    на них ссылки) и deal — лучший пример «ниже рынка» для оффера: {car, price, market, diff} или None (владелец 17.11)."""
     now = time.time()
     off = await ctx.db.off_channels(uid)
     allowed = {ch["id"]: ch for ch in ctx.channels.values() if (ch.get("base") or ch.get("added_by") == uid) and ch["id"] not in off}
@@ -331,18 +338,24 @@ async def missed(ctx: Ctx, f: Filter, uid: int, hours: int = 24, show: int = 3) 
         if f.min_discount and (disc is None or disc < f.min_discount or not matches(f, L, disc)):
             continue
         cheap += bool(disc is not None and disc >= SHOW_DISCOUNT)
-        found.append((r, L, disc))
+        found.append((r, L, disc, mkt.get((L.make, L.model, L.year)) if disc is not None else None))
     n = len(found) + max(0, len(hits) - 80) * (not f.min_discount)
     best = sorted(found, key=lambda x: (-(x[2] if x[2] is not None and x[2] >= SHOW_DISCOUNT else -100), -x[0]["at"]))[:show]
     d = ctx.dict
     items = []
-    for r, L, disc in best:
+    for r, L, disc, _ in best:
         mins = int((now - r["at"]) // 60)
         ago = f"{mins} мин назад" if mins < 60 else f"{mins // 60} ч назад"
         items.append(T.MISSED_ITEM.format(car=html.escape(d.car_name(L.make, L.model) if L.make else "Машина"), year=f" {L.year}" if L.year else "",
                                           price=rub(L.price), city=f" · 📍 {html.escape(place_label(d, L))}" if L.region else "",
                                           ago=ago, disc=f" · 🔥 −{disc}%" if disc is not None and disc >= SHOW_DISCOUNT else ""))
-    return n, cheap, items
+    deal = None
+    if best and best[0][2] is not None and best[0][2] >= SHOW_DISCOUNT and best[0][3]:
+        r, L, disc, market = best[0]
+        market = int(round(market, -4))                     # рынок — до десятков тысяч: это оценка, а не точная цифра
+        if market > L.price:
+            deal = {"car": d.car_name(L.make, L.model) + (f" {L.year}" if L.year else ""), "price": L.price, "market": market, "diff": market - L.price}
+    return {"n": n, "cheap": cheap, "items": items, "ids": [r["id"] for r, *_ in best], "deal": deal}
 
 
 HISTORY = 300            # сколько последних постов канала загружаем в оценку рынка при подключении
@@ -395,11 +408,19 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
     # кому подходит: первый подходящий фильтр каждого человека; кому эта машина уже уходила — пропускаем
     already = await ctx.db.delivered_to(fp, ckey, time.time() - DEDUP_DAYS * DAY)
     targets: dict[int, tuple] = {}
+    tease: dict[int, bool] = {}              # кому без тарифа покажем тизер этой машины → можно ли ему ещё пробный день
+    openable = not is_private(channel) or bool(join_url(channel))      # после оплаты сможем дать ссылку на этот пост — иначе «Открыть» обманет
     for row in rows:
         uid = row["id"]
         if uid in targets or uid in already or (uid, fp) in ctx.pending or (uid, ckey) in ctx.pending:
             continue
         plan = row_plan[row["fid"]]
+        if plan is None:                     # без тарифа: не машина, а тизер — без фото, ссылки и контакта (не чаще раза в день)
+            if (ctx.cfg.payments_on and channel["base"] and openable and row["frank"] == 1 and uid not in tease and len(tease) < TEASE_PER_POST
+                    and await _tease_ok(ctx, uid, now) and matches(Filter.loads(row["data"]), L, r.discount)):
+                st = ctx.tease[uid]; st[0] += 1; st[1] = now          # бронь сразу: соседний пост тому же человеку тизер уже не пошлёт
+                tease[uid] = not row["trial_used"]
+            continue
         if not plan or row["frank"] > plan.max_filters:     # нет доступа или фильтр сверх лимита тарифа
             continue
         if not channel["base"] and plan.max_own == 0:       # свои каналы — не в этом тарифе
@@ -410,9 +431,55 @@ async def process(bot: Bot, ctx: Ctx, raw: RawPost) -> Result:
             ctx.pending |= {k for k in ((uid, fp), (uid, ckey)) if k[1]}
     held = {k for uid in targets for k in ((uid, fp), (uid, ckey)) if k[1]}     # снимаем бронь, когда отправка записана в базу
     try:
-        return await _deliver(bot, ctx, raw, channel, r, L, fp, ckey, targets, photo_task)
+        await _deliver(bot, ctx, raw, channel, r, L, fp, ckey, targets, photo_task)
     finally:
         ctx.pending -= {k for k in held if k[0] not in r.delayed}           # «Простой» снимает свою бронь сам, после отложенной отправки
+    await _tease(bot, ctx, raw, r, L, tease)
+    return r
+
+
+TEASE_PER_POST = 20          # одна машина — не больше стольких тизеров: рассылка неоплатившим не должна тормозить подписчиков
+TEASE_GAP = 20 * 3600        # первые тизеры — не чаще раза в день
+TEASE_DAILY = 3              # столько «ежедневных», дальше — раз в неделю
+TEASE_TOTAL = 7              # и всего не больше стольких: кто не купил после семи — того не дёргаем
+
+
+async def _tease_ok(ctx: Ctx, uid: int, now: float) -> bool:
+    """Можно ли сейчас показать человеку без тарифа тизер: не отписался, прошёл день (после трёх — неделя), всего меньше семи."""
+    st = ctx.tease.get(uid)
+    if st is None:
+        n, last = await ctx.db.tease_state(uid)
+        muted = await ctx.db.has_mark(f"nopush:{uid}")
+        st = ctx.tease.setdefault(uid, [n, last, muted])
+    n, last, muted = st
+    return not muted and n < TEASE_TOTAL and now - last >= (TEASE_GAP if n < TEASE_DAILY else 7 * DAY)
+
+
+async def _tease(bot: Bot, ctx: Ctx, raw: RawPost, r: Result, L: Listing, tease: dict) -> None:
+    """Дожим тех, кто не оплатил (владелец 17.11): живая машина под его фильтр — модель, цена, «ниже рынка», сколько секунд назад вышла,
+    но без фото, ссылки и контакта. Номер объявления пишем в события: после оплаты пришлём на него ссылку."""
+    if not tease:
+        return
+    d = ctx.dict
+    name = L.kind.capitalize() if L.kind else d.car_name(L.make, L.model) if L.make else "Машина"
+    secs = max(1, int(time.time() - raw.date))
+    info = [f"⏱ вышла {secs} с назад" if secs < 90 else f"⏱ вышла {secs // 60} мин назад"]
+    if L.region:
+        info.insert(0, f"📍 {place_label(d, L)}")
+    if L.mileage:
+        info.insert(0, f"🛣 {L.mileage:,} км".replace(",", " "))
+    disc = T.TEASER_DISC.format(d=r.discount) if r.discount is not None and r.discount >= SHOW_DISCOUNT else ""
+    text = T.TEASER.format(car=html.escape(name), year=f" {L.year}" if L.year else "", price=rub(L.price), info=html.escape(" · ".join(info)), disc=disc)
+    price = plans.plans(ctx.cfg)["trial"].price
+
+    async def one(uid: int, can_trial: bool) -> None:
+        try:
+            if await _send(lambda: bot.send_message(uid, text, reply_markup=K.teaser(price if can_trial else None)), uid, ctx, LATER_PRIO):
+                await ctx.db.event(uid, "teaser", str(r.post_id))
+        except Exception as e:
+            log.info("тизер не отправлен: %s", e)
+
+    await asyncio.gather(*(one(uid, ct) for uid, ct in tease.items()))
 
 
 async def _deliver(bot: Bot, ctx: Ctx, raw: RawPost, channel: dict, r: Result, L: Listing, fp: str, ckey, targets: dict, photo_task) -> Result:

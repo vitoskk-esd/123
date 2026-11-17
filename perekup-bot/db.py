@@ -543,6 +543,52 @@ class DB:
         await self.conn.commit()
         return cur.rowcount
 
+    async def has_mark(self, key: str) -> bool:
+        return bool(await self._one("SELECT 1 FROM marks WHERE key=?", key))
+
+    async def mark_at(self, key: str) -> float | None:
+        row = await self._one("SELECT at FROM marks WHERE key=?", key)
+        return row["at"] if row else None
+
+    # ---------- воронка продаж: дожим тех, кто не оплатил, и счётчики (владелец 17.11) ----------
+    async def tease_state(self, uid: int) -> tuple[int, float]:
+        """Сколько тизеров человек уже получил и когда последний."""
+        row = await self._one("SELECT COUNT(*) n, COALESCE(MAX(at), 0) last FROM events WHERE user_id=? AND kind='teaser'", uid)
+        return row["n"], row["last"]
+
+    async def leads(self, now: float, since: float) -> list:
+        """Люди без доступа с активным фильтром, сохранившие первый фильтр после since и не отписавшиеся от напоминаний."""
+        return await self._all(
+            "SELECT u.*, (SELECT MIN(at) FROM events e WHERE e.user_id=u.id AND e.kind='filter') fat FROM users u "
+            "WHERE u.blocked=0 AND u.paid_until<=? AND u.trial_until<=? AND COALESCE(u.plan,'')!='admin' "
+            "AND EXISTS (SELECT 1 FROM filters f WHERE f.user_id=u.id AND f.active=1) "
+            "AND NOT EXISTS (SELECT 1 FROM marks m WHERE m.key='nopush:'||u.id) "
+            "AND (SELECT MIN(at) FROM events e WHERE e.user_id=u.id AND e.kind='filter')>?", now, now, since)
+
+    async def shown_posts(self, uid: int, since: float, limit: int = 6) -> list:
+        """Объявления, которые человек видел до оплаты (тизеры и примеры «что пропустил») — после оплаты пришлём на них ссылки."""
+        ids: list[int] = []
+        for r in await self._all("SELECT meta FROM events WHERE user_id=? AND kind IN ('teaser','missed_shown') AND at>? ORDER BY at DESC", uid, since):
+            ids += [int(x) for x in (r["meta"] or "").split(",") if x.isdigit() and int(x) not in ids]
+        ids = ids[:limit]
+        if not ids:
+            return []
+        rows = await self._all(f"SELECT id, channel_id, msg_id, make, model, year, price FROM posts WHERE id IN ({','.join('?' * len(ids))})", *ids)
+        return sorted(rows, key=lambda r: ids.index(r["id"]))
+
+    async def funnel(self, since: float) -> dict:
+        """Где отваливаются новые люди (пришедшие после since, без админов): сколько дошло до каждого шага."""
+        who = "u.created_at>? AND COALESCE(u.plan,'')!='admin'"
+        step = lambda kinds: self._one(f"SELECT COUNT(DISTINCT e.user_id) n FROM events e JOIN users u ON u.id=e.user_id "
+                                       f"WHERE {who} AND e.kind IN ({','.join('?' * len(kinds))})", since, *kinds)
+        total = lambda kind: self._one("SELECT COUNT(*) n FROM events WHERE kind=? AND at>?", kind, since)
+        return {
+            "users": (await self._one(f"SELECT COUNT(*) n FROM users u WHERE {who}", since))["n"],
+            "tried": (await step(["try"]))["n"], "filt": (await step(["filter"]))["n"],
+            "offer": (await step(["offer", "pay_link"]))["n"], "pay": (await step(["pay_link"]))["n"], "paid": (await step(["paid"]))["n"],
+            "teasers": (await total("teaser"))["n"], "digests": (await total("digest"))["n"], "mutes": (await total("mute"))["n"],
+        }
+
     async def mark_once(self, key: str) -> bool:
         """True, если ключа ещё не было (и ставит его): напоминание уходит ровно один раз."""
         cur = await self.conn.execute("INSERT OR IGNORE INTO marks (key, at) VALUES (?,?)", (key, time.time()))

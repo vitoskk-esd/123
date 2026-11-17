@@ -31,6 +31,8 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
         return
     now = now or time.time()
     all_plans = plans.plans(ctx.cfg)
+    await ctx.db.mark_once("funnel_v1")                        # с этого момента считаем воронку в /admin
+    await lead_digests(bot, ctx, now)
     if await ctx.db.mark_once("trial_reset_paid_13_11"):       # один раз: бравшим бесплатный пробный — можно купить платный
         log.info("пробный день снова доступен: %d", await ctx.db.reset_free_trials())
     # оплатил, но не нажал «Я оплатил» — продлеваем сами
@@ -98,6 +100,25 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
                     basic_filters=f"{b.max_filters} фильтр{'а' if 1 < b.max_filters < 5 else 'ов' if b.max_filters >= 5 else ''}"), K.plans(all_plans, False))
             else:
                 await send(bot, ctx, u["id"], T.ACCESS_ENDED, K.plans(all_plans, not u["trial_used"]))
+
+
+async def lead_digests(bot: Bot, ctx: Ctx, now: float) -> None:
+    """Дожим тех, кто сохранил фильтр и не оплатил (владелец 17.11): через сутки — «вчера под твой фильтр вышло N машин»,
+    через трое — последнее напоминание. По одному разу; отписавшимся («Не присылать») и тем, у кого ничего не вышло, не шлём."""
+    from pipeline import cars_word, missed_full
+    from query import Filter
+    for u in await ctx.db.leads(now, now - 92 * 3600):
+        age = now - u["fat"]
+        for key, lo, hi, hours, text in (("dig1", 24, 44, 24, T.DIGEST1), ("dig3", 72, 92, 72, T.DIGEST3)):
+            if not lo * 3600 <= age < hi * 3600 or not await ctx.db.mark_once(f"{key}:{u['id']}"):
+                continue
+            fs = [f for f in await ctx.db.filters(u["id"]) if f["active"]]
+            m = await missed_full(ctx, Filter.loads(fs[0]["data"]), u["id"], hours)
+            if m["n"] > 0:
+                await send(bot, ctx, u["id"], text.format(n=m["n"], word=cars_word(m["n"]), items="\n".join(m["items"]),
+                                                         cheap=T.MISSED_CHEAP.format(k=m["cheap"]) if m["cheap"] else ""), K.unlock(mute=True))
+                await ctx.db.event(u["id"], "digest", key)
+                await ctx.db.event(u["id"], "missed_shown", ",".join(str(i) for i in m["ids"]))
 
 
 async def autopay_failed(bot: Bot, ctx: Ctx, uid: int, plan) -> None:

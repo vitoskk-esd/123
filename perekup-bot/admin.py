@@ -219,6 +219,11 @@ async def admin(msg: Message, ctx: Ctx) -> None:
     if not await is_admin(msg, ctx):
         return
     s = await ctx.db.admin_stats()
+    since = max(time.time() - 30 * 86400, await ctx.db.mark_at("funnel_v1") or time.time())
+    fn = await ctx.db.funnel(since)
+    pct = lambda k: f" ({fn[k] * 100 // fn['users']}%)" if fn["users"] else ""
+    funnel_text = T.FUNNEL.format(since=time.strftime("%d.%m", time.localtime(since)), **fn, p_try=pct("tried"), p_filter=pct("filt"),
+                                  p_offer=pct("offer"), p_pay=pct("pay"), p_paid=pct("paid")) if ctx.cfg.payments_on else ""
     p = s["posts24"]
     ch = {(r["status"], r["base"]): r["n"] for r in s["channels"]}
     mrr = s["basic"] * ctx.cfg.price_basic + s["pro"] * ctx.cfg.price_pro
@@ -240,6 +245,7 @@ async def admin(msg: Message, ctx: Ctx) -> None:
         f"остальное — проверка, фото и отправка\n\n"
         f"📢 Каналы базы: {ch.get(('joined', 1), 0)} подключено, {ch.get(('queued', 1), 0)} в очереди, "
         f"{ch.get(('awaiting', 1), 0)} ждут одобрения админа, {ch.get(('failed', 1), 0)} с ошибкой · свои у людей: {ch.get(('joined', 0), 0)}\n\n"
+        f"{funnel_text}\n\n"
         f"🔗 Откуда пришли:\n{src or '—'}\n\n"
         "👑 Админ-панель — кнопка внизу или /panel\n\nКоманды:\n/add @канал1 vk.com/группа — добавить каналы и группы ВК в общую базу\n/list — общая база: смотреть и удалять каналы\n"
         "/tobase — перенести свои каналы из «📢 Каналы» в общую базу\n"

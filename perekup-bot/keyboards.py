@@ -44,6 +44,23 @@ def new_filter() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_NEW_FILTER, callback_data="f:new")])
 
 
+def unlock(fid: int | None = None, mute: bool = False) -> InlineKeyboardMarkup:
+    """Под «что ты пропустил» и сводками: к офферу; fid — ещё и «Изменить фильтр»; mute — «Не присылать»."""
+    rows = [[B(text=T.BTN_UNLOCK, callback_data="s:offer")]]
+    if fid:
+        rows.append([B(text=T.BTN_EDIT_FILTER, callback_data=f"f:e:{fid}")])
+    if mute:
+        rows.append([B(text=T.BTN_MUTE, callback_data="s:mute")])
+    return kb(*rows)
+
+
+def teaser(trial_price: int | None) -> InlineKeyboardMarkup:
+    """Под тизером живой машины: пробный день (если ещё не брал) или тарифы + «Не присылать»."""
+    first = (B(text=T.BTN_TEASER_TRIAL.format(price=trial_price), callback_data="s:pay:trial") if trial_price
+             else B(text=T.BTN_TEASER_PLANS, callback_data="s:plans"))
+    return kb([first], [B(text=T.BTN_MUTE, callback_data="s:mute")])
+
+
 def try_button() -> InlineKeyboardMarkup:
     return kb([B(text=T.BTN_TRY, callback_data="s:try")])
 

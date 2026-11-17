@@ -15,6 +15,7 @@ from aiogram.types import CallbackQuery, Chat, Message, MessageId, PhotoSize, Up
 from telethon.tl.types import Channel, ChatPhotoEmpty
 
 import jobs
+import plans as plans_mod
 import texts as T
 from main import build_dispatcher
 from config import Config
@@ -226,7 +227,8 @@ async def test_no_plan_then_buy_basic(env):
     """Без тарифа машины не приходят; оплатил «Простой» — приходят 30 дней; повторный «Я оплатил» не продлевает дважды."""
     dp, bot, s, ctx = env
     await make_filter(dp, bot, "приора до 300к", plan=None, trial_used=True)     # пробный день уже брал
-    assert "выбери тариф" in s.texts(USER)[-1] and "Пробный день — бесплатно" not in s.texts(USER)[-1]
+    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]   # воронка 17.11: после фильтра — не тарифы, а кнопка к офферу
+    assert "ничего не вышло" in last.text and "s:offer" in [b.callback_data for row in last.reply_markup.inline_keyboard for b in row]
     assert (await process(bot, ctx, post(CH1, "Приора 2011, 260 000 руб"))).sent == []
     await dp.feed_update(bot, msg("💳 Подписка"))
     assert "Твой тариф" not in s.texts(USER)[-1] and "Простой — 1390 ₽" in s.texts(USER)[-1] and "PRO — 2490 ₽" in s.texts(USER)[-1]
@@ -257,9 +259,15 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     tries = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER and m.text == T.TRY_PROMPT]
     assert len(tries) == 1 and [b.callback_data for row in tries[0].reply_markup.inline_keyboard for b in row] == ["s:try"]
     assert T.ASK_FILTER not in s.texts(USER) and s.texts(USER)[-1] == T.TRY_PROMPT    # приветствие кончается «Хочу попробовать» (владелец 13.11)
-    await dp.feed_update(bot, cb("s:try"))
-    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]           # сразу все тарифы с картинкой (владелец 16.11)
-    assert "Пробный день — 490 ₽" in last.caption
+    await dp.feed_update(bot, cb("s:try"))                                # воронка 17.11: сначала фильтр, потом цена
+    assert s.texts(USER)[-1] == T.TRY_ASK and not [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER and m.caption and "Простой" in m.caption]
+    await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
+    await dp.feed_update(bot, cb("s:offer"))
+    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]          # оффер: пробный день главной кнопкой
+    assert "Пробный день — 490 ₽" in last.text and "Простой" not in last.text
+    assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:plans"]
+    await dp.feed_update(bot, cb("s:plans"))                              # «Другие тарифы» — все три с картинкой
+    last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
     assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:pay:basic", "s:pay:pro"]
     await dp.feed_update(bot, cb("s:pay:trial"))
     pay = await ctx.db.last_pending(USER)
@@ -267,8 +275,7 @@ async def test_trial_day_once_and_basic_limits_and_upgrade(env):
     await apply_payment(ctx, USER, pay["yk_id"], "succeeded")
     u = await ctx.db.user(USER)
     assert u["trial_used"] == 1 and u["plan"] == "trial" and 23 * 3600 < u["paid_until"] - time.time() <= 24 * 3600
-    await dp.feed_update(bot, msg("камри до 1 млн")); await dp.feed_update(bot, cb("f:save"))
-    await dp.feed_update(bot, msg("солярис до 900к")); await dp.feed_update(bot, cb("f:save"))
+    await dp.feed_update(bot, cb("f:new")); await dp.feed_update(bot, msg("солярис до 900к")); await dp.feed_update(bot, cb("f:save"))
     assert len(await ctx.db.filters(USER)) == 1 and "«Пробный день» — 1 фильтр" in s.texts(USER)[-1]   # в пробном — один фильтр
     await ctx.db.delete_filter(USER, (await ctx.db.filters(USER))[0]["id"])
     await ctx.db.set_user(USER, paid_until=time.time() - 1)                 # день прошёл
@@ -1820,7 +1827,11 @@ async def test_missed_preview_before_plan(env):
     texts = s.texts(USER)
     preview = next(t for t in texts if "За последние сутки под этот фильтр вышло" in t)
     assert "вышло 2 машины" in preview and "Toyota Camry" in preview and "900 000 ₽" in preview and "+7 999" not in preview
-    assert "выбери тариф" in texts[-1] and "Простой" in str([getattr(m, "reply_markup", None) for m in s.sent if getattr(m, "chat_id", None) == USER and getattr(m, "reply_markup", None)][-1])
+    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]      # воронка 17.11: под примерами — кнопка к офферу, тарифы — после неё
+    assert last.text == preview and [b.callback_data for row in last.reply_markup.inline_keyboard for b in row][0] == "s:offer"
+    await dp.feed_update(bot, cb("s:offer"))                                 # пробный уже брал — сразу тарифы на месяц
+    photo = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
+    assert photo.caption.startswith("Пробный день ты уже брал") and "Простой" in str(photo.reply_markup)
     await dp.feed_update(bot, msg("приора до 100к")); await dp.feed_update(bot, cb("f:save"))
     assert any("ничего не вышло" in t for t in s.texts(USER))
 
@@ -1863,10 +1874,10 @@ async def test_free_trial_users_can_buy_paid_trial_once(env):
     await ctx.db.add_payment(OTHER, "tp", 490, "trial"); await ctx.db.finish_payment("tp", "succeeded")   # OTHER платил
     await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
     assert (await ctx.db.user(USER))["trial_used"] == 0 and (await ctx.db.user(OTHER))["trial_used"] == 1
-    await dp.feed_update(bot, cb("s:try"))
+    await dp.feed_update(bot, cb("s:plans"))
     last = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == USER][-1]
     assert "s:pay:trial" in [b.callback_data for row in last.reply_markup.inline_keyboard for b in row]
-    await dp.feed_update(bot, cb("s:try", OTHER))
+    await dp.feed_update(bot, cb("s:offer", OTHER))
     photo = [m for m in s.sent if isinstance(m, SendPhoto) and m.chat_id == OTHER][-1]
     assert photo.caption.startswith("Пробный день ты уже брал") and "Сравни тарифы на картинке" not in photo.caption
 
@@ -2336,3 +2347,87 @@ def test_read_document_retries_on_timeout(monkeypatch):
 
 async def _noop():
     return None
+
+
+async def test_sales_funnel_filter_first_offer_and_counters(env):
+    """Воронка (владелец 17.11): «Хочу попробовать» → вопрос про фильтр (не цены) → «что пропустил» с кнопкой → оффер с арифметикой
+    на примере («при рынке …, разница …») и пробным днём главной кнопкой → оплата → ссылки на машины, которые человек видел до оплаты.
+    В /admin — счётчики: кто до какого шага дошёл."""
+    from user import apply_payment, paid_message
+    import jobs
+    dp, bot, s, ctx = env
+    await jobs.tick(bot, ctx)                                             # отметка «считаем воронку с этого момента»
+    for k in range(6):                                                    # рынок Камри 2012 ≈ 1,5 млн
+        await process(bot, ctx, post(CH2, f"Toyota Camry 2012, цена {1450 + k * 20} 000 ₽, пробег {150 + k} тыс"))
+    await process(bot, ctx, post(CH1, "Toyota Camry 2012, 1 200 000 ₽, пробег 170 тыс, +7 999 111-22-33"))
+    await dp.feed_update(bot, msg("/start reels"))
+    await dp.feed_update(bot, cb("s:try"))
+    assert s.texts(USER)[-1] == T.TRY_ASK                                 # цену пока не показываем
+    await dp.feed_update(bot, msg("камри до 1,3 млн")); await dp.feed_update(bot, cb("f:save"))
+    last = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "вышло 1 машина" in last.text and "1 200 000 ₽" in last.text and "+7 999" not in last.text and "t.me" not in last.text
+    assert [b.callback_data for row in last.reply_markup.inline_keyboard for b in row][0] == "s:offer"
+    await dp.feed_update(bot, cb("s:offer"))
+    offer = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Toyota Camry 2012 — 1 200 000 ₽" in offer.text and "при рынке ≈ 1 490 000 ₽" in offer.text and "Разница — <b>290 000 ₽</b>" in offer.text
+    assert "Пробный день — 490 ₽" in offer.text and "пришлю ссылки на машины" in offer.text
+    assert [b.callback_data for row in offer.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:plans"]
+    await dp.feed_update(bot, cb("s:pay:trial"))
+    pay = await ctx.db.last_pending(USER)
+    until = await apply_payment(ctx, USER, pay["yk_id"], "succeeded")
+    text, _ = await paid_message(ctx, USER, plans_mod.plans(ctx.cfg)["trial"], until)
+    assert "Машины, которые ты видел до оплаты" in text and "https://t.me/avto_msk/" in text and "Toyota Camry 2012 · 1 200 000 ₽" in text
+    assert "видел до оплаты" not in (await paid_message(ctx, USER, plans_mod.plans(ctx.cfg)["trial"], until))[0]    # только один раз
+    await dp.feed_update(bot, msg("/start", OTHER))                       # второй человек дальше старта не пошёл
+    fn = await ctx.db.funnel(0)
+    assert (fn["users"], fn["tried"], fn["filt"], fn["offer"], fn["pay"], fn["paid"]) == (2, 1, 1, 1, 1, 1)
+    await dp.feed_update(bot, msg("/admin", ADMIN))
+    assert "Воронка" in s.texts(ADMIN)[-1] and "оплатили: <b>1</b> (50%)" in s.texts(ADMIN)[-1]
+
+
+async def test_teaser_for_unpaid_once_a_day_and_mute(env):
+    """Дожим (владелец 17.11): человеку без тарифа живая машина под фильтр приходит тизером — без ссылки, фото и контакта, не чаще раза
+    в день; подписчики получают машину как обычно; «Не присылать» выключает напоминания."""
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "приора до 400к", plan=None)
+    await make_filter(dp, bot, "приора до 400к", OTHER)                   # PRO
+    r = await process(bot, ctx, post(CH1, "Приора 2012, 300 000 руб, +7 999 111-22-33"))
+    assert r.sent == [OTHER]                                              # тизер — не доставка
+    tz = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER][-1]
+    assert "Только что вышла машина под твой фильтр" in tz.text and "300 000 ₽" in tz.text and "+7 999" not in tz.text and "t.me" not in tz.text
+    assert [b.callback_data for row in tz.reply_markup.inline_keyboard for b in row] == ["s:pay:trial", "s:mute"]
+    assert tz.link_preview_options is None or not getattr(tz.link_preview_options, "url", None)
+    n = len(s.texts(USER))
+    await process(bot, ctx, post(CH1, "Приора 2013, 320 000 руб"))
+    assert len(s.texts(USER)) == n                                        # второй за день не шлём
+    ctx.tease[USER][1] -= 86400                                           # прошли сутки
+    await process(bot, ctx, post(CH1, "Приора 2014, 350 000 руб"))
+    assert len(s.texts(USER)) == n + 1 and (await ctx.db.tease_state(USER))[0] == 2
+    await dp.feed_update(bot, cb("s:mute"))
+    assert s.texts(USER)[-1] == T.MUTED
+    ctx.tease[USER][1] -= 86400
+    n = len(s.texts(USER))
+    await process(bot, ctx, post(CH1, "Приора 2015, 380 000 руб"))
+    assert len(s.texts(USER)) == n                                        # отписался — тишина
+    ctx.tease.clear()                                                     # после перезапуска бота отписка читается из базы
+    await process(bot, ctx, post(CH1, "Приора 2016, 390 000 руб"))
+    assert len(s.texts(USER)) == n
+
+
+async def test_lead_digests_next_day_and_third_day(env):
+    """Дожим: через сутки после первого фильтра — «вчера под твой фильтр вышло N машин», через трое — последнее напоминание; по одному разу."""
+    import jobs
+    dp, bot, s, ctx = env
+    await make_filter(dp, bot, "солярис до 900к", plan=None)
+    ctx.tease[USER] = [0, 0.0, True]                                      # тизеры в этом тесте не нужны
+    for k in range(2):
+        await process(bot, ctx, post(CH1, f"Hyundai Solaris 201{5 + k}, 7{k}0 000 ₽"))
+    await jobs.tick(bot, ctx)
+    assert not any("Вчера под твой фильтр" in t for t in s.texts(USER))   # сутки ещё не прошли
+    await ctx.db._run("UPDATE events SET at=at-? WHERE user_id=? AND kind='filter'", 25 * 3600, USER)
+    await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
+    d1 = [m for m in s.sent if isinstance(m, SendMessage) and m.chat_id == USER and "Вчера под твой фильтр вышло 2 машины" in m.text]
+    assert len(d1) == 1 and [b.callback_data for row in d1[0].reply_markup.inline_keyboard for b in row] == ["s:offer", "s:mute"]
+    await ctx.db._run("UPDATE events SET at=at-? WHERE user_id=? AND kind='filter'", 48 * 3600, USER)
+    await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
+    assert len([t for t in s.texts(USER) if "За три дня под твой фильтр" in t and "последнее напоминание" in t]) == 1
