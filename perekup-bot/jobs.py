@@ -85,8 +85,10 @@ async def tick(bot: Bot, ctx: Ctx, now: float | None = None) -> None:
             buttons = K.plans(plans.plans(ctx.cfg, u, now), False) if plan.id == "trial" else K.plans(all_plans, False, only=plan.id)
             deal = T.TRIAL_ENDS_DEAL.format(pro_trial=ctx.cfg.price_pro_trial, pro=ctx.cfg.price_pro) if plan.id == "trial" else ""
             await send(bot, ctx, u["id"], T.ACCESS_ENDS.format(when=when, plan=plan.title, n=s["n"], good=s["good"]) + deal, buttons)
-    # доступ закончился
-    for u in await ctx.db.users("MAX(trial_until, paid_until)<? AND MAX(trial_until, paid_until)>?", now, now - 2 * DAY):
+    # доступ закончился — только у тех, у кого он правда был: оплата или бесплатные дни (trial_until позже регистрации).
+    # Новому человеку trial_until = момент /start (бесплатных дней 0) — ему «Подписка закончилась» не пишем (владелец 17.11: «отпугивает»)
+    for u in await ctx.db.users("MAX(trial_until, paid_until)<? AND MAX(trial_until, paid_until)>? AND (paid_until>0 OR trial_until>created_at+3600)",
+                                now, now - 2 * DAY):
         end = int(max(u["trial_until"], u["paid_until"]))
         if u["autorenew"] and ctx.cfg.autopay_live:       # идёт автосписание — «доступ закончился» не пишем
             continue

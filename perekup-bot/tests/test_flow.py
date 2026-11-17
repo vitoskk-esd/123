@@ -2431,3 +2431,18 @@ async def test_lead_digests_next_day_and_third_day(env):
     await ctx.db._run("UPDATE events SET at=at-? WHERE user_id=? AND kind='filter'", 48 * 3600, USER)
     await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
     assert len([t for t in s.texts(USER) if "За три дня под твой фильтр" in t and "последнее напоминание" in t]) == 1
+
+
+async def test_new_user_never_gets_subscription_ended(env):
+    """Владелец 17.11: новый человек сразу после приветствия получал «Подписка закончилась» — у него trial_until = момент /start
+    (бесплатных дней 0), и фоновая проверка считала это кончившимся доступом. Теперь — только тем, у кого доступ был."""
+    import jobs
+    dp, bot, s, ctx = env
+    await dp.feed_update(bot, msg("/start"))
+    await ctx.db._run("UPDATE users SET created_at=created_at-60, trial_until=trial_until-60 WHERE id=?", USER)   # прошла минута
+    await jobs.tick(bot, ctx); await jobs.tick(bot, ctx)
+    assert not any("закончилась" in t or "закончился" in t for t in s.texts(USER))
+    await dp.feed_update(bot, msg("/start", OTHER))                        # а у того, кто платил, — как раньше
+    await ctx.db.set_user(OTHER, paid_until=time.time() - 60, plan="basic")
+    await jobs.tick(bot, ctx)
+    assert any("Подписка закончилась" in t for t in s.texts(OTHER))
