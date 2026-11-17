@@ -50,7 +50,7 @@ mount("s5", { bg: "loftblogera", mid: K("ke", 300, 1910, 880, {}, { armR: -150 }
   bubbles: [{ id: "k3", p: "ke", html: "А вы тот самый, с трактором?<br><em>Миллион просмотров!</em>", fs: 36 }] }, { x: 540, y: 1150, s: 1.02 });
 // 8. Толян: «тебе бы тоже бота»
 mount("s6", { bg: "loftblogera", farBlur: 3, mid: MZ + T("td", 420, 1910, 1000, { armR: -110 }, { rim: "#ffd6f6", side: 1, z: 8 }, { item: "phone" }), lights: LL,
-  bubbles: [{ id: "t1", p: "td", html: "Жора,<br><em>тебе бы тоже бота.</em>", fs: 46 }] }, { x: 540, y: 1100, s: 1.04 });
+  bubbles: [{ id: "t1", p: "td", html: "Жора, тебе тоже<br><em>нужен бот.</em>", fs: 46 }] }, { x: 540, y: 1100, s: 1.04 });
 // 9. бот: Королла и Приора
 mount("i3", { bg: "ploshchadkanoch", over: TWOCARDS4() }, { x: 540, y: 960, s: 1 });
 // 10. площадка ночью, 23:58: 10/10, Римма
