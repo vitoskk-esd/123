@@ -1,0 +1,82 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><link rel="stylesheet" href="../../kit/base.css"><link rel="stylesheet" href="../cine.css"><link rel="stylesheet" href="masks.css">
+<style>
+html,body{margin:0;background:#0b0c10;width:1080px;height:1350px;overflow:hidden}
+.hd{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;gap:18px;padding:0 30px;background:#0b0c10;z-index:5}
+.hd b{font-family:Unbounded;font-weight:900;font-size:28px;color:#151515;background:#ffd23f;border:5px solid #151515;border-radius:12px;padding:4px 14px}
+.hd span{font-family:Unbounded;font-weight:800;font-size:25px;color:#fff;line-height:1.1}.hd i{margin-left:auto;font-style:normal;font-family:"JetBrains Mono";font-weight:800;font-size:24px;color:#8b93a3;white-space:nowrap}
+.fr{position:absolute;top:96px;width:520px;height:924px;overflow:hidden;border-radius:18px;outline:4px solid #2a2d34}
+.fr .sc{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.48148);transform-origin:0 0}
+.fr .lb{position:absolute;left:12px;top:12px;z-index:99;font-family:"JetBrains Mono";font-weight:800;font-size:20px;color:#151515;background:#ffd23f;border-radius:8px;padding:2px 10px}
+.arrow{position:absolute;left:525px;top:520px;width:30px;text-align:center;font-family:Unbounded;font-weight:900;font-size:30px;color:#ffd23f;z-index:9}
+.txt{position:absolute;left:30px;right:30px;top:1032px;color:#fff}
+.txt .vo{font-family:Unbounded;font-weight:800;font-size:27px;line-height:1.22}
+.txt .vo small{display:block;font-family:"JetBrains Mono";font-size:20px;color:#ffd23f;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.txt .mv{margin-top:12px;font-family:Onest;font-size:20px;line-height:1.33;color:#b9bfca}
+.txt .mv b{color:#fff}
+</style></head><body>
+<div class="hd"><b>ПЕРЕКУПЫ</b><span id="h"></span><i id="tc"></i></div>
+<div class="fr" style="left:0"><div class="sc" id="A"></div><div class="lb" id="la">A</div></div>
+<div class="arrow">→</div>
+<div class="fr" style="left:560px"><div class="sc" id="B"></div><div class="lb" id="lbb">B</div></div>
+<div class="txt"><div class="vo" id="vo"></div><div class="mv" id="mv"></div></div>
+<script src="../chars.js"></script><script src="../chars2.js"></script><script src="../chars3.js"></script><script src="../chars4.js"></script><script src="../chars5.js"></script>
+<script src="bgs.js"></script><script src="../cine.js"></script><script src="props.js"></script><script src="props83.js"></script>
+<script>
+// «ТОЛЯН · 22: ЖОРА НА ПАУЗЕ» (ep83) — сезон «Свой автосалон», без мата. «Жора Моторс» три дня закрыт («ПЕРЕУЧЁТ») — Толян подозревает подставу
+// и едет к Жоре домой с квасом. Дверь открывает мама: «Жорик! К тебе студент!» Жора без кепки на диване с приставкой: «Тихо! У меня заезд!»
+// На экране — пародийная игра «Перекуп-Сити»: «в игре у меня салон на сто машин, и никто не ржёт». Мама несёт телефон: бот прислал Камри ниже рынка —
+// Жора тайно подписался на «Перехват» («ты сам сказал: мне тоже нужен бот»). Пока он искал паузу — «ПРОДАНО через 3 минуты». Крючок: «научишь фильтр настроить?»
+const T = (p, x, foot, h, pose = {}, extra = {}, o = {}) => ch("tolyan", p, x, foot, h, o, pose, extra);
+const MA = (p, x, foot, h, pose = {}, extra = {}) => MAMA(ch("vika", p, x, foot, h, null, pose, extra));
+const ZH = (p, x, foot, h, o = {}, pose = {}, extra = {}) => ch("perekup", p, x, foot, h, { ...ZHOME, ...o }, pose, extra);
+const DL = glow(540, 300, 520, "#f4f4ff", .2), HL = glow(300, 1000, 520, "#ff6fd0", .3), LL = glow(980, 900, 380, "#ffe08a", .25), SL2 = glow(200, 300, 400, "#ffffff", .2);
+const ROOM = (tv = true) => PS5(40, 1340, 1.25) + TUMBA(270, 1150, 640, 190) + TV(290, 790, 600, GAME(588, 331, "gm1"));
+const S = [
+ { h: "ОБЛОЖКА → «ЖОРА МОТОРС» ЗАКРЫТ: «ПЕРЕУЧЁТ»", tc: "1/5 · 0:00–0:12",
+   A: { def: () => { const H = HOLDPHONE("tolyan", "ta", 540, 2090, 1680, {}, CAMCARD2(), { rim: "#ffffff", side: 1 });
+       return { bg: "zhorazakryt", farBlur: 8, mid: H.mid, lights: H.lights + DL, over: TITLE("ТОЛЯН · 22:", "ЖОРА НА ПАУЗЕ") }; }, shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "zhorazakryt", mid: T("tb", 300, 1910, 860, { armR: -100 }, { rim: "#fff", side: 1, z: 8 }), lights: DL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "tb", html: "Жора закрылся?<br><em>Это точно подстава.</em>", fs: 40 }], talk: ["tb"] },
+   vo: "Лис: «Три дня “Жора Моторс” не открывался. На двери — “Переучёт”». Толян: «Жора закрылся? Это точно подстава». Лис: «Толян поехал к нему домой».", who: "Лис + Толян",
+   mv: "A — <b>кадр 0</b>: Толян с телефоном — в боте «Toyota Camry · 2015 · 1 050 000 ₽ · −16%» + плашка «ТОЛЯН · 22: ЖОРА НА ПАУЗЕ». B — <b>новый фон — закрытый «ЖОРА МОТОРС»</b>: цепь с замком на двери, листок «ПЕРЕУЧЁТ», сдувшиеся шары, серое небо." },
+ { h: "МАМА: «ЖОРИК! К ТЕБЕ СТУДЕНТ!» → ЖОРА У ПРИСТАВКИ", tc: "2/5 · 0:12–0:24",
+   A: { def: () => ({ bg: "lestnicazhory", mid: MA("ma", 730, 1900, 860, { armL: -60 }, { rim: "#fff", side: -1, z: 7 }) + CURLERS(730, 1128, 1.05) + T("tc", 260, 1910, 860, { armR: -60 }, { rim: "#fff", side: 1, z: 8 }) + KVAS(370, 1440, 1.1), lights: SL2 }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "ma", html: "Жорик!<br><em>К тебе студент!</em>", fs: 44 }], talk: ["ma"] },
+   B: { def: () => ({ bg: "gostinayazhory", mid: ROOM() + SOFA_B(470, 1440, 610) + ZH("za", 780, 2090, 780, { look: "o" }, { armL: 60, armR: 60 }, { rim: "#ff9ad8", side: -1, z: 7 }) + PAD(780, 1745, 1) + SOFA_F(470, 1790, 610), lights: HL + LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "za", html: "Тихо!<br><em>У меня заезд!</em>", fs: 48 }], talk: ["za"] },
+   vo: "Мама Жоры: «Жорик! К тебе студент!» Жора: «Тихо! У меня заезд!» Лис: «Жора третий день сидел у приставки».", who: "мама + Жора + Лис",
+   mv: "A — <b>новый фон — лестничная площадка у квартиры 47</b> (почтовые ящики, батарея, коврик «ДОБРО ПОЖАЛОВАТЬ»); <b>новая героиня — мама Жоры</b> в розовом халате и бигуди; Толян с бутылкой кваса. B — <b>новый фон — гостиная Жоры</b> (ковёр на стене, стенка с сервизом, торшер, палас); <b>приставка нарисована детально</b>: белые изогнутые панели, чёрный корпус с решёткой, синяя подсветка, порты, подставка; Жора без кепки на диване с геймпадом, на ТВ светится игра." },
+ { h: "ЭКРАН ИГРЫ НА ВЕСЬ КАДР → «В ИГРЕ У МЕНЯ САЛОН НА СТО МАШИН»", tc: "3/5 · 0:24–0:37",
+   A: { def: () => ({ bg: "gostinayazhory", over: GAMEFULL() }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "gostinayazhory", mid: ROOM() + T("td", 250, 1930, 880, { armR: -100 }, { rim: "#ff9ad8", side: 1, z: 21 }) + SOFA_B(470, 1440, 610) + ZH("zb", 780, 2090, 780, { look: "flat" }, { armL: 60, armR: 60 }, { rim: "#ff9ad8", side: -1, z: 7 }) + PAD(780, 1745, 1, "pad2") + SOFA_F(470, 1790, 610, "sff2"), lights: HL + LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "zb", html: "В игре у меня салон на сто машин.<br><em>И никто не ржёт.</em>", fs: 36 }], talk: ["zb"] },
+   vo: "Толян: «Жора, ты чего? Салон закрыт!» Жора: «В игре у меня салон на сто машин. И никто не ржёт». Толян: «Из-за видео? Да его все забыли».", who: "Толян + Жора",
+   mv: "A — <b>приём: экран игры на весь кадр</b> — своя пародия «Перекуп-Сити»: закат с полосатым солнцем, пальмы, неоновый город у океана, название рукописным неоном, «НАЖМИТЕ ЛЮБУЮ КНОПКУ» мигает, полосы развёртки и блик стекла. <i>Оригинальную заставку чужой игры не рисуем: это чужой логотип и арт — риск жалобы на аккаунт.</i> B — Толян стоит над Жорой у телевизора." },
+ { h: "МАМА НЕСЁТ ТЕЛЕФОН: «ТЕБЕ БОТ ПИШЕТ» → «ТЫ ПОДПИСАЛСЯ?!»", tc: "4/5 · 0:37–0:50",
+   A: { def: () => ({ bg: "gostinayazhory", mid: ROOM() + MA("mb", 250, 1920, 860, { armR: -120 }, { rim: "#ff9ad8", side: 1, z: 21 }, {}) + CURLERS(250, 1130, 1.05, "cur2", 22) + SOFA_B(470, 1440, 610) + ZH("zc", 780, 2090, 780, { look: "o" }, { armL: 60, armR: 60 }, { rim: "#ff9ad8", side: -1, z: 7 }) + SOFA_F(470, 1790, 610, "sff3"), lights: HL + LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "mb", html: "Жорик, тебе тут бот пишет:<br><em>«Камри ниже рынка».</em>", fs: 36 }], talk: ["mb"] },
+   B: { def: () => ({ bg: "gostinayazhory", farBlur: 3, mid: T("te", 280, 1910, 900, { armR: -150 }, { rim: "#ff9ad8", side: 1, z: 9 }) + ZH("zd", 800, 1910, 880, { look: "flat" }, { armR: -100 }, { rim: "#ff9ad8", side: -1, z: 9 }) + PAD(700, 1560, 1, "pad3", 14, -20), lights: HL + LL }), shot: { x: 540, y: 1150, s: 1.02 },
+     bubbles: [{ p: "te", html: "Ты подписался<br><em>на «Перехват»?!</em>", fs: 40 }, { p: "zd", html: "Ты сам сказал:<br><em>мне тоже нужен бот.</em>", fs: 36 }], talk: ["te"] },
+   vo: "Мама: «Жорик, тебе тут бот пишет: “Камри ниже рынка”». Толян: «Ты подписался на “Перехват”?!» Жора: «Ты сам сказал: мне тоже нужен бот».", who: "мама + Толян + Жора",
+   mv: "A — мама с телефоном (бигуди, халат), Жора на диване не отрывается от игры. B — Толян в шоке, Жора встаёт с геймпадом — <b>отсылка к 21-й серии</b> («Жора, тебе тоже нужен бот»)." },
+ { h: "ПОКА ИСКАЛ ПАУЗУ — «ПРОДАНО ЧЕРЕЗ 3 МИНУТЫ» → «НАУЧИШЬ ФИЛЬТР?»", tc: "5/5 · 0:50–1:08",
+   A: { def: () => ({ bg: "gostinayazhory", over: PHONEBIG(CAMCARD2("c2c2")) }), shot: { x: 540, y: 960, s: 1 } },
+   B: { def: () => ({ bg: "gostinayazhory", farBlur: 6, mid: ZH("ze", 540, 2150, 1500, { look: "flat" }, { armR: -60 }, { rim: "#ff9ad8", side: 1, z: 8 }) + PAD(540, 1820, 2, "pad4", 14, -8), lights: HL }), shot: { x: 540, y: 1000, s: 1.04 },
+     bubbles: [{ p: "ze", html: "Студент…<br><em>научишь фильтр настроить?</em>", fs: 46 }], talk: ["ze"] },
+   vo: "Лис: «Пока Жора искал паузу, Камри купили за три минуты». Жора: «Студент… научишь фильтр настроить?» Лис: «Бот присылает машину через секунду. Остальное — за тобой. “Перехват”, ссылка в шапке». <i>(финальная карточка бота)</i>", who: "Лис + Жора + Лис",
+   mv: "A — <b>приём: штамп «ПРОДАНО · через 3 минуты»</b> слэмом на карточку бота (в ролике перед этим — <b>меню паузы поверх игры</b>: «Продолжить / Мой автосалон: 100 машин / ▶ Выйти в реальность»). B — Жора крупно, с геймпадом, смиренно — крючок на 23-ю. Последний кадр — только бот." },
+];
+const n = +new URLSearchParams(location.search).get("n") || 1, sc = S[n - 1];
+document.getElementById("h").textContent = sc.h; document.getElementById("tc").textContent = sc.tc;
+const put = (id, f) => { const el = document.getElementById(id);
+  if (f.split) { const [dl, sl, dr, sr] = f.split();
+    el.innerHTML = `<div class="cf">${HALF(C.frame(dl, sl), -1)}${HALF(C.frame(dr, sr), 1)}<div style="position:absolute;left:532px;top:0;width:16px;height:1920px;background:#fff;box-shadow:0 0 30px #000;z-index:80"></div>
+      ${C.frame({ hud: f.hud }, { x: 540, y: 960, s: 1 }).replace('<div class="cf">', '<div style="position:absolute;inset:0;z-index:90;pointer-events:none">').replace(/<div class="vig"><\/div>/, "")}</div>`; }
+  else { const def = f.def(); def.bubbles = f.bubbles || []; el.innerHTML = C.frame(def, f.shot); }
+  if (f.sketch) el.querySelector(".cf").style.filter = SKF;
+  (f.talk || []).forEach(p => C.mouth(el, p, "talk")); if (f.after) f.after(el); return el; };
+const a = put("A", sc.A), b = put("B", sc.B);
+document.getElementById("vo").innerHTML = `<small>🎙 ${sc.who.toUpperCase()}</small>${sc.vo}`;
+document.getElementById("mv").innerHTML = sc.mv;
+document.fonts.ready.then(() => { C.layout(a); C.layout(b); window.READY = true; });
+</script></body></html>
