@@ -15,6 +15,9 @@ MODEL = os.environ.get("MODEL", "gemini-3.1-flash-tts-preview")
 # TTS=gemini — только Google; TTS=openrouter — сразу OpenRouter. Оба ключа подставляет прокси.
 PROVIDER = os.environ.get("TTS", "auto")
 USE_OR = PROVIDER == "openrouter"
+# вне облака Claude ключей не подставит прокси — тогда берём их из окружения (GEMINI_API_KEY, OPENROUTER_API_KEY); в чат и в код не писать
+KEY_G = ["-H", "x-goog-api-key: " + os.environ["GEMINI_API_KEY"]] if os.environ.get("GEMINI_API_KEY") else []
+KEY_OR = ["-H", "Authorization: Bearer " + os.environ["OPENROUTER_API_KEY"]] if os.environ.get("OPENROUTER_API_KEY") else []
 
 
 class Quota(Exception):
@@ -54,7 +57,7 @@ def request_or(who, out, text):
     """OpenRouter /audio/speech: тот же промпт (профиль, указания режиссёра, реплики), один голос, ответ — PCM 24 кГц моно."""
     body = {"model": "google/" + MODEL, "voice": V[who[0]]["voice"], "response_format": "pcm", "input": text}
     for attempt in range(5):
-        rr = subprocess.run(["curl", "-sS", "-m", "600", "-o", out + ".pcm", "-w", "%{http_code}", "-X", "POST", "-H", "Content-Type: application/json",
+        rr = subprocess.run(["curl", "-sS", "-m", "600", "-o", out + ".pcm", "-w", "%{http_code}", "-X", "POST", "-H", "Content-Type: application/json", *KEY_OR,
                              "https://openrouter.ai/api/v1/audio/speech", "--data-binary", "@-"], input=json.dumps(body, ensure_ascii=False).encode(), capture_output=True)
         code = rr.stdout.decode().strip()
         if code == "200" and os.path.getsize(out + ".pcm") > 2000:
@@ -77,7 +80,7 @@ def request(who, out):
           if len(who) == 2 else {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": V[who[0]]["voice"]}}})
     body = {"contents": [{"parts": [{"text": f"{style}\n\n{text}"}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
     for attempt in range(6):
-        rr = subprocess.run(["curl", "-sS", "-m", "600", "-w", "\n__HTTP__%{http_code} %{time_total}", "-X", "POST", "-H", "Content-Type: application/json",
+        rr = subprocess.run(["curl", "-sS", "-m", "600", "-w", "\n__HTTP__%{http_code} %{time_total}", "-X", "POST", "-H", "Content-Type: application/json", *KEY_G,
                             f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:streamGenerateContent?alt=sse", "--data-binary", "@-"],
                            input=json.dumps(body, ensure_ascii=False).encode(), capture_output=True)
         r, _, meta = rr.stdout.rpartition(b"\n__HTTP__")
