@@ -165,17 +165,17 @@ window.build = R => {
 };
 
 // ── ep81b «Архив»: быстрая уникализация — меняется только заставка ──
-$("#title .a").textContent = "ТОЛЯН · 19:"; $("#title .a").style.cssText = "font-size:110px;background:#2f6db5;color:#fbfaf3";
-$("#title .b").textContent = "ДЕШЕВЛЕ, ЧЕМ У СТУДЕНТА"; $("#title .b").style.cssText = "font-size:60px;background:#fbfaf3;color:#2f6db5";
+$("#title .a").textContent = "ТОЛЯН · 20:"; $("#title .a").style.cssText = "font-size:110px;background:#2f6db5;color:#fbfaf3";
+$("#title .b").textContent = "ДЕНЬГИ СРАЗУ, ДОКУМЕНТЫ ПОТОМ"; $("#title .b").style.cssText = "font-size:60px;background:#fbfaf3;color:#2f6db5";
 const ORIG = [...document.querySelectorAll("#lbx .lbt, #lbx .lbb")].map(e => e.textContent), HEADT = 2.4;
 { const L = document.querySelector("#lbx"); if (L) { const a = L.querySelector(".lbt"), b = L.querySelector(".lbb");   // кинорамка вместо плашки (ep56)
-  a.textContent = "ТОЛЯН · 19:"; b.textContent = "ДЕШЕВЛЕ, ЧЕМ У СТУДЕНТА"; a.style.background = b.style.background = "#2f6db5"; a.style.color = b.style.color = "#fbfaf3"; } }
+  a.textContent = "ТОЛЯН · 20:"; b.textContent = "ДЕНЬГИ СРАЗУ, ДОКУМЕНТЫ ПОТОМ"; a.style.background = b.style.background = "#2f6db5"; a.style.color = b.style.color = "#fbfaf3"; } }
 { const K = document.querySelector("#ballc"); if (K) { const orig = K.innerHTML, col = K.style.color;   // надпись над хрустальным шаром (ep58)
-  K.innerHTML = "ТОЛЯН · 19:"; K.style.color = "#2f6db5";
+  K.innerHTML = "ТОЛЯН · 20:"; K.style.color = "#2f6db5";
   const B = window.build; window.build = R => { B(R); R.tl.to(K, { opacity: 0, duration: .15 }, HEADT - .6);
     R.tl.set(K, { innerHTML: orig, color: col }, HEADT - .45); R.tl.to(K, { opacity: 1, duration: .15 }, HEADT - .4); }; } }
 { const K = document.querySelector("#skc"); if (K) { const [a, b] = K.children, orig = [a.textContent, b.textContent], bg = K.style.background, col = K.style.color;   // подпись судебного рисунка (ep57)
-  a.textContent = "ТОЛЯН · 19:"; b.textContent = "ДЕШЕВЛЕ, ЧЕМ У СТУДЕНТА"; K.style.background = "#2f6db5"; K.style.color = "#fbfaf3";
+  a.textContent = "ТОЛЯН · 20:"; b.textContent = "ДЕНЬГИ СРАЗУ, ДОКУМЕНТЫ ПОТОМ"; K.style.background = "#2f6db5"; K.style.color = "#fbfaf3";
   const B = window.build; window.build = R => { B(R); R.tl.to(K, { opacity: 0, duration: .15 }, HEADT - .6);
     R.tl.set(a, { textContent: orig[0] }, HEADT - .45).set(b, { textContent: orig[1] }, HEADT - .45).set(K, { background: bg, color: col }, HEADT - .45);
     R.tl.to(K, { opacity: 1, duration: .15 }, HEADT - .4); }; } }
