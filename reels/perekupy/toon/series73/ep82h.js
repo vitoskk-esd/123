@@ -176,17 +176,17 @@ window.build = R => {
 };
 
 // ── ep82h «Пастель»: быстрая уникализация — меняется только заставка ──
-$("#title .a").textContent = "ТОЛЯН · 19:"; $("#title .a").style.cssText = "font-size:110px;background:#ff6fae;color:#151515";
-$("#title .b").textContent = "БАМПЕР С ДОСТАВКОЙ"; $("#title .b").style.cssText = "font-size:60px;background:#151515;color:#ff6fae";
+$("#title .a").textContent = "ТОЛЯН · 21:"; $("#title .a").style.cssText = "font-size:110px;background:#ff6fae;color:#151515";
+$("#title .b").textContent = "МИЛЛИОН ПРОСМОТРОВ"; $("#title .b").style.cssText = "font-size:60px;background:#151515;color:#ff6fae";
 const ORIG = [...document.querySelectorAll("#lbx .lbt, #lbx .lbb")].map(e => e.textContent), HEADT = 2.4;
 { const L = document.querySelector("#lbx"); if (L) { const a = L.querySelector(".lbt"), b = L.querySelector(".lbb");   // кинорамка вместо плашки (ep56)
-  a.textContent = "ТОЛЯН · 19:"; b.textContent = "БАМПЕР С ДОСТАВКОЙ"; a.style.background = b.style.background = "#ff6fae"; a.style.color = b.style.color = "#151515"; } }
+  a.textContent = "ТОЛЯН · 21:"; b.textContent = "МИЛЛИОН ПРОСМОТРОВ"; a.style.background = b.style.background = "#ff6fae"; a.style.color = b.style.color = "#151515"; } }
 { const K = document.querySelector("#ballc"); if (K) { const orig = K.innerHTML, col = K.style.color;   // надпись над хрустальным шаром (ep58)
-  K.innerHTML = "ТОЛЯН · 19:"; K.style.color = "#ff6fae";
+  K.innerHTML = "ТОЛЯН · 21:"; K.style.color = "#ff6fae";
   const B = window.build; window.build = R => { B(R); R.tl.to(K, { opacity: 0, duration: .15 }, HEADT - .6);
     R.tl.set(K, { innerHTML: orig, color: col }, HEADT - .45); R.tl.to(K, { opacity: 1, duration: .15 }, HEADT - .4); }; } }
 { const K = document.querySelector("#skc"); if (K) { const [a, b] = K.children, orig = [a.textContent, b.textContent], bg = K.style.background, col = K.style.color;   // подпись судебного рисунка (ep57)
-  a.textContent = "ТОЛЯН · 19:"; b.textContent = "БАМПЕР С ДОСТАВКОЙ"; K.style.background = "#ff6fae"; K.style.color = "#151515";
+  a.textContent = "ТОЛЯН · 21:"; b.textContent = "МИЛЛИОН ПРОСМОТРОВ"; K.style.background = "#ff6fae"; K.style.color = "#151515";
   const B = window.build; window.build = R => { B(R); R.tl.to(K, { opacity: 0, duration: .15 }, HEADT - .6);
     R.tl.set(a, { textContent: orig[0] }, HEADT - .45).set(b, { textContent: orig[1] }, HEADT - .45).set(K, { background: bg, color: col }, HEADT - .45);
     R.tl.to(K, { opacity: 1, duration: .15 }, HEADT - .4); }; } }
